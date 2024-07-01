@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   shared_preferences: ^2.2.3
   crypto: ^3.0.3
+  encrypt: ^5.0.3
 
 dev_dependencies:
   flutter_test:
