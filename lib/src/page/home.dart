@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+
+import '../page/page.dart';
 import '../store/index.dart';
 
 class Home extends StatefulWidget {
@@ -17,26 +20,12 @@ class HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: DropdownButton<ThemeMode>(
-          // Read the selected themeMode from the controller
-          value: widget.store.settings.themeMode,
-          // Call the updateThemeMode method any time the user selects a theme.
-          onChanged: widget.store.settings.setThemeMode,
-          items: const [
-            DropdownMenuItem(
-              value: ThemeMode.system,
-              child: Text('System Theme'),
-            ),
-            DropdownMenuItem(
-              value: ThemeMode.light,
-              child: Text('Light Theme'),
-            ),
-            DropdownMenuItem(
-              value: ThemeMode.dark,
-              child: Text('Dark Theme'),
-            )
-          ],
-        ),
+        child: ElevatedButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .pushReplacementNamed(InitPassword.routeName);
+            },
+            child: const Text("to init password")),
       ),
     );
   }

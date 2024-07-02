@@ -1,27 +1,7 @@
 import 'dart:convert';
 
-import '../../util/common.dart';
+import '../../model/question.dart';
 import '../shared_preferences/index.dart';
-
-class Question {
-  Question(this.question, {String? answer, String? answerKey}) {
-    if (answer != null) {
-      this.answer = answer;
-    }
-
-    if (answerKey == null && answer != null) {
-      this.answerKey = md5(answer);
-    } else if (answerKey != null) {
-      this.answerKey = answerKey;
-    }
-  }
-
-  late String question;
-  late String? answer;
-  late String answerKey;
-
-  bool verify() => answer != null && md5(answer!) == answerKey;
-}
 
 class VerifyService with SharedPreferencesService {
   Future<String?> getPasswordAes() async => await getString("password_str");

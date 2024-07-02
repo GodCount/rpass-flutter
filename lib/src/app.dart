@@ -1,7 +1,30 @@
 import 'package:flutter/material.dart';
 
 import './store/index.dart';
-import './page/home.dart';
+import './page/page.dart';
+
+class AuthNavigatorRoute extends NavigatorObserver {
+  AuthNavigatorRoute(this._store);
+
+  final Store _store;
+
+  @override
+  void didPush(Route route, Route? previousRoute) {
+    super.didPush(route, previousRoute);
+
+    if (route.settings.name == Home.routeName) {
+      if (!_store.verify.initialled) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          route.navigator?.pushReplacementNamed(InitPassword.routeName);
+        });
+      } else if (_store.verify.token == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          route.navigator?.pushReplacementNamed(VerifyPassword.routeName);
+        });
+      }
+    }
+  }
+}
 
 class RpassApp extends StatelessWidget {
   const RpassApp({
@@ -21,18 +44,14 @@ class RpassApp extends StatelessWidget {
           theme: ThemeData(),
           darkTheme: ThemeData.dark(),
           themeMode: store.settings.themeMode,
-          onGenerateRoute: (RouteSettings routeSettings) {
-            return MaterialPageRoute<void>(
-              settings: routeSettings,
-              builder: (BuildContext context) {
-                switch (routeSettings.name) {
-                  case Home.routeName:
-                    return Home(store: store);
-                  default:
-                    return Home(store: store);
-                }
-              },
-            );
+          initialRoute: "/",
+          navigatorObservers: [AuthNavigatorRoute(store)],
+          routes: {
+            Home.routeName: (context) => Home(store: store),
+            InitPassword.routeName: (context) =>
+                InitPassword(verifyContrller: store.verify),
+            VerifyPassword.routeName: (context) =>
+                VerifyPassword(verifyContrller: store.verify)
           },
         );
       },

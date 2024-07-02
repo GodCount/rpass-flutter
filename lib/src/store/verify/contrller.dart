@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../model/question.dart';
 import '../../util/common.dart';
 import './service.dart';
 
@@ -28,8 +29,6 @@ class VerifyController with ChangeNotifier {
     _token = md5(p1);
     _passwordAes = aesEncrypt(_token!, VERIFY_TEXT);
 
-    notifyListeners();
-
     await _verifyService.setPasswordAes(_passwordAes!);
   }
 
@@ -43,8 +42,6 @@ class VerifyController with ChangeNotifier {
 
     _questionTokenAes = aesEncrypt(
         md5(_questionList.map((item) => item.answerKey).join()), _token!);
-
-    notifyListeners();
 
     await _verifyService.setQuestionTokenAes(_questionTokenAes!);
     await _verifyService.setQuestionList(_questionList);
@@ -63,11 +60,9 @@ class VerifyController with ChangeNotifier {
   }
 
   void forgotToVerifyQuestion(List<Question> questions) {
-  
     assert(questions.every((item) => item.verify()), "answer not euqls key");
     assert(_questionTokenAes != null, "questionTokenAes is null");
     assert(_passwordAes != null, "_passwordAes is null");
-
 
     final key = md5(questions.map((item) => item.answerKey).join());
 
@@ -78,6 +73,15 @@ class VerifyController with ChangeNotifier {
     }
 
     throw Exception("app deranged");
+  }
+
+  Future<void> modifyPassword(String newP1, String newP2) async {
+    await initPassword(newP1, newP2);
+
+    _questionTokenAes = aesEncrypt(
+        md5(_questionList.map((item) => item.answerKey).join()), _token!);
+
+    await _verifyService.setQuestionTokenAes(_questionTokenAes!);
   }
 
   Future<void> load() async {
