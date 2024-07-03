@@ -44,8 +44,12 @@ class RpassApp extends StatelessWidget {
           theme: ThemeData(),
           darkTheme: ThemeData.dark(),
           themeMode: store.settings.themeMode,
-          initialRoute: "/",
-          navigatorObservers: [AuthNavigatorRoute(store)],
+          initialRoute: !store.verify.initialled
+              ? InitPassword.routeName
+              : store.verify.token == null
+                  ? VerifyPassword.routeName
+                  : "/",
+          // navigatorObservers: [AuthNavigatorRoute(store)],
           routes: {
             Home.routeName: (context) => Home(store: store),
             InitPassword.routeName: (context) =>

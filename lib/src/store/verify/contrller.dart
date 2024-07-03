@@ -24,11 +24,11 @@ class VerifyController with ChangeNotifier {
 
   String? get token => _token;
 
-  Future<void> initPassword(String p1, String p2) async {
-    if (p1 != p2) throw Exception("Unequal Passwords");
-    _token = md5(p1);
+  Future<void> initPassword(String password, [List<Question>? questions]) async {
+    assert(password.isNotEmpty);
+    _token = md5(password);
     _passwordAes = aesEncrypt(_token!, VERIFY_TEXT);
-
+    if (questions != null) await setQuestionList(questions);
     await _verifyService.setPasswordAes(_passwordAes!);
   }
 
@@ -75,8 +75,8 @@ class VerifyController with ChangeNotifier {
     throw Exception("app deranged");
   }
 
-  Future<void> modifyPassword(String newP1, String newP2) async {
-    await initPassword(newP1, newP2);
+  Future<void> modifyPassword(String newPassword) async {
+    await initPassword(newPassword);
 
     _questionTokenAes = aesEncrypt(
         md5(_questionList.map((item) => item.answerKey).join()), _token!);
