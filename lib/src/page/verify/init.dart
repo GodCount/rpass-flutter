@@ -26,56 +26,59 @@ class InitPasswordState extends State<InitPassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Card(
-        margin: const EdgeInsets.all(24),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: PageTransitionSwitcher(
-            reverse: !_isSetPasswordDone,
-            transitionBuilder: (
-              child,
-              animation,
-              secondaryAnimation,
-            ) {
-              return SharedAxisTransition(
-                animation: animation,
-                secondaryAnimation: secondaryAnimation,
-                transitionType: SharedAxisTransitionType.vertical,
-                fillColor: Colors.transparent,
-                child: child,
-              );
-            },
-            child: !_isSetPasswordDone
-                ? SetPassword(
-                    controller: _passwordController,
-                    onSetPassword: () {
-                      setState(() {
-                        _isSetPasswordDone = true;
-                      });
-                    },
-                  )
-                : SecurityQuestion(
-                    onSubmit: (questions) {
-                      if (questions == null) {
+      resizeToAvoidBottomInset: false,
+      body: Center(
+        child: Card(
+          margin: const EdgeInsets.all(24),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: PageTransitionSwitcher(
+              reverse: !_isSetPasswordDone,
+              transitionBuilder: (
+                child,
+                animation,
+                secondaryAnimation,
+              ) {
+                return SharedAxisTransition(
+                  animation: animation,
+                  secondaryAnimation: secondaryAnimation,
+                  transitionType: SharedAxisTransitionType.vertical,
+                  fillColor: Colors.transparent,
+                  child: child,
+                );
+              },
+              child: !_isSetPasswordDone
+                  ? SetPassword(
+                      controller: _passwordController,
+                      onSetPassword: () {
                         setState(() {
-                          _isSetPasswordDone = false;
+                          _isSetPasswordDone = true;
                         });
-                      } else {
-                        final password = _passwordController.text;
-                        final questionList = questions
-                            .map((item) =>
-                                Question(item.question, answer: item.answer))
-                            .toList();
-                        widget.verifyContrller
-                            .initPassword(password, questionList)
-                            .then((value) {
-                          Navigator.pushReplacementNamed(context, "/");
-                        }, onError: (error) {
-                          print(error);
-                        });
-                      }
-                    },
-                  ),
+                      },
+                    )
+                  : SecurityQuestion(
+                      onSubmit: (questions) {
+                        if (questions == null) {
+                          setState(() {
+                            _isSetPasswordDone = false;
+                          });
+                        } else {
+                          final password = _passwordController.text;
+                          final questionList = questions
+                              .map((item) =>
+                                  Question(item.question, answer: item.answer))
+                              .toList();
+                          widget.verifyContrller
+                              .initPassword(password, questionList)
+                              .then((value) {
+                            Navigator.pushReplacementNamed(context, "/");
+                          }, onError: (error) {
+                            print(error);
+                          });
+                        }
+                      },
+                    ),
+            ),
           ),
         ),
       ),
@@ -95,84 +98,81 @@ class SetPassword extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final double maxHeight = constraints.maxHeight;
-        final GlobalKey<FormState> formState = GlobalKey<FormState>();
+    final GlobalKey<FormState> formState = GlobalKey<FormState>();
 
-        return Column(
-          children: [
-            Padding(padding: EdgeInsets.symmetric(vertical: maxHeight / 20)),
-            Text(
-              'Hi David Park',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            Padding(padding: EdgeInsets.symmetric(vertical: maxHeight / 50)),
-            const Text('Sign in with your account',
-                textAlign: TextAlign.center),
-            Padding(
-              padding: const EdgeInsets.only(top: 48),
-              child: Form(
-                key: formState,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: controller,
-                      keyboardType: TextInputType.number,
-                      textInputAction: TextInputAction.done,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: const InputDecoration(
-                          labelText: "init password",
-                          border: OutlineInputBorder()),
-                      validator: (value) {
-                        return value == null || value.trim().isEmpty
-                            ? "be not empty"
-                            : value.length > 3
-                                ? null
-                                : "must length > 3";
-                      },
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: TextFormField(
-                        keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.next,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        decoration: const InputDecoration(
-                          labelText: "init password",
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          return value == controller.text ? null : "must equal";
-                        },
-                      ),
-                    ),
-                  ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'Hi David Park',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const Padding(
+          padding: EdgeInsets.only(top: 6),
+          child: Text('Sign in with your account', textAlign: TextAlign.center),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 24),
+          child: Form(
+            key: formState,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  constraints: const BoxConstraints(maxWidth: 200),
+                  child: TextFormField(
+                    controller: controller,
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.next,
+                    autofocus: true,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    decoration: const InputDecoration(
+                        labelText: "init password",
+                        border: OutlineInputBorder()),
+                    validator: (value) {
+                      return value == null || value.trim().isEmpty
+                          ? "be not empty"
+                          : value.length > 3
+                              ? null
+                              : "must length > 3";
+                    },
+                  ),
                 ),
-              ),
-            ),
-            Expanded(
-              child: Center(
-                child: SizedBox(
-                  width: 128,
-                  height: 64,
-                  child: IconButton.filled(
+                Container(
+                  padding: const EdgeInsets.only(top: 12),
+                  constraints: const BoxConstraints(maxWidth: 200),
+                  child: TextFormField(
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.next,
+                    autofocus: true,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    decoration: const InputDecoration(
+                      labelText: "init password",
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      return value == controller.text ? null : "must equal";
+                    },
+                  ),
+                ),
+                Container(
+                  width: 180,
+                  padding: const EdgeInsets.only(top: 24),
+                  child: ElevatedButton(
                     onPressed: () {
                       if (formState.currentState!.validate()) {
                         onSetPassword();
                       }
                     },
-                    icon: const Icon(Icons.keyboard_arrow_right_rounded),
+                    child: const Text("初始化"),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
 }
@@ -207,142 +207,146 @@ class SecurityQuestionState extends State<SecurityQuestion> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final double maxHeight = constraints.maxHeight;
-        _qController.text = _questions[_index].question;
-        _aController.text = _questions[_index].answer;
-        return Column(
-          children: [
-            Padding(padding: EdgeInsets.symmetric(vertical: maxHeight / 20)),
-            Text(
-              'Hi David Park',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            Padding(padding: EdgeInsets.symmetric(vertical: maxHeight / 50)),
-            const Text('Sign in with your account',
-                textAlign: TextAlign.center),
-            Padding(
-              padding: const EdgeInsets.only(top: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    "${_index + 1} / ${_questions.length}",
-                    textAlign: TextAlign.end,
-                  ),
-                  IconButton(
-                    onPressed: _questions.length > 1
-                        ? () {
-                            _questions.removeAt(_index);
-                            setState(() {
-                              _index = _index == 0 ? 0 : _index - 1;
-                            });
-                          }
-                        : null,
-                    icon: const Icon(Icons.delete),
-                  ),
-                ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'Hi David Park',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const Padding(
+          padding: EdgeInsets.only(top: 6),
+          child: Text('Sign in with your account', textAlign: TextAlign.center),
+        ),
+        Container(
+          constraints: const BoxConstraints.tightFor(width: 200),
+          padding: const EdgeInsets.only(top: 24),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                "${_index + 1} / ${_questions.length}",
+                textAlign: TextAlign.end,
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Form(
-                key: _formState,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _qController,
-                      textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
-                          labelText: "question", border: OutlineInputBorder()),
-                      validator: (value) {
-                        return value == null || value.trim().isEmpty
-                            ? "be not empty"
-                            : null;
-                      },
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: TextFormField(
-                        controller: _aController,
-                        textInputAction: TextInputAction.done,
-                        decoration: const InputDecoration(
-                          labelText: "answer",
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          return value == null || value.trim().isEmpty
-                              ? "be not empty"
-                              : null;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: _index > 0
-                        ? () {
-                            setState(() {
-                              _index -= 1;
-                              _formState.currentState?.reset();
-                            });
-                          }
-                        : null,
-                    child: const Text("上一个"),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      if (_formState.currentState!.validate()) {
-                        _questions[_index].question = _qController.value.text;
-                        _questions[_index].answer = _aController.value.text;
-                        if (_index == _questions.length - 1) {
-                          _questions.add(QuestionItem());
-                        }
+              IconButton(
+                onPressed: _questions.length > 1
+                    ? () {
+                        _questions.removeAt(_index);
                         setState(() {
-                          _index += 1;
+                          _index = _index == 0 ? 0 : _index - 1;
                         });
                       }
+                    : null,
+                iconSize: 16,
+                icon: const Icon(Icons.delete),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Form(
+            key: _formState,
+            child: Column(
+              children: [
+                Container(
+                  constraints: const BoxConstraints(maxWidth: 200),
+                  child: TextFormField(
+                    controller: _qController,
+                    textInputAction: TextInputAction.next,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                        labelText: "question", border: OutlineInputBorder()),
+                    validator: (value) {
+                      return value == null || value.trim().isEmpty
+                          ? "be not empty"
+                          : null;
                     },
-                    child: Text(_index == _questions.length - 1 ? "添加" : "下一个"),
                   ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 24, left: 24, right: 24),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => widget.onSubmit(null),
-                  child: const Text("返回"),
                 ),
-              ),
+                Container(
+                  padding: const EdgeInsets.only(top: 6),
+                  constraints: const BoxConstraints(maxWidth: 200),
+                  child: TextFormField(
+                    controller: _aController,
+                    textInputAction: TextInputAction.next,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                      labelText: "answer",
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      return value == null || value.trim().isEmpty
+                          ? "be not empty"
+                          : null;
+                    },
+                  ),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 12, left: 24, right: 24),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_formState.currentState!.validate()) {
-                      widget.onSubmit(_questions);
+          ),
+        ),
+        Container(
+          constraints: const BoxConstraints.tightFor(width: 200),
+          padding: const EdgeInsets.only(top: 6),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextButton(
+                onPressed: _index > 0
+                    ? () {
+                        setState(() {
+                          _index -= 1;
+                          _formState.currentState?.reset();
+                        });
+                      }
+                    : null,
+                child: const Text("上一个"),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (_formState.currentState!.validate()) {
+                    _questions[_index].question = _qController.value.text;
+                    _questions[_index].answer = _aController.value.text;
+                    if (_index == _questions.length - 1) {
+                      _questions.add(QuestionItem());
                     }
-                  },
-                  child: const Text("确定"),
-                ),
+                    setState(() {
+                      _index += 1;
+                    });
+                  }
+                },
+                child: Text(_index == _questions.length - 1 ? "添加" : "下一个"),
               ),
-            )
-          ],
-        );
-      },
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 16, left: 24, right: 24),
+          child: SizedBox(
+            width: 180,
+            child: ElevatedButton(
+              onPressed: () => widget.onSubmit(null),
+              child: const Text("返回"),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 6, left: 24, right: 24),
+          child: SizedBox(
+            width: 180,
+            child: ElevatedButton(
+              onPressed: () {
+                if (_formState.currentState!.validate()) {
+                  widget.onSubmit(_questions);
+                }
+              },
+              child: const Text("确定"),
+            ),
+          ),
+        )
+      ],
     );
   }
 }
