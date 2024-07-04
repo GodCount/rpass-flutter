@@ -1,4 +1,4 @@
-export './home.dart';
+export 'home/home.dart';
 export './verify/init.dart';
 export './verify/verify.dart';
 export './verify/forget.dart';

@@ -1,21 +1,36 @@
+import 'package:flutter/foundation.dart';
+
 import '../util/common.dart';
 
-class Question {
-  Question(this.question, {String? answer, String? answerKey}) {
-    if (answer != null) {
-      this.answer = answer;
-    }
+class QuestionAnswer {
+  QuestionAnswer(this.question, this.answer);
 
-    if (answerKey == null && answer != null) {
-      this.answerKey = md5(answer);
+  late String question;
+  late String answer;
+}
+
+class QuestionAnswerKey {
+  QuestionAnswerKey(this.question, {String? answer, String? answerKey}) {
+    if (answer != null) {
+      this.answerKey = aesEncrypt(md5(answer), question);
     } else if (answerKey != null) {
       this.answerKey = answerKey;
+    } else {
+      throw Exception("need of answer or answerKey");
     }
   }
 
-  late String question;
-  late String? answer;
-  late String answerKey;
+  final String question;
+  late final String answerKey;
 
-  bool verify() => answer != null && md5(answer!) == answerKey;
+  bool verify(String answer) {
+    try {
+      return aesDenrypt(md5(answer), answerKey) == question;
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+      return false;
+    }
+  }
 }

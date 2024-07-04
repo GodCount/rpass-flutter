@@ -14,18 +14,20 @@ class VerifyService with SharedPreferencesService {
   Future<bool> setQuestionTokenAes(String str) =>
       setString("question_token_str", str);
 
-  Future<List<Question>?> getQuestionList() async {
+  Future<List<QuestionAnswerKey>?> getQuestionList() async {
     final question = await getStringList("question_list");
+
+    print(question);
 
     if (question == null) return null;
 
     return question.map((str) {
       final [q, k] = str.split(":");
-      return Question(utf8.decode(base64.decode(q)), answerKey: k);
+      return QuestionAnswerKey(utf8.decode(base64.decode(q)), answerKey: k);
     }).toList();
   }
 
-  Future<bool> setQuestionList(List<Question> list) {
+  Future<bool> setQuestionList(List<QuestionAnswerKey> list) {
     return setStringList(
         "question_list",
         list

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import './store/index.dart';
 import './page/page.dart';
+import './page/test.dart';
 
 class AuthNavigatorRoute extends NavigatorObserver {
   AuthNavigatorRoute(this._store);
@@ -41,21 +42,24 @@ class RpassApp extends StatelessWidget {
       builder: (BuildContext context, Widget? child) {
         return MaterialApp(
           restorationScopeId: 'app',
-          theme: ThemeData(),
-          darkTheme: ThemeData.dark(),
+          theme: ThemeData.light(useMaterial3: true),
+          darkTheme: ThemeData.dark(useMaterial3: true),
           themeMode: store.settings.themeMode,
           initialRoute: !store.verify.initialled
               ? InitPassword.routeName
               : store.verify.token == null
                   ? VerifyPassword.routeName
                   : "/",
-          // navigatorObservers: [AuthNavigatorRoute(store)],
+          navigatorObservers: [AuthNavigatorRoute(store)],
           routes: {
+            // "/": (context) => const OpenContainerTransformDemo(),
             Home.routeName: (context) => Home(store: store),
             InitPassword.routeName: (context) =>
                 InitPassword(verifyContrller: store.verify),
             VerifyPassword.routeName: (context) =>
-                VerifyPassword(verifyContrller: store.verify)
+                VerifyPassword(verifyContrller: store.verify),
+            ForgetPassword.routeName: (context) =>
+                ForgetPassword(verifyContrller: store.verify)
           },
         );
       },
