@@ -42,8 +42,8 @@ class RpassApp extends StatelessWidget {
       builder: (BuildContext context, Widget? child) {
         return MaterialApp(
           restorationScopeId: 'app',
-          theme: ThemeData.light(useMaterial3: true),
-          darkTheme: ThemeData.dark(useMaterial3: true),
+          theme: ThemeData.light(),
+          darkTheme: ThemeData.dark(),
           themeMode: store.settings.themeMode,
           initialRoute: !store.verify.initialled
               ? InitPassword.routeName

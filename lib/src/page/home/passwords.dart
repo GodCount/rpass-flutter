@@ -12,13 +12,23 @@ class PasswordsPage extends StatefulWidget {
   State<PasswordsPage> createState() => PasswordsPageState();
 }
 
-class PasswordsPageState extends State<PasswordsPage> {
+class PasswordsPageState extends State<PasswordsPage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.amberAccent,
-      body: Center(
-        child: Text("password list"),
+    super.build(context);
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        elevation: 2,
+        automaticallyImplyLeading: false,
+        title: const Text("密码"),
+      ),
+      body: Container(
+        color: Colors.amber,
       ),
     );
   }
