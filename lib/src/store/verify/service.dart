@@ -17,8 +17,6 @@ class VerifyService with SharedPreferencesService {
   Future<List<QuestionAnswerKey>?> getQuestionList() async {
     final question = await getStringList("question_list");
 
-    print(question);
-
     if (question == null) return null;
 
     return question.map((str) {

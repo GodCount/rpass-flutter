@@ -5,6 +5,7 @@ import 'package:animations/animations.dart';
 import 'package:flutter/services.dart';
 
 import '../../store/verify/contrller.dart';
+import '../home/home.dart';
 import 'security_question.dart';
 
 class InitPassword extends StatefulWidget {
@@ -23,8 +24,16 @@ class InitPasswordState extends State<InitPassword> {
 
   bool _isSetPasswordDone = false;
 
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    print("build init password");
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Center(
@@ -67,7 +76,7 @@ class InitPasswordState extends State<InitPassword> {
                           widget.verifyContrller
                               .initPassword(password, questions)
                               .then((value) {
-                            Navigator.pushReplacementNamed(context, "/");
+                            Navigator.pushReplacementNamed(context, Home.routeName);
                           }, onError: (error) {
                             if (kDebugMode) {
                               print(error);

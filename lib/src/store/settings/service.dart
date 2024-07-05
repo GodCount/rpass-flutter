@@ -9,4 +9,8 @@ class SettingsService with SharedPreferencesService {
   }
 
   Future<bool> setThemeMode(ThemeMode mode) => setInt("theme_mode", mode.index);
+
+
+  Future<bool> clear() => super.clear();
+
 }

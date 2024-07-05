@@ -1,40 +1,55 @@
 import 'package:flutter/material.dart';
 
+import '../index.dart';
 import './service.dart';
 import '../../model/account.dart';
 
 class AccountsContrller with ChangeNotifier {
-  AccountsContrller(this._accountsService);
+  AccountsContrller();
 
-  final AccountsService _accountsService;
+  late Store _store;
 
-  String? _token;
+  final AccountsService _accountsService = AccountsService();
 
   List<Account>? _accountList;
 
   List<Account> get accountList => _accountList ?? [];
 
-  Future<void> initDenrypt(String token) async {
+  Future<void> initDenrypt() async {
+    assert(_store.verify.token != null, "token is null, to verify password");
+
     if (_accountList != null) return;
-    _accountList = await _accountsService.getAccountList(token);
-    _token = token;
-    notifyListeners();
+
+    _accountList = await _accountsService.getAccountList(_store.verify.token!);
   }
 
   Future<void> addAccount(Account account) async {
     assert(_accountList != null, "_accountList is null, to run initDenrypt");
-    assert(_token != null, "_token is null, to run initDenrypt");
 
     _accountList!.add(account);
 
     notifyListeners();
 
-    await _accountsService.setAccountList(_token!, _accountList!);
+    await _accountsService.setAccountList(_store.verify.token!, _accountList!);
+  }
+
+  Future<void> modifyAccount(Account account) async {
+    assert(_accountList != null, "_accountList is null, to run initDenrypt");
+
+
+    final index = _accountList!.indexWhere((Account item) => item.id == account.id);
+
+    if (index < 0) return await addAccount(account);
+
+    _accountList![index] = account;
+
+    notifyListeners();
+
+    await _accountsService.setAccountList(_store.verify.token!, _accountList!);
   }
 
   Future<void> removeAccount(String id) async {
     assert(_accountList != null, "_accountList is null, to run initDenrypt");
-    assert(_token != null, "_token is null, to run initDenrypt");
 
     test(Account item) => item.id == id;
 
@@ -44,17 +59,16 @@ class AccountsContrller with ChangeNotifier {
 
     notifyListeners();
 
-    await _accountsService.setAccountList(_token!, _accountList!);
+    await _accountsService.setAccountList(_store.verify.token!, _accountList!);
   }
 
-  Future<void> updateToken(String token) async {
+  Future<void> updateToken() async {
     assert(_accountList != null, "_accountList is null, to run initDenrypt");
-    assert(_token != null, "_token is null, to run initDenrypt");
 
-    if (_token == token) return;
+    await _accountsService.setAccountList(_store.verify.token!, _accountList!);
+  }
 
-    _token = token;
-
-    await _accountsService.setAccountList(_token!, _accountList!);
+  Future<void> init(Store store) async {
+    _store = store;
   }
 }

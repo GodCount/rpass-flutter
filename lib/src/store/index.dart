@@ -1,9 +1,6 @@
 import './settings/controller.dart';
-import './settings/service.dart';
 import './verify/contrller.dart';
-import './verify/service.dart';
 import './accounts/contrller.dart';
-import './accounts/service.dart';
 
 final class Store {
   static Store? _instance;
@@ -14,12 +11,13 @@ final class Store {
     _instance = this;
   }
 
-  final settings = SettingsController(SettingsService());
-  final verify = VerifyController(VerifyService());
-  final accounts = AccountsContrller(AccountsService());
+  final settings = SettingsController();
+  final verify = VerifyController();
+  final accounts = AccountsContrller();
 
   Future<void> loadStore() async {
-    await settings.load();
-    await verify.load();
+    await settings.init(this);
+    await verify.init(this);
+    await accounts.init(this);
   }
 }

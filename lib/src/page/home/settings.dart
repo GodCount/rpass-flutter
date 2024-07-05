@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 
 import '../page.dart';
 import '../../store/index.dart';
+import '../verify/security_question.dart';
+import '../../model/question.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, required this.store});
@@ -24,8 +26,6 @@ class SettingsPageState extends State<SettingsPage>
     super.build(context);
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
-        elevation: 2,
         automaticallyImplyLeading: false,
         title: const Text("设置"),
       ),
@@ -107,9 +107,7 @@ class SettingsPageState extends State<SettingsPage>
             ),
             ListTile(
               title: const Text("修改安全问题"),
-              onTap: () {
-                widget.store.settings.setThemeMode(ThemeMode.light);
-              },
+              onTap: _modifyQuestion,
             ),
           ]),
           _cardColumn([
@@ -137,6 +135,34 @@ class SettingsPageState extends State<SettingsPage>
             ListTile(
               title: const Text("导出"),
               onTap: () {},
+            ),
+          ]),
+          _cardColumn([
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(right: 6),
+                    child: Icon(
+                      Icons.pan_tool,
+                    ),
+                  ),
+                  Text(
+                    "测试",
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              title: const Text("清空"),
+              onTap: () async {
+                await widget.store.settings.clear();
+                if (mounted) {
+                  Navigator.of(context).pushNamedAndRemoveUntil(InitPassword.routeName, ModalRoute.withName('/'));
+                }
+              },
             ),
           ]),
         ],
@@ -167,7 +193,9 @@ class SettingsPageState extends State<SettingsPage>
             if (formState.currentState!.validate()) {
               try {
                 await widget.store.verify.modifyPassword(controller.text);
-                widget.store.accounts.updateToken(widget.store.verify.token!);
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
               } catch (e) {
                 if (kDebugMode) {
                   print(e);
@@ -237,6 +265,35 @@ class SettingsPageState extends State<SettingsPage>
                 child: const Text("修改"),
               ),
             ],
+          );
+        });
+  }
+
+  void _modifyQuestion() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: SecurityQuestion(
+              initialList: widget.store.verify.questionList
+                  .map((item) => QuestionAnswer(item.question, ""))
+                  .toList(),
+              onSubmit: (questions) async {
+                if (questions != null) {
+                  try {
+                    await widget.store.verify.setQuestionList(questions);
+                  } catch (e) {
+                    if (kDebugMode) {
+                      print(e);
+                    }
+                    // TODO!
+                  }
+                }
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
           );
         });
   }

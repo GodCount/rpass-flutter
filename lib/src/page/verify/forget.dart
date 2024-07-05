@@ -33,7 +33,7 @@ class ForgetPasswordState extends State<ForgetPassword> {
         .map((item) => QuestionAnswer(item.question, ""))
         .toList();
     _focusNode.addListener(() {
-      if (_focusNode.hasFocus) {
+      if (_errorHitText != null && _focusNode.hasFocus) {
         setState(() {
           _errorHitText = null;
         });
@@ -43,7 +43,16 @@ class ForgetPasswordState extends State<ForgetPassword> {
   }
 
   @override
+  void dispose() {
+    _aController.dispose();
+    _qController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    print("build forget passsword");
     _qController.text = _questions[_index].question;
     _aController.text = _questions[_index].answer;
     return Scaffold(

@@ -23,10 +23,21 @@ class SecurityQuestionState extends State<SecurityQuestion> {
   final TextEditingController _aController = TextEditingController();
   final GlobalKey<FormState> _formState = GlobalKey<FormState>();
 
+
+  @override
+  void dispose() {
+    _qController.dispose();
+    _aController.dispose();
+    super.dispose();
+  }
+
+
   @override
   void initState() {
-    if (widget.initialList != null) {
+    if (widget.initialList != null && widget.initialList!.isNotEmpty) {
       _questions = widget.initialList!;
+      _qController.text = _questions[_index].question;
+      _aController.text = _questions[_index].answer;
     } else {
       _questions = [QuestionAnswer("", "")];
     }

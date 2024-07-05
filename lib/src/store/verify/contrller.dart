@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 
 import '../../model/question.dart';
 import '../../util/common.dart';
+import '../index.dart';
 import './service.dart';
 
 class VerifyController with ChangeNotifier {
-  VerifyController(this._verifyService);
+  VerifyController();
 
   // ignore: constant_identifier_names
   static const String VERIFY_TEXT = "done";
 
-  final VerifyService _verifyService;
+  late Store _store;
+
+  final VerifyService _verifyService = VerifyService();
 
   String? _token;
 
@@ -81,9 +84,13 @@ class VerifyController with ChangeNotifier {
         md5(_questionList.map((item) => item.answerKey).join()), _token!);
 
     await _verifyService.setQuestionTokenAes(_questionTokenAes!);
+
+    await _store.accounts.updateToken();
+
   }
 
-  Future<void> load() async {
+  Future<void> init(Store store) async {
+    _store = store;
     _passwordAes = await _verifyService.getPasswordAes();
 
     _questionTokenAes = await _verifyService.getQuestionTokenAes();

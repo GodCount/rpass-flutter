@@ -7,7 +7,7 @@ import 'passwords.dart';
 class Home extends StatefulWidget {
   const Home({super.key, required this.store});
 
-  static const routeName = "/";
+  static const routeName = "/home";
 
   final Store store;
 
@@ -21,13 +21,12 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
+  bool _initDenrypted = false;
+
   @override
   void initState() {
     _controller = PageController(initialPage: 0);
     super.initState();
-    // if (widget.store.verify.token != null) {
-    //   await widget.store.accounts.initDenrypt(widget.store.verify.token!);
-    // }
   }
 
   @override
@@ -41,17 +40,30 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
     super.build(context);
 
     print("build home");
+
+    if (!_initDenrypted) {
+      widget.store.accounts.initDenrypt().then(
+            (value) => setState(() {
+              _initDenrypted = true;
+            }),
+          );
+    }
+
     return Scaffold(
-      body: PageView(
-        controller: _controller,
-        children: [
-          PasswordsPage(accountsContrller: widget.store.accounts),
-          SettingsPage(store: widget.store)
-        ],
-      ),
-      bottomNavigationBar: MyBottomNavigationBar(
-        controller: _controller,
-      ),
+      body: _initDenrypted
+          ? PageView(
+              controller: _controller,
+              children: [
+                PasswordsPage(accountsContrller: widget.store.accounts),
+                SettingsPage(store: widget.store)
+              ],
+            )
+          : const Center(child: Text("loading...")),
+      bottomNavigationBar: _initDenrypted
+          ? MyBottomNavigationBar(
+              controller: _controller,
+            )
+          : null,
     );
   }
 }
@@ -85,33 +97,26 @@ class MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeData(
-        splashFactory: InkRipple.splashFactory,
-        highlightColor: Colors.transparent,
-      ),
-      child: BottomNavigationBar(
-        currentIndex: _index,
-        onTap: (index) {
-          widget.controller.animateToPage(index,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeIn);
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.supervised_user_circle,
-            ),
-            label: "密码",
+    return BottomNavigationBar(
+      currentIndex: _index,
+      onTap: (index) {
+        widget.controller.animateToPage(index,
+            duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
+      },
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(
+            Icons.supervised_user_circle,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.settings,
-            ),
-            label: "设置",
+          label: "密码",
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(
+            Icons.settings,
           ),
-        ],
-      ),
+          label: "设置",
+        ),
+      ],
     );
   }
 }

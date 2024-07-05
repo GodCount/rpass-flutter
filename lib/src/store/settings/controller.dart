@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../index.dart';
 import './service.dart';
 
 class SettingsController with ChangeNotifier {
-  SettingsController(this._settingsService);
 
-  final SettingsService _settingsService;
+
+  late Store _store;
+
+  final SettingsService _settingsService = SettingsService();
 
   late ThemeMode _themeMode;
 
@@ -23,9 +26,14 @@ class SettingsController with ChangeNotifier {
     await _settingsService.setThemeMode(mode);
   }
 
-  Future<void> load() async {
-    _themeMode = await _settingsService.getThemeMode();
+  Future<void> clear() async {
+    await _settingsService.clear();
+    notifyListeners();
+  }
 
+  Future<void> init(Store store) async {
+    _store = store;
+    _themeMode = await _settingsService.getThemeMode();
     notifyListeners();
   }
 }

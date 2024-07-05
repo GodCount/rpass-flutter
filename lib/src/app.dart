@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import './store/index.dart';
 import './page/page.dart';
 import './page/test.dart';
+import 'theme/theme.dart';
 
 class AuthNavigatorRoute extends NavigatorObserver {
   AuthNavigatorRoute(this._store);
@@ -42,17 +43,19 @@ class RpassApp extends StatelessWidget {
       builder: (BuildContext context, Widget? child) {
         return MaterialApp(
           restorationScopeId: 'app',
-          theme: ThemeData.light(),
-          darkTheme: ThemeData.dark(),
+          theme: RpassTheme.light,
+          darkTheme: RpassTheme.dark,
           themeMode: store.settings.themeMode,
           initialRoute: !store.verify.initialled
               ? InitPassword.routeName
               : store.verify.token == null
                   ? VerifyPassword.routeName
-                  : "/",
-          navigatorObservers: [AuthNavigatorRoute(store)],
+                  : Home.routeName,
+          // navigatorObservers: [AuthNavigatorRoute(store)],
           routes: {
-            // "/": (context) => const OpenContainerTransformDemo(),
+            "/": (context) =>
+                const Center(child: Text("无人区, (根路由会在多数情况被多次 build )")),
+            "/test": (context) => const OpenContainerTransformDemo(),
             Home.routeName: (context) => Home(store: store),
             InitPassword.routeName: (context) =>
                 InitPassword(verifyContrller: store.verify),
