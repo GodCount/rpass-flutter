@@ -42,6 +42,7 @@ dependencies:
   uuid: ^4.4.0
   animations: ^2.0.11
   fluttertoast: ^8.2.6
+  mobile_scanner: ^5.1.1
 
 dev_dependencies:
   flutter_test:

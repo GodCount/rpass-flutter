@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:uuid/uuid.dart';
@@ -6,6 +7,17 @@ import 'package:encrypt/encrypt.dart';
 
 const uuid = Uuid();
 final IV iv = IV.fromUtf8("9" * 16);
+
+const letters = r"qwertyuiopasdfghjklzxcvbnm";
+const numbers = r"0123456789";
+const symbols = r"!@#$%^&*_-=+'(),./\:;<>?[]`{}|~"
+    r'"';
+
+class EmptyError extends Error {
+  final String message;
+  EmptyError(this.message);
+}
+
 
 String md5(String data) {
   return crypto.md5.convert(utf8.encode(data)).toString();
@@ -38,4 +50,47 @@ Iterable<String> aesDenryptList(String key, Iterable<String> list) {
 
 String timeBasedUuid() {
   return uuid.v1();
+}
+
+int randomInt(int min, int max) => min + math.Random().nextInt(max - min);
+
+String randomPassword({
+  required int length,
+  bool enableNumber = true,
+  bool enableSymbol = true,
+  bool enableLetterUppercase = true,
+  bool enableLetterLowercase = true,
+}) {
+  final List<String> values = [];
+
+  if (enableLetterUppercase) {
+    values.addAll(letters.toUpperCase().split(""));
+  }
+
+  if (enableLetterLowercase) {
+    values.addAll(letters.split(""));
+  }
+
+  if (enableNumber) {
+    values.addAll(numbers.split(""));
+  }
+
+  if (enableSymbol) {
+    values.addAll(symbols.split(""));
+  }
+
+  values
+      .sort((a, b) => math.Random().nextInt(100) - math.Random().nextInt(100));
+
+  if (values.isEmpty) {
+    throw EmptyError("enable at least one type");
+  }
+
+  String password = "";
+
+  for (var i = 0; i < length; i++) {
+    password += values[randomInt(0, values.length)];
+  }
+
+  return password;
 }

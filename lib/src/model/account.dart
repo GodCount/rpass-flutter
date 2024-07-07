@@ -57,10 +57,31 @@ class Account {
 
   String? oneTimePassword;
 
+  factory Account.fromEmpty() => Account(
+        domain: "",
+        domainName: "",
+        account: "",
+        password: "",
+        email: "",
+      );
+
   factory Account.fromJson(
     Map<String, dynamic> json,
   ) =>
       _$AccountFromJson(json);
 
   Map<String, dynamic> toJson() => _$AccountToJson(this);
+
+  Account clone() => Account(
+        id: id,
+        date: date,
+        domain: domain,
+        domainName: domainName,
+        account: account,
+        password: password,
+        email: email,
+        description: description,
+        labels: labels,
+        oneTimePassword: oneTimePassword,
+      );
 }

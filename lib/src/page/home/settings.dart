@@ -24,12 +24,19 @@ class SettingsPageState extends State<SettingsPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
+    const shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(6.0), bottomRight: Radius.circular(6.0)),
+    );
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text("设置"),
       ),
       body: ListView(
+        padding: const EdgeInsets.all(6),
         children: [
           _cardColumn([
             Padding(
@@ -72,6 +79,7 @@ class SettingsPageState extends State<SettingsPage>
               },
             ),
             ListTile(
+              shape: shape,
               title: const Text("暗"),
               trailing: widget.store.settings.themeMode == ThemeMode.dark
                   ? const Icon(
@@ -106,6 +114,7 @@ class SettingsPageState extends State<SettingsPage>
               onTap: _modifyPassword,
             ),
             ListTile(
+              shape: shape,
               title: const Text("修改安全问题"),
               onTap: _modifyQuestion,
             ),
@@ -133,6 +142,7 @@ class SettingsPageState extends State<SettingsPage>
               onTap: () {},
             ),
             ListTile(
+              shape: shape,
               title: const Text("导出"),
               onTap: () {},
             ),
@@ -156,11 +166,13 @@ class SettingsPageState extends State<SettingsPage>
               ),
             ),
             ListTile(
+              shape: shape,
               title: const Text("清空"),
               onTap: () async {
                 await widget.store.settings.clear();
                 if (mounted) {
-                  Navigator.of(context).pushNamedAndRemoveUntil(InitPassword.routeName, ModalRoute.withName('/'));
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                      InitPassword.routeName, ModalRoute.withName('/'));
                 }
               },
             ),
@@ -172,7 +184,7 @@ class SettingsPageState extends State<SettingsPage>
 
   Widget _cardColumn(List<Widget> children) {
     return Card(
-      margin: const EdgeInsets.all(12),
+      margin: const EdgeInsets.all(6),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(6.0)),
       ),
@@ -274,6 +286,7 @@ class SettingsPageState extends State<SettingsPage>
         context: context,
         builder: (context) {
           return AlertDialog(
+            scrollable: true,
             content: SecurityQuestion(
               initialList: widget.store.verify.questionList
                   .map((item) => QuestionAnswer(item.question, ""))

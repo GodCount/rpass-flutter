@@ -18,7 +18,7 @@ class AccountsService with SharedPreferencesService {
   Future<bool> setAccountList(String token, List<Account> accounts) {
     return setStringList(
         "account_list",
-        aesDenryptList(token, accounts.map((item) => json.encode(item)))
+        aesEncryptList(token, accounts.map((item) => json.encode(item)))
             .toList());
   }
 }

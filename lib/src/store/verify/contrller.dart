@@ -21,7 +21,7 @@ class VerifyController with ChangeNotifier {
 
   late String? _questionTokenAes;
 
-  late final List<QuestionAnswerKey> _questionList;
+  late List<QuestionAnswerKey> _questionList;
 
   bool get initialled => _passwordAes != null && _passwordAes!.isNotEmpty;
 

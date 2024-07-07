@@ -23,14 +23,13 @@ class SecurityQuestionState extends State<SecurityQuestion> {
   final TextEditingController _aController = TextEditingController();
   final GlobalKey<FormState> _formState = GlobalKey<FormState>();
 
-
   @override
   void dispose() {
     _qController.dispose();
     _aController.dispose();
+    FocusManager.instance.primaryFocus?.unfocus();
     super.dispose();
   }
-
 
   @override
   void initState() {
@@ -163,8 +162,12 @@ class SecurityQuestionState extends State<SecurityQuestion> {
           child: SizedBox(
             width: 180,
             child: ElevatedButton(
-              onPressed: () => widget.onSubmit(null),
-              child: const Text("返回"),
+              onPressed: () {
+                if (_validateSaveQuestion()) {
+                  widget.onSubmit(_questions);
+                }
+              },
+              child: const Text("确认"),
             ),
           ),
         ),
@@ -173,12 +176,8 @@ class SecurityQuestionState extends State<SecurityQuestion> {
           child: SizedBox(
             width: 180,
             child: ElevatedButton(
-              onPressed: () {
-                if (_validateSaveQuestion()) {
-                  widget.onSubmit(_questions);
-                }
-              },
-              child: const Text("确定"),
+              onPressed: () => widget.onSubmit(null),
+              child: const Text("返回"),
             ),
           ),
         )

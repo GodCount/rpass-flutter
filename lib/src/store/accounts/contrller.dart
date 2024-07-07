@@ -13,7 +13,27 @@ class AccountsContrller with ChangeNotifier {
 
   List<Account>? _accountList;
 
+  final Set<String> emailSet = {};
+  final Set<String> accountNumSet = {};
+  final Set<String> labelSet = {};
+
   List<Account> get accountList => _accountList ?? [];
+
+  void _updateSet([List<Account>? accounts]) {
+    assert(_accountList != null, "_accountList is null, to run initDenrypt");
+
+    if (accounts == null) {
+      emailSet.clear();
+      accountNumSet.clear();
+      labelSet.clear();
+    }
+
+    for (var account in accounts ?? _accountList!) {
+      emailSet.add(account.email);
+      accountNumSet.add(account.account);
+      labelSet.addAll(account.labels);
+    }
+  }
 
   Future<void> initDenrypt() async {
     assert(_store.verify.token != null, "token is null, to verify password");
@@ -21,6 +41,20 @@ class AccountsContrller with ChangeNotifier {
     if (_accountList != null) return;
 
     _accountList = await _accountsService.getAccountList(_store.verify.token!);
+
+    _updateSet();
+  }
+
+  Future<void> addAccounts(List<Account> accounts) async {
+    assert(_accountList != null, "_accountList is null, to run initDenrypt");
+
+    _accountList!.insertAll(_accountList!.length, accounts);
+
+    _updateSet(accounts);
+
+    notifyListeners();
+
+    await _accountsService.setAccountList(_store.verify.token!, _accountList!);
   }
 
   Future<void> addAccount(Account account) async {
@@ -28,20 +62,24 @@ class AccountsContrller with ChangeNotifier {
 
     _accountList!.add(account);
 
+    _updateSet([account]);
+
     notifyListeners();
 
     await _accountsService.setAccountList(_store.verify.token!, _accountList!);
   }
 
-  Future<void> modifyAccount(Account account) async {
+  Future<void> setAccount(Account account) async {
     assert(_accountList != null, "_accountList is null, to run initDenrypt");
 
-
-    final index = _accountList!.indexWhere((Account item) => item.id == account.id);
+    final index =
+        _accountList!.indexWhere((Account item) => item.id == account.id);
 
     if (index < 0) return await addAccount(account);
 
     _accountList![index] = account;
+
+    _updateSet();
 
     notifyListeners();
 
@@ -57,9 +95,16 @@ class AccountsContrller with ChangeNotifier {
 
     _accountList!.removeWhere(test);
 
+    _updateSet();
+
     notifyListeners();
 
     await _accountsService.setAccountList(_store.verify.token!, _accountList!);
+  }
+
+  Account getAccountById(String id) {
+    assert(_accountList != null, "_accountList is null, to run initDenrypt");
+    return _accountList!.lastWhere((item) => item.id == id);
   }
 
   Future<void> updateToken() async {

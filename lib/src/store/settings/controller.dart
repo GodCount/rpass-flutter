@@ -28,7 +28,7 @@ class SettingsController with ChangeNotifier {
 
   Future<void> clear() async {
     await _settingsService.clear();
-    notifyListeners();
+    await _store.loadStore();
   }
 
   Future<void> init(Store store) async {

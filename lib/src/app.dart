@@ -5,26 +5,27 @@ import './page/page.dart';
 import './page/test.dart';
 import 'theme/theme.dart';
 
-class AuthNavigatorRoute extends NavigatorObserver {
-  AuthNavigatorRoute(this._store);
-
-  final Store _store;
+class UnfocusNavigatorRoute extends NavigatorObserver {
+  UnfocusNavigatorRoute();
 
   @override
-  void didPush(Route route, Route? previousRoute) {
-    super.didPush(route, previousRoute);
+  void didPush(route, previousRoute) {
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
 
-    if (route.settings.name == Home.routeName) {
-      if (!_store.verify.initialled) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          route.navigator?.pushReplacementNamed(InitPassword.routeName);
-        });
-      } else if (_store.verify.token == null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          route.navigator?.pushReplacementNamed(VerifyPassword.routeName);
-        });
-      }
-    }
+  @override
+  void didPop(route, previousRoute) {
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
+
+  @override
+  void didRemove(route, previousRoute) {
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
+
+  @override
+  void didReplace({newRoute, oldRoute}) {
+    FocusManager.instance.primaryFocus?.unfocus();
   }
 }
 
@@ -51,18 +52,23 @@ class RpassApp extends StatelessWidget {
               : store.verify.token == null
                   ? VerifyPassword.routeName
                   : Home.routeName,
-          // navigatorObservers: [AuthNavigatorRoute(store)],
+          navigatorObservers: [UnfocusNavigatorRoute()],
           routes: {
             "/": (context) =>
                 const Center(child: Text("无人区, (根路由会在多数情况被多次 build )")),
-            "/test": (context) => const OpenContainerTransformDemo(),
-            Home.routeName: (context) => Home(store: store),
+            "/test": (context) => const BarcodeScannerSimple(),
             InitPassword.routeName: (context) =>
                 InitPassword(verifyContrller: store.verify),
             VerifyPassword.routeName: (context) =>
                 VerifyPassword(verifyContrller: store.verify),
             ForgetPassword.routeName: (context) =>
-                ForgetPassword(verifyContrller: store.verify)
+                ForgetPassword(verifyContrller: store.verify),
+            Home.routeName: (context) => Home(store: store),
+            EditAccountPage.routeName: (context) =>
+                EditAccountPage(accountsContrller: store.accounts),
+            LookAccountPage.routeName: (context) =>
+                LookAccountPage(accountsContrller: store.accounts, accountId: "",),
+            QrCodeScannerPage.routeName: (context) => const QrCodeScannerPage(),
           },
         );
       },

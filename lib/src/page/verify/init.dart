@@ -132,7 +132,6 @@ class SetPassword extends StatelessWidget {
                     controller: controller,
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.next,
-                    autofocus: true,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: const InputDecoration(
                         labelText: "init password",
@@ -152,7 +151,6 @@ class SetPassword extends StatelessWidget {
                   child: TextFormField(
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.done,
-                    autofocus: true,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: const InputDecoration(
                       labelText: "init password",
