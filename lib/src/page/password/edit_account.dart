@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../component/label_list.dart';
 import '../../store/accounts/contrller.dart';
 import '../../model/account.dart';
 import '../../util/common.dart';
@@ -114,9 +115,9 @@ class _EditAccountPageState extends State<EditAccountPage> {
         _passwordGolbalKey.currentState!.validator();
   }
 
-  List<_LabelItem> _getLabels() {
+  List<LabelItem> _getLabels() {
     return widget.accountsContrller.labelSet.map((value) {
-      return _LabelItem(value: value, select: _account.labels.contains(value));
+      return LabelItem(value: value, select: _account.labels.contains(value));
     }).toList();
   }
 
@@ -264,7 +265,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                   margin: const EdgeInsets.only(top: 12),
                   padding: const EdgeInsets.all(12),
                   width: width,
-                  child: _LabelList(
+                  child: LabelList(
                     items: _getLabels(),
                     onChange: (labels) {
                       _account.labels = labels;
@@ -286,7 +287,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
               _account.oneTimePassword = _otPasswordController.text;
               _account.description = _descriptionController.text;
               widget.accountsContrller.setAccount(_account);
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(_account.id);
             }
           },
           shape: const RoundedRectangleBorder(
@@ -675,141 +676,5 @@ class _DescriptionTextFieldState extends State<_DescriptionTextField> {
         widget.controller.text = lastValue;
       }
     });
-  }
-}
-
-class _LabelItem {
-  _LabelItem({required this.value, this.select = false, this.newly = false});
-
-  String value;
-  bool select;
-  bool newly;
-}
-
-typedef OnChangeCallback = void Function(List<String> labels);
-
-class _LabelList extends StatefulWidget {
-  const _LabelList({required this.items, required this.onChange});
-
-  final List<_LabelItem> items;
-  final OnChangeCallback onChange;
-
-  @override
-  State<_LabelList> createState() => _LabelListState();
-}
-
-class _LabelListState extends State<_LabelList> {
-  late final List<_LabelItem> _items;
-
-  void _update() {
-    widget.onChange(
-        _items.where((item) => item.select).map((item) => item.value).toList());
-    setState(() {});
-  }
-
-  @override
-  void initState() {
-    _items = widget.items;
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final List<Widget> children = [];
-
-    for (var i = 0; i < _items.length; i++) {
-      final item = _items[i];
-      children.add(ElevatedButton.icon(
-        iconAlignment: IconAlignment.end,
-        style: TextButton.styleFrom(
-          padding: item.newly
-              ? const EdgeInsets.only(
-                  top: 4,
-                  right: 0,
-                  bottom: 4,
-                  left: 24,
-                )
-              : null,
-          side: item.select
-              ? BorderSide(color: Theme.of(context).primaryColor)
-              : null,
-        ),
-        onPressed: () {
-          item.select = !item.select;
-          _update();
-        },
-        label: Text(item.value),
-        icon: item.newly
-            ? SizedBox(
-                height: 32,
-                width: 32,
-                child: IconButton(
-                  iconSize: 16,
-                  onPressed: () {
-                    _items.removeAt(i);
-                    _update();
-                  },
-                  icon: const Icon(Icons.delete),
-                ),
-              )
-            : null,
-      ));
-    }
-
-    children.add(
-      ElevatedButton(
-        onPressed: _addLabel,
-        child: const Icon(Icons.add),
-      ),
-    );
-
-    return Wrap(
-      spacing: 6,
-      runSpacing: 6,
-      children: children,
-    );
-  }
-
-  void _addLabel() {
-    String label = "";
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("标签"),
-          content: TextField(
-            autofocus: true,
-            textInputAction: TextInputAction.done,
-            onChanged: (value) {
-              label = value;
-            },
-            decoration: const InputDecoration(
-              hintText: "新建标签",
-              border: OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text("取消"),
-            ),
-            TextButton(
-              onPressed: () {
-                if (label.isNotEmpty &&
-                    !_items.any((item) => item.value == label)) {
-                  Navigator.of(context).pop();
-                  _items
-                      .add(_LabelItem(value: label, select: true, newly: true));
-                  _update();
-                }
-              },
-              child: const Text("添加"),
-            ),
-          ],
-        );
-      },
-    );
   }
 }
