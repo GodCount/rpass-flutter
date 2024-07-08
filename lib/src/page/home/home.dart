@@ -95,28 +95,70 @@ class MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
     super.initState();
   }
 
+  void _animateToPage(int index) {
+    widget.controller.animateToPage(index,
+        duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: _index,
-      onTap: (index) {
-        widget.controller.animateToPage(index,
-            duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
-      },
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(
-            Icons.supervised_user_circle,
-          ),
-          label: "密码",
+    return Material(
+      color: Theme.of(context).colorScheme.secondaryContainer,
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Expanded(
+              child: InkWell(
+                onTap: () => _animateToPage(0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.account_box_outlined,
+                      color: _index == 0
+                          ? Theme.of(context).colorScheme.primary
+                          : null,
+                    ),
+                    Text(
+                      "密码",
+                      style: _index == 0
+                          ? TextStyle(
+                              color: Theme.of(context).colorScheme.primary)
+                          : null,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: InkWell(
+                onTap: () => _animateToPage(1),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.settings,
+                      color: _index == 1
+                          ? Theme.of(context).colorScheme.primary
+                          : null,
+                    ),
+                    Text(
+                      "设置",
+                      style: _index == 1
+                          ? TextStyle(
+                              color: Theme.of(context).colorScheme.primary)
+                          : null,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
-        BottomNavigationBarItem(
-          icon: Icon(
-            Icons.settings,
-          ),
-          label: "设置",
-        ),
-      ],
+      ),
     );
   }
 }

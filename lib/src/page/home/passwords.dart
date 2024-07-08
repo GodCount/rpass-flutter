@@ -124,10 +124,13 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
   void initState() {
     super.initState();
     _focusNode.addListener(() {
-      print("${_focusNode.hasFocus} , $_hasFocus");
       if (!_focusNode.hasFocus && _hasFocus) {
         setState(() {
           _hasFocus = false;
+        });
+      } else if (_focusNode.hasFocus) {
+        setState(() {
+          _hasFocus = true;
         });
       }
     });
@@ -157,7 +160,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
             onEnd: () {
               if (_hasFocus) {
                 _focusNode.requestFocus();
-              } 
+              }
             },
             child: Text(_hasFocus ? "搜索" : "密码"),
           ),
@@ -217,7 +220,7 @@ class _OpenContainerPasswordItem extends StatelessWidget {
           accountId: account.id,
         );
       },
-      closedElevation: 6,
+      closedElevation: 2,
       closedShape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(8.0)),
       ),

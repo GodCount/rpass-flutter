@@ -139,12 +139,16 @@ class SettingsPageState extends State<SettingsPage>
             ),
             ListTile(
               title: const Text("导入"),
-              onTap: () {},
+              onTap: () {
+                // Navigator.of(context).pushNamed(ExportAccountPage.routeName);
+              },
             ),
             ListTile(
               shape: shape,
               title: const Text("导出"),
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).pushNamed(ExportAccountPage.routeName);
+              },
             ),
           ]),
           _cardColumn([

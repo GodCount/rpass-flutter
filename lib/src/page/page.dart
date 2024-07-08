@@ -5,3 +5,4 @@ export './verify/forget.dart';
 export 'password/edit_account.dart';
 export 'password/look_account.dart';
 export 'scanner/qr_code_scanner.dart';
+export 'setting/export_account.dart';

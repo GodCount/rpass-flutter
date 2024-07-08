@@ -19,6 +19,11 @@ class AccountsContrller with ChangeNotifier {
 
   List<Account> get accountList => _accountList ?? [];
 
+
+  int _searchItemCount = 0;
+
+  int get searchItemCount => _searchItemCount;
+
   void _updateSet([List<Account>? accounts]) {
     assert(_accountList != null, "_accountList is null, to run initDenrypt");
 
@@ -50,6 +55,7 @@ class AccountsContrller with ChangeNotifier {
   void searchSort(String text) {
     assert(_accountList != null, "_accountList is null, to run initDenrypt");
 
+    _searchItemCount = 0;
     // 默认时间降序
     if (text.isEmpty) {
       _accountList!.sort((a, b) => b.date.compareTo(a.date));
@@ -63,6 +69,7 @@ class AccountsContrller with ChangeNotifier {
         weight += account.password.contains(text) ? 2 : 0;
         weight += account.description.contains(text) ? 1 : 0;
         weight += account.labels.contains(text) ? 5 : 0;
+        if (weight > 0) _searchItemCount++;
         weights[account.id] = weight;
       }
       _accountList!.sort((a, b) => weights[b.id]! - weights[a.id]!);

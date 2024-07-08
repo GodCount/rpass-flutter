@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rpass/src/page/setting/export_account.dart';
 
 import './store/index.dart';
 import './page/page.dart';
@@ -66,9 +67,13 @@ class RpassApp extends StatelessWidget {
             Home.routeName: (context) => Home(store: store),
             EditAccountPage.routeName: (context) =>
                 EditAccountPage(accountsContrller: store.accounts),
-            LookAccountPage.routeName: (context) =>
-                LookAccountPage(accountsContrller: store.accounts, accountId: "",),
+            LookAccountPage.routeName: (context) => LookAccountPage(
+                  accountsContrller: store.accounts,
+                  accountId: "",
+                ),
             QrCodeScannerPage.routeName: (context) => const QrCodeScannerPage(),
+            ExportAccountPage.routeName: (context) =>
+                ExportAccountPage(store: store),
           },
         );
       },
