@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
@@ -17,7 +18,6 @@ class EmptyError extends Error {
   final String message;
   EmptyError(this.message);
 }
-
 
 String md5(String data) {
   return crypto.md5.convert(utf8.encode(data)).toString();
@@ -93,4 +93,41 @@ String randomPassword({
   }
 
   return password;
+}
+
+class Debouncer {
+  Debouncer({this.duration = const Duration(seconds: 1)});
+
+  final Duration duration;
+
+  Timer? _timer;
+  Function? func;
+
+  void debounce(Function func) {
+    if (_timer == null) {
+      func.call();
+      _debounceClear();
+    } else {
+      this.func = func;
+      _timer?.cancel();
+      _timer = Timer(duration, () {
+        if (this.func != null) {
+          this.func!.call();
+        }
+        _debounceClear();
+      });
+    }
+  }
+
+  void _debounceClear() {
+    _timer?.cancel();
+    _timer = Timer(duration, () {
+      _timer?.cancel();
+      _timer = null;
+    });
+  }
+
+  void dispose() {
+    _timer?.cancel();
+  }
 }

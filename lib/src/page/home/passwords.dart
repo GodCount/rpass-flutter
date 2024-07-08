@@ -1,11 +1,10 @@
 import 'package:animations/animations.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../model/account.dart';
+import '../../util/common.dart';
 import '../page.dart';
 import '../../store/accounts/contrller.dart';
-import '../test.dart';
 
 class PasswordsPage extends StatefulWidget {
   const PasswordsPage({super.key, required this.accountsContrller});
@@ -19,9 +18,27 @@ class PasswordsPage extends StatefulWidget {
 class PasswordsPageState extends State<PasswordsPage>
     with AutomaticKeepAliveClientMixin {
   final TextEditingController _controller = TextEditingController();
+  late final Debouncer _debouncer;
 
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    _debouncer = Debouncer();
+    _controller.addListener(() {
+      _debouncer.debounce(() {
+        widget.accountsContrller.searchSort(_controller.text);
+      });
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _debouncer.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +124,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
   void initState() {
     super.initState();
     _focusNode.addListener(() {
+      print("${_focusNode.hasFocus} , $_hasFocus");
       if (!_focusNode.hasFocus && _hasFocus) {
         setState(() {
           _hasFocus = false;
@@ -139,7 +157,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
             onEnd: () {
               if (_hasFocus) {
                 _focusNode.requestFocus();
-              }
+              } 
             },
             child: Text(_hasFocus ? "搜索" : "密码"),
           ),
