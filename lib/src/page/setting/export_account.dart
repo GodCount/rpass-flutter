@@ -1,8 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../rpass.dart';
+import '../../component/toast.dart';
 import '../../model/question.dart';
 import '../../store/index.dart';
+import '../../store/verify/contrller.dart';
+import '../../util/common.dart';
+import '../../util/file.dart';
 import '../verify/security_question.dart';
 
 class ExportAccountPage extends StatefulWidget {
@@ -17,13 +24,90 @@ class ExportAccountPage extends StatefulWidget {
 }
 
 class ExportAccountPageState extends State<ExportAccountPage> {
-  bool enableEncrypt = true;
-  bool isNewPassword = false;
-  bool enableSecurityQuestion = true;
-  bool isNewSecurityQuestion = false;
+  bool _enableEncrypt = true;
+  bool _isNewPassword = false;
+  bool _enableSecurityQuestion = true;
+  bool _isNewSecurityQuestion = false;
 
-  TextEditingController passwordController = TextEditingController();
-  List<QuestionAnswer> questions = [];
+  final TextEditingController _passwordController = TextEditingController();
+  List<QuestionAnswer> _questions = [];
+
+  bool _isSaveing = false;
+
+  void _validate() async {
+    if (_enableEncrypt) {
+      if (_isNewPassword && _passwordController.text.isEmpty) {
+        showToast(context, "添加或关闭 独立密码");
+        return;
+      }
+      if (_enableSecurityQuestion &&
+          _isNewSecurityQuestion &&
+          _questions.isEmpty) {
+        showToast(context, "添加或关闭 独立安全问题");
+        return;
+      }
+    }
+
+    setState(() {
+      _isSaveing = true;
+    });
+
+    String saveData;
+
+    if (!_enableEncrypt) {
+      final Object data = {
+        "accounts": widget.store.accounts.accountList,
+        "__version__": RpassInfo.version,
+        "__build_number__": RpassInfo.buildNumber,
+      };
+      saveData = json.encoder.convert(data);
+    } else {
+      final token = _isNewPassword
+          ? md5(_passwordController.text)
+          : widget.store.verify.token!;
+
+      final passwordTest = aesEncrypt(token, VerifyController.VERIFY_TEXT);
+
+      List<QuestionAnswerKey>? questions;
+      String? questionsToken;
+
+      if (_enableSecurityQuestion) {
+        questions = !_isNewSecurityQuestion
+            ? widget.store.verify.questionList
+            : _questions
+                .map((item) =>
+                    QuestionAnswerKey(item.question, answer: item.answer))
+                .toList();
+        questionsToken = aesEncrypt(
+            md5(_questions.map((item) => item.answer).join()), token);
+      }
+
+      final Object data = {
+        ...(questions != null ? {"questions": questions} : {}),
+        "accounts": aesEncrypt(
+            token, json.encoder.convert(widget.store.accounts.accountList)),
+        ...(questionsToken != null
+            ? {"__question_token__": questionsToken}
+            : {}),
+        "__password_verify__": passwordTest,
+        "__version__": RpassInfo.version,
+        "__build_number__": RpassInfo.buildNumber,
+      };
+      saveData = json.encoder.convert(data);
+    }
+    try {
+      await SimpleFile.saveText(
+          data: saveData, name: "rpass_export", ext: ".json");
+      showToast(context, "导出完成");
+    } catch (e) {
+      showToast(context, "导出异常: ${e.toString()}");
+    } finally {
+      _isSaveing = false;
+      _passwordController.text = "";
+      _questions.clear();
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,10 +125,10 @@ class ExportAccountPageState extends State<ExportAccountPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 SwitchListTile(
-                  value: enableEncrypt,
+                  value: _enableEncrypt,
                   onChanged: (value) {
                     setState(() {
-                      enableEncrypt = value;
+                      _enableEncrypt = value;
                     });
                   },
                   title: const Text("加密数据"),
@@ -57,16 +141,16 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                       child: child,
                     );
                   },
-                  child: enableEncrypt
+                  child: _enableEncrypt
                       ? Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             CheckboxListTile(
                               dense: true,
-                              value: isNewPassword,
+                              value: _isNewPassword,
                               onChanged: (value) {
                                 setState(() {
-                                  isNewPassword = value!;
+                                  _isNewPassword = value!;
                                 });
                               },
                               title: const Padding(
@@ -82,7 +166,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                                   child: child,
                                 );
                               },
-                              child: isNewPassword
+                              child: _isNewPassword
                                   ? Padding(
                                       padding: const EdgeInsets.only(
                                         top: 12,
@@ -91,7 +175,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                                         right: 32,
                                       ),
                                       child: TextField(
-                                        controller: passwordController,
+                                        controller: _passwordController,
                                         keyboardType: TextInputType.number,
                                         textInputAction: TextInputAction.done,
                                         inputFormatters: [
@@ -108,10 +192,10 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                             ),
                             CheckboxListTile(
                               dense: true,
-                              value: enableSecurityQuestion,
+                              value: _enableSecurityQuestion,
                               onChanged: (value) {
                                 setState(() {
-                                  enableSecurityQuestion = value!;
+                                  _enableSecurityQuestion = value!;
                                 });
                               },
                               title: const Padding(
@@ -127,13 +211,13 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                                   child: child,
                                 );
                               },
-                              child: enableSecurityQuestion
+                              child: _enableSecurityQuestion
                                   ? CheckboxListTile(
                                       dense: true,
-                                      value: isNewSecurityQuestion,
+                                      value: _isNewSecurityQuestion,
                                       onChanged: (value) {
                                         setState(() {
-                                          isNewSecurityQuestion = value!;
+                                          _isNewSecurityQuestion = value!;
                                         });
                                       },
                                       title: const Padding(
@@ -151,8 +235,8 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                                   child: child,
                                 );
                               },
-                              child: enableSecurityQuestion &&
-                                      isNewSecurityQuestion
+                              child: _enableSecurityQuestion &&
+                                      _isNewSecurityQuestion
                                   ? InkWell(
                                       onTap: _editNewQuestion,
                                       child: Container(
@@ -173,8 +257,8 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                                           ),
                                         ),
                                         child: Text(
-                                          questions.isNotEmpty
-                                              ? questions
+                                          _questions.isNotEmpty
+                                              ? _questions
                                                   .map((item) => item.question)
                                                   .join("; ")
                                               : "独立的备份安全问题",
@@ -192,7 +276,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                   padding: const EdgeInsets.only(top: 12),
                   constraints: const BoxConstraints(minWidth: 180),
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: !_isSaveing ? _validate : null,
                     child: const Text("备份"),
                   ),
                 )
@@ -211,10 +295,10 @@ class ExportAccountPageState extends State<ExportAccountPage> {
         return AlertDialog(
           scrollable: true,
           content: SecurityQuestion(
-            initialList: questions,
+            initialList: _questions,
             onSubmit: (questions) {
               if (questions != null) {
-                this.questions = questions;
+                _questions = questions;
                 setState(() {});
               }
               Navigator.of(context).pop();

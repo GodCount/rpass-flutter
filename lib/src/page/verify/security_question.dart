@@ -5,10 +5,21 @@ import '../../model/question.dart';
 typedef QuestionOnSumit = void Function(List<QuestionAnswer>? questions);
 
 class SecurityQuestion extends StatefulWidget {
-  const SecurityQuestion({super.key, required this.onSubmit, this.initialList});
+  const SecurityQuestion({
+    super.key,
+    required this.onSubmit,
+    this.initialList,
+    this.title,
+    this.subtitle,
+    this.maxQuestion = 3,
+  });
 
   final QuestionOnSumit onSubmit;
   final List<QuestionAnswer>? initialList;
+
+  final String? title;
+  final String? subtitle;
+  final int maxQuestion;
 
   @override
   State<SecurityQuestion> createState() => SecurityQuestionState();
@@ -35,12 +46,53 @@ class SecurityQuestionState extends State<SecurityQuestion> {
   void initState() {
     if (widget.initialList != null && widget.initialList!.isNotEmpty) {
       _questions = widget.initialList!;
-      _qController.text = _questions[_index].question;
-      _aController.text = _questions[_index].answer;
+       _updateText();
     } else {
       _questions = [QuestionAnswer("", "")];
     }
     super.initState();
+  }
+
+  bool _validateSaveQuestion() {
+    if (_formState.currentState!.validate()) {
+      _questions[_index].question = _qController.text;
+      _questions[_index].answer = _aController.text;
+      return true;
+    }
+    return false;
+  }
+
+  void _updateText() {
+    _qController.text = _questions[_index].question;
+    _aController.text = _questions[_index].answer;
+  }
+
+  void _removeQuestion() {
+    _questions.removeAt(_index);
+    setState(() {
+      if (_index > 0) {
+        _index--;
+        _updateText();
+      }
+    });
+  }
+
+  void _prevQuestion() {
+    _formState.currentState?.reset();
+    _index--;
+    _updateText();
+    setState(() {});
+  }
+
+  void _nextQuestionOrAdd() {
+    if (_validateSaveQuestion()) {
+      if (_index == _questions.length - 1) {
+        _questions.add(QuestionAnswer("", ""));
+      }
+      _index++;
+      _updateText();
+      setState(() {});
+    }
   }
 
   @override
@@ -49,12 +101,13 @@ class SecurityQuestionState extends State<SecurityQuestion> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Hi David Park',
+          widget.title ?? "安全问题",
           style: Theme.of(context).textTheme.headlineSmall,
         ),
-        const Padding(
-          padding: EdgeInsets.only(top: 6),
-          child: Text('Sign in with your account', textAlign: TextAlign.center),
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Text(widget.subtitle ?? "当忘记密码时,可用于解锁.",
+              textAlign: TextAlign.center),
         ),
         Container(
           constraints: const BoxConstraints(maxWidth: 264),
@@ -67,14 +120,7 @@ class SecurityQuestionState extends State<SecurityQuestion> {
                 textAlign: TextAlign.end,
               ),
               IconButton(
-                onPressed: _questions.length > 1
-                    ? () {
-                        _questions.removeAt(_index);
-                        setState(() {
-                          _index = _index == 0 ? 0 : _index - 1;
-                        });
-                      }
-                    : null,
+                onPressed: _questions.length > 1 ? _removeQuestion : null,
                 iconSize: 16,
                 icon: const Icon(Icons.delete),
               ),
@@ -94,10 +140,10 @@ class SecurityQuestionState extends State<SecurityQuestion> {
                     textInputAction: TextInputAction.next,
                     autofocus: true,
                     decoration: const InputDecoration(
-                        labelText: "question", border: OutlineInputBorder()),
+                        labelText: "问题", border: OutlineInputBorder()),
                     validator: (value) {
                       return value == null || value.trim().isEmpty
-                          ? "be not empty"
+                          ? "不能为空"
                           : null;
                     },
                   ),
@@ -110,12 +156,12 @@ class SecurityQuestionState extends State<SecurityQuestion> {
                     textInputAction: TextInputAction.next,
                     autofocus: true,
                     decoration: const InputDecoration(
-                      labelText: "answer",
+                      labelText: "答案",
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
                       return value == null || value.trim().isEmpty
-                          ? "be not empty"
+                          ? "不能为空"
                           : null;
                     },
                   ),
@@ -131,29 +177,12 @@ class SecurityQuestionState extends State<SecurityQuestion> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TextButton(
-                onPressed: _index > 0
-                    ? () {
-                        _index -= 1;
-                        _qController.text = _questions[_index].question;
-                        _aController.text = _questions[_index].answer;
-                        _formState.currentState?.reset();
-                        setState(() {});
-                      }
-                    : null,
+                onPressed: _index > 0 ? _prevQuestion : null,
                 child: const Text("上一个"),
               ),
               TextButton(
-                onPressed: () {
-                  if (_validateSaveQuestion()) {
-                    if (_index == _questions.length - 1) {
-                      _questions.add(QuestionAnswer("", ""));
-                    }
-                    _index += 1;
-                    _qController.text = _questions[_index].question;
-                    _aController.text = _questions[_index].answer;
-                    setState(() {});
-                  }
-                },
+                onPressed:
+                    _index < widget.maxQuestion ? _nextQuestionOrAdd : null,
                 child: Text(_index == _questions.length - 1 ? "添加" : "下一个"),
               ),
             ],
@@ -185,14 +214,5 @@ class SecurityQuestionState extends State<SecurityQuestion> {
         )
       ],
     );
-  }
-
-  bool _validateSaveQuestion() {
-    if (_formState.currentState!.validate()) {
-      _questions[_index].question = _qController.value.text;
-      _questions[_index].answer = _aController.value.text;
-      return true;
-    }
-    return false;
   }
 }
