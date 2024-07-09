@@ -133,10 +133,11 @@ class SecurityQuestionState extends State<SecurityQuestion> {
               TextButton(
                 onPressed: _index > 0
                     ? () {
-                        setState(() {
-                          _index -= 1;
-                          _formState.currentState?.reset();
-                        });
+                        _index -= 1;
+                        _qController.text = _questions[_index].question;
+                        _aController.text = _questions[_index].answer;
+                        _formState.currentState?.reset();
+                        setState(() {});
                       }
                     : null,
                 child: const Text("上一个"),
@@ -147,9 +148,10 @@ class SecurityQuestionState extends State<SecurityQuestion> {
                     if (_index == _questions.length - 1) {
                       _questions.add(QuestionAnswer("", ""));
                     }
-                    setState(() {
-                      _index += 1;
-                    });
+                    _index += 1;
+                    _qController.text = _questions[_index].question;
+                    _aController.text = _questions[_index].answer;
+                    setState(() {});
                   }
                 },
                 child: Text(_index == _questions.length - 1 ? "添加" : "下一个"),

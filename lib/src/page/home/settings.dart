@@ -199,90 +199,93 @@ class SettingsPageState extends State<SettingsPage>
   }
 
   void _modifyPassword() {
-    showDialog(
-        context: context,
-        builder: (context) {
-          final TextEditingController controller = TextEditingController();
-          final GlobalKey<FormState> formState = GlobalKey<FormState>();
+    final TextEditingController controller = TextEditingController();
+    final GlobalKey<FormState> formState = GlobalKey<FormState>();
 
-          void onSetPassword() async {
-            if (formState.currentState!.validate()) {
-              try {
-                await widget.store.verify.modifyPassword(controller.text);
-                if (mounted) {
-                  Navigator.of(context).pop();
-                }
-              } catch (e) {
-                if (kDebugMode) {
-                  print(e);
-                }
-                // TODO!
-              }
-            }
+    void onSetPassword() async {
+      if (formState.currentState!.validate()) {
+        try {
+          await widget.store.verify.modifyPassword(controller.text);
+          if (mounted) {
+            Navigator.of(context).pop();
           }
+        } catch (e) {
+          if (kDebugMode) {
+            print(e);
+          }
+          // TODO!
+        }
+      }
+    }
 
-          return AlertDialog(
-            title: const Text("修改密码"),
-            content: Form(
-              key: formState,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: controller,
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("修改密码"),
+          content: Form(
+            key: formState,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: controller,
+                  keyboardType: TextInputType.number,
+                  textInputAction: TextInputAction.next,
+                  autofocus: true,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: const InputDecoration(
+                      labelText: "修改 password", border: OutlineInputBorder()),
+                  validator: (value) {
+                    return value == null || value.trim().isEmpty
+                        ? "be not empty"
+                        : value.length > 3
+                            ? null
+                            : "must length > 3";
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: TextFormField(
                     keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.next,
+                    textInputAction: TextInputAction.done,
                     autofocus: true,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: const InputDecoration(
-                        labelText: "修改 password", border: OutlineInputBorder()),
+                      labelText: "确认 password",
+                      border: OutlineInputBorder(),
+                    ),
                     validator: (value) {
-                      return value == null || value.trim().isEmpty
-                          ? "be not empty"
-                          : value.length > 3
-                              ? null
-                              : "must length > 3";
+                      return value == controller.text ? null : "must equal";
+                    },
+                    onFieldSubmitted: (value) {
+                      if (formState.currentState!.validate()) {
+                        onSetPassword();
+                      }
                     },
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: TextFormField(
-                      keyboardType: TextInputType.number,
-                      textInputAction: TextInputAction.done,
-                      autofocus: true,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: const InputDecoration(
-                        labelText: "确认 password",
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        return value == controller.text ? null : "must equal";
-                      },
-                      onFieldSubmitted: (value) {
-                        if (formState.currentState!.validate()) {
-                          onSetPassword();
-                        }
-                      },
-                    ),
-                  )
-                ],
-              ),
+                )
+              ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text("取消"),
-              ),
-              TextButton(
-                onPressed: onSetPassword,
-                child: const Text("修改"),
-              ),
-            ],
-          );
-        });
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("取消"),
+            ),
+            TextButton(
+              onPressed: onSetPassword,
+              child: const Text("修改"),
+            ),
+          ],
+        );
+      },
+    ).then((value) {
+      controller.dispose();
+    });
   }
 
   void _modifyQuestion() {
