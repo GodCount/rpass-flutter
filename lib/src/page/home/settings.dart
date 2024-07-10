@@ -151,36 +151,6 @@ class SettingsPageState extends State<SettingsPage>
               },
             ),
           ]),
-          _cardColumn([
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(right: 6),
-                    child: Icon(
-                      Icons.pan_tool,
-                    ),
-                  ),
-                  Text(
-                    "测试",
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              shape: shape,
-              title: const Text("清空"),
-              onTap: () async {
-                await widget.store.settings.clear();
-                if (mounted) {
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                      InitPassword.routeName, ModalRoute.withName('/'));
-                }
-              },
-            ),
-          ]),
         ],
       ),
     );

@@ -97,7 +97,10 @@ class ExportAccountPageState extends State<ExportAccountPage> {
     }
     try {
       await SimpleFile.saveText(
-          data: saveData, name: "rpass_export", ext: ".json");
+        data: saveData,
+        name: "rpass_export",
+        ext: ".json",
+      );
       showToast(context, "导出完成");
     } catch (e) {
       showToast(context, "导出异常: ${e.toString()}");
@@ -272,13 +275,31 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                         )
                       : null,
                 ),
-                Container(
-                  padding: const EdgeInsets.only(top: 12),
-                  constraints: const BoxConstraints(minWidth: 180),
-                  child: ElevatedButton(
-                    onPressed: !_isSaveing ? _validate : null,
-                    child: const Text("备份"),
-                  ),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (child, animation) {
+                    return ScaleTransition(
+                      scale: animation,
+                      child: child,
+                    );
+                  },
+                  child: !_isSaveing
+                      ? Container(
+                          key: const ValueKey(1),
+                          padding: const EdgeInsets.only(top: 12),
+                          constraints: const BoxConstraints(minWidth: 180),
+                          child: ElevatedButton(
+                            onPressed: _validate,
+                            child: const Text("备份"),
+                          ),
+                        )
+                      : Container(
+                          key: const ValueKey(2),
+                          margin: const EdgeInsets.only(top: 12),
+                          width: 32,
+                          height: 32,
+                          child: const CircularProgressIndicator(),
+                        ),
                 )
               ],
             ),
