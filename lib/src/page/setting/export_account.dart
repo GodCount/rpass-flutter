@@ -34,7 +34,11 @@ class ExportAccountPageState extends State<ExportAccountPage> {
 
   bool _isSaveing = false;
 
-  void _validate() async {
+  void _export() async {
+    if (widget.store.accounts.accountList.isEmpty) {
+      showToast(context, "没有数据需要备份");
+      return;
+    }
     if (_enableEncrypt) {
       if (_isNewPassword && _passwordController.text.isEmpty) {
         showToast(context, "添加或关闭 独立密码");
@@ -289,7 +293,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                           padding: const EdgeInsets.only(top: 12),
                           constraints: const BoxConstraints(minWidth: 180),
                           child: ElevatedButton(
-                            onPressed: _validate,
+                            onPressed: _export,
                             child: const Text("备份"),
                           ),
                         )

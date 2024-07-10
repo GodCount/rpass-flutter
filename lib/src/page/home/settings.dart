@@ -140,7 +140,7 @@ class SettingsPageState extends State<SettingsPage>
             ListTile(
               title: const Text("导入"),
               onTap: () {
-                // Navigator.of(context).pushNamed(ExportAccountPage.routeName);
+                Navigator.of(context).pushNamed(ImportAccountPage.routeName);
               },
             ),
             ListTile(
