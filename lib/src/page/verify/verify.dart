@@ -51,12 +51,12 @@ class VerifyPasswordState extends State<VerifyPassword> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Hi David Park',
+                  'Rpass',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const Padding(
                   padding: EdgeInsets.only(top: 6),
-                  child: Text('Sign in with your account',
+                  child: Text('验证软件密码',
                       textAlign: TextAlign.center),
                 ),
                 Container(
@@ -71,7 +71,7 @@ class VerifyPasswordState extends State<VerifyPassword> {
                     obscureText: _obscureText,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
-                        labelText: "input password",
+                        labelText: "输入密码",
                         errorText: _errorHitText,
                         border: const OutlineInputBorder(),
                         suffixIcon: IconButton(

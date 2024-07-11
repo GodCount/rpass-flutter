@@ -8,9 +8,9 @@ import '../../component/toast.dart';
 import '../../model/backup.dart';
 import '../../model/question.dart';
 import '../../store/index.dart';
-import '../../store/verify/contrller.dart';
 import '../../util/common.dart';
 import '../../util/file.dart';
+import '../../util/verify_core.dart';
 import '../verify/security_question.dart';
 
 class ExportAccountPage extends StatefulWidget {
@@ -67,24 +67,33 @@ class ExportAccountPageState extends State<ExportAccountPage> {
       );
       saveData = json.encoder.convert(data);
     } else {
-      final token = _isNewPassword
-          ? md5(_passwordController.text)
-          : widget.store.verify.token!;
+      late final String token;
+      late final String passwordTest;
 
-      final passwordTest = aesEncrypt(token, VerifyController.VERIFY_TEXT);
+      if (_isNewPassword) {
+        final data = VerifyCore.createToken(_passwordController.text);
+        token = data.$1;
+        passwordTest = data.$2;
+      } else {
+        token = widget.store.verify.token!;
+        passwordTest = widget.store.verify.passwordAes!;
+      }
 
       List<QuestionAnswerKey>? questions;
       String? questionsToken;
 
       if (_enableSecurityQuestion) {
-        questions = !_isNewSecurityQuestion
-            ? widget.store.verify.questionList
-            : _questions
-                .map((item) =>
-                    QuestionAnswerKey(item.question, answer: item.answer))
-                .toList();
-        questionsToken = aesEncrypt(
-            md5(_questions.map((item) => item.answer).join()), token);
+        if (_isNewSecurityQuestion) {
+          questions = _questions
+              .map((item) =>
+                  QuestionAnswerKey(item.question, answer: item.answer))
+              .toList();
+          questionsToken = VerifyCore.createQuestionAesByKey(
+              token: token, questions: questions);
+        } else {
+          questions = widget.store.verify.questionList;
+          questionsToken = widget.store.verify.questionTokenAes!;
+        }
       }
 
       final EncryptBackup data = EncryptBackup(

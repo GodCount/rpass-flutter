@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../model/question.dart';
-import '../../util/common.dart';
+import '../../util/verify_core.dart';
 import '../index.dart';
 import './service.dart';
 
 class VerifyController with ChangeNotifier {
   VerifyController();
-
-  // ignore: constant_identifier_names
-  static const String VERIFY_TEXT = "done";
 
   late Store _store;
 
@@ -28,12 +25,16 @@ class VerifyController with ChangeNotifier {
   List<QuestionAnswerKey> get questionList => _questionList;
 
   String? get token => _token;
+  String? get passwordAes => _passwordAes;
+  String? get questionTokenAes => _questionTokenAes;
+
 
   Future<void> initPassword(String password,
       [List<QuestionAnswer>? questions]) async {
     assert(password.isNotEmpty);
-    _token = md5(password);
-    _passwordAes = aesEncrypt(_token!, VERIFY_TEXT);
+    final data = VerifyCore.createToken(password);
+    _token = data.$1;
+    _passwordAes = data.$2;
     if (questions != null) await setQuestionList(questions);
     await _verifyService.setPasswordAes(_passwordAes!);
   }
@@ -47,7 +48,7 @@ class VerifyController with ChangeNotifier {
         .map((item) => QuestionAnswerKey(item.question, answer: item.answer)));
 
     _questionTokenAes =
-        aesEncrypt(md5(questions.map((item) => item.answer).join()), _token!);
+        VerifyCore.createQuestionAes(token: _token!, questions: questions);
 
     await _verifyService.setQuestionTokenAes(_questionTokenAes!);
     await _verifyService.setQuestionList(_questionList);
@@ -55,38 +56,29 @@ class VerifyController with ChangeNotifier {
 
   void verify(String password) {
     if (!initialled) throw Exception("Not Initialized");
-
-    final token = md5(password);
-
-    if (aesDenrypt(token, _passwordAes!) != VERIFY_TEXT) {
-      throw Exception("Password Error!");
-    }
-    _token = token;
+    _token = VerifyCore.verify(password: password, passwordAes: _passwordAes!);
   }
 
   void forgotToVerifyQuestion(List<QuestionAnswer> questions) {
     assert(_questionTokenAes != null, "questionTokenAes is null");
     assert(_passwordAes != null, "_passwordAes is null");
 
-    final token = aesDenrypt(
-        md5(questions.map((item) => item.answer).join()), _questionTokenAes!);
-
-    if (aesDenrypt(token, _passwordAes!) != VERIFY_TEXT) {
-      throw Exception("app deranged");
-    }
-    _token = token;
+    _token = VerifyCore.verifyQuestion(
+      questions: questions,
+      questionAes: _questionTokenAes!,
+      passwordAes: _passwordAes!,
+    );
   }
 
   Future<void> modifyPassword(String newPassword) async {
     await initPassword(newPassword);
 
-    _questionTokenAes = aesEncrypt(
-        md5(_questionList.map((item) => item.answerKey).join()), _token!);
+    _questionTokenAes = VerifyCore.createQuestionAesByKey(
+        token: _token!, questions: _questionList);
 
     await _verifyService.setQuestionTokenAes(_questionTokenAes!);
 
     await _store.accounts.updateToken();
-
   }
 
   Future<void> init(Store store) async {

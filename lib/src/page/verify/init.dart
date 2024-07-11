@@ -111,12 +111,12 @@ class SetPassword extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Hi David Park',
+          'Rpass',
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const Padding(
           padding: EdgeInsets.only(top: 6),
-          child: Text('Sign in with your account', textAlign: TextAlign.center),
+          child: Text('初始化你的软件密码', textAlign: TextAlign.center),
         ),
         Padding(
           padding: const EdgeInsets.only(top: 24),
@@ -134,14 +134,14 @@ class SetPassword extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: const InputDecoration(
-                        labelText: "init password",
+                        labelText: "输入数字密码",
                         border: OutlineInputBorder()),
                     validator: (value) {
                       return value == null || value.trim().isEmpty
-                          ? "be not empty"
+                          ? "不能为空"
                           : value.length > 3
                               ? null
-                              : "must length > 3";
+                              : "大于3位";
                     },
                   ),
                 ),
@@ -153,11 +153,11 @@ class SetPassword extends StatelessWidget {
                     textInputAction: TextInputAction.done,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: const InputDecoration(
-                      labelText: "init password",
+                      labelText: "确认密码",
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
-                      return value == controller.text ? null : "must equal";
+                      return value == controller.text ? null : "两次密码不相等";
                     },
                     onFieldSubmitted: (value) {
                       if (formState.currentState!.validate()) {
