@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../component/toast.dart';
-import '../../model/account.dart';
+import '../../model/backup.dart';
 import '../../store/index.dart';
 import '../../util/file.dart';
 
@@ -30,6 +30,7 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
     try {
       final result = await SimpleFile.openText();
       await _verifyImport(result);
+      showToast(context, "导入完成");
     } catch (e) {
       showToast(context, "导入异常: ${e.toString()}");
     } finally {
@@ -41,23 +42,29 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
 
   Future<void> _verifyImport(String data) {
     final completer = Completer<void>();
-    Timer(const Duration(), () {
+    final accountsContrller = widget.store.accounts;
+    Timer(const Duration(), () async {
       try {
         final object = json.decoder.convert(data);
-        if (object["accounts"] == null) {
-          throw Exception("find accounts field!");
+        late Backup backup;
+        try {
+          backup = Backup.fromJson(object);
+        } catch (e) {
+          backup = await _denryptBackup(EncryptBackup.fromJson(object));
         }
-        if (object["accounts"] is List<dynamic>) {
-          final accounts = (object["accounts"] as List<dynamic>)
-              .map((item) => Account.fromJson(item))
-              .toList();
-        }
+        await accountsContrller.importBackupAccounts(backup);
+        completer.complete();
       } catch (e) {
         completer.completeError(e);
       }
     });
 
     return completer.future;
+  }
+
+  Future<Backup> _denryptBackup(EncryptBackup encryptBackup) async {
+    // TODO! 解密返回 Backup -> 处理导入冲突
+    return const Backup(accounts: [], version: "0", buildNumber: "0");
   }
 
   @override

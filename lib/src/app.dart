@@ -53,9 +53,6 @@ class RpassApp extends StatelessWidget {
                   : Home.routeName,
           navigatorObservers: [UnfocusNavigatorRoute()],
           routes: {
-            "/": (context) =>
-                const Center(child: Text("无人区, (根路由会在多数情况被多次 build )")),
-            // "/test": (context) => const BarcodeScannerSimple(),
             InitPassword.routeName: (context) =>
                 InitPassword(verifyContrller: store.verify),
             VerifyPassword.routeName: (context) =>

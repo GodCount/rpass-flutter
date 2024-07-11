@@ -9,26 +9,35 @@ class SimpleFile {
   static Future<Directory> applicationDocumentsDirectory =
       getApplicationDocumentsDirectory();
 
-  static Future<void> saveText({
+  static Future<String> saveText({
     required String data,
     required String name,
-    String ext = ".txt",
+    String ext = "txt",
     String dialogTitle = "导出文件:",
   }) async {
-    final filename = "$name$ext";
+    final filename = "$name.$ext";
 
     final Uint8List fileData = utf8.encode(data);
 
-    String? outputFile = await FilePicker.platform.saveFile(
+    String? filepath = await FilePicker.platform.saveFile(
       dialogTitle: dialogTitle,
+      type: FileType.custom,
+      allowedExtensions: [ext],
       initialDirectory: (await applicationDocumentsDirectory).path,
       bytes: fileData,
       fileName: filename,
     );
 
-    if (outputFile == null) {
+    if (filepath == null) {
       throw Exception("user cancel");
     }
+
+    if (Platform.isMacOS || Platform.isWindows) {
+      File file = File(filepath);
+      await file.writeAsBytes(fileData, flush: true);
+    }
+
+    return filepath;
   }
 
   static Future<String> openText({

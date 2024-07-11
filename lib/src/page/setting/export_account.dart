@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../../../rpass.dart';
 import '../../component/toast.dart';
+import '../../model/backup.dart';
 import '../../model/question.dart';
 import '../../store/index.dart';
 import '../../store/verify/contrller.dart';
@@ -59,11 +60,11 @@ class ExportAccountPageState extends State<ExportAccountPage> {
     String saveData;
 
     if (!_enableEncrypt) {
-      final Object data = {
-        "accounts": widget.store.accounts.accountList,
-        "__version__": RpassInfo.version,
-        "__build_number__": RpassInfo.buildNumber,
-      };
+      final Backup data = Backup(
+        accounts: widget.store.accounts.accountList,
+        version: RpassInfo.version,
+        buildNumber: RpassInfo.buildNumber,
+      );
       saveData = json.encoder.convert(data);
     } else {
       final token = _isNewPassword
@@ -86,26 +87,25 @@ class ExportAccountPageState extends State<ExportAccountPage> {
             md5(_questions.map((item) => item.answer).join()), token);
       }
 
-      final Object data = {
-        ...(questions != null ? {"questions": questions} : {}),
-        "accounts": aesEncrypt(
+      final EncryptBackup data = EncryptBackup(
+        questions: questions,
+        accounts: aesEncrypt(
             token, json.encoder.convert(widget.store.accounts.accountList)),
-        ...(questionsToken != null
-            ? {"__question_token__": questionsToken}
-            : {}),
-        "__password_verify__": passwordTest,
-        "__version__": RpassInfo.version,
-        "__build_number__": RpassInfo.buildNumber,
-      };
+        questionsToken: questionsToken,
+        passwordVerify: passwordTest,
+        version: RpassInfo.version,
+        buildNumber: RpassInfo.buildNumber,
+      );
+
       saveData = json.encoder.convert(data);
     }
     try {
-      await SimpleFile.saveText(
+      final filepath = await SimpleFile.saveText(
         data: saveData,
         name: "rpass_export",
-        ext: ".json",
+        ext: "json",
       );
-      showToast(context, "导出完成");
+      showToast(context, "导出完成,地址: $filepath");
     } catch (e) {
       showToast(context, "导出异常: ${e.toString()}");
     } finally {

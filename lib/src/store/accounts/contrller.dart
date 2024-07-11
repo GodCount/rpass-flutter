@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../model/backup.dart';
+import '../../util/common.dart';
 import '../index.dart';
 import './service.dart';
 import '../../model/account.dart';
@@ -18,7 +20,6 @@ class AccountsContrller with ChangeNotifier {
   final Set<String> labelSet = {};
 
   List<Account> get accountList => _accountList ?? [];
-
 
   int _searchItemCount = 0;
 
@@ -137,6 +138,18 @@ class AccountsContrller with ChangeNotifier {
   Account getAccountById(String id) {
     assert(_accountList != null, "_accountList is null, to run initDenrypt");
     return _accountList!.lastWhere((item) => item.id == id);
+  }
+
+  Future<void> importBackupAccounts(Backup backup) async {
+    if (backup.accounts.isEmpty) return;
+    final localIds = accountList.map((item) => item.id);
+    final result = backup.accounts.map((item) {
+      if (localIds.contains(item.id)) {
+        item.id = timeBasedUuid();
+      }
+      return item;
+    }).toList();
+    await addAccounts(result);
   }
 
   Future<void> updateToken() async {
