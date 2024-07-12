@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../component/toast.dart';
 import '../page.dart';
 import '../../store/index.dart';
 import '../verify/security_question.dart';
@@ -180,10 +180,7 @@ class SettingsPageState extends State<SettingsPage>
             Navigator.of(context).pop();
           }
         } catch (e) {
-          if (kDebugMode) {
-            print(e);
-          }
-          // TODO!
+          showToast(context, "密码修改异常: ${e.toString()}");
         }
       }
     }
@@ -273,10 +270,7 @@ class SettingsPageState extends State<SettingsPage>
                   try {
                     await widget.store.verify.setQuestionList(questions);
                   } catch (e) {
-                    if (kDebugMode) {
-                      print(e);
-                    }
-                    // TODO!
+                    showToast(context, "问题修改异常: ${e.toString()}");
                   }
                 }
                 if (mounted) {

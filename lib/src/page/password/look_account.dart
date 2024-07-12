@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -294,10 +293,7 @@ class _LookAccountPageState extends State<LookAccountPage> {
             Navigator.of(context).pop();
           }
         } catch (e) {
-          if (kDebugMode) {
-            print(e);
-          }
-          // TODO!
+          showToast(context, "账号删除异常: ${e.toString()}");
         }
       }
     });

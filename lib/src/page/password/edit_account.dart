@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../component/label_list.dart';
+import '../../component/toast.dart';
 import '../../store/accounts/contrller.dart';
 import '../../model/account.dart';
 import '../../util/common.dart';
@@ -64,10 +65,14 @@ class _EditAccountPageState extends State<EditAccountPage> {
         _account =
             widget.accountsContrller.getAccountById(widget.accountId!).clone();
       } catch (e) {
-        if (kDebugMode) {
-          print(e);
-        }
-        // TODO!
+        // initState 阶段无法使用 context 延迟一下
+        Future.delayed(Duration.zero, () {
+          showToast(context, "账号信息获取异常: ${e.toString()}");
+          Navigator.of(context).pop();
+        });
+
+        // 先赋值为空,让后续代码正常运行
+        _account = Account.fromEmpty();
       }
     } else {
       _account = Account.fromEmpty();
@@ -148,9 +153,8 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     labelText: "域名",
                     border: OutlineInputBorder(),
                   ),
-                  validator: (value) => !AccountRegExp.domain.hasMatch(value)
-                      ? "格式错误"
-                      : null,
+                  validator: (value) =>
+                      !AccountRegExp.domain.hasMatch(value) ? "格式错误" : null,
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
@@ -201,9 +205,8 @@ class _EditAccountPageState extends State<EditAccountPage> {
                         .map((value) =>
                             DropdownMenuEntry(value: value, label: value))
                         .toList(),
-                    validator: (value) => !AccountRegExp.email.hasMatch(value)
-                        ? "格式错误"
-                        : null,
+                    validator: (value) =>
+                        !AccountRegExp.email.hasMatch(value) ? "格式错误" : null,
                   ),
                 ),
                 Padding(

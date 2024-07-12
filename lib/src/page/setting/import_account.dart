@@ -8,7 +8,6 @@ import '../../component/toast.dart';
 import '../../model/backup.dart';
 import '../../model/question.dart';
 import '../../store/index.dart';
-import '../../store/verify/contrller.dart';
 import '../../util/common.dart';
 import '../../util/file.dart';
 import '../../util/verify_core.dart';
