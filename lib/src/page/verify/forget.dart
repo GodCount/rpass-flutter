@@ -1,8 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../component/toast.dart';
-import '../../model/question.dart';
 import '../../store/verify/contrller.dart';
 import '../page.dart';
 import 'verify_question.dart';

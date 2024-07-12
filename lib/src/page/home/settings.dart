@@ -206,13 +206,13 @@ class SettingsPageState extends State<SettingsPage>
                   autofocus: true,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   decoration: const InputDecoration(
-                      labelText: "修改 password", border: OutlineInputBorder()),
+                      labelText: "修改密码", border: OutlineInputBorder()),
                   validator: (value) {
                     return value == null || value.trim().isEmpty
-                        ? "be not empty"
+                        ? "不能为空"
                         : value.length > 3
                             ? null
-                            : "must length > 3";
+                            : "大于3位";
                   },
                 ),
                 Padding(
@@ -223,11 +223,11 @@ class SettingsPageState extends State<SettingsPage>
                     autofocus: true,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: const InputDecoration(
-                      labelText: "确认 password",
+                      labelText: "确认密码",
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
-                      return value == controller.text ? null : "must equal";
+                      return value == controller.text ? null : "不能为空";
                     },
                     onFieldSubmitted: (value) {
                       if (formState.currentState!.validate()) {

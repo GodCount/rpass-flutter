@@ -102,7 +102,7 @@ class _LookAccountPageState extends State<LookAccountPage> {
             ListTile(
               title: const Padding(
                 padding: EdgeInsets.only(left: 6),
-                child: Text("网站域名"),
+                child: Text("域名"),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
@@ -330,7 +330,7 @@ class _LookAccountPageState extends State<LookAccountPage> {
                     ),
                   ),
                   Text(
-                    "一次性密码",
+                    "一次性密码(OTP)",
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ],
@@ -349,7 +349,7 @@ class _LookAccountPageState extends State<LookAccountPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("描述"),
+          title: const Text("备注"),
           content: SelectableText(
             _account.description,
             maxLines: 10,
@@ -431,14 +431,14 @@ class _LookOtPasswordListTile extends StatefulWidget {
 
 class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile> {
   AuthOneTimePassword? _authOneTimePassword;
-  String errorText = "pasre auth otp error!";
+  String errorText = "";
 
   @override
   void initState() {
     try {
       _authOneTimePassword = AuthOneTimePassword.parse(widget.oneTimePassword);
     } catch (e) {
-      errorText = e.toString();
+      errorText = "解析一次性密码(OTP)异常! ${e.toString()}";
     }
     super.initState();
   }

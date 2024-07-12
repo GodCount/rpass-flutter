@@ -39,7 +39,6 @@ class VerifyPasswordState extends State<VerifyPassword> {
 
   @override
   Widget build(BuildContext context) {
-    print("build verify password");
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Center(

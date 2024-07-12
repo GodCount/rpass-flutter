@@ -39,8 +39,6 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     super.build(context);
 
-    print("build home");
-
     if (!_initDenrypted) {
       widget.store.accounts.initDenrypt().then(
             (value) => setState(() {
@@ -58,7 +56,7 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                 SettingsPage(store: widget.store)
               ],
             )
-          : const Center(child: Text("loading...")),
+          : const Center(child: Text("解密中...")),
       bottomNavigationBar: _initDenrypted
           ? MyBottomNavigationBar(
               controller: _controller,

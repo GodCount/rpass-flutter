@@ -33,7 +33,6 @@ class InitPasswordState extends State<InitPassword> {
 
   @override
   Widget build(BuildContext context) {
-    print("build init password");
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Center(
