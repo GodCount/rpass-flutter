@@ -46,7 +46,7 @@ class SecurityQuestionState extends State<SecurityQuestion> {
   void initState() {
     if (widget.initialList != null && widget.initialList!.isNotEmpty) {
       _questions = widget.initialList!;
-       _updateText();
+      _updateText();
     } else {
       _questions = [QuestionAnswer("", "")];
     }
@@ -72,8 +72,8 @@ class SecurityQuestionState extends State<SecurityQuestion> {
     setState(() {
       if (_index > 0) {
         _index--;
-        _updateText();
       }
+      _updateText();
     });
   }
 

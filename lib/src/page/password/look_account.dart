@@ -116,7 +116,7 @@ class _LookAccountPageState extends State<LookAccountPage> {
               shape: shape,
               title: const Padding(
                 padding: EdgeInsets.only(left: 6),
-                child: Text("网站名"),
+                child: Text("网站标题"),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),

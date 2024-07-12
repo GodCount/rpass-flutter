@@ -17,28 +17,8 @@ class PasswordsPage extends StatefulWidget {
 
 class PasswordsPageState extends State<PasswordsPage>
     with AutomaticKeepAliveClientMixin {
-  final TextEditingController _controller = TextEditingController();
-  late final Debouncer _debouncer;
-
   @override
   bool get wantKeepAlive => true;
-
-  @override
-  void initState() {
-    _debouncer = Debouncer();
-    _controller.addListener(() {
-      _debouncer.debounce(() {
-        widget.accountsContrller.searchSort(_controller.text);
-      });
-    });
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _debouncer.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +32,10 @@ class PasswordsPageState extends State<PasswordsPage>
         automaticallyImplyLeading: false,
         title: _AppBarTitleToSearch(
           title: "密码",
-          controller: _controller,
+          itemCount: accountList.length,
+          onChanged: (text) {
+            return widget.accountsContrller.searchSort(text);
+          },
         ),
       ),
       body: ListenableBuilder(
@@ -105,24 +88,43 @@ class PasswordsPageState extends State<PasswordsPage>
   }
 }
 
-class _AppBarTitleToSearch extends StatefulWidget {
-  const _AppBarTitleToSearch({required this.controller, required this.title});
+typedef OnInputChanged = int Function(String value);
 
-  final TextEditingController controller;
+class _AppBarTitleToSearch extends StatefulWidget {
+  const _AppBarTitleToSearch({
+    required this.onChanged,
+    required this.title,
+    required this.itemCount,
+  });
+
   final String title;
+  final OnInputChanged onChanged;
+  final int itemCount;
 
   @override
   State<_AppBarTitleToSearch> createState() => _AppBarTitleToSearchState();
 }
 
 class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
+  final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  final Debouncer _debouncer = Debouncer();
+
+  int _matchCount = 0;
 
   bool _hasFocus = false;
 
   @override
   void initState() {
     super.initState();
+
+    _controller.addListener(
+      () => _debouncer.debounce(() {
+        _matchCount = widget.onChanged(_controller.text);
+        setState(() {});
+      }),
+    );
+
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus && _hasFocus) {
         setState(() {
@@ -137,6 +139,14 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    _debouncer.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
@@ -145,10 +155,11 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
         });
       },
       child: TextField(
-        controller: widget.controller,
+        controller: _controller,
         focusNode: _focusNode,
         autofocus: false,
         ignorePointers: !_hasFocus,
+        style: Theme.of(context).textTheme.bodySmall,
         decoration: InputDecoration(
           border: InputBorder.none,
           labelStyle:
@@ -162,7 +173,9 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
                 _focusNode.requestFocus();
               }
             },
-            child: Text(_hasFocus ? "搜索" : "密码"),
+            child: _hasFocus || _controller.text.isNotEmpty
+                ? Text("搜索: $_matchCount/${widget.itemCount}")
+                : const Text("密码"),
           ),
           prefixIcon: AnimatedOpacity(
             opacity: _hasFocus ? 1 : 0,
@@ -171,7 +184,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
           ),
           suffixIcon: IconButton(
             onPressed: () {
-              widget.controller.clear();
+              _controller.clear();
               _focusNode.unfocus();
             },
             icon: AnimatedOpacity(

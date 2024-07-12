@@ -164,7 +164,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     textInputAction: TextInputAction.next,
                     focusNoError: true,
                     decoration: const InputDecoration(
-                      labelText: "网站名",
+                      labelText: "网站标题",
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) => value.isEmpty ? "不能为空" : null,

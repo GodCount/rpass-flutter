@@ -21,9 +21,6 @@ class AccountsContrller with ChangeNotifier {
 
   List<Account> get accountList => _accountList ?? [];
 
-  int _searchItemCount = 0;
-
-  int get searchItemCount => _searchItemCount;
 
   void _updateSet([List<Account>? accounts]) {
     assert(_accountList != null, "_accountList is null, to run initDenrypt");
@@ -53,10 +50,10 @@ class AccountsContrller with ChangeNotifier {
     searchSort("");
   }
 
-  void searchSort(String text) {
+  int searchSort(String text) {
     assert(_accountList != null, "_accountList is null, to run initDenrypt");
 
-    _searchItemCount = 0;
+    int matchCount = 0;
     // 默认时间降序
     if (text.isEmpty) {
       _accountList!.sort((a, b) => b.date.compareTo(a.date));
@@ -70,12 +67,13 @@ class AccountsContrller with ChangeNotifier {
         weight += account.password.contains(text) ? 2 : 0;
         weight += account.description.contains(text) ? 1 : 0;
         weight += account.labels.contains(text) ? 5 : 0;
-        if (weight > 0) _searchItemCount++;
+        if (weight > 0) matchCount++;
         weights[account.id] = weight;
       }
       _accountList!.sort((a, b) => weights[b.id]! - weights[a.id]!);
     }
     notifyListeners();
+    return matchCount;
   }
 
   Future<void> addAccounts(List<Account> accounts) async {
@@ -142,11 +140,12 @@ class AccountsContrller with ChangeNotifier {
 
   Future<void> importBackupAccounts(Backup backup) async {
     if (backup.accounts.isEmpty) return;
-    final localIds = accountList.map((item) => item.id);
+    final localIds = accountList.map((item) => item.id).toList();
     final result = backup.accounts.map((item) {
       if (localIds.contains(item.id)) {
         item.id = timeBasedUuid();
       }
+      localIds.add(item.id);
       return item;
     }).toList();
     await addAccounts(result);

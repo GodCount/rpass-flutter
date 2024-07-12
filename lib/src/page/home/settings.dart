@@ -151,6 +151,30 @@ class SettingsPageState extends State<SettingsPage>
               },
             ),
           ]),
+          _cardColumn([
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(right: 6),
+                    child: Icon(
+                      Icons.touch_app,
+                    ),
+                  ),
+                  Text(
+                    "信息",
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+               shape: shape,
+              title: const Text("关于"),
+              onTap: () {},
+            ),
+          ]),
         ],
       ),
     );
