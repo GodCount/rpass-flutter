@@ -110,7 +110,7 @@ class _LookAccountPageState extends State<LookAccountPage> {
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
-              onTap: () => writeClipboard(_account.domain),
+              onLongPress: () => writeClipboard(_account.domain),
             ),
             ListTile(
               shape: shape,
@@ -125,7 +125,7 @@ class _LookAccountPageState extends State<LookAccountPage> {
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
-              onTap: () => writeClipboard(_account.domainName),
+              onLongPress: () => writeClipboard(_account.domainName),
             ),
           ]),
           _cardColumn([
@@ -158,7 +158,7 @@ class _LookAccountPageState extends State<LookAccountPage> {
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
-              onTap: () => writeClipboard(_account.account),
+              onLongPress: () => writeClipboard(_account.account),
             ),
             ListTile(
               title: const Padding(
@@ -172,12 +172,12 @@ class _LookAccountPageState extends State<LookAccountPage> {
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
-              onTap: () => writeClipboard(_account.email),
+              onLongPress: () => writeClipboard(_account.email),
             ),
             _LookPasswordListTile(
               shape: shape,
               password: _account.password,
-              onTap: () => writeClipboard(_account.password),
+              onLongPress: () => writeClipboard(_account.password),
             ),
           ]),
           _otp(shape),
@@ -366,10 +366,10 @@ class _LookAccountPageState extends State<LookAccountPage> {
 }
 
 class _LookPasswordListTile extends StatefulWidget {
-  const _LookPasswordListTile({required this.password, this.onTap, this.shape});
+  const _LookPasswordListTile({required this.password, this.onLongPress, this.shape});
 
   final String password;
-  final GestureTapCallback? onTap;
+  final GestureTapCallback? onLongPress;
   final ShapeBorder? shape;
 
   @override
@@ -406,7 +406,7 @@ class _LookPasswordListTileState extends State<_LookPasswordListTile> {
               : Icons.visibility_off_outlined,
         ),
       ),
-      onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
     );
   }
 }

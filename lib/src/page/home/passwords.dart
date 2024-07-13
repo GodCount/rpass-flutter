@@ -27,21 +27,21 @@ class PasswordsPageState extends State<PasswordsPage>
 
     final mainColor = Theme.of(context).colorScheme.primaryContainer;
 
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: _AppBarTitleToSearch(
-          title: "密码",
-          itemCount: accountList.length,
-          onChanged: (text) {
-            return widget.accountsContrller.searchSort(text);
-          },
-        ),
-      ),
-      body: ListenableBuilder(
-        listenable: widget.accountsContrller,
-        builder: (context, child) {
-          return ListView.separated(
+    return ListenableBuilder(
+      listenable: widget.accountsContrller,
+      builder: (context, child) {
+        return Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            title: _AppBarTitleToSearch(
+              title: "密码",
+              itemCount: accountList.length,
+              onChanged: (text) {
+                return widget.accountsContrller.searchSort(text);
+              },
+            ),
+          ),
+          body: ListView.separated(
             padding: const EdgeInsets.all(12),
             itemCount: accountList.length,
             separatorBuilder: (context, index) {
@@ -55,35 +55,36 @@ class PasswordsPageState extends State<PasswordsPage>
                 account: accountList[index],
               );
             },
-          );
-        },
-      ),
-      floatingActionButton: OpenContainer(
-        transitionType: ContainerTransitionType.fade,
-        transitionDuration: const Duration(milliseconds: 600),
-        openColor: mainColor,
-        closedColor: mainColor,
-        middleColor: mainColor,
-        openBuilder: (BuildContext context, VoidCallback _) {
-          return EditAccountPage(accountsContrller: widget.accountsContrller);
-        },
-        closedElevation: 6.0,
-        closedShape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(56 / 2),
           ),
-        ),
-        closedBuilder: (BuildContext context, VoidCallback openContainer) {
-          return SizedBox(
-            width: 56,
-            height: 56,
-            child: InkWell(
-              onTap: openContainer,
-              child: const Icon(Icons.add),
+          floatingActionButton: OpenContainer(
+            transitionType: ContainerTransitionType.fade,
+            transitionDuration: const Duration(milliseconds: 600),
+            openColor: mainColor,
+            closedColor: mainColor,
+            middleColor: mainColor,
+            openBuilder: (BuildContext context, VoidCallback _) {
+              return EditAccountPage(
+                  accountsContrller: widget.accountsContrller);
+            },
+            closedElevation: 6.0,
+            closedShape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(56 / 2),
+              ),
             ),
-          );
-        },
-      ),
+            closedBuilder: (BuildContext context, VoidCallback openContainer) {
+              return SizedBox(
+                width: 56,
+                height: 56,
+                child: InkWell(
+                  onTap: openContainer,
+                  child: const Icon(Icons.add),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
@@ -210,7 +211,7 @@ class _OpenContainerPasswordItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mainColor = Theme.of(context).cardColor;
+    final mainColor = Theme.of(context).colorScheme.surfaceContainer;
 
     bool isLogPress = false;
 
