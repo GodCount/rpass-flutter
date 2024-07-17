@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.godcount" "\0"
-            VALUE "FileDescription", "rpass" "\0"
+            VALUE "FileDescription", "Rpass" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "rpass" "\0"
+            VALUE "InternalName", "Rpass" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2024 com.godcount. All rights reserved." "\0"
-            VALUE "OriginalFilename", "rpass.exe" "\0"
-            VALUE "ProductName", "rpass" "\0"
+            VALUE "OriginalFilename", "Rpass.exe" "\0"
+            VALUE "ProductName", "Rpass" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
