@@ -1,10 +1,12 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
+import '../../component/highlight_text.dart';
 import '../../model/account.dart';
 import '../../util/common.dart';
 import '../page.dart';
 import '../../store/accounts/contrller.dart';
+import '../test.dart';
 
 class PasswordsPage extends StatefulWidget {
   const PasswordsPage({super.key, required this.accountsContrller});
@@ -20,87 +22,122 @@ class PasswordsPageState extends State<PasswordsPage>
   @override
   bool get wantKeepAlive => true;
 
+  final List<Account> _accounts = [];
+  String _searchText = "";
+
+  @override
+  void initState() {
+    widget.accountsContrller.addListener(_searchAccounts);
+    _searchAccounts();
+    super.initState();
+  }
+
+  void _searchAccounts() {
+    _accounts.clear();
+    if (_searchText.isNotEmpty) {
+      _accounts.addAll(widget.accountsContrller.accountList.where((account) {
+        var weight = account.domain.contains(_searchText) ? 1 : 0;
+        weight += account.domainName.contains(_searchText) ? 1 : 0;
+        weight += account.account.contains(_searchText) ? 1 : 0;
+        weight += account.email.contains(_searchText) ? 1 : 0;
+        weight += account.password.contains(_searchText) ? 1 : 0;
+        weight += account.description.contains(_searchText) ? 1 : 0;
+        weight += account.labels.contains(_searchText) ? 1 : 0;
+        return weight > 0;
+      }));
+    } else {
+      _accounts.addAll(widget.accountsContrller.accountList);
+    }
+
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final accountList = widget.accountsContrller.accountList;
-
     final mainColor = Theme.of(context).colorScheme.primaryContainer;
 
-    return ListenableBuilder(
-      listenable: widget.accountsContrller,
-      builder: (context, child) {
-        return Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            title: _AppBarTitleToSearch(
-              title: "密码",
-              itemCount: accountList.length,
-              onChanged: (text) {
-                return widget.accountsContrller.searchSort(text);
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: _AppBarTitleToSearch(
+          title: "密码",
+          itemCount: widget.accountsContrller.accountList.length,
+          matchCount: _searchText.isNotEmpty ? _accounts.length : 0,
+          onChanged: (text) {
+            _searchText = text;
+            _searchAccounts();
+          },
+        ),
+      ),
+      body: ListView.separated(
+        padding: const EdgeInsets.all(12),
+        itemCount: _accounts.length,
+        separatorBuilder: (context, index) {
+          return const SizedBox(
+            height: 12,
+          );
+        },
+        itemBuilder: (context, index) {
+          return _OpenContainerPasswordItem(
+            accountsContrller: widget.accountsContrller,
+            account: _accounts[index],
+            matchText: _searchText,
+          );
+        },
+      ),
+      floatingActionButton: OpenContainer(
+        transitionType: ContainerTransitionType.fade,
+        transitionDuration: const Duration(milliseconds: 600),
+        openColor: mainColor,
+        closedColor: mainColor,
+        middleColor: mainColor,
+        openBuilder: (BuildContext context, VoidCallback _) {
+          return EditAccountPage(
+            accountsContrller: widget.accountsContrller,
+          );
+        },
+        closedElevation: 6.0,
+        closedShape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(56 / 2),
+          ),
+        ),
+        closedBuilder: (BuildContext context, VoidCallback openContainer) {
+          return SizedBox(
+            width: 56,
+            height: 56,
+            child: InkWell(
+              onTap: openContainer,
+              onLongPress: () {
+                widget.accountsContrller.addAccounts(
+                  generateTestData(widget.accountsContrller.accountList.length,
+                      widget.accountsContrller.accountList.length + 10),
+                );
               },
+              child: const Icon(Icons.add),
             ),
-          ),
-          body: ListView.separated(
-            padding: const EdgeInsets.all(12),
-            itemCount: accountList.length,
-            separatorBuilder: (context, index) {
-              return const SizedBox(
-                height: 12,
-              );
-            },
-            itemBuilder: (context, index) {
-              return _OpenContainerPasswordItem(
-                accountsContrller: widget.accountsContrller,
-                account: accountList[index],
-              );
-            },
-          ),
-          floatingActionButton: OpenContainer(
-            transitionType: ContainerTransitionType.fade,
-            transitionDuration: const Duration(milliseconds: 600),
-            openColor: mainColor,
-            closedColor: mainColor,
-            middleColor: mainColor,
-            openBuilder: (BuildContext context, VoidCallback _) {
-              return EditAccountPage(
-                  accountsContrller: widget.accountsContrller);
-            },
-            closedElevation: 6.0,
-            closedShape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(56 / 2),
-              ),
-            ),
-            closedBuilder: (BuildContext context, VoidCallback openContainer) {
-              return SizedBox(
-                width: 56,
-                height: 56,
-                child: InkWell(
-                  onTap: openContainer,
-                  child: const Icon(Icons.add),
-                ),
-              );
-            },
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
 
-typedef OnInputChanged = int Function(String value);
+typedef OnInputChanged = void Function(String value);
 
 class _AppBarTitleToSearch extends StatefulWidget {
   const _AppBarTitleToSearch({
     required this.onChanged,
     required this.title,
     required this.itemCount,
+    required this.matchCount,
   });
 
   final String title;
   final OnInputChanged onChanged;
   final int itemCount;
+  final int matchCount;
 
   @override
   State<_AppBarTitleToSearch> createState() => _AppBarTitleToSearchState();
@@ -111,20 +148,22 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
   final FocusNode _focusNode = FocusNode();
   final Debouncer _debouncer = Debouncer();
 
-  int _matchCount = 0;
-
   bool _hasFocus = false;
 
   @override
   void initState() {
     super.initState();
 
-    _controller.addListener(
-      () => _debouncer.debounce(() {
-        _matchCount = widget.onChanged(_controller.text);
-        setState(() {});
-      }),
-    );
+    // _controller.addListener(
+    //   () => _debouncer.debounce(() {
+    //     _matchCount = widget.onChanged(_controller.text);
+    //     setState(() {});
+    //   }),
+    // );
+
+    _controller.addListener(() {
+      widget.onChanged(_controller.text);
+    });
 
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus && _hasFocus) {
@@ -175,7 +214,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
               }
             },
             child: _hasFocus || _controller.text.isNotEmpty
-                ? Text("搜索: $_matchCount/${widget.itemCount}")
+                ? Text("搜索: ${widget.matchCount}/${widget.itemCount}")
                 : const Text("密码"),
           ),
           prefixIcon: AnimatedOpacity(
@@ -204,10 +243,12 @@ class _OpenContainerPasswordItem extends StatelessWidget {
   const _OpenContainerPasswordItem({
     required this.account,
     required this.accountsContrller,
+    this.matchText,
   });
 
   final Account account;
   final AccountsContrller accountsContrller;
+  final String? matchText;
 
   @override
   Widget build(BuildContext context) {
@@ -241,6 +282,7 @@ class _OpenContainerPasswordItem extends StatelessWidget {
       closedBuilder: (BuildContext context, VoidCallback openContainer) {
         return _PasswordItem(
           account: account,
+          matchText: matchText,
           onTop: () {
             isLogPress = false;
             openContainer();
@@ -256,9 +298,15 @@ class _OpenContainerPasswordItem extends StatelessWidget {
 }
 
 class _PasswordItem extends StatefulWidget {
-  const _PasswordItem({required this.account, this.onTop, this.onLongPress});
+  const _PasswordItem({
+    required this.account,
+    this.matchText,
+    this.onTop,
+    this.onLongPress,
+  });
 
   final Account account;
+  final String? matchText;
   final GestureTapCallback? onTop;
   final GestureLongPressCallback? onLongPress;
 
@@ -279,18 +327,20 @@ class _PasswordItemState extends State<_PasswordItem> {
         padding: EdgeInsets.only(top: 6),
         child: Icon(Icons.supervised_user_circle),
       ),
-      title: Text(
-        account.domainName,
+      title: HighlightText(
+        text: account.domainName,
+        matchText: widget.matchText,
+        style: Theme.of(context).textTheme.titleLarge,
         overflow: TextOverflow.ellipsis,
       ),
-      titleTextStyle: Theme.of(context).textTheme.titleLarge,
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.only(left: 12),
-            child: Text(
-              account.domain,
+            child: HighlightText(
+              text: account.domain,
+              matchText: widget.matchText,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
@@ -312,18 +362,21 @@ class _PasswordItemState extends State<_PasswordItem> {
   }
 
   Widget _subtitleText(String subLabel, String text) {
-    return RichText(
-      overflow: TextOverflow.ellipsis,
-      text: TextSpan(
-        text: "$subLabel. ",
-        style: Theme.of(context).textTheme.titleMedium,
-        children: [
-          TextSpan(
-            text: text,
-            style: Theme.of(context).textTheme.bodyMedium,
-          )
-        ],
-      ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          subLabel,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        HighlightText(
+          text: text,
+          matchText: widget.matchText,
+          style: Theme.of(context).textTheme.bodyMedium,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 }

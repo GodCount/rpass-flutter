@@ -46,34 +46,6 @@ class AccountsContrller with ChangeNotifier {
     _accountList = await _accountsService.getAccountList(_store.verify.token!);
 
     _updateSet();
-
-    searchSort("");
-  }
-
-  int searchSort(String text) {
-    assert(_accountList != null, "_accountList is null, to run initDenrypt");
-
-    int matchCount = 0;
-    // 默认时间降序
-    if (text.isEmpty) {
-      _accountList!.sort((a, b) => b.date.compareTo(a.date));
-    } else {
-      final weights = <String, int>{};
-      for (var account in _accountList!) {
-        var weight = account.domain.contains(text) ? 2 : 0;
-        weight += account.domainName.contains(text) ? 2 : 0;
-        weight += account.account.contains(text) ? 2 : 0;
-        weight += account.email.contains(text) ? 2 : 0;
-        weight += account.password.contains(text) ? 2 : 0;
-        weight += account.description.contains(text) ? 1 : 0;
-        weight += account.labels.contains(text) ? 5 : 0;
-        if (weight > 0) matchCount++;
-        weights[account.id] = weight;
-      }
-      _accountList!.sort((a, b) => weights[b.id]! - weights[a.id]!);
-    }
-    notifyListeners();
-    return matchCount;
   }
 
   Future<void> addAccounts(List<Account> accounts) async {

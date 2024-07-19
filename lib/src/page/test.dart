@@ -1,5 +1,8 @@
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+
+import '../component/highlight_text.dart';
 import '../model/account.dart';
 
 const testData =
@@ -24,19 +27,84 @@ String getRandomData(int length) {
   return testData.substring(start, start + length);
 }
 
-List<Account> generateTestData(int length) {
+List<Account> generateTestData(int start, int end) {
   final List<Account> list = [];
-  for (int i = 0; i < length; i++) {
+  for (int i = start; i < end; i++) {
     list.add(
       Account(
-          account: getRandomData(5),
-          domainName: getRandomData(8),
-          domain: getRandomData(10),
-          email: getRandomData(10),
-          password: getRandomData(15),
-          description: getRandomData(100),
-          labels: [getRandomData(4), getRandomData(10), getRandomData(8)]),
+        account: "$i" * 5,
+        domainName: "$i" * 5,
+        domain: "$i" * 5,
+        email: "$i" * 5,
+        password: "$i" * 5,
+        description: "$i" * 5,
+      ),
     );
   }
   return list;
+}
+
+class TestHighlightTextPage extends StatefulWidget {
+  const TestHighlightTextPage({super.key});
+
+  @override
+  State<TestHighlightTextPage> createState() => TestHighlightTextPageState();
+}
+
+class TestHighlightTextPageState extends State<TestHighlightTextPage> {
+  String text = "test";
+  String matchText = "t";
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Center(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: TextField(
+                  controller: TextEditingController(text: text),
+                  onChanged: (value) {
+                    setState(() {
+                      text = value;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    labelText: "文本",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: TextField(
+                  controller: TextEditingController(text: matchText),
+                  onChanged: (value) {
+                    setState(() {
+                      matchText = value;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    labelText: "match 文本",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              HighlightText(
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineLarge!
+                    .copyWith(fontSize: 100),
+                text: text,
+                matchText: matchText,
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
