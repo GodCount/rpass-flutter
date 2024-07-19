@@ -5,8 +5,10 @@ class HighlightText extends StatelessWidget {
     super.key,
     required this.text,
     this.matchText,
+    this.prefixText,
     this.style,
     this.matchStyle,
+    this.prefixStyle,
     this.textAlign = TextAlign.start,
     this.textDirection,
     this.overflow = TextOverflow.clip,
@@ -16,9 +18,11 @@ class HighlightText extends StatelessWidget {
 
   final String text;
   final String? matchText;
+  final String? prefixText;
 
   final TextStyle? style;
   final TextStyle? matchStyle;
+  final TextStyle? prefixStyle;
 
   final TextAlign textAlign;
   final TextDirection? textDirection;
@@ -32,18 +36,6 @@ class HighlightText extends StatelessWidget {
     final matchStyle = this.matchStyle ??
         style.copyWith(color: Theme.of(context).primaryColor);
 
-    if (matchText == null || matchText!.isEmpty) {
-      return Text(
-        text,
-        style: style,
-        textAlign: textAlign,
-        textDirection: textDirection,
-        overflow: overflow,
-        textScaler: textScaler,
-        maxLines: maxLines,
-      );
-    }
-
     return RichText(
       textAlign: textAlign,
       textDirection: textDirection,
@@ -51,19 +43,31 @@ class HighlightText extends StatelessWidget {
       textScaler: textScaler,
       maxLines: maxLines,
       text: TextSpan(
-        style: style,
+        text: prefixText,
+        style: prefixStyle,
         children: _getMatchTexts(
+          style: style,
           matchStyle: matchStyle,
-          matchText: matchText!,
+          matchText: matchText ?? '',
         ),
       ),
     );
   }
 
   List<TextSpan> _getMatchTexts({
+    required TextStyle style,
     required TextStyle matchStyle,
     required String matchText,
   }) {
+    if (matchText.isEmpty) {
+      return [
+        TextSpan(
+          style: style,
+          text: this.text,
+        )
+      ];
+    }
+
     final List<TextSpan> texts = [];
     final text = this.text.toLowerCase();
     matchText = matchText.toLowerCase();
@@ -76,17 +80,19 @@ class HighlightText extends StatelessWidget {
       if (index >= 0) {
         if (index - position > 0) {
           texts.add(TextSpan(
-            text: text.substring(position, index),
+            style: style,
+            text: this.text.substring(position, index),
           ));
         }
         position = index + len;
         texts.add(TextSpan(
-          text: text.substring(index, position),
           style: matchStyle,
+          text: this.text.substring(index, position),
         ));
       } else {
         texts.add(TextSpan(
-          text: text.substring(position),
+          style: style,
+          text: this.text.substring(position),
         ));
         break;
       }

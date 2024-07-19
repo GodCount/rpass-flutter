@@ -344,9 +344,9 @@ class _PasswordItemState extends State<_PasswordItem> {
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
-          _subtitleText("A", account.account),
-          _subtitleText("E", account.email),
-          _subtitleText("L", account.labels.join(", ")),
+          _subtitleText("A. ", account.account),
+          _subtitleText("E. ", account.email),
+          _subtitleText("L. ", account.labels.join(", ")),
           Align(
             alignment: Alignment.centerRight,
             child: Text(
@@ -362,21 +362,13 @@ class _PasswordItemState extends State<_PasswordItem> {
   }
 
   Widget _subtitleText(String subLabel, String text) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          subLabel,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        HighlightText(
-          text: text,
-          matchText: widget.matchText,
-          style: Theme.of(context).textTheme.bodyMedium,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
+    return HighlightText(
+      prefixText: subLabel,
+      text: text,
+      matchText: widget.matchText,
+      style: Theme.of(context).textTheme.bodyMedium,
+      prefixStyle: Theme.of(context).textTheme.titleMedium,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }
