@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'package:animated_flip_counter/animated_flip_counter.dart';
 
 import '../../component/label_list.dart';
 import '../../component/toast.dart';
@@ -366,7 +370,11 @@ class _LookAccountPageState extends State<LookAccountPage> {
 }
 
 class _LookPasswordListTile extends StatefulWidget {
-  const _LookPasswordListTile({required this.password, this.onLongPress, this.shape});
+  const _LookPasswordListTile({
+    required this.password,
+    this.onLongPress,
+    this.shape,
+  });
 
   final String password;
   final GestureTapCallback? onLongPress;
@@ -446,9 +454,13 @@ class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile> {
       title: Padding(
         padding: const EdgeInsets.only(left: 6),
         child: _authOneTimePassword != null
-            ? Text(
-                _authOneTimePassword!.code(),
-                style: Theme.of(context).textTheme.titleLarge,
+            ? AnimatedFlipCounter(
+                duration: const Duration(milliseconds: 900),
+                value: _authOneTimePassword!.code(),
+                mainAxisAlignment: MainAxisAlignment.start,
+                thousandSeparator: " ",
+                wholeDigits: 6,
+                textStyle: Theme.of(context).textTheme.headlineMedium,
               )
             : Text(
                 errorText,
@@ -466,10 +478,10 @@ class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile> {
               },
             )
           : null,
-      onTap: () {
+      onLongPress: () {
         Clipboard.setData(
           ClipboardData(
-            text: _authOneTimePassword!.code(),
+            text: "${_authOneTimePassword!.code()}",
           ),
         ).then((value) {
           showToast(context, "复制完成!");
@@ -516,9 +528,10 @@ class _OtpDownCountState extends State<_OtpDownCount>
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         _controller.reverse();
+      } else if (status == AnimationStatus.reverse) {
+        Timer(const Duration(milliseconds: 100), widget.onUpdate);
       } else if (status == AnimationStatus.dismissed) {
         _controller.forward(from: widget.authOneTimePassword.percent());
-        widget.onUpdate();
       }
     });
 

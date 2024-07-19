@@ -56,8 +56,8 @@ class AuthOneTimePassword {
     );
   }
 
-  String code() {
-    return OTP.generateTOTPCodeString(
+  int code() {
+    return OTP.generateTOTPCode(
       secret,
       DateTime.now().millisecondsSinceEpoch,
       interval: period,

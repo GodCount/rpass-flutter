@@ -111,7 +111,8 @@ class ExportAccountPageState extends State<ExportAccountPage> {
     try {
       final filepath = await SimpleFile.saveText(
         data: saveData,
-        name: "rpass_export",
+        // TODO! 优化一下
+        name: "rpass_export_${DateTime.now().toString().split(" ")[0]}",
         ext: "json",
       );
       showToast(context, "导出完成,地址: $filepath");
