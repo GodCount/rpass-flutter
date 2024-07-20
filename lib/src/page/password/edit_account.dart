@@ -58,12 +58,15 @@ class _EditAccountPageState extends State<EditAccountPage> {
 
   final bool _displayScanner = Platform.isAndroid || Platform.isIOS;
 
+  bool _canClone = false;
+
   @override
   void initState() {
     if (widget.accountId != null) {
       try {
         _account =
             widget.accountsContrller.getAccountById(widget.accountId!).clone();
+        _canClone = true;
       } catch (e) {
         // initState 阶段无法使用 context 延迟一下
         Future.delayed(Duration.zero, () {
@@ -126,6 +129,13 @@ class _EditAccountPageState extends State<EditAccountPage> {
     }).toList();
   }
 
+  void _cloneAccount() {
+    _account.date = DateTime.now();
+    _account.id = timeBasedUuid();
+    _canClone = false;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.sizeOf(context).width;
@@ -133,28 +143,38 @@ class _EditAccountPageState extends State<EditAccountPage> {
     width = (width > 375 ? 375 : width) - 48;
 
     return Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: const Text("编辑账号"),
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Center(
-              child: SizedBox(
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text("编辑账号"),
+        actions: [
+          IconButton(
+            onPressed: _canClone ? _cloneAccount : null,
+            icon: const Icon(Icons.copy_rounded),
+            tooltip: "克隆",
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Center(
+          child: SizedBox(
             width: width,
             child: Column(
               children: [
-                _ValidatorTextField(
-                  key: _domainGolbalKey,
-                  controller: _domainController,
-                  textInputAction: TextInputAction.next,
-                  focusNoError: true,
-                  decoration: const InputDecoration(
-                    labelText: "域名",
-                    border: OutlineInputBorder(),
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: _ValidatorTextField(
+                    key: _domainGolbalKey,
+                    controller: _domainController,
+                    textInputAction: TextInputAction.next,
+                    focusNoError: true,
+                    decoration: const InputDecoration(
+                      labelText: "域名",
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) =>
+                        !AccountRegExp.domain.hasMatch(value) ? "格式错误" : null,
                   ),
-                  validator: (value) =>
-                      !AccountRegExp.domain.hasMatch(value) ? "格式错误" : null,
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
@@ -264,45 +284,83 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     hitText: "备注",
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: "标签",
+                      border: OutlineInputBorder(),
+                    ),
+                    child: LabelList(
+                      items: _getLabels(),
+                      onChange: (labels) {
+                        _account.labels = labels;
+                      },
+                    ),
+                  ),
+                ),
                 Container(
-                  margin: const EdgeInsets.only(top: 12),
-                  padding: const EdgeInsets.all(12),
-                  width: width,
-                  child: LabelList(
-                    items: _getLabels(),
-                    onChange: (labels) {
-                      _account.labels = labels;
-                    },
+                  padding: const EdgeInsets.only(top: 16),
+                  alignment: Alignment.topLeft,
+                  child: RichText(
+                    textAlign: TextAlign.start,
+                    text: TextSpan(
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      text: "日期: ",
+                      children: [
+                        TextSpan(
+                          style: Theme.of(context).textTheme.bodySmall,
+                          text: _account.date.toString(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.only(top: 2),
+                  alignment: Alignment.topLeft,
+                  child: RichText(
+                    textAlign: TextAlign.start,
+                    text: TextSpan(
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      text: "标识: ",
+                      children: [
+                        TextSpan(
+                          style: Theme.of(context).textTheme.bodySmall,
+                          text: _account.id,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
-          )),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            if (_validator()) {
-              _account.domain = _domainController.text;
-              _account.domainName = _domainNameController.text;
-              _account.account = _accountController.text;
-              _account.email = _emailController.text;
-              _account.password = _passwordController.text;
-              _account.oneTimePassword = _otPasswordController.text;
-              _account.description = _descriptionController.text;
-              widget.accountsContrller.setAccount(_account);
-              Navigator.of(context).pop(_account.id);
-            }
-          },
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(56 / 2),
-            ),
           ),
-          child: const Icon(Icons.save),
         ),
-        bottomNavigationBar: const SizedBox(
-          height: 56,
-        ));
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (_validator()) {
+            _account.domain = _domainController.text;
+            _account.domainName = _domainNameController.text;
+            _account.account = _accountController.text;
+            _account.email = _emailController.text;
+            _account.password = _passwordController.text;
+            _account.oneTimePassword = _otPasswordController.text;
+            _account.description = _descriptionController.text;
+            widget.accountsContrller.setAccount(_account);
+            Navigator.of(context).pop(_account.id);
+          }
+        },
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(56 / 2),
+          ),
+        ),
+        child: const Icon(Icons.save),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
   }
 
   void _generatePassword() {
@@ -636,7 +694,7 @@ class _DescriptionTextFieldState extends State<_DescriptionTextField> {
       maxLines: 3,
       decoration: InputDecoration(
         border: const OutlineInputBorder(),
-        hintText: widget.hitText,
+        labelText: widget.hitText,
       ),
       onTap: _editText,
     );
