@@ -71,6 +71,7 @@ class PasswordsPageState extends State<PasswordsPage>
         ),
       ),
       body: ListView.separated(
+        shrinkWrap: true,
         padding: const EdgeInsets.all(12),
         itemCount: _accounts.length,
         separatorBuilder: (context, index) {

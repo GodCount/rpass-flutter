@@ -58,105 +58,67 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
             )
           : const Center(child: Text("解密中...")),
       bottomNavigationBar: _initDenrypted
-          ? MyBottomNavigationBar(
-              controller: _controller,
-            )
+          ? _MyBottomNavigationBar(controller: _controller)
           : null,
     );
   }
 }
 
-class MyBottomNavigationBar extends StatefulWidget {
-  const MyBottomNavigationBar({super.key, required this.controller});
+class _MyBottomNavigationBar extends StatefulWidget {
+  const _MyBottomNavigationBar({
+    required this.controller,
+  });
 
   final PageController controller;
 
   @override
-  State<StatefulWidget> createState() => MyBottomNavigationBarState();
+  State<StatefulWidget> createState() => _MyBottomNavigationBarState();
 }
 
-class MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
-  int _index = 0;
-  late final PageController _controller;
+class _MyBottomNavigationBarState extends State<_MyBottomNavigationBar> {
+  int get _pageIndex =>
+      widget.controller.positions.isNotEmpty && widget.controller.page != null
+          ? widget.controller.page!.round()
+          : 0;
+
+  late int _index;
 
   @override
   void initState() {
-    _controller = widget.controller;
-
-    _controller.addListener(() {
-      if (_controller.page!.round() != _index) {
+    _index = _pageIndex;
+    widget.controller.addListener(() {
+      if (_pageIndex != _index) {
         setState(() {
-          _index = _controller.page!.round();
+          _index = _pageIndex;
         });
       }
     });
     super.initState();
   }
 
-  void _animateToPage(int index) {
-    widget.controller.animateToPage(index,
-        duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.secondaryContainer,
-      child: SizedBox(
-        width: double.infinity,
-        height: 56,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Expanded(
-              child: InkWell(
-                onTap: () => _animateToPage(0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.account_box_outlined,
-                      color: _index == 0
-                          ? Theme.of(context).colorScheme.primary
-                          : null,
-                    ),
-                    Text(
-                      "密码",
-                      style: _index == 0
-                          ? TextStyle(
-                              color: Theme.of(context).colorScheme.primary)
-                          : null,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              child: InkWell(
-                onTap: () => _animateToPage(1),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.settings,
-                      color: _index == 1
-                          ? Theme.of(context).colorScheme.primary
-                          : null,
-                    ),
-                    Text(
-                      "设置",
-                      style: _index == 1
-                          ? TextStyle(
-                              color: Theme.of(context).colorScheme.primary)
-                          : null,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+    return NavigationBar(
+      selectedIndex: _index,
+      labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+      animationDuration: const Duration(milliseconds: 300),
+      onDestinationSelected: (value) async {
+        widget.controller.animateToPage(
+          value,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeIn,
+        );
+      },
+      destinations: const [
+        NavigationDestination(
+          icon: Icon(Icons.account_box_outlined),
+          label: "密码",
         ),
-      ),
+        NavigationDestination(
+          icon: Icon(Icons.settings),
+          label: "设置",
+        )
+      ],
     );
   }
 }
