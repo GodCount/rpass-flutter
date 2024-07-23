@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter/services.dart';
+
+import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
 
 import '../../store/verify/contrller.dart';
 import './forget.dart';
@@ -39,6 +40,8 @@ class VerifyPasswordState extends State<VerifyPassword> {
 
   @override
   Widget build(BuildContext context) {
+    final t = RpassLocalizations.of(context)!;
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Center(
@@ -50,13 +53,15 @@ class VerifyPasswordState extends State<VerifyPassword> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Rpass',
+                  t.app_name,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
-                const Padding(
-                  padding: EdgeInsets.only(top: 6),
-                  child: Text('验证软件密码',
-                      textAlign: TextAlign.center),
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    t.verify_password_hint,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.only(top: 12),
@@ -70,7 +75,7 @@ class VerifyPasswordState extends State<VerifyPassword> {
                     obscureText: _obscureText,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
-                        labelText: "输入密码",
+                        labelText: t.input_num_password,
                         errorText: _errorHitText,
                         border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
@@ -98,7 +103,7 @@ class VerifyPasswordState extends State<VerifyPassword> {
                           Navigator.of(context)
                               .pushNamed(ForgetPassword.routeName);
                         },
-                        child: const Text("忘记密码"),
+                        child: Text(t.forget_password),
                       ),
                     ],
                   ),
@@ -108,7 +113,7 @@ class VerifyPasswordState extends State<VerifyPassword> {
                   padding: const EdgeInsets.only(top: 24),
                   child: ElevatedButton(
                     onPressed: _verifyPassword,
-                    child: const Text("确认"),
+                    child: Text(t.confirm),
                   ),
                 ),
               ],

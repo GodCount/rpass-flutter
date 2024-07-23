@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
 
 import 'package:animations/animations.dart';
-import 'package:flutter/services.dart';
 
 import '../../store/verify/contrller.dart';
 import '../home/home.dart';
@@ -23,7 +25,6 @@ class InitPasswordState extends State<InitPassword> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isSetPasswordDone = false;
-
 
   @override
   void dispose() {
@@ -75,7 +76,8 @@ class InitPasswordState extends State<InitPassword> {
                           widget.verifyContrller
                               .initPassword(password, questions)
                               .then((value) {
-                            Navigator.pushReplacementNamed(context, Home.routeName);
+                            Navigator.pushReplacementNamed(
+                                context, Home.routeName);
                           }, onError: (error) {
                             if (kDebugMode) {
                               print(error);
@@ -106,16 +108,18 @@ class SetPassword extends StatelessWidget {
   Widget build(BuildContext context) {
     final GlobalKey<FormState> formState = GlobalKey<FormState>();
 
+    final t = RpassLocalizations.of(context)!;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Rpass',
+          t.app_name,
           style: Theme.of(context).textTheme.headlineSmall,
         ),
-        const Padding(
-          padding: EdgeInsets.only(top: 6),
-          child: Text('初始化你的软件密码', textAlign: TextAlign.center),
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Text(t.init_main_password, textAlign: TextAlign.center),
         ),
         Padding(
           padding: const EdgeInsets.only(top: 24),
@@ -132,16 +136,13 @@ class SetPassword extends StatelessWidget {
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.next,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(
-                        labelText: "输入数字密码",
-                        border: OutlineInputBorder()),
-                    validator: (value) {
-                      return value == null || value.trim().isEmpty
-                          ? "不能为空"
-                          : value.length > 3
-                              ? null
-                              : "大于3位";
-                    },
+                    decoration: InputDecoration(
+                      labelText: t.input_num_password,
+                      border: const OutlineInputBorder(),
+                    ),
+                    validator: (value) => value == null || value.length < 4
+                        ? t.at_least_4digits
+                        : null,
                   ),
                 ),
                 Container(
@@ -151,13 +152,12 @@ class SetPassword extends StatelessWidget {
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.done,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(
-                      labelText: "确认密码",
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: t.confirm_password,
+                      border: const OutlineInputBorder(),
                     ),
-                    validator: (value) {
-                      return value == controller.text ? null : "两次密码不相等";
-                    },
+                    validator: (value) =>
+                        value == controller.text ? null : t.password_not_equal,
                     onFieldSubmitted: (value) {
                       if (formState.currentState!.validate()) {
                         onSetPassword();
@@ -174,7 +174,7 @@ class SetPassword extends StatelessWidget {
                         onSetPassword();
                       }
                     },
-                    child: const Text("初始化"),
+                    child: Text(t.init),
                   ),
                 ),
               ],

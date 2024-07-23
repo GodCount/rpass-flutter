@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
+
 import '../../component/toast.dart';
 import '../../store/verify/contrller.dart';
 import '../page.dart';
@@ -19,6 +21,8 @@ class ForgetPassword extends StatefulWidget {
 class ForgetPasswordState extends State<ForgetPassword> {
   @override
   Widget build(BuildContext context) {
+    final t = RpassLocalizations.of(context)!;
+
     return Scaffold(
       body: Center(
         child: Card(
@@ -36,7 +40,7 @@ class ForgetPasswordState extends State<ForgetPassword> {
                     Navigator.of(context).pushNamedAndRemoveUntil(
                         Home.routeName, ModalRoute.withName('/'));
                   } catch (e) {
-                    showToast(context, "安全问题异常: ${e.toString()}");
+                    showToast(context, t.security_qa_throw(e.toString()));
                   }
                 }
               },

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
+
 import '../../model/question.dart';
 
 typedef QuestionOnSumit = void Function(List<QuestionAnswer>? questions);
@@ -97,17 +99,21 @@ class SecurityQuestionState extends State<SecurityQuestion> {
 
   @override
   Widget build(BuildContext context) {
+    final t = RpassLocalizations.of(context)!;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          widget.title ?? "安全问题",
+          widget.title ?? t.security_qa,
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         Padding(
           padding: const EdgeInsets.only(top: 6),
-          child: Text(widget.subtitle ?? "当忘记密码时,可用于解锁.",
-              textAlign: TextAlign.center),
+          child: Text(
+            widget.subtitle ?? t.security_qa_hint,
+            textAlign: TextAlign.center,
+          ),
         ),
         Container(
           constraints: const BoxConstraints(maxWidth: 264),
@@ -139,13 +145,13 @@ class SecurityQuestionState extends State<SecurityQuestion> {
                     controller: _qController,
                     textInputAction: TextInputAction.next,
                     autofocus: true,
-                    decoration: const InputDecoration(
-                        labelText: "问题", border: OutlineInputBorder()),
-                    validator: (value) {
-                      return value == null || value.trim().isEmpty
-                          ? "不能为空"
-                          : null;
-                    },
+                    decoration: InputDecoration(
+                      labelText: t.question,
+                      border: const OutlineInputBorder(),
+                    ),
+                    validator: (value) => value == null || value.trim().isEmpty
+                        ? t.cannot_emprty
+                        : null,
                   ),
                 ),
                 Container(
@@ -155,15 +161,13 @@ class SecurityQuestionState extends State<SecurityQuestion> {
                     controller: _aController,
                     textInputAction: TextInputAction.next,
                     autofocus: true,
-                    decoration: const InputDecoration(
-                      labelText: "答案",
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: t.answer,
+                      border: const OutlineInputBorder(),
                     ),
-                    validator: (value) {
-                      return value == null || value.trim().isEmpty
-                          ? "不能为空"
-                          : null;
-                    },
+                    validator: (value) => value == null || value.trim().isEmpty
+                        ? t.cannot_emprty
+                        : null,
                   ),
                 ),
               ],
@@ -178,12 +182,12 @@ class SecurityQuestionState extends State<SecurityQuestion> {
             children: [
               TextButton(
                 onPressed: _index > 0 ? _prevQuestion : null,
-                child: const Text("上一个"),
+                child: Text(t.prev),
               ),
               TextButton(
                 onPressed:
                     _index < widget.maxQuestion ? _nextQuestionOrAdd : null,
-                child: Text(_index == _questions.length - 1 ? "添加" : "下一个"),
+                child: Text(_index == _questions.length - 1 ? t.add : t.next),
               ),
             ],
           ),
@@ -198,7 +202,7 @@ class SecurityQuestionState extends State<SecurityQuestion> {
                   widget.onSubmit(_questions);
                 }
               },
-              child: const Text("确认"),
+              child: Text(t.confirm),
             ),
           ),
         ),
@@ -208,7 +212,7 @@ class SecurityQuestionState extends State<SecurityQuestion> {
             width: 180,
             child: ElevatedButton(
               onPressed: () => widget.onSubmit(null),
-              child: const Text("返回"),
+              child: Text(t.back),
             ),
           ),
         )

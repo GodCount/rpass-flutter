@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
+
 import '../../model/question.dart';
 
 typedef OnVerifyCallback = void Function(List<QuestionAnswer>? questions);
@@ -51,18 +53,20 @@ class _VerifyQuestionState extends State<VerifyQuestion> {
 
   @override
   Widget build(BuildContext context) {
+    final t = RpassLocalizations.of(context)!;
+
     _qController.text = _questions[_index].question;
     _aController.text = _questions[_index].answer;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Rpass',
+          t.app_name,
           style: Theme.of(context).textTheme.headlineSmall,
         ),
-        const Padding(
-          padding: EdgeInsets.only(top: 6),
-          child: Text('回答安全问题以解密', textAlign: TextAlign.center),
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Text(t.input_security_qa_hint, textAlign: TextAlign.center),
         ),
         Container(
           constraints: const BoxConstraints(maxWidth: 264),
@@ -83,9 +87,9 @@ class _VerifyQuestionState extends State<VerifyQuestion> {
           child: TextField(
             controller: _qController,
             readOnly: true,
-            decoration: const InputDecoration(
-              labelText: "问题",
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: t.question,
+              border: const OutlineInputBorder(),
             ),
           ),
         ),
@@ -98,7 +102,7 @@ class _VerifyQuestionState extends State<VerifyQuestion> {
             textInputAction: TextInputAction.next,
             autofocus: true,
             decoration: InputDecoration(
-              labelText: "答案",
+              labelText: t.answer,
               errorText: _errorHitText,
               border: const OutlineInputBorder(),
             ),
@@ -121,21 +125,22 @@ class _VerifyQuestionState extends State<VerifyQuestion> {
                   }
                 } else {
                   setState(() {
-                    _errorHitText = "不对啊, 再想想!";
+                    _errorHitText = t.security_qa_error;
                   });
                 }
               },
-              child: Text(_index == _questions.length - 1 ? "确认" : "下一个"),
+              child: Text(_index == _questions.length - 1 ? t.confirm : t.next),
             ),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(top: 6, left: 24, right: 24, bottom: 12),
+          padding:
+              const EdgeInsets.only(top: 6, left: 24, right: 24, bottom: 12),
           child: SizedBox(
             width: 180,
             child: ElevatedButton(
               onPressed: () => widget.onVerify(null),
-              child: const Text("输入密码"),
+              child: Text(t.back),
             ),
           ),
         )
