@@ -10,8 +10,23 @@ class SettingsService with SharedPreferencesService {
 
   Future<bool> setThemeMode(ThemeMode mode) => setInt("theme_mode", mode.index);
 
+  Future<Locale?> getLocale() async {
+    final lang = await getString("locale");
+    if (lang != null) {
+      final [languageCode, countryCode] = lang.split("_");
+      return Locale(languageCode, countryCode);
+    }
+    return null;
+  }
+
+  Future<bool> setLocale(Locale? locale) {
+    if(locale != null) {
+      return setString("locale", locale.toString());
+    }else {
+      return remove("locale");
+    }
+  }
 
   @override
   Future<bool> clear() => super.clear();
-
 }

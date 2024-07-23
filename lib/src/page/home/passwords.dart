@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 
 import '../../component/highlight_text.dart';
 import '../../model/account.dart';
-import '../../util/common.dart';
 import '../page.dart';
 import '../../store/accounts/contrller.dart';
-import '../test.dart';
 
 class PasswordsPage extends StatefulWidget {
   const PasswordsPage({super.key, required this.accountsContrller});
@@ -110,12 +108,6 @@ class PasswordsPageState extends State<PasswordsPage>
             height: 56,
             child: InkWell(
               onTap: openContainer,
-              onLongPress: () {
-                widget.accountsContrller.addAccounts(
-                  generateTestData(widget.accountsContrller.accountList.length,
-                      widget.accountsContrller.accountList.length + 10),
-                );
-              },
               child: const Icon(Icons.add),
             ),
           );
@@ -147,20 +139,12 @@ class _AppBarTitleToSearch extends StatefulWidget {
 class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-  final Debouncer _debouncer = Debouncer();
 
   bool _hasFocus = false;
 
   @override
   void initState() {
     super.initState();
-
-    // _controller.addListener(
-    //   () => _debouncer.debounce(() {
-    //     _matchCount = widget.onChanged(_controller.text);
-    //     setState(() {});
-    //   }),
-    // );
 
     _controller.addListener(() {
       widget.onChanged(_controller.text);
@@ -183,7 +167,6 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
   void dispose() {
     _controller.dispose();
     _focusNode.dispose();
-    _debouncer.dispose();
     super.dispose();
   }
 

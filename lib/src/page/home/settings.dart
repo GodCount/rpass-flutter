@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
 
 import '../../component/toast.dart';
 import '../page.dart';
@@ -30,6 +31,8 @@ class SettingsPageState extends State<SettingsPage>
           bottomLeft: Radius.circular(6.0), bottomRight: Radius.circular(6.0)),
     );
 
+    final t = RpassLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -45,23 +48,16 @@ class SettingsPageState extends State<SettingsPage>
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(right: 6),
-                    child: Icon(
-                      Icons.color_lens,
-                    ),
+                    child: Icon(Icons.color_lens),
                   ),
-                  Text(
-                    "主题",
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
+                  Text("主题", style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),
             ),
             ListTile(
               title: const Text("系统"),
               trailing: widget.store.settings.themeMode == ThemeMode.system
-                  ? const Icon(
-                      Icons.check,
-                    )
+                  ? const Icon(Icons.check)
                   : null,
               onTap: () {
                 widget.store.settings.setThemeMode(ThemeMode.system);
@@ -70,9 +66,7 @@ class SettingsPageState extends State<SettingsPage>
             ListTile(
               title: const Text("亮"),
               trailing: widget.store.settings.themeMode == ThemeMode.light
-                  ? const Icon(
-                      Icons.check,
-                    )
+                  ? const Icon(Icons.check)
                   : null,
               onTap: () {
                 widget.store.settings.setThemeMode(ThemeMode.light);
@@ -82,9 +76,7 @@ class SettingsPageState extends State<SettingsPage>
               shape: shape,
               title: const Text("暗"),
               trailing: widget.store.settings.themeMode == ThemeMode.dark
-                  ? const Icon(
-                      Icons.check,
-                    )
+                  ? const Icon(Icons.check)
                   : null,
               onTap: () {
                 widget.store.settings.setThemeMode(ThemeMode.dark);
@@ -98,14 +90,31 @@ class SettingsPageState extends State<SettingsPage>
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(right: 6),
-                    child: Icon(
-                      Icons.security,
-                    ),
+                    child: Icon(Icons.translate),
                   ),
-                  Text(
-                    "安全",
-                    style: Theme.of(context).textTheme.bodyLarge,
+                  Text("语言", style: Theme.of(context).textTheme.bodyLarge),
+                ],
+              ),
+            ),
+            ListTile(
+              title: Text(
+                  widget.store.settings.locale != null ? t.locale_name : "系统"),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () {
+                Navigator.of(context).pushNamed(ChangeLocalePage.routeName);
+              },
+            ),
+          ]),
+          _cardColumn([
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(right: 6),
+                    child: Icon(Icons.security),
                   ),
+                  Text("安全", style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),
             ),
@@ -126,14 +135,9 @@ class SettingsPageState extends State<SettingsPage>
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(right: 6),
-                    child: Icon(
-                      Icons.import_export,
-                    ),
+                    child: Icon(Icons.import_export),
                   ),
-                  Text(
-                    "备份",
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
+                  Text("备份", style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),
             ),
@@ -158,19 +162,14 @@ class SettingsPageState extends State<SettingsPage>
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(right: 6),
-                    child: Icon(
-                      Icons.touch_app,
-                    ),
+                    child: Icon(Icons.touch_app),
                   ),
-                  Text(
-                    "信息",
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
+                  Text("信息", style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),
             ),
             ListTile(
-               shape: shape,
+              shape: shape,
               title: const Text("关于"),
               onTap: () {},
             ),

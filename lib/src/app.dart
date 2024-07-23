@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
 
 import './store/index.dart';
 import './page/page.dart';
@@ -46,6 +47,17 @@ class RpassApp extends StatelessWidget {
           theme: RpassTheme.light,
           darkTheme: RpassTheme.dark,
           themeMode: store.settings.themeMode,
+          locale: store.settings.locale,
+          localizationsDelegates: RpassLocalizations.localizationsDelegates,
+          supportedLocales: RpassLocalizations.supportedLocales,
+          localeResolutionCallback: (locale, locales) {
+            if (locale != null &&
+                store.settings.locale == null &&
+                RpassLocalizations.delegate.isSupported(locale)) {
+              return locale;
+            }
+            return null;
+          },
           initialRoute: !store.verify.initialled
               ? InitPassword.routeName
               : store.verify.token == null
@@ -63,14 +75,14 @@ class RpassApp extends StatelessWidget {
             EditAccountPage.routeName: (context) =>
                 EditAccountPage(accountsContrller: store.accounts),
             LookAccountPage.routeName: (context) => LookAccountPage(
-                  accountsContrller: store.accounts,
-                  accountId: "",
-                ),
+                accountsContrller: store.accounts, accountId: ""),
             QrCodeScannerPage.routeName: (context) => const QrCodeScannerPage(),
             ExportAccountPage.routeName: (context) =>
                 ExportAccountPage(store: store),
             ImportAccountPage.routeName: (context) =>
                 ImportAccountPage(store: store),
+            ChangeLocalePage.routeName: (context) =>
+                ChangeLocalePage(settingsController: store.settings)
           },
         );
       },
