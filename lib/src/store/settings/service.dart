@@ -13,16 +13,16 @@ class SettingsService with SharedPreferencesService {
   Future<Locale?> getLocale() async {
     final lang = await getString("locale");
     if (lang != null) {
-      final [languageCode, countryCode] = lang.split("_");
-      return Locale(languageCode, countryCode);
+      final codes = lang.split("_");
+      return Locale(codes[0], codes.length > 1 ? codes[1] : null);
     }
     return null;
   }
 
   Future<bool> setLocale(Locale? locale) {
-    if(locale != null) {
+    if (locale != null) {
       return setString("locale", locale.toString());
-    }else {
+    } else {
       return remove("locale");
     }
   }
