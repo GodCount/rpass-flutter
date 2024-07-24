@@ -75,7 +75,7 @@ class _LookAccountPageState extends State<LookAccountPage> {
                   accountId: _account.id,
                 );
               })).then((value) {
-                if (value is String && value == _account.id) {
+                if (value is String && widget.accountsContrller.hasAccountById(value)) {
                   _account = widget.accountsContrller.getAccountById(value);
                   setState(() {});
                 }

@@ -105,6 +105,11 @@ class AccountsContrller with ChangeNotifier {
     await _accountsService.setAccountList(_store.verify.token!, _accountList!);
   }
 
+  bool hasAccountById(String id) {
+    assert(_accountList != null, "_accountList is null, to run initDenrypt");
+    return _accountList!.any((item) => item.id == id);
+  }
+
   Account getAccountById(String id) {
     assert(_accountList != null, "_accountList is null, to run initDenrypt");
     return _accountList!.lastWhere((item) => item.id == id);
