@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
+
 import '../../store/index.dart';
 import 'settings.dart';
 import 'passwords.dart';
@@ -39,6 +41,8 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     super.build(context);
 
+    final t = RpassLocalizations.of(context)!;
+
     if (!_initDenrypted) {
       widget.store.accounts.initDenrypt().then(
             (value) => setState(() {
@@ -56,7 +60,7 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                 SettingsPage(store: widget.store)
               ],
             )
-          : const Center(child: Text("解密中...")),
+          : Center(child: Text(t.denrypting)),
       bottomNavigationBar: _initDenrypted
           ? _MyBottomNavigationBar(controller: _controller)
           : null,
@@ -98,6 +102,8 @@ class _MyBottomNavigationBarState extends State<_MyBottomNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
+    final t = RpassLocalizations.of(context)!;
+
     return NavigationBar(
       selectedIndex: _index,
       backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
@@ -110,14 +116,14 @@ class _MyBottomNavigationBarState extends State<_MyBottomNavigationBar> {
           curve: Curves.easeIn,
         );
       },
-      destinations: const [
+      destinations: [
         NavigationDestination(
-          icon: Icon(Icons.account_box_outlined),
-          label: "密码",
+          icon: const Icon(Icons.account_box_outlined),
+          label: t.password,
         ),
         NavigationDestination(
-          icon: Icon(Icons.settings),
-          label: "设置",
+          icon: const Icon(Icons.settings),
+          label: t.setting,
         )
       ],
     );

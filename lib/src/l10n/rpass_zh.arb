@@ -21,7 +21,7 @@
     "back": "返回",
     "security_qa_throw": "安全问题异常: {message}",
     "@security_qa_throw": {
-        "description": "带有错误信息的提示",
+        "description": "带有错误信息的消息",
         "placeholders": {
             "message": {
                 "type": "String"
@@ -30,6 +30,171 @@
     },
     "input_security_qa_hint": "回答安全问题以解密数据",
     "security_qa_error": "不对啊, 再想想!",
-    "verify_password_hint": "验证主密码解锁",
-    "forget_password": "忘记密码"
+    "verify_password": "验证密码",
+    "forget_password": "忘记密码",
+    "denrypting": "解密中...",
+    "password": "密码",
+    "setting": "设置",
+    "search_match_count": "搜索: {matchCount}/{totalCount}",
+    "@search_match_count": {
+        "description": "带有搜索匹配数的",
+        "placeholders": {
+            "matchCount": {
+                "type": "int"
+            },
+            "totalCount": {
+                "type": "int"
+            }
+        }
+    },
+    "account_ab": "账号.",
+    "@account_ab": {
+        "description": "ab 是 ab. 表示缩写, 在这里表示首字母"
+    },
+    "email_ab": "邮箱.",
+    "label_ab": "标签.",
+    "theme": "主题",
+    "system": "系统",
+    "light": "亮",
+    "dark" : "暗",
+    "language": "语言",
+    "security": "安全",
+    "modify_password": "修改密码",
+    "modify_security_qa": "修改安全问题",
+    "backup": "备份",
+    "import": "导入",
+    "export": "导出",
+    "info": "信息",
+    "about": "关于",
+    "modify_password_throw": "密码修改异常: {message}",
+    "@modify_password_throw": {
+        "description": "带有错误信息的消息",
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "cancel": "取消",
+    "modify": "修改",
+    "modify_security_qa_throw": "安全问题修改异常: {message}",
+    "@modify_security_qa_throw": {
+        "description": "带有错误信息的消息",
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "info_read_throw": "信息读取异常: {message}",
+    "@info_read_throw": {
+        "description": "带有错误信息的消息",
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "edit_account": "编辑账号",
+    "clone": "克隆",
+    "domain": "域名",
+    "format_error": "格式错误, 应匹配: {regexp}",
+    "@format_error": {
+        "description": "带有正确格式信息的消息",
+        "placeholders": {
+            "regexp": {
+                "type": "String"
+            }
+        }
+    },
+    "domain_title": "网站标题",
+    "account": "账号",
+    "email": "邮箱",
+    "otp": "一次性密码(OTP)",
+    "label": "标签",
+    "date": "日期",
+    "uuid": "标识",
+    "gen_password":"生成密码",
+    "refresh": "刷新",
+    "symbol": "符号",
+    "remark": "备注",
+    "save": "保存",
+    "copy_done": "复制完成",
+    "lookup": "查看",
+    "source": "来源",
+    "delete": "删除",
+    "delete_warn_hit": "确定要删除吗, 删除后将无法恢复.",
+    "account_delete_throw": "账号删除异常: {message}",
+    "@account_delete_throw": {
+        "description": "带有错误信息的消息",
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "calculate_otp_throw": "计算OPT异常: {message}",
+    "@calculate_otp_throw": {
+        "description": "带有错误信息的消息",
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "description": "描述",
+    "language_setting": "语言设置",
+    "no_backup": "没有需要备份的",
+    "at_least_1security_qa": "至少需要一个安全问题",
+    "export_done_location": "导出完成, 地址: {location}",
+    "@export_done_location": {
+        "description": "带有路径信息的消息",
+        "placeholders": {
+            "location": {
+                "type": "String"
+            }
+        }
+    },
+    "export_throw": "导出异常: {message}",
+    "@export_throw": {
+        "description": "带有错误信息的消息",
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "encrypt_data": "加密数据",
+    "alone_password": "单独的密码",
+    "enable_security_qa": "启用安全问题",
+    "alone_security_qa": "单独的安全问题",
+    "import_done": "导入完成",
+    "import_throw": "导入异常: {message}",
+    "@import_throw": {
+        "description": "带有错误信息的消息",
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "verify_password_throw": "验证密码异常: {message}",
+    "@verify_password_throw": {
+        "description": "带有错误信息的消息",
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "denrypt_throw": "验证密码异常: {message}",
+    "@denrypt_throw": {
+        "description": "带有错误信息的消息",
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "scan_code": "扫码"
 }

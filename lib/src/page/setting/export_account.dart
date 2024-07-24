@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
+
 import '../../../rpass.dart';
 import '../../component/toast.dart';
 import '../../model/backup.dart';
@@ -36,19 +38,21 @@ class ExportAccountPageState extends State<ExportAccountPage> {
   bool _isSaveing = false;
 
   void _export() async {
+    final t = RpassLocalizations.of(context)!;
+
     if (widget.store.accounts.accountList.isEmpty) {
-      showToast(context, "没有数据需要备份");
+      showToast(context, t.no_backup);
       return;
     }
     if (_enableEncrypt) {
-      if (_isNewPassword && _passwordController.text.isEmpty) {
-        showToast(context, "添加或关闭 独立密码");
+      if (_isNewPassword && _passwordController.text.trim().length < 4) {
+        showToast(context, t.input_num_password);
         return;
       }
       if (_enableSecurityQuestion &&
           _isNewSecurityQuestion &&
           _questions.isEmpty) {
-        showToast(context, "添加或关闭 独立安全问题");
+        showToast(context, t.at_least_1security_qa);
         return;
       }
     }
@@ -115,9 +119,9 @@ class ExportAccountPageState extends State<ExportAccountPage> {
         name: "rpass_export_${DateTime.now().toString().split(" ")[0]}",
         ext: "json",
       );
-      showToast(context, "导出完成,地址: $filepath");
+      showToast(context, t.export_done_location(filepath));
     } catch (e) {
-      showToast(context, "导出异常: ${e.toString()}");
+      showToast(context, t.export_throw(e.toString()));
     } finally {
       _isSaveing = false;
       _passwordController.text = "";
@@ -128,9 +132,11 @@ class ExportAccountPageState extends State<ExportAccountPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = RpassLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("导出"),
+        title: Text(t.export),
         centerTitle: true,
       ),
       body: Center(
@@ -148,7 +154,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                       _enableEncrypt = value;
                     });
                   },
-                  title: const Text("加密数据"),
+                  title: Text(t.encrypt_data),
                 ),
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
@@ -170,9 +176,9 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                                   _isNewPassword = value!;
                                 });
                               },
-                              title: const Padding(
-                                padding: EdgeInsets.only(left: 6),
-                                child: Text("独立密码"),
+                              title: Padding(
+                                padding: const EdgeInsets.only(left: 6),
+                                child: Text(t.alone_password),
                               ),
                             ),
                             AnimatedSwitcher(
@@ -198,10 +204,9 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                                         inputFormatters: [
                                           FilteringTextInputFormatter.digitsOnly
                                         ],
-                                        decoration: const InputDecoration(
-                                          labelText: "备份密码",
-                                          hintText: "独立的备份数据密码",
-                                          border: OutlineInputBorder(),
+                                        decoration: InputDecoration(
+                                          labelText: t.input_num_password,
+                                          border: const OutlineInputBorder(),
                                         ),
                                       ),
                                     )
@@ -215,9 +220,9 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                                   _enableSecurityQuestion = value!;
                                 });
                               },
-                              title: const Padding(
-                                padding: EdgeInsets.only(left: 6),
-                                child: Text("开启安全问题"),
+                              title: Padding(
+                                padding: const EdgeInsets.only(left: 6),
+                                child: Text(t.enable_security_qa),
                               ),
                             ),
                             AnimatedSwitcher(
@@ -237,9 +242,10 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                                           _isNewSecurityQuestion = value!;
                                         });
                                       },
-                                      title: const Padding(
-                                        padding: EdgeInsets.only(left: 12),
-                                        child: Text("独立问题"),
+                                      title: Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 12),
+                                        child: Text(t.alone_security_qa),
                                       ),
                                     )
                                   : null,
@@ -254,32 +260,28 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                               },
                               child: _enableSecurityQuestion &&
                                       _isNewSecurityQuestion
-                                  ? InkWell(
-                                      onTap: _editNewQuestion,
-                                      child: Container(
-                                        width: double.infinity,
-                                        margin: const EdgeInsets.only(
-                                          top: 12,
-                                          bottom: 12,
-                                          left: 28,
-                                          right: 32,
-                                        ),
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                            color: const Color(0xFF000000),
+                                  ? Container(
+                                      margin: const EdgeInsets.only(
+                                        top: 12,
+                                        bottom: 12,
+                                        left: 28,
+                                        right: 32,
+                                      ),
+                                      child: GestureDetector(
+                                        onTap: _editNewQuestion,
+                                        child: InputDecorator(
+                                          decoration: InputDecoration(
+                                            labelText: _questions.isNotEmpty ? t.security_qa : null,
+                                            border: const OutlineInputBorder(),
                                           ),
-                                          borderRadius: const BorderRadius.all(
-                                            Radius.circular(4.0),
+                                          child: Text(
+                                            _questions.isNotEmpty
+                                                ? _questions
+                                                    .map((it) => it.question)
+                                                    .join("; ")
+                                                : t.security_qa,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
-                                        ),
-                                        child: Text(
-                                          _questions.isNotEmpty
-                                              ? _questions
-                                                  .map((item) => item.question)
-                                                  .join("; ")
-                                              : "独立的备份安全问题",
-                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
                                     )
@@ -304,7 +306,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                           constraints: const BoxConstraints(minWidth: 180),
                           child: ElevatedButton(
                             onPressed: _export,
-                            child: const Text("备份"),
+                            child: Text(t.backup),
                           ),
                         )
                       : Container(

@@ -24,14 +24,14 @@ class VerifyPasswordState extends State<VerifyPassword> {
   final FocusNode _focusNode = FocusNode();
 
   bool _obscureText = true;
-  String? _errorHitText;
+  String? _errorMessage;
 
   @override
   void initState() {
     _focusNode.addListener(() {
-      if (_focusNode.hasFocus && _errorHitText != null) {
+      if (_focusNode.hasFocus && _errorMessage != null) {
         setState(() {
-          _errorHitText = null;
+          _errorMessage = null;
         });
       }
     });
@@ -59,12 +59,12 @@ class VerifyPasswordState extends State<VerifyPassword> {
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
-                    t.verify_password_hint,
+                    t.verify_password,
                     textAlign: TextAlign.center,
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.only(top: 12),
+                  padding: const EdgeInsets.only(top: 24),
                   constraints: const BoxConstraints(maxWidth: 264),
                   child: TextField(
                     focusNode: _focusNode,
@@ -76,7 +76,9 @@ class VerifyPasswordState extends State<VerifyPassword> {
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
                         labelText: t.input_num_password,
-                        errorText: _errorHitText,
+                        errorText: _errorMessage != null
+                            ? t.verify_password_throw(_errorMessage!)
+                            : null,
                         border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
                             onPressed: () {
@@ -134,7 +136,7 @@ class VerifyPasswordState extends State<VerifyPassword> {
           print(error);
         }
         setState(() {
-          _errorHitText = error.toString();
+          _errorMessage = error.toString();
         });
       }
     }

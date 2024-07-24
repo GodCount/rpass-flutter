@@ -29,16 +29,19 @@ class _ChangeLocalePageState extends State<ChangeLocalePage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = RpassLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("设置语言"),
+        title: Text(t.language_setting),
         centerTitle: true,
       ),
       body: ListView(
         padding: const EdgeInsets.all(6),
         children: [null, ...RpassLocalizations.supportedLocales].map((locale) {
           return ListTile(
-            title: Text(locale != null ? _locales[locale.toString()]! : "系统"),
+            title: Text(
+              locale != null ? _locales[locale.toString()]! : t.system,
+            ),
             trailing: widget.settingsController.locale == locale
                 ? const Icon(Icons.check)
                 : null,

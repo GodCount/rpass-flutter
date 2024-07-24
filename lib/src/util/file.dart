@@ -13,7 +13,7 @@ class SimpleFile {
     required String data,
     required String name,
     String ext = "txt",
-    String dialogTitle = "导出文件:",
+    String? dialogTitle,
   }) async {
     final filename = "$name.$ext";
 
@@ -41,7 +41,7 @@ class SimpleFile {
   }
 
   static Future<String> openText({
-    String dialogTitle = "导入文件:",
+    String? dialogTitle,
   }) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
         dialogTitle: dialogTitle,

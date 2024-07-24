@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
+
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 
 import '../../component/label_list.dart';
@@ -43,7 +45,7 @@ class _LookAccountPageState extends State<LookAccountPage> {
 
   void writeClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text)).then((value) {
-      showToast(context, "复制完成!");
+      showToast(context, RpassLocalizations.of(context)!.copy_done);
     }, onError: (error) {
       showToast(context, error.toString());
     });
@@ -51,13 +53,15 @@ class _LookAccountPageState extends State<LookAccountPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = RpassLocalizations.of(context)!;
+
     const shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(6.0), bottomRight: Radius.circular(6.0)),
     );
     return Scaffold(
       appBar: AppBar(
-        title: const Text("查看"),
+        title: Text(t.lookup),
         actions: [
           IconButton(
             onPressed: _deleteAccount,
@@ -96,16 +100,16 @@ class _LookAccountPageState extends State<LookAccountPage> {
                     ),
                   ),
                   Text(
-                    "来源",
+                    t.source,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ],
               ),
             ),
             ListTile(
-              title: const Padding(
-                padding: EdgeInsets.only(left: 6),
-                child: Text("域名"),
+              title: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: Text(t.domain),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
@@ -118,9 +122,9 @@ class _LookAccountPageState extends State<LookAccountPage> {
             ),
             ListTile(
               shape: shape,
-              title: const Padding(
-                padding: EdgeInsets.only(left: 6),
-                child: Text("网站标题"),
+              title: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: Text(t.domain_title),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
@@ -144,16 +148,16 @@ class _LookAccountPageState extends State<LookAccountPage> {
                     ),
                   ),
                   Text(
-                    "账号",
+                    t.account,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ],
               ),
             ),
             ListTile(
-              title: const Padding(
-                padding: EdgeInsets.only(left: 6),
-                child: Text("账号"),
+              title: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: Text(t.account),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
@@ -165,9 +169,9 @@ class _LookAccountPageState extends State<LookAccountPage> {
               onLongPress: () => writeClipboard(_account.account),
             ),
             ListTile(
-              title: const Padding(
-                padding: EdgeInsets.only(left: 6),
-                child: Text("邮箱"),
+              title: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: Text(t.email),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
@@ -197,7 +201,7 @@ class _LookAccountPageState extends State<LookAccountPage> {
                     ),
                   ),
                   Text(
-                    "备注",
+                    t.remark,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ],
@@ -205,9 +209,9 @@ class _LookAccountPageState extends State<LookAccountPage> {
             ),
             ListTile(
               shape: shape,
-              title: const Padding(
-                padding: EdgeInsets.only(left: 6),
-                child: Text("标签"),
+              title: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: Text(t.label),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
@@ -221,9 +225,9 @@ class _LookAccountPageState extends State<LookAccountPage> {
             ),
             ListTile(
               shape: shape,
-              title: const Padding(
-                padding: EdgeInsets.only(left: 6),
-                child: Text("描述"),
+              title: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: Text(t.description),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
@@ -240,9 +244,9 @@ class _LookAccountPageState extends State<LookAccountPage> {
           _cardColumn([
             ListTile(
               shape: shape,
-              title: const Padding(
-                padding: EdgeInsets.only(left: 6),
-                child: Text("日期"),
+              title: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: Text(t.date),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
@@ -251,9 +255,9 @@ class _LookAccountPageState extends State<LookAccountPage> {
             ),
             ListTile(
               shape: shape,
-              title: const Padding(
-                padding: EdgeInsets.only(left: 6),
-                child: Text("标识"),
+              title: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: Text(t.uuid),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
@@ -267,24 +271,26 @@ class _LookAccountPageState extends State<LookAccountPage> {
   }
 
   void _deleteAccount() {
+    final t = RpassLocalizations.of(context)!;
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("删除"),
-          content: const Text("确定要删除账号吗, 删除后将无法恢复."),
+          title: Text(t.delete),
+          content: Text(t.delete_warn_hit),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text("取消"),
+              child: Text(t.cancel),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(true);
               },
-              child: const Text("删除"),
+              child: Text(t.delete),
             ),
           ],
         );
@@ -297,7 +303,7 @@ class _LookAccountPageState extends State<LookAccountPage> {
             Navigator.of(context).pop();
           }
         } catch (e) {
-          showToast(context, "账号删除异常: ${e.toString()}");
+          showToast(context, t.account_delete_throw(e.toString()));
         }
       }
     });
@@ -330,7 +336,7 @@ class _LookAccountPageState extends State<LookAccountPage> {
                     ),
                   ),
                   Text(
-                    "一次性密码(OTP)",
+                    RpassLocalizations.of(context)!.otp,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ],
@@ -345,11 +351,12 @@ class _LookAccountPageState extends State<LookAccountPage> {
   }
 
   void _showDescriptionDialog() {
+    final t = RpassLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("备注"),
+          title: Text(t.description),
           content: SelectableText(
             _account.description,
             maxLines: 10,
@@ -360,7 +367,7 @@ class _LookAccountPageState extends State<LookAccountPage> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text("取消"),
+              child: Text(t.cancel),
             ),
           ],
         );
@@ -391,9 +398,9 @@ class _LookPasswordListTileState extends State<_LookPasswordListTile> {
   Widget build(BuildContext context) {
     return ListTile(
       shape: widget.shape,
-      title: const Padding(
-        padding: EdgeInsets.only(left: 6),
-        child: Text("密码"),
+      title: Padding(
+        padding: const EdgeInsets.only(left: 6),
+        child: Text(RpassLocalizations.of(context)!.password),
       ),
       subtitle: Padding(
         padding: const EdgeInsets.only(left: 12),
@@ -435,20 +442,21 @@ class _LookOtPasswordListTile extends StatefulWidget {
 
 class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile> {
   AuthOneTimePassword? _authOneTimePassword;
-  String errorText = "";
+  String errorMessage = "";
 
   @override
   void initState() {
     try {
       _authOneTimePassword = AuthOneTimePassword.parse(widget.oneTimePassword);
     } catch (e) {
-      errorText = "解析一次性密码(OTP)异常! ${e.toString()}";
+      errorMessage = e.toString();
     }
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = RpassLocalizations.of(context)!;
     return ListTile(
       shape: widget.shape,
       title: Padding(
@@ -463,7 +471,7 @@ class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile> {
                 textStyle: Theme.of(context).textTheme.headlineMedium,
               )
             : Text(
-                errorText,
+                t.calculate_otp_throw(errorMessage),
                 style: Theme.of(context)
                     .textTheme
                     .titleLarge
@@ -484,7 +492,7 @@ class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile> {
             text: "${_authOneTimePassword!.code()}",
           ),
         ).then((value) {
-          showToast(context, "复制完成!");
+          showToast(context, t.copy_done);
         }, onError: (error) {
           showToast(context, error.toString());
         });

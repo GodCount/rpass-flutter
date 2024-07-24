@@ -1,6 +1,8 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
+import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
+
 import '../../component/highlight_text.dart';
 import '../../model/account.dart';
 import '../page.dart';
@@ -59,7 +61,6 @@ class PasswordsPageState extends State<PasswordsPage>
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: _AppBarTitleToSearch(
-          title: "密码",
           itemCount: widget.accountsContrller.accountList.length,
           matchCount: _searchText.isNotEmpty ? _accounts.length : 0,
           onChanged: (text) {
@@ -122,12 +123,10 @@ typedef OnInputChanged = void Function(String value);
 class _AppBarTitleToSearch extends StatefulWidget {
   const _AppBarTitleToSearch({
     required this.onChanged,
-    required this.title,
     required this.itemCount,
     required this.matchCount,
   });
 
-  final String title;
   final OnInputChanged onChanged;
   final int itemCount;
   final int matchCount;
@@ -172,6 +171,8 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
 
   @override
   Widget build(BuildContext context) {
+    final t = RpassLocalizations.of(context)!;
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -198,8 +199,10 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
               }
             },
             child: _hasFocus || _controller.text.isNotEmpty
-                ? Text("搜索: ${widget.matchCount}/${widget.itemCount}")
-                : const Text("密码"),
+                ? Text(
+                    t.search_match_count(widget.matchCount, widget.itemCount),
+                  )
+                : Text(t.password),
           ),
           prefixIcon: AnimatedOpacity(
             opacity: _hasFocus ? 1 : 0,
@@ -301,6 +304,9 @@ class _PasswordItem extends StatefulWidget {
 class _PasswordItemState extends State<_PasswordItem> {
   @override
   Widget build(BuildContext context) {
+
+    final t = RpassLocalizations.of(context)!;
+
     final Account account = widget.account;
     return ListTile(
       isThreeLine: true,
@@ -328,9 +334,9 @@ class _PasswordItemState extends State<_PasswordItem> {
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
-          _subtitleText("A. ", account.account),
-          _subtitleText("E. ", account.email),
-          _subtitleText("L. ", account.labels.join(", ")),
+          _subtitleText(t.account_ab, account.account),
+          _subtitleText(t.email_ab, account.email),
+          _subtitleText(t.label_ab, account.labels.join(", ")),
           Align(
             alignment: Alignment.centerRight,
             child: Text(
@@ -347,7 +353,7 @@ class _PasswordItemState extends State<_PasswordItem> {
 
   Widget _subtitleText(String subLabel, String text) {
     return HighlightText(
-      prefixText: subLabel,
+      prefixText: "$subLabel ",
       text: text,
       matchText: widget.matchText,
       style: Theme.of(context).textTheme.bodyMedium,

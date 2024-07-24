@@ -36,7 +36,7 @@ class SettingsPageState extends State<SettingsPage>
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text("设置"),
+        title: Text(t.setting),
       ),
       body: ListView(
         padding: const EdgeInsets.all(6),
@@ -50,12 +50,12 @@ class SettingsPageState extends State<SettingsPage>
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.color_lens),
                   ),
-                  Text("主题", style: Theme.of(context).textTheme.bodyLarge),
+                  Text(t.theme, style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),
             ),
             ListTile(
-              title: const Text("系统"),
+              title: Text(t.system),
               trailing: widget.store.settings.themeMode == ThemeMode.system
                   ? const Icon(Icons.check)
                   : null,
@@ -64,7 +64,7 @@ class SettingsPageState extends State<SettingsPage>
               },
             ),
             ListTile(
-              title: const Text("亮"),
+              title: Text(t.light),
               trailing: widget.store.settings.themeMode == ThemeMode.light
                   ? const Icon(Icons.check)
                   : null,
@@ -74,7 +74,7 @@ class SettingsPageState extends State<SettingsPage>
             ),
             ListTile(
               shape: shape,
-              title: const Text("暗"),
+              title: Text(t.dark),
               trailing: widget.store.settings.themeMode == ThemeMode.dark
                   ? const Icon(Icons.check)
                   : null,
@@ -92,13 +92,15 @@ class SettingsPageState extends State<SettingsPage>
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.translate),
                   ),
-                  Text("语言", style: Theme.of(context).textTheme.bodyLarge),
+                  Text(t.language,
+                      style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),
             ),
             ListTile(
-              title: Text(
-                  widget.store.settings.locale != null ? t.locale_name : "系统"),
+              title: Text(widget.store.settings.locale != null
+                  ? t.locale_name
+                  : t.system),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () {
                 Navigator.of(context).pushNamed(ChangeLocalePage.routeName);
@@ -114,17 +116,18 @@ class SettingsPageState extends State<SettingsPage>
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.security),
                   ),
-                  Text("安全", style: Theme.of(context).textTheme.bodyLarge),
+                  Text(t.security,
+                      style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),
             ),
             ListTile(
-              title: const Text("修改密码"),
+              title: Text(t.modify_password),
               onTap: _modifyPassword,
             ),
             ListTile(
               shape: shape,
-              title: const Text("修改安全问题"),
+              title: Text(t.modify_security_qa),
               onTap: _modifyQuestion,
             ),
           ]),
@@ -137,19 +140,19 @@ class SettingsPageState extends State<SettingsPage>
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.import_export),
                   ),
-                  Text("备份", style: Theme.of(context).textTheme.bodyLarge),
+                  Text(t.backup, style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),
             ),
             ListTile(
-              title: const Text("导入"),
+              title: Text(t.import),
               onTap: () {
                 Navigator.of(context).pushNamed(ImportAccountPage.routeName);
               },
             ),
             ListTile(
               shape: shape,
-              title: const Text("导出"),
+              title: Text(t.export),
               onTap: () {
                 Navigator.of(context).pushNamed(ExportAccountPage.routeName);
               },
@@ -164,13 +167,13 @@ class SettingsPageState extends State<SettingsPage>
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.touch_app),
                   ),
-                  Text("信息", style: Theme.of(context).textTheme.bodyLarge),
+                  Text(t.info, style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),
             ),
             ListTile(
               shape: shape,
-              title: const Text("关于"),
+              title: Text(t.about),
               onTap: () {},
             ),
           ]),
@@ -195,6 +198,8 @@ class SettingsPageState extends State<SettingsPage>
     final TextEditingController controller = TextEditingController();
     final GlobalKey<FormState> formState = GlobalKey<FormState>();
 
+    final t = RpassLocalizations.of(context)!;
+
     void onSetPassword() async {
       if (formState.currentState!.validate()) {
         try {
@@ -203,7 +208,7 @@ class SettingsPageState extends State<SettingsPage>
             Navigator.of(context).pop();
           }
         } catch (e) {
-          showToast(context, "密码修改异常: ${e.toString()}");
+          showToast(context, t.modify_password_throw(e.toString()));
         }
       }
     }
@@ -212,7 +217,7 @@ class SettingsPageState extends State<SettingsPage>
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("修改密码"),
+          title: Text(t.modify_password),
           content: Form(
             key: formState,
             autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -225,15 +230,13 @@ class SettingsPageState extends State<SettingsPage>
                   textInputAction: TextInputAction.next,
                   autofocus: true,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(
-                      labelText: "修改密码", border: OutlineInputBorder()),
-                  validator: (value) {
-                    return value == null || value.trim().isEmpty
-                        ? "不能为空"
-                        : value.length > 3
-                            ? null
-                            : "大于3位";
-                  },
+                  decoration: InputDecoration(
+                    labelText: t.input_num_password,
+                    border: const OutlineInputBorder(),
+                  ),
+                  validator: (value) => value == null || value.length < 4
+                      ? t.at_least_4digits
+                      : null,
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
@@ -242,13 +245,12 @@ class SettingsPageState extends State<SettingsPage>
                     textInputAction: TextInputAction.done,
                     autofocus: true,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(
-                      labelText: "确认密码",
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: t.confirm_password,
+                      border: const OutlineInputBorder(),
                     ),
-                    validator: (value) {
-                      return value == controller.text ? null : "不能为空";
-                    },
+                    validator: (value) =>
+                        value == controller.text ? null : t.password_not_equal,
                     onFieldSubmitted: (value) {
                       if (formState.currentState!.validate()) {
                         onSetPassword();
@@ -264,11 +266,11 @@ class SettingsPageState extends State<SettingsPage>
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text("取消"),
+              child: Text(t.cancel),
             ),
             TextButton(
               onPressed: onSetPassword,
-              child: const Text("修改"),
+              child: Text(t.modify),
             ),
           ],
         );
@@ -293,7 +295,12 @@ class SettingsPageState extends State<SettingsPage>
                   try {
                     await widget.store.verify.setQuestionList(questions);
                   } catch (e) {
-                    showToast(context, "问题修改异常: ${e.toString()}");
+                    showToast(
+                      context,
+                      RpassLocalizations.of(context)!.modify_security_qa_throw(
+                        e.toString(),
+                      ),
+                    );
                   }
                 }
                 if (mounted) {

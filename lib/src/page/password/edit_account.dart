@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
+
 import '../../component/label_list.dart';
 import '../../component/toast.dart';
 import '../../store/accounts/contrller.dart';
@@ -70,7 +72,12 @@ class _EditAccountPageState extends State<EditAccountPage> {
       } catch (e) {
         // initState 阶段无法使用 context 延迟一下
         Future.delayed(Duration.zero, () {
-          showToast(context, "账号信息获取异常: ${e.toString()}");
+          showToast(
+            context,
+            RpassLocalizations.of(context)!.info_read_throw(
+              e.toString(),
+            ),
+          );
           Navigator.of(context).pop();
         });
 
@@ -138,6 +145,8 @@ class _EditAccountPageState extends State<EditAccountPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = RpassLocalizations.of(context)!;
+
     double width = MediaQuery.sizeOf(context).width;
 
     width = (width > 375 ? 375 : width) - 48;
@@ -145,12 +154,12 @@ class _EditAccountPageState extends State<EditAccountPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("编辑账号"),
+        title: Text(t.edit_account),
         actions: [
           IconButton(
             onPressed: _canClone ? _cloneAccount : null,
             icon: const Icon(Icons.copy_rounded),
-            tooltip: "克隆",
+            tooltip: t.clone,
           ),
         ],
       ),
@@ -168,9 +177,9 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     controller: _domainController,
                     textInputAction: TextInputAction.next,
                     focusNoError: true,
-                    decoration: const InputDecoration(
-                      labelText: "域名",
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: t.domain,
+                      border: const OutlineInputBorder(),
                     ),
                     validator: (value) =>
                         !AccountRegExp.domain.hasMatch(value) ? "格式错误" : null,
@@ -183,11 +192,12 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     controller: _domainNameController,
                     textInputAction: TextInputAction.next,
                     focusNoError: true,
-                    decoration: const InputDecoration(
-                      labelText: "网站标题",
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: t.domain_title,
+                      border: const OutlineInputBorder(),
                     ),
-                    validator: (value) => value.isEmpty ? "不能为空" : null,
+                    validator: (value) =>
+                        value.isEmpty ? t.cannot_emprty : null,
                   ),
                 ),
                 Padding(
@@ -199,14 +209,15 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     width: width,
                     enableFilter: true,
                     enableSearch: false,
-                    label: const Text("账号"),
+                    label: Text(t.account),
                     menuHeight: 100,
                     requestFocusOnTap: true,
                     dropdownMenuEntries: widget.accountsContrller.accountNumSet
                         .map((value) =>
                             DropdownMenuEntry(value: value, label: value))
                         .toList(),
-                    validator: (value) => value.isEmpty ? "不能为空" : null,
+                    validator: (value) =>
+                        value.isEmpty ? t.cannot_emprty : null,
                   ),
                 ),
                 Padding(
@@ -218,15 +229,16 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     width: width,
                     enableFilter: true,
                     enableSearch: false,
-                    label: const Text("邮箱"),
+                    label: Text(t.email),
                     menuHeight: 100,
                     requestFocusOnTap: true,
                     dropdownMenuEntries: widget.accountsContrller.emailSet
                         .map((value) =>
                             DropdownMenuEntry(value: value, label: value))
                         .toList(),
-                    validator: (value) =>
-                        !AccountRegExp.email.hasMatch(value) ? "格式错误" : null,
+                    validator: (value) => !AccountRegExp.email.hasMatch(value)
+                        ? t.format_error(AccountRegExp.email.toString())
+                        : null,
                   ),
                 ),
                 Padding(
@@ -237,14 +249,15 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     textInputAction: TextInputAction.next,
                     focusNoError: true,
                     decoration: InputDecoration(
-                      labelText: "密码",
+                      labelText: t.password,
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         onPressed: _generatePassword,
                         icon: const Icon(Icons.create),
                       ),
                     ),
-                    validator: (value) => value.isEmpty ? "不能为空" : null,
+                    validator: (value) =>
+                        value.isEmpty ? t.cannot_emprty : null,
                   ),
                 ),
                 Padding(
@@ -254,7 +267,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     controller: _otPasswordController,
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
-                      labelText: "一次性密码(OTP)",
+                      labelText: t.otp,
                       border: const OutlineInputBorder(),
                       suffixIcon: _displayScanner
                           ? IconButton(
@@ -273,7 +286,8 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     ),
                     validator: (value) => value.isNotEmpty &&
                             !AccountRegExp.oneTimePassword.hasMatch(value)
-                        ? "格式错误"
+                        ? t.format_error(
+                            AccountRegExp.oneTimePassword.toString())
                         : null,
                   ),
                 ),
@@ -281,15 +295,15 @@ class _EditAccountPageState extends State<EditAccountPage> {
                   padding: const EdgeInsets.only(top: 12),
                   child: _DescriptionTextField(
                     controller: _descriptionController,
-                    hitText: "备注",
+                    hitText: t.description,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
                   child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: "标签",
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: t.label,
+                      border: const OutlineInputBorder(),
                     ),
                     child: LabelList(
                       items: _getLabels(),
@@ -306,7 +320,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     textAlign: TextAlign.start,
                     text: TextSpan(
                       style: Theme.of(context).textTheme.bodyLarge,
-                      text: "日期: ",
+                      text: "${t.date}: ",
                       children: [
                         TextSpan(
                           style: Theme.of(context).textTheme.bodySmall,
@@ -323,7 +337,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     textAlign: TextAlign.start,
                     text: TextSpan(
                       style: Theme.of(context).textTheme.bodyLarge,
-                      text: "标识: ",
+                      text: "${t.uuid}: ",
                       children: [
                         TextSpan(
                           style: Theme.of(context).textTheme.bodySmall,
@@ -367,11 +381,13 @@ class _EditAccountPageState extends State<EditAccountPage> {
     final GlobalKey<_GeneratePasswordState> generateGlobalKey =
         GlobalKey<_GeneratePasswordState>();
 
+    final t = RpassLocalizations.of(context)!;
+
     showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text("生成密码"),
+            title: Text(t.gen_password),
             scrollable: true,
             content: _GeneratePassword(
               key: generateGlobalKey,
@@ -380,13 +396,13 @@ class _EditAccountPageState extends State<EditAccountPage> {
               TextButton(
                 onPressed: () =>
                     generateGlobalKey.currentState?.updatePassword(),
-                child: const Text("刷新"),
+                child: Text(t.refresh),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text("取消"),
+                child: Text(t.cancel),
               ),
               TextButton(
                 onPressed: () {
@@ -394,7 +410,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                   _passwordController.text =
                       generateGlobalKey.currentState!.password;
                 },
-                child: const Text("确认"),
+                child: Text(t.confirm),
               ),
             ],
           );
@@ -614,6 +630,8 @@ class _GeneratePasswordState extends State<_GeneratePassword> {
 
   @override
   Widget build(BuildContext context) {
+    final t = RpassLocalizations.of(context)!;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -643,7 +661,7 @@ class _GeneratePasswordState extends State<_GeneratePassword> {
         ),
         CheckboxListTile(
           value: _enableSymbol,
-          title: const Text("标点符号"),
+          title: Text(t.symbol),
           onChanged: (value) {
             _enableSymbol = value!;
             updatePassword();
@@ -701,12 +719,14 @@ class _DescriptionTextFieldState extends State<_DescriptionTextField> {
   }
 
   void _editText() {
+    final t = RpassLocalizations.of(context)!;
+
     final String lastValue = widget.controller.text;
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("备注"),
+          title: Text(t.description),
           scrollable: true,
           content: TextField(
             controller: widget.controller,
@@ -721,13 +741,13 @@ class _DescriptionTextFieldState extends State<_DescriptionTextField> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text("取消"),
+              child: Text(t.cancel),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(true);
               },
-              child: const Text("保存"),
+              child: Text(t.save),
             ),
           ],
         );

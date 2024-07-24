@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
+
 import '../../component/toast.dart';
 import '../../model/backup.dart';
 import '../../model/question.dart';
@@ -35,10 +37,11 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
     try {
       final result = await SimpleFile.openText();
       if (await _verifyImport(result)) {
-        showToast(context, "导入完成");
+        showToast(context, RpassLocalizations.of(context)!.import_done);
       }
     } catch (e) {
-      showToast(context, "导入异常: ${e.toString()}");
+      showToast(
+          context, RpassLocalizations.of(context)!.import_throw(e.toString()));
     } finally {
       setState(() {
         _isImporting = false;
@@ -97,9 +100,10 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = RpassLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("导入"),
+        title: Text(t.import),
         centerTitle: true,
       ),
       body: Center(
@@ -123,7 +127,7 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
                       constraints: const BoxConstraints(minWidth: 180),
                       child: ElevatedButton(
                         onPressed: _import,
-                        child: const Text("导入"),
+                        child: Text(t.import),
                       ),
                     )
                   : Container(
@@ -163,7 +167,7 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
   late bool _existSecurityQuestion;
   bool _forgetPassword = false;
   bool _obscureText = true;
-  String? _errorHitText;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -183,7 +187,7 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
       _denryptBackup(token);
     } catch (e) {
       setState(() {
-        _errorHitText = "密码异常: ${e.toString()}";
+        _errorMessage = e.toString();
       });
     }
   }
@@ -197,7 +201,8 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
       );
       _denryptBackup(token);
     } catch (e) {
-      showToast(context, "安全问题异常: ${e.toString()}");
+      showToast(context,
+          RpassLocalizations.of(context)!.security_qa_throw(e.toString()));
     }
   }
 
@@ -211,7 +216,8 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
       });
       widget.onDenrypt(backup);
     } catch (e) {
-      showToast(context, "解密异常: ${e.toString()}");
+      showToast(
+          context, RpassLocalizations.of(context)!.denrypt_throw(e.toString()));
     }
   }
 
@@ -243,16 +249,18 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
   }
 
   Widget _inputPassword() {
+    final t = RpassLocalizations.of(context)!;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Rpass',
+          t.app_name,
           style: Theme.of(context).textTheme.headlineSmall,
         ),
-        const Padding(
-          padding: EdgeInsets.only(top: 6),
-          child: Text('验证密码', textAlign: TextAlign.center),
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Text(t.verify_password, textAlign: TextAlign.center),
         ),
         Container(
           padding: const EdgeInsets.only(top: 12),
@@ -266,8 +274,10 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
             obscureText: _obscureText,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             decoration: InputDecoration(
-                labelText: "输入密码",
-                errorText: _errorHitText,
+                labelText: t.input_num_password,
+                errorText: _errorMessage != null
+                    ? t.verify_password_throw(_errorMessage!)
+                    : null,
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                     onPressed: () {
@@ -296,7 +306,7 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
                       _forgetPassword = true;
                     });
                   },
-                  child: const Text("忘记密码"),
+                  child: Text(t.forget_password),
                 ),
               ],
             ),
@@ -306,7 +316,7 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
           padding: const EdgeInsets.only(top: 24),
           child: ElevatedButton(
             onPressed: _verifyPassword,
-            child: const Text("确认"),
+            child: Text(t.confirm),
           ),
         ),
         Container(
@@ -314,7 +324,7 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
           padding: const EdgeInsets.only(top: 6, bottom: 12),
           child: ElevatedButton(
             onPressed: () => widget.onDenrypt(null),
-            child: const Text("取消"),
+            child: Text(t.cancel),
           ),
         ),
       ],

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
+
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class QrCodeScannerPage extends StatefulWidget {
@@ -18,7 +20,7 @@ class _QrCodeScannerPageState extends State<QrCodeScannerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('扫码'),
+        title: Text(RpassLocalizations.of(context)!.scan_code),
       ),
       backgroundColor: Colors.black,
       body: Stack(
