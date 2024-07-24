@@ -137,7 +137,8 @@ class SetPassword extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
-                      labelText: t.input_num_password,
+                      labelText: t.password,
+                      hintText: t.input_num_password,
                       border: const OutlineInputBorder(),
                     ),
                     validator: (value) => value == null || value.length < 4

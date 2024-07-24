@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
 
-import '../../../rpass.dart';
+import '../../rpass.dart';
 import '../../component/toast.dart';
 import '../../model/backup.dart';
 import '../../model/question.dart';
@@ -205,7 +205,8 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                                           FilteringTextInputFormatter.digitsOnly
                                         ],
                                         decoration: InputDecoration(
-                                          labelText: t.input_num_password,
+                                          labelText: t.password,
+                                          hintText: t.input_num_password,
                                           border: const OutlineInputBorder(),
                                         ),
                                       ),
@@ -271,7 +272,9 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                                         onTap: _editNewQuestion,
                                         child: InputDecorator(
                                           decoration: InputDecoration(
-                                            labelText: _questions.isNotEmpty ? t.security_qa : null,
+                                            labelText: _questions.isNotEmpty
+                                                ? t.security_qa
+                                                : null,
                                             border: const OutlineInputBorder(),
                                           ),
                                           child: Text(

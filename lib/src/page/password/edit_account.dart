@@ -181,8 +181,9 @@ class _EditAccountPageState extends State<EditAccountPage> {
                       labelText: t.domain,
                       border: const OutlineInputBorder(),
                     ),
-                    validator: (value) =>
-                        !AccountRegExp.domain.hasMatch(value) ? "格式错误" : null,
+                    validator: (value) => !AccountRegExp.domain.hasMatch(value)
+                        ? t.format_error(AccountRegExp.domain.pattern)
+                        : null,
                   ),
                 ),
                 Padding(
@@ -237,7 +238,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                             DropdownMenuEntry(value: value, label: value))
                         .toList(),
                     validator: (value) => !AccountRegExp.email.hasMatch(value)
-                        ? t.format_error(AccountRegExp.email.toString())
+                        ? t.format_error(AccountRegExp.email.pattern)
                         : null,
                   ),
                 ),
@@ -286,8 +287,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     ),
                     validator: (value) => value.isNotEmpty &&
                             !AccountRegExp.oneTimePassword.hasMatch(value)
-                        ? t.format_error(
-                            AccountRegExp.oneTimePassword.toString())
+                        ? t.format_error(AccountRegExp.oneTimePassword.pattern)
                         : null,
                   ),
                 ),

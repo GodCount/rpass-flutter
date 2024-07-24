@@ -1,5 +1,6 @@
 {
     "@@author": "GodCount",
+    "@@context": "由作者激情手打",
     "@@locale": "zh",
     "locale_name": "简体中文",
     "app_name": "Rpass",
@@ -47,16 +48,16 @@
             }
         }
     },
-    "account_ab": "账号.",
+    "account_ab": "A.",
     "@account_ab": {
         "description": "ab 是 ab. 表示缩写, 在这里表示首字母"
     },
-    "email_ab": "邮箱.",
-    "label_ab": "标签.",
+    "email_ab": "E.",
+    "label_ab": "L.",
     "theme": "主题",
     "system": "系统",
     "light": "亮",
-    "dark" : "暗",
+    "dark": "暗",
     "language": "语言",
     "security": "安全",
     "modify_password": "修改密码",
@@ -98,11 +99,11 @@
     "edit_account": "编辑账号",
     "clone": "克隆",
     "domain": "域名",
-    "format_error": "格式错误, 应匹配: {regexp}",
+    "format_error": "格式错误, 应匹配: {pattern}",
     "@format_error": {
         "description": "带有正确格式信息的消息",
         "placeholders": {
-            "regexp": {
+            "pattern": {
                 "type": "String"
             }
         }
@@ -114,7 +115,7 @@
     "label": "标签",
     "date": "日期",
     "uuid": "标识",
-    "gen_password":"生成密码",
+    "gen_password": "生成密码",
     "refresh": "刷新",
     "symbol": "符号",
     "remark": "备注",

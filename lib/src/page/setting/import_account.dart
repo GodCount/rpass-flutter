@@ -274,7 +274,8 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
             obscureText: _obscureText,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             decoration: InputDecoration(
-                labelText: t.input_num_password,
+                labelText: t.password,
+                hintText: t.input_num_password,
                 errorText: _errorMessage != null
                     ? t.verify_password_throw(_errorMessage!)
                     : null,
