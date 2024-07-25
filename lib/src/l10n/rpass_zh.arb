@@ -197,5 +197,6 @@
             }
         }
     },
-    "scan_code": "扫码"
+    "scan_code": "扫码",
+    "new_label": "新建标签"
 }

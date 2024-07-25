@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
+
 typedef OnChangeCallback = void Function(List<String> labels);
 
 class LabelItem {
@@ -119,21 +121,23 @@ class _LabelListState extends State<LabelList> {
   }
 
   void _addLabel() {
+    final t = RpassLocalizations.of(context)!;
+
     String label = "";
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("标签"),
+          title: Text(t.label),
           content: TextField(
             autofocus: true,
             textInputAction: TextInputAction.done,
             onChanged: (value) {
               label = value;
             },
-            decoration: const InputDecoration(
-              hintText: "新建标签",
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              hintText: t.new_label,
+              border: const OutlineInputBorder(),
             ),
           ),
           actions: [
@@ -141,7 +145,7 @@ class _LabelListState extends State<LabelList> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text("取消"),
+              child: Text(t.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -153,7 +157,7 @@ class _LabelListState extends State<LabelList> {
                   _update();
                 }
               },
-              child: const Text("添加"),
+              child: Text(t.add),
             ),
           ],
         );

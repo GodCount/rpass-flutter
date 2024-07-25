@@ -197,5 +197,6 @@
             }
         }
     },
-    "scan_code": "Scan Code"
+    "scan_code": "Scan Code",
+    "new_label": "New Label"
 }
