@@ -1,5 +1,5 @@
-import '../model/question.dart';
 import 'common.dart';
+import '../model/rpass/question.dart';
 
 class VerifyCore {
   // ignore: constant_identifier_names

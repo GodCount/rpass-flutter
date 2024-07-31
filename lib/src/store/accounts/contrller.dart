@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../model/backup.dart';
 import '../../util/common.dart';
 import '../index.dart';
 import './service.dart';
-import '../../model/account.dart';
+import '../../model/rpass/backup.dart';
+import '../../model/rpass/account.dart';
 
 class AccountsContrller with ChangeNotifier {
   AccountsContrller();

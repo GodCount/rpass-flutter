@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../model/question.dart';
+import '../../model/rpass/question.dart';
 import '../../util/verify_core.dart';
 import '../index.dart';
 import './service.dart';

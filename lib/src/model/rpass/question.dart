@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../util/common.dart';
+import '../../util/common.dart';
 
 part 'question.g.dart';
 

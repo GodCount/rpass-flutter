@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
 
-import '../../model/question.dart';
+import '../../model/rpass/question.dart';
 
 typedef QuestionOnSumit = void Function(List<QuestionAnswer>? questions);
 

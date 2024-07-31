@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import '../../util/common.dart';
 import '../shared_preferences/index.dart';
-import '../../model/account.dart';
+import '../../model/rpass/account.dart';
 
 class AccountsService with SharedPreferencesService {
   Future<List<Account>> getAccountList(String token) async {

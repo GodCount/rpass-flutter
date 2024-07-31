@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../component/highlight_text.dart';
-import '../model/account.dart';
+import '../model/rpass/account.dart';
 
 const testData =
     "Esse ad Lorem elit cupidatat duis culpa irure in.Lorem laboris nostrud fugiat ut enim eiusmod voluptate. Sunt fugiat commodo consequat velit nostrud exercitation proident. Sint commodo id elit labore laborum excepteur elit velit enim laboris sint enim non ad."
@@ -58,6 +58,7 @@ class TestHighlightTextPageState extends State<TestHighlightTextPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Center(

@@ -8,7 +8,7 @@ import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
 import '../../component/label_list.dart';
 import '../../component/toast.dart';
 import '../../store/accounts/contrller.dart';
-import '../../model/account.dart';
+import '../../model/rpass/account.dart';
 import '../../util/common.dart';
 import '../page.dart';
 

@@ -9,7 +9,7 @@ import 'package:animated_flip_counter/animated_flip_counter.dart';
 
 import '../../component/label_list.dart';
 import '../../component/toast.dart';
-import '../../model/account.dart';
+import '../../model/rpass/account.dart';
 import '../../store/accounts/contrller.dart';
 import '../../util/one_time_password.dart';
 import './edit_account.dart';

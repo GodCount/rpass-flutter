@@ -6,7 +6,7 @@ import '../../component/toast.dart';
 import '../page.dart';
 import '../../store/index.dart';
 import '../verify/security_question.dart';
-import '../../model/question.dart';
+import '../../model/rpass/question.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, required this.store});

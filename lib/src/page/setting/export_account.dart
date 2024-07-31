@@ -7,8 +7,8 @@ import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
 
 import '../../rpass.dart';
 import '../../component/toast.dart';
-import '../../model/backup.dart';
-import '../../model/question.dart';
+import '../../model/rpass/backup.dart';
+import '../../model/rpass/question.dart';
 import '../../store/index.dart';
 import '../../util/common.dart';
 import '../../util/file.dart';

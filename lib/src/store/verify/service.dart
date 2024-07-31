@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import '../../model/question.dart';
+import '../../model/rpass/question.dart';
 import '../shared_preferences/index.dart';
 
 class VerifyService with SharedPreferencesService {
