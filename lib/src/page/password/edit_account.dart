@@ -79,10 +79,10 @@ class _EditAccountPageState extends State<EditAccountPage> {
         });
 
         // 先赋值为空,让后续代码正常运行
-        _account = Account.fromEmpty();
+        _account = Account();
       }
     } else {
-      _account = Account.fromEmpty();
+      _account = Account();
     }
 
     _domainGolbalKey = GlobalKey<_ValidatorTextFieldState>();

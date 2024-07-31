@@ -10,11 +10,11 @@ Account _$AccountFromJson(Map<String, dynamic> json) => Account(
       id: json['id'] as String?,
       date: _$JsonConverterFromJson<int, DateTime>(
           json['date'], const JsonDateTimeConverterNonNullable().fromJson),
-      domain: json['domain'] as String,
-      domainName: json['domainName'] as String,
-      account: json['account'] as String,
-      password: json['password'] as String,
-      email: json['email'] as String,
+      domain: json['domain'] as String?,
+      domainName: json['domainName'] as String?,
+      account: json['account'] as String?,
+      password: json['password'] as String?,
+      email: json['email'] as String?,
       description: json['description'] as String?,
       labels:
           (json['labels'] as List<dynamic>?)?.map((e) => e as String).toList(),
