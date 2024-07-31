@@ -93,6 +93,7 @@ class _LabelListState extends State<LabelList> {
       } else {
         children.add(
           Chip(
+            padding: const EdgeInsets.only(top: 0, bottom: 0, left: 8.0, right: 8.0),
             shadowColor: Theme.of(context).shadowColor,
             side: BorderSide(color: Theme.of(context).primaryColor),
             shape: RoundedRectangleBorder(

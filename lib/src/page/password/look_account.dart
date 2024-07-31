@@ -14,6 +14,20 @@ import '../../store/accounts/contrller.dart';
 import '../../util/one_time_password.dart';
 import './edit_account.dart';
 
+mixin HintEmptyTextUtil<T extends StatefulWidget> on State<T> {
+  Widget _hintEmptyText(bool isEmpty, Widget widget) {
+    return isEmpty
+        ? Opacity(
+            opacity: .5,
+            child: Text(
+              RpassLocalizations.of(context)!.empty,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          )
+        : widget;
+  }
+}
+
 class LookAccountPage extends StatefulWidget {
   const LookAccountPage({
     super.key,
@@ -30,7 +44,8 @@ class LookAccountPage extends StatefulWidget {
   State<LookAccountPage> createState() => _LookAccountPageState();
 }
 
-class _LookAccountPageState extends State<LookAccountPage> {
+class _LookAccountPageState extends State<LookAccountPage>
+    with HintEmptyTextUtil {
   late Account _account;
 
   @override
@@ -75,7 +90,8 @@ class _LookAccountPageState extends State<LookAccountPage> {
                   accountId: _account.id,
                 );
               })).then((value) {
-                if (value is String && widget.accountsContrller.hasAccountById(value)) {
+                if (value is String &&
+                    widget.accountsContrller.hasAccountById(value)) {
                   _account = widget.accountsContrller.getAccountById(value);
                   setState(() {});
                 }
@@ -113,12 +129,17 @@ class _LookAccountPageState extends State<LookAccountPage> {
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(
-                  _account.domain,
-                  style: Theme.of(context).textTheme.titleSmall,
+                child: _hintEmptyText(
+                  _account.domain.isEmpty,
+                  Text(
+                    _account.domain,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                 ),
               ),
-              onLongPress: () => writeClipboard(_account.domain),
+              onLongPress: _account.domain.isNotEmpty
+                  ? () => writeClipboard(_account.domain)
+                  : null,
             ),
             ListTile(
               shape: shape,
@@ -128,12 +149,17 @@ class _LookAccountPageState extends State<LookAccountPage> {
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(
-                  _account.domainName,
-                  style: Theme.of(context).textTheme.titleSmall,
+                child: _hintEmptyText(
+                  _account.domainName.isEmpty,
+                  Text(
+                    _account.domainName,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                 ),
               ),
-              onLongPress: () => writeClipboard(_account.domainName),
+              onLongPress: _account.domainName.isNotEmpty
+                  ? () => writeClipboard(_account.domainName)
+                  : null,
             ),
           ]),
           _cardColumn([
@@ -161,12 +187,17 @@ class _LookAccountPageState extends State<LookAccountPage> {
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(
-                  _account.account,
-                  style: Theme.of(context).textTheme.titleSmall,
+                child: _hintEmptyText(
+                  _account.account.isEmpty,
+                  Text(
+                    _account.account,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                 ),
               ),
-              onLongPress: () => writeClipboard(_account.account),
+              onLongPress: _account.account.isNotEmpty
+                  ? () => writeClipboard(_account.account)
+                  : null,
             ),
             ListTile(
               title: Padding(
@@ -175,12 +206,17 @@ class _LookAccountPageState extends State<LookAccountPage> {
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(
-                  _account.email,
-                  style: Theme.of(context).textTheme.titleSmall,
+                child: _hintEmptyText(
+                  _account.account.isEmpty,
+                  Text(
+                    _account.email,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                 ),
               ),
-              onLongPress: () => writeClipboard(_account.email),
+              onLongPress: _account.email.isNotEmpty
+                  ? () => writeClipboard(_account.email)
+                  : null,
             ),
             _LookPasswordListTile(
               shape: shape,
@@ -215,11 +251,14 @@ class _LookAccountPageState extends State<LookAccountPage> {
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: LabelList(
-                  preview: true,
-                  items: _account.labels
-                      .map((value) => LabelItem(value: value))
-                      .toList(),
+                child: _hintEmptyText(
+                  _account.labels.isEmpty,
+                  LabelList(
+                    preview: true,
+                    items: _account.labels
+                        .map((value) => LabelItem(value: value))
+                        .toList(),
+                  ),
                 ),
               ),
             ),
@@ -231,14 +270,19 @@ class _LookAccountPageState extends State<LookAccountPage> {
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(
-                  _account.description,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleSmall,
+                child: _hintEmptyText(
+                  _account.description.isEmpty,
+                  Text(
+                    _account.description,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                 ),
               ),
-              onLongPress: _showDescriptionDialog,
+              onLongPress: _account.description.isNotEmpty
+                  ? _showDescriptionDialog
+                  : null,
             ),
           ]),
           _cardColumn([
@@ -391,7 +435,8 @@ class _LookPasswordListTile extends StatefulWidget {
   State<_LookPasswordListTile> createState() => _LookPasswordListTileState();
 }
 
-class _LookPasswordListTileState extends State<_LookPasswordListTile> {
+class _LookPasswordListTileState extends State<_LookPasswordListTile>
+    with HintEmptyTextUtil {
   bool showPassword = false;
 
   @override
@@ -404,24 +449,29 @@ class _LookPasswordListTileState extends State<_LookPasswordListTile> {
       ),
       subtitle: Padding(
         padding: const EdgeInsets.only(left: 12),
-        child: Text(
-          showPassword ? widget.password : "*" * widget.password.length,
-          style: Theme.of(context).textTheme.titleSmall,
+        child: _hintEmptyText(
+          widget.password.isEmpty,
+          Text(
+            showPassword ? widget.password : "*" * widget.password.length,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
         ),
       ),
-      trailing: IconButton(
-        onPressed: () {
-          setState(() {
-            showPassword = !showPassword;
-          });
-        },
-        icon: Icon(
-          showPassword
-              ? Icons.remove_red_eye_outlined
-              : Icons.visibility_off_outlined,
-        ),
-      ),
-      onLongPress: widget.onLongPress,
+      trailing: widget.password.isNotEmpty
+          ? IconButton(
+              onPressed: () {
+                setState(() {
+                  showPassword = !showPassword;
+                });
+              },
+              icon: Icon(
+                showPassword
+                    ? Icons.remove_red_eye_outlined
+                    : Icons.visibility_off_outlined,
+              ),
+            )
+          : null,
+      onLongPress: widget.password.isNotEmpty ? widget.onLongPress : null,
     );
   }
 }

@@ -198,5 +198,7 @@
         }
     },
     "scan_code": "Scan Code",
-    "new_label": "New Label"
+    "new_label": "New Label",
+    "cannot_all_empty": "Cannot be all for empty",
+    "empty": "Empty"
 }

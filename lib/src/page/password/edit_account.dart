@@ -44,10 +44,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
   late final Account _account;
 
   late final GlobalKey<_ValidatorTextFieldState> _domainGolbalKey;
-  late final GlobalKey<_ValidatorTextFieldState> _domainNameGolbalKey;
-  late final GlobalKey<_ValidatorDropdownMenuState> _accountGolbalKey;
   late final GlobalKey<_ValidatorDropdownMenuState> _emailGolbalKey;
-  late final GlobalKey<_ValidatorTextFieldState> _passwordGolbalKey;
   late final GlobalKey<_ValidatorTextFieldState> _otPasswordGolbalKey;
 
   late final TextEditingController _domainController;
@@ -89,12 +86,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
     }
 
     _domainGolbalKey = GlobalKey<_ValidatorTextFieldState>();
-    _domainNameGolbalKey = GlobalKey<_ValidatorTextFieldState>();
-
-    _accountGolbalKey = GlobalKey<_ValidatorDropdownMenuState>();
     _emailGolbalKey = GlobalKey<_ValidatorDropdownMenuState>();
-
-    _passwordGolbalKey = GlobalKey<_ValidatorTextFieldState>();
     _otPasswordGolbalKey = GlobalKey<_ValidatorTextFieldState>();
 
     _domainController = TextEditingController(text: _account.domain);
@@ -124,10 +116,18 @@ class _EditAccountPageState extends State<EditAccountPage> {
 
   bool _validator() {
     return _domainGolbalKey.currentState!.validator() &&
-        _domainNameGolbalKey.currentState!.validator() &&
-        _accountGolbalKey.currentState!.validator() &&
         _emailGolbalKey.currentState!.validator() &&
-        _passwordGolbalKey.currentState!.validator();
+        _otPasswordGolbalKey.currentState!.validator();
+  }
+
+  bool _allEmpty() {
+    return _domainController.text.isEmpty &&
+        _domainNameController.text.isEmpty &&
+        _accountController.text.isEmpty &&
+        _emailController.text.isEmpty &&
+        _passwordController.text.isEmpty &&
+        _otPasswordController.text.isEmpty &&
+        _descriptionController.text.isEmpty;
   }
 
   List<LabelItem> _getLabels() {
@@ -181,30 +181,26 @@ class _EditAccountPageState extends State<EditAccountPage> {
                       labelText: t.domain,
                       border: const OutlineInputBorder(),
                     ),
-                    validator: (value) => !AccountRegExp.domain.hasMatch(value)
+                    validator: (value) => value.isNotEmpty &&
+                            !AccountRegExp.domain.hasMatch(value)
                         ? t.format_error(AccountRegExp.domain.pattern)
                         : null,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
-                  child: _ValidatorTextField(
-                    key: _domainNameGolbalKey,
+                  child: TextField(
                     controller: _domainNameController,
                     textInputAction: TextInputAction.next,
-                    focusNoError: true,
                     decoration: InputDecoration(
                       labelText: t.domain_title,
                       border: const OutlineInputBorder(),
                     ),
-                    validator: (value) =>
-                        value.isEmpty ? t.cannot_emprty : null,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
                   child: _ValidatorDropdownMenu(
-                    key: _accountGolbalKey,
                     controller: _accountController,
                     focusNoError: true,
                     width: width,
@@ -217,8 +213,6 @@ class _EditAccountPageState extends State<EditAccountPage> {
                         .map((value) =>
                             DropdownMenuEntry(value: value, label: value))
                         .toList(),
-                    validator: (value) =>
-                        value.isEmpty ? t.cannot_emprty : null,
                   ),
                 ),
                 Padding(
@@ -237,18 +231,17 @@ class _EditAccountPageState extends State<EditAccountPage> {
                         .map((value) =>
                             DropdownMenuEntry(value: value, label: value))
                         .toList(),
-                    validator: (value) => !AccountRegExp.email.hasMatch(value)
-                        ? t.format_error(AccountRegExp.email.pattern)
-                        : null,
+                    validator: (value) =>
+                        value.isNotEmpty && !AccountRegExp.email.hasMatch(value)
+                            ? t.format_error(AccountRegExp.email.pattern)
+                            : null,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
-                  child: _ValidatorTextField(
-                    key: _passwordGolbalKey,
+                  child: TextField(
                     controller: _passwordController,
                     textInputAction: TextInputAction.next,
-                    focusNoError: true,
                     decoration: InputDecoration(
                       labelText: t.password,
                       border: const OutlineInputBorder(),
@@ -257,8 +250,6 @@ class _EditAccountPageState extends State<EditAccountPage> {
                         icon: const Icon(Icons.create),
                       ),
                     ),
-                    validator: (value) =>
-                        value.isEmpty ? t.cannot_emprty : null,
                   ),
                 ),
                 Padding(
@@ -354,7 +345,9 @@ class _EditAccountPageState extends State<EditAccountPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          if (_validator()) {
+          if (_allEmpty()) {
+            showToast(context, t.cannot_all_empty);
+          } else if (_validator()) {
             _account.domain = _domainController.text;
             _account.domainName = _domainNameController.text;
             _account.account = _accountController.text;
@@ -422,10 +415,10 @@ typedef ValidatorCallback = String? Function(String value);
 
 class _ValidatorDropdownMenu extends StatefulWidget {
   const _ValidatorDropdownMenu({
-    required super.key,
+    super.key,
     required this.dropdownMenuEntries,
-    required this.validator,
     required this.controller,
+    this.validator,
     this.focusNoError = true,
     this.width,
     this.enableFilter = false,
@@ -436,7 +429,7 @@ class _ValidatorDropdownMenu extends StatefulWidget {
   });
 
   final List<DropdownMenuEntry<String>> dropdownMenuEntries;
-  final ValidatorCallback validator;
+  final ValidatorCallback? validator;
   final bool focusNoError;
   final TextEditingController controller;
 
@@ -458,11 +451,7 @@ class _ValidatorDropdownMenuState extends State<_ValidatorDropdownMenu> {
   @override
   void initState() {
     widget.controller.addListener(() {
-      final text = widget.validator(widget.controller.text);
-      if (text != _errorText) {
-        _errorText = text;
-        setState(() {});
-      }
+      validator();
     });
 
     if (widget.focusNoError) {
@@ -487,7 +476,8 @@ class _ValidatorDropdownMenuState extends State<_ValidatorDropdownMenu> {
   }
 
   bool validator() {
-    final text = widget.validator(widget.controller.text);
+    if (widget.validator == null) return true;
+    final text = widget.validator!(widget.controller.text);
     if (text != _errorText) {
       _errorText = text;
       setState(() {});
@@ -514,7 +504,7 @@ class _ValidatorDropdownMenuState extends State<_ValidatorDropdownMenu> {
 
 class _ValidatorTextField extends StatefulWidget {
   const _ValidatorTextField({
-    required super.key,
+    super.key,
     required this.validator,
     required this.controller,
     this.focusNoError = true,
