@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:crypto/crypto.dart' as crypto;
-import 'package:uuid/uuid.dart';
+import 'package:csv/csv.dart';
+import 'package:csv/csv_settings_autodetection.dart';
 import 'package:encrypt/encrypt.dart';
+import 'package:uuid/uuid.dart';
 
 const uuid = Uuid();
 final IV iv = IV.fromUtf8("9" * 16);
@@ -130,4 +132,82 @@ class Debouncer {
   void dispose() {
     _timer?.cancel();
   }
+}
+
+List<Map<String, dynamic>> csvToJson(
+  String csv, {
+  String? fieldDelimiter,
+  String? textDelimiter,
+  String? textEndDelimiter,
+  String? eol,
+  CsvSettingsDetector? csvSettingsDetector,
+  bool? shouldParseNumbers,
+  bool? allowInvalid,
+  var convertEmptyTo,
+}) {
+  final list2 = const CsvToListConverter().convert(
+    csv,
+    fieldDelimiter: fieldDelimiter,
+    textDelimiter: textDelimiter,
+    textEndDelimiter: textEndDelimiter,
+    eol: eol,
+    csvSettingsDetector: csvSettingsDetector,
+    shouldParseNumbers: shouldParseNumbers,
+    allowInvalid: allowInvalid,
+    convertEmptyTo: convertEmptyTo,
+  );
+
+  final fields = list2.first;
+
+  final List<Map<String, dynamic>> results = [];
+
+  for (var i = 1; i < list2.length; i++) {
+    final item = list2[i];
+    final Map<String, dynamic> result = {};
+    for (var j = 0; j < fields.length; j++) {
+      result[fields[j]] = item[j];
+    }
+    results.add(result);
+  }
+
+  return results;
+}
+
+String jsonToCsv(
+  List<Map<String, dynamic>> list, {
+  String? fieldDelimiter,
+  String? textDelimiter,
+  String? textEndDelimiter,
+  String? eol,
+  bool? delimitAllFields,
+  var convertNullTo,
+}) {
+  final fields = list.first.keys.toList();
+  final List<List> results = [fields];
+  for (var item in list) {
+    results.add(item.values.toList());
+  }
+  return const ListToCsvConverter().convert(
+    results,
+    fieldDelimiter: fieldDelimiter,
+    textDelimiter: textDelimiter,
+    textEndDelimiter: textEndDelimiter,
+    eol: eol,
+    delimitAllFields: delimitAllFields,
+    convertNullTo: convertNullTo,
+  );
+}
+
+class CommonRegExp {
+  static final RegExp domain = RegExp(r"^(https?:\/\/)?(\w+)\..+");
+  static final RegExp email = RegExp(
+      r"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'"
+      r'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-'
+      r'\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*'
+      r'[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4]'
+      r'[0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9]'
+      r'[0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\'
+      r'x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])');
+
+  static final RegExp oneTimePassword = RegExp(r"^otpauth://totp/.+");
 }

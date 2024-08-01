@@ -8,8 +8,7 @@ part of 'account.dart';
 
 Account _$AccountFromJson(Map<String, dynamic> json) => Account(
       id: json['id'] as String?,
-      date: _$JsonConverterFromJson<int, DateTime>(
-          json['date'], const JsonDateTimeConverterNonNullable().fromJson),
+      date: const JsonDateTimeConverterNonNullable().fromJson(json['date']),
       domain: json['domain'] as String?,
       domainName: json['domainName'] as String?,
       account: json['account'] as String?,
@@ -24,14 +23,6 @@ Account _$AccountFromJson(Map<String, dynamic> json) => Account(
 Map<String, dynamic> _$AccountToJson(Account instance) {
   final val = <String, dynamic>{
     'id': instance.id,
-    'date': const JsonDateTimeConverterNonNullable().toJson(instance.date),
-    'domain': instance.domain,
-    'domainName': instance.domainName,
-    'account': instance.account,
-    'password': instance.password,
-    'email': instance.email,
-    'description': instance.description,
-    'labels': instance.labels,
   };
 
   void writeNotNull(String key, dynamic value) {
@@ -40,12 +31,15 @@ Map<String, dynamic> _$AccountToJson(Account instance) {
     }
   }
 
+  writeNotNull(
+      'date', const JsonDateTimeConverterNonNullable().toJson(instance.date));
+  val['domain'] = instance.domain;
+  val['domainName'] = instance.domainName;
+  val['account'] = instance.account;
+  val['password'] = instance.password;
+  val['email'] = instance.email;
+  val['description'] = instance.description;
+  val['labels'] = instance.labels;
   writeNotNull('oneTimePassword', instance.oneTimePassword);
   return val;
 }
-
-Value? _$JsonConverterFromJson<Json, Value>(
-  Object? json,
-  Value? Function(Json json) fromJson,
-) =>
-    json == null ? null : fromJson(json as Json);

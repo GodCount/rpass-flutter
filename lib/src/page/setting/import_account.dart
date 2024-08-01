@@ -7,13 +7,22 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
 
 import '../../component/toast.dart';
+import '../../model/browser/chrome.dart';
+import '../../model/browser/firefox.dart';
 import '../../model/rpass/backup.dart';
 import '../../model/rpass/question.dart';
+import '../../rpass.dart';
 import '../../store/index.dart';
 import '../../util/common.dart';
 import '../../util/file.dart';
 import '../../util/verify_core.dart';
 import '../verify/verify_question.dart';
+
+enum ImportType {
+  rpass,
+  chrome,
+  firefox,
+}
 
 class ImportAccountPage extends StatefulWidget {
   const ImportAccountPage({super.key, required this.store});
@@ -27,16 +36,28 @@ class ImportAccountPage extends StatefulWidget {
 }
 
 class _ImportAccountPageState extends State<ImportAccountPage> {
-  bool _isImporting = false;
+  ImportType? _importType;
 
-  void _import() async {
+  void _import(ImportType type) async {
     setState(() {
-      _isImporting = true;
+      _importType = type;
     });
 
     try {
-      final result = await SimpleFile.openText();
-      if (await _verifyImport(result)) {
+      Backup? backup;
+      switch (type) {
+        case ImportType.rpass:
+          backup = await _importRpass();
+          break;
+        case ImportType.chrome:
+          backup = await _importChrome();
+          break;
+        case ImportType.firefox:
+          backup = await _importFirefox();
+          break;
+      }
+      if (backup != null) {
+        await widget.store.accounts.importBackupAccounts(backup);
         showToast(context, RpassLocalizations.of(context)!.import_done);
       }
     } catch (e) {
@@ -44,29 +65,23 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
           context, RpassLocalizations.of(context)!.import_throw(e.toString()));
     } finally {
       setState(() {
-        _isImporting = false;
+        _importType = null;
       });
     }
   }
 
-  Future<bool> _verifyImport(String data) {
-    final completer = Completer<bool>();
-    final accountsContrller = widget.store.accounts;
+  Future<Backup?> _importRpass() {
+    final completer = Completer<Backup?>();
     Timer(const Duration(), () async {
       try {
+        final data = await SimpleFile.openText(allowedExtensions: ["json"]);
         final object = json.decoder.convert(data);
-        late Backup backup;
         try {
-          backup = Backup.fromJson(object);
+          completer.complete(Backup.fromJson(object));
         } catch (e) {
-          final reslut = await _denryptBackup(EncryptBackup.fromJson(object));
-          if (reslut == null) {
-            return completer.complete(false);
-          }
-          backup = reslut;
+          return completer
+              .complete(await _denryptBackup(EncryptBackup.fromJson(object)));
         }
-        await accountsContrller.importBackupAccounts(backup);
-        completer.complete(true);
       } catch (e) {
         completer.completeError(e);
       }
@@ -98,6 +113,24 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
     return completer.future;
   }
 
+  Future<Backup?> _importChrome() async {
+    final data = await SimpleFile.openText(allowedExtensions: ["csv"]);
+    final result = ChromeAccount.toAccounts(ChromeAccount.fromCsv(data));
+    return Backup(
+        accounts: result,
+        version: RpassInfo.version,
+        buildNumber: RpassInfo.buildNumber);
+  }
+
+  Future<Backup?> _importFirefox() async {
+    final data = await SimpleFile.openText(allowedExtensions: ["csv"]);
+    final result = FirefoxAccount.toAccounts(FirefoxAccount.fromCsv(data));
+    return Backup(
+        accounts: result,
+        version: RpassInfo.version,
+        buildNumber: RpassInfo.buildNumber);
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = RpassLocalizations.of(context)!;
@@ -109,38 +142,58 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
       body: Center(
         child: Card(
           margin: const EdgeInsets.all(24),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.only(top: 12, bottom: 12),
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              transitionBuilder: (child, animation) {
-                return ScaleTransition(
-                  scale: animation,
-                  child: child,
-                );
-              },
-              child: !_isImporting
-                  ? Container(
-                      key: const ValueKey(1),
-                      padding: const EdgeInsets.only(top: 12),
-                      constraints: const BoxConstraints(minWidth: 180),
-                      child: ElevatedButton(
-                        onPressed: _import,
-                        child: Text(t.import),
-                      ),
-                    )
-                  : Container(
-                      key: const ValueKey(2),
-                      margin: const EdgeInsets.only(top: 12),
-                      width: 32,
-                      height: 32,
-                      child: const CircularProgressIndicator(),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(6.0)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _listTile(
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(6.0),
+                      topRight: Radius.circular(6.0),
                     ),
-            ),
+                  ),
+                  type: ImportType.rpass,
+                  title: RpassInfo.appName),
+              _listTile(type: ImportType.chrome, title: "Chrome"),
+              _listTile(
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(6.0),
+                    bottomRight: Radius.circular(6.0),
+                  ),
+                ),
+                type: ImportType.firefox,
+                title: "Firefox",
+              ),
+            ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _listTile({
+    ShapeBorder? shape,
+    required ImportType type,
+    required String title,
+  }) {
+    return ListTile(
+      shape: shape,
+      onTap: _importType == null ? () => _import(type) : null,
+      title: Opacity(
+        opacity: _importType == null ? 1 : 0.5,
+        child: Text(title),
+      ),
+      trailing: _importType == type
+          ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(),
+            )
+          : null,
     );
   }
 }

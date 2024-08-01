@@ -42,12 +42,14 @@ class SimpleFile {
 
   static Future<String> openText({
     String? dialogTitle,
+    List<String>? allowedExtensions,
   }) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-        dialogTitle: dialogTitle,
-        type: FileType.custom,
-        initialDirectory: (await applicationDocumentsDirectory).path,
-        allowedExtensions: ["json", "txt"]);
+      dialogTitle: dialogTitle,
+      type: FileType.custom,
+      initialDirectory: (await applicationDocumentsDirectory).path,
+      allowedExtensions: allowedExtensions,
+    );
     if (result == null || result.xFiles.isEmpty) {
       throw Exception("user cancel");
     }
