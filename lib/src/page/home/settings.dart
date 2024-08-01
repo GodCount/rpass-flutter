@@ -195,15 +195,15 @@ class SettingsPageState extends State<SettingsPage>
   }
 
   void _modifyPassword() {
-    final TextEditingController controller = TextEditingController();
     final GlobalKey<FormState> formState = GlobalKey<FormState>();
+    String newPassword = "";
 
     final t = RpassLocalizations.of(context)!;
 
     void onSetPassword() async {
       if (formState.currentState!.validate()) {
         try {
-          await widget.store.verify.modifyPassword(controller.text);
+          await widget.store.verify.modifyPassword(newPassword);
           if (mounted) {
             Navigator.of(context).pop();
           }
@@ -225,7 +225,7 @@ class SettingsPageState extends State<SettingsPage>
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextFormField(
-                  controller: controller,
+                  onChanged: (text) => newPassword = text,
                   keyboardType: TextInputType.number,
                   textInputAction: TextInputAction.next,
                   autofocus: true,
@@ -251,7 +251,7 @@ class SettingsPageState extends State<SettingsPage>
                       border: const OutlineInputBorder(),
                     ),
                     validator: (value) =>
-                        value == controller.text ? null : t.password_not_equal,
+                        value == newPassword ? null : t.password_not_equal,
                     onFieldSubmitted: (value) {
                       if (formState.currentState!.validate()) {
                         onSetPassword();
@@ -276,9 +276,7 @@ class SettingsPageState extends State<SettingsPage>
           ],
         );
       },
-    ).then((value) {
-      controller.dispose();
-    });
+    );
   }
 
   void _modifyQuestion() {
