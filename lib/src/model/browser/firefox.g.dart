@@ -8,7 +8,7 @@ part of 'firefox.dart';
 
 FirefoxAccount _$FirefoxAccountFromJson(Map<String, dynamic> json) =>
     FirefoxAccount(
-      url: json['url'] as String,
+      url: const JsonUrlConverter().fromJson(json['url'] as String),
       username: json['username'] as String,
       password: json['password'] as String,
       httpRealm: json['httpRealm'] as String?,
@@ -24,7 +24,7 @@ FirefoxAccount _$FirefoxAccountFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$FirefoxAccountToJson(FirefoxAccount instance) {
   final val = <String, dynamic>{
-    'url': instance.url,
+    'url': const JsonUrlConverter().toJson(instance.url),
     'username': instance.username,
     'password': instance.password,
   };

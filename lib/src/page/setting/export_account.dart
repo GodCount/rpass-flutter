@@ -6,6 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
 import 'package:intl/intl.dart';
 
+import '../../model/browser/chrome.dart';
+import '../../model/browser/firefox.dart';
+import '../../model/common.dart';
 import '../../rpass.dart';
 import '../../component/toast.dart';
 import '../../model/rpass/backup.dart';
@@ -37,30 +40,65 @@ class ExportAccountPageState extends State<ExportAccountPage> {
   List<QuestionAnswer> _questions = [];
 
   bool _isSaveing = false;
+  BackupType? _exportType;
 
-  void _export() async {
+  BackupType _otherExportType = BackupType.chrome;
+
+  void _export(BackupType type) async {
+    final t = RpassLocalizations.of(context)!;
+
+    _isSaveing = true;
+    _exportType = type;
+    setState(() {});
+
+    try {
+      String? filepath;
+
+      switch (type) {
+        case BackupType.rpass:
+          filepath = await _exportRpass();
+          break;
+        case BackupType.chrome:
+          filepath = await _exportChrome();
+          break;
+        case BackupType.firefox:
+          filepath = await _exportFirefox();
+          break;
+      }
+
+      if (filepath == null) return;
+
+      showToast(context, t.export_done_location(filepath));
+    } catch (e) {
+      showToast(context, t.export_throw(e.toString()));
+    } finally {
+      _isSaveing = false;
+      _exportType = null;
+      _passwordController.text = "";
+      _questions.clear();
+      setState(() {});
+    }
+  }
+
+  Future<String?> _exportRpass() async {
     final t = RpassLocalizations.of(context)!;
 
     if (widget.store.accounts.accountList.isEmpty) {
       showToast(context, t.no_backup);
-      return;
+      return null;
     }
     if (_enableEncrypt) {
       if (_isNewPassword && _passwordController.text.trim().length < 4) {
         showToast(context, t.input_num_password);
-        return;
+        return null;
       }
       if (_enableSecurityQuestion &&
           _isNewSecurityQuestion &&
           _questions.isEmpty) {
         showToast(context, t.at_least_1security_qa);
-        return;
+        return null;
       }
     }
-
-    setState(() {
-      _isSaveing = true;
-    });
 
     String saveData;
 
@@ -113,21 +151,39 @@ class ExportAccountPageState extends State<ExportAccountPage> {
 
       saveData = json.encoder.convert(data);
     }
-    try {
-      final filepath = await SimpleFile.saveText(
-        data: saveData,
-        name: "rpass_export_${DateFormat.yMd().format(DateTime.now())}",
-        ext: "json",
-      );
-      showToast(context, t.export_done_location(filepath));
-    } catch (e) {
-      showToast(context, t.export_throw(e.toString()));
-    } finally {
-      _isSaveing = false;
-      _passwordController.text = "";
-      _questions.clear();
-      setState(() {});
-    }
+
+    final filepath = await SimpleFile.saveText(
+      data: saveData,
+      name: "rpass_export_${DateFormat("yyyy.MM.dd").format(DateTime.now())}",
+      ext: "json",
+    );
+    return filepath;
+  }
+
+  Future<String> _exportChrome() async {
+    final saveData = ChromeAccount.toCsv(widget.store.accounts.accountList);
+    final filepath = await SimpleFile.saveText(
+      data: saveData,
+      name: "rpass_export_chrome_${DateFormat("yyyy.MM.dd").format(DateTime.now())}",
+      ext: "csv",
+    );
+    return filepath;
+  }
+
+  Future<String> _exportFirefox() async {
+    final saveData = FirefoxAccount.toCsv(widget.store.accounts.accountList);
+    final filepath = await SimpleFile.saveText(
+      data: saveData,
+      name: "rpass_export_firefox_${DateFormat("yyyy.MM.dd").format(DateTime.now())}",
+      ext: "csv",
+    );
+    return filepath;
+  }
+
+  void _onChangeExportType(BackupType? value) {
+    setState(() {
+      _otherExportType = value ?? BackupType.chrome;
+    });
   }
 
   @override
@@ -139,191 +195,265 @@ class ExportAccountPageState extends State<ExportAccountPage> {
         title: Text(t.export),
         centerTitle: true,
       ),
-      body: Center(
-        child: Card(
-          margin: const EdgeInsets.all(24),
-          child: Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SwitchListTile(
-                  value: _enableEncrypt,
-                  onChanged: (value) {
-                    setState(() {
-                      _enableEncrypt = value;
-                    });
-                  },
-                  title: Text(t.encrypt_data),
-                ),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (child, animation) {
-                    return SizeTransition(
-                      sizeFactor: animation,
-                      child: child,
-                    );
-                  },
-                  child: _enableEncrypt
-                      ? Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CheckboxListTile(
-                              dense: true,
-                              value: _isNewPassword,
-                              onChanged: (value) {
-                                setState(() {
-                                  _isNewPassword = value!;
-                                });
-                              },
-                              title: Padding(
-                                padding: const EdgeInsets.only(left: 6),
-                                child: Text(t.alone_password),
-                              ),
-                            ),
-                            AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 300),
-                              transitionBuilder: (child, animation) {
-                                return SizeTransition(
-                                  sizeFactor: animation,
-                                  child: child,
-                                );
-                              },
-                              child: _isNewPassword
-                                  ? Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 12,
-                                        bottom: 12,
-                                        left: 28,
-                                        right: 32,
-                                      ),
-                                      child: TextField(
-                                        controller: _passwordController,
-                                        keyboardType: TextInputType.number,
-                                        textInputAction: TextInputAction.done,
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter.digitsOnly
-                                        ],
-                                        decoration: InputDecoration(
-                                          labelText: t.password,
-                                          hintText: t.input_num_password,
-                                          border: const OutlineInputBorder(),
-                                        ),
-                                      ),
-                                    )
-                                  : null,
-                            ),
-                            CheckboxListTile(
-                              dense: true,
-                              value: _enableSecurityQuestion,
-                              onChanged: (value) {
-                                setState(() {
-                                  _enableSecurityQuestion = value!;
-                                });
-                              },
-                              title: Padding(
-                                padding: const EdgeInsets.only(left: 6),
-                                child: Text(t.enable_security_qa),
-                              ),
-                            ),
-                            AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 300),
-                              transitionBuilder: (child, animation) {
-                                return SizeTransition(
-                                  sizeFactor: animation,
-                                  child: child,
-                                );
-                              },
-                              child: _enableSecurityQuestion
-                                  ? CheckboxListTile(
-                                      dense: true,
-                                      value: _isNewSecurityQuestion,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _isNewSecurityQuestion = value!;
-                                        });
-                                      },
-                                      title: Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 12),
-                                        child: Text(t.alone_security_qa),
-                                      ),
-                                    )
-                                  : null,
-                            ),
-                            AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 300),
-                              transitionBuilder: (child, animation) {
-                                return SizeTransition(
-                                  sizeFactor: animation,
-                                  child: child,
-                                );
-                              },
-                              child: _enableSecurityQuestion &&
-                                      _isNewSecurityQuestion
-                                  ? Container(
-                                      margin: const EdgeInsets.only(
-                                        top: 12,
-                                        bottom: 12,
-                                        left: 28,
-                                        right: 32,
-                                      ),
-                                      child: GestureDetector(
-                                        onTap: _editNewQuestion,
-                                        child: InputDecorator(
-                                          decoration: InputDecoration(
-                                            labelText: _questions.isNotEmpty
-                                                ? t.security_qa
-                                                : null,
-                                            border: const OutlineInputBorder(),
-                                          ),
-                                          child: Text(
-                                            _questions.isNotEmpty
-                                                ? _questions
-                                                    .map((it) => it.question)
-                                                    .join("; ")
-                                                : t.security_qa,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  : null,
-                            ),
-                          ],
-                        )
-                      : null,
-                ),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (child, animation) {
-                    return ScaleTransition(
-                      scale: animation,
-                      child: child,
-                    );
-                  },
-                  child: !_isSaveing
-                      ? Container(
-                          key: const ValueKey(1),
-                          padding: const EdgeInsets.only(top: 12),
-                          constraints: const BoxConstraints(minWidth: 180),
-                          child: ElevatedButton(
-                            onPressed: _export,
-                            child: Text(t.backup),
-                          ),
-                        )
-                      : Container(
-                          key: const ValueKey(2),
-                          margin: const EdgeInsets.only(top: 12),
-                          width: 32,
-                          height: 32,
-                          child: const CircularProgressIndicator(),
-                        ),
-                )
-              ],
+      body: ListView(
+        padding: const EdgeInsets.all(6),
+        children: [
+          _cardColumn([
+            Padding(
+              padding: const EdgeInsets.only(top: 12, bottom: 12),
+              child: Text(
+                t.app_name,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
             ),
-          ),
-        ),
+            SwitchListTile(
+              value: _enableEncrypt,
+              onChanged: !_isSaveing
+                  ? (value) {
+                      setState(() {
+                        _enableEncrypt = value;
+                      });
+                    }
+                  : null,
+              title: Text(t.encrypt_data),
+            ),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) {
+                return SizeTransition(
+                  sizeFactor: animation,
+                  child: child,
+                );
+              },
+              child: _enableEncrypt
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CheckboxListTile(
+                          dense: true,
+                          value: _isNewPassword,
+                          onChanged: !_isSaveing
+                              ? (value) {
+                                  setState(() {
+                                    _isNewPassword = value!;
+                                  });
+                                }
+                              : null,
+                          title: Padding(
+                            padding: const EdgeInsets.only(left: 6),
+                            child: Text(t.alone_password),
+                          ),
+                        ),
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          transitionBuilder: (child, animation) {
+                            return SizeTransition(
+                              sizeFactor: animation,
+                              child: child,
+                            );
+                          },
+                          child: _isNewPassword
+                              ? Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 12,
+                                    bottom: 12,
+                                    left: 28,
+                                    right: 32,
+                                  ),
+                                  child: TextField(
+                                    controller: _passwordController,
+                                    keyboardType: TextInputType.number,
+                                    textInputAction: TextInputAction.done,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly
+                                    ],
+                                    decoration: InputDecoration(
+                                      labelText: t.password,
+                                      hintText: t.input_num_password,
+                                      border: const OutlineInputBorder(),
+                                    ),
+                                  ),
+                                )
+                              : null,
+                        ),
+                        CheckboxListTile(
+                          dense: true,
+                          value: _enableSecurityQuestion,
+                          onChanged: !_isSaveing
+                              ? (value) {
+                                  setState(() {
+                                    _enableSecurityQuestion = value!;
+                                  });
+                                }
+                              : null,
+                          title: Padding(
+                            padding: const EdgeInsets.only(left: 6),
+                            child: Text(t.enable_security_qa),
+                          ),
+                        ),
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          transitionBuilder: (child, animation) {
+                            return SizeTransition(
+                              sizeFactor: animation,
+                              child: child,
+                            );
+                          },
+                          child: _enableSecurityQuestion
+                              ? CheckboxListTile(
+                                  dense: true,
+                                  value: _isNewSecurityQuestion,
+                                  onChanged: !_isSaveing
+                                      ? (value) {
+                                          setState(() {
+                                            _isNewSecurityQuestion = value!;
+                                          });
+                                        }
+                                      : null,
+                                  title: Padding(
+                                    padding: const EdgeInsets.only(left: 12),
+                                    child: Text(t.alone_security_qa),
+                                  ),
+                                )
+                              : null,
+                        ),
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          transitionBuilder: (child, animation) {
+                            return SizeTransition(
+                              sizeFactor: animation,
+                              child: child,
+                            );
+                          },
+                          child: _enableSecurityQuestion &&
+                                  _isNewSecurityQuestion
+                              ? Container(
+                                  margin: const EdgeInsets.only(
+                                    top: 12,
+                                    bottom: 12,
+                                    left: 28,
+                                    right: 32,
+                                  ),
+                                  child: GestureDetector(
+                                    onTap:
+                                        !_isSaveing ? _editNewQuestion : null,
+                                    child: InputDecorator(
+                                      decoration: InputDecoration(
+                                        labelText: _questions.isNotEmpty
+                                            ? t.security_qa
+                                            : null,
+                                        border: const OutlineInputBorder(),
+                                      ),
+                                      child: Text(
+                                        _questions.isNotEmpty
+                                            ? _questions
+                                                .map((it) => it.question)
+                                                .join("; ")
+                                            : t.security_qa,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : null,
+                        ),
+                      ],
+                    )
+                  : null,
+            ),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) {
+                return ScaleTransition(
+                  scale: animation,
+                  child: child,
+                );
+              },
+              child: !_isSaveing || _exportType != BackupType.rpass
+                  ? Container(
+                      key: const ValueKey(1),
+                      margin: const EdgeInsets.only(top: 12, bottom: 12),
+                      constraints: const BoxConstraints(minWidth: 180),
+                      child: ElevatedButton(
+                        onPressed: !_isSaveing
+                            ? () => _export(BackupType.rpass)
+                            : null,
+                        child: Text(t.backup),
+                      ),
+                    )
+                  : Container(
+                      key: const ValueKey(2),
+                      margin: const EdgeInsets.only(top: 12, bottom: 12),
+                      width: 32,
+                      height: 32,
+                      child: const CircularProgressIndicator(),
+                    ),
+            )
+          ]),
+          _cardColumn([
+            Padding(
+              padding: const EdgeInsets.only(top: 12, bottom: 12),
+              child: Text(
+                t.other,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            RadioListTile(
+              value: BackupType.chrome,
+              groupValue: _otherExportType,
+              controlAffinity: ListTileControlAffinity.trailing,
+              title: Text(t.chrome),
+              onChanged: !_isSaveing ? _onChangeExportType : null,
+            ),
+            RadioListTile(
+              value: BackupType.firefox,
+              groupValue: _otherExportType,
+              controlAffinity: ListTileControlAffinity.trailing,
+              title: Text(t.firefox),
+              onChanged: !_isSaveing ? _onChangeExportType : null,
+            ),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) {
+                return ScaleTransition(
+                  scale: animation,
+                  child: child,
+                );
+              },
+              child: !_isSaveing || _exportType == BackupType.rpass
+                  ? Container(
+                      key: const ValueKey(1),
+                      margin: const EdgeInsets.only(top: 12, bottom: 12),
+                      constraints: const BoxConstraints(minWidth: 180),
+                      child: ElevatedButton(
+                        onPressed: !_isSaveing
+                            ? () => _export(_otherExportType)
+                            : null,
+                        child: Text(t.backup),
+                      ),
+                    )
+                  : Container(
+                      key: const ValueKey(2),
+                      margin: const EdgeInsets.only(top: 12, bottom: 12),
+                      width: 32,
+                      height: 32,
+                      child: const CircularProgressIndicator(),
+                    ),
+            )
+          ]),
+        ],
+      ),
+    );
+  }
+
+  Widget _cardColumn(List<Widget> children) {
+    return Card(
+      margin: const EdgeInsets.all(6),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(6.0)),
+      ),
+      child: Column(
+        children: children,
       ),
     );
   }

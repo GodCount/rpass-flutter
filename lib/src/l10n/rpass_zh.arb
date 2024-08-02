@@ -200,5 +200,8 @@
     "scan_code": "扫码",
     "new_label": "新建标签",
     "cannot_all_empty": "不能全为空",
-    "empty": "空"
+    "empty": "空",
+    "chrome": "谷歌",
+    "firefox": "火狐",
+    "other": "其他"
 }

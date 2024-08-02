@@ -9,6 +9,7 @@ import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
 import '../../component/toast.dart';
 import '../../model/browser/chrome.dart';
 import '../../model/browser/firefox.dart';
+import '../../model/common.dart';
 import '../../model/rpass/backup.dart';
 import '../../model/rpass/question.dart';
 import '../../rpass.dart';
@@ -17,12 +18,6 @@ import '../../util/common.dart';
 import '../../util/file.dart';
 import '../../util/verify_core.dart';
 import '../verify/verify_question.dart';
-
-enum ImportType {
-  rpass,
-  chrome,
-  firefox,
-}
 
 class ImportAccountPage extends StatefulWidget {
   const ImportAccountPage({super.key, required this.store});
@@ -36,10 +31,10 @@ class ImportAccountPage extends StatefulWidget {
 }
 
 class _ImportAccountPageState extends State<ImportAccountPage> {
-  ImportType? _importType;
+  BackupType? _importType;
   bool? _importSuccess;
 
-  void _import(ImportType type) async {
+  void _import(BackupType type) async {
     setState(() {
       _importType = type;
     });
@@ -47,13 +42,13 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
     try {
       Backup? backup;
       switch (type) {
-        case ImportType.rpass:
+        case BackupType.rpass:
           backup = await _importRpass();
           break;
-        case ImportType.chrome:
+        case BackupType.chrome:
           backup = await _importChrome();
           break;
-        case ImportType.firefox:
+        case BackupType.firefox:
           backup = await _importFirefox();
           break;
       }
@@ -158,15 +153,16 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               _listTile(
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(6.0),
-                      topRight: Radius.circular(6.0),
-                    ),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(6.0),
+                    topRight: Radius.circular(6.0),
                   ),
-                  type: ImportType.rpass,
-                  title: RpassInfo.appName),
-              _listTile(type: ImportType.chrome, title: "Chrome"),
+                ),
+                type: BackupType.rpass,
+                title: t.app_name,
+              ),
+              _listTile(type: BackupType.chrome, title: t.chrome),
               _listTile(
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.only(
@@ -174,8 +170,8 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
                     bottomRight: Radius.circular(6.0),
                   ),
                 ),
-                type: ImportType.firefox,
-                title: "Firefox",
+                type: BackupType.firefox,
+                title: t.firefox,
               ),
             ],
           ),
@@ -186,7 +182,7 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
 
   Widget _listTile({
     ShapeBorder? shape,
-    required ImportType type,
+    required BackupType type,
     required String title,
   }) {
     return ListTile(

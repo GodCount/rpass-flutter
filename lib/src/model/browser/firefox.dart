@@ -41,6 +41,7 @@ class FirefoxAccount extends BrowserAccount {
     required this.timePasswordChanged,
   });
 
+  @JsonUrlConverter()
   String url;
 
   String username;
@@ -82,15 +83,14 @@ class FirefoxAccount extends BrowserAccount {
 
   factory FirefoxAccount.formAccount(Account account) {
     return FirefoxAccount(
-      url: account.domain,
-      username: account.account,
-      password: account.password,
-      formActionOrigin: account.domain,
-      guid: account.id,
-      timeCreated: account.date,
-      timeLastUsed: DateTime.now(),
-      timePasswordChanged: DateTime.now()
-    );
+        url: account.domain,
+        username: account.account,
+        password: account.password,
+        formActionOrigin: account.domain,
+        guid: account.id,
+        timeCreated: account.date,
+        timeLastUsed: DateTime.now(),
+        timePasswordChanged: DateTime.now());
   }
 
   Map<String, dynamic> toJson() => _$FirefoxAccountToJson(this);

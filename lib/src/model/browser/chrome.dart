@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:json_annotation/json_annotation.dart';
 
+import '../common.dart';
 import 'browser.dart';
 import '../../util/common.dart';
 import '../rpass/account.dart';
@@ -18,8 +19,10 @@ class ChromeAccount extends BrowserAccount {
     this.note = "",
   });
 
+  @JsonUrlConverter()
   String name;
 
+  @JsonUrlConverter()
   String url;
 
   String username;
