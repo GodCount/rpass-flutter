@@ -8,11 +8,11 @@ part of 'chrome.dart';
 
 ChromeAccount _$ChromeAccountFromJson(Map<String, dynamic> json) =>
     ChromeAccount(
-      name: json['name'] as String?,
-      url: json['url'] as String?,
-      username: json['username'] as String?,
-      password: json['password'] as String?,
-      note: json['note'] as String?,
+      name: json['name'] as String,
+      url: json['url'] as String,
+      username: json['username'] as String,
+      password: json['password'] as String,
+      note: json['note'] as String? ?? "",
     );
 
 Map<String, dynamic> _$ChromeAccountToJson(ChromeAccount instance) =>

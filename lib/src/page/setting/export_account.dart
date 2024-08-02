@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
+import 'package:intl/intl.dart';
 
 import '../../rpass.dart';
 import '../../component/toast.dart';
@@ -115,8 +116,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
     try {
       final filepath = await SimpleFile.saveText(
         data: saveData,
-        // TODO! 优化一下
-        name: "rpass_export_${DateTime.now().toString().split(" ")[0]}",
+        name: "rpass_export_${DateFormat.yMd().format(DateTime.now())}",
         ext: "json",
       );
       showToast(context, t.export_done_location(filepath));

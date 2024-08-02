@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:json_annotation/json_annotation.dart';
 
 import 'browser.dart';
@@ -9,16 +11,12 @@ part 'chrome.g.dart';
 @JsonSerializable(explicitToJson: true)
 class ChromeAccount extends BrowserAccount {
   ChromeAccount({
-    String? name,
-    String? url,
-    String? username,
-    String? password,
-    String? note,
-  })  : name = name ?? url ?? "",
-        url = url ?? "",
-        username = username ?? "",
-        password = password ?? "",
-        note = note ?? "";
+    required this.name,
+    required this.url,
+    required this.username,
+    required this.password,
+    this.note = "",
+  });
 
   String name;
 
@@ -31,7 +29,11 @@ class ChromeAccount extends BrowserAccount {
   String note;
 
   static List<ChromeAccount> fromCsv(String csv) {
-    return csvToJson(csv).map((item) => ChromeAccount.fromJson(item)).toList();
+    return csvToJson(
+      csv,
+      shouldParseNumbers: false,
+      eol: !Platform.isWindows ? "\n" : null,
+    ).map((item) => ChromeAccount.fromJson(item)).toList();
   }
 
   static List<Account> toAccounts(List<ChromeAccount> list) {
@@ -53,7 +55,7 @@ class ChromeAccount extends BrowserAccount {
       url: account.domain,
       username: account.account,
       password: account.password,
-      note: account.description
+      note: account.description,
     );
   }
 

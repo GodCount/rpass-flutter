@@ -8,13 +8,12 @@ part of 'firefox.dart';
 
 FirefoxAccount _$FirefoxAccountFromJson(Map<String, dynamic> json) =>
     FirefoxAccount(
-      url: json['url'] as String?,
-      username: json['username'] as String?,
-      password: json['password'] as String?,
+      url: json['url'] as String,
+      username: json['username'] as String,
+      password: json['password'] as String,
       httpRealm: json['httpRealm'] as String?,
-      formActionOrigin: json['formActionOrigin'] as String?,
-      guid: _$JsonConverterFromJson<String, String>(
-          json['guid'], const GuidConverter().fromJson),
+      formActionOrigin: json['formActionOrigin'] as String,
+      guid: const GuidConverter().fromJson(json['guid'] as String),
       timeCreated: const JsonDateTimeConverterNonNullable()
           .fromJson(json['timeCreated']),
       timeLastUsed: const JsonDateTimeConverterNonNullable()
@@ -49,9 +48,3 @@ Map<String, dynamic> _$FirefoxAccountToJson(FirefoxAccount instance) {
           .toJson(instance.timePasswordChanged));
   return val;
 }
-
-Value? _$JsonConverterFromJson<Json, Value>(
-  Object? json,
-  Value? Function(Json json) fromJson,
-) =>
-    json == null ? null : fromJson(json as Json);

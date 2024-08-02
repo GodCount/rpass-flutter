@@ -37,6 +37,7 @@ class ImportAccountPage extends StatefulWidget {
 
 class _ImportAccountPageState extends State<ImportAccountPage> {
   ImportType? _importType;
+  bool? _importSuccess;
 
   void _import(ImportType type) async {
     setState(() {
@@ -56,16 +57,22 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
           backup = await _importFirefox();
           break;
       }
-      if (backup != null) {
+      if (backup != null && backup.accounts.isNotEmpty) {
         await widget.store.accounts.importBackupAccounts(backup);
         showToast(context, RpassLocalizations.of(context)!.import_done);
+        _importSuccess = true;
       }
     } catch (e) {
       showToast(
           context, RpassLocalizations.of(context)!.import_throw(e.toString()));
+      _importSuccess = false;
     } finally {
-      setState(() {
-        _importType = null;
+      setState(() {});
+      Timer(const Duration(seconds: 1), () {
+        setState(() {
+          _importType = null;
+          _importSuccess = null;
+        });
       });
     }
   }
@@ -117,18 +124,20 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
     final data = await SimpleFile.openText(allowedExtensions: ["csv"]);
     final result = ChromeAccount.toAccounts(ChromeAccount.fromCsv(data));
     return Backup(
-        accounts: result,
-        version: RpassInfo.version,
-        buildNumber: RpassInfo.buildNumber);
+      accounts: result,
+      version: RpassInfo.version,
+      buildNumber: RpassInfo.buildNumber,
+    );
   }
 
   Future<Backup?> _importFirefox() async {
     final data = await SimpleFile.openText(allowedExtensions: ["csv"]);
     final result = FirefoxAccount.toAccounts(FirefoxAccount.fromCsv(data));
     return Backup(
-        accounts: result,
-        version: RpassInfo.version,
-        buildNumber: RpassInfo.buildNumber);
+      accounts: result,
+      version: RpassInfo.version,
+      buildNumber: RpassInfo.buildNumber,
+    );
   }
 
   @override
@@ -188,10 +197,29 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
         child: Text(title),
       ),
       trailing: _importType == type
-          ? const SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(),
+          ? AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: child,
+                );
+              },
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: _importSuccess == null
+                    ? const CircularProgressIndicator()
+                    : _importSuccess!
+                        ? Icon(
+                            Icons.task_alt,
+                            color: Theme.of(context).colorScheme.secondary,
+                          )
+                        : Icon(
+                            Icons.error_outline,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+              ),
             )
           : null,
     );

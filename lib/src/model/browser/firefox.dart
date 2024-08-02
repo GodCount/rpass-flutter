@@ -30,23 +30,16 @@ class GuidConverter implements JsonConverter<String, String> {
 @JsonSerializable(explicitToJson: true)
 class FirefoxAccount extends BrowserAccount {
   FirefoxAccount({
-    String? url,
-    String? username,
-    String? password,
+    required this.url,
+    required this.username,
+    required this.password,
     this.httpRealm,
-    String? formActionOrigin,
-    String? guid,
-    DateTime? timeCreated,
-    DateTime? timeLastUsed,
-    DateTime? timePasswordChanged,
-  })  : url = url ?? formActionOrigin ?? "",
-        username = username ?? "",
-        password = password ?? "",
-        formActionOrigin = formActionOrigin ?? "",
-        guid = guid ?? timeBasedUuid(),
-        timeCreated = timeCreated ?? DateTime.now(),
-        timeLastUsed = timeLastUsed ?? DateTime.now(),
-        timePasswordChanged = timePasswordChanged ?? DateTime.now();
+    required this.formActionOrigin,
+    required this.guid,
+    required this.timeCreated,
+    required this.timeLastUsed,
+    required this.timePasswordChanged,
+  });
 
   String url;
 
@@ -95,6 +88,8 @@ class FirefoxAccount extends BrowserAccount {
       formActionOrigin: account.domain,
       guid: account.id,
       timeCreated: account.date,
+      timeLastUsed: DateTime.now(),
+      timePasswordChanged: DateTime.now()
     );
   }
 
