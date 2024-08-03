@@ -174,7 +174,9 @@ class SettingsPageState extends State<SettingsPage>
             ListTile(
               shape: shape,
               title: Text(t.about),
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).pushNamed(AboutPage.routeName);
+              },
             ),
           ]),
         ],

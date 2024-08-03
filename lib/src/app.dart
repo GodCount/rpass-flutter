@@ -72,6 +72,7 @@ class RpassApp extends StatelessWidget {
             ForgetPassword.routeName: (context) =>
                 ForgetPassword(verifyContrller: store.verify),
             Home.routeName: (context) => Home(store: store),
+            AboutPage.routeName: (context) => const AboutPage(),
             EditAccountPage.routeName: (context) =>
                 EditAccountPage(accountsContrller: store.accounts),
             LookAccountPage.routeName: (context) => LookAccountPage(

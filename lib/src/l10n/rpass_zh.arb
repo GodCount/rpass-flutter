@@ -203,5 +203,15 @@
     "empty": "空",
     "chrome": "谷歌",
     "firefox": "火狐",
-    "other": "其他"
+    "other": "其他",
+    "app_description": "Rpass 是一款免费的开源应用程序, 可让您方便简洁的记录密码信息.",
+    "source_code_location": "源代码 ({location})",
+    "@source_code_location": {
+        "description": "带有指向信息的消息",
+        "placeholders": {
+            "location": {
+                "type": "String"
+            }
+        }
+    }
 }

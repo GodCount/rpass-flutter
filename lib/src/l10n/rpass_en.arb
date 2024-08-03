@@ -203,5 +203,15 @@
     "empty": "Empty",
     "chrome": "Chrome",
     "firefox": "Firefox",
-    "other": "Other"
+    "other": "Other",
+    "app_description": "Rpass is a free and open-source application that allows you to conveniently and concisely record password information",
+    "source_code_location": "Source Code ({location})",
+    "@source_code_location": {
+        "description": "Messages with directional information",
+        "placeholders": {
+            "location": {
+                "type": "String"
+            }
+        }
+    }
 }
