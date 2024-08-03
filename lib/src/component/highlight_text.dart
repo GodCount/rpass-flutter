@@ -34,7 +34,7 @@ class HighlightText extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = this.style ?? Theme.of(context).textTheme.bodyMedium!;
     final matchStyle = this.matchStyle ??
-        style.copyWith(color: Theme.of(context).primaryColor);
+        style.copyWith(color: Theme.of(context).colorScheme.primary);
 
     return RichText(
       textAlign: textAlign,

@@ -65,7 +65,7 @@ class _VerifyQuestionState extends State<VerifyQuestion> {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         Padding(
-          padding: const EdgeInsets.only(top: 6),
+          padding: const EdgeInsets.only(top: 16),
           child: Text(t.input_security_qa_hint, textAlign: TextAlign.center),
         ),
         Container(

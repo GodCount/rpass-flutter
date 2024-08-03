@@ -109,7 +109,7 @@ class SecurityQuestionState extends State<SecurityQuestion> {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         Padding(
-          padding: const EdgeInsets.only(top: 6),
+          padding: const EdgeInsets.only(top: 16),
           child: Text(
             widget.subtitle ?? t.security_qa_hint,
             textAlign: TextAlign.center,

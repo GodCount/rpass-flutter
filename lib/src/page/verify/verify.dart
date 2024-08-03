@@ -57,7 +57,7 @@ class VerifyPasswordState extends State<VerifyPassword> {
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 6),
+                  padding: const EdgeInsets.only(top: 16),
                   child: Text(
                     t.verify_password,
                     textAlign: TextAlign.center,

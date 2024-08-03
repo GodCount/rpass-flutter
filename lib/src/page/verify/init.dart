@@ -118,7 +118,7 @@ class SetPassword extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         Padding(
-          padding: const EdgeInsets.only(top: 6),
+          padding: const EdgeInsets.only(top: 16),
           child: Text(t.init_main_password, textAlign: TextAlign.center),
         ),
         Padding(
