@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 
-final class RpassTheme {
-  static final dark = ThemeData(
-    brightness: Brightness.dark,
-    appBarTheme: const AppBarTheme(
-      centerTitle: true,
-      elevation: 2,
-    ),
-  );
+const color = Color(0x11659AFF);
 
-  static final light = ThemeData(
-    brightness: Brightness.light,
+ThemeData theme(Brightness brightness) {
+  return ThemeData(
+    useMaterial3: true,
+    brightness: brightness,
+    colorScheme: ColorScheme.fromSeed(seedColor: color, brightness: brightness),
     appBarTheme: const AppBarTheme(
       centerTitle: true,
       elevation: 2,
