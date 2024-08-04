@@ -19,7 +19,7 @@ class Account {
     List<String>? labels,
     this.oneTimePassword,
   })  : id = id ?? timeBasedUuid(),
-        date = date ?? DateTime.timestamp(),
+        date = date ?? DateTime.now(),
         domain = domain ?? "",
         domainName = domainName ?? "",
         account = account ?? "",
@@ -49,9 +49,10 @@ class Account {
 
   String? oneTimePassword;
 
-  factory Account.fromJson(
-    Map<String, dynamic> json,
-  ) =>
+  String get hash => md5(
+      "$domain$domainName$account$password$email$description${oneTimePassword ?? ""}");
+
+  factory Account.fromJson(Map<String, dynamic> json) =>
       _$AccountFromJson(json);
 
   Map<String, dynamic> toJson() => _$AccountToJson(this);

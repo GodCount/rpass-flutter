@@ -21,7 +21,6 @@ class AccountsContrller with ChangeNotifier {
 
   List<Account> get accountList => _accountList ?? [];
 
-
   void _updateSet([List<Account>? accounts]) {
     assert(_accountList != null, "_accountList is null, to run initDenrypt");
 
@@ -117,14 +116,25 @@ class AccountsContrller with ChangeNotifier {
 
   Future<void> importBackupAccounts(Backup backup) async {
     if (backup.accounts.isEmpty) return;
-    final localIds = accountList.map((item) => item.id).toList();
-    final result = backup.accounts.map((item) {
+    final localIds = [];
+    final localHashs = [];
+
+    for (var item in accountList) {
+      localIds.add(item.id);
+      localHashs.add(item.hash);
+    }
+
+    final List<Account> result = [];
+    for (var item in backup.accounts) {
+      if (localHashs.contains(item.hash)) continue;
       if (localIds.contains(item.id)) {
         item.id = timeBasedUuid();
       }
       localIds.add(item.id);
-      return item;
-    }).toList();
+      localHashs.add(item.hash);
+      result.add(item);
+    }
+
     await addAccounts(result);
   }
 
