@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart' as crypto;
 import 'package:csv/csv.dart';
 import 'package:csv/csv_settings_autodetection.dart';
 import 'package:encrypt/encrypt.dart';
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 const uuid = Uuid();
@@ -210,4 +211,10 @@ class CommonRegExp {
       r'x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])');
 
   static final RegExp oneTimePassword = RegExp(r"^otpauth://totp/.+");
+}
+
+
+String dateFormat(DateTime date, [bool time = true]) {
+  if(time) return DateFormat("yyyy.MM.dd HH:mm:ss").format(date);
+  return DateFormat("yyyy.MM.dd").format(date);
 }

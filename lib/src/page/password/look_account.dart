@@ -11,6 +11,7 @@ import '../../component/label_list.dart';
 import '../../component/toast.dart';
 import '../../model/rpass/account.dart';
 import '../../store/accounts/contrller.dart';
+import '../../util/common.dart';
 import '../../util/one_time_password.dart';
 import './edit_account.dart';
 
@@ -294,7 +295,7 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(_account.date.toString()),
+                child: Text(dateFormat(_account.date)),
               ),
             ),
             ListTile(

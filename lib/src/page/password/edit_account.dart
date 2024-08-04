@@ -301,7 +301,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                       children: [
                         TextSpan(
                           style: Theme.of(context).textTheme.bodySmall,
-                          text: _account.date.toString(),
+                          text: dateFormat(_account.date),
                         ),
                       ],
                     ),

@@ -5,6 +5,7 @@ import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
 
 import '../../component/highlight_text.dart';
 import '../../model/rpass/account.dart';
+import '../../util/common.dart';
 import '../page.dart';
 import '../../store/accounts/contrller.dart';
 
@@ -304,7 +305,6 @@ class _PasswordItem extends StatefulWidget {
 class _PasswordItemState extends State<_PasswordItem> {
   @override
   Widget build(BuildContext context) {
-
     final t = RpassLocalizations.of(context)!;
 
     final Account account = widget.account;
@@ -340,7 +340,7 @@ class _PasswordItemState extends State<_PasswordItem> {
           Align(
             alignment: Alignment.centerRight,
             child: Text(
-              account.date.toString(),
+              dateFormat(account.date),
               overflow: TextOverflow.ellipsis,
             ),
           ),

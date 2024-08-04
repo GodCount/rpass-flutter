@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
-import 'package:intl/intl.dart';
 
 import '../../model/browser/chrome.dart';
 import '../../model/browser/firefox.dart';
@@ -154,7 +153,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
 
     final filepath = await SimpleFile.saveText(
       data: saveData,
-      name: "rpass_export_${DateFormat("yyyy.MM.dd").format(DateTime.now())}",
+      name: "rpass_export_${dateFormat(DateTime.now())}",
       ext: "json",
     );
     return filepath;
@@ -164,7 +163,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
     final saveData = ChromeAccount.toCsv(widget.store.accounts.accountList);
     final filepath = await SimpleFile.saveText(
       data: saveData,
-      name: "rpass_export_chrome_${DateFormat("yyyy.MM.dd").format(DateTime.now())}",
+      name: "rpass_export_chrome_${dateFormat(DateTime.now())}",
       ext: "csv",
     );
     return filepath;
@@ -174,7 +173,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
     final saveData = FirefoxAccount.toCsv(widget.store.accounts.accountList);
     final filepath = await SimpleFile.saveText(
       data: saveData,
-      name: "rpass_export_firefox_${DateFormat("yyyy.MM.dd").format(DateTime.now())}",
+      name: "rpass_export_firefox_${dateFormat(DateTime.now())}",
       ext: "csv",
     );
     return filepath;
