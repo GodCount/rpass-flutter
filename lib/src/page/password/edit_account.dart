@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
 
 import '../../component/label_list.dart';
+import '../../component/match_text.dart';
 import '../../component/toast.dart';
 import '../../store/accounts/contrller.dart';
 import '../../model/rpass/account.dart';
@@ -167,10 +168,10 @@ class _EditAccountPageState extends State<EditAccountPage> {
                       labelText: t.domain,
                       border: const OutlineInputBorder(),
                     ),
-                    validator: (value) => value.isNotEmpty &&
-                            !CommonRegExp.domain.hasMatch(value)
-                        ? t.format_error(CommonRegExp.domain.pattern)
-                        : null,
+                    validator: (value) =>
+                        value.isNotEmpty && !CommonRegExp.domain.hasMatch(value)
+                            ? t.format_error(CommonRegExp.domain.pattern)
+                            : null,
                   ),
                 ),
                 Padding(
@@ -362,14 +363,21 @@ class _EditAccountPageState extends State<EditAccountPage> {
 
     final t = RpassLocalizations.of(context)!;
 
+    double width = MediaQuery.sizeOf(context).width;
+
+    width = (width > 375 ? 375 : width) - 48;
+
     showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
             title: Text(t.gen_password),
             scrollable: true,
-            content: _GeneratePassword(
-              key: generateGlobalKey,
+            content: SizedBox(
+              width: width,
+              child: _GeneratePassword(
+                key: generateGlobalKey,
+              ),
             ),
             actions: [
               TextButton(
@@ -583,19 +591,38 @@ class _GeneratePasswordState extends State<_GeneratePassword> {
   late String password;
 
   updatePassword() {
-    try {
-      password = randomPassword(
-        length: _length.toInt(),
-        enableNumber: _enableNumber,
-        enableSymbol: _enableSymbol,
-        enableLetterLowercase: _letterUppercase,
-        enableLetterUppercase: _letterLowercase,
-      );
-    } on EmptyError {
-      _enableNumber = true;
-      return updatePassword();
-    }
+    password = randomPassword(
+      length: _length.toInt(),
+      enableNumber: _enableNumber,
+      enableSymbol: _enableSymbol,
+      enableLetterLowercase: _letterUppercase,
+      enableLetterUppercase: _letterLowercase,
+    );
     setState(() {});
+  }
+
+  _cahnged({
+    bool? enableNumber,
+    bool? enableSymbol,
+    bool? letterUppercase,
+    bool? letterLowercase,
+  }) {
+    enableNumber ??= _enableNumber;
+    enableSymbol ??= _enableSymbol;
+    letterUppercase ??= _letterUppercase;
+    letterLowercase ??= _letterLowercase;
+
+    if (!enableNumber &&
+        !enableSymbol &&
+        !letterUppercase &&
+        !letterLowercase) {
+      return;
+    }
+    _enableNumber = enableNumber;
+    _letterUppercase = letterUppercase;
+    _letterLowercase = letterLowercase;
+    _enableSymbol = enableSymbol;
+    updatePassword();
   }
 
   @override
@@ -614,43 +641,31 @@ class _GeneratePasswordState extends State<_GeneratePassword> {
         CheckboxListTile(
           value: _enableNumber,
           title: const Text("0~9"),
-          onChanged: (value) {
-            _enableNumber = value!;
-            updatePassword();
-          },
+          onChanged: (value) => _cahnged(enableNumber: value),
         ),
         CheckboxListTile(
           value: _letterUppercase,
           title: const Text("a~z"),
-          onChanged: (value) {
-            _letterUppercase = value!;
-            updatePassword();
-          },
+          onChanged: (value) => _cahnged(letterUppercase: value),
         ),
         CheckboxListTile(
           value: _letterLowercase,
           title: const Text("A~Z"),
-          onChanged: (value) {
-            _letterLowercase = value!;
-            updatePassword();
-          },
+          onChanged: (value) => _cahnged(letterLowercase: value),
         ),
         CheckboxListTile(
           value: _enableSymbol,
           title: Text(t.symbol),
-          onChanged: (value) {
-            _enableSymbol = value!;
-            updatePassword();
-          },
+          onChanged: (value) => _cahnged(enableSymbol: value),
         ),
         Padding(
           padding: const EdgeInsets.only(top: 12),
           child: Slider(
             value: _length,
             label: "${_length.toInt()}",
-            divisions: 24,
+            divisions: 48,
             min: 4,
-            max: 24,
+            max: 48,
             onChanged: (value) {
               _length = value;
               updatePassword();
@@ -659,7 +674,26 @@ class _GeneratePasswordState extends State<_GeneratePassword> {
         ),
         Padding(
           padding: const EdgeInsets.only(top: 12),
-          child: SelectableText(password),
+          child: MatchText(
+            text: password,
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge!
+                .copyWith(color: Colors.red),
+            matchs: [
+              MatchHighlight(
+                regExp: RegExp(r"[a-zA-Z]+"),
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              MatchHighlight(
+                regExp: RegExp(r"\d+"),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge!
+                    .copyWith(color: Colors.blue),
+              )
+            ],
+          ),
         )
       ],
     );

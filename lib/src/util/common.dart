@@ -66,36 +66,50 @@ String randomPassword({
 }) {
   final List<String> values = [];
 
+  final List<String> cahrs = [];
+
   if (enableLetterUppercase) {
-    values.addAll(letters.toUpperCase().split(""));
+    final list = letters.toUpperCase().split("");
+    cahrs.addAll(list);
+    values.add(list[randomInt(0, list.length)]);
   }
 
   if (enableLetterLowercase) {
-    values.addAll(letters.split(""));
+    final list = letters.split("");
+    cahrs.addAll(list);
+    values.add(list[randomInt(0, list.length)]);
   }
 
   if (enableNumber) {
-    values.addAll(numbers.split(""));
+    final list = numbers.split("");
+    cahrs.addAll(list);
+    values.add(list[randomInt(0, list.length)]);
   }
 
   if (enableSymbol) {
-    values.addAll(symbols.split(""));
+    final list = symbols.split("");
+    cahrs.addAll(list);
+    values.add(list[randomInt(0, list.length)]);
   }
 
-  values
-      .sort((a, b) => math.Random().nextInt(100) - math.Random().nextInt(100));
-
-  if (values.isEmpty) {
+  if (cahrs.isEmpty) {
     throw EmptyError("enable at least one type");
   }
 
-  String password = "";
+  cahrs.sort((a, b) => math.Random().nextInt(2));
 
-  for (var i = 0; i < length; i++) {
-    password += values[randomInt(0, values.length)];
+  if (values.length >= length) {
+    values.sort((a, b) => math.Random().nextInt(2));
+    return values.sublist(0, length).join("");
   }
 
-  return password;
+  length -= values.length;
+  for (var i = 0; i < length; i++) {
+    values.add(cahrs[randomInt(0, cahrs.length)]);
+  }
+  values.sort((a, b) => math.Random().nextInt(2));
+
+  return values.join("");
 }
 
 class Debouncer {
@@ -213,8 +227,7 @@ class CommonRegExp {
   static final RegExp oneTimePassword = RegExp(r"^otpauth://totp/.+");
 }
 
-
 String dateFormat(DateTime date, [bool time = true]) {
-  if(time) return DateFormat("yyyy.MM.dd HH:mm:ss").format(date);
+  if (time) return DateFormat("yyyy.MM.dd HH:mm:ss").format(date);
   return DateFormat("yyyy.MM.dd").format(date);
 }
