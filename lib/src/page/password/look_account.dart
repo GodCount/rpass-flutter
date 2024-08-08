@@ -12,21 +12,8 @@ import '../../model/rpass/account.dart';
 import '../../store/accounts/contrller.dart';
 import '../../util/common.dart';
 import '../../util/one_time_password.dart';
+import '../widget/utils.dart';
 import './edit_account.dart';
-
-mixin HintEmptyTextUtil<T extends StatefulWidget> on State<T> {
-  Widget _hintEmptyText(bool isEmpty, Widget widget) {
-    return isEmpty
-        ? Opacity(
-            opacity: .5,
-            child: Text(
-              I18n.of(context)!.empty,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          )
-        : widget;
-  }
-}
 
 class LookAccountPage extends StatefulWidget {
   const LookAccountPage({
@@ -45,7 +32,7 @@ class LookAccountPage extends StatefulWidget {
 }
 
 class _LookAccountPageState extends State<LookAccountPage>
-    with HintEmptyTextUtil {
+    with HintEmptyTextUtil, CommonWidgetUtil {
   late Account _account;
 
   @override
@@ -56,14 +43,6 @@ class _LookAccountPageState extends State<LookAccountPage>
       Navigator.of(context).pop();
     }
     super.initState();
-  }
-
-  void writeClipboard(String text) {
-    Clipboard.setData(ClipboardData(text: text)).then((value) {
-      showToast(context, I18n.of(context)!.copy_done);
-    }, onError: (error) {
-      showToast(context, error.toString());
-    });
   }
 
   @override
@@ -129,7 +108,7 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: _hintEmptyText(
+                child: hintEmptyText(
                   _account.domain.isEmpty,
                   Text(
                     _account.domain,
@@ -149,7 +128,7 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: _hintEmptyText(
+                child: hintEmptyText(
                   _account.domainName.isEmpty,
                   Text(
                     _account.domainName,
@@ -187,7 +166,7 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: _hintEmptyText(
+                child: hintEmptyText(
                   _account.account.isEmpty,
                   Text(
                     _account.account,
@@ -206,7 +185,7 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: _hintEmptyText(
+                child: hintEmptyText(
                   _account.account.isEmpty,
                   Text(
                     _account.email,
@@ -251,7 +230,7 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: _hintEmptyText(
+                child: hintEmptyText(
                   _account.labels.isEmpty,
                   LabelList(
                     preview: true,
@@ -270,7 +249,7 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: _hintEmptyText(
+                child: hintEmptyText(
                   _account.description.isEmpty,
                   Text(
                     _account.description,
@@ -449,7 +428,7 @@ class _LookPasswordListTileState extends State<_LookPasswordListTile>
       ),
       subtitle: Padding(
         padding: const EdgeInsets.only(left: 12),
-        child: _hintEmptyText(
+        child: hintEmptyText(
           widget.password.isEmpty,
           Text(
             showPassword ? widget.password : "*" * widget.password.length,

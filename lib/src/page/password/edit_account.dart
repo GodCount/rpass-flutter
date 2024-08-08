@@ -11,6 +11,7 @@ import '../../store/accounts/contrller.dart';
 import '../../model/rpass/account.dart';
 import '../../util/common.dart';
 import '../page.dart';
+import '../widget/utils.dart';
 
 class EditAccountPage extends StatefulWidget {
   const EditAccountPage(
@@ -580,7 +581,8 @@ class _GeneratePassword extends StatefulWidget {
   State<_GeneratePassword> createState() => _GeneratePasswordState();
 }
 
-class _GeneratePasswordState extends State<_GeneratePassword> {
+class _GeneratePasswordState extends State<_GeneratePassword>
+    with CommonWidgetUtil {
   bool _letterUppercase = true;
   bool _letterLowercase = true;
   bool _enableNumber = true;
@@ -673,25 +675,28 @@ class _GeneratePasswordState extends State<_GeneratePassword> {
         ),
         Padding(
           padding: const EdgeInsets.only(top: 12),
-          child: MatchText(
-            text: password,
-            style: Theme.of(context)
-                .textTheme
-                .bodyLarge!
-                .copyWith(color: Colors.red),
-            matchs: [
-              MatchHighlight(
-                regExp: RegExp(r"[a-zA-Z]+"),
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              MatchHighlight(
-                regExp: RegExp(r"\d+"),
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyLarge!
-                    .copyWith(color: Colors.blue),
-              )
-            ],
+          child: GestureDetector(
+            onLongPress: () => writeClipboard(password),
+            child: MatchText(
+              text: password,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyLarge!
+                  .copyWith(color: Colors.red),
+              matchs: [
+                MatchHighlight(
+                  regExp: RegExp(r"[a-zA-Z]+"),
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                MatchHighlight(
+                  regExp: RegExp(r"\d+"),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge!
+                      .copyWith(color: Colors.blue),
+                )
+              ],
+            ),
           ),
         )
       ],
