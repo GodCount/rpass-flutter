@@ -3,7 +3,7 @@ import 'package:rpass/src/rpass.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
+import '../../i18n.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -12,7 +12,7 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     return Scaffold(
       appBar: AppBar(

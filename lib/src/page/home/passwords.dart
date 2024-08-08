@@ -1,9 +1,8 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
-
 import '../../component/highlight_text.dart';
+import '../../i18n.dart';
 import '../../model/rpass/account.dart';
 import '../../util/common.dart';
 import '../page.dart';
@@ -172,7 +171,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
 
   @override
   Widget build(BuildContext context) {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     return GestureDetector(
       onTap: () {
@@ -305,7 +304,7 @@ class _PasswordItem extends StatefulWidget {
 class _PasswordItemState extends State<_PasswordItem> {
   @override
   Widget build(BuildContext context) {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     final Account account = widget.account;
     return ListTile(

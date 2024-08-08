@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
-
 import '../../component/toast.dart';
+import '../../i18n.dart';
 import '../../store/verify/contrller.dart';
 import '../page.dart';
 import 'verify_question.dart';
@@ -21,7 +20,7 @@ class ForgetPassword extends StatefulWidget {
 class ForgetPasswordState extends State<ForgetPassword> {
   @override
   Widget build(BuildContext context) {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     return Scaffold(
       body: Center(

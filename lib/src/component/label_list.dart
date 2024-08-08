@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
+import '../i18n.dart';
 
 typedef OnChangeCallback = void Function(List<String> labels);
 
@@ -122,7 +122,7 @@ class _LabelListState extends State<LabelList> {
   }
 
   void _addLabel() {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     String label = "";
     showDialog(

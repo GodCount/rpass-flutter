@@ -2,10 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
-
 import 'package:animations/animations.dart';
 
+import '../../i18n.dart';
 import '../../store/verify/contrller.dart';
 import '../home/home.dart';
 import 'security_question.dart';
@@ -108,7 +107,7 @@ class SetPassword extends StatelessWidget {
   Widget build(BuildContext context) {
     final GlobalKey<FormState> formState = GlobalKey<FormState>();
 
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     return Column(
       mainAxisSize: MainAxisSize.min,

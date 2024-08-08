@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
+import 'package:rpass/src/i18n.dart';
 
 import './store/index.dart';
 import './page/page.dart';
@@ -48,12 +48,12 @@ class RpassApp extends StatelessWidget {
           darkTheme: theme( Brightness.dark),
           themeMode: store.settings.themeMode,
           locale: store.settings.locale,
-          localizationsDelegates: RpassLocalizations.localizationsDelegates,
-          supportedLocales: RpassLocalizations.supportedLocales,
+          localizationsDelegates: I18n.localizationsDelegates,
+          supportedLocales: I18n.supportedLocales,
           localeResolutionCallback: (locale, locales) {
             if (locale != null &&
                 store.settings.locale == null &&
-                RpassLocalizations.delegate.isSupported(locale)) {
+                I18n.delegate.isSupported(locale)) {
               return locale;
             }
             return null;

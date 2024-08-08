@@ -3,11 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
-
 import '../../component/label_list.dart';
 import '../../component/match_text.dart';
 import '../../component/toast.dart';
+import '../../i18n.dart';
 import '../../store/accounts/contrller.dart';
 import '../../model/rpass/account.dart';
 import '../../util/common.dart';
@@ -58,7 +57,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
         Future.delayed(Duration.zero, () {
           showToast(
             context,
-            RpassLocalizations.of(context)!.info_read_throw(
+            I18n.of(context)!.info_read_throw(
               e.toString(),
             ),
           );
@@ -132,7 +131,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     double width = MediaQuery.sizeOf(context).width;
 
@@ -361,7 +360,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
     final GlobalKey<_GeneratePasswordState> generateGlobalKey =
         GlobalKey<_GeneratePasswordState>();
 
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     double width = MediaQuery.sizeOf(context).width;
 
@@ -633,7 +632,7 @@ class _GeneratePasswordState extends State<_GeneratePassword> {
 
   @override
   Widget build(BuildContext context) {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -729,7 +728,7 @@ class _DescriptionTextFieldState extends State<_DescriptionTextField> {
   }
 
   void _editText() {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     final String lastValue = widget.controller.text;
     showDialog(

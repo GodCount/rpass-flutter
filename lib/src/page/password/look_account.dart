@@ -3,12 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
-
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 
 import '../../component/label_list.dart';
 import '../../component/toast.dart';
+import '../../i18n.dart';
 import '../../model/rpass/account.dart';
 import '../../store/accounts/contrller.dart';
 import '../../util/common.dart';
@@ -21,7 +20,7 @@ mixin HintEmptyTextUtil<T extends StatefulWidget> on State<T> {
         ? Opacity(
             opacity: .5,
             child: Text(
-              RpassLocalizations.of(context)!.empty,
+              I18n.of(context)!.empty,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           )
@@ -61,7 +60,7 @@ class _LookAccountPageState extends State<LookAccountPage>
 
   void writeClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text)).then((value) {
-      showToast(context, RpassLocalizations.of(context)!.copy_done);
+      showToast(context, I18n.of(context)!.copy_done);
     }, onError: (error) {
       showToast(context, error.toString());
     });
@@ -69,7 +68,7 @@ class _LookAccountPageState extends State<LookAccountPage>
 
   @override
   Widget build(BuildContext context) {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     const shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
@@ -316,7 +315,7 @@ class _LookAccountPageState extends State<LookAccountPage>
   }
 
   void _deleteAccount() {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     showDialog(
       context: context,
@@ -381,7 +380,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                     ),
                   ),
                   Text(
-                    RpassLocalizations.of(context)!.otp,
+                    I18n.of(context)!.otp,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ],
@@ -396,7 +395,7 @@ class _LookAccountPageState extends State<LookAccountPage>
   }
 
   void _showDescriptionDialog() {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
     showDialog(
       context: context,
       builder: (context) {
@@ -446,7 +445,7 @@ class _LookPasswordListTileState extends State<_LookPasswordListTile>
       shape: widget.shape,
       title: Padding(
         padding: const EdgeInsets.only(left: 6),
-        child: Text(RpassLocalizations.of(context)!.password),
+        child: Text(I18n.of(context)!.password),
       ),
       subtitle: Padding(
         padding: const EdgeInsets.only(left: 12),
@@ -507,7 +506,7 @@ class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile> {
 
   @override
   Widget build(BuildContext context) {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
     return ListTile(
       shape: widget.shape,
       title: Padding(

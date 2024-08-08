@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
-
+import '../../i18n.dart';
 import '../../store/index.dart';
 import 'settings.dart';
 import 'passwords.dart';
@@ -41,7 +40,7 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     super.build(context);
 
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     if (!_initDenrypted) {
       widget.store.accounts.initDenrypt().then(
@@ -102,7 +101,7 @@ class _MyBottomNavigationBarState extends State<_MyBottomNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     return NavigationBar(
       selectedIndex: _index,

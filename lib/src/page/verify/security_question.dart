@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
-
+import '../../i18n.dart';
 import '../../model/rpass/question.dart';
 
 typedef QuestionOnSumit = void Function(List<QuestionAnswer>? questions);
@@ -99,7 +98,7 @@ class SecurityQuestionState extends State<SecurityQuestion> {
 
   @override
   Widget build(BuildContext context) {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     return Column(
       mainAxisSize: MainAxisSize.min,

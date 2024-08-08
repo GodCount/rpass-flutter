@@ -2,8 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
-
+import '../../i18n.dart';
 import '../../store/verify/contrller.dart';
 import './forget.dart';
 import '../home/home.dart';
@@ -40,7 +39,7 @@ class VerifyPasswordState extends State<VerifyPassword> {
 
   @override
   Widget build(BuildContext context) {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,

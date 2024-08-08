@@ -3,8 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
-
+import '../../i18n.dart';
 import '../../model/browser/chrome.dart';
 import '../../model/browser/firefox.dart';
 import '../../model/common.dart';
@@ -44,7 +43,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
   BackupType _otherExportType = BackupType.chrome;
 
   void _export(BackupType type) async {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     _isSaveing = true;
     _exportType = type;
@@ -80,7 +79,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
   }
 
   Future<String?> _exportRpass() async {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     if (widget.store.accounts.accountList.isEmpty) {
       showToast(context, t.no_backup);
@@ -187,7 +186,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     return Scaffold(
       appBar: AppBar(

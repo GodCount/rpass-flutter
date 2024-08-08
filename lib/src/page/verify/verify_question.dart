@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
-
+import '../../i18n.dart';
 import '../../model/rpass/question.dart';
 
 typedef OnVerifyCallback = void Function(List<QuestionAnswer>? questions);
@@ -53,7 +52,7 @@ class _VerifyQuestionState extends State<VerifyQuestion> {
 
   @override
   Widget build(BuildContext context) {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     _qController.text = _questions[_index].question;
     _aController.text = _questions[_index].answer;

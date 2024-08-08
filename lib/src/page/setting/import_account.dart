@@ -4,9 +4,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
 
 import '../../component/toast.dart';
+import '../../i18n.dart';
 import '../../model/browser/chrome.dart';
 import '../../model/browser/firefox.dart';
 import '../../model/common.dart';
@@ -54,12 +54,12 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
       }
       if (backup != null && backup.accounts.isNotEmpty) {
         await widget.store.accounts.importBackupAccounts(backup);
-        showToast(context, RpassLocalizations.of(context)!.import_done);
+        showToast(context, I18n.of(context)!.import_done);
         _importSuccess = true;
       }
     } catch (e) {
       showToast(
-          context, RpassLocalizations.of(context)!.import_throw(e.toString()));
+          context, I18n.of(context)!.import_throw(e.toString()));
       _importSuccess = false;
     } finally {
       setState(() {});
@@ -137,7 +137,7 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: Text(t.import),
@@ -279,7 +279,7 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
       _denryptBackup(token);
     } catch (e) {
       showToast(context,
-          RpassLocalizations.of(context)!.security_qa_throw(e.toString()));
+          I18n.of(context)!.security_qa_throw(e.toString()));
     }
   }
 
@@ -294,7 +294,7 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
       widget.onDenrypt(backup);
     } catch (e) {
       showToast(
-          context, RpassLocalizations.of(context)!.denrypt_throw(e.toString()));
+          context, I18n.of(context)!.denrypt_throw(e.toString()));
     }
   }
 
@@ -326,7 +326,7 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
   }
 
   Widget _inputPassword() {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     return Column(
       mainAxisSize: MainAxisSize.min,

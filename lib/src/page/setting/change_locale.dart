@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
-
+import '../../i18n.dart';
 import '../../store/settings/controller.dart';
 
 class ChangeLocalePage extends StatefulWidget {
@@ -20,16 +19,16 @@ class _ChangeLocalePageState extends State<ChangeLocalePage> {
 
   @override
   void initState() {
-    for (var locale in RpassLocalizations.supportedLocales) {
+    for (var locale in I18n.supportedLocales) {
       _locales[locale.toString()] =
-          lookupRpassLocalizations(locale).locale_name;
+          I18n.lookupLocalizations(locale).locale_name;
     }
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: Text(t.language_setting),
@@ -37,7 +36,7 @@ class _ChangeLocalePageState extends State<ChangeLocalePage> {
       ),
       body: ListView(
         padding: const EdgeInsets.all(6),
-        children: [null, ...RpassLocalizations.supportedLocales].map((locale) {
+        children: [null, ...I18n.supportedLocales].map((locale) {
           return ListTile(
             title: Text(
               locale != null ? _locales[locale.toString()]! : t.system,

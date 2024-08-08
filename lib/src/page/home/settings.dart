@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
 
 import '../../component/toast.dart';
+import '../../i18n.dart';
 import '../page.dart';
 import '../../store/index.dart';
 import '../verify/security_question.dart';
@@ -31,7 +31,7 @@ class SettingsPageState extends State<SettingsPage>
           bottomLeft: Radius.circular(6.0), bottomRight: Radius.circular(6.0)),
     );
 
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
@@ -200,7 +200,7 @@ class SettingsPageState extends State<SettingsPage>
     final GlobalKey<FormState> formState = GlobalKey<FormState>();
     String newPassword = "";
 
-    final t = RpassLocalizations.of(context)!;
+    final t = I18n.of(context)!;
 
     void onSetPassword() async {
       if (formState.currentState!.validate()) {
@@ -298,7 +298,7 @@ class SettingsPageState extends State<SettingsPage>
                   } catch (e) {
                     showToast(
                       context,
-                      RpassLocalizations.of(context)!.modify_security_qa_throw(
+                      I18n.of(context)!.modify_security_qa_throw(
                         e.toString(),
                       ),
                     );
