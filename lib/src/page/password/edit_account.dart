@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../component/label_list.dart';
 import '../../component/match_text.dart';
 import '../../component/toast.dart';
+import '../../component/transition.dart';
 import '../../i18n.dart';
 import '../../store/accounts/contrller.dart';
 import '../../model/rpass/account.dart';
@@ -28,6 +29,8 @@ class EditAccountPage extends StatefulWidget {
 }
 
 class _EditAccountPageState extends State<EditAccountPage> {
+  final GlobalKey<ScaleReboundState> _scaleReboundKey = GlobalKey();
+
   late final Account _account;
 
   late final GlobalKey<_ValidatorTextFieldState> _domainGolbalKey;
@@ -127,7 +130,9 @@ class _EditAccountPageState extends State<EditAccountPage> {
     _account.date = DateTime.now();
     _account.id = timeBasedUuid();
     _canClone = false;
-    setState(() {});
+    setState(() {
+      _scaleReboundKey.currentState!.rebound();
+    });
   }
 
   @override
@@ -152,180 +157,184 @@ class _EditAccountPageState extends State<EditAccountPage> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        child: Center(
-          child: SizedBox(
-            width: width,
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: _ValidatorTextField(
-                    key: _domainGolbalKey,
-                    controller: _domainController,
-                    textInputAction: TextInputAction.next,
-                    focusNoError: true,
-                    decoration: InputDecoration(
-                      labelText: t.domain,
-                      border: const OutlineInputBorder(),
-                    ),
-                    validator: (value) =>
-                        value.isNotEmpty && !CommonRegExp.domain.hasMatch(value)
-                            ? t.format_error(CommonRegExp.domain.pattern)
-                            : null,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: TextField(
-                    controller: _domainNameController,
-                    textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(
-                      labelText: t.domain_title,
-                      border: const OutlineInputBorder(),
+        child: ScaleRebound(
+          key: _scaleReboundKey,
+          child: Center(
+            child: SizedBox(
+              width: width,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: _ValidatorTextField(
+                      key: _domainGolbalKey,
+                      controller: _domainController,
+                      textInputAction: TextInputAction.next,
+                      focusNoError: true,
+                      decoration: InputDecoration(
+                        labelText: t.domain,
+                        border: const OutlineInputBorder(),
+                      ),
+                      validator: (value) => value.isNotEmpty &&
+                              !CommonRegExp.domain.hasMatch(value)
+                          ? t.format_error(CommonRegExp.domain.pattern)
+                          : null,
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: _ValidatorDropdownMenu(
-                    controller: _accountController,
-                    focusNoError: true,
-                    width: width,
-                    enableFilter: true,
-                    enableSearch: false,
-                    label: Text(t.account),
-                    menuHeight: 100,
-                    requestFocusOnTap: true,
-                    dropdownMenuEntries: widget.accountsContrller.accountNumSet
-                        .map((value) =>
-                            DropdownMenuEntry(value: value, label: value))
-                        .toList(),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: _ValidatorDropdownMenu(
-                    key: _emailGolbalKey,
-                    controller: _emailController,
-                    focusNoError: true,
-                    width: width,
-                    enableFilter: true,
-                    enableSearch: false,
-                    label: Text(t.email),
-                    menuHeight: 100,
-                    requestFocusOnTap: true,
-                    dropdownMenuEntries: widget.accountsContrller.emailSet
-                        .map((value) =>
-                            DropdownMenuEntry(value: value, label: value))
-                        .toList(),
-                    validator: (value) =>
-                        value.isNotEmpty && !CommonRegExp.email.hasMatch(value)
-                            ? t.format_error(CommonRegExp.email.pattern)
-                            : null,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: TextField(
-                    controller: _passwordController,
-                    textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(
-                      labelText: t.password,
-                      border: const OutlineInputBorder(),
-                      suffixIcon: IconButton(
-                        onPressed: _generatePassword,
-                        icon: const Icon(Icons.create),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: TextField(
+                      controller: _domainNameController,
+                      textInputAction: TextInputAction.next,
+                      decoration: InputDecoration(
+                        labelText: t.domain_title,
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: _ValidatorTextField(
-                    key: _otPasswordGolbalKey,
-                    controller: _otPasswordController,
-                    textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(
-                      labelText: t.otp,
-                      border: const OutlineInputBorder(),
-                      suffixIcon: _displayScanner
-                          ? IconButton(
-                              onPressed: () async {
-                                Navigator.of(context)
-                                    .pushNamed(QrCodeScannerPage.routeName)
-                                    .then((value) {
-                                  if (value is String && value.isNotEmpty) {
-                                    _otPasswordController.text = value;
-                                  }
-                                });
-                              },
-                              icon: const Icon(Icons.qr_code_scanner),
-                            )
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: _ValidatorDropdownMenu(
+                      controller: _accountController,
+                      focusNoError: true,
+                      width: width,
+                      enableFilter: true,
+                      enableSearch: false,
+                      label: Text(t.account),
+                      menuHeight: 100,
+                      requestFocusOnTap: true,
+                      dropdownMenuEntries: widget
+                          .accountsContrller.accountNumSet
+                          .map((value) =>
+                              DropdownMenuEntry(value: value, label: value))
+                          .toList(),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: _ValidatorDropdownMenu(
+                      key: _emailGolbalKey,
+                      controller: _emailController,
+                      focusNoError: true,
+                      width: width,
+                      enableFilter: true,
+                      enableSearch: false,
+                      label: Text(t.email),
+                      menuHeight: 100,
+                      requestFocusOnTap: true,
+                      dropdownMenuEntries: widget.accountsContrller.emailSet
+                          .map((value) =>
+                              DropdownMenuEntry(value: value, label: value))
+                          .toList(),
+                      validator: (value) => value.isNotEmpty &&
+                              !CommonRegExp.email.hasMatch(value)
+                          ? t.format_error(CommonRegExp.email.pattern)
                           : null,
                     ),
-                    validator: (value) => value.isNotEmpty &&
-                            !CommonRegExp.oneTimePassword.hasMatch(value)
-                        ? t.format_error(CommonRegExp.oneTimePassword.pattern)
-                        : null,
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: _DescriptionTextField(
-                    controller: _descriptionController,
-                    hitText: t.description,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: InputDecorator(
-                    decoration: InputDecoration(
-                      labelText: t.label,
-                      border: const OutlineInputBorder(),
-                    ),
-                    child: LabelList(
-                      items: _getLabels(),
-                      onChange: (labels) {
-                        _account.labels = labels;
-                      },
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.only(top: 16),
-                  alignment: Alignment.topLeft,
-                  child: RichText(
-                    textAlign: TextAlign.start,
-                    text: TextSpan(
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      text: "${t.date}: ",
-                      children: [
-                        TextSpan(
-                          style: Theme.of(context).textTheme.bodySmall,
-                          text: dateFormat(_account.date),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: TextField(
+                      controller: _passwordController,
+                      textInputAction: TextInputAction.next,
+                      decoration: InputDecoration(
+                        labelText: t.password,
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          onPressed: _generatePassword,
+                          icon: const Icon(Icons.create),
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-                Container(
-                  padding: const EdgeInsets.only(top: 2),
-                  alignment: Alignment.topLeft,
-                  child: RichText(
-                    textAlign: TextAlign.start,
-                    text: TextSpan(
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      text: "${t.uuid}: ",
-                      children: [
-                        TextSpan(
-                          style: Theme.of(context).textTheme.bodySmall,
-                          text: _account.id,
-                        ),
-                      ],
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: _ValidatorTextField(
+                      key: _otPasswordGolbalKey,
+                      controller: _otPasswordController,
+                      textInputAction: TextInputAction.next,
+                      decoration: InputDecoration(
+                        labelText: t.otp,
+                        border: const OutlineInputBorder(),
+                        suffixIcon: _displayScanner
+                            ? IconButton(
+                                onPressed: () async {
+                                  Navigator.of(context)
+                                      .pushNamed(QrCodeScannerPage.routeName)
+                                      .then((value) {
+                                    if (value is String && value.isNotEmpty) {
+                                      _otPasswordController.text = value;
+                                    }
+                                  });
+                                },
+                                icon: const Icon(Icons.qr_code_scanner),
+                              )
+                            : null,
+                      ),
+                      validator: (value) => value.isNotEmpty &&
+                              !CommonRegExp.oneTimePassword.hasMatch(value)
+                          ? t.format_error(CommonRegExp.oneTimePassword.pattern)
+                          : null,
                     ),
                   ),
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: _DescriptionTextField(
+                      controller: _descriptionController,
+                      hitText: t.description,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: t.label,
+                        border: const OutlineInputBorder(),
+                      ),
+                      child: LabelList(
+                        items: _getLabels(),
+                        onChange: (labels) {
+                          _account.labels = labels;
+                        },
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.only(top: 16),
+                    alignment: Alignment.topLeft,
+                    child: RichText(
+                      textAlign: TextAlign.start,
+                      text: TextSpan(
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        text: "${t.date}: ",
+                        children: [
+                          TextSpan(
+                            style: Theme.of(context).textTheme.bodySmall,
+                            text: dateFormat(_account.date),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.only(top: 2),
+                    alignment: Alignment.topLeft,
+                    child: RichText(
+                      textAlign: TextAlign.start,
+                      text: TextSpan(
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        text: "${t.uuid}: ",
+                        children: [
+                          TextSpan(
+                            style: Theme.of(context).textTheme.bodySmall,
+                            text: _account.id,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
