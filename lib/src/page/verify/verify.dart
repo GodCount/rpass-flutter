@@ -72,23 +72,28 @@ class VerifyPasswordState extends State<VerifyPassword> {
                     textInputAction: TextInputAction.done,
                     autofocus: true,
                     obscureText: _obscureText,
+                    obscuringCharacter: "*",
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
-                        labelText: t.password,
-                        hintText: t.input_num_password,
-                        errorText: _errorMessage != null
-                            ? t.verify_password_throw(_errorMessage!)
-                            : null,
-                        border: const OutlineInputBorder(),
-                        suffixIcon: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _obscureText = !_obscureText;
-                              });
-                            },
-                            icon: Icon(_obscureText
-                                ? Icons.remove_red_eye_outlined
-                                : Icons.visibility_off_outlined))),
+                      labelText: t.password,
+                      hintText: t.input_num_password,
+                      errorText: _errorMessage != null
+                          ? t.verify_password_throw(_errorMessage!)
+                          : null,
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _obscureText = !_obscureText;
+                          });
+                        },
+                        icon: Icon(
+                          _obscureText
+                              ? Icons.remove_red_eye_outlined
+                              : Icons.visibility_off_outlined,
+                        ),
+                      ),
+                    ),
                     onSubmitted: (value) {
                       _verifyPassword();
                     },

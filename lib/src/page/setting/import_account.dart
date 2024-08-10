@@ -349,6 +349,7 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
             textInputAction: TextInputAction.done,
             autofocus: true,
             obscureText: _obscureText,
+            obscuringCharacter: "*",
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             decoration: InputDecoration(
                 labelText: t.password,

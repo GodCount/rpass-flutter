@@ -44,10 +44,28 @@ class _VerifyQuestionState extends State<VerifyQuestion> {
 
   @override
   void dispose() {
-    _aController.dispose();
     _qController.dispose();
+    _aController.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  void _confirmOrNext() {
+    if (widget.questions[_index].verify(_aController.text)) {
+      _questions[_index].answer = _aController.text;
+      if (_index < _questions.length - 1) {
+        _index++;
+        _errorHitText = null;
+        setState(() {});
+        _focusNode.requestFocus();
+      } else {
+        widget.onVerify(_questions);
+      }
+    } else {
+      setState(() {
+        _errorHitText = I18n.of(context)!.security_qa_error;
+      });
+    }
   }
 
   @override
@@ -56,6 +74,9 @@ class _VerifyQuestionState extends State<VerifyQuestion> {
 
     _qController.text = _questions[_index].question;
     _aController.text = _questions[_index].answer;
+
+    final isDone = _index >= _questions.length - 1;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -86,6 +107,7 @@ class _VerifyQuestionState extends State<VerifyQuestion> {
           child: TextField(
             controller: _qController,
             readOnly: true,
+            textInputAction: TextInputAction.none,
             decoration: InputDecoration(
               labelText: t.question,
               border: const OutlineInputBorder(),
@@ -98,13 +120,15 @@ class _VerifyQuestionState extends State<VerifyQuestion> {
           child: TextField(
             controller: _aController,
             focusNode: _focusNode,
-            textInputAction: TextInputAction.next,
+            textInputAction:
+                isDone ? TextInputAction.done : TextInputAction.next,
             autofocus: true,
             decoration: InputDecoration(
               labelText: t.answer,
               errorText: _errorHitText,
               border: const OutlineInputBorder(),
             ),
+            onSubmitted: (value) => _confirmOrNext(),
           ),
         ),
         Padding(
@@ -112,23 +136,8 @@ class _VerifyQuestionState extends State<VerifyQuestion> {
           child: SizedBox(
             width: 180,
             child: ElevatedButton(
-              onPressed: () {
-                if (widget.questions[_index].verify(_aController.text)) {
-                  _questions[_index].answer = _aController.text;
-                  if (_index < _questions.length - 1) {
-                    setState(() {
-                      _index += 1;
-                    });
-                  } else {
-                    widget.onVerify(_questions);
-                  }
-                } else {
-                  setState(() {
-                    _errorHitText = t.security_qa_error;
-                  });
-                }
-              },
-              child: Text(_index == _questions.length - 1 ? t.confirm : t.next),
+              onPressed: _confirmOrNext,
+              child: Text(isDone ? t.confirm : t.next),
             ),
           ),
         ),

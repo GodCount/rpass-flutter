@@ -156,8 +156,11 @@ class SetPassword extends StatelessWidget {
                       labelText: t.confirm_password,
                       border: const OutlineInputBorder(),
                     ),
-                    validator: (value) =>
-                        value == controller.text ? null : t.password_not_equal,
+                    validator: (value) => value == null ||
+                            value.isEmpty ||
+                            value == controller.text
+                        ? null
+                        : t.password_not_equal,
                     onFieldSubmitted: (value) {
                       if (formState.currentState!.validate()) {
                         onSetPassword();

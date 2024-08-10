@@ -6,14 +6,15 @@ import '../../model/rpass/question.dart';
 typedef QuestionOnSumit = void Function(List<QuestionAnswer>? questions);
 
 class SecurityQuestion extends StatefulWidget {
-  const SecurityQuestion({
+  SecurityQuestion({
     super.key,
     required this.onSubmit,
-    this.initialList,
+    List<QuestionAnswer>? initialList,
     this.title,
     this.subtitle,
     this.maxQuestion = 3,
-  });
+  })  : assert(maxQuestion > 0, "maxQuestion must be greater than 0"),
+        initialList = initialList?.sublist(0, maxQuestion);
 
   final QuestionOnSumit onSubmit;
   final List<QuestionAnswer>? initialList;
@@ -35,10 +36,13 @@ class SecurityQuestionState extends State<SecurityQuestion> {
   final TextEditingController _aController = TextEditingController();
   final GlobalKey<FormState> _formState = GlobalKey<FormState>();
 
+  final FocusNode _focusNode = FocusNode();
+
   @override
   void dispose() {
     _qController.dispose();
     _aController.dispose();
+    _focusNode.dispose();
     FocusManager.instance.primaryFocus?.unfocus();
     super.dispose();
   }
@@ -93,12 +97,21 @@ class SecurityQuestionState extends State<SecurityQuestion> {
       _index++;
       _updateText();
       setState(() {});
+      _focusNode.requestFocus();
+    }
+  }
+
+  void _confirm() {
+    if (_validateSaveQuestion()) {
+      widget.onSubmit(_questions);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
+
+    final maxQuestion = widget.maxQuestion - 1;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -142,6 +155,7 @@ class SecurityQuestionState extends State<SecurityQuestion> {
                   constraints: const BoxConstraints(maxWidth: 264),
                   child: TextFormField(
                     controller: _qController,
+                    focusNode: _focusNode,
                     textInputAction: TextInputAction.next,
                     autofocus: true,
                     decoration: InputDecoration(
@@ -158,7 +172,9 @@ class SecurityQuestionState extends State<SecurityQuestion> {
                   constraints: const BoxConstraints(maxWidth: 264),
                   child: TextFormField(
                     controller: _aController,
-                    textInputAction: TextInputAction.next,
+                    textInputAction: _index >= maxQuestion
+                        ? TextInputAction.done
+                        : TextInputAction.next,
                     autofocus: true,
                     decoration: InputDecoration(
                       labelText: t.answer,
@@ -167,6 +183,13 @@ class SecurityQuestionState extends State<SecurityQuestion> {
                     validator: (value) => value == null || value.trim().isEmpty
                         ? t.cannot_emprty
                         : null,
+                    onFieldSubmitted: (value) {
+                      if (_index >= maxQuestion) {
+                        _confirm();
+                      } else {
+                        _nextQuestionOrAdd();
+                      }
+                    },
                   ),
                 ),
               ],
@@ -184,8 +207,7 @@ class SecurityQuestionState extends State<SecurityQuestion> {
                 child: Text(t.prev),
               ),
               TextButton(
-                onPressed:
-                    _index < widget.maxQuestion ? _nextQuestionOrAdd : null,
+                onPressed: _index < maxQuestion ? _nextQuestionOrAdd : null,
                 child: Text(_index == _questions.length - 1 ? t.add : t.next),
               ),
             ],
@@ -196,11 +218,7 @@ class SecurityQuestionState extends State<SecurityQuestion> {
           child: SizedBox(
             width: 180,
             child: ElevatedButton(
-              onPressed: () {
-                if (_validateSaveQuestion()) {
-                  widget.onSubmit(_questions);
-                }
-              },
+              onPressed: _confirm,
               child: Text(t.confirm),
             ),
           ),

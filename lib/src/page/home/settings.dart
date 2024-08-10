@@ -253,7 +253,9 @@ class SettingsPageState extends State<SettingsPage>
                       border: const OutlineInputBorder(),
                     ),
                     validator: (value) =>
-                        value == newPassword ? null : t.password_not_equal,
+                        value == null || value.isEmpty || value == newPassword
+                            ? null
+                            : t.password_not_equal,
                     onFieldSubmitted: (value) {
                       if (formState.currentState!.validate()) {
                         onSetPassword();
