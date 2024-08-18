@@ -105,7 +105,6 @@ class _MyBottomNavigationBarState extends State<_MyBottomNavigationBar> {
 
     return NavigationBar(
       selectedIndex: _index,
-      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
       labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
       animationDuration: const Duration(milliseconds: 300),
       onDestinationSelected: (value) async {

@@ -239,7 +239,7 @@ class _OpenContainerPasswordItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mainColor = Theme.of(context).colorScheme.surfaceContainer;
+    final mainColor = Theme.of(context).colorScheme.surfaceContainerLow;
 
     bool isLogPress = false;
 

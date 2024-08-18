@@ -145,7 +145,6 @@ class _EditAccountPageState extends State<EditAccountPage> {
 
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         title: Text(t.edit_account),
         actions: [
           IconButton(

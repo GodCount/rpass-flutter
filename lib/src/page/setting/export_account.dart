@@ -191,7 +191,6 @@ class ExportAccountPageState extends State<ExportAccountPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(t.export),
-        centerTitle: true,
       ),
       body: ListView(
         padding: const EdgeInsets.all(6),

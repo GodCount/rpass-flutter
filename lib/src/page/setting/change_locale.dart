@@ -32,7 +32,6 @@ class _ChangeLocalePageState extends State<ChangeLocalePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(t.language_setting),
-        centerTitle: true,
       ),
       body: ListView(
         padding: const EdgeInsets.all(6),

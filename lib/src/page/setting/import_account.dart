@@ -141,7 +141,6 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(t.import),
-        centerTitle: true,
       ),
       body: Center(
         child: Card(
