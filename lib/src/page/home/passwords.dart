@@ -35,14 +35,16 @@ class PasswordsPageState extends State<PasswordsPage>
   void _searchAccounts() {
     _accounts.clear();
     if (_searchText.isNotEmpty) {
+      final searchText = _searchText.toLowerCase();
       _accounts.addAll(widget.accountsContrller.accountList.where((account) {
-        var weight = account.domain.contains(_searchText) ? 1 : 0;
-        weight += account.domainName.contains(_searchText) ? 1 : 0;
-        weight += account.account.contains(_searchText) ? 1 : 0;
-        weight += account.email.contains(_searchText) ? 1 : 0;
-        weight += account.password.contains(_searchText) ? 1 : 0;
-        weight += account.description.contains(_searchText) ? 1 : 0;
-        weight += account.labels.contains(_searchText) ? 1 : 0;
+        var weight = account.domain.toLowerCase().contains(searchText) ? 1 : 0;
+        weight += account.domainName.toLowerCase().contains(searchText) ? 1 : 0;
+        weight += account.account.toLowerCase().contains(searchText) ? 1 : 0;
+        weight += account.email.toLowerCase().contains(searchText) ? 1 : 0;
+        weight += account.password.toLowerCase().contains(searchText) ? 1 : 0;
+        weight +=
+            account.description.toLowerCase().contains(searchText) ? 1 : 0;
+        weight += account.labels.contains(searchText) ? 1 : 0;
         return weight > 0;
       }));
     } else {
