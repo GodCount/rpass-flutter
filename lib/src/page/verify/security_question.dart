@@ -14,7 +14,9 @@ class SecurityQuestion extends StatefulWidget {
     this.subtitle,
     this.maxQuestion = 3,
   })  : assert(maxQuestion > 0, "maxQuestion must be greater than 0"),
-        initialList = initialList?.sublist(0, maxQuestion);
+        initialList = initialList != null && initialList.length > maxQuestion
+            ? initialList.sublist(0, maxQuestion)
+            : initialList;
 
   final QuestionOnSumit onSubmit;
   final List<QuestionAnswer>? initialList;
