@@ -1,12 +1,15 @@
+import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../component/toast.dart';
 import '../../i18n.dart';
+import '../../util/verify_core.dart';
 import '../page.dart';
 import '../../store/index.dart';
 import '../verify/security_question.dart';
 import '../../model/rpass/question.dart';
+import '../widget/biometric.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, required this.store});
@@ -32,6 +35,8 @@ class SettingsPageState extends State<SettingsPage>
     );
 
     final t = I18n.of(context)!;
+
+    final biometric = Biometric.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -121,6 +126,32 @@ class SettingsPageState extends State<SettingsPage>
                 ],
               ),
             ),
+            if (biometric.isSupport)
+              ListTile(
+                title: Text(t.biometric),
+                trailing: widget.store.settings.enableBiometric
+                    ? const Icon(Icons.check)
+                    : null,
+                onTap: () async {
+                  try {
+                    final enableBiometric =
+                        !widget.store.settings.enableBiometric;
+                    await Biometric.of(context).updateToken(
+                      enableBiometric ? widget.store.verify.token : null,
+                    );
+                    widget.store.settings.seEnableBiometric(enableBiometric);
+                  } on AuthException catch (e) {
+                    if (e.code == AuthExceptionCode.userCanceled ||
+                        e.code == AuthExceptionCode.canceled ||
+                        e.code == AuthExceptionCode.timeout) {
+                      return;
+                    }
+                    rethrow;
+                  } catch (e) {
+                    showToast(context, t.biometric_throw(e.toString()));
+                  }
+                },
+              ),
             ListTile(
               title: Text(t.modify_password),
               onTap: _modifyPassword,
@@ -205,7 +236,30 @@ class SettingsPageState extends State<SettingsPage>
     void onSetPassword() async {
       if (formState.currentState!.validate()) {
         try {
-          await widget.store.verify.modifyPassword(newPassword);
+          final biometric = Biometric.of(context);
+          if (biometric.enable) {
+            try {
+              await biometric
+                  .updateToken(VerifyCore.createToken(newPassword).$1);
+            } on AuthException catch (e) {
+              if (e.code == AuthExceptionCode.userCanceled ||
+                  e.code == AuthExceptionCode.canceled ||
+                  e.code == AuthExceptionCode.timeout) {
+                return;
+              }
+              rethrow;
+            } catch (e) {
+              rethrow;
+            }
+          }
+
+          try {
+            await widget.store.verify.modifyPassword(newPassword);
+          } catch (e) {
+            await biometric.updateToken(widget.store.verify.token);
+            rethrow;
+          }
+
           if (mounted) {
             Navigator.of(context).pop();
           }

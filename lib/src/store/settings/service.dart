@@ -27,6 +27,14 @@ class SettingsService with SharedPreferencesService {
     }
   }
 
+  Future<bool> getEnableBiometric() async {
+    return await getBool("enable_biometric") ?? false;
+  }
+
+  Future<bool> setEnableBiometric(bool enable) async {
+    return await setBool("enable_biometric", enable);
+  }
+
   @override
   Future<bool> clear() => super.clear();
 }

@@ -1,5 +1,6 @@
 package com.godcount.rpass
 
-import io.flutter.embedding.android.FlutterActivity
+import android.os.Bundle
+import io.flutter.embedding.android.FlutterFragmentActivity
 
-class MainActivity: FlutterActivity()
+class MainActivity: FlutterFragmentActivity() {}

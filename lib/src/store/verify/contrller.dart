@@ -28,7 +28,6 @@ class VerifyController with ChangeNotifier {
   String? get passwordAes => _passwordAes;
   String? get questionTokenAes => _questionTokenAes;
 
-
   Future<void> initPassword(String password,
       [List<QuestionAnswer>? questions]) async {
     assert(password.isNotEmpty);
@@ -57,6 +56,11 @@ class VerifyController with ChangeNotifier {
   void verify(String password) {
     if (!initialled) throw Exception("Not Initialized");
     _token = VerifyCore.verify(password: password, passwordAes: _passwordAes!);
+  }
+
+  void verifyToken(String token) {
+    if (!initialled) throw Exception("Not Initialized");
+    _token = VerifyCore.verifyToken(token: token, passwordAes: _passwordAes!);
   }
 
   void forgotToVerifyQuestion(List<QuestionAnswer> questions) {

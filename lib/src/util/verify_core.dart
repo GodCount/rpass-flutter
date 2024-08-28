@@ -29,8 +29,13 @@ class VerifyCore {
     required String password,
     required String passwordAes,
   }) {
-    final token = md5(password);
+    return verifyToken(token: md5(password), passwordAes: passwordAes);
+  }
 
+  static String verifyToken({
+    required String token,
+    required String passwordAes,
+  }) {
     if (aesDenrypt(token, passwordAes) == VERIFY_TEXT) {
       return token;
     }

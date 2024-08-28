@@ -213,5 +213,17 @@
                 "type": "String"
             }
         }
+    },
+    "biometric": "Biometric",
+    "biometric_prompt_title": "Verify your identity",
+    "biometric_prompt_subtitle": "Use fingerprint to complete verification before continuing",
+    "biometric_throw": "Biometric exception: {message}",
+    "@biometric_throw": {
+        "description": "Message with error information",
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
     }
 }

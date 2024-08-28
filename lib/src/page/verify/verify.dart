@@ -1,9 +1,12 @@
+import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../component/toast.dart';
 import '../../i18n.dart';
 import '../../store/verify/contrller.dart';
+import '../widget/biometric.dart';
 import './forget.dart';
 import '../home/home.dart';
 
@@ -23,6 +26,7 @@ class VerifyPasswordState extends State<VerifyPassword> {
   final FocusNode _focusNode = FocusNode();
 
   bool _obscureText = true;
+  bool _biometricDisable = false;
   String? _errorMessage;
 
   @override
@@ -34,13 +38,53 @@ class VerifyPasswordState extends State<VerifyPassword> {
         });
       }
     });
+    _verifyBiometric();
     super.initState();
+  }
+
+  void _verifyPassword() {
+    if (_passwordController.text.isNotEmpty) {
+      try {
+        widget.verifyContrller.verify(_passwordController.text);
+        Navigator.of(context).pushReplacementNamed(Home.routeName);
+      } catch (error) {
+        if (kDebugMode) {
+          print(error);
+        }
+        setState(() {
+          _errorMessage = error.toString();
+        });
+      }
+    }
+  }
+
+  void _verifyBiometric() async {
+    try {
+      final biometric = Biometric.of(context);
+      if (biometric.enable) {
+        await biometric.verify();
+        Navigator.of(context).pushReplacementNamed(Home.routeName);
+      }
+    } on AuthException catch (e) {
+      if (e.code == AuthExceptionCode.userCanceled ||
+          e.code == AuthExceptionCode.canceled ||
+          e.code == AuthExceptionCode.timeout) {
+        return;
+      }
+      rethrow;
+    } catch (e) {
+      showToast(context, I18n.of(context)!.biometric_throw(e.toString()));
+      setState(() {
+        _biometricDisable = true;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
 
+    final biometric = Biometric.of(context);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Center(
@@ -123,27 +167,20 @@ class VerifyPasswordState extends State<VerifyPassword> {
                     child: Text(t.confirm),
                   ),
                 ),
+                if (biometric.enable)
+                  Container(
+                    width: 180,
+                    padding: const EdgeInsets.only(top: 12),
+                    child: ElevatedButton(
+                      onPressed: !_biometricDisable ? _verifyBiometric : null,
+                      child: Text(t.biometric),
+                    ),
+                  ),
               ],
             ),
           ),
         ),
       ),
     );
-  }
-
-  void _verifyPassword() {
-    if (_passwordController.text.isNotEmpty) {
-      try {
-        widget.verifyContrller.verify(_passwordController.text);
-        Navigator.of(context).pushReplacementNamed(Home.routeName);
-      } catch (error) {
-        if (kDebugMode) {
-          print(error);
-        }
-        setState(() {
-          _errorMessage = error.toString();
-        });
-      }
-    }
   }
 }

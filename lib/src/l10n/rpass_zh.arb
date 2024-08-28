@@ -213,5 +213,17 @@
                 "type": "String"
             }
         }
+    },
+    "biometric": "生物识别",
+    "biometric_prompt_title": "验证您的身份",
+    "biometric_prompt_subtitle": "使用指纹完成验证才能继续",
+    "biometric_throw": "生物识别异常: {message}",
+    "@biometric_throw": {
+        "description": "带有错误信息的消息",
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
     }
 }

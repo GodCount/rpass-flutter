@@ -3,6 +3,7 @@ import 'package:rpass/src/i18n.dart';
 
 import './store/index.dart';
 import './page/page.dart';
+import 'page/widget/biometric.dart';
 import 'theme/theme.dart';
 
 class UnfocusNavigatorRoute extends NavigatorObserver {
@@ -44,8 +45,8 @@ class RpassApp extends StatelessWidget {
       builder: (BuildContext context, Widget? child) {
         return MaterialApp(
           restorationScopeId: 'app',
-          theme: theme( Brightness.light),
-          darkTheme: theme( Brightness.dark),
+          theme: theme(Brightness.light),
+          darkTheme: theme(Brightness.dark),
           themeMode: store.settings.themeMode,
           locale: store.settings.locale,
           localizationsDelegates: I18n.localizationsDelegates,
@@ -85,6 +86,7 @@ class RpassApp extends StatelessWidget {
             ChangeLocalePage.routeName: (context) =>
                 ChangeLocalePage(settingsController: store.settings)
           },
+          builder: (context, child) => Biometric(store: store, child: child!),
         );
       },
     );

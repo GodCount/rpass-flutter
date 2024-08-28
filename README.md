@@ -26,7 +26,7 @@
 - [x] 导出密码 (火狐浏览器, 谷歌浏览器)
 - [x] 导出自带格式密码文件(json),支持加密导出
 - [ ] 后台遮罩界面
-- [ ] 指纹解锁
+- [X] 指纹解锁
 - [ ] 自动填充
 
 
@@ -34,34 +34,7 @@
 
 - 加密流程
 
-```mermaid
-graph TD;
-password[密码];
-md5[MD5];
-token[密码 token];
-aes[AES];
-sq[安全问题];
-sq_token[安全问题 token];
-aes2[AES];
-md52[MD5];
-plaintext[数据];
-ciphertext[(加密数据)];
-cipher_token[(加密 token)];
-
-password-->md5-->token;
-token--key-->aes;
-plaintext--data-->aes;
-aes-->ciphertext;
-
-sq-->md52-->sq_token;
-sq_token--key-->aes2;
-token--data-->aes2;
-aes2-->cipher_token;
-cipher_token--data-->aes3[AES];
-sq_token--key-->aes3;
-aes3-->token;
-
-```
+![加密流程](docs/PixPin_2024-08-28_23-39-01.png)
 
 
 ## 开发/测试
