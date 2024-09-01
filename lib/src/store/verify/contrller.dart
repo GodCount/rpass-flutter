@@ -46,8 +46,8 @@ class VerifyController with ChangeNotifier {
     _questionList.addAll(questions
         .map((item) => QuestionAnswerKey(item.question, answer: item.answer)));
 
-    _questionTokenAes =
-        VerifyCore.createQuestionAes(token: _token!, questions: questions);
+    _questionTokenAes = VerifyCore.createQuestionAes(
+        token: _token!, questions: _questionList);
 
     await _verifyService.setQuestionTokenAes(_questionTokenAes!);
     await _verifyService.setQuestionList(_questionList);
@@ -77,7 +77,7 @@ class VerifyController with ChangeNotifier {
   Future<void> modifyPassword(String newPassword) async {
     await initPassword(newPassword);
 
-    _questionTokenAes = VerifyCore.createQuestionAesByKey(
+    _questionTokenAes = VerifyCore.createQuestionAes(
         token: _token!, questions: _questionList);
 
     await _verifyService.setQuestionTokenAes(_questionTokenAes!);
