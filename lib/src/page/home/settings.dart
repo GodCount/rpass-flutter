@@ -282,7 +282,6 @@ class SettingsPageState extends State<SettingsPage>
               children: [
                 TextFormField(
                   onChanged: (text) => newPassword = text,
-                  keyboardType: TextInputType.number,
                   textInputAction: TextInputAction.next,
                   autofocus: true,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -298,7 +297,6 @@ class SettingsPageState extends State<SettingsPage>
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: TextFormField(
-                    keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.done,
                     autofocus: true,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],

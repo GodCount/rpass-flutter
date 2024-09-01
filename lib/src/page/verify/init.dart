@@ -132,7 +132,6 @@ class SetPassword extends StatelessWidget {
                   constraints: const BoxConstraints(maxWidth: 264),
                   child: TextFormField(
                     controller: controller,
-                    keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.next,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
@@ -149,7 +148,6 @@ class SetPassword extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 12),
                   constraints: const BoxConstraints(maxWidth: 264),
                   child: TextFormField(
-                    keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.done,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
