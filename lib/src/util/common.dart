@@ -17,11 +17,6 @@ const numbers = r"0123456789";
 const symbols = r"!@#$%^&*_-=+'(),./\:;<>?[]`{}|~"
     r'"';
 
-class EmptyError extends Error {
-  final String message;
-  EmptyError(this.message);
-}
-
 String md5(String data) {
   return crypto.md5.convert(utf8.encode(data)).toString();
 }
@@ -93,7 +88,7 @@ String randomPassword({
   }
 
   if (cahrs.isEmpty) {
-    throw EmptyError("enable at least one type");
+    throw Exception("enable at least one type");
   }
 
   cahrs.sort((a, b) => math.Random().nextInt(2));

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../i18n.dart';
 import '../../store/index.dart';
-import '../../util/common.dart';
 
 class Biometric extends StatefulWidget {
   const Biometric({super.key, required this.store, required this.child});
@@ -105,7 +104,7 @@ class BiometricState extends State<Biometric> {
         await (await _getStorageFile()).read(promptInfo: _getPromptInfo());
     if (token == null || token.isEmpty) {
       widget.store.settings.seEnableBiometric(false);
-      throw EmptyError("no record token from biometric");
+      throw Exception("no record token from biometric");
     }
 
     widget.store.verify.verifyToken(token);
