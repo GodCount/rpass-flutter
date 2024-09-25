@@ -3,18 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../component/toast.dart';
+import '../../context/biometric.dart';
+import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../util/verify_core.dart';
 import '../page.dart';
-import '../../store/index.dart';
 import '../verify/security_question.dart';
 import '../../model/rpass/question.dart';
-import '../widget/biometric.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key, required this.store});
-
-  final Store store;
+  const SettingsPage({super.key});
 
   @override
   State<SettingsPage> createState() => SettingsPageState();
@@ -36,6 +34,7 @@ class SettingsPageState extends State<SettingsPage>
 
     final t = I18n.of(context)!;
 
+    final store = StoreProvider.of(context);
     final biometric = Biometric.of(context);
 
     return Scaffold(
@@ -61,30 +60,30 @@ class SettingsPageState extends State<SettingsPage>
             ),
             ListTile(
               title: Text(t.system),
-              trailing: widget.store.settings.themeMode == ThemeMode.system
+              trailing: store.settings.themeMode == ThemeMode.system
                   ? const Icon(Icons.check)
                   : null,
               onTap: () {
-                widget.store.settings.setThemeMode(ThemeMode.system);
+                store.settings.setThemeMode(ThemeMode.system);
               },
             ),
             ListTile(
               title: Text(t.light),
-              trailing: widget.store.settings.themeMode == ThemeMode.light
+              trailing: store.settings.themeMode == ThemeMode.light
                   ? const Icon(Icons.check)
                   : null,
               onTap: () {
-                widget.store.settings.setThemeMode(ThemeMode.light);
+                store.settings.setThemeMode(ThemeMode.light);
               },
             ),
             ListTile(
               shape: shape,
               title: Text(t.dark),
-              trailing: widget.store.settings.themeMode == ThemeMode.dark
+              trailing: store.settings.themeMode == ThemeMode.dark
                   ? const Icon(Icons.check)
                   : null,
               onTap: () {
-                widget.store.settings.setThemeMode(ThemeMode.dark);
+                store.settings.setThemeMode(ThemeMode.dark);
               },
             ),
           ]),
@@ -103,9 +102,8 @@ class SettingsPageState extends State<SettingsPage>
               ),
             ),
             ListTile(
-              title: Text(widget.store.settings.locale != null
-                  ? t.locale_name
-                  : t.system),
+              title: Text(
+                  store.settings.locale != null ? t.locale_name : t.system),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () {
                 Navigator.of(context).pushNamed(ChangeLocalePage.routeName);
@@ -129,17 +127,15 @@ class SettingsPageState extends State<SettingsPage>
             if (biometric.isSupport)
               ListTile(
                 title: Text(t.biometric),
-                trailing: widget.store.settings.enableBiometric
+                trailing: store.settings.enableBiometric
                     ? const Icon(Icons.check)
                     : null,
                 onTap: () async {
                   try {
-                    final enableBiometric =
-                        !widget.store.settings.enableBiometric;
-                    await Biometric.of(context).updateToken(
-                      enableBiometric ? widget.store.verify.token : null,
-                    );
-                    widget.store.settings.seEnableBiometric(enableBiometric);
+                    final enableBiometric = !store.settings.enableBiometric;
+                    await biometric.updateToken(
+                        context, enableBiometric ? store.verify.token : null);
+                    store.settings.seEnableBiometric(enableBiometric);
                   } on AuthException catch (e) {
                     if (e.code == AuthExceptionCode.userCanceled ||
                         e.code == AuthExceptionCode.canceled ||
@@ -236,11 +232,15 @@ class SettingsPageState extends State<SettingsPage>
     void onSetPassword() async {
       if (formState.currentState!.validate()) {
         try {
+          final store = StoreProvider.of(context);
           final biometric = Biometric.of(context);
+
           if (biometric.enable) {
             try {
-              await biometric
-                  .updateToken(VerifyCore.createToken(newPassword).$1);
+              await biometric.updateToken(
+                context,
+                VerifyCore.createToken(newPassword).$1,
+              );
             } on AuthException catch (e) {
               if (e.code == AuthExceptionCode.userCanceled ||
                   e.code == AuthExceptionCode.canceled ||
@@ -254,9 +254,9 @@ class SettingsPageState extends State<SettingsPage>
           }
 
           try {
-            await widget.store.verify.modifyPassword(newPassword);
+            await store.verify.modifyPassword(newPassword);
           } catch (e) {
-            await biometric.updateToken(widget.store.verify.token);
+            await biometric.updateToken(context, store.verify.token);
             rethrow;
           }
 
@@ -341,16 +341,17 @@ class SettingsPageState extends State<SettingsPage>
     showDialog(
         context: context,
         builder: (context) {
+          final store = StoreProvider.of(context);
           return AlertDialog(
             scrollable: true,
             content: SecurityQuestion(
-              initialList: widget.store.verify.questionList
+              initialList: store.verify.questionList
                   .map((item) => QuestionAnswer(item.question, ""))
                   .toList(),
               onSubmit: (questions) async {
                 if (questions != null) {
                   try {
-                    await widget.store.verify.setQuestionList(questions);
+                    await store.verify.setQuestionList(questions);
                   } catch (e) {
                     showToast(
                       context,

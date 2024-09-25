@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'src/page/widget/biometric.dart';
+import 'src/context/biometric.dart';
 import 'src/rpass.dart';
 import 'src/app.dart';
 import 'src/store/index.dart';

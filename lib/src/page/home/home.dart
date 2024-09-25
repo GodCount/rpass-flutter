@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../context/store.dart';
 import '../../i18n.dart';
-import '../../store/index.dart';
 import 'settings.dart';
 import 'passwords.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key, required this.store});
+  const Home({super.key});
 
   static const routeName = "/home";
-
-  final Store store;
 
   @override
   State<Home> createState() => HomeState();
@@ -43,7 +41,7 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
     final t = I18n.of(context)!;
 
     if (!_initDenrypted) {
-      widget.store.accounts.initDenrypt().then(
+      StoreProvider.of(context).accounts.initDenrypt().then(
             (value) => setState(() {
               _initDenrypted = true;
             }),
@@ -54,10 +52,7 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
       body: _initDenrypted
           ? PageView(
               controller: _controller,
-              children: [
-                PasswordsPage(accountsContrller: widget.store.accounts),
-                SettingsPage(store: widget.store)
-              ],
+              children: const [PasswordsPage(), SettingsPage()],
             )
           : Center(child: Text(t.denrypting)),
       bottomNavigationBar: _initDenrypted

@@ -2,13 +2,12 @@ import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../i18n.dart';
-import '../../store/index.dart';
+import '../i18n.dart';
+import 'store.dart';
 
 class Biometric extends StatefulWidget {
-  const Biometric({super.key, required this.store, required this.child});
+  const Biometric({super.key, required this.child});
 
-  final Store store;
   final Widget child;
 
   static BiometricState of(BuildContext context) {
@@ -49,7 +48,8 @@ class BiometricState extends State<Biometric> {
       _authenticateResponse == CanAuthenticateResponse.success ||
       _authenticateResponse == CanAuthenticateResponse.statusUnknown;
 
-  bool get enable => isSupport && widget.store.settings.enableBiometric;
+  bool get enable =>
+      isSupport && StoreProvider.of(context).settings.enableBiometric;
 
   static Future<void> initCanAuthenticate() async {
     try {
@@ -61,7 +61,8 @@ class BiometricState extends State<Biometric> {
     }
   }
 
-  PromptInfo _getPromptInfo() {
+  /// 需要 MaterialApp 下的 BuildContext 以获取 I18 context
+  PromptInfo _getPromptInfo(BuildContext context) {
     final t = I18n.of(context)!;
     final iosPromptInfo = IosPromptInfo(
       saveTitle: t.biometric_prompt_subtitle,
@@ -85,38 +86,39 @@ class BiometricState extends State<Biometric> {
     }
   }
 
-  Future<BiometricStorageFile> _getStorageFile() async {
+  Future<BiometricStorageFile> _getStorageFile(BuildContext context) async {
     _assertBiometric();
     if (_storageFile != null) return _storageFile!;
-    _storageFile =
-        await _biometric.getStorage("token", promptInfo: _getPromptInfo());
+    _storageFile = await _biometric.getStorage("token",
+        promptInfo: _getPromptInfo(context));
     return _storageFile!;
   }
 
-  Future<void> verify() async {
+  Future<void> verify(BuildContext context) async {
     _assertBiometric();
 
     if (!enable) {
       throw Exception("not enabled biometric");
     }
 
-    final token =
-        await (await _getStorageFile()).read(promptInfo: _getPromptInfo());
+    final token = await (await _getStorageFile(context))
+        .read(promptInfo: _getPromptInfo(context));
     if (token == null || token.isEmpty) {
-      widget.store.settings.seEnableBiometric(false);
+      StoreProvider.of(context).settings.seEnableBiometric(false);
       throw Exception("no record token from biometric");
     }
 
-    widget.store.verify.verifyToken(token);
+    StoreProvider.of(context).verify.verifyToken(token);
   }
 
-  Future<void> updateToken(String? token) async {
+  Future<void> updateToken(BuildContext context, String? token) async {
     _assertBiometric();
     if (token == null) {
-      await (await _getStorageFile()).delete(promptInfo: _getPromptInfo());
+      await (await _getStorageFile(context))
+          .delete(promptInfo: _getPromptInfo(context));
     } else {
-      await (await _getStorageFile())
-          .write(token, promptInfo: _getPromptInfo());
+      await (await _getStorageFile(context))
+          .write(token, promptInfo: _getPromptInfo(context));
     }
   }
 

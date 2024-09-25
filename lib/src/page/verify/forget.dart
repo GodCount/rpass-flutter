@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../component/toast.dart';
+import '../../context/store.dart';
 import '../../i18n.dart';
-import '../../store/verify/contrller.dart';
 import '../page.dart';
 import 'verify_question.dart';
 
 class ForgetPassword extends StatefulWidget {
-  const ForgetPassword({super.key, required this.verifyContrller});
+  const ForgetPassword({super.key});
 
   static const routeName = "/forget";
-
-  final VerifyController verifyContrller;
 
   @override
   State<ForgetPassword> createState() => ForgetPasswordState();
@@ -21,6 +19,7 @@ class ForgetPasswordState extends State<ForgetPassword> {
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
+    final store = StoreProvider.of(context);
 
     return Scaffold(
       body: Center(
@@ -29,13 +28,13 @@ class ForgetPasswordState extends State<ForgetPassword> {
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: VerifyQuestion(
-              questions: widget.verifyContrller.questionList,
+              questions: store.verify.questionList,
               onVerify: (questions) {
                 if (questions == null) {
                   Navigator.of(context).pop();
                 } else {
                   try {
-                    widget.verifyContrller.forgotToVerifyQuestion(questions);
+                    store.verify.forgotToVerifyQuestion(questions);
                     Navigator.of(context).pushNamedAndRemoveUntil(
                         Home.routeName, ModalRoute.withName('/'));
                   } catch (e) {

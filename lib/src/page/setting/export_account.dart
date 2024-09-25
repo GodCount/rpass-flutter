@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../model/browser/chrome.dart';
 import '../../model/browser/firefox.dart';
@@ -11,18 +12,15 @@ import '../../rpass.dart';
 import '../../component/toast.dart';
 import '../../model/rpass/backup.dart';
 import '../../model/rpass/question.dart';
-import '../../store/index.dart';
 import '../../util/common.dart';
 import '../../util/file.dart';
 import '../../util/verify_core.dart';
 import '../verify/security_question.dart';
 
 class ExportAccountPage extends StatefulWidget {
-  const ExportAccountPage({super.key, required this.store});
+  const ExportAccountPage({super.key});
 
   static const routeName = "/export_account";
-
-  final Store store;
 
   @override
   ExportAccountPageState createState() => ExportAccountPageState();
@@ -80,8 +78,9 @@ class ExportAccountPageState extends State<ExportAccountPage> {
 
   Future<String?> _exportRpass() async {
     final t = I18n.of(context)!;
+    final store = StoreProvider.of(context);
 
-    if (widget.store.accounts.accountList.isEmpty) {
+    if (store.accounts.accountList.isEmpty) {
       showToast(context, t.no_backup);
       return null;
     }
@@ -102,7 +101,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
 
     if (!_enableEncrypt) {
       final Backup data = Backup(
-        accounts: widget.store.accounts.accountList,
+        accounts: store.accounts.accountList,
         version: RpassInfo.version,
         buildNumber: RpassInfo.buildNumber,
       );
@@ -116,8 +115,8 @@ class ExportAccountPageState extends State<ExportAccountPage> {
         token = data.$1;
         passwordTest = data.$2;
       } else {
-        token = widget.store.verify.token!;
-        passwordTest = widget.store.verify.passwordAes!;
+        token = store.verify.token!;
+        passwordTest = store.verify.passwordAes!;
       }
 
       List<QuestionAnswerKey>? questions;
@@ -132,15 +131,15 @@ class ExportAccountPageState extends State<ExportAccountPage> {
           questionsToken = VerifyCore.createQuestionAesByKey(
               token: token, questions: questions);
         } else {
-          questions = widget.store.verify.questionList;
-          questionsToken = widget.store.verify.questionTokenAes!;
+          questions = store.verify.questionList;
+          questionsToken = store.verify.questionTokenAes!;
         }
       }
 
       final EncryptBackup data = EncryptBackup(
         questions: questions,
-        accounts: aesEncrypt(
-            token, json.encoder.convert(widget.store.accounts.accountList)),
+        accounts:
+            aesEncrypt(token, json.encoder.convert(store.accounts.accountList)),
         questionsToken: questionsToken,
         passwordVerify: passwordTest,
         version: RpassInfo.version,
@@ -159,7 +158,8 @@ class ExportAccountPageState extends State<ExportAccountPage> {
   }
 
   Future<String> _exportChrome() async {
-    final saveData = ChromeAccount.toCsv(widget.store.accounts.accountList);
+    final saveData =
+        ChromeAccount.toCsv(StoreProvider.of(context).accounts.accountList);
     final filepath = await SimpleFile.saveText(
       data: saveData,
       name: "rpass_export_chrome_${dateFormat(DateTime.now())}",
@@ -169,7 +169,8 @@ class ExportAccountPageState extends State<ExportAccountPage> {
   }
 
   Future<String> _exportFirefox() async {
-    final saveData = FirefoxAccount.toCsv(widget.store.accounts.accountList);
+    final saveData =
+        FirefoxAccount.toCsv(StoreProvider.of(context).accounts.accountList);
     final filepath = await SimpleFile.saveText(
       data: saveData,
       name: "rpass_export_firefox_${dateFormat(DateTime.now())}",

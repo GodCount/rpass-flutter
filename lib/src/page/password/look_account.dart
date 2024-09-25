@@ -7,9 +7,9 @@ import 'package:animated_flip_counter/animated_flip_counter.dart';
 
 import '../../component/label_list.dart';
 import '../../component/toast.dart';
+import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../model/rpass/account.dart';
-import '../../store/accounts/contrller.dart';
 import '../../util/common.dart';
 import '../../util/one_time_password.dart';
 import '../widget/utils.dart';
@@ -18,11 +18,9 @@ import './edit_account.dart';
 class LookAccountPage extends StatefulWidget {
   const LookAccountPage({
     super.key,
-    required this.accountsContrller,
     required this.accountId,
   });
 
-  final AccountsContrller accountsContrller;
   final String accountId;
 
   static const routeName = "/look_account";
@@ -33,21 +31,26 @@ class LookAccountPage extends StatefulWidget {
 
 class _LookAccountPageState extends State<LookAccountPage>
     with HintEmptyTextUtil, CommonWidgetUtil {
-  late Account _account;
+  late Account _account = Account();
 
   @override
   void initState() {
-    try {
-      _account = widget.accountsContrller.getAccountById(widget.accountId);
-    } catch (e) {
-      Navigator.of(context).pop();
-    }
+    Future.delayed(Duration.zero, () {
+      try {
+        _account =
+            StoreProvider.of(context).accounts.getAccountById(widget.accountId);
+      } catch (e) {
+        Navigator.of(context).pop();
+      }
+    });
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
+    final store = StoreProvider.of(context);
 
     const shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
@@ -65,13 +68,11 @@ class _LookAccountPageState extends State<LookAccountPage>
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {
                 return EditAccountPage(
-                  accountsContrller: widget.accountsContrller,
                   accountId: _account.id,
                 );
               })).then((value) {
-                if (value is String &&
-                    widget.accountsContrller.hasAccountById(value)) {
-                  _account = widget.accountsContrller.getAccountById(value);
+                if (value is String && store.accounts.hasAccountById(value)) {
+                  _account = store.accounts.getAccountById(value);
                   setState(() {});
                 }
               });
@@ -321,7 +322,7 @@ class _LookAccountPageState extends State<LookAccountPage>
     ).then((value) async {
       if (value is bool && value) {
         try {
-          await widget.accountsContrller.removeAccount(_account.id);
+          await StoreProvider.of(context).accounts.removeAccount(_account.id);
           if (mounted) {
             Navigator.of(context).pop();
           }

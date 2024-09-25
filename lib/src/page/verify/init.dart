@@ -4,17 +4,15 @@ import 'package:flutter/services.dart';
 
 import 'package:animations/animations.dart';
 
+import '../../context/store.dart';
 import '../../i18n.dart';
-import '../../store/verify/contrller.dart';
 import '../home/home.dart';
 import 'security_question.dart';
 
 class InitPassword extends StatefulWidget {
-  const InitPassword({super.key, required this.verifyContrller});
+  const InitPassword({super.key});
 
   static const routeName = "/init";
-
-  final VerifyController verifyContrller;
 
   @override
   State<InitPassword> createState() => InitPasswordState();
@@ -33,6 +31,8 @@ class InitPasswordState extends State<InitPassword> {
 
   @override
   Widget build(BuildContext context) {
+    final store = StoreProvider.of(context);
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Center(
@@ -72,9 +72,8 @@ class InitPasswordState extends State<InitPassword> {
                           });
                         } else {
                           final password = _passwordController.text;
-                          widget.verifyContrller
-                              .initPassword(password, questions)
-                              .then((value) {
+                          store.verify.initPassword(password, questions).then(
+                              (value) {
                             Navigator.pushReplacementNamed(
                                 context, Home.routeName);
                           }, onError: (error) {

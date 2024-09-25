@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
 import '../../component/highlight_text.dart';
+import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../model/rpass/account.dart';
 import '../../util/common.dart';
@@ -9,9 +12,7 @@ import '../page.dart';
 import '../../store/accounts/contrller.dart';
 
 class PasswordsPage extends StatefulWidget {
-  const PasswordsPage({super.key, required this.accountsContrller});
-
-  final AccountsContrller accountsContrller;
+  const PasswordsPage({super.key});
 
   @override
   State<PasswordsPage> createState() => PasswordsPageState();
@@ -27,16 +28,19 @@ class PasswordsPageState extends State<PasswordsPage>
 
   @override
   void initState() {
-    widget.accountsContrller.addListener(_searchAccounts);
+    Future.delayed(Duration.zero, () {
+      StoreProvider.of(context).accounts.addListener(_searchAccounts);
+    });
     _searchAccounts();
     super.initState();
   }
 
   void _searchAccounts() {
     _accounts.clear();
+    final store = StoreProvider.of(context);
     if (_searchText.isNotEmpty) {
       final searchText = _searchText.toLowerCase();
-      _accounts.addAll(widget.accountsContrller.accountList.where((account) {
+      _accounts.addAll(store.accounts.accountList.where((account) {
         var weight = account.domain.toLowerCase().contains(searchText) ? 1 : 0;
         weight += account.domainName.toLowerCase().contains(searchText) ? 1 : 0;
         weight += account.account.toLowerCase().contains(searchText) ? 1 : 0;
@@ -48,7 +52,7 @@ class PasswordsPageState extends State<PasswordsPage>
         return weight > 0;
       }));
     } else {
-      _accounts.addAll(widget.accountsContrller.accountList);
+      _accounts.addAll(store.accounts.accountList);
     }
 
     setState(() {});
@@ -57,13 +61,15 @@ class PasswordsPageState extends State<PasswordsPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final store = StoreProvider.of(context);
+
     final mainColor = Theme.of(context).colorScheme.primaryContainer;
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: _AppBarTitleToSearch(
-          itemCount: widget.accountsContrller.accountList.length,
+          itemCount: store.accounts.accountList.length,
           matchCount: _searchText.isNotEmpty ? _accounts.length : 0,
           onChanged: (text) {
             _searchText = text;
@@ -82,7 +88,7 @@ class PasswordsPageState extends State<PasswordsPage>
         },
         itemBuilder: (context, index) {
           return _OpenContainerPasswordItem(
-            accountsContrller: widget.accountsContrller,
+            accountsContrller: store.accounts,
             account: _accounts[index],
             matchText: _searchText,
           );
@@ -95,9 +101,7 @@ class PasswordsPageState extends State<PasswordsPage>
         closedColor: mainColor,
         middleColor: mainColor,
         openBuilder: (BuildContext context, VoidCallback _) {
-          return EditAccountPage(
-            accountsContrller: widget.accountsContrller,
-          );
+          return EditAccountPage();
         },
         closedElevation: 6.0,
         closedShape: const RoundedRectangleBorder(
@@ -255,12 +259,10 @@ class _OpenContainerPasswordItem extends StatelessWidget {
       openBuilder: (BuildContext context, VoidCallback _) {
         if (isLogPress) {
           return EditAccountPage(
-            accountsContrller: accountsContrller,
             accountId: account.id,
           );
         }
         return LookAccountPage(
-          accountsContrller: accountsContrller,
           accountId: account.id,
         );
       },

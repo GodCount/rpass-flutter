@@ -4,8 +4,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-
 import '../../component/toast.dart';
+import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../model/browser/chrome.dart';
 import '../../model/browser/firefox.dart';
@@ -13,18 +13,15 @@ import '../../model/common.dart';
 import '../../model/rpass/backup.dart';
 import '../../model/rpass/question.dart';
 import '../../rpass.dart';
-import '../../store/index.dart';
 import '../../util/common.dart';
 import '../../util/file.dart';
 import '../../util/verify_core.dart';
 import '../verify/verify_question.dart';
 
 class ImportAccountPage extends StatefulWidget {
-  const ImportAccountPage({super.key, required this.store});
+  const ImportAccountPage({super.key});
 
   static const routeName = "/import_account";
-
-  final Store store;
 
   @override
   State<ImportAccountPage> createState() => _ImportAccountPageState();
@@ -53,13 +50,12 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
           break;
       }
       if (backup != null && backup.accounts.isNotEmpty) {
-        await widget.store.accounts.importBackupAccounts(backup);
+        await StoreProvider.of(context).accounts.importBackupAccounts(backup);
         showToast(context, I18n.of(context)!.import_done);
         _importSuccess = true;
       }
     } catch (e) {
-      showToast(
-          context, I18n.of(context)!.import_throw(e.toString()));
+      showToast(context, I18n.of(context)!.import_throw(e.toString()));
       _importSuccess = false;
     } finally {
       setState(() {});
@@ -277,8 +273,7 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
       );
       _denryptBackup(token);
     } catch (e) {
-      showToast(context,
-          I18n.of(context)!.security_qa_throw(e.toString()));
+      showToast(context, I18n.of(context)!.security_qa_throw(e.toString()));
     }
   }
 
@@ -292,8 +287,7 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
       });
       widget.onDenrypt(backup);
     } catch (e) {
-      showToast(
-          context, I18n.of(context)!.denrypt_throw(e.toString()));
+      showToast(context, I18n.of(context)!.denrypt_throw(e.toString()));
     }
   }
 

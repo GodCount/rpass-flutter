@@ -4,18 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../component/toast.dart';
+import '../../context/biometric.dart';
+import '../../context/store.dart';
 import '../../i18n.dart';
-import '../../store/verify/contrller.dart';
-import '../widget/biometric.dart';
 import './forget.dart';
 import '../home/home.dart';
 
 class VerifyPassword extends StatefulWidget {
-  const VerifyPassword({super.key, required this.verifyContrller});
+  const VerifyPassword({super.key});
 
   static const routeName = "/verify";
-
-  final VerifyController verifyContrller;
 
   @override
   State<VerifyPassword> createState() => VerifyPasswordState();
@@ -45,7 +43,7 @@ class VerifyPasswordState extends State<VerifyPassword> {
   void _verifyPassword() {
     if (_passwordController.text.isNotEmpty) {
       try {
-        widget.verifyContrller.verify(_passwordController.text);
+        StoreProvider.of(context).verify.verify(_passwordController.text);
         Navigator.of(context).pushReplacementNamed(Home.routeName);
       } catch (error) {
         if (kDebugMode) {
@@ -62,7 +60,7 @@ class VerifyPasswordState extends State<VerifyPassword> {
     try {
       final biometric = Biometric.of(context);
       if (biometric.enable) {
-        await biometric.verify();
+        await biometric.verify(context);
         Navigator.of(context).pushReplacementNamed(Home.routeName);
       }
     } on AuthException catch (e) {

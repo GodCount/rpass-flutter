@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../context/store.dart';
 import '../../i18n.dart';
-import '../../store/settings/controller.dart';
 
 class ChangeLocalePage extends StatefulWidget {
-  const ChangeLocalePage({super.key, required this.settingsController});
+  const ChangeLocalePage({super.key});
 
   static const routeName = "/change_locale";
-
-  final SettingsController settingsController;
 
   @override
   State<ChangeLocalePage> createState() => _ChangeLocalePageState();
@@ -29,6 +27,7 @@ class _ChangeLocalePageState extends State<ChangeLocalePage> {
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
+    final store = StoreProvider.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(t.language_setting),
@@ -40,11 +39,11 @@ class _ChangeLocalePageState extends State<ChangeLocalePage> {
             title: Text(
               locale != null ? _locales[locale.toString()]! : t.system,
             ),
-            trailing: widget.settingsController.locale == locale
+            trailing: store.settings.locale == locale
                 ? const Icon(Icons.check)
                 : null,
             onTap: () {
-              widget.settingsController.setLocale(locale);
+              store.settings.setLocale(locale);
             },
           );
         }).toList(),

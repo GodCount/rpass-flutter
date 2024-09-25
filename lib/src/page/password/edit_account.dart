@@ -7,20 +7,17 @@ import '../../component/label_list.dart';
 import '../../component/match_text.dart';
 import '../../component/toast.dart';
 import '../../component/transition.dart';
+import '../../context/store.dart';
 import '../../i18n.dart';
-import '../../store/accounts/contrller.dart';
 import '../../model/rpass/account.dart';
 import '../../util/common.dart';
 import '../page.dart';
 import '../widget/utils.dart';
 
 class EditAccountPage extends StatefulWidget {
-  const EditAccountPage(
-      {super.key, required this.accountsContrller, this.accountId});
+  const EditAccountPage({super.key, this.accountId});
 
   static const routeName = "/edit_account";
-
-  final AccountsContrller accountsContrller;
 
   final String? accountId;
 
@@ -31,7 +28,7 @@ class EditAccountPage extends StatefulWidget {
 class _EditAccountPageState extends State<EditAccountPage> {
   final GlobalKey<ScaleReboundState> _scaleReboundKey = GlobalKey();
 
-  late final Account _account;
+  Account _account = Account();
 
   late final GlobalKey<_ValidatorTextFieldState> _domainGolbalKey;
   late final GlobalKey<_ValidatorDropdownMenuState> _emailGolbalKey;
@@ -51,14 +48,15 @@ class _EditAccountPageState extends State<EditAccountPage> {
 
   @override
   void initState() {
-    if (widget.accountId != null) {
-      try {
-        _account =
-            widget.accountsContrller.getAccountById(widget.accountId!).clone();
-        _canClone = true;
-      } catch (e) {
-        // initState 阶段无法使用 context 延迟一下
-        Future.delayed(Duration.zero, () {
+    Future.delayed(Duration.zero, () {
+      if (widget.accountId != null) {
+        try {
+          _account = StoreProvider.of(context)
+              .accounts
+              .getAccountById(widget.accountId!)
+              .clone();
+          _canClone = true;
+        } catch (e) {
           showToast(
             context,
             I18n.of(context)!.info_read_throw(
@@ -66,14 +64,9 @@ class _EditAccountPageState extends State<EditAccountPage> {
             ),
           );
           Navigator.of(context).pop();
-        });
-
-        // 先赋值为空,让后续代码正常运行
-        _account = Account();
+        }
       }
-    } else {
-      _account = Account();
-    }
+    });
 
     _domainGolbalKey = GlobalKey<_ValidatorTextFieldState>();
     _emailGolbalKey = GlobalKey<_ValidatorDropdownMenuState>();
@@ -121,7 +114,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
   }
 
   List<LabelItem> _getLabels() {
-    return widget.accountsContrller.labelSet.map((value) {
+    return StoreProvider.of(context).accounts.labelSet.map((value) {
       return LabelItem(value: value, select: _account.labels.contains(value));
     }).toList();
   }
@@ -138,6 +131,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
+    final store = StoreProvider.of(context);
 
     double width = MediaQuery.sizeOf(context).width;
 
@@ -202,8 +196,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                       label: Text(t.account),
                       menuHeight: 100,
                       requestFocusOnTap: true,
-                      dropdownMenuEntries: widget
-                          .accountsContrller.accountNumSet
+                      dropdownMenuEntries: store.accounts.accountNumSet
                           .map((value) =>
                               DropdownMenuEntry(value: value, label: value))
                           .toList(),
@@ -221,7 +214,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                       label: Text(t.email),
                       menuHeight: 100,
                       requestFocusOnTap: true,
-                      dropdownMenuEntries: widget.accountsContrller.emailSet
+                      dropdownMenuEntries: store.accounts.emailSet
                           .map((value) =>
                               DropdownMenuEntry(value: value, label: value))
                           .toList(),
@@ -350,7 +343,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
             _account.password = _passwordController.text;
             _account.oneTimePassword = _otPasswordController.text;
             _account.description = _descriptionController.text;
-            widget.accountsContrller.setAccount(_account);
+            store.accounts.setAccount(_account);
             Navigator.of(context).pop(_account.id);
           }
         },
