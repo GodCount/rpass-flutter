@@ -112,7 +112,6 @@ class VerifyPasswordState extends State<VerifyPassword> {
                   child: TextField(
                     focusNode: _focusNode,
                     controller: _passwordController,
-                    keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.done,
                     autofocus: true,
                     obscureText: _obscureText,

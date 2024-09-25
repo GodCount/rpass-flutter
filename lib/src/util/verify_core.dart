@@ -15,11 +15,6 @@ class VerifyCore {
   }
 
   static String createQuestionAes(
-      {required String token, required List<QuestionAnswer> questions}) {
-    return aesEncrypt(md5(questions.map((item) => item.answer).join()), token);
-  }
-
-  static String createQuestionAesByKey(
       {required String token, required List<QuestionAnswerKey> questions}) {
     return aesEncrypt(
         md5(questions.map((item) => item.answerKey).join()), token);
@@ -48,7 +43,11 @@ class VerifyCore {
     required String passwordAes,
   }) {
     final token = aesDenrypt(
-        md5(questions.map((item) => item.answer).join()), questionAes);
+        md5(questions
+            .map(
+                (item) => QuestionAnswerKey(item.question, answer: item.answer).answerKey)
+            .join()),
+        questionAes);
 
     if (aesDenrypt(token, passwordAes) == VERIFY_TEXT) {
       return token;

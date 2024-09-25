@@ -344,7 +344,6 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
           child: TextField(
             focusNode: _focusNode,
             controller: _passwordController,
-            keyboardType: TextInputType.number,
             textInputAction: TextInputAction.done,
             autofocus: true,
             obscureText: _obscureText,

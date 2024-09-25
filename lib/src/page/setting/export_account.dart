@@ -129,7 +129,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
               .map((item) =>
                   QuestionAnswerKey(item.question, answer: item.answer))
               .toList();
-          questionsToken = VerifyCore.createQuestionAesByKey(
+          questionsToken = VerifyCore.createQuestionAes(
               token: token, questions: questions);
         } else {
           questions = widget.store.verify.questionList;
@@ -259,7 +259,6 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                                   ),
                                   child: TextField(
                                     controller: _passwordController,
-                                    keyboardType: TextInputType.number,
                                     textInputAction: TextInputAction.done,
                                     inputFormatters: [
                                       FilteringTextInputFormatter.digitsOnly
