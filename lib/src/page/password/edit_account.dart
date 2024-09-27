@@ -12,7 +12,7 @@ import '../../i18n.dart';
 import '../../model/rpass/account.dart';
 import '../../util/common.dart';
 import '../page.dart';
-import '../widget/utils.dart';
+import '../../widget/utils.dart';
 
 class EditAccountPage extends StatefulWidget {
   const EditAccountPage({super.key, this.accountId});

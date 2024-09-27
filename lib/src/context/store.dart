@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../store/index.dart';
 import 'biometric.dart';
+import 'kdbx.dart';
 
 class StoreProvider extends StatefulWidget {
   const StoreProvider({super.key, required this.store, required this.child});
@@ -39,9 +40,7 @@ class StoreProvider extends StatefulWidget {
 class StoreProviderState extends State<StoreProvider> {
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: widget.store.settings,
-      builder: (context, child) => child!,
+    return KdbxProvider(
       child: Biometric(
         child: widget.child,
       ),

@@ -12,7 +12,7 @@ import '../../i18n.dart';
 import '../../model/rpass/account.dart';
 import '../../util/common.dart';
 import '../../util/one_time_password.dart';
-import '../widget/utils.dart';
+import '../../widget/utils.dart';
 import './edit_account.dart';
 
 class LookAccountPage extends StatefulWidget {

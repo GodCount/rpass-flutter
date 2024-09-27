@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../component/toast.dart';
-import '../../i18n.dart';
+import '../component/toast.dart';
+import '../i18n.dart';
 
 mixin HintEmptyTextUtil<T extends StatefulWidget> on State<T> {
   Widget hintEmptyText(bool isEmpty, Widget widget) {

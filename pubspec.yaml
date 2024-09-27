@@ -54,6 +54,11 @@ dependencies:
   csv: ^6.0.0
   url_launcher: ^6.3.0
   biometric_storage: ^5.1.0-rc.4
+  kdbx:
+    git:
+      url: https://github.com/rongyu-zhen/kdbx.dart.git
+      ref: master
+  path: ^1.9.0
 
 dev_dependencies:
   flutter_test:
