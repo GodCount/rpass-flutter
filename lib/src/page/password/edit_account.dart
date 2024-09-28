@@ -774,3 +774,18 @@ class _DescriptionTextFieldState extends State<_DescriptionTextField> {
     });
   }
 }
+
+
+
+
+
+
+class KdbxTextField extends StatefulWidget {
+  
+}
+
+
+
+
+
+

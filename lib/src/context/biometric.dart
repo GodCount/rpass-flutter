@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -89,36 +91,47 @@ class BiometricState extends State<Biometric> {
   Future<BiometricStorageFile> _getStorageFile(BuildContext context) async {
     _assertBiometric();
     if (_storageFile != null) return _storageFile!;
-    _storageFile = await _biometric.getStorage("token",
+    _storageFile = await _biometric.getStorage("credentials",
         promptInfo: _getPromptInfo(context));
     return _storageFile!;
   }
 
-  Future<void> verify(BuildContext context) async {
+  String _encode(Uint8List data) {
+    return base64.encode(data);
+  }
+
+  Uint8List _decode(String data) {
+    return base64.decode(data);
+  }
+
+  Future<Uint8List> getCredentials(BuildContext context) async {
     _assertBiometric();
 
     if (!enable) {
       throw Exception("not enabled biometric");
     }
 
-    final token = await (await _getStorageFile(context))
+    final credentials = await (await _getStorageFile(context))
         .read(promptInfo: _getPromptInfo(context));
-    if (token == null || token.isEmpty) {
+    if (credentials == null || credentials.isEmpty) {
       StoreProvider.of(context).settings.seEnableBiometric(false);
       throw Exception("no record token from biometric");
     }
 
-    StoreProvider.of(context).verify.verifyToken(token);
+    return _decode(credentials);
   }
 
-  Future<void> updateToken(BuildContext context, String? token) async {
+  Future<void> updateCredentials(
+    BuildContext context,
+    Uint8List? credentials,
+  ) async {
     _assertBiometric();
-    if (token == null) {
+    if (credentials == null) {
       await (await _getStorageFile(context))
           .delete(promptInfo: _getPromptInfo(context));
     } else {
       await (await _getStorageFile(context))
-          .write(token, promptInfo: _getPromptInfo(context));
+          .write(_encode(credentials), promptInfo: _getPromptInfo(context));
     }
   }
 

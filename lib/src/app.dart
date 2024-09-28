@@ -47,6 +47,7 @@ class RpassApp extends StatelessWidget {
         listenable: store.settings,
         builder: (context, child) {
           final kdbx = KdbxProvider.of(context);
+
           return MaterialApp(
             restorationScopeId: 'app',
             theme: theme(Brightness.light),
@@ -64,27 +65,30 @@ class RpassApp extends StatelessWidget {
               return null;
             },
             initialRoute: kdbx == null
-                ? store.localKdbx.localKdbxFileExists
-                    ? VerifyPassword.routeName
-                    : InitPassword.routeName
+                ? InitKdbxPage.routeName
                 : Home.routeName,
             navigatorObservers: [UnfocusNavigatorRoute()],
             routes: {
-              InitPassword.routeName: (context) => const InitPassword(),
-              VerifyPassword.routeName: (context) => const VerifyPassword(),
-              ForgetPassword.routeName: (context) => const ForgetPassword(),
               Home.routeName: (context) => const Home(),
-              AboutPage.routeName: (context) => const AboutPage(),
-              EditAccountPage.routeName: (context) => const EditAccountPage(),
-              LookAccountPage.routeName: (context) =>
-                  const LookAccountPage(accountId: ""),
-              QrCodeScannerPage.routeName: (context) =>
-                  const QrCodeScannerPage(),
-              ExportAccountPage.routeName: (context) =>
-                  const ExportAccountPage(),
-              ImportAccountPage.routeName: (context) =>
-                  const ImportAccountPage(),
-              ChangeLocalePage.routeName: (context) => const ChangeLocalePage()
+              CreateKdbxPage.routeName: (context) => const CreateKdbxPage(),
+              LoadKdbxPage.routeName: (context) => const LoadKdbxPage(),
+              InitKdbxPage.routeName: (context) => const InitKdbxPage(),
+
+              // InitPassword.routeName: (context) => const InitPassword(),
+              // VerifyPassword.routeName: (context) => const VerifyPassword(),
+              // ForgetPassword.routeName: (context) => const ForgetPassword(),
+              // Home.routeName: (context) => const Home(),
+              // AboutPage.routeName: (context) => const AboutPage(),
+              // EditAccountPage.routeName: (context) => const EditAccountPage(),
+              // LookAccountPage.routeName: (context) =>
+              //     const LookAccountPage(accountId: ""),
+              // QrCodeScannerPage.routeName: (context) =>
+              //     const QrCodeScannerPage(),
+              // ExportAccountPage.routeName: (context) =>
+              //     const ExportAccountPage(),
+              // ImportAccountPage.routeName: (context) =>
+              //     const ImportAccountPage(),
+              // ChangeLocalePage.routeName: (context) => const ChangeLocalePage()
             },
           );
         },

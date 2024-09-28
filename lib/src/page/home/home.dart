@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../context/store.dart';
+import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import 'settings.dart';
-import 'passwords.dart';
+// import 'passwords.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -20,8 +20,6 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
-  bool _initDenrypted = false;
-
   @override
   void initState() {
     _controller = PageController(initialPage: 0);
@@ -37,28 +35,27 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final kdbx = KdbxProvider.of(context);
 
-    final t = I18n.of(context)!;
-
-    if (!_initDenrypted) {
-      StoreProvider.of(context).accounts.initDenrypt().then(
-            (value) => setState(() {
-              _initDenrypted = true;
-            }),
-          );
-    }
-
-    return Scaffold(
-      body: _initDenrypted
-          ? PageView(
+    return kdbx != null
+        ? Scaffold(
+            body: PageView(
               controller: _controller,
-              children: const [PasswordsPage(), SettingsPage()],
-            )
-          : Center(child: Text(t.denrypting)),
-      bottomNavigationBar: _initDenrypted
-          ? _MyBottomNavigationBar(controller: _controller)
-          : null,
-    );
+              children: const [
+                Center(
+                  child: Text("未完成"),
+                ),
+                SettingsPage()
+              ],
+            ),
+            bottomNavigationBar:
+                _MyBottomNavigationBar(controller: _controller),
+          )
+        : const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
   }
 }
 

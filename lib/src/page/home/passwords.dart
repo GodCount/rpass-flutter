@@ -101,7 +101,7 @@ class PasswordsPageState extends State<PasswordsPage>
         closedColor: mainColor,
         middleColor: mainColor,
         openBuilder: (BuildContext context, VoidCallback _) {
-          return EditAccountPage();
+          return const EditAccountPage();
         },
         closedElevation: 6.0,
         closedShape: const RoundedRectangleBorder(

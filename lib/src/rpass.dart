@@ -7,6 +7,9 @@ class RpassInfo {
     _packageInfo = await PackageInfo.fromPlatform();
   }
 
+  static const defaultKdbxName = "default";
+  static const defaultKdbxFileName = "$defaultKdbxName.kdbx";
+
   static String get appName => _packageInfo?.appName ?? "Rpass";
   static String get packageName => _packageInfo?.packageName ?? "Rpass";
   static String get version => _packageInfo?.version ?? "1.0.0";

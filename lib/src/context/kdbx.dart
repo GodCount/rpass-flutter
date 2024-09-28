@@ -46,7 +46,7 @@ class KdbxProviderState extends State<KdbxProvider> {
   Kdbx? kdbx;
 
   void setKdbx(Kdbx kdbx) {
-    kdbx = kdbx;
+    this.kdbx = kdbx;
   }
 
   @override

@@ -1,9 +1,11 @@
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rpass/src/kdbx/kdbx.dart';
 
 import '../../component/toast.dart';
 import '../../context/biometric.dart';
+import '../../context/kdbx.dart';
 import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../util/verify_core.dart';
@@ -132,9 +134,13 @@ class SettingsPageState extends State<SettingsPage>
                     : null,
                 onTap: () async {
                   try {
+                    final kdbx = KdbxProvider.of(context)!;
+
                     final enableBiometric = !store.settings.enableBiometric;
-                    await biometric.updateToken(
-                        context, enableBiometric ? store.verify.token : null);
+                    await biometric.updateCredentials(
+                      context,
+                      enableBiometric ? kdbx.credentials.getHash() : null,
+                    );
                     store.settings.seEnableBiometric(enableBiometric);
                   } on AuthException catch (e) {
                     if (e.code == AuthExceptionCode.userCanceled ||
@@ -151,11 +157,6 @@ class SettingsPageState extends State<SettingsPage>
             ListTile(
               title: Text(t.modify_password),
               onTap: _modifyPassword,
-            ),
-            ListTile(
-              shape: shape,
-              title: Text(t.modify_security_qa),
-              onTap: _modifyQuestion,
             ),
           ]),
           _cardColumn([
@@ -232,14 +233,17 @@ class SettingsPageState extends State<SettingsPage>
     void onSetPassword() async {
       if (formState.currentState!.validate()) {
         try {
-          final store = StoreProvider.of(context);
           final biometric = Biometric.of(context);
+          final kdbx = KdbxProvider.of(context)!;
+
+          final oldCredentials = kdbx.credentials;
+          final credentials = kdbx.createCredentials(newPassword);
 
           if (biometric.enable) {
             try {
-              await biometric.updateToken(
+              await biometric.updateCredentials(
                 context,
-                VerifyCore.createToken(newPassword).$1,
+                credentials.getHash(),
               );
             } on AuthException catch (e) {
               if (e.code == AuthExceptionCode.userCanceled ||
@@ -254,9 +258,15 @@ class SettingsPageState extends State<SettingsPage>
           }
 
           try {
-            await store.verify.modifyPassword(newPassword);
+            kdbx
+              ..modifyCredentials(credentials)
+              ..save();
           } catch (e) {
-            await biometric.updateToken(context, store.verify.token);
+            kdbx.modifyCredentials(oldCredentials);
+            await biometric.updateCredentials(
+              context,
+              oldCredentials.getHash(),
+            );
             rethrow;
           }
 
@@ -310,11 +320,7 @@ class SettingsPageState extends State<SettingsPage>
                         value == null || value.isEmpty || value == newPassword
                             ? null
                             : t.password_not_equal,
-                    onFieldSubmitted: (value) {
-                      if (formState.currentState!.validate()) {
-                        onSetPassword();
-                      }
-                    },
+                    onFieldSubmitted: (value) => onSetPassword(),
                   ),
                 )
               ],
@@ -335,38 +341,5 @@ class SettingsPageState extends State<SettingsPage>
         );
       },
     );
-  }
-
-  void _modifyQuestion() {
-    showDialog(
-        context: context,
-        builder: (context) {
-          final store = StoreProvider.of(context);
-          return AlertDialog(
-            scrollable: true,
-            content: SecurityQuestion(
-              initialList: store.verify.questionList
-                  .map((item) => QuestionAnswer(item.question, ""))
-                  .toList(),
-              onSubmit: (questions) async {
-                if (questions != null) {
-                  try {
-                    await store.verify.setQuestionList(questions);
-                  } catch (e) {
-                    showToast(
-                      context,
-                      I18n.of(context)!.modify_security_qa_throw(
-                        e.toString(),
-                      ),
-                    );
-                  }
-                }
-                if (mounted) {
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-          );
-        });
   }
 }
