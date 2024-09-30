@@ -30,7 +30,7 @@ class KdbxProvider extends StatefulWidget {
     return kdbxProvider!;
   }
 
-  static void setKdbx(BuildContext context, Kdbx kdbx) {
+  static void setKdbx(BuildContext context, Kdbx? kdbx) {
     _ofState(context).setKdbx(kdbx);
   }
 
@@ -45,7 +45,7 @@ class KdbxProvider extends StatefulWidget {
 class KdbxProviderState extends State<KdbxProvider> {
   Kdbx? kdbx;
 
-  void setKdbx(Kdbx kdbx) {
+  void setKdbx(Kdbx? kdbx) {
     this.kdbx = kdbx;
   }
 

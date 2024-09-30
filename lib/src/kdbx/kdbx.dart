@@ -2,34 +2,58 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:kdbx/kdbx.dart' hide KdbxException;
+import 'package:kdbx/kdbx.dart' hide KdbxException, KdbxKeyCommon;
 
 import '../rpass.dart';
 import 'common.dart';
 import 'icons.dart';
 
 export 'common.dart';
-export 'package:kdbx/kdbx.dart' show KdbxEntry, KdbxGroup;
+export 'package:kdbx/kdbx.dart'
+    show KdbxEntry, KdbxGroup, KdbxKey, PlainValue, StringValue;
 
 abstract class KdbxBase {
   abstract final KdbxFile kdbxFile;
 }
 
-class RpassKdbxKeyCommon extends KdbxKeyCommon {
+class KdbxKeySpecial {
+  static const KEY_TAGS = 'Tags';
+  static const KEY_ATTACH = 'Attach';
+
+  static KdbxKey TAGS = KdbxKey(KEY_TAGS);
+  static KdbxKey ATTACH = KdbxKey(KEY_ATTACH);
+
+  static List<KdbxKey> all = [
+    TAGS,
+    ATTACH,
+  ];
+}
+
+class KdbxKeyCommon {
+  static const KEY_TITLE = 'Title';
+  static const KEY_URL = 'URL';
+  static const KEY_USER_NAME = 'UserName';
   static const KEY_EMAIL = 'Email';
+  static const KEY_PASSWORD = 'Password';
+  static const KEY_OTP = 'OTPAuth';
   static const KEY_NOTES = 'Notes';
 
+  static KdbxKey TITLE = KdbxKey(KEY_TITLE);
+  static KdbxKey URL = KdbxKey(KEY_URL);
+  static KdbxKey USER_NAME = KdbxKey(KEY_USER_NAME);
   static KdbxKey EMAIL = KdbxKey(KEY_EMAIL);
+  static KdbxKey PASSWORD = KdbxKey(KEY_PASSWORD);
+  static KdbxKey OTP = KdbxKey(KEY_OTP);
   static KdbxKey NOTES = KdbxKey(KEY_NOTES);
 
   // 注意顺序
   static List<KdbxKey> all = [
-    KdbxKeyCommon.TITLE,
-    KdbxKeyCommon.URL,
-    KdbxKeyCommon.USER_NAME,
+    TITLE,
+    URL,
+    USER_NAME,
     EMAIL,
-    KdbxKeyCommon.PASSWORD,
-    KdbxKeyCommon.OTP,
+    PASSWORD,
+    OTP,
     NOTES
   ];
 }
@@ -41,7 +65,7 @@ class FieldStatistic {
     Set<String>? emails,
     Set<String>? passwords,
     Set<String>? tags,
-    Set<KdbxKey>? customFields,
+    Set<String>? customFields,
   })  : urls = urls ?? {},
         userNames = userNames ?? {},
         emails = emails ?? {},
@@ -53,7 +77,25 @@ class FieldStatistic {
   final Set<String> emails;
   final Set<String> passwords;
   final Set<String> tags;
-  final Set<KdbxKey> customFields;
+  final Set<String> customFields;
+
+  Set<String>? getStatistic(KdbxKey kdbKey) {
+    switch (kdbKey.key) {
+      case KdbxKeyCommon.KEY_URL:
+        return urls;
+      case KdbxKeyCommon.KEY_USER_NAME:
+        return userNames;
+      case KdbxKeyCommon.KEY_EMAIL:
+        return emails;
+      case KdbxKeyCommon.KEY_PASSWORD:
+        return passwords;
+      case KdbxKeySpecial.KEY_TAGS:
+        return tags;
+      case "CustomFields":
+        return customFields;
+    }
+    return null;
+  }
 }
 
 extension KdbxMetaExt on KdbxBase {
@@ -117,7 +159,7 @@ extension KdbxEntryExt on KdbxBase {
 
   void createEntry(KdbxGroup parent) {
     final entry = KdbxEntry.create(kdbxFile, parent);
-    for (var key in RpassKdbxKeyCommon.all) {
+    for (var key in KdbxKeyCommon.all) {
       entry.setString(key, PlainValue(''));
     }
     parent.addEntry(entry);
@@ -186,7 +228,7 @@ mixin KdbxEntryFieldStatistic on KdbxBase {
     for (var item in totalEntrys) {
       final url = item.getString(KdbxKeyCommon.URL)?.getText();
       final userName = item.getString(KdbxKeyCommon.USER_NAME)?.getText();
-      final email = item.getString(RpassKdbxKeyCommon.EMAIL)?.getText();
+      final email = item.getString(KdbxKeyCommon.EMAIL)?.getText();
       final password = item.getString(KdbxKeyCommon.PASSWORD)?.getText();
       url != null && fieldStatistic.urls.add(url);
       userName != null && fieldStatistic.userNames.add(userName);
@@ -194,8 +236,8 @@ mixin KdbxEntryFieldStatistic on KdbxBase {
       password != null && fieldStatistic.passwords.add(password);
       fieldStatistic.tags.addAll(item.tagList);
       fieldStatistic.customFields.addAll(item.stringEntries
-          .where((kdbKey) => !RpassKdbxKeyCommon.all.contains(kdbKey.key))
-          .map((kdbKey) => kdbKey.key));
+          .where((kdbKey) => !KdbxKeyCommon.all.contains(kdbKey.key))
+          .map((kdbKey) => kdbKey.key.key));
     }
     return fieldStatistic;
   }

@@ -2,13 +2,16 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../component/label_list.dart';
 import '../../component/match_text.dart';
 import '../../component/toast.dart';
 import '../../component/transition.dart';
+import '../../context/kdbx.dart';
 import '../../context/store.dart';
 import '../../i18n.dart';
+import '../../kdbx/kdbx.dart';
 import '../../model/rpass/account.dart';
 import '../../util/common.dart';
 import '../page.dart';
@@ -775,17 +778,176 @@ class _DescriptionTextFieldState extends State<_DescriptionTextField> {
   }
 }
 
+abstract class KdbxFieldSaved<T> {
+  KdbxFieldSaved({required this.key, required this.value});
 
-
-
-
-
-class KdbxTextField extends StatefulWidget {
-  
+  final KdbxKey key;
+  final T value;
 }
 
+class KdbxTextFieldSaved extends KdbxFieldSaved<StringValue> {
+  KdbxTextFieldSaved({required super.key, required super.value});
+}
 
+class KdbxField extends StatefulWidget {
+  const KdbxField({
+    super.key,
+    required this.kdbxEntry,
+    required this.kdbxKey,
+    required this.onSaved,
+  });
 
+  final KdbxEntry kdbxEntry;
+  final KdbxKey kdbxKey;
+  final FormFieldSetter<KdbxFieldSaved> onSaved;
 
+  @override
+  State<KdbxField> createState() => _KdbxFieldState();
+}
 
+class _KdbxFieldState extends State<KdbxField> {
+  @override
+  Widget build(BuildContext context) {
+    return _buildFormFieldFactory();
+  }
 
+  String _kdbKey2I18n() {
+    final t = I18n.of(context)!;
+    switch (widget.kdbxKey.key) {
+      case KdbxKeyCommon.KEY_TITLE:
+        return t.domain_title;
+      case KdbxKeyCommon.KEY_URL:
+        return t.domain;
+      case KdbxKeyCommon.KEY_USER_NAME:
+        return t.account;
+      case KdbxKeyCommon.KEY_EMAIL:
+        return t.email;
+      case KdbxKeyCommon.KEY_PASSWORD:
+        return t.password;
+      case KdbxKeyCommon.KEY_OTP:
+        return t.otp;
+      case KdbxKeyCommon.KEY_NOTES:
+        return t.description;
+      case KdbxKeySpecial.KEY_TAGS:
+        return t.label;
+      case KdbxKeySpecial.KEY_ATTACH:
+      default:
+        return widget.kdbxKey.key;
+    }
+  }
+
+  Widget _buildFormFieldFactory() {
+    final kdbx = KdbxProvider.of(context)!;
+    switch (widget.kdbxKey.key) {
+      case KdbxKeyCommon.KEY_URL:
+      case KdbxKeyCommon.KEY_USER_NAME:
+      case KdbxKeyCommon.KEY_EMAIL:
+        return DropdownMenuFormField(
+          initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
+          itmes: kdbx.fieldStatistic.getStatistic(widget.kdbxKey)!.toList(),
+          label: _kdbKey2I18n(),
+          onSaved: (value) => widget.onSaved(KdbxTextFieldSaved(
+            key: widget.kdbxKey,
+            value: PlainValue(value),
+          )),
+        );
+      case KdbxKeyCommon.KEY_PASSWORD:
+        return DropdownMenuFormField(
+          initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
+          itmes: kdbx.fieldStatistic.getStatistic(widget.kdbxKey)!.toList(),
+          label: _kdbKey2I18n(),
+          onSaved: (value) => widget.onSaved(KdbxTextFieldSaved(
+            key: widget.kdbxKey,
+            value: PlainValue(value),
+          )),
+          // trailingIcon: GestureDetector(
+          //   onTap: () {
+
+          //   },
+          //   child: const Icon(Icons.create),
+          // ),
+        );
+      case KdbxKeyCommon.KEY_OTP:
+        break;
+      case KdbxKeyCommon.KEY_NOTES:
+        break;
+      case KdbxKeySpecial.KEY_TAGS:
+        break;
+      case KdbxKeySpecial.KEY_ATTACH:
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+class DropdownMenuFormField extends FormField<String> {
+  DropdownMenuFormField({
+    super.key,
+    double? width,
+    double? menuHeight,
+    Widget? trailingIcon,
+    String? label,
+    super.initialValue,
+    EdgeInsets? expandedInsets,
+    required List<String> itmes,
+    super.onSaved,
+    super.autovalidateMode = AutovalidateMode.disabled,
+    super.validator,
+  }) : super(builder: (FormFieldState<String> field) {
+          final state = field as _DropdownMenuFormFieldState;
+          return DropdownMenu(
+            key: key,
+            width: width,
+            menuHeight: menuHeight,
+            trailingIcon: trailingIcon,
+            label: label != null ? Text(label) : null,
+            errorText: state.errorText,
+            selectedTrailingIcon: trailingIcon,
+            enableFilter: true,
+            enableSearch: true,
+            controller: state.controller,
+            initialSelection: state._dropdownMenuFormField.initialValue,
+            expandedInsets: expandedInsets,
+            dropdownMenuEntries: itmes
+                .map((value) => DropdownMenuEntry(value: value, label: value))
+                .toList(),
+          );
+        });
+
+  @override
+  FormFieldState<String> createState() => _DropdownMenuFormFieldState();
+}
+
+class _DropdownMenuFormFieldState extends FormFieldState<String> {
+  late TextEditingController controller;
+
+  DropdownMenuFormField get _dropdownMenuFormField =>
+      super.widget as DropdownMenuFormField;
+
+  @override
+  void initState() {
+    controller = TextEditingController(text: widget.initialValue);
+    controller.addListener(_handleControllerChanged);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.removeListener(_handleControllerChanged);
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  void reset() {
+    controller.text = widget.initialValue ?? "";
+    super.reset();
+  }
+
+  void _handleControllerChanged() {
+    if (controller.text != value) {
+      didChange(controller.text);
+    }
+  }
+}
