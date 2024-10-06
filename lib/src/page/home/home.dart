@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
+import 'groups.dart';
 import 'settings.dart';
-// import 'passwords.dart';
+import 'passwords.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -41,12 +42,7 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
         ? Scaffold(
             body: PageView(
               controller: _controller,
-              children: const [
-                Center(
-                  child: Text("未完成"),
-                ),
-                SettingsPage()
-              ],
+              children: const [PasswordsPage(), GroupsPage(), SettingsPage()],
             ),
             bottomNavigationBar:
                 _MyBottomNavigationBar(controller: _controller),
@@ -110,6 +106,10 @@ class _MyBottomNavigationBarState extends State<_MyBottomNavigationBar> {
         NavigationDestination(
           icon: const Icon(Icons.account_box_outlined),
           label: t.password,
+        ),
+        const NavigationDestination(
+          icon: Icon(Icons.groups_2_rounded),
+          label: "分组",
         ),
         NavigationDestination(
           icon: const Icon(Icons.settings),

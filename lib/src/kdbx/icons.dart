@@ -60,7 +60,7 @@ class KdbxIcon2Material {
     Icons.edit_rounded,
     Icons.account_box_rounded,
     Icons.book_rounded,
-    Icons.list_rounded,
+    Icons.list_alt_outlined,
     Icons.key_rounded,
     Icons.build_rounded,
     Icons.house_rounded,

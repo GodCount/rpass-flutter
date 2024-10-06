@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 class SimpleFile {
   static Future<Directory> applicationDocumentsDirectory =
@@ -11,17 +12,14 @@ class SimpleFile {
 
   static Future<String> saveFile({
     required Uint8List data,
-    required String name,
-    String ext = "txt",
+    required String filename,
     String? dialogTitle,
   }) async {
-    final filename = "$name.$ext";
-
     String? filepath = await FilePicker.platform.saveFile(
       dialogTitle: dialogTitle,
       type: FileType.custom,
-      allowedExtensions: [ext],
       initialDirectory: (await applicationDocumentsDirectory).path,
+      allowedExtensions: [path.extension(filename).replaceAll(".", "")],
       bytes: data,
       fileName: filename,
     );
@@ -46,7 +44,7 @@ class SimpleFile {
       dialogTitle: dialogTitle,
       type: FileType.custom,
       initialDirectory: (await applicationDocumentsDirectory).path,
-      allowedExtensions: allowedExtensions,
+      allowedExtensions: allowedExtensions ?? ["*"],
     );
     if (result == null || result.xFiles.isEmpty) {
       throw Exception("user cancel");
@@ -56,14 +54,12 @@ class SimpleFile {
 
   static Future<String> saveText({
     required String data,
-    required String name,
-    String ext = "txt",
+    required String filename,
     String? dialogTitle,
   }) {
     return saveFile(
       data: utf8.encode(data),
-      name: name,
-      ext: ext,
+      filename: filename,
       dialogTitle: dialogTitle,
     );
   }

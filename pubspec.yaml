@@ -59,6 +59,7 @@ dependencies:
       url: https://github.com/rongyu-zhen/kdbx.dart.git
       ref: master
   path: ^1.9.0
+  flutter_slidable: ^3.1.1
 
 dev_dependencies:
   flutter_test:

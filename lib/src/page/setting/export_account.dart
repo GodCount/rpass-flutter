@@ -151,8 +151,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
 
     final filepath = await SimpleFile.saveText(
       data: saveData,
-      name: "rpass_export_${dateFormat(DateTime.now())}",
-      ext: "json",
+      filename: "rpass_export_${dateFormat(DateTime.now())}.json",
     );
     return filepath;
   }
@@ -162,8 +161,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
         ChromeAccount.toCsv(StoreProvider.of(context).accounts.accountList);
     final filepath = await SimpleFile.saveText(
       data: saveData,
-      name: "rpass_export_chrome_${dateFormat(DateTime.now())}",
-      ext: "csv",
+      filename: "rpass_export_chrome_${dateFormat(DateTime.now())}.csv",
     );
     return filepath;
   }
@@ -173,8 +171,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
         FirefoxAccount.toCsv(StoreProvider.of(context).accounts.accountList);
     final filepath = await SimpleFile.saveText(
       data: saveData,
-      name: "rpass_export_firefox_${dateFormat(DateTime.now())}",
-      ext: "csv",
+      filename: "rpass_export_firefox_${dateFormat(DateTime.now())}.csv",
     );
     return filepath;
   }

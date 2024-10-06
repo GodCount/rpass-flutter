@@ -64,15 +64,20 @@ class RpassApp extends StatelessWidget {
               }
               return null;
             },
-            initialRoute: kdbx == null
-                ? InitKdbxPage.routeName
-                : Home.routeName,
+            initialRoute:
+                kdbx == null ? InitKdbxPage.routeName : Home.routeName,
             navigatorObservers: [UnfocusNavigatorRoute()],
             routes: {
               Home.routeName: (context) => const Home(),
               CreateKdbxPage.routeName: (context) => const CreateKdbxPage(),
               LoadKdbxPage.routeName: (context) => const LoadKdbxPage(),
               InitKdbxPage.routeName: (context) => const InitKdbxPage(),
+              SelectIconPage.routeName: (context) => const SelectIconPage(),
+
+              EditAccountPage.routeName: (context) => const EditAccountPage(),
+              GenPassword.routeName: (context) => const GenPassword(),
+              EditNotes.routeName: (context) => const EditNotes(),
+              LookAccountPage.routeName: (context) => const LookAccountPage(),
 
               // InitPassword.routeName: (context) => const InitPassword(),
               // VerifyPassword.routeName: (context) => const VerifyPassword(),

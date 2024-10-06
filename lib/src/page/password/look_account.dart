@@ -5,23 +5,18 @@ import 'package:flutter/services.dart';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 
-import '../../component/label_list.dart';
 import '../../component/toast.dart';
-import '../../context/store.dart';
+import '../../context/kdbx.dart';
 import '../../i18n.dart';
-import '../../model/rpass/account.dart';
+import '../../kdbx/kdbx.dart';
 import '../../util/common.dart';
 import '../../util/one_time_password.dart';
-import '../../widget/utils.dart';
-import './edit_account.dart';
+import '../../widget/chip_list.dart';
+import '../../widget/common.dart';
+import '../page.dart';
 
 class LookAccountPage extends StatefulWidget {
-  const LookAccountPage({
-    super.key,
-    required this.accountId,
-  });
-
-  final String accountId;
+  const LookAccountPage({super.key});
 
   static const routeName = "/look_account";
 
@@ -31,73 +26,113 @@ class LookAccountPage extends StatefulWidget {
 
 class _LookAccountPageState extends State<LookAccountPage>
     with HintEmptyTextUtil, CommonWidgetUtil {
-  late Account _account = Account();
-
-  @override
-  void initState() {
-    Future.delayed(Duration.zero, () {
-      try {
-        _account =
-            StoreProvider.of(context).accounts.getAccountById(widget.accountId);
-      } catch (e) {
-        Navigator.of(context).pop();
-      }
-    });
-
-    super.initState();
-  }
+  KdbxEntry? _kdbxEntry;
 
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-    final store = StoreProvider.of(context);
+
+    _kdbxEntry ??= ModalRoute.of(context)!.settings.arguments as KdbxEntry?;
+
+    if (_kdbxEntry == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(t.lookup),
+        ),
+        body: const Center(
+          child: Text("没有找到实体！"),
+        ),
+      );
+    }
+
+    final defaultFields = [
+      ...KdbxKeyCommon.all,
+      ...KdbxKeySpecial.all,
+    ];
+
+    final customFields = _kdbxEntry!.stringEntries
+        .where((item) => !defaultFields.contains(item.key));
 
     const shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(6.0), bottomRight: Radius.circular(6.0)),
     );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(t.lookup),
-        actions: [
-          IconButton(
-            onPressed: _deleteAccount,
-            icon: const Icon(Icons.delete),
-          ),
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return EditAccountPage(
-                  accountId: _account.id,
-                );
-              })).then((value) {
-                if (value is String && store.accounts.hasAccountById(value)) {
-                  _account = store.accounts.getAccountById(value);
-                  setState(() {});
-                }
-              });
-            },
-            icon: const Icon(Icons.edit),
-          ),
-        ],
+        actions: !_kdbxEntry!.isHistoryEntry
+            ? [
+                IconButton(
+                  onPressed: _deleteAccount,
+                  icon: const Icon(Icons.delete),
+                ),
+                IconButton(
+                  onPressed: () {
+                    showEntryHistoryList(_kdbxEntry!);
+                  },
+                  icon: const Icon(Icons.history_rounded),
+                ),
+              ]
+            : null,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(6),
         children: [
           _cardColumn([
             Padding(
               padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.only(right: 6),
-                    child: Icon(
-                      Icons.domain,
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: KdbxIconWidget(
+                      kdbxIcon: KdbxIconWidgetData(
+                        icon: _kdbxEntry!.parent?.icon.get() ?? KdbxIcon.Key,
+                        customIcon: _kdbxEntry!.parent?.customIcon,
+                      ),
+                      size: 24,
                     ),
                   ),
-                  Text(
-                    t.source,
-                    style: Theme.of(context).textTheme.titleLarge,
+                  hintEmptyText(
+                    (_kdbxEntry!.parent?.name.get() ?? '').isEmpty,
+                    Expanded(
+                      child: Text(
+                        _kdbxEntry!.parent?.name.get() ?? '',
+                        softWrap: false,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ]),
+          _cardColumn([
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: KdbxIconWidget(
+                      kdbxIcon: KdbxIconWidgetData(
+                        icon: _kdbxEntry!.icon.get() ?? KdbxIcon.Key,
+                        customIcon: _kdbxEntry!.customIcon,
+                      ),
+                      size: 24,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      _kdbxEntry!.getNonNullString(KdbxKeyCommon.TITLE),
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                   ),
                 ],
               ),
@@ -110,55 +145,19 @@ class _LookAccountPageState extends State<LookAccountPage>
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: hintEmptyText(
-                  _account.domain.isEmpty,
+                  _kdbxEntry!.getNonNullString(KdbxKeyCommon.URL).isEmpty,
                   Text(
-                    _account.domain,
+                    _kdbxEntry!.getNonNullString(KdbxKeyCommon.URL),
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
               ),
-              onLongPress: _account.domain.isNotEmpty
-                  ? () => writeClipboard(_account.domain)
-                  : null,
-            ),
-            ListTile(
-              shape: shape,
-              title: Padding(
-                padding: const EdgeInsets.only(left: 6),
-                child: Text(t.domain_title),
-              ),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(left: 12),
-                child: hintEmptyText(
-                  _account.domainName.isEmpty,
-                  Text(
-                    _account.domainName,
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                ),
-              ),
-              onLongPress: _account.domainName.isNotEmpty
-                  ? () => writeClipboard(_account.domainName)
-                  : null,
-            ),
-          ]),
-          _cardColumn([
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(right: 6),
-                    child: Icon(
-                      Icons.account_box_outlined,
-                    ),
-                  ),
-                  Text(
-                    t.account,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ],
-              ),
+              onLongPress:
+                  _kdbxEntry!.getNonNullString(KdbxKeyCommon.URL).isNotEmpty
+                      ? () => writeClipboard(
+                            _kdbxEntry!.getNonNullString(KdbxKeyCommon.URL),
+                          )
+                      : null,
             ),
             ListTile(
               title: Padding(
@@ -168,15 +167,18 @@ class _LookAccountPageState extends State<LookAccountPage>
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: hintEmptyText(
-                  _account.account.isEmpty,
+                  _kdbxEntry!.getNonNullString(KdbxKeyCommon.USER_NAME).isEmpty,
                   Text(
-                    _account.account,
+                    _kdbxEntry!.getNonNullString(KdbxKeyCommon.USER_NAME),
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
               ),
-              onLongPress: _account.account.isNotEmpty
-                  ? () => writeClipboard(_account.account)
+              onLongPress: _kdbxEntry!
+                      .getNonNullString(KdbxKeyCommon.USER_NAME)
+                      .isNotEmpty
+                  ? () => writeClipboard(
+                      _kdbxEntry!.getNonNullString(KdbxKeyCommon.USER_NAME))
                   : null,
             ),
             ListTile(
@@ -187,24 +189,70 @@ class _LookAccountPageState extends State<LookAccountPage>
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: hintEmptyText(
-                  _account.account.isEmpty,
+                  _kdbxEntry!.getNonNullString(KdbxKeyCommon.EMAIL).isEmpty,
                   Text(
-                    _account.email,
+                    _kdbxEntry!.getNonNullString(KdbxKeyCommon.EMAIL),
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
               ),
-              onLongPress: _account.email.isNotEmpty
-                  ? () => writeClipboard(_account.email)
-                  : null,
+              onLongPress:
+                  _kdbxEntry!.getNonNullString(KdbxKeyCommon.EMAIL).isNotEmpty
+                      ? () => writeClipboard(
+                          _kdbxEntry!.getNonNullString(KdbxKeyCommon.EMAIL))
+                      : null,
             ),
             _LookPasswordListTile(
               shape: shape,
-              password: _account.password,
-              onLongPress: () => writeClipboard(_account.password),
+              password: _kdbxEntry!.getNonNullString(KdbxKeyCommon.PASSWORD),
+              onLongPress: () => writeClipboard(
+                  _kdbxEntry!.getNonNullString(KdbxKeyCommon.PASSWORD)),
             ),
           ]),
           _otp(shape),
+          if (customFields.isNotEmpty)
+            _cardColumn([
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(right: 6),
+                      child: Icon(
+                        Icons.add_box_rounded,
+                      ),
+                    ),
+                    Text(
+                      "自定义字段",
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ],
+                ),
+              ),
+              ...customFields.map(
+                (item) => ListTile(
+                  shape: shape,
+                  title: Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: Text(item.key.key),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: hintEmptyText(
+                      _kdbxEntry!.getNonNullString(item.key).isEmpty,
+                      Text(
+                        _kdbxEntry!.getNonNullString(item.key),
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ),
+                  ),
+                  onLongPress: _kdbxEntry!.getNonNullString(item.key).isNotEmpty
+                      ? () =>
+                          writeClipboard(_kdbxEntry!.getNonNullString(item.key))
+                      : null,
+                ),
+              ),
+            ]),
           _cardColumn([
             Padding(
               padding: const EdgeInsets.all(12),
@@ -224,6 +272,28 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
             ),
             ListTile(
+              title: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: Text(t.description),
+              ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(left: 12),
+                child: hintEmptyText(
+                  _kdbxEntry!.getNonNullString(KdbxKeyCommon.NOTES).isEmpty,
+                  Text(
+                    _kdbxEntry!.getNonNullString(KdbxKeyCommon.NOTES),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+              ),
+              onTap:
+                  _kdbxEntry!.getNonNullString(KdbxKeyCommon.NOTES).isNotEmpty
+                      ? _showDescriptionDialog
+                      : null,
+            ),
+            ListTile(
               shape: shape,
               title: Padding(
                 padding: const EdgeInsets.only(left: 6),
@@ -232,11 +302,18 @@ class _LookAccountPageState extends State<LookAccountPage>
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: hintEmptyText(
-                  _account.labels.isEmpty,
-                  LabelList(
-                    preview: true,
-                    items: _account.labels
-                        .map((value) => LabelItem(value: value))
+                  _kdbxEntry!.tagList.isEmpty,
+                  ChipList(
+                    maxHeight: 150,
+                    items: _kdbxEntry!.tagList
+                        .map(
+                          (item) => ChipListItem(
+                            label: item,
+                            value: item,
+                            select: true,
+                            deletable: false,
+                          ),
+                        )
                         .toList(),
                   ),
                 ),
@@ -244,37 +321,73 @@ class _LookAccountPageState extends State<LookAccountPage>
             ),
             ListTile(
               shape: shape,
-              title: Padding(
-                padding: const EdgeInsets.only(left: 6),
-                child: Text(t.description),
+              title: const Padding(
+                padding: EdgeInsets.only(left: 6),
+                child: Text("附件"),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: hintEmptyText(
-                  _account.description.isEmpty,
-                  Text(
-                    _account.description,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall,
+                  _kdbxEntry!.binaryEntries.isEmpty,
+                  ChipList(
+                    maxHeight: 150,
+                    onChipTap: (binary) {
+                      showBinaryAction(binary);
+                    },
+                    items: _kdbxEntry!.binaryEntries
+                        .map(
+                          (item) => ChipListItem(
+                            label: item.key.key,
+                            value: item,
+                            select: true,
+                            deletable: false,
+                          ),
+                        )
+                        .toList(),
                   ),
                 ),
               ),
-              onLongPress: _account.description.isNotEmpty
-                  ? _showDescriptionDialog
-                  : null,
             ),
           ]),
           _cardColumn([
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(right: 6),
+                    child: Icon(
+                      Icons.date_range_rounded,
+                    ),
+                  ),
+                  Text(
+                    t.date,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ],
+              ),
+            ),
             ListTile(
               shape: shape,
-              title: Padding(
-                padding: const EdgeInsets.only(left: 6),
-                child: Text(t.date),
+              title: const Padding(
+                padding: EdgeInsets.only(left: 6),
+                child: Text("创建"),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(dateFormat(_account.date)),
+                child: Text(dateFormat(_kdbxEntry!.times.creationTime.get()!)),
+              ),
+            ),
+            ListTile(
+              shape: shape,
+              title: const Padding(
+                padding: EdgeInsets.only(left: 6),
+                child: Text("最近修改"),
+              ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(left: 12),
+                child: Text(
+                    dateFormat(_kdbxEntry!.times.lastModificationTime.get()!)),
               ),
             ),
             ListTile(
@@ -285,12 +398,31 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(_account.id),
+                child: Text(_kdbxEntry!.uuid.uuid),
               ),
             ),
           ])
         ],
       ),
+      floatingActionButton: !_kdbxEntry!.isHistoryEntry
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.of(context)
+                    .pushNamed(EditAccountPage.routeName, arguments: _kdbxEntry)
+                    .then((value) {
+                  if (value is bool && value) {
+                    setState(() {});
+                  }
+                });
+              },
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(56 / 2),
+                ),
+              ),
+              child: const Icon(Icons.edit),
+            )
+          : null,
     );
   }
 
@@ -322,7 +454,8 @@ class _LookAccountPageState extends State<LookAccountPage>
     ).then((value) async {
       if (value is bool && value) {
         try {
-          await StoreProvider.of(context).accounts.removeAccount(_account.id);
+          final kdbx = KdbxProvider.of(context)!;
+          kdbx.deleteEntry(_kdbxEntry!);
           if (mounted) {
             Navigator.of(context).pop();
           }
@@ -335,7 +468,7 @@ class _LookAccountPageState extends State<LookAccountPage>
 
   Widget _cardColumn(List<Widget> children) {
     return Card(
-      margin: const EdgeInsets.all(12),
+      margin: const EdgeInsets.all(6),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(6.0)),
       ),
@@ -346,8 +479,7 @@ class _LookAccountPageState extends State<LookAccountPage>
   }
 
   Widget _otp(ShapeBorder? shape) {
-    return _account.oneTimePassword != null &&
-            _account.oneTimePassword!.isNotEmpty
+    return _kdbxEntry!.getNonNullString(KdbxKeyCommon.OTP).isNotEmpty
         ? _cardColumn([
             Padding(
               padding: const EdgeInsets.all(12),
@@ -368,34 +500,19 @@ class _LookAccountPageState extends State<LookAccountPage>
             ),
             _LookOtPasswordListTile(
               shape: shape,
-              oneTimePassword: _account.oneTimePassword!,
+              oneTimePassword: _kdbxEntry!.getNonNullString(KdbxKeyCommon.OTP),
             ),
           ])
         : const SizedBox.shrink();
   }
 
   void _showDescriptionDialog() {
-    final t = I18n.of(context)!;
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(t.description),
-          content: SelectableText(
-            _account.description,
-            maxLines: 10,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(t.cancel),
-            ),
-          ],
-        );
-      },
+    Navigator.of(context).pushNamed(
+      EditNotes.routeName,
+      arguments: EditNotesArgs(
+        text: _kdbxEntry!.getNonNullString(KdbxKeyCommon.NOTES),
+        readOnly: true,
+      ),
     );
   }
 }

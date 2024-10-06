@@ -36,7 +36,6 @@ class VerifyPasswordState extends State<VerifyPassword> {
         });
       }
     });
-    _verifyBiometric();
     super.initState();
   }
 
@@ -56,33 +55,10 @@ class VerifyPasswordState extends State<VerifyPassword> {
     }
   }
 
-  void _verifyBiometric() async {
-    try {
-      final biometric = Biometric.of(context);
-      if (biometric.enable) {
-        await biometric.verify(context);
-        Navigator.of(context).pushReplacementNamed(Home.routeName);
-      }
-    } on AuthException catch (e) {
-      if (e.code == AuthExceptionCode.userCanceled ||
-          e.code == AuthExceptionCode.canceled ||
-          e.code == AuthExceptionCode.timeout) {
-        return;
-      }
-      rethrow;
-    } catch (e) {
-      showToast(context, I18n.of(context)!.biometric_throw(e.toString()));
-      setState(() {
-        _biometricDisable = true;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
 
-    final biometric = Biometric.of(context);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Center(
@@ -165,15 +141,6 @@ class VerifyPasswordState extends State<VerifyPassword> {
                     child: Text(t.confirm),
                   ),
                 ),
-                if (biometric.enable)
-                  Container(
-                    width: 180,
-                    padding: const EdgeInsets.only(top: 12),
-                    child: ElevatedButton(
-                      onPressed: !_biometricDisable ? _verifyBiometric : null,
-                      child: Text(t.biometric),
-                    ),
-                  ),
               ],
             ),
           ),

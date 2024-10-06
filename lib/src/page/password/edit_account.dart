@@ -2,354 +2,228 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:path/path.dart' as path;
 
-import '../../component/label_list.dart';
-import '../../component/match_text.dart';
-import '../../component/toast.dart';
-import '../../component/transition.dart';
 import '../../context/kdbx.dart';
-import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
-import '../../model/rpass/account.dart';
 import '../../util/common.dart';
+import '../../util/file.dart';
+import '../../widget/chip_list.dart';
+import '../../widget/common.dart';
 import '../page.dart';
-import '../../widget/utils.dart';
 
 class EditAccountPage extends StatefulWidget {
-  const EditAccountPage({super.key, this.accountId});
+  const EditAccountPage({super.key});
 
   static const routeName = "/edit_account";
-
-  final String? accountId;
 
   @override
   State<EditAccountPage> createState() => _EditAccountPageState();
 }
 
 class _EditAccountPageState extends State<EditAccountPage> {
-  final GlobalKey<ScaleReboundState> _scaleReboundKey = GlobalKey();
+  final GlobalKey<FormState> _from = GlobalKey();
 
-  Account _account = Account();
+  Set<KdbxKey>? _entryFields;
 
-  late final GlobalKey<_ValidatorTextFieldState> _domainGolbalKey;
-  late final GlobalKey<_ValidatorDropdownMenuState> _emailGolbalKey;
-  late final GlobalKey<_ValidatorTextFieldState> _otPasswordGolbalKey;
+  KdbxEntry? _kdbxEntry;
 
-  late final TextEditingController _domainController;
-  late final TextEditingController _domainNameController;
-  late final TextEditingController _accountController;
-  late final TextEditingController _emailController;
-  late final TextEditingController _passwordController;
-  late final TextEditingController _otPasswordController;
-  late final TextEditingController _descriptionController;
-
-  final bool _displayScanner = Platform.isAndroid || Platform.isIOS;
-
-  bool _canClone = false;
+  bool _isDirty = false;
 
   @override
   void initState() {
-    Future.delayed(Duration.zero, () {
-      if (widget.accountId != null) {
-        try {
-          _account = StoreProvider.of(context)
-              .accounts
-              .getAccountById(widget.accountId!)
-              .clone();
-          _canClone = true;
-        } catch (e) {
-          showToast(
-            context,
-            I18n.of(context)!.info_read_throw(
-              e.toString(),
-            ),
-          );
-          Navigator.of(context).pop();
-        }
-      }
-    });
-
-    _domainGolbalKey = GlobalKey<_ValidatorTextFieldState>();
-    _emailGolbalKey = GlobalKey<_ValidatorDropdownMenuState>();
-    _otPasswordGolbalKey = GlobalKey<_ValidatorTextFieldState>();
-
-    _domainController = TextEditingController(text: _account.domain);
-    _domainNameController = TextEditingController(text: _account.domainName);
-    _accountController = TextEditingController(text: _account.account);
-    _emailController = TextEditingController(text: _account.email);
-    _passwordController = TextEditingController(text: _account.password);
-    _otPasswordController =
-        TextEditingController(text: _account.oneTimePassword);
-    _descriptionController = TextEditingController(text: _account.description);
-
     super.initState();
   }
 
   @override
   void dispose() {
-    _domainController.dispose();
-    _domainNameController.dispose();
-    _accountController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _otPasswordController.dispose();
-    _descriptionController.dispose();
-
     super.dispose();
   }
 
-  bool _validator() {
-    return _domainGolbalKey.currentState!.validator() &&
-        _emailGolbalKey.currentState!.validator() &&
-        _otPasswordGolbalKey.currentState!.validator();
+  void _kdbxEntrySave() async {
+    if (_from.currentState!.validate()) {
+      try {
+        _from.currentState!.save();
+        await KdbxProvider.of(context)!.save();
+        Navigator.of(context).pop(true);
+      } catch (e) {
+        print(e);
+        // TODO! 保存失败提示
+      }
+    }
   }
 
-  bool _allEmpty() {
-    return _domainController.text.isEmpty &&
-        _domainNameController.text.isEmpty &&
-        _accountController.text.isEmpty &&
-        _emailController.text.isEmpty &&
-        _passwordController.text.isEmpty &&
-        _otPasswordController.text.isEmpty &&
-        _descriptionController.text.isEmpty;
+  void _kdbxEntryGroupSave(KdbxGroup? group) {
+    final kdbx = KdbxProvider.of(context)!;
+
+    if (group != null && _kdbxEntry!.parent != group) {
+      kdbx.kdbxFile.move(_kdbxEntry!, group);
+    }
   }
 
-  List<LabelItem> _getLabels() {
-    return StoreProvider.of(context).accounts.labelSet.map((value) {
-      return LabelItem(value: value, select: _account.labels.contains(value));
-    }).toList();
+  void _entryFieldSaved(EntryFieldSaved field) {
+    if (field is EntryBinaryFieldSaved) {
+      final binarys = field.value;
+      final oldBinaryKeys = _kdbxEntry!.binaryEntries.map((item) => item.key);
+      // 删除不包含
+      for (var key in oldBinaryKeys) {
+        if (!binarys.any((item) => item.key == key)) {
+          _kdbxEntry!.removeBinary(key);
+        }
+      }
+      for (var binary in binarys) {
+        if (_kdbxEntry!.getBinary(binary.key) == null) {
+          // TODO! isProtected 应该怎么设置
+          _kdbxEntry!.createBinary(
+            isProtected: binary.value.isProtected,
+            name: binary.key.key,
+            bytes: binary.value.value,
+          );
+        }
+      }
+    } else if (field is EntryTagsFieldSaved) {
+      _kdbxEntry!.tagList = field.value;
+    } else if (field is EntryTextFieldSaved) {
+      if (field.renameKdbxKey != null) {
+        _kdbxEntry!.renameKey(field.key, field.renameKdbxKey!);
+      }
+      _kdbxEntry!.setString(field.renameKdbxKey ?? field.key, field.value);
+    } else if (field is EntryTitleFieldSaved) {
+      if (field.customIcon != null) {
+        _kdbxEntry!.customIcon = field.customIcon;
+      } else {
+        _kdbxEntry!.icon.set(field.icon);
+        _kdbxEntry!.customIcon = null;
+      }
+      _kdbxEntry!.setString(field.key, field.value);
+    } else {
+      // TODO! 不可能出现的情况
+    }
   }
 
-  void _cloneAccount() {
-    _account.date = DateTime.now();
-    _account.id = timeBasedUuid();
-    _canClone = false;
+  void _entryFieldDelete(KdbxKey key) {
     setState(() {
-      _scaleReboundKey.currentState!.rebound();
+      _entryFields!.remove(key);
     });
+  }
+
+  void _addEntryField() async {
+    final t = I18n.of(context)!;
+    final kdbx = KdbxProvider.of(context)!;
+
+    final limitItmes = [
+      ...KdbxKeyCommon.all,
+      ...KdbxKeySpecial.all,
+      ..._entryFields!
+    ].map((item) => item.key).toList();
+
+    final result = await InputDialog.openDialog(
+      context,
+      title: t.add,
+      label: "新建字段",
+      promptItmes: kdbx.fieldStatistic.customFields
+          .where((item) => !limitItmes.contains(item))
+          .toList(),
+      limitItems: limitItmes,
+    );
+    if (result != null && result is String) {
+      setState(() {
+        _entryFields!.add(KdbxKey(result));
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-    final store = StoreProvider.of(context);
+    final kdbx = KdbxProvider.of(context)!;
 
-    double width = MediaQuery.sizeOf(context).width;
+    _kdbxEntry ??= ModalRoute.of(context)!.settings.arguments as KdbxEntry?;
 
-    width = (width > 375 ? 375 : width) - 48;
+    _kdbxEntry ??= kdbx.createVirtualEntry()
+      ..setString(
+        KdbxKeyCommon.PASSWORD,
+        PlainValue(
+          randomPassword(length: 10),
+        ),
+      );
+
+    final defaultFields = [
+      ...KdbxKeyCommon.all,
+      ...KdbxKeySpecial.all,
+    ];
+
+    _entryFields ??= _kdbxEntry!.stringEntries
+        .where((item) => !defaultFields.contains(item.key))
+        .map((item) => item.key)
+        .toSet();
+
+    final children = [
+      KdbxEntryGroup(
+        initialValue: _kdbxEntry!.parent != null &&
+                _kdbxEntry!.parent != kdbx.virtualGroup
+            ? _kdbxEntry!.parent
+            : kdbx.kdbxFile.body.rootGroup,
+        onSaved: _kdbxEntryGroupSave,
+      ),
+      ...KdbxKeyCommon.all.map(
+        (item) => EntryField(
+          kdbxKey: item,
+          kdbxEntry: _kdbxEntry!,
+          slidableEnabled: false,
+          onSaved: _entryFieldSaved,
+        ),
+      ),
+      ..._entryFields!.map(
+        (item) => EntryField(
+          kdbxKey: item,
+          kdbxEntry: _kdbxEntry!,
+          onDeleted: _entryFieldDelete,
+          onSaved: _entryFieldSaved,
+        ),
+      ),
+      _buildAddFieldWidget(),
+      ...KdbxKeySpecial.all.map(
+        (item) => EntryField(
+          kdbxKey: item,
+          kdbxEntry: _kdbxEntry!,
+          slidableEnabled: false,
+          onSaved: _entryFieldSaved,
+        ),
+      ),
+      const SizedBox(height: 42)
+    ];
 
     return Scaffold(
       appBar: AppBar(
         title: Text(t.edit_account),
-        actions: [
-          IconButton(
-            onPressed: _canClone ? _cloneAccount : null,
-            icon: const Icon(Icons.copy_rounded),
-            tooltip: t.clone,
-          ),
-        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: ScaleRebound(
-          key: _scaleReboundKey,
-          child: Center(
-            child: SizedBox(
-              width: width,
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: _ValidatorTextField(
-                      key: _domainGolbalKey,
-                      controller: _domainController,
-                      textInputAction: TextInputAction.next,
-                      focusNoError: true,
-                      decoration: InputDecoration(
-                        labelText: t.domain,
-                        border: const OutlineInputBorder(),
-                      ),
-                      validator: (value) => value.isNotEmpty &&
-                              !CommonRegExp.domain.hasMatch(value)
-                          ? t.format_error(CommonRegExp.domain.pattern)
-                          : null,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: TextField(
-                      controller: _domainNameController,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        labelText: t.domain_title,
-                        border: const OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: _ValidatorDropdownMenu(
-                      controller: _accountController,
-                      focusNoError: true,
-                      width: width,
-                      enableFilter: true,
-                      enableSearch: false,
-                      label: Text(t.account),
-                      menuHeight: 100,
-                      requestFocusOnTap: true,
-                      dropdownMenuEntries: store.accounts.accountNumSet
-                          .map((value) =>
-                              DropdownMenuEntry(value: value, label: value))
-                          .toList(),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: _ValidatorDropdownMenu(
-                      key: _emailGolbalKey,
-                      controller: _emailController,
-                      focusNoError: true,
-                      width: width,
-                      enableFilter: true,
-                      enableSearch: false,
-                      label: Text(t.email),
-                      menuHeight: 100,
-                      requestFocusOnTap: true,
-                      dropdownMenuEntries: store.accounts.emailSet
-                          .map((value) =>
-                              DropdownMenuEntry(value: value, label: value))
-                          .toList(),
-                      validator: (value) => value.isNotEmpty &&
-                              !CommonRegExp.email.hasMatch(value)
-                          ? t.format_error(CommonRegExp.email.pattern)
-                          : null,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: TextField(
-                      controller: _passwordController,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        labelText: t.password,
-                        border: const OutlineInputBorder(),
-                        suffixIcon: IconButton(
-                          onPressed: _generatePassword,
-                          icon: const Icon(Icons.create),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: _ValidatorTextField(
-                      key: _otPasswordGolbalKey,
-                      controller: _otPasswordController,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        labelText: t.otp,
-                        border: const OutlineInputBorder(),
-                        suffixIcon: _displayScanner
-                            ? IconButton(
-                                onPressed: () async {
-                                  Navigator.of(context)
-                                      .pushNamed(QrCodeScannerPage.routeName)
-                                      .then((value) {
-                                    if (value is String && value.isNotEmpty) {
-                                      _otPasswordController.text = value;
-                                    }
-                                  });
-                                },
-                                icon: const Icon(Icons.qr_code_scanner),
-                              )
-                            : null,
-                      ),
-                      validator: (value) => value.isNotEmpty &&
-                              !CommonRegExp.oneTimePassword.hasMatch(value)
-                          ? t.format_error(CommonRegExp.oneTimePassword.pattern)
-                          : null,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: _DescriptionTextField(
-                      controller: _descriptionController,
-                      hitText: t.description,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: InputDecorator(
-                      decoration: InputDecoration(
-                        labelText: t.label,
-                        border: const OutlineInputBorder(),
-                      ),
-                      child: LabelList(
-                        items: _getLabels(),
-                        onChange: (labels) {
-                          _account.labels = labels;
-                        },
-                      ),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.only(top: 16),
-                    alignment: Alignment.topLeft,
-                    child: RichText(
-                      textAlign: TextAlign.start,
-                      text: TextSpan(
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        text: "${t.date}: ",
-                        children: [
-                          TextSpan(
-                            style: Theme.of(context).textTheme.bodySmall,
-                            text: dateFormat(_account.date),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.only(top: 2),
-                    alignment: Alignment.topLeft,
-                    child: RichText(
-                      textAlign: TextAlign.start,
-                      text: TextSpan(
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        text: "${t.uuid}: ",
-                        children: [
-                          TextSpan(
-                            style: Theme.of(context).textTheme.bodySmall,
-                            text: _account.id,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+      body: Form(
+        key: _from,
+        onChanged: () {
+          setState(() {
+            _isDirty = true;
+          });
+        },
+        child: SlidableAutoCloseBehavior(
+          child: ListView.separated(
+            padding: const EdgeInsets.only(top: 24, bottom: 24),
+            separatorBuilder: (context, index) {
+              return const SizedBox(
+                height: 12,
+              );
+            },
+            itemBuilder: (context, index) {
+              return children[index];
+            },
+            itemCount: children.length,
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (_allEmpty()) {
-            showToast(context, t.cannot_all_empty);
-          } else if (_validator()) {
-            _account.domain = _domainController.text;
-            _account.domainName = _domainNameController.text;
-            _account.account = _accountController.text;
-            _account.email = _emailController.text;
-            _account.password = _passwordController.text;
-            _account.oneTimePassword = _otPasswordController.text;
-            _account.description = _descriptionController.text;
-            store.accounts.setAccount(_account);
-            Navigator.of(context).pop(_account.id);
-          }
-        },
+        onPressed: _isDirty ? _kdbxEntrySave : null,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(
             Radius.circular(56 / 2),
@@ -357,458 +231,195 @@ class _EditAccountPageState extends State<EditAccountPage> {
         ),
         child: const Icon(Icons.save),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
-  void _generatePassword() {
-    final GlobalKey<_GeneratePasswordState> generateGlobalKey =
-        GlobalKey<_GeneratePasswordState>();
-
-    final t = I18n.of(context)!;
-
-    double width = MediaQuery.sizeOf(context).width;
-
-    width = (width > 375 ? 375 : width) - 48;
-
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text(t.gen_password),
-            scrollable: true,
-            content: SizedBox(
-              width: width,
-              child: _GeneratePassword(
-                key: generateGlobalKey,
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () =>
-                    generateGlobalKey.currentState?.updatePassword(),
-                child: Text(t.refresh),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text(t.cancel),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _passwordController.text =
-                      generateGlobalKey.currentState!.password;
-                },
-                child: Text(t.confirm),
-              ),
-            ],
-          );
-        });
-  }
-}
-
-typedef ValidatorCallback = String? Function(String value);
-
-class _ValidatorDropdownMenu extends StatefulWidget {
-  const _ValidatorDropdownMenu({
-    super.key,
-    required this.dropdownMenuEntries,
-    required this.controller,
-    this.validator,
-    this.focusNoError = true,
-    this.width,
-    this.enableFilter = false,
-    this.enableSearch = true,
-    this.label,
-    this.menuHeight,
-    this.requestFocusOnTap,
-  });
-
-  final List<DropdownMenuEntry<String>> dropdownMenuEntries;
-  final ValidatorCallback? validator;
-  final bool focusNoError;
-  final TextEditingController controller;
-
-  final double? width;
-  final bool enableFilter;
-  final bool enableSearch;
-  final Widget? label;
-  final double? menuHeight;
-  final bool? requestFocusOnTap;
-
-  @override
-  State<_ValidatorDropdownMenu> createState() => _ValidatorDropdownMenuState();
-}
-
-class _ValidatorDropdownMenuState extends State<_ValidatorDropdownMenu> {
-  String? _errorText;
-  FocusNode? _focusNode;
-
-  @override
-  void initState() {
-    widget.controller.addListener(() {
-      validator();
-    });
-
-    if (widget.focusNoError) {
-      _focusNode = FocusNode();
-      _focusNode!.addListener(() {
-        if (_focusNode!.hasFocus &&
-            _errorText != null &&
-            widget.controller.text.isEmpty) {
-          _errorText = null;
-          setState(() {});
-        }
-      });
-    }
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _focusNode?.dispose();
-    super.dispose();
-  }
-
-  bool validator() {
-    if (widget.validator == null) return true;
-    final text = widget.validator!(widget.controller.text);
-    if (text != _errorText) {
-      _errorText = text;
-      setState(() {});
-    }
-    return text == null;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownMenu(
-      errorText: _errorText,
-      focusNode: _focusNode,
-      width: widget.width,
-      controller: widget.controller,
-      enableFilter: widget.enableFilter,
-      enableSearch: widget.enableSearch,
-      label: widget.label,
-      menuHeight: widget.menuHeight,
-      dropdownMenuEntries: widget.dropdownMenuEntries,
-      requestFocusOnTap: widget.requestFocusOnTap,
-    );
-  }
-}
-
-class _ValidatorTextField extends StatefulWidget {
-  const _ValidatorTextField({
-    super.key,
-    required this.validator,
-    required this.controller,
-    this.focusNoError = true,
-    this.decoration,
-    this.textInputAction,
-  });
-
-  final ValidatorCallback validator;
-  final bool focusNoError;
-  final TextEditingController controller;
-
-  final InputDecoration? decoration;
-  final TextInputAction? textInputAction;
-
-  @override
-  State<_ValidatorTextField> createState() => _ValidatorTextFieldState();
-}
-
-class _ValidatorTextFieldState extends State<_ValidatorTextField> {
-  String? _errorText;
-  FocusNode? _focusNode;
-
-  @override
-  void initState() {
-    widget.controller.addListener(() {
-      final text = widget.validator(widget.controller.text);
-      if (text != _errorText) {
-        _errorText = text;
-        setState(() {});
-      }
-    });
-
-    if (widget.focusNoError) {
-      _focusNode = FocusNode();
-      _focusNode!.addListener(() {
-        if (_focusNode!.hasFocus &&
-            _errorText != null &&
-            widget.controller.text.isEmpty) {
-          _errorText = null;
-          setState(() {});
-        }
-      });
-    }
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _focusNode?.dispose();
-    super.dispose();
-  }
-
-  bool validator() {
-    final text = widget.validator(widget.controller.text);
-    if (text != _errorText) {
-      _errorText = text;
-      setState(() {});
-    }
-    return text == null;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final decoration = widget.decoration?.copyWith(errorText: _errorText) ??
-        InputDecoration(errorText: _errorText);
-    return TextField(
-      controller: widget.controller,
-      focusNode: _focusNode,
-      textInputAction: widget.textInputAction,
-      decoration: decoration,
-    );
-  }
-}
-
-class _GeneratePassword extends StatefulWidget {
-  const _GeneratePassword({super.key});
-
-  @override
-  State<_GeneratePassword> createState() => _GeneratePasswordState();
-}
-
-class _GeneratePasswordState extends State<_GeneratePassword>
-    with CommonWidgetUtil {
-  bool _letterUppercase = true;
-  bool _letterLowercase = true;
-  bool _enableNumber = true;
-  bool _enableSymbol = true;
-  double _length = 10;
-
-  late String password;
-
-  updatePassword() {
-    password = randomPassword(
-      length: _length.toInt(),
-      enableNumber: _enableNumber,
-      enableSymbol: _enableSymbol,
-      enableLetterLowercase: _letterUppercase,
-      enableLetterUppercase: _letterLowercase,
-    );
-    setState(() {});
-  }
-
-  _cahnged({
-    bool? enableNumber,
-    bool? enableSymbol,
-    bool? letterUppercase,
-    bool? letterLowercase,
-  }) {
-    enableNumber ??= _enableNumber;
-    enableSymbol ??= _enableSymbol;
-    letterUppercase ??= _letterUppercase;
-    letterLowercase ??= _letterLowercase;
-
-    if (!enableNumber &&
-        !enableSymbol &&
-        !letterUppercase &&
-        !letterLowercase) {
-      return;
-    }
-    _enableNumber = enableNumber;
-    _letterUppercase = letterUppercase;
-    _letterLowercase = letterLowercase;
-    _enableSymbol = enableSymbol;
-    updatePassword();
-  }
-
-  @override
-  void initState() {
-    password = randomPassword(length: _length.toInt());
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final t = I18n.of(context)!;
-
+  Widget _buildAddFieldWidget() {
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        CheckboxListTile(
-          value: _enableNumber,
-          title: const Text("0~9"),
-          onChanged: (value) => _cahnged(enableNumber: value),
-        ),
-        CheckboxListTile(
-          value: _letterUppercase,
-          title: const Text("a~z"),
-          onChanged: (value) => _cahnged(letterUppercase: value),
-        ),
-        CheckboxListTile(
-          value: _letterLowercase,
-          title: const Text("A~Z"),
-          onChanged: (value) => _cahnged(letterLowercase: value),
-        ),
-        CheckboxListTile(
-          value: _enableSymbol,
-          title: Text(t.symbol),
-          onChanged: (value) => _cahnged(enableSymbol: value),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: Slider(
-            value: _length,
-            label: "${_length.toInt()}",
-            divisions: 48,
-            min: 4,
-            max: 48,
-            onChanged: (value) {
-              _length = value;
-              updatePassword();
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: GestureDetector(
-            onLongPress: () => writeClipboard(password),
-            child: MatchText(
-              text: password,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyLarge!
-                  .copyWith(color: Colors.red),
-              matchs: [
-                MatchHighlight(
-                  regExp: RegExp(r"[a-zA-Z]+"),
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                MatchHighlight(
-                  regExp: RegExp(r"\d+"),
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyLarge!
-                      .copyWith(color: Colors.blue),
-                )
-              ],
-            ),
-          ),
+        TextButton.icon(
+          onPressed: _addEntryField,
+          label: const Text("添加字段"),
+          icon: const Icon(Icons.add),
         )
       ],
     );
   }
 }
 
-class _DescriptionTextField extends StatefulWidget {
-  const _DescriptionTextField({
-    required this.controller,
-    this.hitText,
-  });
-
-  final TextEditingController controller;
-  final String? hitText;
-
-  @override
-  State<_DescriptionTextField> createState() => _DescriptionTextFieldState();
-}
-
-class _DescriptionTextFieldState extends State<_DescriptionTextField> {
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: widget.controller,
-      readOnly: true,
-      maxLines: 3,
-      decoration: InputDecoration(
-        border: const OutlineInputBorder(),
-        labelText: widget.hitText,
-      ),
-      onTap: _editText,
-    );
-  }
-
-  void _editText() {
-    final t = I18n.of(context)!;
-
-    final String lastValue = widget.controller.text;
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(t.description),
-          scrollable: true,
-          content: TextField(
-            controller: widget.controller,
-            maxLines: 10,
-            autofocus: true,
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(t.cancel),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: Text(t.save),
-            ),
-          ],
-        );
-      },
-    ).then((value) {
-      if (value != true) {
-        widget.controller.text = lastValue;
-      }
-    });
-  }
-}
-
-abstract class KdbxFieldSaved<T> {
-  KdbxFieldSaved({required this.key, required this.value});
+abstract class EntryFieldSaved<T> {
+  EntryFieldSaved({required this.key, required this.value});
 
   final KdbxKey key;
   final T value;
 }
 
-class KdbxTextFieldSaved extends KdbxFieldSaved<StringValue> {
-  KdbxTextFieldSaved({required super.key, required super.value});
+class EntryTitleFieldSaved extends EntryFieldSaved<StringValue> {
+  EntryTitleFieldSaved({
+    required super.key,
+    required super.value,
+    required this.icon,
+    this.customIcon,
+  });
+
+  final KdbxIcon icon;
+  final KdbxCustomIcon? customIcon;
 }
 
-class KdbxField extends StatefulWidget {
-  const KdbxField({
+class EntryTextFieldSaved extends EntryFieldSaved<StringValue> {
+  EntryTextFieldSaved({
+    required super.key,
+    required super.value,
+    this.renameKdbxKey,
+  });
+  final KdbxKey? renameKdbxKey;
+}
+
+class EntryTagsFieldSaved extends EntryFieldSaved<List<String>> {
+  EntryTagsFieldSaved({required super.key, required super.value});
+}
+
+class EntryBinaryFieldSaved
+    extends EntryFieldSaved<List<MapEntry<KdbxKey, KdbxBinary>>> {
+  EntryBinaryFieldSaved({required super.key, required super.value});
+}
+
+typedef OnEntryFidleDeleted = void Function(KdbxKey key);
+typedef OnEntryFieldSaved = void Function(EntryFieldSaved field);
+
+typedef OnTrailingTap = Future<String?> Function();
+
+class KdbxEntryGroup extends FormField<KdbxGroup> {
+  KdbxEntryGroup({super.key, super.initialValue, super.onSaved})
+      : super(
+          builder: (field) {
+            return Padding(
+              padding: const EdgeInsets.only(left: 16, right: 16),
+              child: GestureDetector(
+                onTap: () async {
+                  final kdbx = KdbxProvider.of(field.context)!;
+
+                  final result = await SimpleSelectorDialog.openDialog(
+                    field.context,
+                    title: "选择分组",
+                    value: field.value,
+                    items: [kdbx.kdbxFile.body.rootGroup, ...kdbx.rootGroups]
+                        .map((item) => SimpleSelectorDialogItem(
+                              value: item,
+                              label: item.name.get() ?? '',
+                            ))
+                        .toList(),
+                  );
+
+                  if (result != null && result is KdbxGroup) {
+                    field.didChange(result);
+                  }
+                },
+                child: InputDecorator(
+                  isEmpty: field.value == null,
+                  decoration: const InputDecoration(
+                    labelText: "分组",
+                    border: OutlineInputBorder(),
+                  ),
+                  child: field.value != null
+                      ? Text(field.value!.name.get() ?? '')
+                      : null,
+                ),
+              ),
+            );
+          },
+        );
+}
+
+class EntryField extends StatefulWidget {
+  const EntryField({
     super.key,
-    required this.kdbxEntry,
     required this.kdbxKey,
+    required this.kdbxEntry,
+    this.onDeleted,
+    this.slidableEnabled = true,
     required this.onSaved,
   });
 
-  final KdbxEntry kdbxEntry;
   final KdbxKey kdbxKey;
-  final FormFieldSetter<KdbxFieldSaved> onSaved;
+  final KdbxEntry kdbxEntry;
+  final bool slidableEnabled;
+  final OnEntryFidleDeleted? onDeleted;
+  final OnEntryFieldSaved onSaved;
 
   @override
-  State<KdbxField> createState() => _KdbxFieldState();
+  State<EntryField> createState() => _EntryFieldState();
 }
 
-class _KdbxFieldState extends State<KdbxField> {
+class _EntryFieldState extends State<EntryField> with CommonWidgetUtil {
+  KdbxKey? _renameKdbxKey;
+
+  final bool _displayScanner = Platform.isAndroid || Platform.isIOS;
+  List<KdbxKey> _binaryKeys = [];
+
+  void _onRenameKdbxKey() async {
+    final t = I18n.of(context)!;
+    final kdbx = KdbxProvider.of(context)!;
+    final limitItmes = {
+      ...KdbxKeyCommon.all,
+      ...KdbxKeySpecial.all,
+      ...widget.kdbxEntry.stringEntries.map((item) => item.key)
+    }.map((item) => item.key).toList();
+
+    limitItmes.remove(widget.kdbxKey.key);
+
+    if (_renameKdbxKey != null) {
+      limitItmes.remove(_renameKdbxKey!.key);
+    }
+
+    final result = await InputDialog.openDialog(
+      context,
+      title: "重命名",
+      label: "新建字段",
+      initialValue: _renameKdbxKey?.key ?? widget.kdbxKey.key,
+      promptItmes: kdbx.fieldStatistic.customFields
+          .where((item) => !limitItmes.contains(item))
+          .toList(),
+      limitItems: limitItmes,
+    );
+    if (result != null && result is String) {
+      setState(() {
+        _renameKdbxKey = KdbxKey(result);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return _buildFormFieldFactory();
+    return Slidable(
+      groupTag: "0",
+      enabled: widget.slidableEnabled,
+      endActionPane: ActionPane(
+        motion: const ScrollMotion(),
+        children: [
+          SlidableAction(
+            icon: Icons.drive_file_rename_outline,
+            borderRadius: BorderRadius.circular(99),
+            foregroundColor: Theme.of(context).colorScheme.secondary,
+            onPressed: (context) => _onRenameKdbxKey(),
+          ),
+          if (widget.onDeleted != null)
+            SlidableAction(
+              icon: Icons.delete_rounded,
+              borderRadius: BorderRadius.circular(99),
+              foregroundColor: Theme.of(context).colorScheme.error,
+              onPressed: (context) => widget.onDeleted!(widget.kdbxKey),
+            ),
+          const SizedBox(
+            width: 16,
+          )
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 16, right: 16),
+        child: _buildFormFieldFactory(),
+      ),
+    );
   }
 
   String _kdbKey2I18n() {
@@ -832,13 +443,77 @@ class _KdbxFieldState extends State<KdbxField> {
         return t.label;
       case KdbxKeySpecial.KEY_ATTACH:
       default:
-        return widget.kdbxKey.key;
+        return _renameKdbxKey?.key ?? widget.kdbxKey.key;
     }
+  }
+
+  FormFieldValidator<String?>? _entryFieldValidator() {
+    final t = I18n.of(context)!;
+
+    switch (widget.kdbxKey.key) {
+      case KdbxKeyCommon.KEY_URL:
+        return (value) =>
+            value!.isNotEmpty && !CommonRegExp.domain.hasMatch(value)
+                ? t.format_error(CommonRegExp.domain.pattern)
+                : null;
+      case KdbxKeyCommon.KEY_EMAIL:
+        return (value) =>
+            value!.isNotEmpty && !CommonRegExp.email.hasMatch(value)
+                ? t.format_error(CommonRegExp.email.pattern)
+                : null;
+      case KdbxKeyCommon.KEY_OTP:
+        return (value) =>
+            value!.isNotEmpty && !CommonRegExp.oneTimePassword.hasMatch(value)
+                ? t.format_error(CommonRegExp.oneTimePassword.pattern)
+                : null;
+      default:
+        return null;
+    }
+  }
+
+  void _kdbxTextFieldSaved(String? value) {
+    widget.onSaved(EntryTextFieldSaved(
+      key: widget.kdbxKey,
+      renameKdbxKey: _renameKdbxKey,
+      value: PlainValue(value),
+    ));
+  }
+
+  KdbxKey _uniqueBinaryName(String filepath) {
+    final fileName = path.basename(filepath);
+    final lastIndex = fileName.lastIndexOf('.');
+    final baseName =
+        lastIndex > -1 ? fileName.substring(0, lastIndex) : fileName;
+    final ext = lastIndex > -1 ? fileName.substring(lastIndex + 1) : 'ext';
+    for (var i = 0; i < 1000; i++) {
+      final k = i == 0 ? KdbxKey(fileName) : KdbxKey('$baseName$i.$ext');
+      if (!_binaryKeys.contains(k)) {
+        return k;
+      }
+    }
+    throw StateError('Unable to find unique name for $fileName');
   }
 
   Widget _buildFormFieldFactory() {
     final kdbx = KdbxProvider.of(context)!;
     switch (widget.kdbxKey.key) {
+      case KdbxKeyCommon.KEY_TITLE:
+        return EntryTitleFormField(
+          initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
+          label: _kdbKey2I18n(),
+          kdbxIcon: KdbxIconWidgetData(
+            icon: widget.kdbxEntry.icon.get() ?? KdbxIcon.Key,
+            customIcon: widget.kdbxEntry.customIcon,
+          ),
+          onSaved: (data) {
+            widget.onSaved(EntryTitleFieldSaved(
+              key: widget.kdbxKey,
+              value: PlainValue(data!.$1),
+              icon: data.$2,
+              customIcon: data.$3,
+            ));
+          },
+        );
       case KdbxKeyCommon.KEY_URL:
       case KdbxKeyCommon.KEY_USER_NAME:
       case KdbxKeyCommon.KEY_EMAIL:
@@ -846,39 +521,377 @@ class _KdbxFieldState extends State<KdbxField> {
           initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
           itmes: kdbx.fieldStatistic.getStatistic(widget.kdbxKey)!.toList(),
           label: _kdbKey2I18n(),
-          onSaved: (value) => widget.onSaved(KdbxTextFieldSaved(
-            key: widget.kdbxKey,
-            value: PlainValue(value),
-          )),
+          onSaved: _kdbxTextFieldSaved,
+          expandedInsets: const EdgeInsets.all(0),
+          validator: _entryFieldValidator(),
         );
       case KdbxKeyCommon.KEY_PASSWORD:
-        return DropdownMenuFormField(
+        return EntryTextFormField(
           initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
-          itmes: kdbx.fieldStatistic.getStatistic(widget.kdbxKey)!.toList(),
           label: _kdbKey2I18n(),
-          onSaved: (value) => widget.onSaved(KdbxTextFieldSaved(
-            key: widget.kdbxKey,
-            value: PlainValue(value),
-          )),
-          // trailingIcon: GestureDetector(
-          //   onTap: () {
-
-          //   },
-          //   child: const Icon(Icons.create),
-          // ),
+          trailingIcon: const Icon(Icons.create),
+          onTrailingTap: () async {
+            final password = await Navigator.of(context)
+                .pushNamed(GenPassword.routeName, arguments: true);
+            if (password != null && password is String) {
+              return password;
+            }
+            return null;
+          },
+          onSaved: _kdbxTextFieldSaved,
         );
       case KdbxKeyCommon.KEY_OTP:
-        break;
+        return EntryTextFormField(
+          initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
+          label: _kdbKey2I18n(),
+          trailingIcon:
+              _displayScanner ? const Icon(Icons.qr_code_scanner) : null,
+          onTrailingTap: _displayScanner
+              ? () async {
+                  final optUrl = await Navigator.of(context)
+                      .pushNamed(QrCodeScannerPage.routeName);
+                  if (optUrl != null && optUrl is String) {
+                    return optUrl;
+                  }
+                  return null;
+                }
+              : null,
+          onSaved: _kdbxTextFieldSaved,
+          validator: _entryFieldValidator(),
+        );
       case KdbxKeyCommon.KEY_NOTES:
-        break;
+        return EntryNotesFormField(
+          initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
+          label: _kdbKey2I18n(),
+          onSaved: _kdbxTextFieldSaved,
+        );
       case KdbxKeySpecial.KEY_TAGS:
-        break;
+        final tags = widget.kdbxEntry.tagList;
+        return ChipListFormField(
+          label: _kdbKey2I18n(),
+          initialValue: kdbx.fieldStatistic
+              .getStatistic(widget.kdbxKey)!
+              .map((item) => ChipListItem(
+                    value: item,
+                    label: item,
+                    select: tags.contains(item),
+                    deletable: false,
+                  ))
+              .toList(),
+          onChipTap: (item) {
+            item.select = !item.select;
+            return true;
+          },
+          onAddChipTap: _addTag,
+          onSaved: (list) {
+            widget.onSaved(EntryTagsFieldSaved(
+              key: widget.kdbxKey,
+              value: list!
+                  .where((item) => item.select)
+                  .map((item) => item.value)
+                  .toList(),
+            ));
+          },
+        );
       case KdbxKeySpecial.KEY_ATTACH:
-        break;
+        return ChipListFormField(
+          label: _kdbKey2I18n(),
+          initialValue: widget.kdbxEntry.binaryEntries
+              .map((item) => ChipListItem(
+                    value: item,
+                    label: item.key.key,
+                    deletable: !item.value.isProtected,
+                  ))
+              .toList(),
+          onChanged: (list) {
+            _binaryKeys = list.map((item) => item.value.key).toList();
+          },
+          onChipTap: (item) {
+            showBinaryAction(item);
+            return false;
+          },
+          onAddChipTap: (list) async {
+            try {
+              final (filepath, bytes) = await SimpleFile.openFile();
+              final map = MapEntry(
+                  _uniqueBinaryName(filepath),
+                  KdbxBinary(
+                    isInline: false,
+                    isProtected: false,
+                    value: bytes,
+                  ));
+              return ChipListItem(value: map, label: map.key.key);
+            } catch (e) {
+              // TODO! 提示错误
+            }
+            return null;
+          },
+          onSaved: (list) {
+            widget.onSaved(EntryBinaryFieldSaved(
+              key: widget.kdbxKey,
+              value: list!.map((item) => item.value).toList(),
+            ));
+          },
+        );
       default:
-        break;
+        return EntryTextFormField(
+          initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
+          label: _kdbKey2I18n(),
+          onSaved: _kdbxTextFieldSaved,
+        );
     }
   }
+
+  Future<ChipListItem<String>?> _addTag(List<ChipListItem<String>> list) async {
+    final t = I18n.of(context)!;
+    final kdbx = KdbxProvider.of(context)!;
+
+    final result = await InputDialog.openDialog(
+      context,
+      title: t.label,
+      label: t.new_label,
+      limitItems: [
+        ...kdbx.fieldStatistic.getStatistic(KdbxKeySpecial.TAGS)!,
+        ...list.map((item) => item.value)
+      ],
+    );
+
+    if (result != null && result is String) {
+      return ChipListItem(
+        value: result,
+        label: result,
+        select: true,
+      );
+    }
+
+    return null;
+  }
+}
+
+class EntryTitleFormField extends StatefulWidget {
+  const EntryTitleFormField({
+    super.key,
+    required this.kdbxIcon,
+    this.label,
+    this.initialValue,
+    required this.onSaved,
+  });
+
+  final String? label;
+  final String? initialValue;
+  final KdbxIconWidgetData kdbxIcon;
+
+  final FormFieldSetter<(String, KdbxIcon, KdbxCustomIcon?)> onSaved;
+
+  @override
+  State<EntryTitleFormField> createState() => _EntryTitleFormFieldState();
+}
+
+class _EntryTitleFormFieldState extends State<EntryTitleFormField> {
+  final GlobalKey<FormFieldState<String>> _globalKey = GlobalKey();
+
+  late TextEditingController _controller;
+  late KdbxIconWidgetData _kdbxIcon;
+
+  @override
+  void initState() {
+    _controller = TextEditingController(text: widget.initialValue);
+    _kdbxIcon = widget.kdbxIcon;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      key: _globalKey,
+      controller: _controller,
+      onSaved: (value) {
+        widget.onSaved((value!, _kdbxIcon.icon, _kdbxIcon.customIcon));
+      },
+      decoration: InputDecoration(
+        labelText: widget.label,
+        border: const OutlineInputBorder(),
+        prefixIcon: IconButton(
+          onPressed: () async {
+            final reslut =
+                await Navigator.of(context).pushNamed(SelectIconPage.routeName);
+            if (reslut != null && reslut is KdbxIconWidgetData) {
+              setState(() {
+                _kdbxIcon = reslut;
+                // 使 textform 触发 from 的 onChange
+                _globalKey.currentState?.didChange(_controller.text);
+              });
+            }
+          },
+          icon: KdbxIconWidget(
+            kdbxIcon: _kdbxIcon,
+            size: 18,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class EntryTextFormField extends StatefulWidget {
+  const EntryTextFormField({
+    super.key,
+    this.label,
+    this.initialValue,
+    this.trailingIcon,
+    this.onTrailingTap,
+    this.onSaved,
+    this.validator,
+  });
+
+  final String? label;
+  final String? initialValue;
+  final Widget? trailingIcon;
+  final OnTrailingTap? onTrailingTap;
+
+  final FormFieldSetter<String>? onSaved;
+  final FormFieldValidator<String>? validator;
+
+  @override
+  State<EntryTextFormField> createState() => _EntryTextFormFieldState();
+}
+
+class _EntryTextFormFieldState extends State<EntryTextFormField> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    _controller = TextEditingController(text: widget.initialValue);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      validator: widget.validator,
+      controller: _controller,
+      onSaved: widget.onSaved,
+      decoration: InputDecoration(
+        labelText: widget.label,
+        border: const OutlineInputBorder(),
+        suffixIcon:
+            (widget.trailingIcon != null && widget.onTrailingTap != null)
+                ? Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: IconButton(
+                      onPressed: () async {
+                        _controller.text =
+                            await widget.onTrailingTap!() ?? _controller.text;
+                      },
+                      icon: widget.trailingIcon!,
+                    ),
+                  )
+                : null,
+      ),
+    );
+  }
+}
+
+class EntryNotesFormField extends FormField<String> {
+  EntryNotesFormField({
+    super.key,
+    String? label,
+    super.initialValue,
+    super.onSaved,
+  }) : super(builder: (field) {
+          return GestureDetector(
+            onTap: () async {
+              final text = await Navigator.of(field.context)
+                  .pushNamed(EditNotes.routeName,
+                      arguments: EditNotesArgs(
+                        text: field.value ?? '',
+                      ));
+              if (text != null && text is String) {
+                field.didChange(text);
+              }
+            },
+            child: InputDecorator(
+              isEmpty: field.value == null || field.value!.isEmpty,
+              decoration: InputDecoration(
+                labelText: label,
+                border: const OutlineInputBorder(),
+              ),
+              child: field.value != null && field.value!.isNotEmpty
+                  ? Text(field.value!)
+                  : null,
+            ),
+          );
+        });
+}
+
+typedef OnChipTap<T> = bool Function(ChipListItem<T> item);
+typedef OnAddChipTap<T> = Future<ChipListItem<T>?> Function(
+    List<ChipListItem<T>> list);
+
+class ChipListFormField<T> extends FormField<List<ChipListItem<T>>> {
+  ChipListFormField({
+    super.key,
+    String? label,
+    OnChipTap<T>? onChipTap,
+    OnAddChipTap<T>? onAddChipTap,
+    ValueChanged<List<ChipListItem<T>>>? onChanged,
+    required List<ChipListItem<T>> initialValue,
+    super.onSaved,
+    super.autovalidateMode = AutovalidateMode.disabled,
+  }) : super(
+          initialValue: initialValue,
+          builder: (field) {
+            void onChangedHandler(List<ChipListItem<T>> value) {
+              field.didChange(value);
+              onChanged?.call(value);
+            }
+
+            return InputDecorator(
+              decoration: InputDecoration(
+                labelText: label,
+                border: const OutlineInputBorder(),
+              ),
+              child: ChipList<T>(
+                maxHeight: 150,
+                items: field.value!,
+                onChipTap: onChipTap != null
+                    ? (item) {
+                        if (onChipTap(item)) {
+                          onChangedHandler(field.value!);
+                        }
+                      }
+                    : null,
+                onDeleted: (item) {
+                  final list = field.value!;
+                  list.remove(item);
+                  onChangedHandler(list);
+                },
+                onAddChipTap: onAddChipTap != null
+                    ? () async {
+                        final item = await onAddChipTap(field.value!);
+                        if (item != null) {
+                          final list = field.value!;
+                          list.add(item);
+                          onChangedHandler(list);
+                        }
+                      }
+                    : null,
+              ),
+            );
+          },
+        );
 }
 
 class DropdownMenuFormField extends FormField<String> {
@@ -887,6 +900,7 @@ class DropdownMenuFormField extends FormField<String> {
     double? width,
     double? menuHeight,
     Widget? trailingIcon,
+    OnTrailingTap? onTrailingTap,
     String? label,
     super.initialValue,
     EdgeInsets? expandedInsets,
@@ -896,18 +910,30 @@ class DropdownMenuFormField extends FormField<String> {
     super.validator,
   }) : super(builder: (FormFieldState<String> field) {
           final state = field as _DropdownMenuFormFieldState;
+
+          final Widget? trailing = trailingIcon != null
+              ? GestureDetector(
+                  onTap: onTrailingTap != null
+                      ? () async {
+                          state.controller.text =
+                              await onTrailingTap() ?? state.controller.text;
+                        }
+                      : null,
+                  child: trailingIcon,
+                )
+              : null;
+
           return DropdownMenu(
-            key: key,
             width: width,
             menuHeight: menuHeight,
-            trailingIcon: trailingIcon,
+            trailingIcon: trailing,
             label: label != null ? Text(label) : null,
             errorText: state.errorText,
-            selectedTrailingIcon: trailingIcon,
+            selectedTrailingIcon: trailing,
             enableFilter: true,
             enableSearch: true,
             controller: state.controller,
-            initialSelection: state._dropdownMenuFormField.initialValue,
+            initialSelection: initialValue,
             expandedInsets: expandedInsets,
             dropdownMenuEntries: itmes
                 .map((value) => DropdownMenuEntry(value: value, label: value))
@@ -921,9 +947,6 @@ class DropdownMenuFormField extends FormField<String> {
 
 class _DropdownMenuFormFieldState extends FormFieldState<String> {
   late TextEditingController controller;
-
-  DropdownMenuFormField get _dropdownMenuFormField =>
-      super.widget as DropdownMenuFormField;
 
   @override
   void initState() {

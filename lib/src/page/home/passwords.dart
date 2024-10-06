@@ -4,12 +4,11 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
 import '../../component/highlight_text.dart';
-import '../../context/store.dart';
+import '../../context/kdbx.dart';
 import '../../i18n.dart';
-import '../../model/rpass/account.dart';
-import '../../util/common.dart';
+import '../../kdbx/kdbx.dart';
+import '../../widget/common.dart';
 import '../page.dart';
-import '../../store/accounts/contrller.dart';
 
 class PasswordsPage extends StatefulWidget {
   const PasswordsPage({super.key});
@@ -23,36 +22,44 @@ class PasswordsPageState extends State<PasswordsPage>
   @override
   bool get wantKeepAlive => true;
 
-  final List<Account> _accounts = [];
+  final List<KdbxEntry> _totalEntry = [];
   String _searchText = "";
 
   @override
   void initState() {
     Future.delayed(Duration.zero, () {
-      StoreProvider.of(context).accounts.addListener(_searchAccounts);
+      KdbxProvider.of(context)!.addListener(_searchAccounts);
     });
     _searchAccounts();
     super.initState();
   }
 
+  @override
+  void dispose() {
+    KdbxProvider.of(context)!.removeListener(_searchAccounts);
+    super.dispose();
+  }
+
   void _searchAccounts() {
-    _accounts.clear();
-    final store = StoreProvider.of(context);
+    _totalEntry.clear();
+    final kdbx = KdbxProvider.of(context)!;
     if (_searchText.isNotEmpty) {
       final searchText = _searchText.toLowerCase();
-      _accounts.addAll(store.accounts.accountList.where((account) {
-        var weight = account.domain.toLowerCase().contains(searchText) ? 1 : 0;
-        weight += account.domainName.toLowerCase().contains(searchText) ? 1 : 0;
-        weight += account.account.toLowerCase().contains(searchText) ? 1 : 0;
-        weight += account.email.toLowerCase().contains(searchText) ? 1 : 0;
-        weight += account.password.toLowerCase().contains(searchText) ? 1 : 0;
-        weight +=
-            account.description.toLowerCase().contains(searchText) ? 1 : 0;
-        weight += account.labels.contains(searchText) ? 1 : 0;
+      _totalEntry.addAll(kdbx.totalEntry.where((item) {
+        var weight = 0;
+        for (var key in KdbxKeyCommon.all) {
+          weight += (item.getString(key)?.getText() ?? '')
+                  .toLowerCase()
+                  .contains(searchText)
+              ? 1
+              : 0;
+        }
+        weight += item.tagList.contains(searchText) ? 1 : 0;
+
         return weight > 0;
       }));
     } else {
-      _accounts.addAll(store.accounts.accountList);
+      _totalEntry.addAll(kdbx.totalEntry);
     }
 
     setState(() {});
@@ -61,7 +68,8 @@ class PasswordsPageState extends State<PasswordsPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final store = StoreProvider.of(context);
+
+    final kdbx = KdbxProvider.of(context)!;
 
     final mainColor = Theme.of(context).colorScheme.primaryContainer;
 
@@ -69,8 +77,8 @@ class PasswordsPageState extends State<PasswordsPage>
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: _AppBarTitleToSearch(
-          itemCount: store.accounts.accountList.length,
-          matchCount: _searchText.isNotEmpty ? _accounts.length : 0,
+          itemCount: kdbx.totalEntry.length,
+          matchCount: _searchText.isNotEmpty ? _totalEntry.length : 0,
           onChanged: (text) {
             _searchText = text;
             _searchAccounts();
@@ -80,7 +88,7 @@ class PasswordsPageState extends State<PasswordsPage>
       body: ListView.separated(
         shrinkWrap: true,
         padding: const EdgeInsets.all(12),
-        itemCount: _accounts.length,
+        itemCount: _totalEntry.length,
         separatorBuilder: (context, index) {
           return const SizedBox(
             height: 12,
@@ -88,8 +96,7 @@ class PasswordsPageState extends State<PasswordsPage>
         },
         itemBuilder: (context, index) {
           return _OpenContainerPasswordItem(
-            accountsContrller: store.accounts,
-            account: _accounts[index],
+            kdbxEntry: _totalEntry[index],
             matchText: _searchText,
           );
         },
@@ -217,8 +224,11 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
           ),
           suffixIcon: IconButton(
             onPressed: () {
-              _controller.clear();
-              _focusNode.unfocus();
+              if (_controller.text.isNotEmpty) {
+                _controller.clear();
+              } else {
+                _focusNode.unfocus();
+              }
             },
             icon: AnimatedOpacity(
               opacity: _hasFocus ? 1 : 0,
@@ -234,13 +244,11 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
 
 class _OpenContainerPasswordItem extends StatelessWidget {
   const _OpenContainerPasswordItem({
-    required this.account,
-    required this.accountsContrller,
+    required this.kdbxEntry,
     this.matchText,
   });
 
-  final Account account;
-  final AccountsContrller accountsContrller;
+  final KdbxEntry kdbxEntry;
   final String? matchText;
 
   @override
@@ -256,15 +264,12 @@ class _OpenContainerPasswordItem extends StatelessWidget {
       openColor: mainColor,
       closedColor: mainColor,
       middleColor: mainColor,
+      routeSettings: RouteSettings(arguments: kdbxEntry),
       openBuilder: (BuildContext context, VoidCallback _) {
         if (isLogPress) {
-          return EditAccountPage(
-            accountId: account.id,
-          );
+          return const EditAccountPage();
         }
-        return LookAccountPage(
-          accountId: account.id,
-        );
+        return const LookAccountPage();
       },
       closedElevation: 2,
       closedShape: const RoundedRectangleBorder(
@@ -272,7 +277,7 @@ class _OpenContainerPasswordItem extends StatelessWidget {
       ),
       closedBuilder: (BuildContext context, VoidCallback openContainer) {
         return _PasswordItem(
-          account: account,
+          kdbxEntry: kdbxEntry,
           matchText: matchText,
           onTop: () {
             isLogPress = false;
@@ -290,13 +295,13 @@ class _OpenContainerPasswordItem extends StatelessWidget {
 
 class _PasswordItem extends StatefulWidget {
   const _PasswordItem({
-    required this.account,
+    required this.kdbxEntry,
     this.matchText,
     this.onTop,
     this.onLongPress,
   });
 
-  final Account account;
+  final KdbxEntry kdbxEntry;
   final String? matchText;
   final GestureTapCallback? onTop;
   final GestureLongPressCallback? onLongPress;
@@ -310,18 +315,24 @@ class _PasswordItemState extends State<_PasswordItem> {
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
 
-    final Account account = widget.account;
+    final kdbxEntry = widget.kdbxEntry;
     return ListTile(
       isThreeLine: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(8.0)),
       ),
-      leading: const Padding(
-        padding: EdgeInsets.only(top: 6),
-        child: Icon(Icons.supervised_user_circle),
+      leading: Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: KdbxIconWidget(
+          kdbxIcon: KdbxIconWidgetData(
+            icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
+            customIcon: kdbxEntry.customIcon,
+          ),
+          size: 24,
+        ),
       ),
       title: HighlightText(
-        text: account.domainName,
+        text: kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE),
         matchText: widget.matchText,
         style: Theme.of(context).textTheme.titleLarge,
         overflow: TextOverflow.ellipsis,
@@ -332,18 +343,20 @@ class _PasswordItemState extends State<_PasswordItem> {
           Padding(
             padding: const EdgeInsets.only(left: 12),
             child: HighlightText(
-              text: account.domain,
+              text: kdbxEntry.getNonNullString(KdbxKeyCommon.URL),
               matchText: widget.matchText,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
-          _subtitleText(t.account_ab, account.account),
-          _subtitleText(t.email_ab, account.email),
-          _subtitleText(t.label_ab, account.labels.join(", ")),
+          _subtitleText(t.account_ab,
+              kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME)),
+          _subtitleText(
+              t.email_ab, kdbxEntry.getNonNullString(KdbxKeyCommon.EMAIL)),
+          _subtitleText(t.label_ab, kdbxEntry.tagList.join(", ")),
           Align(
             alignment: Alignment.centerRight,
             child: Text(
-              dateFormat(account.date),
+              kdbxEntry.parent?.name.get() ?? '',
               overflow: TextOverflow.ellipsis,
             ),
           ),

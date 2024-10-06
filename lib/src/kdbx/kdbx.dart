@@ -10,7 +10,17 @@ import 'icons.dart';
 
 export 'common.dart';
 export 'package:kdbx/kdbx.dart'
-    show KdbxEntry, KdbxGroup, KdbxKey, PlainValue, StringValue;
+    show
+        KdbxEntry,
+        KdbxGroup,
+        KdbxKey,
+        PlainValue,
+        StringValue,
+        KdbxBinary,
+        KdbxIcon,
+        KdbxCustomIcon,
+        KdbxDao,
+        KdbxUuid;
 
 abstract class KdbxBase {
   abstract final KdbxFile kdbxFile;
@@ -63,21 +73,21 @@ class FieldStatistic {
     Set<String>? urls,
     Set<String>? userNames,
     Set<String>? emails,
-    Set<String>? passwords,
     Set<String>? tags,
     Set<String>? customFields,
+    Set<String>? customIcons,
   })  : urls = urls ?? {},
         userNames = userNames ?? {},
         emails = emails ?? {},
-        passwords = passwords ?? {},
         tags = tags ?? {},
-        customFields = customFields ?? {};
+        customFields = customFields ?? {},
+        customIcons = customIcons ?? {};
   final Set<String> urls;
   final Set<String> userNames;
   final Set<String> emails;
-  final Set<String> passwords;
   final Set<String> tags;
   final Set<String> customFields;
+  final Set<String> customIcons;
 
   Set<String>? getStatistic(KdbxKey kdbKey) {
     switch (kdbKey.key) {
@@ -87,11 +97,11 @@ class FieldStatistic {
         return userNames;
       case KdbxKeyCommon.KEY_EMAIL:
         return emails;
-      case KdbxKeyCommon.KEY_PASSWORD:
-        return passwords;
       case KdbxKeySpecial.KEY_TAGS:
         return tags;
       case "CustomFields":
+        return customFields;
+      case "CustomIcons":
         return customFields;
     }
     return null;
@@ -113,6 +123,8 @@ extension KdbxMetaExt on KdbxBase {
       kdbxFile.body.meta.recycleBinUUID.get()?.uuid ?? KdbxUuid.NIL.uuid;
 
   Iterable<KdbxBinary> get binariesIterablea => kdbxFile.ctx.binariesIterable;
+  Iterable<KdbxCustomIcon> get customIcons =>
+      kdbxFile.body.meta.customIcons.values;
 
   set databaseName(String value) {
     kdbxFile.body.meta.databaseName.set(value);
@@ -142,8 +154,8 @@ extension KdbxGroupExt on KdbxBase {
       .toList(growable: false);
 
   // 只考虑在根组下添加新组, 不打算嵌套组
-  void createGroup(String name) {
-    kdbxFile.createGroup(parent: kdbxFile.body.rootGroup, name: name);
+  KdbxGroup  createGroup(String name) {
+    return kdbxFile.createGroup(parent: kdbxFile.body.rootGroup, name: name);
   }
 
   void deleteGroup(KdbxGroup group) {
@@ -151,18 +163,39 @@ extension KdbxGroupExt on KdbxBase {
   }
 }
 
+mixin KdbxVirtualObject on KdbxBase {
+  KdbxGroup? _kdbxVirtualGroup;
+
+  KdbxGroup? get virtualGroup => _kdbxVirtualGroup;
+
+  KdbxGroup _getVirtualGroup() {
+    if (_kdbxVirtualGroup != null) return _kdbxVirtualGroup!;
+    _kdbxVirtualGroup = KdbxGroup.create(
+      ctx: kdbxFile.ctx,
+      parent: null,
+      name: "Virtual-Group",
+    );
+    return _kdbxVirtualGroup!;
+  }
+
+  KdbxEntry createVirtualEntry() {
+    return createEntry(_getVirtualGroup());
+  }
+}
+
 extension KdbxEntryExt on KdbxBase {
   // 除垃圾桶的全部 KdbxEntry
-  List<KdbxEntry> get totalEntrys => rootGroups
+  List<KdbxEntry> get totalEntry => [kdbxFile.body.rootGroup, ...rootGroups]
       .expand((group) => group.getAllEntries())
       .toList(growable: false);
 
-  void createEntry(KdbxGroup parent) {
+  KdbxEntry createEntry(KdbxGroup parent) {
     final entry = KdbxEntry.create(kdbxFile, parent);
     for (var key in KdbxKeyCommon.all) {
       entry.setString(key, PlainValue(''));
     }
     parent.addEntry(entry);
+    return entry;
   }
 
   void deleteEntry(KdbxEntry entry) {
@@ -219,33 +252,52 @@ extension KdbxCredentialsExt on KdbxBase {
 mixin KdbxEntryFieldStatistic on KdbxBase {
   FieldStatistic? _fieldStatistic;
 
-  FieldStatistic get fieldStatistic => _fieldStatistic == null
-      ? _fieldStatistic = getFieldStatistic()
-      : _fieldStatistic!;
+  FieldStatistic get fieldStatistic => _getFieldStatistic();
 
-  FieldStatistic getFieldStatistic() {
-    final fieldStatistic = FieldStatistic();
-    for (var item in totalEntrys) {
-      final url = item.getString(KdbxKeyCommon.URL)?.getText();
-      final userName = item.getString(KdbxKeyCommon.USER_NAME)?.getText();
-      final email = item.getString(KdbxKeyCommon.EMAIL)?.getText();
-      final password = item.getString(KdbxKeyCommon.PASSWORD)?.getText();
-      url != null && fieldStatistic.urls.add(url);
-      userName != null && fieldStatistic.userNames.add(userName);
-      email != null && fieldStatistic.emails.add(email);
-      password != null && fieldStatistic.passwords.add(password);
-      fieldStatistic.tags.addAll(item.tagList);
-      fieldStatistic.customFields.addAll(item.stringEntries
+  FieldStatistic _getFieldStatistic() {
+    if (_fieldStatistic != null) {
+      return _fieldStatistic!;
+    }
+
+    _fieldStatistic = FieldStatistic();
+
+    _fieldStatistic!.customIcons.addAll(customIcons.map(
+      (item) => item.uuid.uuid,
+    ));
+
+    void setFieldStatistic(KdbxEntry entry) {
+      final url = entry.getString(KdbxKeyCommon.URL)?.getText();
+      final userName = entry.getString(KdbxKeyCommon.USER_NAME)?.getText();
+      final email = entry.getString(KdbxKeyCommon.EMAIL)?.getText();
+
+      url != null && url.isNotEmpty && _fieldStatistic!.urls.add(url);
+      userName != null &&
+          userName.isNotEmpty &&
+          _fieldStatistic!.userNames.add(userName);
+
+      email != null && email.isNotEmpty && _fieldStatistic!.emails.add(email);
+
+      _fieldStatistic!.tags.addAll(entry.tagList);
+
+      _fieldStatistic!.customFields.addAll(entry.stringEntries
           .where((kdbKey) => !KdbxKeyCommon.all.contains(kdbKey.key))
           .map((kdbKey) => kdbKey.key.key));
     }
-    return fieldStatistic;
-  }
 
-  void _refreshFieldStatistic() {
-    if (_fieldStatistic != null) {
-      _fieldStatistic = getFieldStatistic();
-    }
+    totalEntry.forEach(setFieldStatistic);
+
+    kdbxFile.dirtyObjectsChanged.listen((event) {
+      _fieldStatistic!.customIcons.addAll(customIcons.map(
+        (item) => item.uuid.uuid,
+      ));
+      for (var item in event) {
+        if (item is KdbxEntry) {
+          setFieldStatistic(item);
+        }
+      }
+    });
+
+    return _fieldStatistic!;
   }
 }
 
@@ -255,7 +307,8 @@ extension KdbxIconExt on KdbxObject {
   }
 }
 
-class Kdbx extends KdbxBase with KdbxEntryFieldStatistic {
+class Kdbx extends KdbxBase
+    with KdbxEntryFieldStatistic, KdbxVirtualObject, ChangeNotifier {
   Kdbx({required this.kdbxFile, this.filepath});
 
   @override
@@ -320,7 +373,7 @@ class Kdbx extends KdbxBase with KdbxEntryFieldStatistic {
     this.filepath ??= filepath;
     if (this.filepath != null) {
       await File(this.filepath!).writeAsBytes(await kdbxFile.save());
-      _refreshFieldStatistic();
+      notifyListeners();
     } else {
       throw Exception("filepath is null");
     }
@@ -332,7 +385,11 @@ class Kdbx extends KdbxBase with KdbxEntryFieldStatistic {
 }
 
 extension KdbxEntryTagExt on KdbxEntry {
-  List<String> get tagList => (tags.get() ?? "").split(";");
+  List<String> get tagList =>
+      (tags.get() ?? "").split(";").where((item) => item.isNotEmpty).toList();
+
+  set tagList(List<String> list) => tags.set(list.join(";"));
+
   void addTag(String value) {
     if (!tagList.contains(value)) {
       tags.set("$tags;$value");
@@ -344,5 +401,9 @@ extension KdbxEntryTagExt on KdbxEntry {
     if (tmpTagList.remove(value)) {
       tags.set(tmpTagList.join(";"));
     }
+  }
+
+  String getNonNullString(KdbxKey key) {
+    return getString(key)?.getText() ?? '';
   }
 }

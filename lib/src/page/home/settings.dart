@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,10 +10,8 @@ import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
 import '../../context/store.dart';
 import '../../i18n.dart';
-import '../../util/verify_core.dart';
+import '../../util/file.dart';
 import '../page.dart';
-import '../verify/security_question.dart';
-import '../../model/rpass/question.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -182,7 +182,12 @@ class SettingsPageState extends State<SettingsPage>
               shape: shape,
               title: Text(t.export),
               onTap: () {
-                Navigator.of(context).pushNamed(ExportAccountPage.routeName);
+                final kdbx = KdbxProvider.of(context)!;
+                SimpleFile.saveText(
+                  data: kdbx.kdbxFile.body.toXml().toXmlString(),
+                  filename: "test.xml",
+                );
+                // Navigator.of(context).pushNamed(ExportAccountPage.routeName);
               },
             ),
           ]),
