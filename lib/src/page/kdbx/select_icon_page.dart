@@ -11,10 +11,10 @@ class SelectIconPage extends StatefulWidget {
   static const routeName = "/select_icon";
 
   @override
-  State<SelectIconPage> createState() => _CreateKdbxPageState();
+  State<SelectIconPage> createState() => _SelectIconPageState();
 }
 
-class _CreateKdbxPageState extends State<SelectIconPage> {
+class _SelectIconPageState extends State<SelectIconPage> {
   void _onIconTap(KdbxIconWidgetData icon) {
     Navigator.of(context).pop(icon);
   }
@@ -74,9 +74,7 @@ class _CreateKdbxPageState extends State<SelectIconPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           try {
-            final (path, bytes) = await SimpleFile.openFile(
-              allowedExtensions: ["png", "jpg", "jpeg"],
-            );
+            final (_, bytes) = await SimpleFile.openFile(type: FileType.image);
             _onIconTap(KdbxIconWidgetData(
               icon: KdbxIcon.Key,
               customIcon: KdbxCustomIcon(uuid: KdbxUuid.random(), data: bytes),

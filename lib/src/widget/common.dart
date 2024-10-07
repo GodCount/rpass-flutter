@@ -74,6 +74,76 @@ mixin CommonWidgetUtil<T extends StatefulWidget> on State<T> {
     );
   }
 
+  String getKdbxObjectTitle(KdbxObject kdbxObject) {
+    return kdbxObject is KdbxEntry
+        ? kdbxObject.label ?? ''
+        : kdbxObject is KdbxGroup
+            ? kdbxObject.name.get() ?? ''
+            : '';
+  }
+
+  void showRecycleBinAction(
+    KdbxObject kdbxObject, {
+    GestureTapCallback? onRestoreTap,
+    GestureTapCallback? onDeleteTap,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return ListView(
+          shrinkWrap: true,
+          children: [
+            Align(
+              alignment: Alignment.center,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 6, bottom: 6),
+                child: Text(
+                  getKdbxObjectTitle(kdbxObject),
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+            ),
+            if (kdbxObject is KdbxEntry)
+              ListTile(
+                leading: const Icon(Icons.person_search),
+                title: const Text("查看"),
+                onTap: () {
+                  Navigator.of(context).popAndPushNamed(
+                    LookAccountPage.routeName,
+                    arguments: kdbxObject,
+                  );
+                },
+              ),
+            ListTile(
+              iconColor: Theme.of(context).colorScheme.primary,
+              textColor: Theme.of(context).colorScheme.primary,
+              leading: const Icon(Icons.restore_from_trash),
+              title: const Text("恢复"),
+              onTap: onRestoreTap != null
+                  ? () {
+                      Navigator.of(context).pop();
+                      onRestoreTap();
+                    }
+                  : null,
+            ),
+            ListTile(
+              iconColor: Theme.of(context).colorScheme.error,
+              textColor: Theme.of(context).colorScheme.error,
+              leading: const Icon(Icons.delete_forever),
+              title: const Text("彻底删除"),
+              onTap: onDeleteTap != null
+                  ? () {
+                      Navigator.of(context).pop();
+                      onDeleteTap();
+                    }
+                  : null,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void showEntryHistoryList(KdbxEntry kdbxEntry) {
     showModalBottomSheet(
       context: context,

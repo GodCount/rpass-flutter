@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:kdbx/kdbx.dart' hide KdbxException, KdbxKeyCommon;
 
 import '../rpass.dart';
-import 'common.dart';
 import 'icons.dart';
 
 export 'common.dart';
@@ -13,6 +12,7 @@ export 'package:kdbx/kdbx.dart'
     show
         KdbxEntry,
         KdbxGroup,
+        KdbxObject,
         KdbxKey,
         PlainValue,
         StringValue,
@@ -205,29 +205,25 @@ extension KdbxEntryExt on KdbxBase {
 }
 
 extension KdbxRecycleBinExt on KdbxBase {
-  List<KdbxObject> get totalRecycleBinObjects => kdbxFile
-      .getRecycleBinOrCreate()
-      .getAllGroupsAndEntries()
-      .toList(growable: false);
+  List<KdbxObject> get recycleBinObjects => [
+        ...kdbxFile.getRecycleBinOrCreate().groups,
+        ...kdbxFile.getRecycleBinOrCreate().entries,
+      ];
 
   void deletePermanently(KdbxObject object) {
     kdbxFile.deletePermanently(object);
   }
 
-  void restoreObject(KdbxObject object, [KdbxGroup? toGroup]) {
-    KdbxGroup? prveGroup = toGroup;
+  void restoreObject(KdbxObject object) {
+    KdbxGroup? prveGroup;
 
-    if (prveGroup == null) {
-      if (object is KdbxGroup || object is KdbxEntry) {
-        prveGroup = kdbxFile.findGroupByUuid(object.previousParentGroup.get());
-      } else {
-        throw KdbxError("not support kdbx object ${object.node.name}");
+    try {
+      prveGroup = kdbxFile.findGroupByUuid(object.previousParentGroup.get());
+      if (prveGroup.isInRecycleBin() || prveGroup == kdbxFile.recycleBin) {
+        prveGroup = kdbxFile.body.rootGroup;
       }
-    }
-
-    if (prveGroup.isInRecycleBin() || prveGroup == kdbxFile.recycleBin) {
-      throw KdbxException("It's still in the recycling bin",
-          KdbxExceptionCode.NeverLeave_RecycleBin);
+    } catch (e) {
+      prveGroup = kdbxFile.body.rootGroup;
     }
 
     kdbxFile.move(object, prveGroup);

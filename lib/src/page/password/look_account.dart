@@ -61,20 +61,21 @@ class _LookAccountPageState extends State<LookAccountPage>
     return Scaffold(
       appBar: AppBar(
         title: Text(t.lookup),
-        actions: !_kdbxEntry!.isHistoryEntry
-            ? [
-                IconButton(
-                  onPressed: _deleteAccount,
-                  icon: const Icon(Icons.delete),
-                ),
-                IconButton(
-                  onPressed: () {
-                    showEntryHistoryList(_kdbxEntry!);
-                  },
-                  icon: const Icon(Icons.history_rounded),
-                ),
-              ]
-            : null,
+        actions: [
+          IconButton(
+            onPressed:
+                !_kdbxEntry!.isHistoryEntry && !_kdbxEntry!.isInRecycleBin()
+                    ? _deleteAccount
+                    : null,
+            icon: const Icon(Icons.delete),
+          ),
+          IconButton(
+            onPressed: !_kdbxEntry!.isHistoryEntry
+                ? () => showEntryHistoryList(_kdbxEntry!)
+                : null,
+            icon: const Icon(Icons.history_rounded),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(6),
@@ -405,7 +406,8 @@ class _LookAccountPageState extends State<LookAccountPage>
           const SizedBox(height: 42)
         ],
       ),
-      floatingActionButton: !_kdbxEntry!.isHistoryEntry
+      floatingActionButton: !_kdbxEntry!.isHistoryEntry &&
+              !_kdbxEntry!.isInRecycleBin()
           ? FloatingActionButton(
               onPressed: () {
                 Navigator.of(context)
@@ -454,9 +456,10 @@ class _LookAccountPageState extends State<LookAccountPage>
       },
     ).then((value) async {
       if (value is bool && value) {
+        final kdbx = KdbxProvider.of(context)!;
         try {
-          final kdbx = KdbxProvider.of(context)!;
           kdbx.deleteEntry(_kdbxEntry!);
+          await kdbx.save();
           if (mounted) {
             Navigator.of(context).pop();
           }

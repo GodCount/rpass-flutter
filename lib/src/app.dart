@@ -73,6 +73,8 @@ class RpassApp extends StatelessWidget {
               LoadKdbxPage.routeName: (context) => const LoadKdbxPage(),
               InitKdbxPage.routeName: (context) => const InitKdbxPage(),
               SelectIconPage.routeName: (context) => const SelectIconPage(),
+              RecycleBinPage.routeName: (context) => const RecycleBinPage(),
+
 
               EditAccountPage.routeName: (context) => const EditAccountPage(),
               GenPassword.routeName: (context) => const GenPassword(),
@@ -81,6 +83,9 @@ class RpassApp extends StatelessWidget {
 
               QrCodeScannerPage.routeName: (context) =>
                   const QrCodeScannerPage(),
+              ChangeLocalePage.routeName: (context) => const ChangeLocalePage(),
+              AboutPage.routeName: (context) => const AboutPage(),
+
 
               // InitPassword.routeName: (context) => const InitPassword(),
               // VerifyPassword.routeName: (context) => const VerifyPassword(),

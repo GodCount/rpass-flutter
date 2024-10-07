@@ -400,6 +400,7 @@ class _EntryFieldState extends State<EntryField> with CommonWidgetUtil {
           SlidableAction(
             icon: Icons.drive_file_rename_outline,
             borderRadius: BorderRadius.circular(99),
+            backgroundColor: Colors.transparent,
             foregroundColor: Theme.of(context).colorScheme.secondary,
             onPressed: (context) => _onRenameKdbxKey(),
           ),
@@ -407,6 +408,7 @@ class _EntryFieldState extends State<EntryField> with CommonWidgetUtil {
             SlidableAction(
               icon: Icons.delete_rounded,
               borderRadius: BorderRadius.circular(99),
+              backgroundColor: Colors.transparent,
               foregroundColor: Theme.of(context).colorScheme.error,
               onPressed: (context) => widget.onDeleted!(widget.kdbxKey),
             ),

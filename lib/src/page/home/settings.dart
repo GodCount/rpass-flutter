@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -96,6 +94,31 @@ class SettingsPageState extends State<SettingsPage>
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(right: 6),
+                    child: Icon(Icons.view_in_ar_rounded),
+                  ),
+                  Text(
+                    "密码库",
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              shape: shape,
+              title: const Text("回收站"),
+              trailing: const Icon(Icons.recycling_rounded),
+              onTap: () {
+                Navigator.of(context).pushNamed(RecycleBinPage.routeName);
+              },
+            ),
+          ]),
+          _cardColumn([
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.translate),
                   ),
                   Text(t.language,
@@ -104,6 +127,7 @@ class SettingsPageState extends State<SettingsPage>
               ),
             ),
             ListTile(
+              shape: shape,
               title: Text(
                   store.settings.locale != null ? t.locale_name : t.system),
               trailing: const Icon(Icons.chevron_right_rounded),
