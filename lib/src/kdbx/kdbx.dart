@@ -154,7 +154,7 @@ extension KdbxGroupExt on KdbxBase {
       .toList(growable: false);
 
   // 只考虑在根组下添加新组, 不打算嵌套组
-  KdbxGroup  createGroup(String name) {
+  KdbxGroup createGroup(String name) {
     return kdbxFile.createGroup(parent: kdbxFile.body.rootGroup, name: name);
   }
 
@@ -185,9 +185,10 @@ mixin KdbxVirtualObject on KdbxBase {
 
 extension KdbxEntryExt on KdbxBase {
   // 除垃圾桶的全部 KdbxEntry
-  List<KdbxEntry> get totalEntry => [kdbxFile.body.rootGroup, ...rootGroups]
-      .expand((group) => group.getAllEntries())
-      .toList(growable: false);
+  List<KdbxEntry> get totalEntry => [
+        ...kdbxFile.body.rootGroup.entries,
+        ...rootGroups.expand((group) => group.getAllEntries())
+      ];
 
   KdbxEntry createEntry(KdbxGroup parent) {
     final entry = KdbxEntry.create(kdbxFile, parent);

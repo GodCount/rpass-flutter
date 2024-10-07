@@ -401,7 +401,8 @@ class _LookAccountPageState extends State<LookAccountPage>
                 child: Text(_kdbxEntry!.uuid.uuid),
               ),
             ),
-          ])
+          ]),
+          const SizedBox(height: 42)
         ],
       ),
       floatingActionButton: !_kdbxEntry!.isHistoryEntry

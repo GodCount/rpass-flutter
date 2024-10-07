@@ -935,6 +935,7 @@ class DropdownMenuFormField extends FormField<String> {
             controller: state.controller,
             initialSelection: initialValue,
             expandedInsets: expandedInsets,
+            requestFocusOnTap: true,
             dropdownMenuEntries: itmes
                 .map((value) => DropdownMenuEntry(value: value, label: value))
                 .toList(),

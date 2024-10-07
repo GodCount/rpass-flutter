@@ -42,9 +42,11 @@ class SimpleFile {
   }) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       dialogTitle: dialogTitle,
-      type: FileType.custom,
+      type: allowedExtensions == null || allowedExtensions.isEmpty
+          ? FileType.any
+          : FileType.custom,
       initialDirectory: (await applicationDocumentsDirectory).path,
-      allowedExtensions: allowedExtensions ?? ["*"],
+      allowedExtensions: allowedExtensions,
     );
     if (result == null || result.xFiles.isEmpty) {
       throw Exception("user cancel");
@@ -70,7 +72,9 @@ class SimpleFile {
   }) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       dialogTitle: dialogTitle,
-      type: FileType.custom,
+      type: allowedExtensions == null || allowedExtensions.isEmpty
+          ? FileType.any
+          : FileType.custom,
       initialDirectory: (await applicationDocumentsDirectory).path,
       allowedExtensions: allowedExtensions,
     );

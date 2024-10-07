@@ -61,6 +61,9 @@ class PasswordsPageState extends State<PasswordsPage>
     } else {
       _totalEntry.addAll(kdbx.totalEntry);
     }
+    _totalEntry.sort((a, b) => a.times.lastModificationTime.get()!.compareTo(
+          b.times.lastModificationTime.get()!,
+        ));
 
     setState(() {});
   }

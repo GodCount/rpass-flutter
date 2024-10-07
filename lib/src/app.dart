@@ -79,6 +79,9 @@ class RpassApp extends StatelessWidget {
               EditNotes.routeName: (context) => const EditNotes(),
               LookAccountPage.routeName: (context) => const LookAccountPage(),
 
+              QrCodeScannerPage.routeName: (context) =>
+                  const QrCodeScannerPage(),
+
               // InitPassword.routeName: (context) => const InitPassword(),
               // VerifyPassword.routeName: (context) => const VerifyPassword(),
               // ForgetPassword.routeName: (context) => const ForgetPassword(),

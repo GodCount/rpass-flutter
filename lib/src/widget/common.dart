@@ -44,9 +44,12 @@ mixin CommonWidgetUtil<T extends StatefulWidget> on State<T> {
           children: [
             Align(
               alignment: Alignment.center,
-              child: Text(
-                binary.label,
-                style: Theme.of(context).textTheme.titleMedium,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 6, bottom: 6),
+                child: Text(
+                  binary.label,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
               ),
             ),
             ListTile(
@@ -75,38 +78,42 @@ mixin CommonWidgetUtil<T extends StatefulWidget> on State<T> {
     showModalBottomSheet(
       context: context,
       builder: (context) {
+        final history = kdbxEntry.history.reversed.toList();
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Align(
               alignment: Alignment.center,
-              child: Text(
-                "时间线",
-                style: Theme.of(context).textTheme.titleMedium,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 6, bottom: 6),
+                child: Text(
+                  "时间线",
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
               ),
             ),
-            kdbxEntry.history.isNotEmpty
+            history.isNotEmpty
                 ? Expanded(
                     child: ListView.builder(
-                        reverse: true,
                         shrinkWrap: true,
-                        itemCount: kdbxEntry.history.length,
+                        itemCount: history.length,
                         itemBuilder: (context, index) {
-                          final entry = kdbxEntry.history[index];
+                          final entry = history[index];
 
                           TimeLineNodeType type = TimeLineNodeType.all;
 
-                          if (kdbxEntry.history.length == 1) {
+                          if (history.length == 1) {
                             type = TimeLineNodeType.dot;
                           } else if (index == 0) {
-                            type = TimeLineNodeType.top;
-                          } else if (index == kdbxEntry.history.length - 1) {
                             type = TimeLineNodeType.bottom;
+                          } else if (index == history.length - 1) {
+                            type = TimeLineNodeType.top;
                           }
 
                           return ListTile(
                             leading: _timelineNode(type),
                             title: Card(
+                              elevation: 4.0,
                               shape: const RoundedRectangleBorder(
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(6.0)),
@@ -153,14 +160,14 @@ mixin CommonWidgetUtil<T extends StatefulWidget> on State<T> {
         if (type != TimeLineNodeType.dot)
           Align(
             alignment: type == TimeLineNodeType.top
-                ? Alignment.topCenter
+                ? const Alignment(0.0, -1.2)
                 : type == TimeLineNodeType.bottom
-                    ? Alignment.bottomCenter
+                    ? const Alignment(0.0, 1.2)
                     : Alignment.center,
             widthFactor: 1,
             heightFactor: 2,
             child: FractionallySizedBox(
-              heightFactor: type != TimeLineNodeType.all ? 0.5 : 1.5,
+              heightFactor: type != TimeLineNodeType.all ? 0.5 : 1.2,
               child: Container(
                 width: 4,
                 color: Colors.amber,
@@ -173,7 +180,6 @@ mixin CommonWidgetUtil<T extends StatefulWidget> on State<T> {
           decoration: const BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.amber,
-            // border: border,
           ),
         )
       ],
@@ -422,21 +428,34 @@ class SimpleSelectorDialogState<T> extends State<SimpleSelectorDialog<T>> {
 
     return AlertDialog(
       title: widget.title != null ? Text(widget.title!) : null,
-      content: ListView(
-        shrinkWrap: true,
-        children: widget.items
-            .map(
-              (item) => ListTile(
-                title: Text(item.label),
-                trailing:
-                    item.value == widget.value ? const Icon(Icons.done) : null,
-                onTap: () {
-                  widget
-                      .onResult(item.value == widget.value ? null : item.value);
-                },
-              ),
-            )
-            .toList(),
+      contentPadding: EdgeInsets.only(
+        top: Theme.of(context).useMaterial3 ? 16.0 : 20.0,
+        right: 0,
+        bottom: 24.0,
+        left: 0,
+      ),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: ListView(
+          shrinkWrap: true,
+          children: widget.items
+              .map(
+                (item) => ListTile(
+                  title: Padding(
+                    padding: const EdgeInsets.only(left: 24.0),
+                    child: Text(item.label),
+                  ),
+                  trailing: item.value == widget.value
+                      ? const Icon(Icons.done)
+                      : null,
+                  onTap: () {
+                    widget.onResult(
+                        item.value == widget.value ? null : item.value);
+                  },
+                ),
+              )
+              .toList(),
+        ),
       ),
       actions: [
         TextButton(
