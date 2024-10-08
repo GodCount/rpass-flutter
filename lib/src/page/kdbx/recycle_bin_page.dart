@@ -4,6 +4,7 @@ import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../widget/common.dart';
+import '../page.dart';
 
 class RecycleBinPage extends StatefulWidget {
   const RecycleBinPage({super.key});
@@ -20,14 +21,8 @@ class _RecycleBinPageState extends State<RecycleBinPage>
   bool _isLongPress = false;
 
   void _save() async {
-    try {
-      await KdbxProvider.of(context)!.save();
-    } catch (e) {
-      print(e);
-      // TODO! 保存失败提示
-    } finally {
-      setState(() {});
-    }
+    await kdbxSave(KdbxProvider.of(context)!);
+    setState(() {});
   }
 
   void _deleteWarnDialog(VoidCallback confirmCallback) async {
@@ -39,6 +34,49 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     )) {
       confirmCallback();
     }
+  }
+
+  void showRecycleBinAction(KdbxObject kdbxObject) {
+    showBottomSheetList(
+      title: getKdbxObjectTitle(kdbxObject),
+      children: [
+        if (kdbxObject is KdbxEntry)
+          ListTile(
+            leading: const Icon(Icons.person_search),
+            title: const Text("查看"),
+            onTap: () async {
+              await Navigator.of(context).popAndPushNamed(
+                LookAccountPage.routeName,
+                arguments: kdbxObject,
+              );
+              setState(() {});
+            },
+          ),
+        ListTile(
+          iconColor: Theme.of(context).colorScheme.primary,
+          textColor: Theme.of(context).colorScheme.primary,
+          leading: const Icon(Icons.restore_from_trash),
+          title: const Text("恢复"),
+          onTap: () {
+            KdbxProvider.of(context)!.restoreObject(kdbxObject);
+            _save();
+            Navigator.of(context).pop();
+          },
+        ),
+        ListTile(
+          iconColor: Theme.of(context).colorScheme.error,
+          textColor: Theme.of(context).colorScheme.error,
+          leading: const Icon(Icons.delete_forever),
+          title: const Text("彻底删除"),
+          onTap: () {
+            KdbxProvider.of(context)!.deletePermanently(kdbxObject);
+
+            _save();
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
   }
 
   void _clearLongPress() {
@@ -78,17 +116,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
       }
       setState(() {});
     } else {
-      showRecycleBinAction(
-        kdbxObject,
-        onRestoreTap: () {
-          KdbxProvider.of(context)!.restoreObject(kdbxObject);
-          _save();
-        },
-        onDeleteTap: () => _deleteWarnDialog(() {
-          KdbxProvider.of(context)!.deletePermanently(kdbxObject);
-          _save();
-        }),
-      );
+      showRecycleBinAction(kdbxObject);
     }
   }
 

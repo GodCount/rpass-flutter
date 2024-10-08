@@ -48,15 +48,6 @@ class GroupsPageState extends State<GroupsPage>
     super.dispose();
   }
 
-  void _kdbxSave() async {
-    try {
-      await KdbxProvider.of(context)!.save();
-    } catch (e) {
-      print(e);
-      // TODO! 处理异常
-    }
-  }
-
   void _kdbxGroupSave(KdbxGroupData data) async {
     final kdbx = KdbxProvider.of(context)!;
 
@@ -72,7 +63,7 @@ class GroupsPageState extends State<GroupsPage>
       kdbxGroup.icon.set(data.kdbxIcon.icon);
     }
 
-    _kdbxSave();
+    await kdbxSave(kdbx);
   }
 
   void _kdbxGroupDelete(KdbxGroup kdbxGroup) async {
@@ -80,8 +71,9 @@ class GroupsPageState extends State<GroupsPage>
       title: "删除",
       message: "是否将项目移动到回收站!",
     )) {
-      KdbxProvider.of(context)!.deleteGroup(kdbxGroup);
-      _kdbxSave();
+      final kdbx = KdbxProvider.of(context)!;
+      kdbx.deleteGroup(kdbxGroup);
+      await kdbxSave(kdbx);
     }
   }
 

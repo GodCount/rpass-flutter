@@ -405,24 +405,34 @@ class _LookAccountPageState extends State<LookAccountPage>
           const SizedBox(height: 42)
         ],
       ),
-      floatingActionButton: !_kdbxEntry!.isHistoryEntry &&
-              !_kdbxEntry!.isInRecycleBin()
+      floatingActionButton: !_kdbxEntry!.isHistoryEntry
           ? FloatingActionButton(
-              onPressed: () {
-                Navigator.of(context)
-                    .pushNamed(EditAccountPage.routeName, arguments: _kdbxEntry)
-                    .then((value) {
-                  if (value is bool && value) {
-                    setState(() {});
+              onPressed: () async {
+                if (_kdbxEntry!.isInRecycleBin()) {
+                  final kdbx = KdbxProvider.of(context)!;
+                  kdbx.restoreObject(_kdbxEntry!);
+                  if (await kdbxSave(kdbx)) {
+                    Navigator.of(context).pop();
                   }
-                });
+                } else {
+                  Navigator.of(context)
+                      .pushNamed(EditAccountPage.routeName,
+                          arguments: _kdbxEntry)
+                      .then((value) {
+                    if (value is bool && value) {
+                      setState(() {});
+                    }
+                  });
+                }
               },
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(
                   Radius.circular(56 / 2),
                 ),
               ),
-              child: const Icon(Icons.edit),
+              child: _kdbxEntry!.isInRecycleBin()
+                  ? const Icon(Icons.restore_from_trash)
+                  : const Icon(Icons.edit),
             )
           : null,
     );
@@ -435,11 +445,9 @@ class _LookAccountPageState extends State<LookAccountPage>
       message: "是否将项目移动到回收站!",
     )) {
       final kdbx = KdbxProvider.of(context)!;
-      try {
-        kdbx.deleteEntry(_kdbxEntry!);
-        await kdbx.save();
-      } catch (e) {
-        showToast(I18n.of(context)!.account_delete_throw(e.toString()));
+      kdbx.deleteEntry(_kdbxEntry!);
+      if (await kdbxSave(kdbx)) {
+        Navigator.of(context).pop();
       }
     }
   }

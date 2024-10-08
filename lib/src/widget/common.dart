@@ -38,6 +38,18 @@ mixin CommonWidgetUtil<T extends StatefulWidget> on State<T> {
     });
   }
 
+  Future<bool> kdbxSave(Kdbx kdbx) async {
+    try {
+      await kdbx.save();
+      return true;
+    } catch (e) {
+      print(e);
+      showToast(e.toString());
+      // TODO! 记录异常
+      return false;
+    }
+  }
+
   Future<void> showToast(String msg) async {
     if (Platform.isAndroid || Platform.isIOS) {
       await Fluttertoast.showToast(msg: msg);
@@ -157,53 +169,6 @@ mixin BottomSheetUtil<T extends StatefulWidget>
             : '';
   }
 
-  void showRecycleBinAction(
-    KdbxObject kdbxObject, {
-    GestureTapCallback? onRestoreTap,
-    GestureTapCallback? onDeleteTap,
-  }) {
-    showBottomSheetList(
-      title: getKdbxObjectTitle(kdbxObject),
-      children: [
-        if (kdbxObject is KdbxEntry)
-          ListTile(
-            leading: const Icon(Icons.person_search),
-            title: const Text("查看"),
-            onTap: () {
-              Navigator.of(context).popAndPushNamed(
-                LookAccountPage.routeName,
-                arguments: kdbxObject,
-              );
-            },
-          ),
-        ListTile(
-          iconColor: Theme.of(context).colorScheme.primary,
-          textColor: Theme.of(context).colorScheme.primary,
-          leading: const Icon(Icons.restore_from_trash),
-          title: const Text("恢复"),
-          onTap: onRestoreTap != null
-              ? () {
-                  Navigator.of(context).pop();
-                  onRestoreTap();
-                }
-              : null,
-        ),
-        ListTile(
-          iconColor: Theme.of(context).colorScheme.error,
-          textColor: Theme.of(context).colorScheme.error,
-          leading: const Icon(Icons.delete_forever),
-          title: const Text("彻底删除"),
-          onTap: onDeleteTap != null
-              ? () {
-                  Navigator.of(context).pop();
-                  onDeleteTap();
-                }
-              : null,
-        ),
-      ],
-    );
-  }
-
   void showKdbxGroupAction(
     String title, {
     GestureTapCallback? onModifyTap,
@@ -215,7 +180,7 @@ mixin BottomSheetUtil<T extends StatefulWidget>
         ListTile(
           iconColor: Theme.of(context).colorScheme.primary,
           textColor: Theme.of(context).colorScheme.primary,
-          leading: const Icon(Icons.restore_from_trash),
+          leading: const Icon(Icons.edit),
           title: const Text("修改"),
           onTap: onModifyTap != null
               ? () {
@@ -227,7 +192,7 @@ mixin BottomSheetUtil<T extends StatefulWidget>
         ListTile(
           iconColor: Theme.of(context).colorScheme.error,
           textColor: Theme.of(context).colorScheme.error,
-          leading: const Icon(Icons.delete_forever),
+          leading: const Icon(Icons.delete),
           title: const Text("删除"),
           onTap: onDeleteTap != null
               ? () {

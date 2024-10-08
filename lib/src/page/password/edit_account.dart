@@ -23,7 +23,8 @@ class EditAccountPage extends StatefulWidget {
   State<EditAccountPage> createState() => _EditAccountPageState();
 }
 
-class _EditAccountPageState extends State<EditAccountPage> {
+class _EditAccountPageState extends State<EditAccountPage>
+    with CommonWidgetUtil {
   final GlobalKey<FormState> _from = GlobalKey();
 
   Set<KdbxKey>? _entryFields;
@@ -44,13 +45,9 @@ class _EditAccountPageState extends State<EditAccountPage> {
 
   void _kdbxEntrySave() async {
     if (_from.currentState!.validate()) {
-      try {
-        _from.currentState!.save();
-        await KdbxProvider.of(context)!.save();
+      _from.currentState!.save();
+      if (await kdbxSave(KdbxProvider.of(context)!)) {
         Navigator.of(context).pop(true);
-      } catch (e) {
-        print(e);
-        // TODO! 保存失败提示
       }
     }
   }
