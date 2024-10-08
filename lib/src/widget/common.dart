@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
-import '../component/toast.dart';
+import '../context/kdbx.dart';
 import '../i18n.dart';
 import '../kdbx/icons.dart';
 import '../kdbx/kdbx.dart';
@@ -9,6 +12,8 @@ import '../page/page.dart';
 import '../util/common.dart';
 import '../util/file.dart';
 import 'chip_list.dart';
+
+enum TimeLineNodeType { all, top, bottom, dot }
 
 mixin HintEmptyTextUtil<T extends StatefulWidget> on State<T> {
   Widget hintEmptyText(bool isEmpty, Widget widget) {
@@ -24,54 +29,124 @@ mixin HintEmptyTextUtil<T extends StatefulWidget> on State<T> {
   }
 }
 
-enum TimeLineNodeType { all, top, bottom, dot }
-
 mixin CommonWidgetUtil<T extends StatefulWidget> on State<T> {
   void writeClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text)).then((value) {
-      showToast(context, I18n.of(context)!.copy_done);
+      showToast(I18n.of(context)!.copy_done);
     }, onError: (error) {
-      showToast(context, error.toString());
+      showToast(error.toString());
     });
   }
 
-  void showBinaryAction(ChipListItem<MapEntry<KdbxKey, KdbxBinary>> binary) {
+  Future<void> showToast(String msg) async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      await Fluttertoast.showToast(msg: msg);
+    } else {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            content: Text(msg),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(I18n.of(context)!.confirm),
+              )
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  Future<bool> showConfirmDialog({
+    required String title,
+    required String message,
+    String? cancel,
+    String? confirm,
+  }) async {
+    final result = await showDialog(
+      context: context,
+      builder: (context) {
+        final t = I18n.of(context)!;
+
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(cancel ?? t.cancel),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: Text(confirm ?? t.confirm),
+            ),
+          ],
+        );
+      },
+    );
+    return result is bool && result ? true : false;
+  }
+}
+
+mixin BottomSheetUtil<T extends StatefulWidget>
+    on State<T>, CommonWidgetUtil<T> {
+  void showBottomSheetList({
+    String? title,
+    required List<ListTile> children,
+  }) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
         return ListView(
           shrinkWrap: true,
           children: [
-            Align(
-              alignment: Alignment.center,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 6, bottom: 6),
-                child: Text(
-                  binary.label,
-                  style: Theme.of(context).textTheme.titleLarge,
+            if (title != null)
+              Align(
+                alignment: Alignment.center,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 12, bottom: 6),
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                 ),
               ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.save),
-              title: const Text("保存"),
-              onTap: () async {
-                try {
-                  Navigator.of(context).pop();
-                  final result = await SimpleFile.saveFile(
-                    data: binary.value.value.value,
-                    filename: binary.label,
-                  );
-                  showToast(context, result);
-                } catch (e) {
-                  // TODO! 处理异常
-                }
-              },
-            ),
+            ...children,
           ],
         );
       },
     );
+  }
+
+  void showBinaryAction(ChipListItem<MapEntry<KdbxKey, KdbxBinary>> binary) {
+    showBottomSheetList(title: binary.label, children: [
+      ListTile(
+        leading: const Icon(Icons.save),
+        title: const Text("保存"),
+        onTap: () async {
+          try {
+            final result = await SimpleFile.saveFile(
+              data: binary.value.value.value,
+              filename: binary.label,
+            );
+            showToast(result);
+          } catch (e) {
+            // TODO! 处理异常
+          } finally {
+            Navigator.of(context).pop();
+          }
+        },
+      )
+    ]);
   }
 
   String getKdbxObjectTitle(KdbxObject kdbxObject) {
@@ -87,60 +162,81 @@ mixin CommonWidgetUtil<T extends StatefulWidget> on State<T> {
     GestureTapCallback? onRestoreTap,
     GestureTapCallback? onDeleteTap,
   }) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return ListView(
-          shrinkWrap: true,
-          children: [
-            Align(
-              alignment: Alignment.center,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 6, bottom: 6),
-                child: Text(
-                  getKdbxObjectTitle(kdbxObject),
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-            ),
-            if (kdbxObject is KdbxEntry)
-              ListTile(
-                leading: const Icon(Icons.person_search),
-                title: const Text("查看"),
-                onTap: () {
-                  Navigator.of(context).popAndPushNamed(
-                    LookAccountPage.routeName,
-                    arguments: kdbxObject,
-                  );
-                },
-              ),
-            ListTile(
-              iconColor: Theme.of(context).colorScheme.primary,
-              textColor: Theme.of(context).colorScheme.primary,
-              leading: const Icon(Icons.restore_from_trash),
-              title: const Text("恢复"),
-              onTap: onRestoreTap != null
-                  ? () {
-                      Navigator.of(context).pop();
-                      onRestoreTap();
-                    }
-                  : null,
-            ),
-            ListTile(
-              iconColor: Theme.of(context).colorScheme.error,
-              textColor: Theme.of(context).colorScheme.error,
-              leading: const Icon(Icons.delete_forever),
-              title: const Text("彻底删除"),
-              onTap: onDeleteTap != null
-                  ? () {
-                      Navigator.of(context).pop();
-                      onDeleteTap();
-                    }
-                  : null,
-            ),
-          ],
-        );
-      },
+    showBottomSheetList(
+      title: getKdbxObjectTitle(kdbxObject),
+      children: [
+        if (kdbxObject is KdbxEntry)
+          ListTile(
+            leading: const Icon(Icons.person_search),
+            title: const Text("查看"),
+            onTap: () {
+              Navigator.of(context).popAndPushNamed(
+                LookAccountPage.routeName,
+                arguments: kdbxObject,
+              );
+            },
+          ),
+        ListTile(
+          iconColor: Theme.of(context).colorScheme.primary,
+          textColor: Theme.of(context).colorScheme.primary,
+          leading: const Icon(Icons.restore_from_trash),
+          title: const Text("恢复"),
+          onTap: onRestoreTap != null
+              ? () {
+                  Navigator.of(context).pop();
+                  onRestoreTap();
+                }
+              : null,
+        ),
+        ListTile(
+          iconColor: Theme.of(context).colorScheme.error,
+          textColor: Theme.of(context).colorScheme.error,
+          leading: const Icon(Icons.delete_forever),
+          title: const Text("彻底删除"),
+          onTap: onDeleteTap != null
+              ? () {
+                  Navigator.of(context).pop();
+                  onDeleteTap();
+                }
+              : null,
+        ),
+      ],
+    );
+  }
+
+  void showKdbxGroupAction(
+    String title, {
+    GestureTapCallback? onModifyTap,
+    GestureTapCallback? onDeleteTap,
+  }) {
+    showBottomSheetList(
+      title: title,
+      children: [
+        ListTile(
+          iconColor: Theme.of(context).colorScheme.primary,
+          textColor: Theme.of(context).colorScheme.primary,
+          leading: const Icon(Icons.restore_from_trash),
+          title: const Text("修改"),
+          onTap: onModifyTap != null
+              ? () {
+                  Navigator.of(context).pop();
+                  onModifyTap();
+                }
+              : null,
+        ),
+        ListTile(
+          iconColor: Theme.of(context).colorScheme.error,
+          textColor: Theme.of(context).colorScheme.error,
+          leading: const Icon(Icons.delete_forever),
+          title: const Text("删除"),
+          onTap: onDeleteTap != null
+              ? () {
+                  Navigator.of(context).pop();
+                  onDeleteTap();
+                }
+              : null,
+        ),
+      ],
     );
   }
 
@@ -155,7 +251,7 @@ mixin CommonWidgetUtil<T extends StatefulWidget> on State<T> {
             Align(
               alignment: Alignment.center,
               child: Padding(
-                padding: const EdgeInsets.only(top: 6, bottom: 6),
+                padding: const EdgeInsets.only(top: 12, bottom: 6),
                 child: Text(
                   "时间线",
                   style: Theme.of(context).textTheme.titleLarge,

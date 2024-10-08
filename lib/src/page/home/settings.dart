@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rpass/src/kdbx/kdbx.dart';
 
-import '../../component/toast.dart';
 import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
 import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../util/file.dart';
+import '../../widget/common.dart';
 import '../page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -19,7 +19,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class SettingsPageState extends State<SettingsPage>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, CommonWidgetUtil {
   @override
   bool get wantKeepAlive => true;
 
@@ -174,7 +174,7 @@ class SettingsPageState extends State<SettingsPage>
                     }
                     rethrow;
                   } catch (e) {
-                    showToast(context, t.biometric_throw(e.toString()));
+                    showToast(t.biometric_throw(e.toString()));
                   }
                 },
               ),
@@ -303,7 +303,7 @@ class SettingsPageState extends State<SettingsPage>
             Navigator.of(context).pop();
           }
         } catch (e) {
-          showToast(context, t.modify_password_throw(e.toString()));
+          showToast(t.modify_password_throw(e.toString()));
         }
       }
     }

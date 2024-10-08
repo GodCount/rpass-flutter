@@ -351,7 +351,8 @@ class EntryField extends StatefulWidget {
   State<EntryField> createState() => _EntryFieldState();
 }
 
-class _EntryFieldState extends State<EntryField> with CommonWidgetUtil {
+class _EntryFieldState extends State<EntryField>
+    with CommonWidgetUtil, BottomSheetUtil {
   KdbxKey? _renameKdbxKey;
 
   final bool _displayScanner = Platform.isAndroid || Platform.isIOS;

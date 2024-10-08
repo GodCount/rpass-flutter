@@ -9,12 +9,12 @@ import '../../model/browser/chrome.dart';
 import '../../model/browser/firefox.dart';
 import '../../model/common.dart';
 import '../../rpass.dart';
-import '../../component/toast.dart';
 import '../../model/rpass/backup.dart';
 import '../../model/rpass/question.dart';
 import '../../util/common.dart';
 import '../../util/file.dart';
 import '../../util/verify_core.dart';
+import '../../widget/common.dart';
 import '../verify/security_question.dart';
 
 class ExportAccountPage extends StatefulWidget {
@@ -26,7 +26,8 @@ class ExportAccountPage extends StatefulWidget {
   ExportAccountPageState createState() => ExportAccountPageState();
 }
 
-class ExportAccountPageState extends State<ExportAccountPage> {
+class ExportAccountPageState extends State<ExportAccountPage>
+    with CommonWidgetUtil {
   bool _enableEncrypt = true;
   bool _isNewPassword = false;
   bool _enableSecurityQuestion = true;
@@ -64,9 +65,9 @@ class ExportAccountPageState extends State<ExportAccountPage> {
 
       if (filepath == null) return;
 
-      showToast(context, t.export_done_location(filepath));
+      showToast(t.export_done_location(filepath));
     } catch (e) {
-      showToast(context, t.export_throw(e.toString()));
+      showToast(t.export_throw(e.toString()));
     } finally {
       _isSaveing = false;
       _exportType = null;
@@ -81,18 +82,18 @@ class ExportAccountPageState extends State<ExportAccountPage> {
     final store = StoreProvider.of(context);
 
     if (store.accounts.accountList.isEmpty) {
-      showToast(context, t.no_backup);
+      showToast(t.no_backup);
       return null;
     }
     if (_enableEncrypt) {
       if (_isNewPassword && _passwordController.text.trim().length < 4) {
-        showToast(context, t.input_num_password);
+        showToast(t.input_num_password);
         return null;
       }
       if (_enableSecurityQuestion &&
           _isNewSecurityQuestion &&
           _questions.isEmpty) {
-        showToast(context, t.at_least_1security_qa);
+        showToast(t.at_least_1security_qa);
         return null;
       }
     }

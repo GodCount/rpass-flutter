@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 
-import '../../component/toast.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
@@ -25,7 +24,7 @@ class LookAccountPage extends StatefulWidget {
 }
 
 class _LookAccountPageState extends State<LookAccountPage>
-    with HintEmptyTextUtil, CommonWidgetUtil {
+    with HintEmptyTextUtil, CommonWidgetUtil, BottomSheetUtil {
   KdbxEntry? _kdbxEntry;
 
   @override
@@ -429,45 +428,20 @@ class _LookAccountPageState extends State<LookAccountPage>
     );
   }
 
-  void _deleteAccount() {
+  void _deleteAccount() async {
     final t = I18n.of(context)!;
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(t.delete),
-          content: Text(t.delete_warn_hit),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(t.cancel),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: Text(t.delete),
-            ),
-          ],
-        );
-      },
-    ).then((value) async {
-      if (value is bool && value) {
-        final kdbx = KdbxProvider.of(context)!;
-        try {
-          kdbx.deleteEntry(_kdbxEntry!);
-          await kdbx.save();
-          if (mounted) {
-            Navigator.of(context).pop();
-          }
-        } catch (e) {
-          showToast(context, t.account_delete_throw(e.toString()));
-        }
+    if (await showConfirmDialog(
+      title: "删除",
+      message: "是否将项目移动到回收站!",
+    )) {
+      final kdbx = KdbxProvider.of(context)!;
+      try {
+        kdbx.deleteEntry(_kdbxEntry!);
+        await kdbx.save();
+      } catch (e) {
+        showToast(I18n.of(context)!.account_delete_throw(e.toString()));
       }
-    });
+    }
   }
 
   Widget _cardColumn(List<Widget> children) {
@@ -591,7 +565,8 @@ class _LookOtPasswordListTile extends StatefulWidget {
       _LookOtPasswordListTileState();
 }
 
-class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile> {
+class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile>
+    with CommonWidgetUtil {
   AuthOneTimePassword? _authOneTimePassword;
   String errorMessage = "";
 
@@ -643,9 +618,9 @@ class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile> {
             text: "${_authOneTimePassword!.code()}",
           ),
         ).then((value) {
-          showToast(context, t.copy_done);
+          showToast(t.copy_done);
         }, onError: (error) {
-          showToast(context, error.toString());
+          showToast(error.toString());
         });
       },
     );

@@ -26,7 +26,7 @@ class KdbxGroupData {
 }
 
 class GroupsPageState extends State<GroupsPage>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, CommonWidgetUtil, BottomSheetUtil {
   @override
   bool get wantKeepAlive => true;
 
@@ -48,26 +48,40 @@ class GroupsPageState extends State<GroupsPage>
     super.dispose();
   }
 
-  void _kdbxGroupSave(KdbxGroupData data) async {
+  void _kdbxSave() async {
     try {
-      final kdbx = KdbxProvider.of(context)!;
-
-      final kdbxGroup = data.kdbxGroup ?? kdbx.createGroup(data.name);
-
-      if (data.name != kdbxGroup.name.get()) {
-        kdbxGroup.name.set(data.name);
-      }
-
-      if (data.kdbxIcon.customIcon != null) {
-        kdbxGroup.customIcon = data.kdbxIcon.customIcon;
-      } else if (data.kdbxIcon.icon != kdbxGroup.icon.get()) {
-        kdbxGroup.icon.set(data.kdbxIcon.icon);
-      }
-
       await KdbxProvider.of(context)!.save();
     } catch (e) {
       print(e);
       // TODO! 处理异常
+    }
+  }
+
+  void _kdbxGroupSave(KdbxGroupData data) async {
+    final kdbx = KdbxProvider.of(context)!;
+
+    final kdbxGroup = data.kdbxGroup ?? kdbx.createGroup(data.name);
+
+    if (data.name != kdbxGroup.name.get()) {
+      kdbxGroup.name.set(data.name);
+    }
+
+    if (data.kdbxIcon.customIcon != null) {
+      kdbxGroup.customIcon = data.kdbxIcon.customIcon;
+    } else if (data.kdbxIcon.icon != kdbxGroup.icon.get()) {
+      kdbxGroup.icon.set(data.kdbxIcon.icon);
+    }
+
+    _kdbxSave();
+  }
+
+  void _kdbxGroupDelete(KdbxGroup kdbxGroup) async {
+    if (await showConfirmDialog(
+      title: "删除",
+      message: "是否将项目移动到回收站!",
+    )) {
+      KdbxProvider.of(context)!.deleteGroup(kdbxGroup);
+      _kdbxSave();
     }
   }
 
@@ -160,15 +174,19 @@ class GroupsPageState extends State<GroupsPage>
         child: InkWell(
           borderRadius: const BorderRadius.all(Radius.circular(6.0)),
           onTap: () {},
-          onLongPress: () => _setKdbxGroup(
-            KdbxGroupData(
-              name: kdbxGroup.name.get() ?? '',
-              kdbxIcon: KdbxIconWidgetData(
-                icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
-                customIcon: kdbxGroup.customIcon,
+          onLongPress: () => showKdbxGroupAction(
+            kdbxGroup.name.get() ?? '',
+            onModifyTap: () => _setKdbxGroup(
+              KdbxGroupData(
+                name: kdbxGroup.name.get() ?? '',
+                kdbxIcon: KdbxIconWidgetData(
+                  icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
+                  customIcon: kdbxGroup.customIcon,
+                ),
+                kdbxGroup: kdbxGroup,
               ),
-              kdbxGroup: kdbxGroup,
             ),
+            onDeleteTap: () => _kdbxGroupDelete(kdbxGroup),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,

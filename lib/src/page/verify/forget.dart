@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../component/toast.dart';
 import '../../context/store.dart';
 import '../../i18n.dart';
+import '../../widget/common.dart';
 import '../page.dart';
 import 'verify_question.dart';
 
@@ -15,7 +15,7 @@ class ForgetPassword extends StatefulWidget {
   State<ForgetPassword> createState() => ForgetPasswordState();
 }
 
-class ForgetPasswordState extends State<ForgetPassword> {
+class ForgetPasswordState extends State<ForgetPassword> with CommonWidgetUtil {
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
@@ -38,7 +38,7 @@ class ForgetPasswordState extends State<ForgetPassword> {
                     Navigator.of(context).pushNamedAndRemoveUntil(
                         Home.routeName, ModalRoute.withName('/'));
                   } catch (e) {
-                    showToast(context, t.security_qa_throw(e.toString()));
+                    showToast(t.security_qa_throw(e.toString()));
                   }
                 }
               },

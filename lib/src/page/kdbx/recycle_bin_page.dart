@@ -14,7 +14,8 @@ class RecycleBinPage extends StatefulWidget {
   State<RecycleBinPage> createState() => _RecycleBinPageState();
 }
 
-class _RecycleBinPageState extends State<RecycleBinPage> with CommonWidgetUtil {
+class _RecycleBinPageState extends State<RecycleBinPage>
+    with CommonWidgetUtil, BottomSheetUtil {
   final List<KdbxObject> _selecteds = [];
   bool _isLongPress = false;
 
@@ -29,36 +30,15 @@ class _RecycleBinPageState extends State<RecycleBinPage> with CommonWidgetUtil {
     }
   }
 
-  void _deleteWarnDialog(VoidCallback confirmCallback) {
+  void _deleteWarnDialog(VoidCallback confirmCallback) async {
     final t = I18n.of(context)!;
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("永久删除"),
-          content: Text("删除后将无法恢复!"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(t.cancel),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: Text(t.delete),
-            ),
-          ],
-        );
-      },
-    ).then((value) async {
-      if (value is bool && value) {
-        confirmCallback();
-      }
-    });
+    if (await showConfirmDialog(
+      title: "永久删除",
+      message: "删除项目后将无法恢复!",
+      confirm: t.delete,
+    )) {
+      confirmCallback();
+    }
   }
 
   void _clearLongPress() {

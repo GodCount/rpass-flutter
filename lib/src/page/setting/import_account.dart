@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../component/toast.dart';
 import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../model/browser/chrome.dart';
@@ -16,6 +15,7 @@ import '../../rpass.dart';
 import '../../util/common.dart';
 import '../../util/file.dart';
 import '../../util/verify_core.dart';
+import '../../widget/common.dart';
 import '../verify/verify_question.dart';
 
 class ImportAccountPage extends StatefulWidget {
@@ -27,7 +27,8 @@ class ImportAccountPage extends StatefulWidget {
   State<ImportAccountPage> createState() => _ImportAccountPageState();
 }
 
-class _ImportAccountPageState extends State<ImportAccountPage> {
+class _ImportAccountPageState extends State<ImportAccountPage>
+    with CommonWidgetUtil {
   BackupType? _importType;
   bool? _importSuccess;
 
@@ -51,11 +52,11 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
       }
       if (backup != null && backup.accounts.isNotEmpty) {
         await StoreProvider.of(context).accounts.importBackupAccounts(backup);
-        showToast(context, I18n.of(context)!.import_done);
+        showToast(I18n.of(context)!.import_done);
         _importSuccess = true;
       }
     } catch (e) {
-      showToast(context, I18n.of(context)!.import_throw(e.toString()));
+      showToast(I18n.of(context)!.import_throw(e.toString()));
       _importSuccess = false;
     } finally {
       setState(() {});
@@ -232,7 +233,8 @@ class _VerifyImportPassword extends StatefulWidget {
   State<_VerifyImportPassword> createState() => _VerifyImportPasswordState();
 }
 
-class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
+class _VerifyImportPasswordState extends State<_VerifyImportPassword>
+    with CommonWidgetUtil {
   final TextEditingController _passwordController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
@@ -273,7 +275,7 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
       );
       _denryptBackup(token);
     } catch (e) {
-      showToast(context, I18n.of(context)!.security_qa_throw(e.toString()));
+      showToast(I18n.of(context)!.security_qa_throw(e.toString()));
     }
   }
 
@@ -287,7 +289,7 @@ class _VerifyImportPasswordState extends State<_VerifyImportPassword> {
       });
       widget.onDenrypt(backup);
     } catch (e) {
-      showToast(context, I18n.of(context)!.denrypt_throw(e.toString()));
+      showToast(I18n.of(context)!.denrypt_throw(e.toString()));
     }
   }
 

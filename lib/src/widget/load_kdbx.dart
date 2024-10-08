@@ -2,10 +2,10 @@ import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../component/toast.dart';
 import '../context/biometric.dart';
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
+import 'common.dart';
 
 typedef OnLoadedKdbx = void Function(Kdbx kdbx);
 
@@ -27,7 +27,7 @@ class LoadKdbx extends StatefulWidget {
   State<LoadKdbx> createState() => _LoadKdbxState();
 }
 
-class _LoadKdbxState extends State<LoadKdbx> {
+class _LoadKdbxState extends State<LoadKdbx> with CommonWidgetUtil {
   final TextEditingController _passwordController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
@@ -98,7 +98,7 @@ class _LoadKdbxState extends State<LoadKdbx> {
       }
       rethrow;
     } catch (e) {
-      showToast(context, I18n.of(context)!.biometric_throw(e.toString()));
+      showToast(I18n.of(context)!.biometric_throw(e.toString()));
       setState(() {
         _biometricDisable = true;
       });

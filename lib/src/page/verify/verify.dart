@@ -1,10 +1,7 @@
-import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../component/toast.dart';
-import '../../context/biometric.dart';
 import '../../context/store.dart';
 import '../../i18n.dart';
 import './forget.dart';
@@ -24,7 +21,6 @@ class VerifyPasswordState extends State<VerifyPassword> {
   final FocusNode _focusNode = FocusNode();
 
   bool _obscureText = true;
-  bool _biometricDisable = false;
   String? _errorMessage;
 
   @override
