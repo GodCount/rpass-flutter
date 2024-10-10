@@ -22,6 +22,7 @@ class PasswordsPageState extends State<PasswordsPage>
   @override
   bool get wantKeepAlive => true;
 
+  final KbdxSearchHandler _kbdxSearchHandler = KbdxSearchHandler();
   final List<KdbxEntry> _totalEntry = [];
   String _searchText = "";
 
@@ -43,21 +44,14 @@ class PasswordsPageState extends State<PasswordsPage>
   void _searchAccounts() {
     _totalEntry.clear();
     final kdbx = KdbxProvider.of(context)!;
-    if (_searchText.isNotEmpty) {
-      final searchText = _searchText.toLowerCase();
-      _totalEntry.addAll(kdbx.totalEntry.where((item) {
-        var weight = 0;
-        for (var key in KdbxKeyCommon.all) {
-          weight += (item.getString(key)?.getText() ?? '')
-                  .toLowerCase()
-                  .contains(searchText)
-              ? 1
-              : 0;
-        }
-        weight += item.tagList.contains(searchText) ? 1 : 0;
 
-        return weight > 0;
-      }));
+    _kbdxSearchHandler.setFieldOther(kdbx.fieldStatistic.customFields);
+
+    if (_searchText.isNotEmpty) {
+      _totalEntry.addAll(_kbdxSearchHandler.search(
+        _searchText,
+        kdbx.totalEntry,
+      ));
     } else {
       _totalEntry.addAll(kdbx.totalEntry);
     }
