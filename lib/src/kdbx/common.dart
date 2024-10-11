@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'kdbx.dart';
 
 class KdbxError extends Error {
@@ -28,96 +30,84 @@ class KdbxException implements Exception {
   }
 }
 
-class _ParseObject {
-  _ParseObject({this.field, required this.value});
+class ParseObject {
+  ParseObject({this.field, required this.value});
 
   final String? field;
   final String value;
 
-  Map<String, String?> toJson() {
-    return {"field": field, "value": value};
+  @override
+  bool operator ==(Object other) {
+    return other is ParseObject && other.field == field && other.value == value;
   }
-}
 
-extension _SplitReserveSeparators on String {
-  List<String> splitRS(Pattern pattern) {
-    final List<String> result = [];
-    int lastIndex = 0;
+  @override
+  int get hashCode => "$field$value".hashCode;
 
-    for (var match in pattern.allMatches(this)) {
-      final value = substring(lastIndex, match.start);
-      if (value.isNotEmpty) result.add(value);
-      result.add(match.group(0)!);
-      lastIndex = match.end;
-    }
-    if (substring(lastIndex).isNotEmpty) {
-      result.add(substring(lastIndex));
-    }
-
-    return result;
+  @override
+  String toString() {
+    return 'ParseObject{field: $field, value: $value}';
   }
 }
 
 class InputParse {
   InputParse(this.objects);
 
-  final List<_ParseObject> objects;
+  final List<ParseObject> objects;
 
   factory InputParse.parse(String input, Map<String, String> mapFieldTable) {
     return InputParse(_parse(input.trim(), mapFieldTable));
   }
 
-  static List<_ParseObject> _parse(
-    String input,
+  static List<ParseObject> _parse(
+    String str,
     Map<String, String> mapFieldTable,
   ) {
     final table = mapFieldTable.map((key, value) => MapEntry("$key:", value));
 
-    if (!input.contains(RegExp("(?<field>${table.keys.join("|")})"))) {
-      return [_ParseObject(value: input)];
-    }
-
-    final List<_ParseObject> objects = [];
-
+    final spacePattern = RegExp(r"\s+");
+    final quotePattern = RegExp(r'(?:(?<=\s+|^)")(?<value>.*?)(?:"(?=\s+|$))');
     final fieldPattern = RegExp("^(?<field>${table.keys.join("|")})");
-    final patterns = input.splitRS(RegExp(r'\s+(?=(?:[^"]*"[^"]*")*[^"]*$)'));
-    String? nonFieldValue;
-    bool lastField = false;
-    for (var text in patterns) {
-      final match = fieldPattern.firstMatch(text);
-      if (match != null) {
-        if (nonFieldValue != null) {
-          if (!lastField) {
-            objects.add(_ParseObject(value: nonFieldValue));
-          }
-          nonFieldValue = null;
-        }
 
-        final field = match.namedGroup("field")!;
-        String value = text.substring(match.end);
+    int i = 0;
+    final Set<ParseObject> result = {};
+    while (i < str.length) {
+      String? field;
+      String part = str.substring(i);
+      final fieldMatch = fieldPattern.firstMatch(part);
 
-        if (value.startsWith('"') && value.endsWith('"')) {
-          value = value.substring(1, value.length - 1);
-        }
-
-        objects.add(_ParseObject(field: table[field], value: value));
-
-        lastField = true;
-      } else {
-        if (nonFieldValue == null) {
-          nonFieldValue = text;
-        } else {
-          nonFieldValue = lastField ? text : nonFieldValue + text;
-          lastField = false;
-        }
+      if (fieldMatch != null) {
+        field = table[fieldMatch.namedGroup("field")];
+        i += fieldMatch.end;
+        part = str.substring(i);
       }
+
+      final spaceMatch = spacePattern.firstMatch(part);
+      final quoteMatch = quotePattern.firstMatch(part);
+
+      if (spaceMatch == null) {
+        result.add(ParseObject(field: field, value: part));
+        break;
+      }
+      if (quoteMatch == null || spaceMatch.start < quoteMatch.start) {
+        if (spaceMatch.start > 0) {
+          result.add(ParseObject(
+            field: field,
+            value: part.substring(0, spaceMatch.start),
+          ));
+        }
+        i += spaceMatch.end;
+        continue;
+      }
+
+      result.add(ParseObject(
+        field: field,
+        value: quoteMatch.namedGroup("value") ?? "",
+      ));
+      i += quoteMatch.end;
     }
 
-    if (nonFieldValue != null) {
-      objects.add(_ParseObject(value: nonFieldValue));
-    }
-
-    return objects;
+    return result.toList();
   }
 }
 
@@ -149,7 +139,7 @@ class KbdxSearchHandler {
 
   final Map<String, String> _customFieldTable = {};
 
-  bool _whereAll(KdbxEntry kdbxEntry, String value) {
+  bool _allContains(KdbxEntry kdbxEntry, String value) {
     var weight = 0;
     for (var key in KdbxKeyCommon.all) {
       weight +=
@@ -159,11 +149,11 @@ class KbdxSearchHandler {
     return weight > 0;
   }
 
-  bool _fieldContains(List<_ParseObject> objects, KdbxEntry kdbxEntry) {
+  bool _fieldContains(Iterable<ParseObject> objects, KdbxEntry kdbxEntry) {
     for (var item in objects) {
       switch (item.field) {
         case null:
-          if (!_whereAll(kdbxEntry, item.value.toLowerCase())) return false;
+          if (!_allContains(kdbxEntry, item.value.toLowerCase())) return false;
           break;
         case KdbxKeySpecial.KEY_TAGS:
           if (!kdbxEntry.tagList
@@ -175,7 +165,7 @@ class KbdxSearchHandler {
               kdbxEntry.parent?.name.get() != item.value) return false;
           break;
         default:
-          if (kdbxEntry
+          if (!kdbxEntry
               .getNonNullString(KdbxKey(item.field!))
               .toLowerCase()
               .contains(item.value.toLowerCase())) return false;
@@ -188,13 +178,15 @@ class KbdxSearchHandler {
   void setFieldOther(Set<String> fields) {
     _customFieldTable.clear();
     for (var item in fields) {
-      _customFieldTable[item] = item;
+      _customFieldTable[RegExp.escape(item)] = item;
     }
   }
 
   List<KdbxEntry> search(String input, List<KdbxEntry> sourceList) {
     final inputParse = InputParse.parse(
-        input, Map.from(_mapFieldTable)..addAll(_customFieldTable));
+      input,
+      Map.from(_mapFieldTable)..addAll(_customFieldTable),
+    );
     return sourceList
         .where((item) => _fieldContains(inputParse.objects, item))
         .toList()

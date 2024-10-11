@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:rpass/src/widget/common.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../widget/common.dart';
 import '../page.dart';
 
 class GroupsPage extends StatefulWidget {
@@ -165,7 +165,10 @@ class GroupsPageState extends State<GroupsPage>
         ),
         child: InkWell(
           borderRadius: const BorderRadius.all(Radius.circular(6.0)),
-          onTap: () {},
+          onTap: () {
+            Home.of(context)!
+                .toPasswordPageSearch("g:${kdbxGroup.name.get() ?? ''}");
+          },
           onLongPress: () => showKdbxGroupAction(
             kdbxGroup.name.get() ?? '',
             onModifyTap: () => _setKdbxGroup(

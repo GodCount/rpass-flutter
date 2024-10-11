@@ -524,6 +524,7 @@ class _EntryFieldState extends State<EntryField>
           onSaved: _kdbxTextFieldSaved,
           expandedInsets: const EdgeInsets.all(0),
           validator: _entryFieldValidator(),
+          menuHeight: 150,
         );
       case KdbxKeyCommon.KEY_PASSWORD:
         return EntryTextFormField(

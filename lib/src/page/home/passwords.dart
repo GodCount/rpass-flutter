@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
-import '../../component/highlight_text.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
@@ -11,7 +10,9 @@ import '../../widget/common.dart';
 import '../page.dart';
 
 class PasswordsPage extends StatefulWidget {
-  const PasswordsPage({super.key});
+  const PasswordsPage({super.key, this.searchController});
+
+  final TextEditingController? searchController;
 
   @override
   State<PasswordsPage> createState() => PasswordsPageState();
@@ -19,15 +20,18 @@ class PasswordsPage extends StatefulWidget {
 
 class PasswordsPageState extends State<PasswordsPage>
     with AutomaticKeepAliveClientMixin {
+  late TextEditingController _searchController;
+
   @override
   bool get wantKeepAlive => true;
 
   final KbdxSearchHandler _kbdxSearchHandler = KbdxSearchHandler();
   final List<KdbxEntry> _totalEntry = [];
-  String _searchText = "";
 
   @override
   void initState() {
+    _searchController = widget.searchController ?? TextEditingController();
+    _searchController.addListener(_searchAccounts);
     Future.delayed(Duration.zero, () {
       KdbxProvider.of(context)!.addListener(_searchAccounts);
     });
@@ -37,6 +41,7 @@ class PasswordsPageState extends State<PasswordsPage>
 
   @override
   void dispose() {
+    _searchController.dispose();
     KdbxProvider.of(context)!.removeListener(_searchAccounts);
     super.dispose();
   }
@@ -47,17 +52,18 @@ class PasswordsPageState extends State<PasswordsPage>
 
     _kbdxSearchHandler.setFieldOther(kdbx.fieldStatistic.customFields);
 
-    if (_searchText.isNotEmpty) {
+    if (_searchController.text.isNotEmpty) {
       _totalEntry.addAll(_kbdxSearchHandler.search(
-        _searchText,
+        _searchController.text,
         kdbx.totalEntry,
       ));
     } else {
-      _totalEntry.addAll(kdbx.totalEntry);
+      _totalEntry
+        ..addAll(kdbx.totalEntry)
+        ..sort((a, b) => a.times.lastModificationTime
+            .get()!
+            .compareTo(b.times.lastModificationTime.get()!));
     }
-    _totalEntry.sort((a, b) => a.times.lastModificationTime.get()!.compareTo(
-          b.times.lastModificationTime.get()!,
-        ));
 
     setState(() {});
   }
@@ -74,12 +80,10 @@ class PasswordsPageState extends State<PasswordsPage>
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: _AppBarTitleToSearch(
+          controller: _searchController,
           itemCount: kdbx.totalEntry.length,
-          matchCount: _searchText.isNotEmpty ? _totalEntry.length : 0,
-          onChanged: (text) {
-            _searchText = text;
-            _searchAccounts();
-          },
+          matchCount:
+              _searchController.text.isNotEmpty ? _totalEntry.length : 0,
         ),
       ),
       body: ListView.separated(
@@ -92,10 +96,7 @@ class PasswordsPageState extends State<PasswordsPage>
           );
         },
         itemBuilder: (context, index) {
-          return _OpenContainerPasswordItem(
-            kdbxEntry: _totalEntry[index],
-            matchText: _searchText,
-          );
+          return _OpenContainerPasswordItem(kdbxEntry: _totalEntry[index]);
         },
       ),
       floatingActionButton: OpenContainer(
@@ -128,16 +129,14 @@ class PasswordsPageState extends State<PasswordsPage>
   }
 }
 
-typedef OnInputChanged = void Function(String value);
-
 class _AppBarTitleToSearch extends StatefulWidget {
   const _AppBarTitleToSearch({
-    required this.onChanged,
+    required this.controller,
     required this.itemCount,
     required this.matchCount,
   });
 
-  final OnInputChanged onChanged;
+  final TextEditingController controller;
   final int itemCount;
   final int matchCount;
 
@@ -146,7 +145,6 @@ class _AppBarTitleToSearch extends StatefulWidget {
 }
 
 class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
-  final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
   bool _hasFocus = false;
@@ -154,11 +152,6 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
   @override
   void initState() {
     super.initState();
-
-    _controller.addListener(() {
-      widget.onChanged(_controller.text);
-    });
-
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus && _hasFocus) {
         setState(() {
@@ -174,7 +167,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    widget.controller.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -190,7 +183,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
         });
       },
       child: TextField(
-        controller: _controller,
+        controller: widget.controller,
         focusNode: _focusNode,
         autofocus: false,
         ignorePointers: !_hasFocus,
@@ -208,7 +201,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
                 _focusNode.requestFocus();
               }
             },
-            child: _hasFocus || _controller.text.isNotEmpty
+            child: _hasFocus || widget.controller.text.isNotEmpty
                 ? Text(
                     t.search_match_count(widget.matchCount, widget.itemCount),
                   )
@@ -221,8 +214,8 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
           ),
           suffixIcon: IconButton(
             onPressed: () {
-              if (_controller.text.isNotEmpty) {
-                _controller.clear();
+              if (widget.controller.text.isNotEmpty) {
+                widget.controller.clear();
               } else {
                 _focusNode.unfocus();
               }
@@ -242,11 +235,9 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
 class _OpenContainerPasswordItem extends StatelessWidget {
   const _OpenContainerPasswordItem({
     required this.kdbxEntry,
-    this.matchText,
   });
 
   final KdbxEntry kdbxEntry;
-  final String? matchText;
 
   @override
   Widget build(BuildContext context) {
@@ -275,7 +266,6 @@ class _OpenContainerPasswordItem extends StatelessWidget {
       closedBuilder: (BuildContext context, VoidCallback openContainer) {
         return _PasswordItem(
           kdbxEntry: kdbxEntry,
-          matchText: matchText,
           onTop: () {
             isLogPress = false;
             openContainer();
@@ -293,13 +283,11 @@ class _OpenContainerPasswordItem extends StatelessWidget {
 class _PasswordItem extends StatefulWidget {
   const _PasswordItem({
     required this.kdbxEntry,
-    this.matchText,
     this.onTop,
     this.onLongPress,
   });
 
   final KdbxEntry kdbxEntry;
-  final String? matchText;
   final GestureTapCallback? onTop;
   final GestureLongPressCallback? onLongPress;
 
@@ -328,9 +316,8 @@ class _PasswordItemState extends State<_PasswordItem> {
           size: 24,
         ),
       ),
-      title: HighlightText(
-        text: kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE),
-        matchText: widget.matchText,
+      title: Text(
+        kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE),
         style: Theme.of(context).textTheme.titleLarge,
         overflow: TextOverflow.ellipsis,
       ),
@@ -339,17 +326,23 @@ class _PasswordItemState extends State<_PasswordItem> {
         children: [
           Padding(
             padding: const EdgeInsets.only(left: 12),
-            child: HighlightText(
-              text: kdbxEntry.getNonNullString(KdbxKeyCommon.URL),
-              matchText: widget.matchText,
+            child: Text(
+              kdbxEntry.getNonNullString(KdbxKeyCommon.URL),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
-          _subtitleText(t.account_ab,
-              kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME)),
           _subtitleText(
-              t.email_ab, kdbxEntry.getNonNullString(KdbxKeyCommon.EMAIL)),
-          _subtitleText(t.label_ab, kdbxEntry.tagList.join(", ")),
+            t.account_ab,
+            kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME),
+          ),
+          _subtitleText(
+            t.email_ab,
+            kdbxEntry.getNonNullString(KdbxKeyCommon.EMAIL),
+          ),
+          _subtitleText(
+            t.label_ab,
+            kdbxEntry.tagList.join(", "),
+          ),
           Align(
             alignment: Alignment.centerRight,
             child: Text(
@@ -365,13 +358,18 @@ class _PasswordItemState extends State<_PasswordItem> {
   }
 
   Widget _subtitleText(String subLabel, String text) {
-    return HighlightText(
-      prefixText: "$subLabel ",
-      text: text,
-      matchText: widget.matchText,
-      style: Theme.of(context).textTheme.bodyMedium,
-      prefixStyle: Theme.of(context).textTheme.titleMedium,
+    return RichText(
       overflow: TextOverflow.ellipsis,
+      text: TextSpan(
+        style: Theme.of(context).textTheme.titleMedium,
+        text: "$subLabel ",
+        children: [
+          TextSpan(
+            style: Theme.of(context).textTheme.bodyMedium,
+            text: text,
+          )
+        ],
+      ),
     );
   }
 }

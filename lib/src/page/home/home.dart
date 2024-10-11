@@ -11,26 +11,42 @@ class Home extends StatefulWidget {
 
   static const routeName = "/home";
 
+  static HomeState? of(BuildContext context) {
+    HomeState? home;
+    if (context is StatefulElement && context.state is HomeState) {
+      home = context.state as HomeState;
+    }
+
+    home = home ?? context.findAncestorStateOfType<HomeState>();
+
+    return home;
+  }
+
   @override
   State<Home> createState() => HomeState();
 }
 
 class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
-  late PageController _controller;
+  final PageController _controller = PageController(initialPage: 0);
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   bool get wantKeepAlive => true;
 
   @override
-  void initState() {
-    _controller = PageController(initialPage: 0);
-    super.initState();
-  }
-
-  @override
   void dispose() {
     _controller.dispose();
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void toPasswordPageSearch(String text) async {
+    await _controller.animateToPage(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeIn,
+    );
+    _searchController.text = text;
   }
 
   @override
@@ -42,12 +58,17 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
         ? Scaffold(
             body: PageView(
               controller: _controller,
-              children: const [PasswordsPage(), GroupsPage(), SettingsPage()],
+              children: [
+                PasswordsPage(searchController: _searchController),
+                const GroupsPage(),
+                const SettingsPage(),
+              ],
             ),
             bottomNavigationBar:
                 _MyBottomNavigationBar(controller: _controller),
           )
         : const Scaffold(
+            // TODO! 无限期等待!
             body: Center(
               child: CircularProgressIndicator(),
             ),
