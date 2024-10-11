@@ -1,8 +1,6 @@
 
 
 import './settings/controller.dart';
-import './verify/contrller.dart';
-import './accounts/contrller.dart';
 import 'loacal_info/contrller.dart';
 
 
@@ -16,14 +14,10 @@ final class Store {
   }
 
   final settings = SettingsController();
-  final verify = VerifyController();
-  final accounts = AccountsContrller();
   final localInfo = LocalInfoContrller();
 
   Future<void> loadStore() async {
     await settings.init(this);
-    await verify.init(this);
-    await accounts.init(this);
     await localInfo.init(this);
   }
 }

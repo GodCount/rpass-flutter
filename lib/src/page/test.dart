@@ -2,8 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../component/highlight_text.dart';
-import '../model/rpass/account.dart';
+import '../old/model/rpass/account.dart';
 
 const testData =
     "Esse ad Lorem elit cupidatat duis culpa irure in.Lorem laboris nostrud fugiat ut enim eiusmod voluptate. Sunt fugiat commodo consequat velit nostrud exercitation proident. Sint commodo id elit labore laborum excepteur elit velit enim laboris sint enim non ad."
@@ -42,70 +41,4 @@ List<Account> generateTestData(int start, int end) {
     );
   }
   return list;
-}
-
-class TestHighlightTextPage extends StatefulWidget {
-  const TestHighlightTextPage({super.key});
-
-  @override
-  State<TestHighlightTextPage> createState() => TestHighlightTextPageState();
-}
-
-class TestHighlightTextPageState extends State<TestHighlightTextPage> {
-  String text = "test";
-  String matchText = "t";
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Center(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: TextField(
-                  controller: TextEditingController(text: text),
-                  onChanged: (value) {
-                    setState(() {
-                      text = value;
-                    });
-                  },
-                  decoration: const InputDecoration(
-                    labelText: "文本",
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: TextField(
-                  controller: TextEditingController(text: matchText),
-                  onChanged: (value) {
-                    setState(() {
-                      matchText = value;
-                    });
-                  },
-                  decoration: const InputDecoration(
-                    labelText: "match 文本",
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              HighlightText(
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineLarge!
-                    .copyWith(fontSize: 100),
-                text: text,
-                matchText: matchText,
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

@@ -1,10 +1,18 @@
 import 'dart:convert';
 
-import '../../util/common.dart';
-import '../shared_preferences/index.dart';
+import '../../../store/shared_preferences/index.dart';
+import '../../../util/common.dart';
 import '../../model/rpass/account.dart';
 
+
+
 class AccountsService with SharedPreferencesService {
+
+
+  Future<int> getAccountListCount() async {
+    return (await getStringList("account_list"))?.length ?? 0;
+  }
+
   Future<List<Account>> getAccountList(String token) async {
     final list = await getStringList("account_list");
 
@@ -15,10 +23,8 @@ class AccountsService with SharedPreferencesService {
         .toList();
   }
 
-  Future<bool> setAccountList(String token, List<Account> accounts) {
-    return setStringList(
-        "account_list",
-        aesEncryptList(token, accounts.map((item) => json.encode(item)))
-            .toList());
+    @override
+  Future<bool> clear() {
+    return remove("account_list");
   }
 }

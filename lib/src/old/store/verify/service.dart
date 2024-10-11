@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import '../../model/rpass/question.dart';
-import '../shared_preferences/index.dart';
+import '../../../store/shared_preferences/index.dart';
 
 class VerifyService with SharedPreferencesService {
   Future<String?> getPasswordAes() async => await getString("password_str");
@@ -32,5 +32,13 @@ class VerifyService with SharedPreferencesService {
             .map((item) =>
                 "${base64.encode(utf8.encode(item.question))}:${item.answerKey}")
             .toList());
+  }
+
+  @override
+  Future<bool> clear() async {
+    await remove("password_str");
+    await remove("question_token_str");
+    await remove("question_list");
+    return true;
   }
 }

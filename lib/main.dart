@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'src/context/biometric.dart';
+import 'src/old/store/index.dart';
 import 'src/rpass.dart';
 import 'src/app.dart';
 import 'src/store/index.dart';
@@ -10,12 +11,10 @@ void main() async {
 
   await RpassInfo.init();
 
-  final store = Store();
-  await store.loadStore();
+  await Store().loadStore();
+  await OldStore().loadStore();
 
   await BiometricState.initCanAuthenticate();
 
-  runApp(RpassApp(
-    store: store,
-  ));
+  runApp(const RpassApp());
 }

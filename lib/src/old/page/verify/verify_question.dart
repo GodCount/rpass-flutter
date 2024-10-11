@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../i18n.dart';
+import '../../../i18n.dart';
 import '../../model/rpass/question.dart';
 
 typedef OnVerifyCallback = void Function(List<QuestionAnswer>? questions);

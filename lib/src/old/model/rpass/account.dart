@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import '../../util/common.dart';
+import '../../../util/common.dart';
 import '../common.dart';
 
 part 'account.g.dart';

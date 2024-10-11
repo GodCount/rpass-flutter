@@ -5,6 +5,8 @@ import './store/index.dart';
 import './page/page.dart';
 import 'context/kdbx.dart';
 import 'context/store.dart';
+import 'old/page/verify/verify.dart';
+import 'old/store/index.dart';
 import 'theme/theme.dart';
 
 class UnfocusNavigatorRoute extends NavigatorObserver {
@@ -32,15 +34,12 @@ class UnfocusNavigatorRoute extends NavigatorObserver {
 }
 
 class RpassApp extends StatelessWidget {
-  const RpassApp({
-    super.key,
-    required this.store,
-  });
-
-  final Store store;
+  const RpassApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final store = Store();
+    final oldStore = OldStore();
     return StoreProvider(
       store: store,
       child: ListenableBuilder(
@@ -64,8 +63,11 @@ class RpassApp extends StatelessWidget {
               }
               return null;
             },
-            initialRoute:
-                kdbx == null ? InitKdbxPage.routeName : Home.routeName,
+            initialRoute: oldStore.accounts.isExistAccount
+                ? VerifyPassword.routeName
+                : kdbx == null
+                    ? InitKdbxPage.routeName
+                    : Home.routeName,
             navigatorObservers: [UnfocusNavigatorRoute()],
             routes: {
               Home.routeName: (context) => const Home(),
@@ -74,7 +76,6 @@ class RpassApp extends StatelessWidget {
               InitKdbxPage.routeName: (context) => const InitKdbxPage(),
               SelectIconPage.routeName: (context) => const SelectIconPage(),
               RecycleBinPage.routeName: (context) => const RecycleBinPage(),
-
 
               EditAccountPage.routeName: (context) => const EditAccountPage(),
               GenPassword.routeName: (context) => const GenPassword(),
@@ -86,6 +87,8 @@ class RpassApp extends StatelessWidget {
               ChangeLocalePage.routeName: (context) => const ChangeLocalePage(),
               AboutPage.routeName: (context) => const AboutPage(),
 
+              // 旧版数据迁移,验证界面
+              VerifyPassword.routeName: (context) => const VerifyPassword(),
 
               // InitPassword.routeName: (context) => const InitPassword(),
               // VerifyPassword.routeName: (context) => const VerifyPassword(),
