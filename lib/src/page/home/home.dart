@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
+import '../../kdbx/kdbx.dart';
+import '../../old/store/index.dart';
+import '../../widget/common.dart';
 import 'groups.dart';
 import 'settings.dart';
 import 'passwords.dart';
@@ -26,12 +29,35 @@ class Home extends StatefulWidget {
   State<Home> createState() => HomeState();
 }
 
-class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
+class HomeState extends State<Home>
+    with AutomaticKeepAliveClientMixin, CommonWidgetUtil {
   final PageController _controller = PageController(initialPage: 0);
   final TextEditingController _searchController = TextEditingController();
 
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration.zero, _initMigrate);
+  }
+
+  void _initMigrate() async {
+    final oldStore = OldStore();
+    if (oldStore.accounts.accountList.isNotEmpty) {
+      final kdbx = KdbxProvider.of(context)!;
+      try {
+        kdbx.import(OldRpassAdapter().import(oldStore.accounts.accountList));
+        await kdbxSave(kdbx);
+        await oldStore.clear();
+        showToast("数据迁移完成");
+        setState(() {});
+      } catch (e) {
+        showToast("迁移出现了意外情况! $e");
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -52,9 +78,8 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final kdbx = KdbxProvider.of(context);
 
-    return kdbx != null
+    return OldStore().accounts.accountList.isEmpty
         ? Scaffold(
             body: PageView(
               controller: _controller,
@@ -68,7 +93,6 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                 _MyBottomNavigationBar(controller: _controller),
           )
         : const Scaffold(
-            // TODO! 无限期等待!
             body: Center(
               child: CircularProgressIndicator(),
             ),

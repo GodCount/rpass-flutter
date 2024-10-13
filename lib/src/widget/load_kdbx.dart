@@ -69,6 +69,7 @@ class _LoadKdbxState extends State<LoadKdbx> with CommonWidgetUtil {
         );
         widget.onLoadedKdbx(kdbx);
       } catch (error) {
+        print(error);
         setState(() {
           _errorMessage = error.toString();
         });

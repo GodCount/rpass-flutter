@@ -1,8 +1,4 @@
-
-
-import 'package:flutter/material.dart';
-
-import '../../page/page.dart';
+import '../../kdbx/kdbx.dart';
 import 'accounts/contrller.dart';
 import 'verify/contrller.dart';
 
@@ -18,10 +14,9 @@ final class OldStore {
   final accounts = AccountsContrller();
   final verify = VerifyController();
 
-  Future<void> migrate(BuildContext context, String token) async {
-    final accountList = await accounts.denrypt(token);
-    await Navigator.of(context).popAndPushNamed(InitKdbxPage.routeName);
-    // TODO!
+  Future<void> clear() async {
+    await accounts.clear();
+    await verify.clear();
   }
 
   Future<void> loadStore() async {

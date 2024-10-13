@@ -1,21 +1,13 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
+import '../../context/kdbx.dart';
 import '../../context/store.dart';
 import '../../i18n.dart';
-import '../../model/browser/chrome.dart';
-import '../../model/browser/firefox.dart';
-import '../../model/common.dart';
+import '../../kdbx/kdbx.dart';
 import '../../rpass.dart';
-import '../../model/rpass/backup.dart';
-import '../../model/rpass/question.dart';
 import '../../util/common.dart';
 import '../../util/file.dart';
-import '../../util/verify_core.dart';
 import '../../widget/common.dart';
-import '../verify/security_question.dart';
 
 class ExportAccountPage extends StatefulWidget {
   const ExportAccountPage({super.key});
@@ -28,159 +20,38 @@ class ExportAccountPage extends StatefulWidget {
 
 class ExportAccountPageState extends State<ExportAccountPage>
     with CommonWidgetUtil {
-  bool _enableEncrypt = true;
-  bool _isNewPassword = false;
-  bool _enableSecurityQuestion = true;
-  bool _isNewSecurityQuestion = false;
-
-  final TextEditingController _passwordController = TextEditingController();
-  List<QuestionAnswer> _questions = [];
-
-  bool _isSaveing = false;
-  BackupType? _exportType;
-
-  BackupType _otherExportType = BackupType.chrome;
-
-  void _export(BackupType type) async {
-    final t = I18n.of(context)!;
-
-    _isSaveing = true;
-    _exportType = type;
-    setState(() {});
-
+  void _exportKdbxFile() async {
+    final kdbx = KdbxProvider.of(context)!;
     try {
-      String? filepath;
-
-      switch (type) {
-        case BackupType.rpass:
-          filepath = await _exportRpass();
-          break;
-        case BackupType.chrome:
-          filepath = await _exportChrome();
-          break;
-        case BackupType.firefox:
-          filepath = await _exportFirefox();
-          break;
-      }
-
-      if (filepath == null) return;
-
-      showToast(t.export_done_location(filepath));
+      final filepath = await SimpleFile.saveFile(
+        data: await kdbx.getKdbxFileBytes(),
+        filename: "${RpassInfo.appName}.kdbx",
+      );
+      showToast(filepath);
     } catch (e) {
-      showToast(t.export_throw(e.toString()));
-    } finally {
-      _isSaveing = false;
-      _exportType = null;
-      _passwordController.text = "";
-      _questions.clear();
-      setState(() {});
+      showToast(I18n.of(context)!.export_throw(e.toString()));
     }
   }
 
-  Future<String?> _exportRpass() async {
-    final t = I18n.of(context)!;
-    final store = StoreProvider.of(context);
-
-    if (store.accounts.accountList.isEmpty) {
-      showToast(t.no_backup);
-      return null;
+  void _otherExportAlert(FormatTransform adapter) async {
+    if (await showConfirmDialog(
+      title: "警告",
+      message: "确认明文导出数据?\n注意导出的数据只包含对应的关键字段.",
+    )) {
+      final kdbx = KdbxProvider.of(context)!;
+      try {
+        final result = jsonToCsv(adapter.export(
+          kdbx.totalEntry.map((item) => item.toPlainMapEntry()).toList(),
+        ));
+        final filepath = await SimpleFile.saveText(
+          data: result,
+          filename: "${RpassInfo.appName}_${adapter.name}.csv",
+        );
+        showToast(filepath);
+      } catch (e) {
+        showToast(I18n.of(context)!.export_throw(e.toString()));
+      }
     }
-    if (_enableEncrypt) {
-      if (_isNewPassword && _passwordController.text.trim().length < 4) {
-        showToast(t.input_num_password);
-        return null;
-      }
-      if (_enableSecurityQuestion &&
-          _isNewSecurityQuestion &&
-          _questions.isEmpty) {
-        showToast(t.at_least_1security_qa);
-        return null;
-      }
-    }
-
-    String saveData;
-
-    if (!_enableEncrypt) {
-      final Backup data = Backup(
-        accounts: store.accounts.accountList,
-        version: RpassInfo.version,
-        buildNumber: RpassInfo.buildNumber,
-      );
-      saveData = json.encoder.convert(data);
-    } else {
-      late final String token;
-      late final String passwordTest;
-
-      if (_isNewPassword) {
-        final data = VerifyCore.createToken(_passwordController.text);
-        token = data.$1;
-        passwordTest = data.$2;
-      } else {
-        token = store.verify.token!;
-        passwordTest = store.verify.passwordAes!;
-      }
-
-      List<QuestionAnswerKey>? questions;
-      String? questionsToken;
-
-      if (_enableSecurityQuestion) {
-        if (_isNewSecurityQuestion) {
-          questions = _questions
-              .map((item) =>
-                  QuestionAnswerKey(item.question, answer: item.answer))
-              .toList();
-          questionsToken = VerifyCore.createQuestionAesByKey(
-              token: token, questions: questions);
-        } else {
-          questions = store.verify.questionList;
-          questionsToken = store.verify.questionTokenAes!;
-        }
-      }
-
-      final EncryptBackup data = EncryptBackup(
-        questions: questions,
-        accounts:
-            aesEncrypt(token, json.encoder.convert(store.accounts.accountList)),
-        questionsToken: questionsToken,
-        passwordVerify: passwordTest,
-        version: RpassInfo.version,
-        buildNumber: RpassInfo.buildNumber,
-      );
-
-      saveData = json.encoder.convert(data);
-    }
-
-    final filepath = await SimpleFile.saveText(
-      data: saveData,
-      filename: "rpass_export_${dateFormat(DateTime.now())}.json",
-    );
-    return filepath;
-  }
-
-  Future<String> _exportChrome() async {
-    final saveData =
-        ChromeAccount.toCsv(StoreProvider.of(context).accounts.accountList);
-    final filepath = await SimpleFile.saveText(
-      data: saveData,
-      filename: "rpass_export_chrome_${dateFormat(DateTime.now())}.csv",
-    );
-    return filepath;
-  }
-
-  Future<String> _exportFirefox() async {
-    final saveData =
-        FirefoxAccount.toCsv(StoreProvider.of(context).accounts.accountList);
-    final filepath = await SimpleFile.saveText(
-      data: saveData,
-      filename: "rpass_export_firefox_${dateFormat(DateTime.now())}.csv",
-    );
-    return filepath;
-  }
-
-  void _onChangeExportType(BackupType? value) {
-    setState(() {
-      _otherExportType = value ?? BackupType.chrome;
-    });
   }
 
   @override
@@ -191,287 +62,47 @@ class ExportAccountPageState extends State<ExportAccountPage>
       appBar: AppBar(
         title: Text(t.export),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(6),
-        children: [
-          _cardColumn([
-            Padding(
-              padding: const EdgeInsets.only(top: 12, bottom: 12),
-              child: Text(
-                t.app_name,
-                style: Theme.of(context).textTheme.titleMedium,
+      body: Center(
+        child: _cardColumn([
+          ListTile(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(6.0),
+                topRight: Radius.circular(6.0),
               ),
             ),
-            SwitchListTile(
-              value: _enableEncrypt,
-              onChanged: !_isSaveing
-                  ? (value) {
-                      setState(() {
-                        _enableEncrypt = value;
-                      });
-                    }
-                  : null,
-              title: Text(t.encrypt_data),
-            ),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              transitionBuilder: (child, animation) {
-                return SizeTransition(
-                  sizeFactor: animation,
-                  child: child,
-                );
-              },
-              child: _enableEncrypt
-                  ? Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CheckboxListTile(
-                          dense: true,
-                          value: _isNewPassword,
-                          onChanged: !_isSaveing
-                              ? (value) {
-                                  setState(() {
-                                    _isNewPassword = value!;
-                                  });
-                                }
-                              : null,
-                          title: Padding(
-                            padding: const EdgeInsets.only(left: 6),
-                            child: Text(t.alone_password),
-                          ),
-                        ),
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          transitionBuilder: (child, animation) {
-                            return SizeTransition(
-                              sizeFactor: animation,
-                              child: child,
-                            );
-                          },
-                          child: _isNewPassword
-                              ? Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 12,
-                                    bottom: 12,
-                                    left: 28,
-                                    right: 32,
-                                  ),
-                                  child: TextField(
-                                    controller: _passwordController,
-                                    keyboardType: TextInputType.number,
-                                    textInputAction: TextInputAction.done,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly
-                                    ],
-                                    decoration: InputDecoration(
-                                      labelText: t.password,
-                                      hintText: t.input_num_password,
-                                      border: const OutlineInputBorder(),
-                                    ),
-                                  ),
-                                )
-                              : null,
-                        ),
-                        CheckboxListTile(
-                          dense: true,
-                          value: _enableSecurityQuestion,
-                          onChanged: !_isSaveing
-                              ? (value) {
-                                  setState(() {
-                                    _enableSecurityQuestion = value!;
-                                  });
-                                }
-                              : null,
-                          title: Padding(
-                            padding: const EdgeInsets.only(left: 6),
-                            child: Text(t.enable_security_qa),
-                          ),
-                        ),
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          transitionBuilder: (child, animation) {
-                            return SizeTransition(
-                              sizeFactor: animation,
-                              child: child,
-                            );
-                          },
-                          child: _enableSecurityQuestion
-                              ? CheckboxListTile(
-                                  dense: true,
-                                  value: _isNewSecurityQuestion,
-                                  onChanged: !_isSaveing
-                                      ? (value) {
-                                          setState(() {
-                                            _isNewSecurityQuestion = value!;
-                                          });
-                                        }
-                                      : null,
-                                  title: Padding(
-                                    padding: const EdgeInsets.only(left: 12),
-                                    child: Text(t.alone_security_qa),
-                                  ),
-                                )
-                              : null,
-                        ),
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          transitionBuilder: (child, animation) {
-                            return SizeTransition(
-                              sizeFactor: animation,
-                              child: child,
-                            );
-                          },
-                          child: _enableSecurityQuestion &&
-                                  _isNewSecurityQuestion
-                              ? Container(
-                                  margin: const EdgeInsets.only(
-                                    top: 12,
-                                    bottom: 12,
-                                    left: 28,
-                                    right: 32,
-                                  ),
-                                  child: GestureDetector(
-                                    onTap:
-                                        !_isSaveing ? _editNewQuestion : null,
-                                    child: InputDecorator(
-                                      decoration: InputDecoration(
-                                        labelText: _questions.isNotEmpty
-                                            ? t.security_qa
-                                            : null,
-                                        border: const OutlineInputBorder(),
-                                      ),
-                                      child: Text(
-                                        _questions.isNotEmpty
-                                            ? _questions
-                                                .map((it) => it.question)
-                                                .join("; ")
-                                            : t.security_qa,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              : null,
-                        ),
-                      ],
-                    )
-                  : null,
-            ),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              transitionBuilder: (child, animation) {
-                return ScaleTransition(
-                  scale: animation,
-                  child: child,
-                );
-              },
-              child: !_isSaveing || _exportType != BackupType.rpass
-                  ? Container(
-                      key: const ValueKey(1),
-                      margin: const EdgeInsets.only(top: 12, bottom: 12),
-                      constraints: const BoxConstraints(minWidth: 180),
-                      child: ElevatedButton(
-                        onPressed: !_isSaveing
-                            ? () => _export(BackupType.rpass)
-                            : null,
-                        child: Text(t.backup),
-                      ),
-                    )
-                  : Container(
-                      key: const ValueKey(2),
-                      margin: const EdgeInsets.only(top: 12, bottom: 12),
-                      width: 32,
-                      height: 32,
-                      child: const CircularProgressIndicator(),
-                    ),
-            )
-          ]),
-          _cardColumn([
-            Padding(
-              padding: const EdgeInsets.only(top: 12, bottom: 12),
-              child: Text(
-                t.other,
-                style: Theme.of(context).textTheme.titleMedium,
+            title: Text("导出 kdbx 文件"),
+            onTap: _exportKdbxFile,
+          ),
+          ListTile(
+            title: Text("导出 csv 文件(chrome)"),
+            onTap: () => _otherExportAlert(ChromeCsvAdapter()),
+          ),
+          ListTile(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(6.0),
+                bottomRight: Radius.circular(6.0),
               ),
             ),
-            RadioListTile(
-              value: BackupType.chrome,
-              groupValue: _otherExportType,
-              controlAffinity: ListTileControlAffinity.trailing,
-              title: Text(t.chrome),
-              onChanged: !_isSaveing ? _onChangeExportType : null,
-            ),
-            RadioListTile(
-              value: BackupType.firefox,
-              groupValue: _otherExportType,
-              controlAffinity: ListTileControlAffinity.trailing,
-              title: Text(t.firefox),
-              onChanged: !_isSaveing ? _onChangeExportType : null,
-            ),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              transitionBuilder: (child, animation) {
-                return ScaleTransition(
-                  scale: animation,
-                  child: child,
-                );
-              },
-              child: !_isSaveing || _exportType == BackupType.rpass
-                  ? Container(
-                      key: const ValueKey(1),
-                      margin: const EdgeInsets.only(top: 12, bottom: 12),
-                      constraints: const BoxConstraints(minWidth: 180),
-                      child: ElevatedButton(
-                        onPressed: !_isSaveing
-                            ? () => _export(_otherExportType)
-                            : null,
-                        child: Text(t.backup),
-                      ),
-                    )
-                  : Container(
-                      key: const ValueKey(2),
-                      margin: const EdgeInsets.only(top: 12, bottom: 12),
-                      width: 32,
-                      height: 32,
-                      child: const CircularProgressIndicator(),
-                    ),
-            )
-          ]),
-        ],
+            title: Text("导出 csv 文件(firefox)"),
+            onTap: () => _otherExportAlert(FirefoxCsvAdapter()),
+          ),
+        ]),
       ),
     );
   }
 
   Widget _cardColumn(List<Widget> children) {
     return Card(
-      margin: const EdgeInsets.all(6),
+      margin: const EdgeInsets.all(24),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(6.0)),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: children,
       ),
-    );
-  }
-
-  void _editNewQuestion() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          scrollable: true,
-          content: SecurityQuestion(
-            initialList: _questions,
-            onSubmit: (questions) {
-              if (questions != null) {
-                _questions = questions;
-                setState(() {});
-              }
-              Navigator.of(context).pop();
-            },
-          ),
-        );
-      },
     );
   }
 }

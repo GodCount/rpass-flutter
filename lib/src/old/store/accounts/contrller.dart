@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../model/rpass/account.dart';
 import './service.dart';
 
 class AccountsContrller with ChangeNotifier {
@@ -8,19 +7,21 @@ class AccountsContrller with ChangeNotifier {
 
   final AccountsService _accountsService = AccountsService();
 
-  List<Account>? _accountList;
+  List<Map<String, dynamic>>? _accountList;
   int _accountListCount = 0;
 
-  List<Account> get accountList => _accountList ?? [];
+  List<Map<String, dynamic>> get accountList => _accountList ?? [];
   bool get isExistAccount => _accountListCount > 0;
 
-  Future<List<Account>> denrypt(String token) async {
+  Future<List<Map<String, dynamic>>> denrypt(String token) async {
     _accountList = await _accountsService.getAccountList(token);
     return _accountList!;
   }
 
   Future<void> clear() async {
     await _accountsService.clear();
+    _accountListCount = 0;
+    _accountList = null;
   }
 
   Future<void> init() async {

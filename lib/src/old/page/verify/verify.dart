@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../i18n.dart';
+import '../../../page/page.dart';
 import '../../../util/common.dart';
 import '../../../widget/common.dart';
 import '../../model/rpass/question.dart';
@@ -18,34 +19,27 @@ class VerifyPassword extends StatefulWidget {
 
 class VerifyPasswordState extends State<VerifyPassword> with CommonWidgetUtil {
   final TextEditingController _passwordController = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
-
   bool _obscureText = true;
-  String? _errorMessage;
 
   bool _isVerify = true;
 
   @override
   void initState() {
-    _focusNode.addListener(() {
-      if (_focusNode.hasFocus && _errorMessage != null) {
-        setState(() {
-          _errorMessage = null;
-        });
-      }
-    });
     super.initState();
+  }
+
+  void _denrypt(String token) async {
+    try {
+      await OldStore().accounts.denrypt(token);
+      Navigator.of(context).popAndPushNamed(InitKdbxPage.routeName);
+    } catch (e) {
+      showToast(I18n.of(context)!.security_qa_throw(e.toString()));
+    }
   }
 
   void _verifyPassword() async {
     if (_passwordController.text.isNotEmpty) {
-      try {
-        await OldStore().migrate(context, md5(_passwordController.text));
-      } catch (error) {
-        setState(() {
-          _errorMessage = error.toString();
-        });
-      }
+      _denrypt(md5(_passwordController.text));
     }
   }
 
@@ -57,11 +51,7 @@ class VerifyPasswordState extends State<VerifyPassword> with CommonWidgetUtil {
     }
 
     try {
-      final store = OldStore();
-      await store.migrate(
-        context,
-        store.verify.forgotToVerifyQuestion(questions),
-      );
+      _denrypt(OldStore().verify.forgotToVerifyQuestion(questions));
     } catch (e) {
       showToast(I18n.of(context)!.security_qa_throw(e.toString()));
     }
@@ -106,10 +96,10 @@ class VerifyPasswordState extends State<VerifyPassword> with CommonWidgetUtil {
               t.app_name,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 16),
+            const Padding(
+              padding: EdgeInsets.only(top: 16),
               child: Text(
-                t.verify_password,
+                "  正在进行软件数据迁移升级, 解密数据后,将全部迁移到新的数据库(kdbx)存储数据, 更好, 更稳定, 更安全, 更多功能.",
                 textAlign: TextAlign.center,
               ),
             ),
@@ -117,7 +107,6 @@ class VerifyPasswordState extends State<VerifyPassword> with CommonWidgetUtil {
               padding: const EdgeInsets.only(top: 24),
               constraints: const BoxConstraints(maxWidth: 264),
               child: TextField(
-                focusNode: _focusNode,
                 controller: _passwordController,
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.done,
@@ -127,9 +116,6 @@ class VerifyPasswordState extends State<VerifyPassword> with CommonWidgetUtil {
                 decoration: InputDecoration(
                   labelText: t.password,
                   hintText: t.input_num_password,
-                  errorText: _errorMessage != null
-                      ? t.verify_password_throw(_errorMessage!)
-                      : null,
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     onPressed: () {

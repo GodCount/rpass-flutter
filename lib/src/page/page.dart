@@ -14,7 +14,7 @@ export 'password/edit_notes.dart';
 export 'password/look_account.dart';
 
 
-// export 'setting/export_account.dart';
+export 'setting/export_account.dart';
 // export 'setting/import_account.dart';
 export 'setting/change_locale.dart';
 export 'setting/about.dart';

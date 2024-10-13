@@ -31,11 +31,12 @@ class VerifyController with ChangeNotifier {
 
   Future<void> clear() async {
     await _verifyService.clear();
+    _questionTokenAes = null;
+    _questionList = [];
   }
 
   Future<void> init() async {
     _questionTokenAes = await _verifyService.getQuestionTokenAes();
     _questionList = await _verifyService.getQuestionList() ?? [];
-    notifyListeners();
   }
 }

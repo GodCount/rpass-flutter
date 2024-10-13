@@ -167,7 +167,7 @@ class GroupsPageState extends State<GroupsPage>
           borderRadius: const BorderRadius.all(Radius.circular(6.0)),
           onTap: () {
             Home.of(context)!
-                .toPasswordPageSearch("g:${kdbxGroup.name.get() ?? ''}");
+                .toPasswordPageSearch('g:"${kdbxGroup.name.get() ?? ''}"');
           },
           onLongPress: () => showKdbxGroupAction(
             kdbxGroup.name.get() ?? '',

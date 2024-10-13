@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../context/kdbx.dart';
 import '../../context/store.dart';
+import '../../i18n.dart';
+import '../../kdbx/kdbx.dart';
 import '../../rpass.dart';
 import '../../widget/common.dart';
 import '../../widget/create_kdbx.dart';
@@ -18,6 +20,14 @@ class InitKdbxPage extends StatefulWidget {
 }
 
 class _InitKdbxPageState extends State<InitKdbxPage> with CommonWidgetUtil {
+  void _addPresetGroup(Kdbx kdbx) {
+    final t = I18n.of(context)!;
+    final general = kdbx.createGroup("通用");
+    kdbx.customData[KdbxCustomDataKey.GENERAL_GROUP_UUID] = general.uuid.uuid;
+    kdbx.createGroup("邮箱");
+    kdbxSave(kdbx);
+  }
+
   @override
   Widget build(BuildContext context) {
     final store = StoreProvider.of(context);
@@ -43,7 +53,7 @@ class _InitKdbxPageState extends State<InitKdbxPage> with CommonWidgetUtil {
                 kdbxName: RpassInfo.defaultKdbxName,
                 onCreatedKdbx: (kdbx) {
                   kdbx.filepath = store.localInfo.localKdbxFile.path;
-                  kdbxSave(kdbx);
+                  _addPresetGroup(kdbx);
                   KdbxProvider.setKdbx(context, kdbx);
                   Navigator.of(context).pushReplacementNamed(Home.routeName);
                 },

@@ -42,6 +42,12 @@ void main() {
       expect(inputParse.objects.length, 1);
       expect(inputParse.objects[0].field, mapFieldTable["t"]);
       expect(inputParse.objects[0].value, "关键字");
+
+      input = 't:"关键字"';
+      inputParse = InputParse.parse(input, mapFieldTable);
+      expect(inputParse.objects.length, 1);
+      expect(inputParse.objects[0].field, mapFieldTable["t"]);
+      expect(inputParse.objects[0].value, "关键字");
     });
 
     test("字段中包含字段", () {

@@ -86,6 +86,8 @@ class RpassApp extends StatelessWidget {
                   const QrCodeScannerPage(),
               ChangeLocalePage.routeName: (context) => const ChangeLocalePage(),
               AboutPage.routeName: (context) => const AboutPage(),
+              ExportAccountPage.routeName: (context) =>
+                  const ExportAccountPage(),
 
               // 旧版数据迁移,验证界面
               VerifyPassword.routeName: (context) => const VerifyPassword(),

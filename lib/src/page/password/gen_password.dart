@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../component/match_text.dart';
+import '../../widget/match_text.dart';
 import '../../i18n.dart';
 import '../../util/common.dart';
 import '../../widget/common.dart';

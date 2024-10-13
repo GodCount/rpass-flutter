@@ -186,7 +186,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
         controller: widget.controller,
         focusNode: _focusNode,
         autofocus: false,
-        ignorePointers: !_hasFocus,
+        ignorePointers: !_hasFocus && widget.controller.text.isEmpty,
         style: Theme.of(context).textTheme.bodySmall,
         decoration: InputDecoration(
           border: InputBorder.none,
@@ -221,9 +221,13 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
               }
             },
             icon: AnimatedOpacity(
-              opacity: _hasFocus ? 1 : 0,
+              opacity: _hasFocus || widget.controller.text.isNotEmpty ? 1 : 0,
               duration: const Duration(milliseconds: 300),
-              child: const Icon(Icons.close),
+              child: AnimatedIconSwitcher(
+                icon: widget.controller.text.isNotEmpty
+                    ? const Icon(Icons.close, key: ValueKey(1),)
+                    : const Icon(Icons.arrow_downward_rounded, key: ValueKey(2)),
+              ),
             ),
           ),
         ),

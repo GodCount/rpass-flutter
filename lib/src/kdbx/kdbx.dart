@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:kdbx/kdbx.dart' hide KdbxException, KdbxKeyCommon;
 
 import '../rpass.dart';
+import 'common.dart';
 import 'icons.dart';
 
 export 'common.dart';
+export 'adapter/adapter.dart';
 export 'package:kdbx/kdbx.dart'
     show
         KdbxEntry,
@@ -24,6 +26,10 @@ export 'package:kdbx/kdbx.dart'
 
 abstract class KdbxBase {
   abstract final KdbxFile kdbxFile;
+}
+
+class KdbxCustomDataKey {
+  static const GENERAL_GROUP_UUID = 'general_group_uuid';
 }
 
 class KdbxKeySpecial {
@@ -126,6 +132,8 @@ extension KdbxMetaExt on KdbxBase {
   Iterable<KdbxCustomIcon> get customIcons =>
       kdbxFile.body.meta.customIcons.values;
 
+  KdbxCustomData get customData => kdbxFile.body.meta.customData;
+
   set databaseName(String value) {
     kdbxFile.body.meta.databaseName.set(value);
   }
@@ -160,6 +168,16 @@ extension KdbxGroupExt on KdbxBase {
 
   void deleteGroup(KdbxGroup group) {
     kdbxFile.deleteGroup(group);
+  }
+
+  KdbxGroup? findGroupByUuid(KdbxUuid uuid) {
+    try {
+      return kdbxFile.body.rootGroup
+          .getAllGroups()
+          .firstWhere((group) => group.uuid == uuid);
+    } catch (e) {
+      return null;
+    }
   }
 }
 
@@ -304,6 +322,27 @@ extension KdbxIconExt on KdbxObject {
   }
 }
 
+extension KdbxExternalImport on KdbxBase {
+  void import(List<Map<KdbxKey, String>> list, {KdbxGroup? kdbxGroup}) {
+    if (kdbxGroup == null) {
+      final uuid = customData[KdbxCustomDataKey.GENERAL_GROUP_UUID];
+      kdbxGroup = uuid != null
+          ? findGroupByUuid(KdbxUuid(uuid)) ?? kdbxFile.body.rootGroup
+          : kdbxFile.body.rootGroup;
+    }
+    for(var item in list) {
+      final kdbxEntry = createEntry(kdbxGroup);
+      for(var entry in item.entries) {
+        if(entry.key == KdbxKeySpecial.TAGS) {
+          kdbxEntry.tags.set(entry.value);
+        }else{
+          kdbxEntry.setString(entry.key, PlainValue(entry.value));
+        }
+      }
+    }
+  }
+}
+
 class Kdbx extends KdbxBase
     with KdbxEntryFieldStatistic, KdbxVirtualObject, ChangeNotifier {
   Kdbx({required this.kdbxFile, this.filepath});
@@ -369,11 +408,15 @@ class Kdbx extends KdbxBase
   Future<void> save([String? filepath]) async {
     this.filepath ??= filepath;
     if (this.filepath != null) {
-      await File(this.filepath!).writeAsBytes(await kdbxFile.save());
+      await File(this.filepath!).writeAsBytes(await getKdbxFileBytes());
       notifyListeners();
     } else {
       throw Exception("filepath is null");
     }
+  }
+
+  Future<Uint8List> getKdbxFileBytes() {
+    return kdbxFile.save();
   }
 
   merge(Kdbx kdbx) {
@@ -402,5 +445,11 @@ extension KdbxEntryTagExt on KdbxEntry {
 
   String getNonNullString(KdbxKey key) {
     return getString(key)?.getText() ?? '';
+  }
+
+  Map<KdbxKey, String> toPlainMapEntry() {
+    return Map.fromEntries(KdbxKeyCommon.all.map(
+      (item) => MapEntry(item, getNonNullString(item)),
+    ));
   }
 }

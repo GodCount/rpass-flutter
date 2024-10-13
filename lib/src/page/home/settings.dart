@@ -111,6 +111,14 @@ class SettingsPageState extends State<SettingsPage>
                 Navigator.of(context).pushNamed(RecycleBinPage.routeName);
               },
             ),
+            ListTile(
+              shape: shape,
+              title: const Text("更多设置"),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () {
+                Navigator.of(context).pushNamed(RecycleBinPage.routeName);
+              },
+            ),
           ]),
           _cardColumn([
             Padding(
@@ -175,6 +183,8 @@ class SettingsPageState extends State<SettingsPage>
                     rethrow;
                   } catch (e) {
                     showToast(t.biometric_throw(e.toString()));
+                  } finally {
+                    setState(() {});
                   }
                 },
               ),
@@ -206,12 +216,7 @@ class SettingsPageState extends State<SettingsPage>
               shape: shape,
               title: Text(t.export),
               onTap: () {
-                final kdbx = KdbxProvider.of(context)!;
-                SimpleFile.saveText(
-                  data: kdbx.kdbxFile.body.toXml().toXmlString(),
-                  filename: "test.xml",
-                );
-                // Navigator.of(context).pushNamed(ExportAccountPage.routeName);
+                Navigator.of(context).pushNamed(ExportAccountPage.routeName);
               },
             ),
           ]),

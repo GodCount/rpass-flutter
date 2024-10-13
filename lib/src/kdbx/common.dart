@@ -86,9 +86,13 @@ class InputParse {
       final quoteMatch = quotePattern.firstMatch(part);
 
       if (spaceMatch == null) {
-        result.add(ParseObject(field: field, value: part));
+        result.add(ParseObject(
+          field: field,
+          value: quoteMatch?.namedGroup("value") ?? part,
+        ));
         break;
       }
+
       if (quoteMatch == null || spaceMatch.start < quoteMatch.start) {
         if (spaceMatch.start > 0) {
           result.add(ParseObject(
@@ -194,4 +198,12 @@ class KbdxSearchHandler {
           .get()!
           .compareTo(b.times.lastModificationTime.get()!));
   }
+}
+
+abstract class FormatTransform {
+  String get name;
+
+  List<Map<KdbxKey, String>> import(List<Map<String, dynamic>> input);
+
+  List<Map<String, dynamic>> export(List<Map<KdbxKey, String>> input);
 }

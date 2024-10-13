@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../context/kdbx.dart';
 import '../i18n.dart';
 import '../kdbx/icons.dart';
 import '../kdbx/kdbx.dart';
@@ -50,27 +49,31 @@ mixin CommonWidgetUtil<T extends StatefulWidget> on State<T> {
     }
   }
 
+  Future<void> showAlert(String msg) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          content: Text(msg),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(I18n.of(context)!.confirm),
+            )
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> showToast(String msg) async {
     if (Platform.isAndroid || Platform.isIOS) {
       await Fluttertoast.showToast(msg: msg);
     } else {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return AlertDialog(
-            content: Text(msg),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text(I18n.of(context)!.confirm),
-              )
-            ],
-          );
-        },
-      );
+      await showAlert(msg);
     }
   }
 
@@ -597,5 +600,41 @@ class SimpleSelectorDialogState<T> extends State<SimpleSelectorDialog<T>> {
         ),
       ],
     );
+  }
+}
+
+class AnimatedIconSwitcher extends StatefulWidget {
+  const AnimatedIconSwitcher({
+    super.key,
+    required this.icon,
+  });
+
+  final Widget icon;
+
+  @override
+  State<AnimatedIconSwitcher> createState() => _AnimatedIconSwitcherState();
+}
+
+class _AnimatedIconSwitcherState extends State<AnimatedIconSwitcher> {
+  Key? prveKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      transitionBuilder: (child, animation) => RotationTransition(
+        turns: prveKey != widget.key
+            ? Tween<double>(begin: 1, end: 0.5).animate(animation)
+            : Tween<double>(begin: 0.5, end: 1).animate(animation),
+        child: FadeTransition(opacity: animation, child: child),
+      ),
+      child: widget.icon,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant AnimatedIconSwitcher oldWidget) {
+    prveKey = oldWidget.key;
+    super.didUpdateWidget(oldWidget);
   }
 }
