@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
-
 export 'package:file_picker/file_picker.dart' show FileType;
 
 class SimpleFile {
@@ -46,7 +45,7 @@ class SimpleFile {
   }) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       dialogTitle: dialogTitle,
-      type: type,
+      type: allowedExtensions != null ? FileType.custom : type,
       initialDirectory: (await applicationDocumentsDirectory).path,
       allowedExtensions: allowedExtensions,
     );
@@ -70,12 +69,12 @@ class SimpleFile {
 
   static Future<String> openText({
     String? dialogTitle,
-     FileType type = FileType.any,
+    FileType type = FileType.any,
     List<String>? allowedExtensions,
   }) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       dialogTitle: dialogTitle,
-      type: type,
+      type: allowedExtensions != null ? FileType.custom : type,
       initialDirectory: (await applicationDocumentsDirectory).path,
       allowedExtensions: allowedExtensions,
     );

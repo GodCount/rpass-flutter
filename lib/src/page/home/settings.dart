@@ -7,7 +7,6 @@ import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
 import '../../context/store.dart';
 import '../../i18n.dart';
-import '../../util/file.dart';
 import '../../widget/common.dart';
 import '../page.dart';
 
@@ -111,14 +110,15 @@ class SettingsPageState extends State<SettingsPage>
                 Navigator.of(context).pushNamed(RecycleBinPage.routeName);
               },
             ),
-            ListTile(
-              shape: shape,
-              title: const Text("更多设置"),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () {
-                Navigator.of(context).pushNamed(RecycleBinPage.routeName);
-              },
-            ),
+            // TODO! 上游 kdbx.dart 还没实现
+            // ListTile(
+            //   shape: shape,
+            //   title: const Text("更多设置"),
+            //   trailing: const Icon(Icons.chevron_right_rounded),
+            //   onTap: () {
+            //     Navigator.of(context).pushNamed(KdbxSettingPage.routeName);
+            //   },
+            // ),
           ]),
           _cardColumn([
             Padding(
@@ -209,7 +209,7 @@ class SettingsPageState extends State<SettingsPage>
             ListTile(
               title: Text(t.import),
               onTap: () {
-                // Navigator.of(context).pushNamed(ImportAccountPage.routeName);
+                Navigator.of(context).pushNamed(ImportAccountPage.routeName);
               },
             ),
             ListTile(

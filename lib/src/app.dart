@@ -76,6 +76,7 @@ class RpassApp extends StatelessWidget {
               InitKdbxPage.routeName: (context) => const InitKdbxPage(),
               SelectIconPage.routeName: (context) => const SelectIconPage(),
               RecycleBinPage.routeName: (context) => const RecycleBinPage(),
+              KdbxSettingPage.routeName: (context) => const KdbxSettingPage(),
 
               EditAccountPage.routeName: (context) => const EditAccountPage(),
               GenPassword.routeName: (context) => const GenPassword(),
@@ -88,25 +89,11 @@ class RpassApp extends StatelessWidget {
               AboutPage.routeName: (context) => const AboutPage(),
               ExportAccountPage.routeName: (context) =>
                   const ExportAccountPage(),
+              ImportAccountPage.routeName: (context) =>
+                  const ImportAccountPage(),
 
               // 旧版数据迁移,验证界面
               VerifyPassword.routeName: (context) => const VerifyPassword(),
-
-              // InitPassword.routeName: (context) => const InitPassword(),
-              // VerifyPassword.routeName: (context) => const VerifyPassword(),
-              // ForgetPassword.routeName: (context) => const ForgetPassword(),
-              // Home.routeName: (context) => const Home(),
-              // AboutPage.routeName: (context) => const AboutPage(),
-              // EditAccountPage.routeName: (context) => const EditAccountPage(),
-              // LookAccountPage.routeName: (context) =>
-              //     const LookAccountPage(accountId: ""),
-              // QrCodeScannerPage.routeName: (context) =>
-              //     const QrCodeScannerPage(),
-              // ExportAccountPage.routeName: (context) =>
-              //     const ExportAccountPage(),
-              // ImportAccountPage.routeName: (context) =>
-              //     const ImportAccountPage(),
-              // ChangeLocalePage.routeName: (context) => const ChangeLocalePage()
             },
           );
         },

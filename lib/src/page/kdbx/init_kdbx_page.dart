@@ -24,7 +24,8 @@ class _InitKdbxPageState extends State<InitKdbxPage> with CommonWidgetUtil {
     final t = I18n.of(context)!;
     final general = kdbx.createGroup("通用");
     kdbx.customData[KdbxCustomDataKey.GENERAL_GROUP_UUID] = general.uuid.uuid;
-    kdbx.createGroup("邮箱");
+    kdbx.createGroup("邮箱").icon.set(KdbxIcon.EMail);
+    kdbx.kdbxFile.body.rootGroup.name.set("默认");
     kdbxSave(kdbx);
   }
 

@@ -15,7 +15,10 @@ class OldRpassAdapter extends FormatTransform {
               KdbxKeyCommon.PASSWORD: item["password"] as String? ?? '',
               KdbxKeyCommon.OTP: item["oneTimePassword"] as String? ?? '',
               KdbxKeyCommon.NOTES: item["description"] as String? ?? '',
-              KdbxKeySpecial.TAGS: (item["labels"] as List<String>?)?.join(";") ?? '',
+              KdbxKeySpecial.TAGS: (item["labels"] as List<dynamic>?)
+                      ?.map((item) => item as String)
+                      .join(";") ??
+                  ''
             })
         .toList();
   }

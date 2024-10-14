@@ -219,15 +219,17 @@ class _EditAccountPageState extends State<EditAccountPage>
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _isDirty ? _kdbxEntrySave : null,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(56 / 2),
-          ),
-        ),
-        child: const Icon(Icons.save),
-      ),
+      floatingActionButton: _isDirty
+          ? FloatingActionButton(
+              onPressed: _kdbxEntrySave,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(56 / 2),
+                ),
+              ),
+              child: const Icon(Icons.save),
+            )
+          : null,
     );
   }
 
@@ -300,7 +302,7 @@ class KdbxEntryGroup extends FormField<KdbxGroup> {
                     field.context,
                     title: "选择分组",
                     value: field.value,
-                    items: [kdbx.kdbxFile.body.rootGroup, ...kdbx.rootGroups]
+                    items: kdbx.rootGroups
                         .map((item) => SimpleSelectorDialogItem(
                               value: item,
                               label: item.name.get() ?? '',

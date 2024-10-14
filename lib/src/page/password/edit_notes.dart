@@ -60,19 +60,19 @@ class _EditNotesState extends State<EditNotes> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _text != null
-            ? () {
+      floatingActionButton: _text != null
+          ? FloatingActionButton(
+              onPressed: () {
                 Navigator.of(context).pop(_text);
-              }
-            : null,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(56 / 2),
-          ),
-        ),
-        child: const Icon(Icons.done),
-      ),
+              },
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(56 / 2),
+                ),
+              ),
+              child: const Icon(Icons.done),
+            )
+          : null,
     );
   }
 }

@@ -144,7 +144,7 @@ class Debouncer {
   }
 }
 
-List<Map<String, String?>> csvToJson(
+List<Map<String, dynamic>> csvToJson(
   String csv, {
   String? fieldDelimiter,
   String? textDelimiter,
@@ -155,7 +155,7 @@ List<Map<String, String?>> csvToJson(
   bool? allowInvalid,
   var convertEmptyTo,
 }) {
-  final list2 = const CsvToListConverter().convert<String?>(
+  final list2 = const CsvToListConverter().convert(
     csv,
     fieldDelimiter: fieldDelimiter,
     textDelimiter: textDelimiter,
@@ -167,13 +167,13 @@ List<Map<String, String?>> csvToJson(
     convertEmptyTo: convertEmptyTo,
   );
 
-  final fields = list2.first as List<String>;
+  final fields = list2.first;
 
-  final List<Map<String, String?>> results = [];
+  final List<Map<String, dynamic>> results = [];
 
   for (var i = 1; i < list2.length; i++) {
     final item = list2[i];
-    final Map<String, String?> result = {};
+    final Map<String, dynamic> result = {};
     for (var j = 0; j < fields.length; j++) {
       result[fields[j]] = item[j];
     }
