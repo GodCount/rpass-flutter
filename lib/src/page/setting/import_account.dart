@@ -23,13 +23,15 @@ class _ImportAccountPageState extends State<ImportAccountPage>
     try {
       final kdbx = KdbxProvider.of(context)!;
       final result = await SimpleFile.openText(allowedExtensions: ["csv"]);
-      final list = adapter.import(csvToJson(result));
+      final list = adapter.import(csvToJson(result, shouldParseNumbers: false));
       kdbx.import(list);
       if (await kdbxSave(kdbx)) {
         showToast("${t.import_done} ${list.length}");
       }
     } catch (e) {
-      showToast(t.import_throw(e.toString()));
+      if (e is! CancelException) {
+        showToast(t.import_throw(e.toString()));
+      }
     }
   }
 

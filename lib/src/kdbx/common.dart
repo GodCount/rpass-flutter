@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import 'kdbx.dart';
 
 class KdbxError extends Error {

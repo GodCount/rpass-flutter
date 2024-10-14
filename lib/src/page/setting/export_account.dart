@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../context/kdbx.dart';
-import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../rpass.dart';
@@ -29,7 +28,9 @@ class ExportAccountPageState extends State<ExportAccountPage>
       );
       showToast(filepath);
     } catch (e) {
-      showToast(I18n.of(context)!.export_throw(e.toString()));
+      if (e is! CancelException) {
+        showToast(I18n.of(context)!.export_throw(e.toString()));
+      }
     }
   }
 
@@ -49,7 +50,9 @@ class ExportAccountPageState extends State<ExportAccountPage>
         );
         showToast(filepath);
       } catch (e) {
-        showToast(I18n.of(context)!.export_throw(e.toString()));
+        if (e is! CancelException) {
+          showToast(I18n.of(context)!.export_throw(e.toString()));
+        }
       }
     }
   }

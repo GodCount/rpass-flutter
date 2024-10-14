@@ -122,7 +122,7 @@ class GroupsPageState extends State<GroupsPage>
     final width = mediaQuery.size.width;
     final kdbx = KdbxProvider.of(context)!;
 
-    final groups = kdbx.rootGroups;
+    final groups = [kdbx.kdbxFile.body.rootGroup, ...kdbx.rootGroups];
 
     return Scaffold(
       appBar: AppBar(
@@ -181,7 +181,9 @@ class GroupsPageState extends State<GroupsPage>
                 kdbxGroup: kdbxGroup,
               ),
             ),
-            onDeleteTap: () => _kdbxGroupDelete(kdbxGroup),
+            onDeleteTap: kdbxGroup.parent != null
+                ? () => _kdbxGroupDelete(kdbxGroup)
+                : null,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,

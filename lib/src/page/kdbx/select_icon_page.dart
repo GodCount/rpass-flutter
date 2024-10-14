@@ -80,7 +80,9 @@ class _SelectIconPageState extends State<SelectIconPage> {
               customIcon: KdbxCustomIcon(uuid: KdbxUuid.random(), data: bytes),
             ));
           } catch (e) {
-            // TODO! 提示异常
+            if (e is! CancelException) {
+              // TODO! 提示错误
+            }
           }
         },
         shape: const RoundedRectangleBorder(

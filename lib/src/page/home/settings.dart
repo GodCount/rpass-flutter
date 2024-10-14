@@ -2,11 +2,13 @@ import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rpass/src/kdbx/kdbx.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
 import '../../context/store.dart';
 import '../../i18n.dart';
+import '../../rpass.dart';
 import '../../widget/common.dart';
 import '../page.dart';
 
@@ -237,7 +239,40 @@ class SettingsPageState extends State<SettingsPage>
               shape: shape,
               title: Text(t.about),
               onTap: () {
-                Navigator.of(context).pushNamed(AboutPage.routeName);
+                showAboutDialog(
+                    context: context,
+                    applicationName: RpassInfo.appName,
+                    applicationVersion: RpassInfo.version,
+                    applicationIcon: const Image(
+                      image: AssetImage('assets/icons/logo.png'),
+                      width: 72,
+                      height: 72,
+                    ),
+                    applicationLegalese: t.app_description,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextButton(
+                              onPressed: () async => await launchUrl(
+                                  Uri.parse(
+                                      "https://github.com/GodCount/rpass-flutter"),
+                                  mode: LaunchMode.externalApplication),
+                              child: Text(t.source_code_location("Github")),
+                            ),
+                            TextButton(
+                              onPressed: () async => await launchUrl(
+                                  Uri.parse(
+                                      "https://gitee.com/do_yzr/rpass-flutter"),
+                                  mode: LaunchMode.externalApplication),
+                              child: Text(t.source_code_location("Gitee")),
+                            ),
+                          ],
+                        ),
+                      )
+                    ]);
               },
             ),
           ]),

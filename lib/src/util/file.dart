@@ -8,6 +8,8 @@ import 'package:path/path.dart' as path;
 
 export 'package:file_picker/file_picker.dart' show FileType;
 
+class CancelException implements Exception {}
+
 class SimpleFile {
   static Future<Directory> applicationDocumentsDirectory =
       getApplicationDocumentsDirectory();
@@ -27,7 +29,7 @@ class SimpleFile {
     );
 
     if (filepath == null) {
-      throw Exception("user cancel");
+      throw CancelException();
     }
 
     if (Platform.isMacOS || Platform.isWindows) {
@@ -50,7 +52,7 @@ class SimpleFile {
       allowedExtensions: allowedExtensions,
     );
     if (result == null || result.xFiles.isEmpty) {
-      throw Exception("user cancel");
+      throw CancelException();
     }
     return (result.xFiles[0].path, await result.xFiles[0].readAsBytes());
   }
@@ -79,7 +81,7 @@ class SimpleFile {
       allowedExtensions: allowedExtensions,
     );
     if (result == null || result.xFiles.isEmpty) {
-      throw Exception("user cancel");
+      throw CancelException();
     }
     return await result.xFiles[0].readAsString();
   }

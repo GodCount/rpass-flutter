@@ -625,7 +625,9 @@ class _EntryFieldState extends State<EntryField>
                   ));
               return ChipListItem(value: map, label: map.key.key);
             } catch (e) {
-              // TODO! 提示错误
+              if (e is! CancelException) {
+                // TODO! 提示错误
+              }
             }
             return null;
           },

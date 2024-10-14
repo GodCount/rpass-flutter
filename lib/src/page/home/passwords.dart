@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../rpass.dart';
 import '../../widget/common.dart';
 import '../page.dart';
 
@@ -207,10 +208,13 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
                   )
                 : Text(t.password),
           ),
-          prefixIcon: AnimatedOpacity(
-            opacity: _hasFocus ? 1 : 0,
-            duration: const Duration(milliseconds: 300),
-            child: const Icon(Icons.search),
+          prefixIcon: IconButton(
+            onPressed: _showSearchHelp,
+            icon: AnimatedOpacity(
+              opacity: _hasFocus ? 1 : 0,
+              duration: const Duration(milliseconds: 300),
+              child: const Icon(Icons.help_outline_rounded),
+            ),
           ),
           suffixIcon: IconButton(
             onPressed: () {
@@ -220,18 +224,44 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
                 _focusNode.unfocus();
               }
             },
-            icon: AnimatedOpacity(
-              opacity: _hasFocus || widget.controller.text.isNotEmpty ? 1 : 0,
-              duration: const Duration(milliseconds: 300),
-              child: AnimatedIconSwitcher(
-                icon: widget.controller.text.isNotEmpty
-                    ? const Icon(Icons.close, key: ValueKey(1),)
-                    : const Icon(Icons.arrow_downward_rounded, key: ValueKey(2)),
-              ),
+            icon: AnimatedIconSwitcher(
+              icon: !_hasFocus && widget.controller.text.isEmpty
+                  ? const Icon(
+                      Icons.search_rounded,
+                      key: ValueKey(1),
+                    )
+                  : widget.controller.text.isNotEmpty
+                      ? const Icon(
+                          Icons.close,
+                          key: ValueKey(2),
+                        )
+                      : const Icon(
+                          Icons.arrow_downward_rounded,
+                          key: ValueKey(3),
+                        ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  void _showSearchHelp() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return const AlertDialog(
+          title: Text("搜索提示"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('规则搜索: [字段名:]["]关键字["]'),
+              Text('例子: title:小明'),
+            ],
+          ),
+        );
+      },
     );
   }
 }

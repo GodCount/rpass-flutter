@@ -86,7 +86,6 @@ class RpassApp extends StatelessWidget {
               QrCodeScannerPage.routeName: (context) =>
                   const QrCodeScannerPage(),
               ChangeLocalePage.routeName: (context) => const ChangeLocalePage(),
-              AboutPage.routeName: (context) => const AboutPage(),
               ExportAccountPage.routeName: (context) =>
                   const ExportAccountPage(),
               ImportAccountPage.routeName: (context) =>

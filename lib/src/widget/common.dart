@@ -155,7 +155,9 @@ mixin BottomSheetUtil<T extends StatefulWidget>
             );
             showToast(result);
           } catch (e) {
-            // TODO! 处理异常
+            if (e is! CancelException) {
+              // TODO! 处理异常
+            }
           } finally {
             Navigator.of(context).pop();
           }
@@ -197,6 +199,7 @@ mixin BottomSheetUtil<T extends StatefulWidget>
           textColor: Theme.of(context).colorScheme.error,
           leading: const Icon(Icons.delete),
           title: const Text("删除"),
+          enabled: onDeleteTap != null,
           onTap: onDeleteTap != null
               ? () {
                   Navigator.of(context).pop();
@@ -624,7 +627,7 @@ class _AnimatedIconSwitcherState extends State<AnimatedIconSwitcher> {
       duration: const Duration(milliseconds: 300),
       transitionBuilder: (child, animation) => RotationTransition(
         turns: prveKey != widget.key
-            ? Tween<double>(begin: 1, end: 0.5).animate(animation)
+            ? Tween<double>(begin: 0.5, end: 0.5).animate(animation)
             : Tween<double>(begin: 0.5, end: 1).animate(animation),
         child: FadeTransition(opacity: animation, child: child),
       ),
