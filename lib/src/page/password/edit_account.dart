@@ -296,21 +296,10 @@ class KdbxEntryGroup extends FormField<KdbxGroup> {
               padding: const EdgeInsets.only(left: 16, right: 16),
               child: GestureDetector(
                 onTap: () async {
-                  final kdbx = KdbxProvider.of(field.context)!;
+                  final result =
+                      await field.showGroupSelectorDialog(field.value);
 
-                  final result = await SimpleSelectorDialog.openDialog(
-                    field.context,
-                    title: "选择分组",
-                    value: field.value,
-                    items: kdbx.rootGroups
-                        .map((item) => SimpleSelectorDialogItem(
-                              value: item,
-                              label: item.name.get() ?? '',
-                            ))
-                        .toList(),
-                  );
-
-                  if (result != null && result is KdbxGroup) {
+                  if (result != null) {
                     field.didChange(result);
                   }
                 },

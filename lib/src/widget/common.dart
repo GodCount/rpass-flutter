@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../context/kdbx.dart';
 import '../i18n.dart';
 import '../kdbx/icons.dart';
 import '../kdbx/kdbx.dart';
+import 'extension_state.dart';
 
 enum TimeLineNodeType { all, top, bottom, dot }
 
@@ -122,6 +124,10 @@ class InputDialogState extends State<InputDialog> {
     super.dispose();
   }
 
+  void update() {
+    setState(() {});
+  }
+
   void _handleControllerChanged() {
     setState(() {
       if (widget.limitItems != null) {
@@ -193,7 +199,7 @@ class InputDialogState extends State<InputDialog> {
           child: Text(t.cancel),
         ),
         TextButton(
-          onPressed: !isLimitContent && _controller.text.isNotEmpty
+          onPressed: !isLimitContent && _controller.text.trim().isNotEmpty
               ? () {
                   widget.onResult(_controller.text);
                 }
@@ -205,42 +211,25 @@ class InputDialogState extends State<InputDialog> {
   }
 }
 
-class SimpleSelectorDialogItem<T> {
-  SimpleSelectorDialogItem({
-    required this.value,
-    required this.label,
-  });
-  final T value;
-  final String label;
-}
-
-class SimpleSelectorDialog<T> extends StatefulWidget {
-  const SimpleSelectorDialog({
+class GroupSelectorDialog extends StatefulWidget {
+  const GroupSelectorDialog({
     super.key,
-    this.title,
     this.value,
-    required this.items,
     required this.onResult,
   });
 
-  final String? title;
-  final T? value;
-  final List<SimpleSelectorDialogItem<T>> items;
-  final FormFieldSetter<T> onResult;
+  final KdbxGroup? value;
+  final FormFieldSetter<KdbxGroup> onResult;
 
-  static Future<Object?> openDialog<T>(
+  static Future<KdbxGroup?> openDialog(
     BuildContext context, {
-    String? title,
-    T? value,
-    required List<SimpleSelectorDialogItem<T>> items,
+    KdbxGroup? value,
   }) {
     return showDialog(
       context: context,
       builder: (context) {
-        return SimpleSelectorDialog<T>(
-          title: title,
+        return GroupSelectorDialog(
           value: value,
-          items: items,
           onResult: (value) {
             Navigator.of(context).pop(value);
           },
@@ -250,17 +239,35 @@ class SimpleSelectorDialog<T> extends StatefulWidget {
   }
 
   @override
-  State<SimpleSelectorDialog<T>> createState() =>
-      SimpleSelectorDialogState<T>();
+  State<GroupSelectorDialog> createState() => GroupSelectorDialogState();
 }
 
-class SimpleSelectorDialogState<T> extends State<SimpleSelectorDialog<T>> {
+class GroupSelectorDialogState extends State<GroupSelectorDialog> {
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
+    final kdbx = KdbxProvider.of(context)!;
 
     return AlertDialog(
-      title: widget.title != null ? Text(widget.title!) : null,
+      title: Row(
+        children: [
+          Expanded(child: Text("选择分组")),
+          IconButton(
+            onPressed: () async {
+              await setKdbxGroup(
+                KdbxGroupData(
+                  name: '',
+                  kdbxIcon: KdbxIconWidgetData(
+                    icon: KdbxIcon.Folder,
+                  ),
+                ),
+              );
+              setState(() {});
+            },
+            icon: const Icon(Icons.add),
+          )
+        ],
+      ),
       contentPadding: EdgeInsets.only(
         top: Theme.of(context).useMaterial3 ? 16.0 : 20.0,
         right: 0,
@@ -271,19 +278,17 @@ class SimpleSelectorDialogState<T> extends State<SimpleSelectorDialog<T>> {
         width: double.maxFinite,
         child: ListView(
           shrinkWrap: true,
-          children: widget.items
+          children: [kdbx.kdbxFile.body.rootGroup, ...kdbx.rootGroups]
               .map(
                 (item) => ListTile(
                   title: Padding(
                     padding: const EdgeInsets.only(left: 24.0),
-                    child: Text(item.label),
+                    child: Text(getKdbxObjectTitle(item)),
                   ),
-                  trailing: item.value == widget.value
-                      ? const Icon(Icons.done)
-                      : null,
+                  trailing:
+                      item == widget.value ? const Icon(Icons.done) : null,
                   onTap: () {
-                    widget.onResult(
-                        item.value == widget.value ? null : item.value);
+                    widget.onResult(item == widget.value ? null : item);
                   },
                 ),
               )

@@ -14,18 +14,6 @@ class GroupsPage extends StatefulWidget {
   State<GroupsPage> createState() => GroupsPageState();
 }
 
-class KdbxGroupData {
-  KdbxGroupData({
-    required this.name,
-    required this.kdbxIcon,
-    this.kdbxGroup,
-  });
-
-  String name;
-  KdbxIconWidgetData kdbxIcon;
-  KdbxGroup? kdbxGroup;
-}
-
 class GroupsPageState extends State<GroupsPage>
     with AutomaticKeepAliveClientMixin {
   @override
@@ -49,24 +37,6 @@ class GroupsPageState extends State<GroupsPage>
     super.dispose();
   }
 
-  void _kdbxGroupSave(KdbxGroupData data) async {
-    final kdbx = KdbxProvider.of(context)!;
-
-    final kdbxGroup = data.kdbxGroup ?? kdbx.createGroup(data.name);
-
-    if (data.name != kdbxGroup.name.get()) {
-      kdbxGroup.name.set(data.name);
-    }
-
-    if (data.kdbxIcon.customIcon != null) {
-      kdbxGroup.customIcon = data.kdbxIcon.customIcon;
-    } else if (data.kdbxIcon.icon != kdbxGroup.icon.get()) {
-      kdbxGroup.icon.set(data.kdbxIcon.icon);
-    }
-
-    await kdbxSave(kdbx);
-  }
-
   void _kdbxGroupDelete(KdbxGroup kdbxGroup) async {
     if (await showConfirmDialog(
       title: "删除",
@@ -75,42 +45,6 @@ class GroupsPageState extends State<GroupsPage>
       final kdbx = KdbxProvider.of(context)!;
       kdbx.deleteGroup(kdbxGroup);
       await kdbxSave(kdbx);
-    }
-  }
-
-  void _setKdbxGroup(KdbxGroupData data) async {
-    final kdbx = KdbxProvider.of(context)!;
-
-    final result = await InputDialog.openDialog(
-      context,
-      title: "修改",
-      label: "新的名称",
-      initialValue: data.name,
-      limitItems: kdbx.rootGroups
-          .map((item) => item.name.get() ?? '')
-          .where((item) => item.isNotEmpty && item != data.name)
-          .toSet()
-          .toList(),
-      leadingBuilder: (state) {
-        return IconButton(
-          onPressed: () async {
-            final reslut =
-                await Navigator.of(context).pushNamed(SelectIconPage.routeName);
-            if (reslut != null && reslut is KdbxIconWidgetData) {
-              data.kdbxIcon = reslut;
-              state.setState(() {});
-            }
-          },
-          icon: KdbxIconWidget(
-            kdbxIcon: data.kdbxIcon,
-            size: 24,
-          ),
-        );
-      },
-    );
-    if (result is String) {
-      data.name = result;
-      _kdbxGroupSave(data);
     }
   }
 
@@ -137,7 +71,7 @@ class GroupsPageState extends State<GroupsPage>
         children: groups.map((item) => _buildGroupItem(item)).toList(),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _setKdbxGroup(
+        onPressed: () => setKdbxGroup(
           KdbxGroupData(
             name: '',
             kdbxIcon: KdbxIconWidgetData(
@@ -176,7 +110,7 @@ class GroupsPageState extends State<GroupsPage>
               Navigator.of(context)
                   .pushNamed(ManageGroupEntry.routeName, arguments: kdbxGroup);
             },
-            onModifyTap: () => _setKdbxGroup(
+            onModifyTap: () => setKdbxGroup(
               KdbxGroupData(
                 name: kdbxGroup.name.get() ?? '',
                 kdbxIcon: KdbxIconWidgetData(

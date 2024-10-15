@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../context/kdbx.dart';
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
 import '../page/page.dart';
 import '../util/common.dart';
 import '../util/file.dart';
 import 'chip_list.dart';
+import 'common.dart';
 
 extension StatefulClipboard on State {
   void writeClipboard(String text) {
@@ -82,6 +84,10 @@ extension StatefulDialog on State {
       },
     );
     return result is bool && result ? true : false;
+  }
+
+  Future<KdbxGroup?> showGroupSelectorDialog(KdbxGroup? kdbxGroup) {
+    return GroupSelectorDialog.openDialog(context, value: kdbxGroup);
   }
 }
 
@@ -301,6 +307,18 @@ extension StateFulBottomSheet on State {
   }
 }
 
+class KdbxGroupData {
+  KdbxGroupData({
+    required this.name,
+    required this.kdbxIcon,
+    this.kdbxGroup,
+  });
+
+  String name;
+  KdbxIconWidgetData kdbxIcon;
+  KdbxGroup? kdbxGroup;
+}
+
 extension StatefulKdbx on State {
   String getKdbxObjectTitle(KdbxObject kdbxObject) {
     return kdbxObject is KdbxEntry
@@ -320,5 +338,60 @@ extension StatefulKdbx on State {
       // TODO! 记录异常
       return false;
     }
+  }
+
+  Future<bool> _kdbxGroupSave(KdbxGroupData data) async {
+    final kdbx = KdbxProvider.of(context)!;
+
+    final kdbxGroup = data.kdbxGroup ?? kdbx.createGroup(data.name);
+
+    if (data.name != kdbxGroup.name.get()) {
+      kdbxGroup.name.set(data.name);
+    }
+
+    if (data.kdbxIcon.customIcon != null) {
+      kdbxGroup.customIcon = data.kdbxIcon.customIcon;
+    } else if (data.kdbxIcon.icon != kdbxGroup.icon.get()) {
+      kdbxGroup.icon.set(data.kdbxIcon.icon);
+    }
+
+    return await kdbxSave(kdbx);
+  }
+
+  Future<bool> setKdbxGroup(KdbxGroupData data) async {
+    final kdbx = KdbxProvider.of(context)!;
+
+    final result = await InputDialog.openDialog(
+      context,
+      title: data.kdbxGroup != null ? "修改" : "新建",
+      label: "名称",
+      initialValue: data.name,
+      limitItems: kdbx.rootGroups
+          .map((item) => item.name.get() ?? '')
+          .where((item) => item.isNotEmpty && item != data.name)
+          .toSet()
+          .toList(),
+      leadingBuilder: (state) {
+        return IconButton(
+          onPressed: () async {
+            final reslut =
+                await Navigator.of(context).pushNamed(SelectIconPage.routeName);
+            if (reslut != null && reslut is KdbxIconWidgetData) {
+              data.kdbxIcon = reslut;
+              state.update();
+            }
+          },
+          icon: KdbxIconWidget(
+            kdbxIcon: data.kdbxIcon,
+            size: 24,
+          ),
+        );
+      },
+    );
+    if (result is String) {
+      data.name = result;
+      return _kdbxGroupSave(data);
+    }
+    return false;
   }
 }
