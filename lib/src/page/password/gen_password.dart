@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../widget/match_text.dart';
 import '../../i18n.dart';
 import '../../util/common.dart';
-import '../../widget/common.dart';
+import '../../widget/extension_state.dart';
 
 class GenPassword extends StatefulWidget {
   const GenPassword({super.key});
@@ -14,7 +14,7 @@ class GenPassword extends StatefulWidget {
   State<GenPassword> createState() => _GenPasswordState();
 }
 
-class _GenPasswordState extends State<GenPassword> with CommonWidgetUtil {
+class _GenPasswordState extends State<GenPassword> {
   bool _enableLetter = true;
   bool _enableNumber = true;
   bool _enableSymbol = true;
@@ -116,9 +116,9 @@ class _GenPasswordState extends State<GenPassword> with CommonWidgetUtil {
               ),
               subtitle: const Text(""),
               trailing: IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: _updatePassword,
-                ),
+                icon: const Icon(Icons.refresh),
+                onPressed: _updatePassword,
+              ),
             ),
           ]),
           _cardColumn([

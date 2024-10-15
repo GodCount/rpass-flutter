@@ -5,7 +5,7 @@ import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../rpass.dart';
-import '../../widget/common.dart';
+import '../../widget/extension_state.dart';
 import '../../widget/create_kdbx.dart';
 import '../../widget/load_kdbx.dart';
 import '../page.dart';
@@ -19,7 +19,7 @@ class InitKdbxPage extends StatefulWidget {
   State<InitKdbxPage> createState() => _InitKdbxPageState();
 }
 
-class _InitKdbxPageState extends State<InitKdbxPage> with CommonWidgetUtil {
+class _InitKdbxPageState extends State<InitKdbxPage> {
   void _addPresetGroup(Kdbx kdbx) {
     final t = I18n.of(context)!;
     final general = kdbx.createGroup("通用");

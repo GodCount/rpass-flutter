@@ -3,7 +3,7 @@ import 'package:rpass/src/kdbx/kdbx.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
-import '../../widget/common.dart';
+import '../../widget/extension_state.dart';
 
 class KdbxSettingPage extends StatefulWidget {
   const KdbxSettingPage({super.key});
@@ -14,8 +14,7 @@ class KdbxSettingPage extends StatefulWidget {
   State<KdbxSettingPage> createState() => _KdbxSettingPageState();
 }
 
-class _KdbxSettingPageState extends State<KdbxSettingPage>
-    with CommonWidgetUtil {
+class _KdbxSettingPageState extends State<KdbxSettingPage> {
   int _historyMaxItems = 20;
   int _historyMaxSize = 10;
 

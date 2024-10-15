@@ -9,7 +9,7 @@ import '../../context/kdbx.dart';
 import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../rpass.dart';
-import '../../widget/common.dart';
+import '../../widget/extension_state.dart';
 import '../page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -20,7 +20,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class SettingsPageState extends State<SettingsPage>
-    with AutomaticKeepAliveClientMixin, CommonWidgetUtil {
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 

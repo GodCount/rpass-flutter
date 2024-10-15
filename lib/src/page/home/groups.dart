@@ -4,6 +4,7 @@ import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../widget/common.dart';
+import '../../widget/extension_state.dart';
 import '../page.dart';
 
 class GroupsPage extends StatefulWidget {
@@ -26,7 +27,7 @@ class KdbxGroupData {
 }
 
 class GroupsPageState extends State<GroupsPage>
-    with AutomaticKeepAliveClientMixin, CommonWidgetUtil, BottomSheetUtil {
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 

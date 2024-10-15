@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../i18n.dart';
 import '../../../page/page.dart';
 import '../../../util/common.dart';
-import '../../../widget/common.dart';
+import '../../../widget/extension_state.dart';
 import '../../model/rpass/question.dart';
 import '../../store/index.dart';
 import 'verify_question.dart';
@@ -17,7 +17,7 @@ class VerifyPassword extends StatefulWidget {
   State<VerifyPassword> createState() => VerifyPasswordState();
 }
 
-class VerifyPasswordState extends State<VerifyPassword> with CommonWidgetUtil {
+class VerifyPasswordState extends State<VerifyPassword> {
   final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
 

@@ -4,7 +4,7 @@ import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../old/store/index.dart';
-import '../../widget/common.dart';
+import '../../widget/extension_state.dart';
 import 'groups.dart';
 import 'settings.dart';
 import 'passwords.dart';
@@ -29,8 +29,7 @@ class Home extends StatefulWidget {
   State<Home> createState() => HomeState();
 }
 
-class HomeState extends State<Home>
-    with AutomaticKeepAliveClientMixin, CommonWidgetUtil {
+class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   final PageController _controller = PageController(initialPage: 0);
   final TextEditingController _searchController = TextEditingController();
 

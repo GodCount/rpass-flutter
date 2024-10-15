@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:path/path.dart' as path;
 
+import '../page.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
@@ -12,7 +13,7 @@ import '../../util/common.dart';
 import '../../util/file.dart';
 import '../../widget/chip_list.dart';
 import '../../widget/common.dart';
-import '../page.dart';
+import '../../widget/extension_state.dart';
 
 class EditAccountPage extends StatefulWidget {
   const EditAccountPage({super.key});
@@ -23,8 +24,7 @@ class EditAccountPage extends StatefulWidget {
   State<EditAccountPage> createState() => _EditAccountPageState();
 }
 
-class _EditAccountPageState extends State<EditAccountPage>
-    with CommonWidgetUtil {
+class _EditAccountPageState extends State<EditAccountPage> {
   final GlobalKey<FormState> _from = GlobalKey();
 
   Set<KdbxKey>? _entryFields;
@@ -350,8 +350,7 @@ class EntryField extends StatefulWidget {
   State<EntryField> createState() => _EntryFieldState();
 }
 
-class _EntryFieldState extends State<EntryField>
-    with CommonWidgetUtil, BottomSheetUtil {
+class _EntryFieldState extends State<EntryField> {
   KdbxKey? _renameKdbxKey;
 
   final bool _displayScanner = Platform.isAndroid || Platform.isIOS;

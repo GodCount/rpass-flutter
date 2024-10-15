@@ -6,7 +6,7 @@ import '../../kdbx/kdbx.dart';
 import '../../rpass.dart';
 import '../../util/common.dart';
 import '../../util/file.dart';
-import '../../widget/common.dart';
+import '../../widget/extension_state.dart';
 
 class ExportAccountPage extends StatefulWidget {
   const ExportAccountPage({super.key});
@@ -17,8 +17,7 @@ class ExportAccountPage extends StatefulWidget {
   ExportAccountPageState createState() => ExportAccountPageState();
 }
 
-class ExportAccountPageState extends State<ExportAccountPage>
-    with CommonWidgetUtil {
+class ExportAccountPageState extends State<ExportAccountPage> {
   void _exportKdbxFile() async {
     final kdbx = KdbxProvider.of(context)!;
     try {

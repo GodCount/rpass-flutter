@@ -14,7 +14,7 @@ class ManageGroupEntry extends StatefulWidget {
 }
 
 class _ManageGroupEntryState extends State<ManageGroupEntry>
-    with HintEmptyTextUtil, CommonWidgetUtil, BottomSheetUtil {
+    with HintEmptyTextUtil {
   KdbxGroup? _kdbxGroup;
 
   @override

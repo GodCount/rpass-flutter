@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 
+import '../page.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
@@ -12,7 +13,7 @@ import '../../util/common.dart';
 import '../../util/one_time_password.dart';
 import '../../widget/chip_list.dart';
 import '../../widget/common.dart';
-import '../page.dart';
+import '../../widget/extension_state.dart';
 
 class LookAccountPage extends StatefulWidget {
   const LookAccountPage({super.key});
@@ -24,7 +25,7 @@ class LookAccountPage extends StatefulWidget {
 }
 
 class _LookAccountPageState extends State<LookAccountPage>
-    with HintEmptyTextUtil, CommonWidgetUtil, BottomSheetUtil {
+    with HintEmptyTextUtil {
   KdbxEntry? _kdbxEntry;
 
   @override
@@ -573,8 +574,7 @@ class _LookOtPasswordListTile extends StatefulWidget {
       _LookOtPasswordListTileState();
 }
 
-class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile>
-    with CommonWidgetUtil {
+class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile> {
   AuthOneTimePassword? _authOneTimePassword;
   String errorMessage = "";
 

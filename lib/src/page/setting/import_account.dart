@@ -4,7 +4,7 @@ import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../util/common.dart';
 import '../../util/file.dart';
-import '../../widget/common.dart';
+import '../../widget/extension_state.dart';
 
 class ImportAccountPage extends StatefulWidget {
   const ImportAccountPage({super.key});
@@ -15,8 +15,7 @@ class ImportAccountPage extends StatefulWidget {
   State<ImportAccountPage> createState() => _ImportAccountPageState();
 }
 
-class _ImportAccountPageState extends State<ImportAccountPage>
-    with CommonWidgetUtil {
+class _ImportAccountPageState extends State<ImportAccountPage> {
   void _csvImport(FormatTransform adapter) async {
     final t = I18n.of(context)!;
 

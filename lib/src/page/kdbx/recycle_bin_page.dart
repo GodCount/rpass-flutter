@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../page.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../widget/common.dart';
-import '../page.dart';
-
+import '../../widget/extension_state.dart';
 class RecycleBinPage extends StatefulWidget {
   const RecycleBinPage({super.key});
 
@@ -15,8 +15,7 @@ class RecycleBinPage extends StatefulWidget {
   State<RecycleBinPage> createState() => _RecycleBinPageState();
 }
 
-class _RecycleBinPageState extends State<RecycleBinPage>
-    with CommonWidgetUtil, BottomSheetUtil {
+class _RecycleBinPageState extends State<RecycleBinPage> {
   final List<KdbxObject> _selecteds = [];
   bool _isLongPress = false;
 

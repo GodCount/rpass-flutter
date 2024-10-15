@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import '../context/biometric.dart';
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
-import 'common.dart';
+import 'extension_state.dart';
 
 typedef OnLoadedKdbx = void Function(Kdbx kdbx);
 
@@ -27,7 +27,7 @@ class LoadKdbx extends StatefulWidget {
   State<LoadKdbx> createState() => _LoadKdbxState();
 }
 
-class _LoadKdbxState extends State<LoadKdbx> with CommonWidgetUtil {
+class _LoadKdbxState extends State<LoadKdbx> {
   final TextEditingController _passwordController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
@@ -69,7 +69,6 @@ class _LoadKdbxState extends State<LoadKdbx> with CommonWidgetUtil {
         );
         widget.onLoadedKdbx(kdbx);
       } catch (error) {
-        print(error);
         setState(() {
           _errorMessage = error.toString();
         });
