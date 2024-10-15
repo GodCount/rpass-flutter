@@ -77,6 +77,7 @@ class RpassApp extends StatelessWidget {
               SelectIconPage.routeName: (context) => const SelectIconPage(),
               RecycleBinPage.routeName: (context) => const RecycleBinPage(),
               KdbxSettingPage.routeName: (context) => const KdbxSettingPage(),
+              ManageGroupEntry.routeName: (context) => const ManageGroupEntry(),
 
               EditAccountPage.routeName: (context) => const EditAccountPage(),
               GenPassword.routeName: (context) => const GenPassword(),

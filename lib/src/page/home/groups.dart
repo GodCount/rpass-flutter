@@ -171,6 +171,10 @@ class GroupsPageState extends State<GroupsPage>
           },
           onLongPress: () => showKdbxGroupAction(
             kdbxGroup.name.get() ?? '',
+            onManageTap: () {
+              Navigator.of(context)
+                  .pushNamed(ManageGroupEntry.routeName, arguments: kdbxGroup);
+            },
             onModifyTap: () => _setKdbxGroup(
               KdbxGroupData(
                 name: kdbxGroup.name.get() ?? '',

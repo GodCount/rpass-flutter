@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
-import '../../rpass.dart';
 import '../../widget/common.dart';
 import '../page.dart';
 
@@ -250,16 +249,70 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
     showDialog(
       context: context,
       builder: (context) {
-        return const AlertDialog(
-          title: Text("搜索提示"),
-          content: Column(
+        final t = I18n.of(context)!;
+
+        return AlertDialog(
+          content: const Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('规则搜索: [字段名:]["]关键字["]'),
-              Text('例子: title:小明'),
+              ListTile(
+                title: Text("搜索规则:"),
+                subtitle: Padding(
+                  padding: EdgeInsets.only(left: 6),
+                  child: Text('[字段名:]["]关键句["]'),
+                ),
+              ),
+              ListTile(
+                isThreeLine: true,
+                title: Text("字段名:"),
+                subtitle: Padding(
+                  padding: EdgeInsets.only(left: 6),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('title(t) url'),
+                      SizedBox(height: 6),
+                      Text('user(u) email(e)'),
+                      SizedBox(height: 6),
+                      Text('note(n) password(p)'),
+                      SizedBox(height: 6),
+                      Text('OTPAuth(otp) tag'),
+                      SizedBox(height: 6),
+                      Text('group(g)'),
+                      SizedBox(height: 6),
+                      Text('自定义字段'),
+                    ],
+                  ),
+                ),
+              ),
+              ListTile(
+                isThreeLine: true,
+                title: Text("例子:"),
+                subtitle: Padding(
+                  padding: EdgeInsets.only(left: 6),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('u:小明 note:"到此一游, 小明"'),
+                      SizedBox(height: 6),
+                      Text('g:邮箱 u:小明明'),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(t.confirm),
+            ),
+          ],
         );
       },
     );

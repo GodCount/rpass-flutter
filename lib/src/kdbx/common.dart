@@ -118,7 +118,7 @@ class KbdxSearchHandler {
 
   /// 对指定字段进行匹配
   /// 字段映射表, 可以缩写映射到完整字段
-  final Map<String, String> _mapFieldTable = {
+  static final Map<String, String> MAP_FIELD_TABLE = {
     // 值字段
     "t": "Title",
     "title": "Title",
@@ -128,7 +128,7 @@ class KbdxSearchHandler {
     "e": "Email",
     "email": "Email",
     "n": "Notes",
-    "notes": "Notes",
+    "note": "Notes",
     "p": "Password",
     "password": "Password",
     "otp": "OTPAuth",
@@ -187,7 +187,7 @@ class KbdxSearchHandler {
   List<KdbxEntry> search(String input, List<KdbxEntry> sourceList) {
     final inputParse = InputParse.parse(
       input,
-      Map.from(_mapFieldTable)..addAll(_customFieldTable),
+      Map.from(MAP_FIELD_TABLE)..addAll(_customFieldTable),
     );
     return sourceList
         .where((item) => _fieldContains(inputParse.objects, item))

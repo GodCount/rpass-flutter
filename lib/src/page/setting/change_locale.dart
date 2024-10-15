@@ -33,7 +33,6 @@ class _ChangeLocalePageState extends State<ChangeLocalePage> {
         title: Text(t.language_setting),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(6),
         children: [null, ...I18n.supportedLocales].map((locale) {
           return ListTile(
             title: Text(

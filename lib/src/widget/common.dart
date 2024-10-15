@@ -176,12 +176,23 @@ mixin BottomSheetUtil<T extends StatefulWidget>
 
   void showKdbxGroupAction(
     String title, {
+    GestureTapCallback? onManageTap,
     GestureTapCallback? onModifyTap,
     GestureTapCallback? onDeleteTap,
   }) {
     showBottomSheetList(
       title: title,
       children: [
+        ListTile(
+          leading: const Icon(Icons.manage_accounts_rounded),
+          title: const Text("管理"),
+          onTap: onManageTap != null
+              ? () {
+                  Navigator.of(context).pop();
+                  onManageTap();
+                }
+              : null,
+        ),
         ListTile(
           iconColor: Theme.of(context).colorScheme.primary,
           textColor: Theme.of(context).colorScheme.primary,

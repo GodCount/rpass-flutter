@@ -5,6 +5,7 @@ export 'kdbx/init_kdbx_page.dart';
 export 'kdbx/select_icon_page.dart';
 export 'kdbx/recycle_bin_page.dart';
 export 'kdbx/kdbx_setting_page.dart';
+export 'kdbx/manage_group_entry.dart';
 
 
 export 'scanner/qr_code_scanner.dart';
