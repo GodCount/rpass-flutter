@@ -6,8 +6,6 @@ import '../kdbx/icons.dart';
 import '../kdbx/kdbx.dart';
 import 'extension_state.dart';
 
-enum TimeLineNodeType { all, top, bottom, dot }
-
 mixin HintEmptyTextUtil<T extends StatefulWidget> on State<T> {
   Widget hintEmptyText(bool isEmpty, Widget widget) {
     return isEmpty
@@ -340,5 +338,87 @@ class _AnimatedIconSwitcherState extends State<AnimatedIconSwitcher> {
   void didUpdateWidget(covariant AnimatedIconSwitcher oldWidget) {
     prveKey = oldWidget.key;
     super.didUpdateWidget(oldWidget);
+  }
+}
+
+extension _IntIterator on int {
+  Iterable<T> range<T>(T Function(int i) toElement) sync* {
+    for (var i = 0; i < this; i++) {
+      yield toElement(i);
+    }
+  }
+}
+
+class TimeLineListWidget extends StatelessWidget {
+  const TimeLineListWidget({
+    super.key,
+    required this.itemCount,
+    required this.itemBuilder,
+  });
+
+  final int itemCount;
+  final IndexedWidgetBuilder itemBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Table(
+        columnWidths: const {
+          1: FixedColumnWidth(32),
+        },
+        children: itemCount.range((i) {
+          final child = itemBuilder(context, i);
+          final even = i % 2 == 0;
+          return TableRow(
+            children: [
+              TableCell(
+                child: Visibility(
+                  visible: even,
+                  child: child,
+                ),
+              ),
+              TableCell(
+                verticalAlignment: TableCellVerticalAlignment.fill,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        width: 2,
+                        color: i != 0 && itemCount > 1
+                            ? Colors.amber
+                            : Colors.transparent,
+                      ),
+                    ),
+                    Container(
+                      width: 15,
+                      height: 15,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.amber,
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        width: 2,
+                        color: itemCount > 1 && i != itemCount - 1
+                            ? Colors.amber
+                            : Colors.transparent,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              TableCell(
+                child: Visibility(
+                  visible: !even,
+                  child: child,
+                ),
+              )
+            ],
+          );
+        }).toList(),
+      ),
+    );
   }
 }

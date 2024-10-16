@@ -509,7 +509,7 @@ class _EntryFieldState extends State<EntryField> {
       case KdbxKeyCommon.KEY_EMAIL:
         return DropdownMenuFormField(
           initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
-          itmes: kdbx.fieldStatistic.getStatistic(widget.kdbxKey)!.toList(),
+          items: kdbx.fieldStatistic.getStatistic(widget.kdbxKey)!.toList(),
           label: _kdbKey2I18n(),
           onSaved: _kdbxTextFieldSaved,
           expandedInsets: const EdgeInsets.all(0),
@@ -897,7 +897,7 @@ class DropdownMenuFormField extends FormField<String> {
     String? label,
     super.initialValue,
     EdgeInsets? expandedInsets,
-    required List<String> itmes,
+    required List<String> items,
     super.onSaved,
     super.autovalidateMode = AutovalidateMode.disabled,
     super.validator,
@@ -929,7 +929,7 @@ class DropdownMenuFormField extends FormField<String> {
             initialSelection: initialValue,
             expandedInsets: expandedInsets,
             requestFocusOnTap: true,
-            dropdownMenuEntries: itmes
+            dropdownMenuEntries: items
                 .map((value) => DropdownMenuEntry(value: value, label: value))
                 .toList(),
           );

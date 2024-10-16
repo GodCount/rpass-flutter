@@ -6,6 +6,7 @@ import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../widget/common.dart';
 import '../../widget/extension_state.dart';
+
 class RecycleBinPage extends StatefulWidget {
   const RecycleBinPage({super.key});
 
@@ -35,7 +36,7 @@ class _RecycleBinPageState extends State<RecycleBinPage> {
     }
   }
 
-  void showRecycleBinAction(KdbxObject kdbxObject) {
+  void _showRecycleBinAction(KdbxObject kdbxObject) {
     showBottomSheetList(
       title: getKdbxObjectTitle(kdbxObject),
       children: [
@@ -67,12 +68,13 @@ class _RecycleBinPageState extends State<RecycleBinPage> {
           textColor: Theme.of(context).colorScheme.error,
           leading: const Icon(Icons.delete_forever),
           title: const Text("彻底删除"),
-          onTap: () {
-            KdbxProvider.of(context)!.deletePermanently(kdbxObject);
-
-            _save();
-            Navigator.of(context).pop();
-          },
+          onTap: () => _deleteWarnDialog(
+            () {
+              KdbxProvider.of(context)!.deletePermanently(kdbxObject);
+              _save();
+              Navigator.of(context).pop();
+            },
+          ),
         ),
       ],
     );
@@ -115,7 +117,7 @@ class _RecycleBinPageState extends State<RecycleBinPage> {
       }
       setState(() {});
     } else {
-      showRecycleBinAction(kdbxObject);
+      _showRecycleBinAction(kdbxObject);
     }
   }
 
@@ -128,6 +130,12 @@ class _RecycleBinPageState extends State<RecycleBinPage> {
         _selecteds.add(kdbxObject);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _selecteds.clear();
+    super.dispose();
   }
 
   @override

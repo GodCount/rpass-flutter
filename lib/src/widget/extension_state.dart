@@ -91,8 +91,6 @@ extension StatefulDialog on State {
   }
 }
 
-enum TimeLineNodeType { all, top, bottom, dot }
-
 extension StateFulBottomSheet on State {
   void showBottomSheetList({
     String? title,
@@ -214,44 +212,31 @@ extension StateFulBottomSheet on State {
             ),
             history.isNotEmpty
                 ? Expanded(
-                    child: ListView.builder(
-                        shrinkWrap: true,
+                    child: TimeLineListWidget(
                         itemCount: history.length,
                         itemBuilder: (context, index) {
                           final entry = history[index];
-
-                          TimeLineNodeType type = TimeLineNodeType.all;
-
-                          if (history.length == 1) {
-                            type = TimeLineNodeType.dot;
-                          } else if (index == 0) {
-                            type = TimeLineNodeType.bottom;
-                          } else if (index == history.length - 1) {
-                            type = TimeLineNodeType.top;
-                          }
-
-                          return ListTile(
-                            leading: _timelineNode(type),
-                            title: Card(
-                              elevation: 4.0,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(6.0)),
-                              ),
-                              child: InkWell(
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(6.0)),
-                                onTap: () {
-                                  Navigator.of(context).popAndPushNamed(
-                                      LookAccountPage.routeName,
-                                      arguments: entry);
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Text(
-                                    dateFormat(
-                                      entry.times.lastModificationTime.get()!,
-                                    ),
+                          return Card(
+                            elevation: 4.0,
+                            margin: const EdgeInsets.only(left: 12, right: 12),
+                            shape: const RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(6.0)),
+                            ),
+                            child: InkWell(
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(6.0)),
+                              onTap: () {
+                                Navigator.of(context).popAndPushNamed(
+                                  LookAccountPage.routeName,
+                                  arguments: entry,
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Text(
+                                  dateFormat(
+                                    entry.times.lastModificationTime.get()!,
                                   ),
                                 ),
                               ),
@@ -270,39 +255,6 @@ extension StateFulBottomSheet on State {
           ],
         );
       },
-    );
-  }
-
-  Widget _timelineNode(TimeLineNodeType type) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        if (type != TimeLineNodeType.dot)
-          Align(
-            alignment: type == TimeLineNodeType.top
-                ? const Alignment(0.0, -1.2)
-                : type == TimeLineNodeType.bottom
-                    ? const Alignment(0.0, 1.2)
-                    : Alignment.center,
-            widthFactor: 1,
-            heightFactor: 2,
-            child: FractionallySizedBox(
-              heightFactor: type != TimeLineNodeType.all ? 0.5 : 1.2,
-              child: Container(
-                width: 4,
-                color: Colors.amber,
-              ),
-            ),
-          ),
-        Container(
-          width: 15,
-          height: 15,
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.amber,
-          ),
-        )
-      ],
     );
   }
 }
