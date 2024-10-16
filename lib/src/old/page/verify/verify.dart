@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 import '../../../i18n.dart';
 import '../../../page/page.dart';
@@ -7,6 +8,8 @@ import '../../../widget/extension_state.dart';
 import '../../model/rpass/question.dart';
 import '../../store/index.dart';
 import 'verify_question.dart';
+
+final _logger = Logger("old:verify");
 
 class VerifyPassword extends StatefulWidget {
   const VerifyPassword({super.key});
@@ -33,6 +36,7 @@ class VerifyPasswordState extends State<VerifyPassword> {
       await OldStore().accounts.denrypt(token);
       Navigator.of(context).popAndPushNamed(InitKdbxPage.routeName);
     } catch (e) {
+      _logger.fine("denrypt old data password error!", e);
       showToast(I18n.of(context)!.security_qa_throw(e.toString()));
     }
   }
@@ -53,6 +57,7 @@ class VerifyPasswordState extends State<VerifyPassword> {
     try {
       _denrypt(OldStore().verify.forgotToVerifyQuestion(questions));
     } catch (e) {
+      _logger.warning("denrypt old data password error by question!", e);
       showToast(I18n.of(context)!.security_qa_throw(e.toString()));
     }
   }

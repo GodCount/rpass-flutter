@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
+import 'package:logging/logging.dart';
 
 import '../page.dart';
 import '../../context/kdbx.dart';
@@ -14,6 +15,8 @@ import '../../util/one_time_password.dart';
 import '../../widget/chip_list.dart';
 import '../../widget/common.dart';
 import '../../widget/extension_state.dart';
+
+final _logger = Logger("page:look_account");
 
 class LookAccountPage extends StatefulWidget {
   const LookAccountPage({super.key});
@@ -35,6 +38,7 @@ class _LookAccountPageState extends State<LookAccountPage>
     _kdbxEntry ??= ModalRoute.of(context)!.settings.arguments as KdbxEntry?;
 
     if (_kdbxEntry == null) {
+      _logger.warning("open look account page _kdbxEntry is null");
       return Scaffold(
         appBar: AppBar(
           title: Text(t.lookup),

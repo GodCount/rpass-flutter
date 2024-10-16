@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:kdbx/kdbx.dart' hide KdbxException, KdbxKeyCommon;
 
 import '../rpass.dart';
-import 'common.dart';
 import 'icons.dart';
 
 export 'common.dart';

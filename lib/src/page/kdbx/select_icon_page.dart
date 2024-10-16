@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
+import 'package:rpass/src/widget/extension_state.dart';
 
 import '../../context/kdbx.dart';
 import '../../kdbx/kdbx.dart';
 import '../../util/file.dart';
 import '../../widget/common.dart';
+
+final _logger = Logger("page:select_icon_page");
+
 
 class SelectIconPage extends StatefulWidget {
   const SelectIconPage({super.key});
@@ -81,7 +86,8 @@ class _SelectIconPageState extends State<SelectIconPage> {
             ));
           } catch (e) {
             if (e is! CancelException) {
-              // TODO! 提示错误
+              _logger.warning("read image file fail!", e);
+              showToast("无法读取文件!");
             }
           }
         },

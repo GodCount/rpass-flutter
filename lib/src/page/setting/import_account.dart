@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../util/common.dart';
 import '../../util/file.dart';
 import '../../widget/extension_state.dart';
+
+final _logger = Logger("pagr:import_account");
 
 class ImportAccountPage extends StatefulWidget {
   const ImportAccountPage({super.key});
@@ -29,6 +32,7 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
       }
     } catch (e) {
       if (e is! CancelException) {
+        _logger.warning("import csv file fail!", e);
         showToast(t.import_throw(e.toString()));
       }
     }

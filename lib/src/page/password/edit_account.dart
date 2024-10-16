@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import '../page.dart';
@@ -14,6 +15,8 @@ import '../../util/file.dart';
 import '../../widget/chip_list.dart';
 import '../../widget/common.dart';
 import '../../widget/extension_state.dart';
+
+final _logger = Logger("page:edit_account");
 
 class EditAccountPage extends StatefulWidget {
   const EditAccountPage({super.key});
@@ -96,7 +99,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
       }
       _kdbxEntry!.setString(field.key, field.value);
     } else {
-      // TODO! 不可能出现的情况
+      _logger.warning("untreated class $field");
     }
   }
 
@@ -614,7 +617,8 @@ class _EntryFieldState extends State<EntryField> {
               return ChipListItem(value: map, label: map.key.key);
             } catch (e) {
               if (e is! CancelException) {
-                // TODO! 提示错误
+                _logger.warning("open file fail!", e);
+                showToast("无法打开文件");
               }
             }
             return null;

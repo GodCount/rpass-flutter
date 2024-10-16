@@ -1,6 +1,7 @@
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:logging/logging.dart';
 import 'package:rpass/src/kdbx/kdbx.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -11,6 +12,8 @@ import '../../i18n.dart';
 import '../../rpass.dart';
 import '../../widget/extension_state.dart';
 import '../page.dart';
+
+final _logger = Logger("page:settings");
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -176,6 +179,7 @@ class SettingsPageState extends State<SettingsPage>
                       enableBiometric ? kdbx.credentials.getHash() : null,
                     );
                     store.settings.seEnableBiometric(enableBiometric);
+                    _logger.finest("biometric status is $enableBiometric");
                   } on AuthException catch (e) {
                     if (e.code == AuthExceptionCode.userCanceled ||
                         e.code == AuthExceptionCode.canceled ||
@@ -183,7 +187,8 @@ class SettingsPageState extends State<SettingsPage>
                       return;
                     }
                     rethrow;
-                  } catch (e) {
+                  } catch (e, s) {
+                    _logger.severe("set biometric exception!", e, s);
                     showToast(t.biometric_throw(e.toString()));
                   } finally {
                     setState(() {});
@@ -314,6 +319,7 @@ class SettingsPageState extends State<SettingsPage>
                 context,
                 credentials.getHash(),
               );
+              _logger.finest("update credentials to biometric done!");
             } on AuthException catch (e) {
               if (e.code == AuthExceptionCode.userCanceled ||
                   e.code == AuthExceptionCode.canceled ||
@@ -321,7 +327,8 @@ class SettingsPageState extends State<SettingsPage>
                 return;
               }
               rethrow;
-            } catch (e) {
+            } catch (e, s) {
+              _logger.severe("update credentials to biometric fail!", e, s);
               rethrow;
             }
           }
@@ -330,12 +337,14 @@ class SettingsPageState extends State<SettingsPage>
             kdbx
               ..modifyCredentials(credentials)
               ..save();
-          } catch (e) {
+            _logger.finest("update credentials done!");
+          } catch (e, s) {
             kdbx.modifyCredentials(oldCredentials);
             await biometric.updateCredentials(
               context,
               oldCredentials.getHash(),
             );
+            _logger.severe("update credentials fail!", e, s);
             rethrow;
           }
 

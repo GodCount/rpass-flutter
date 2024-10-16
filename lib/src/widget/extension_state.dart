@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:logging/logging.dart';
 
 import '../context/kdbx.dart';
 import '../i18n.dart';
@@ -12,6 +13,8 @@ import '../util/common.dart';
 import '../util/file.dart';
 import 'chip_list.dart';
 import 'common.dart';
+
+final _logger = Logger("widget:extension_state");
 
 extension StatefulClipboard on State {
   void writeClipboard(String text) {
@@ -134,7 +137,8 @@ extension StateFulBottomSheet on State {
             showToast(result);
           } catch (e) {
             if (e is! CancelException) {
-              // TODO! 处理异常
+              _logger.warning("save as attachment fail!", e);
+              showToast("无法保存附件");
             }
           } finally {
             Navigator.of(context).pop();
@@ -284,10 +288,9 @@ extension StatefulKdbx on State {
     try {
       await kdbx.save();
       return true;
-    } catch (e) {
-      print(e);
+    } catch (e, s) {
+      _logger.severe("kdbx save fail!", e, s);
       showToast(e.toString());
-      // TODO! 记录异常
       return false;
     }
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
@@ -8,6 +9,8 @@ import '../../widget/extension_state.dart';
 import 'groups.dart';
 import 'settings.dart';
 import 'passwords.dart';
+
+final _logger = Logger("page:home");
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -52,7 +55,9 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
         await oldStore.clear();
         showToast("数据迁移完成");
         setState(() {});
-      } catch (e) {
+        _logger.finest("old data migrate done.");
+      } catch (e, s) {
+        _logger.severe("old data migrate fial!", e, s);
         showToast("迁移出现了意外情况! $e");
       }
     }

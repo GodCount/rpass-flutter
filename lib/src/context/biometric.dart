@@ -3,9 +3,12 @@ import 'dart:convert';
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 import '../i18n.dart';
 import 'store.dart';
+
+final _logger = Logger("context:biometric");
 
 class Biometric extends StatefulWidget {
   const Biometric({super.key, required this.child});
@@ -57,9 +60,7 @@ class BiometricState extends State<Biometric> {
     try {
       _authenticateResponse = await BiometricStorage().canAuthenticate();
     } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
+      _logger.warning("unsupport biometric!", e);
     }
   }
 

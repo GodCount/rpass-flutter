@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
@@ -7,6 +8,8 @@ import '../../rpass.dart';
 import '../../util/common.dart';
 import '../../util/file.dart';
 import '../../widget/extension_state.dart';
+
+final _logger = Logger("page:export_account");
 
 class ExportAccountPage extends StatefulWidget {
   const ExportAccountPage({super.key});
@@ -28,6 +31,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
       showToast(filepath);
     } catch (e) {
       if (e is! CancelException) {
+        _logger.warning("export kdbx file fail!", e);
         showToast(I18n.of(context)!.export_throw(e.toString()));
       }
     }
@@ -50,6 +54,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
         showToast(filepath);
       } catch (e) {
         if (e is! CancelException) {
+          _logger.warning("export file file fail!", e);
           showToast(I18n.of(context)!.export_throw(e.toString()));
         }
       }

@@ -495,7 +495,7 @@ packages:
     source: hosted
     version: "3.0.0"
   logging:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: logging
       sha256: "623a88c9594aa774443aa3eb2d41807a48486b5613e67599fb4c41c0ad47c340"
@@ -503,7 +503,7 @@ packages:
     source: hosted
     version: "1.2.0"
   logging_appenders:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: logging_appenders
       sha256: e329e7472f99416d0edaaf6451fe6c02dec91d34535bd252e284a0b94ab23d79

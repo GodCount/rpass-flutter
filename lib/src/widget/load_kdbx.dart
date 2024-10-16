@@ -1,11 +1,14 @@
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:logging/logging.dart';
 
 import '../context/biometric.dart';
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
 import 'extension_state.dart';
+
+final _logger = Logger("widget:load_kdbx");
 
 typedef OnLoadedKdbx = void Function(Kdbx kdbx);
 
@@ -68,9 +71,10 @@ class _LoadKdbxState extends State<LoadKdbx> {
           filepath: filepath,
         );
         widget.onLoadedKdbx(kdbx);
-      } catch (error) {
+      } catch (e) {
+        _logger.warning("load kdbx fail!", e);
         setState(() {
-          _errorMessage = error.toString();
+          _errorMessage = e.toString();
         });
       }
     }
@@ -98,6 +102,7 @@ class _LoadKdbxState extends State<LoadKdbx> {
       }
       rethrow;
     } catch (e) {
+      _logger.warning("load kdbx by biometric fail!", e);
       showToast(I18n.of(context)!.biometric_throw(e.toString()));
       setState(() {
         _biometricDisable = true;
