@@ -101,7 +101,7 @@ class SettingsPageState extends State<SettingsPage>
                     child: Icon(Icons.view_in_ar_rounded),
                   ),
                   Text(
-                    "密码库",
+                    t.pass_lib,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                 ],
@@ -109,7 +109,7 @@ class SettingsPageState extends State<SettingsPage>
             ),
             ListTile(
               shape: shape,
-              title: const Text("回收站"),
+              title: Text(t.recycle_bin),
               trailing: const Icon(Icons.recycling_rounded),
               onTap: () {
                 Navigator.of(context).pushNamed(RecycleBinPage.routeName);

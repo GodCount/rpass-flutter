@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:logging/logging.dart';
@@ -43,8 +42,8 @@ class _LookAccountPageState extends State<LookAccountPage>
         appBar: AppBar(
           title: Text(t.lookup),
         ),
-        body: const Center(
-          child: Text("没有找到实体！"),
+        body: Center(
+          child: Text(t.not_found_entry),
         ),
       );
     }
@@ -228,7 +227,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                       ),
                     ),
                     Text(
-                      "自定义字段",
+                      t.custom_field,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ],
@@ -326,9 +325,9 @@ class _LookAccountPageState extends State<LookAccountPage>
             ),
             ListTile(
               shape: shape,
-              title: const Padding(
-                padding: EdgeInsets.only(left: 6),
-                child: Text("附件"),
+              title: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: Text(t.attachment),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
@@ -374,9 +373,9 @@ class _LookAccountPageState extends State<LookAccountPage>
             ),
             ListTile(
               shape: shape,
-              title: const Padding(
+              title: Padding(
                 padding: EdgeInsets.only(left: 6),
-                child: Text("创建"),
+                child: Text(t.create),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
@@ -385,9 +384,9 @@ class _LookAccountPageState extends State<LookAccountPage>
             ),
             ListTile(
               shape: shape,
-              title: const Padding(
+              title: Padding(
                 padding: EdgeInsets.only(left: 6),
-                child: Text("最近修改"),
+                child: Text(t.last_modify),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
@@ -446,8 +445,8 @@ class _LookAccountPageState extends State<LookAccountPage>
   void _deleteAccount() async {
     final t = I18n.of(context)!;
     if (await showConfirmDialog(
-      title: "删除",
-      message: "是否将项目移动到回收站!",
+      title: t.delete,
+      message: t.is_move_recycle,
     )) {
       final kdbx = KdbxProvider.of(context)!;
       kdbx.deleteEntry(_kdbxEntry!);

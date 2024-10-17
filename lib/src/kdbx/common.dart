@@ -192,9 +192,9 @@ class KbdxSearchHandler {
     return sourceList
         .where((item) => _fieldContains(inputParse.objects, item))
         .toList()
-      ..sort((a, b) => a.times.lastModificationTime
+      ..sort((a, b) => b.times.lastModificationTime
           .get()!
-          .compareTo(b.times.lastModificationTime.get()!));
+          .compareTo(a.times.lastModificationTime.get()!));
   }
 }
 

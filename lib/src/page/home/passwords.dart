@@ -60,9 +60,9 @@ class PasswordsPageState extends State<PasswordsPage>
     } else {
       _totalEntry
         ..addAll(kdbx.totalEntry)
-        ..sort((a, b) => a.times.lastModificationTime
+        ..sort((a, b) => b.times.lastModificationTime
             .get()!
-            .compareTo(b.times.lastModificationTime.get()!));
+            .compareTo(a.times.lastModificationTime.get()!));
     }
 
     setState(() {});
@@ -252,53 +252,53 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
         final t = I18n.of(context)!;
 
         return AlertDialog(
-          content: const Column(
+          content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ListTile(
-                title: Text("搜索规则:"),
+                title: Text(t.search_rule),
                 subtitle: Padding(
-                  padding: EdgeInsets.only(left: 6),
-                  child: Text('[字段名:]["]关键句["]'),
+                  padding: const EdgeInsets.only(left: 6),
+                  child: Text(t.rule_detail),
                 ),
               ),
               ListTile(
                 isThreeLine: true,
-                title: Text("字段名:"),
+                title: Text(t.field_name),
                 subtitle: Padding(
-                  padding: EdgeInsets.only(left: 6),
+                  padding: const EdgeInsets.only(left: 6),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('title(t) url'),
-                      SizedBox(height: 6),
-                      Text('user(u) email(e)'),
-                      SizedBox(height: 6),
-                      Text('note(n) password(p)'),
-                      SizedBox(height: 6),
-                      Text('OTPAuth(otp) tag'),
-                      SizedBox(height: 6),
-                      Text('group(g)'),
-                      SizedBox(height: 6),
-                      Text('自定义字段'),
+                      const Text('title(t) url'),
+                      const SizedBox(height: 6),
+                      const Text('user(u) email(e)'),
+                      const SizedBox(height: 6),
+                      const Text('note(n) password(p)'),
+                      const SizedBox(height: 6),
+                      const Text('OTPAuth(otp) tag'),
+                      const SizedBox(height: 6),
+                      const Text('group(g)'),
+                      const SizedBox(height: 6),
+                      Text(t.custom_field),
                     ],
                   ),
                 ),
               ),
               ListTile(
                 isThreeLine: true,
-                title: Text("例子:"),
+                title: Text(t.search_eg),
                 subtitle: Padding(
-                  padding: EdgeInsets.only(left: 6),
+                  padding: const EdgeInsets.only(left: 6),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('u:小明 note:"到此一游, 小明"'),
-                      SizedBox(height: 6),
-                      Text('g:邮箱 u:小明明'),
+                      Text(t.search_eg_1),
+                      const SizedBox(height: 6),
+                      Text(t.search_eg_2),
                     ],
                   ),
                 ),

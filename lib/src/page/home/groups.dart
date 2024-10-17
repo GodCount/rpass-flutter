@@ -38,9 +38,11 @@ class GroupsPageState extends State<GroupsPage>
   }
 
   void _kdbxGroupDelete(KdbxGroup kdbxGroup) async {
+    final t = I18n.of(context)!;
+
     if (await showConfirmDialog(
-      title: "删除",
-      message: "是否将项目移动到回收站!",
+      title: t.delete,
+      message: t.is_move_recycle,
     )) {
       final kdbx = KdbxProvider.of(context)!;
       kdbx.deleteGroup(kdbxGroup);

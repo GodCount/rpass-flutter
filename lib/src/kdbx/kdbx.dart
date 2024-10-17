@@ -21,7 +21,8 @@ export 'package:kdbx/kdbx.dart'
         KdbxIcon,
         KdbxCustomIcon,
         KdbxDao,
-        KdbxUuid;
+        KdbxUuid,
+        KdbxInvalidKeyException;
 
 abstract class KdbxBase {
   abstract final KdbxFile kdbxFile;
@@ -329,12 +330,12 @@ extension KdbxExternalImport on KdbxBase {
           ? findGroupByUuid(KdbxUuid(uuid)) ?? kdbxFile.body.rootGroup
           : kdbxFile.body.rootGroup;
     }
-    for(var item in list) {
+    for (var item in list) {
       final kdbxEntry = createEntry(kdbxGroup);
-      for(var entry in item.entries) {
-        if(entry.key == KdbxKeySpecial.TAGS) {
+      for (var entry in item.entries) {
+        if (entry.key == KdbxKeySpecial.TAGS) {
           kdbxEntry.tags.set(entry.value);
-        }else{
+        } else {
           kdbxEntry.setString(entry.key, PlainValue(entry.value));
         }
       }

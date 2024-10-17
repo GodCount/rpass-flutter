@@ -28,7 +28,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
         data: await kdbx.getKdbxFileBytes(),
         filename: "${RpassInfo.appName}.kdbx",
       );
-      showToast(filepath);
+      showToast(I18n.of(context)!.export_done_location(filepath));
     } catch (e) {
       if (e is! CancelException) {
         _logger.warning("export kdbx file fail!", e);
@@ -38,9 +38,11 @@ class ExportAccountPageState extends State<ExportAccountPage> {
   }
 
   void _otherExportAlert(FormatTransform adapter) async {
+    final t = I18n.of(context)!;
+
     if (await showConfirmDialog(
-      title: "警告",
-      message: "确认明文导出数据?\n注意导出的数据只包含对应的关键字段.",
+      title: t.warn,
+      message: t.plaintext_export_warn,
     )) {
       final kdbx = KdbxProvider.of(context)!;
       try {
@@ -51,7 +53,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
           data: result,
           filename: "${RpassInfo.appName}_${adapter.name}.csv",
         );
-        showToast(filepath);
+        showToast(t.export_done_location(filepath));
       } catch (e) {
         if (e is! CancelException) {
           _logger.warning("export file file fail!", e);
@@ -78,11 +80,11 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                 topRight: Radius.circular(6.0),
               ),
             ),
-            title: Text("导出 kdbx 文件"),
+            title: Text(t.export_n_file("kdbx")),
             onTap: _exportKdbxFile,
           ),
           ListTile(
-            title: Text("导出 csv 文件(chrome)"),
+            title: Text(t.export_n_file("csv (chrome)")),
             onTap: () => _otherExportAlert(ChromeCsvAdapter()),
           ),
           ListTile(
@@ -92,7 +94,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
                 bottomRight: Radius.circular(6.0),
               ),
             ),
-            title: Text("导出 csv 文件(firefox)"),
+            title: Text(t.export_n_file("csv (firefox)")),
             onTap: () => _otherExportAlert(FirefoxCsvAdapter()),
           ),
         ]),

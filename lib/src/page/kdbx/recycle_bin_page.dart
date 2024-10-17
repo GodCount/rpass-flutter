@@ -28,8 +28,8 @@ class _RecycleBinPageState extends State<RecycleBinPage> {
   void _deleteWarnDialog(VoidCallback confirmCallback) async {
     final t = I18n.of(context)!;
     if (await showConfirmDialog(
-      title: "永久删除",
-      message: "删除项目后将无法恢复!",
+      title: t.completely_delete,
+      message: t.delete_no_revert,
       confirm: t.delete,
     )) {
       confirmCallback();
@@ -37,13 +37,15 @@ class _RecycleBinPageState extends State<RecycleBinPage> {
   }
 
   void _showRecycleBinAction(KdbxObject kdbxObject) {
+    final t = I18n.of(context)!;
+
     showBottomSheetList(
       title: getKdbxObjectTitle(kdbxObject),
       children: [
         if (kdbxObject is KdbxEntry)
           ListTile(
             leading: const Icon(Icons.person_search),
-            title: const Text("查看"),
+            title: Text(t.lookup),
             onTap: () async {
               await Navigator.of(context).popAndPushNamed(
                 LookAccountPage.routeName,
@@ -56,7 +58,7 @@ class _RecycleBinPageState extends State<RecycleBinPage> {
           iconColor: Theme.of(context).colorScheme.primary,
           textColor: Theme.of(context).colorScheme.primary,
           leading: const Icon(Icons.restore_from_trash),
-          title: const Text("恢复"),
+          title: Text(t.revert),
           onTap: () {
             KdbxProvider.of(context)!.restoreObject(kdbxObject);
             _save();
@@ -67,7 +69,7 @@ class _RecycleBinPageState extends State<RecycleBinPage> {
           iconColor: Theme.of(context).colorScheme.error,
           textColor: Theme.of(context).colorScheme.error,
           leading: const Icon(Icons.delete_forever),
-          title: const Text("彻底删除"),
+          title: Text(t.completely_delete),
           onTap: () => _deleteWarnDialog(
             () {
               KdbxProvider.of(context)!.deletePermanently(kdbxObject);
@@ -140,11 +142,13 @@ class _RecycleBinPageState extends State<RecycleBinPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = I18n.of(context)!;
+
     final kdbx = KdbxProvider.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("回收站"),
+        title: Text(t.recycle_bin),
         automaticallyImplyLeading: !_isLongPress,
         leading: _isLongPress
             ? IconButton(

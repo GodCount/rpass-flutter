@@ -249,7 +249,7 @@ class GroupSelectorDialogState extends State<GroupSelectorDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          Expanded(child: Text("选择分组")),
+          Expanded(child: Text(t.select_group)),
           IconButton(
             onPressed: () async {
               await setKdbxGroup(

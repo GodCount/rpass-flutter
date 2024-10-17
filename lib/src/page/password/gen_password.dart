@@ -73,7 +73,7 @@ class _GenPasswordState extends State<GenPassword> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: returnPassword,
-        title:  Text(t.gen_password),
+        title: Text(t.gen_password),
       ),
       body: ListView(
         padding: const EdgeInsets.all(6),
@@ -87,7 +87,8 @@ class _GenPasswordState extends State<GenPassword> {
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.password_rounded),
                   ),
-                  Text(t.password, style: Theme.of(context).textTheme.bodyLarge),
+                  Text(t.password,
+                      style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),
             ),
@@ -130,7 +131,8 @@ class _GenPasswordState extends State<GenPassword> {
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.straighten),
                   ),
-                  Text(t.pass_length, style: Theme.of(context).textTheme.bodyLarge),
+                  Text(t.pass_length,
+                      style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),
             ),
@@ -160,19 +162,20 @@ class _GenPasswordState extends State<GenPassword> {
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.onetwothree),
                   ),
-                  Text(t.include_cahr, style: Theme.of(context).textTheme.bodyLarge),
+                  Text(t.include_cahr,
+                      style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),
             ),
             ListTile(
-              title: const Text("字母(aA)"),
+              title: Text("${t.letter} (aA)"),
               trailing: _enableLetter ? const Icon(Icons.check) : null,
               onTap: () {
                 _cahnged(enableLetter: !_enableLetter);
               },
             ),
             ListTile(
-              title: const Text("数字(01)"),
+              title: Text("${t.number} (01)"),
               trailing: _enableNumber ? const Icon(Icons.check) : null,
               onTap: () {
                 _cahnged(enableNumber: !_enableNumber);
@@ -180,7 +183,7 @@ class _GenPasswordState extends State<GenPassword> {
             ),
             ListTile(
               shape: shape,
-              title: const Text("特殊字符(!@)"),
+              title: Text("${t.special_char} (!@)"),
               trailing: _enableSymbol ? const Icon(Icons.check) : null,
               onTap: () {
                 _cahnged(enableSymbol: !_enableSymbol);

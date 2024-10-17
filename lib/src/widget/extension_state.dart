@@ -147,7 +147,7 @@ extension StateFulBottomSheet on State {
     showBottomSheetList(title: binary.label, children: [
       ListTile(
         leading: const Icon(Icons.save),
-        title: const Text("保存"),
+        title: Text(I18n.of(context)!.save),
         onTap: () async {
           try {
             final result = await SimpleFile.saveFile(
@@ -174,12 +174,13 @@ extension StateFulBottomSheet on State {
     GestureTapCallback? onModifyTap,
     GestureTapCallback? onDeleteTap,
   }) {
+    final t = I18n.of(context)!;
     showBottomSheetList(
       title: title,
       children: [
         ListTile(
           leading: const Icon(Icons.manage_accounts_rounded),
-          title: const Text("管理"),
+          title: Text(t.manage),
           onTap: onManageTap != null
               ? () {
                   Navigator.of(context).pop();
@@ -191,7 +192,7 @@ extension StateFulBottomSheet on State {
           iconColor: Theme.of(context).colorScheme.primary,
           textColor: Theme.of(context).colorScheme.primary,
           leading: const Icon(Icons.edit),
-          title: const Text("修改"),
+          title: Text(t.modify),
           onTap: onModifyTap != null
               ? () {
                   Navigator.of(context).pop();
@@ -203,7 +204,7 @@ extension StateFulBottomSheet on State {
           iconColor: Theme.of(context).colorScheme.error,
           textColor: Theme.of(context).colorScheme.error,
           leading: const Icon(Icons.delete),
-          title: const Text("删除"),
+          title: Text(t.delete),
           enabled: onDeleteTap != null,
           onTap: onDeleteTap != null
               ? () {
@@ -220,6 +221,8 @@ extension StateFulBottomSheet on State {
     showModalBottomSheet(
       context: context,
       builder: (context) {
+        final t = I18n.of(context)!;
+
         final history = kdbxEntry.history.reversed.toList();
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -229,7 +232,7 @@ extension StateFulBottomSheet on State {
               child: Padding(
                 padding: const EdgeInsets.only(top: 12, bottom: 6),
                 child: Text(
-                  "时间线",
+                  t.timeline,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
@@ -268,11 +271,11 @@ extension StateFulBottomSheet on State {
                           );
                         }),
                   )
-                : const Expanded(
+                : Expanded(
                     child: Center(
                       child: Opacity(
                         opacity: .5,
-                        child: Text("没有历史记录！"),
+                        child: Text(t.not_history_record),
                       ),
                     ),
                   )
@@ -334,12 +337,14 @@ extension StatefulKdbx on State {
   }
 
   Future<bool> setKdbxGroup(KdbxGroupData data) async {
+    final t = I18n.of(context)!;
+
     final kdbx = KdbxProvider.of(context)!;
 
     final result = await InputDialog.openDialog(
       context,
-      title: data.kdbxGroup != null ? "修改" : "新建",
-      label: "名称",
+      title: data.kdbxGroup != null ? t.modify : t.create,
+      label: t.title,
       initialValue: data.name,
       limitItems: kdbx.rootGroups
           .map((item) => item.name.get() ?? '')

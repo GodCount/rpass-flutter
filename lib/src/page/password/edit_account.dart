@@ -122,7 +122,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
     final result = await InputDialog.openDialog(
       context,
       title: t.add,
-      label: "新建字段",
+      label: t.new_field,
       promptItmes: kdbx.fieldStatistic.customFields
           .where((item) => !limitItmes.contains(item))
           .toList(),
@@ -241,7 +241,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
       children: [
         TextButton.icon(
           onPressed: _addEntryField,
-          label: const Text("添加字段"),
+          label: Text(I18n.of(context)!.add_field),
           icon: const Icon(Icons.add),
         )
       ],
@@ -308,9 +308,9 @@ class KdbxEntryGroup extends FormField<KdbxGroup> {
                 },
                 child: InputDecorator(
                   isEmpty: field.value == null,
-                  decoration: const InputDecoration(
-                    labelText: "分组",
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: I18n.of(field.context)!.group,
+                    border: const OutlineInputBorder(),
                   ),
                   child: field.value != null
                       ? Text(field.value!.name.get() ?? '')
@@ -419,7 +419,7 @@ class _EntryFieldState extends State<EntryField> {
     final t = I18n.of(context)!;
     switch (widget.kdbxKey.key) {
       case KdbxKeyCommon.KEY_TITLE:
-        return t.domain_title;
+        return t.title;
       case KdbxKeyCommon.KEY_URL:
         return t.domain;
       case KdbxKeyCommon.KEY_USER_NAME:

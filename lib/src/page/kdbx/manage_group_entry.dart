@@ -99,7 +99,7 @@ class _ManageGroupEntryState extends State<ManageGroupEntry> {
         appBar: AppBar(
           title: Text(t.man_group_pass),
         ),
-        body:  Center(
+        body: Center(
           child: Text(t.empty_group),
         ),
       );

@@ -7,17 +7,17 @@
     "init_main_password": "Initialize main password",
     "at_least_4digits": "At least 4 digits",
     "confirm_password": "Confirm password",
-    "password_not_equal": "Passwords do not match",
+    "password_not_equal": "Passwords do not match!",
     "init": "Initialize",
     "question": "Question",
     "answer": "Answer",
-    "cannot_emprty": "Cannot be empty",
+    "cannot_emprty": "Cannot be empty!",
     "prev": "Previous",
     "next": "Next",
     "add": "Add",
     "confirm": "Confirm",
     "back": "Back",
-    "input_security_qa_hint": "Answer security question to decrypt data",
+    "input_security_qa_hint": "Answer security question to decrypt data!",
     "security_qa_error": "That''s not right, think again!",
     "verify_password": "Verify password",
     "forget_password": "Forgot password",
@@ -67,7 +67,7 @@
             }
         }
     },
-    "domain_title": "Website Title",
+    "title": "Title",
     "account": "Account",
     "email": "Email",
     "otp": "One-Time Password (OTP)",
@@ -97,7 +97,7 @@
     "import_done": "Import Completed",
     "scan_code": "Scan Code",
     "new_label": "New Label",
-    "cannot_all_empty": "Cannot be all for empty",
+    "cannot_all_empty": "Cannot be all for empty!",
     "empty": "Empty",
     "chrome": "Chrome",
     "firefox": "Firefox",
@@ -113,8 +113,8 @@
         }
     },
     "biometric": "Biometric",
-    "biometric_prompt_title": "Verify your identity",
-    "biometric_prompt_subtitle": "Use fingerprint to complete verification before continuing",
+    "biometric_prompt_title": "Verify your identity!",
+    "biometric_prompt_subtitle": "Use fingerprint to complete verification before continuing.",
     "throw_message": "exception: {message}",
     "@throw_message": {
         "placeholders": {
@@ -122,5 +122,70 @@
                 "type": "String"
             }
         }
-    }
+    },
+    "common": "Common",
+    "default_": "Default",
+    "pass_lib": "Password Library",
+    "pass_lib_setting": "Password Library Settings",
+    "history_record": "History Record",
+    "max_count": "Maximum Count",
+    "max_size": "Maximum Size",
+    "is_move_recycle": "Move items to the Recycle Bin?",
+    "man_selected_pass": "Manage Selected Passwords",
+    "move": "Move",
+    "man_group_pass": "Manage Group Passwords",
+    "empty_group": "The group is empty!",
+    "rename": "Rename",
+    "new_field": "New Field",
+    "look_notes": "View Notes",
+    "edit_notes": "Edit Notes",
+    "gen_password": "Password Generator",
+    "pass_length": "Password Length",
+    "include_cahr": "Include Characters",
+    "export_n_file": "Export {name} file",
+    "@export_n_file": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "import_n_file": "Import {name} file",
+    "@import_n_file": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "select_group": "Select Group",
+    "group": "Group",
+    "data_migrate_done": "Data Migration Complete.",
+    "custom_field": "Custom Field",
+    "search_rule": "Search Rule:",
+    "rule_detail": "[Field Name:][\"]Key Phrase[\"]",
+    "field_name": "Field Name:",
+    "search_eg": "Example:",
+    "search_eg_1": "u:Xiaoming note:\"Visited here, XiaoMing\"",
+    "search_eg_2": "g:Email u:Xiaoming",
+    "recycle_bin": "Recycle Bin",
+    "completely_delete": "Completely Delete",
+    "delete_no_revert": "Deleting items will be irreversible!",
+    "revert": "Revert",
+    "select_icon": "Select Icon",
+    "add_field": "Add Field",
+    "letter": "Letter",
+    "number": "Number",
+    "special_char": "Special Character",
+    "not_found_entry": "No entries found!",
+    "attachment": "Attachment",
+    "create": "Create",
+    "last_modify": "Last Modified",
+    "warn": "Warning",
+    "plaintext_export_warn": "Confirm to export data in plain text?\nNote that the exported data will only contain the corresponding key fields.",
+    "manage": "Manage",
+    "timeline": "Timeline",
+    "not_history_record": "No history records!",
+    "password_error": "Password Error!",
+    "data_migrate_hint": "Data migration and upgrade is currently underway. After decrypting the data, it will be entirely migrated to a new database (kdbx) for storage. This new system offers improved performance, greater stability, enhanced security, and a wider range of features."
 }

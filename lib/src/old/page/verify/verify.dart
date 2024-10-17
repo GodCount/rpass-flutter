@@ -101,10 +101,10 @@ class VerifyPasswordState extends State<VerifyPassword> {
               t.app_name,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
-            const Padding(
-              padding: EdgeInsets.only(top: 16),
+            Padding(
+              padding: const EdgeInsets.only(top: 16),
               child: Text(
-                "  正在进行软件数据迁移升级, 解密数据后,将全部迁移到新的数据库(kdbx)存储数据, 更好, 更稳定, 更安全, 更多功能.",
+                t.data_migrate_hint,
                 textAlign: TextAlign.center,
               ),
             ),

@@ -53,7 +53,7 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
         kdbx.import(OldRpassAdapter().import(oldStore.accounts.accountList));
         await kdbxSave(kdbx);
         await oldStore.clear();
-        showToast("数据迁移完成");
+        showToast(I18n.of(context)!.data_migrate_done);
         setState(() {});
         _logger.finest("old data migrate done.");
       } catch (e, s) {
@@ -156,9 +156,9 @@ class _MyBottomNavigationBarState extends State<_MyBottomNavigationBar> {
           icon: const Icon(Icons.account_box_outlined),
           label: t.password,
         ),
-        const NavigationDestination(
-          icon: Icon(Icons.groups_2_rounded),
-          label: "分组",
+        NavigationDestination(
+          icon: const Icon(Icons.groups_2_rounded),
+          label: t.group,
         ),
         NavigationDestination(
           icon: const Icon(Icons.settings),

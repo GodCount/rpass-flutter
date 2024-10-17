@@ -71,11 +71,13 @@ class _LoadKdbxState extends State<LoadKdbx> {
           filepath: filepath,
         );
         widget.onLoadedKdbx(kdbx);
+      } on KdbxInvalidKeyException {
+        _errorMessage = I18n.of(context)!.password_error;
       } catch (e) {
         _logger.warning("load kdbx fail!", e);
-        setState(() {
-          _errorMessage = e.toString();
-        });
+        _errorMessage = e.toString();
+      } finally {
+        setState(() {});
       }
     }
   }

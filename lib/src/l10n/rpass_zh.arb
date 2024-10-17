@@ -7,18 +7,18 @@
     "init_main_password": "初始化主密码",
     "at_least_4digits": "至少4位数",
     "confirm_password": "确认密码",
-    "password_not_equal": "密码不相等",
+    "password_not_equal": "密码不相等！",
     "init": "初始化",
     "question": "问题",
     "answer": "答案",
-    "cannot_emprty": "不能为空",
+    "cannot_emprty": "不能为空！",
     "prev": "上一条",
     "next": "下一条",
     "add": "添加",
     "confirm": "确认",
     "back": "返回",
-    "input_security_qa_hint": "回答安全问题以解密数据",
-    "security_qa_error": "不对啊, 再想想!",
+    "input_security_qa_hint": "回答安全问题以解密数据！",
+    "security_qa_error": "不对啊, 再想想！",
     "verify_password": "验证密码",
     "forget_password": "忘记密码",
     "password": "密码",
@@ -58,7 +58,7 @@
     "edit_account": "编辑账号",
     "clone": "克隆",
     "domain": "域名",
-    "format_error": "格式错误, 应匹配: {pattern}",
+    "format_error": "格式错误，应匹配: {pattern}",
     "@format_error": {
         "description": "带有正确格式信息的消息",
         "placeholders": {
@@ -67,7 +67,7 @@
             }
         }
     },
-    "domain_title": "网站标题",
+    "title": "标题",
     "account": "账号",
     "email": "邮箱",
     "otp": "一次性密码(OTP)",
@@ -82,7 +82,7 @@
     "lookup": "查看",
     "source": "来源",
     "delete": "删除",
-    "delete_warn_hit": "确定要删除吗, 删除后将无法恢复.",
+    "delete_warn_hit": "确定要删除吗？删除后将无法恢复．",
     "description": "描述",
     "language_setting": "语言设置",
     "export_done_location": "导出完成, 地址: {location}",
@@ -97,12 +97,12 @@
     "import_done": "导入完成",
     "scan_code": "扫码",
     "new_label": "新建标签",
-    "cannot_all_empty": "不能全为空",
+    "cannot_all_empty": "不能全为空！",
     "empty": "空",
     "chrome": "谷歌",
     "firefox": "火狐",
     "other": "其他",
-    "app_description": "Rpass 是一款免费的开源应用程序, 可让您方便简洁的记录密码信息.",
+    "app_description": "Rpass 是一款免费的开源应用程序，可让您方便简洁的记录密码信息．",
     "source_code_location": "源代码 ({location})",
     "@source_code_location": {
         "description": "带有指向信息的消息",
@@ -113,8 +113,8 @@
         }
     },
     "biometric": "生物识别",
-    "biometric_prompt_title": "验证您的身份",
-    "biometric_prompt_subtitle": "使用指纹完成验证才能继续",
+    "biometric_prompt_title": "验证您的身份！",
+    "biometric_prompt_subtitle": "使用指纹完成验证才能继续．",
     "throw_message": "异常: {message}",
     "@throw_message": {
         "placeholders": {
@@ -125,20 +125,67 @@
     },
     "common": "通用",
     "default_": "默认",
+    "pass_lib": "密码库",
     "pass_lib_setting": "密码库设置",
     "history_record": "历史记录",
     "max_count": "最大条数",
     "max_size": "最大大小",
-    "is_move_recycle":"是否将项目移动到回收站",
+    "is_move_recycle": "是否将项目移动到回收站？",
     "man_selected_pass": "管理选中密码",
     "move": "移动",
     "man_group_pass": "管理组内密码",
-    "empty_group": "组是空的",
+    "empty_group": "组是空的！",
     "rename": "重命名",
     "new_field": "新建字段",
     "look_notes": "查看备注",
     "edit_notes": "编辑备注",
     "gen_password": "密码生成器",
     "pass_length": "密码长度",
-    "include_cahr": "包含字符"
+    "include_cahr": "包含字符",
+    "export_n_file": "导出 {name} 文件",
+    "@export_n_file": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "import_n_file": "导入 {name} 文件",
+    "@import_n_file": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "select_group": "选择分组",
+    "group": "分组",
+    "data_migrate_done": "数据迁移完成.",
+    "custom_field": "自定义字段",
+    "search_rule": "搜索规则:",
+    "rule_detail": "[字段名:][\"]关键句[\"]",
+    "field_name": "字段名:",
+    "search_eg": "例子:",
+    "search_eg_1": "u:小明 note:\"到此一游，小明\"",
+    "search_eg_2": "g:邮箱 u:小明",
+    "recycle_bin":"回收站",
+    "completely_delete":"彻底删除",
+    "delete_no_revert": "删除项目后将无法恢复！",
+    "revert": "恢复",
+    "select_icon": "选择图标",
+    "add_field": "添加字段",
+    "letter":"字母",
+    "number": "数字",
+    "special_char":"特殊字符",
+    "not_found_entry": "未找到项目！",
+    "attachment": "附件",
+    "create": "创建",
+    "last_modify": "最后修改",
+    "warn": "警告",
+    "plaintext_export_warn": "确认明文导出数据？\n注意导出的数据只包含对应的关键字段．",
+    "manage": "管理",
+    "timeline": "时间线",
+    "not_history_record":"没有历史记录！",
+    "password_error": "密码错误！",
+    "data_migrate_hint": "正在进行软件数据迁移升级，解密数据后，将全部迁移到新的数据库 (kdbx) 存储数据，更好，更稳定，更安全，更多功能．"
 }

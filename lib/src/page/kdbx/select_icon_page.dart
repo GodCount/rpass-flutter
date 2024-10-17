@@ -3,12 +3,12 @@ import 'package:logging/logging.dart';
 import 'package:rpass/src/widget/extension_state.dart';
 
 import '../../context/kdbx.dart';
+import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../util/file.dart';
 import '../../widget/common.dart';
 
 final _logger = Logger("page:select_icon_page");
-
 
 class SelectIconPage extends StatefulWidget {
   const SelectIconPage({super.key});
@@ -26,13 +26,15 @@ class _SelectIconPageState extends State<SelectIconPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = I18n.of(context)!;
+
     final mediaQuery = MediaQuery.of(context);
     final width = mediaQuery.size.width;
     final kdbx = KdbxProvider.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("选择图标"),
+        title: Text(t.select_icon),
       ),
       body: GridView.count(
         crossAxisCount: width ~/ 64,
