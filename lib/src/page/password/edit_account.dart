@@ -365,8 +365,8 @@ class _EntryFieldState extends State<EntryField> {
 
     final result = await InputDialog.openDialog(
       context,
-      title: "重命名",
-      label: "新建字段",
+      title: t.rename,
+      label: t.new_field,
       initialValue: _renameKdbxKey?.key ?? widget.kdbxKey.key,
       promptItmes: kdbx.fieldStatistic.customFields
           .where((item) => !limitItmes.contains(item))
@@ -618,7 +618,7 @@ class _EntryFieldState extends State<EntryField> {
             } catch (e) {
               if (e is! CancelException) {
                 _logger.warning("open file fail!", e);
-                showToast("无法打开文件");
+                showError(e);
               }
             }
             return null;

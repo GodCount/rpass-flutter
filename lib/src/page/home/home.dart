@@ -58,7 +58,7 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
         _logger.finest("old data migrate done.");
       } catch (e, s) {
         _logger.severe("old data migrate fial!", e, s);
-        showToast("迁移出现了意外情况! $e");
+        showError(e);
       }
     }
   }

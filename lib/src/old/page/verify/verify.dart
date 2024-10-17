@@ -37,7 +37,7 @@ class VerifyPasswordState extends State<VerifyPassword> {
       Navigator.of(context).popAndPushNamed(InitKdbxPage.routeName);
     } catch (e) {
       _logger.fine("denrypt old data password error!", e);
-      showToast(I18n.of(context)!.security_qa_throw(e.toString()));
+      showError(e);
     }
   }
 
@@ -58,7 +58,7 @@ class VerifyPasswordState extends State<VerifyPassword> {
       _denrypt(OldStore().verify.forgotToVerifyQuestion(questions));
     } catch (e) {
       _logger.warning("denrypt old data password error by question!", e);
-      showToast(I18n.of(context)!.security_qa_throw(e.toString()));
+      showError(e);
     }
   }
 
@@ -120,7 +120,6 @@ class VerifyPasswordState extends State<VerifyPassword> {
                 obscuringCharacter: "*",
                 decoration: InputDecoration(
                   labelText: t.password,
-                  hintText: t.input_num_password,
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     onPressed: () {

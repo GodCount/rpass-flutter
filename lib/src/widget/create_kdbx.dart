@@ -76,7 +76,6 @@ class CreateKdbxState extends State<CreateKdbx> {
                         ],
                         decoration: InputDecoration(
                           labelText: t.password,
-                          hintText: t.input_num_password,
                           border: const OutlineInputBorder(),
                         ),
                         validator: (value) => value == null || value.length < 4

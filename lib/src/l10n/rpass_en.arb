@@ -5,13 +5,10 @@
     "locale_name": "English",
     "app_name": "Rpass",
     "init_main_password": "Initialize main password",
-    "input_num_password": "Enter a numeric password of 4 digits or more",
     "at_least_4digits": "At least 4 digits",
     "confirm_password": "Confirm password",
     "password_not_equal": "Passwords do not match",
     "init": "Initialize",
-    "security_qa": "Security question",
-    "security_qa_hint": "Can be used to unlock when you forget your password.",
     "question": "Question",
     "answer": "Answer",
     "cannot_emprty": "Cannot be empty",
@@ -20,20 +17,10 @@
     "add": "Add",
     "confirm": "Confirm",
     "back": "Back",
-    "security_qa_throw": "Security question exception: {message}",
-    "@security_qa_throw": {
-        "description": "Message with error information",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
     "input_security_qa_hint": "Answer security question to decrypt data",
-    "security_qa_error": "That's not right, think again!",
+    "security_qa_error": "That''s not right, think again!",
     "verify_password": "Verify password",
     "forget_password": "Forgot password",
-    "denrypting": "Decrypting...",
     "password": "Password",
     "setting": "Settings",
     "search_match_count": "Search: {matchCount}/{totalCount}",
@@ -61,41 +48,13 @@
     "language": "Language",
     "security": "Security",
     "modify_password": "Modify Password",
-    "modify_security_qa": "Modify Security Question",
     "backup": "Backup",
     "import": "Import",
     "export": "Export",
     "info": "Information",
     "about": "About",
-    "modify_password_throw": "Password modification exception: {message}",
-    "@modify_password_throw": {
-        "description": "Message with error information",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
     "cancel": "Cancel",
     "modify": "Modify",
-    "modify_security_qa_throw": "Security question modification exception: {message}",
-    "@modify_security_qa_throw": {
-        "description": "Message with error information",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
-    "info_read_throw": "Information read exception: {message}",
-    "@info_read_throw": {
-        "description": "Message with error information",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
     "edit_account": "Edit Account",
     "clone": "Clone",
     "domain": "Domain",
@@ -115,7 +74,6 @@
     "label": "Label",
     "date": "Date",
     "uuid": "ID",
-    "gen_password": "Generate Password",
     "refresh": "Refresh",
     "symbol": "Symbol",
     "remark": "Remark",
@@ -125,28 +83,8 @@
     "source": "Source",
     "delete": "Delete",
     "delete_warn_hit": "Are you sure you want to delete? It cannot be recovered after deletion.",
-    "account_delete_throw": "Account deletion exception: {message}",
-    "@account_delete_throw": {
-        "description": "Message with error information",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
-    "calculate_otp_throw": "OTP calculation exception: {message}",
-    "@calculate_otp_throw": {
-        "description": "Message with error information",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
     "description": "Description",
     "language_setting": "Language Setting",
-    "no_backup": "Nothing to backup",
-    "at_least_1security_qa": "At least one security question is required",
     "export_done_location": "Export completed, location: {location}",
     "@export_done_location": {
         "description": "Message with path information",
@@ -156,47 +94,7 @@
             }
         }
     },
-    "export_throw": "Export exception: {message}",
-    "@export_throw": {
-        "description": "Message with error information",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
-    "encrypt_data": "Encrypt Data",
-    "alone_password": "Separate Password",
-    "enable_security_qa": "Enable Security Question",
-    "alone_security_qa": "Separate Security Question",
     "import_done": "Import Completed",
-    "import_throw": "Import exception: {message}",
-    "@import_throw": {
-        "description": "Message with error information",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
-    "verify_password_throw": "Password verification exception: {message}",
-    "@verify_password_throw": {
-        "description": "Message with error information",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
-    "denrypt_throw": "Password verification exception: {message}",
-    "@denrypt_throw": {
-        "description": "Message with error information",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
     "scan_code": "Scan Code",
     "new_label": "New Label",
     "cannot_all_empty": "Cannot be all for empty",
@@ -217,9 +115,8 @@
     "biometric": "Biometric",
     "biometric_prompt_title": "Verify your identity",
     "biometric_prompt_subtitle": "Use fingerprint to complete verification before continuing",
-    "biometric_throw": "Biometric exception: {message}",
-    "@biometric_throw": {
-        "description": "Message with error information",
+    "throw_message": "exception: {message}",
+    "@throw_message": {
         "placeholders": {
             "message": {
                 "type": "String"

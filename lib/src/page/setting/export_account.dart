@@ -32,7 +32,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
     } catch (e) {
       if (e is! CancelException) {
         _logger.warning("export kdbx file fail!", e);
-        showToast(I18n.of(context)!.export_throw(e.toString()));
+        showError(e);
       }
     }
   }
@@ -55,7 +55,7 @@ class ExportAccountPageState extends State<ExportAccountPage> {
       } catch (e) {
         if (e is! CancelException) {
           _logger.warning("export file file fail!", e);
-          showToast(I18n.of(context)!.export_throw(e.toString()));
+          showError(e);
         }
       }
     }

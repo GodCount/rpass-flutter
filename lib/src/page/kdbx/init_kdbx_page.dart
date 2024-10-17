@@ -22,10 +22,10 @@ class InitKdbxPage extends StatefulWidget {
 class _InitKdbxPageState extends State<InitKdbxPage> {
   void _addPresetGroup(Kdbx kdbx) {
     final t = I18n.of(context)!;
-    final general = kdbx.createGroup("通用");
+    final general = kdbx.createGroup(t.common);
     kdbx.customData[KdbxCustomDataKey.GENERAL_GROUP_UUID] = general.uuid.uuid;
-    kdbx.createGroup("邮箱").icon.set(KdbxIcon.EMail);
-    kdbx.kdbxFile.body.rootGroup.name.set("默认");
+    kdbx.createGroup(t.email).icon.set(KdbxIcon.EMail);
+    kdbx.kdbxFile.body.rootGroup.name.set(t.default_);
     kdbxSave(kdbx);
   }
 

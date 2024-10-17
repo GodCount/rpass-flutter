@@ -20,8 +20,8 @@ extension StatefulClipboard on State {
   void writeClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text)).then((value) {
       showToast(I18n.of(context)!.copy_done);
-    }, onError: (error) {
-      showToast(error.toString());
+    }, onError: (e) {
+      showError(e);
     });
   }
 }
@@ -34,6 +34,26 @@ extension StatefulDialog on State {
       builder: (context) {
         return AlertDialog(
           content: Text(msg),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(I18n.of(context)!.confirm),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> showError(Object? error) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          content: Text(I18n.of(context)!.throw_message(error.toString())),
           actions: [
             TextButton(
               onPressed: () {
@@ -138,7 +158,7 @@ extension StateFulBottomSheet on State {
           } catch (e) {
             if (e is! CancelException) {
               _logger.warning("save as attachment fail!", e);
-              showToast("无法保存附件");
+              showError(e);
             }
           } finally {
             Navigator.of(context).pop();
@@ -290,7 +310,7 @@ extension StatefulKdbx on State {
       return true;
     } catch (e, s) {
       _logger.severe("kdbx save fail!", e, s);
-      showToast(e.toString());
+      showError(e);
       return false;
     }
   }

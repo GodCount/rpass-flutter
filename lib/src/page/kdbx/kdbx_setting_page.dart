@@ -54,7 +54,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("密码库设置"),
+        title: Text(t.pass_lib_setting),
       ),
       body: ListView(
         padding: const EdgeInsets.all(6),
@@ -68,12 +68,12 @@ class _KdbxSettingPageState extends State<KdbxSettingPage> {
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.history_rounded),
                   ),
-                  Text("历史记录", style: Theme.of(context).textTheme.bodyLarge),
+                  Text(t.history_record, style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),
             ),
             ListTile(
-              title: Text("最大条数"),
+              title: Text(t.max_count),
               subtitle: Row(
                 children: [
                   Expanded(
@@ -95,7 +95,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage> {
               ),
             ),
             ListTile(
-              title: Text("最大大小"),
+              title: Text(t.max_size),
               subtitle: Row(
                 children: [
                   Expanded(

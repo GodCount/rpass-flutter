@@ -29,7 +29,7 @@ class _EditNotesState extends State<EditNotes> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(args.readOnly ? "查看备注" : "编辑备注"),
+        title: Text(args.readOnly ? t.look_notes : t.edit_notes),
       ),
       body: Card(
         margin: const EdgeInsets.all(6),

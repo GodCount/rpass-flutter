@@ -5,13 +5,10 @@
     "locale_name": "简体中文",
     "app_name": "Rpass",
     "init_main_password": "初始化主密码",
-    "input_num_password": "输入4位及以上的数字密码",
     "at_least_4digits": "至少4位数",
     "confirm_password": "确认密码",
     "password_not_equal": "密码不相等",
     "init": "初始化",
-    "security_qa": "安全问题",
-    "security_qa_hint": "当忘记密码时,可用于解锁.",
     "question": "问题",
     "answer": "答案",
     "cannot_emprty": "不能为空",
@@ -20,20 +17,10 @@
     "add": "添加",
     "confirm": "确认",
     "back": "返回",
-    "security_qa_throw": "安全问题异常: {message}",
-    "@security_qa_throw": {
-        "description": "带有错误信息的消息",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
     "input_security_qa_hint": "回答安全问题以解密数据",
     "security_qa_error": "不对啊, 再想想!",
     "verify_password": "验证密码",
     "forget_password": "忘记密码",
-    "denrypting": "解密中...",
     "password": "密码",
     "setting": "设置",
     "search_match_count": "搜索: {matchCount}/{totalCount}",
@@ -61,41 +48,13 @@
     "language": "语言",
     "security": "安全",
     "modify_password": "修改密码",
-    "modify_security_qa": "修改安全问题",
     "backup": "备份",
     "import": "导入",
     "export": "导出",
     "info": "信息",
     "about": "关于",
-    "modify_password_throw": "密码修改异常: {message}",
-    "@modify_password_throw": {
-        "description": "带有错误信息的消息",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
     "cancel": "取消",
     "modify": "修改",
-    "modify_security_qa_throw": "安全问题修改异常: {message}",
-    "@modify_security_qa_throw": {
-        "description": "带有错误信息的消息",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
-    "info_read_throw": "信息读取异常: {message}",
-    "@info_read_throw": {
-        "description": "带有错误信息的消息",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
     "edit_account": "编辑账号",
     "clone": "克隆",
     "domain": "域名",
@@ -115,7 +74,6 @@
     "label": "标签",
     "date": "日期",
     "uuid": "标识",
-    "gen_password": "生成密码",
     "refresh": "刷新",
     "symbol": "符号",
     "remark": "备注",
@@ -125,28 +83,8 @@
     "source": "来源",
     "delete": "删除",
     "delete_warn_hit": "确定要删除吗, 删除后将无法恢复.",
-    "account_delete_throw": "账号删除异常: {message}",
-    "@account_delete_throw": {
-        "description": "带有错误信息的消息",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
-    "calculate_otp_throw": "计算OPT异常: {message}",
-    "@calculate_otp_throw": {
-        "description": "带有错误信息的消息",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
     "description": "描述",
     "language_setting": "语言设置",
-    "no_backup": "没有需要备份的",
-    "at_least_1security_qa": "至少需要一个安全问题",
     "export_done_location": "导出完成, 地址: {location}",
     "@export_done_location": {
         "description": "带有路径信息的消息",
@@ -156,47 +94,7 @@
             }
         }
     },
-    "export_throw": "导出异常: {message}",
-    "@export_throw": {
-        "description": "带有错误信息的消息",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
-    "encrypt_data": "加密数据",
-    "alone_password": "单独的密码",
-    "enable_security_qa": "启用安全问题",
-    "alone_security_qa": "单独的安全问题",
     "import_done": "导入完成",
-    "import_throw": "导入异常: {message}",
-    "@import_throw": {
-        "description": "带有错误信息的消息",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
-    "verify_password_throw": "验证密码异常: {message}",
-    "@verify_password_throw": {
-        "description": "带有错误信息的消息",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
-    "denrypt_throw": "验证密码异常: {message}",
-    "@denrypt_throw": {
-        "description": "带有错误信息的消息",
-        "placeholders": {
-            "message": {
-                "type": "String"
-            }
-        }
-    },
     "scan_code": "扫码",
     "new_label": "新建标签",
     "cannot_all_empty": "不能全为空",
@@ -217,13 +115,30 @@
     "biometric": "生物识别",
     "biometric_prompt_title": "验证您的身份",
     "biometric_prompt_subtitle": "使用指纹完成验证才能继续",
-    "biometric_throw": "生物识别异常: {message}",
-    "@biometric_throw": {
-        "description": "带有错误信息的消息",
+    "throw_message": "异常: {message}",
+    "@throw_message": {
         "placeholders": {
             "message": {
                 "type": "String"
             }
         }
-    }
+    },
+    "common": "通用",
+    "default_": "默认",
+    "pass_lib_setting": "密码库设置",
+    "history_record": "历史记录",
+    "max_count": "最大条数",
+    "max_size": "最大大小",
+    "is_move_recycle":"是否将项目移动到回收站",
+    "man_selected_pass": "管理选中密码",
+    "move": "移动",
+    "man_group_pass": "管理组内密码",
+    "empty_group": "组是空的",
+    "rename": "重命名",
+    "new_field": "新建字段",
+    "look_notes": "查看备注",
+    "edit_notes": "编辑备注",
+    "gen_password": "密码生成器",
+    "pass_length": "密码长度",
+    "include_cahr": "包含字符"
 }

@@ -609,7 +609,7 @@ class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile> {
                 textStyle: Theme.of(context).textTheme.headlineMedium,
               )
             : Text(
-                t.calculate_otp_throw(errorMessage),
+                t.throw_message(errorMessage),
                 style: Theme.of(context)
                     .textTheme
                     .titleLarge
@@ -625,15 +625,7 @@ class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile> {
             )
           : null,
       onLongPress: () {
-        Clipboard.setData(
-          ClipboardData(
-            text: "${_authOneTimePassword!.code()}",
-          ),
-        ).then((value) {
-          showToast(t.copy_done);
-        }, onError: (error) {
-          showToast(error.toString());
-        });
+        writeClipboard("${_authOneTimePassword!.code()}");
       },
     );
   }

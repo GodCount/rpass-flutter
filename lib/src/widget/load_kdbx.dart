@@ -103,7 +103,7 @@ class _LoadKdbxState extends State<LoadKdbx> {
       rethrow;
     } catch (e) {
       _logger.warning("load kdbx by biometric fail!", e);
-      showToast(I18n.of(context)!.biometric_throw(e.toString()));
+      showError(e);
       setState(() {
         _biometricDisable = true;
       });
@@ -147,9 +147,8 @@ class _LoadKdbxState extends State<LoadKdbx> {
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
                   labelText: t.password,
-                  hintText: t.input_num_password,
                   errorText: _errorMessage != null
-                      ? t.verify_password_throw(_errorMessage!)
+                      ? t.throw_message(_errorMessage!)
                       : null,
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(

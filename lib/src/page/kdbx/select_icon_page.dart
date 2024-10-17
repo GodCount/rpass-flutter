@@ -87,7 +87,7 @@ class _SelectIconPageState extends State<SelectIconPage> {
           } catch (e) {
             if (e is! CancelException) {
               _logger.warning("read image file fail!", e);
-              showToast("无法读取文件!");
+              showError(e);
             }
           }
         },

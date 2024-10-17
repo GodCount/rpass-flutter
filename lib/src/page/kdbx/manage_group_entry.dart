@@ -31,8 +31,8 @@ class _ManageGroupEntryState extends State<ManageGroupEntry> {
   void _deleteSelecteds() async {
     final t = I18n.of(context)!;
     if (await showConfirmDialog(
-      title: "删除",
-      message: "是否将项目移动到回收站!",
+      title: t.delete,
+      message: t.is_move_recycle,
     )) {
       final kdbx = KdbxProvider.of(context)!;
       for (var item in _selecteds) {
@@ -58,12 +58,13 @@ class _ManageGroupEntryState extends State<ManageGroupEntry> {
   }
 
   void _showSelectorEntryAction() {
+    final t = I18n.of(context)!;
     showBottomSheetList(
-      title: "管理选中密码",
+      title: t.man_selected_pass,
       children: [
         ListTile(
           leading: const Icon(Icons.drive_file_move_rounded),
-          title: const Text("移动"),
+          title: Text(t.move),
           onTap: () {
             Navigator.of(context).pop();
             _moveSelecteds();
@@ -71,7 +72,7 @@ class _ManageGroupEntryState extends State<ManageGroupEntry> {
         ),
         ListTile(
           leading: const Icon(Icons.delete),
-          title: const Text("删除"),
+          title: Text(t.delete),
           onTap: () {
             Navigator.of(context).pop();
             _deleteSelecteds();
@@ -96,10 +97,10 @@ class _ManageGroupEntryState extends State<ManageGroupEntry> {
     if (_kdbxGroup == null) {
       return Scaffold(
         appBar: AppBar(
-          title: Text("组内密码管理"),
+          title: Text(t.man_group_pass),
         ),
-        body: const Center(
-          child: Text("没有找到组！"),
+        body:  Center(
+          child: Text(t.empty_group),
         ),
       );
     }
@@ -109,7 +110,7 @@ class _ManageGroupEntryState extends State<ManageGroupEntry> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text("组内密码管理"),
+            Text(t.man_group_pass),
             Text(
               "(${_selecteds.length}/${_kdbxGroup!.entries.length})",
               style: Theme.of(context).textTheme.bodyLarge,

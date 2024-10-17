@@ -33,7 +33,7 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
     } catch (e) {
       if (e is! CancelException) {
         _logger.warning("import csv file fail!", e);
-        showToast(t.import_throw(e.toString()));
+        showError(e);
       }
     }
   }

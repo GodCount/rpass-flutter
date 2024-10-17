@@ -73,7 +73,7 @@ class _GenPasswordState extends State<GenPassword> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: returnPassword,
-        title: const Text("密码生成器"),
+        title:  Text(t.gen_password),
       ),
       body: ListView(
         padding: const EdgeInsets.all(6),
@@ -87,7 +87,7 @@ class _GenPasswordState extends State<GenPassword> {
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.password_rounded),
                   ),
-                  Text("密码", style: Theme.of(context).textTheme.bodyLarge),
+                  Text(t.password, style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),
             ),
@@ -130,7 +130,7 @@ class _GenPasswordState extends State<GenPassword> {
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.straighten),
                   ),
-                  Text("密码长度", style: Theme.of(context).textTheme.bodyLarge),
+                  Text(t.pass_length, style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),
             ),
@@ -160,7 +160,7 @@ class _GenPasswordState extends State<GenPassword> {
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.onetwothree),
                   ),
-                  Text("包含字符", style: Theme.of(context).textTheme.bodyLarge),
+                  Text(t.include_cahr, style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),
             ),

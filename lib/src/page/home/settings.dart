@@ -189,7 +189,7 @@ class SettingsPageState extends State<SettingsPage>
                     rethrow;
                   } catch (e, s) {
                     _logger.severe("set biometric exception!", e, s);
-                    showToast(t.biometric_throw(e.toString()));
+                    showError(e);
                   } finally {
                     setState(() {});
                   }
@@ -352,7 +352,7 @@ class SettingsPageState extends State<SettingsPage>
             Navigator.of(context).pop();
           }
         } catch (e) {
-          showToast(t.modify_password_throw(e.toString()));
+          showError(e);
         }
       }
     }
@@ -376,7 +376,6 @@ class SettingsPageState extends State<SettingsPage>
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   decoration: InputDecoration(
                     labelText: t.password,
-                    hintText: t.input_num_password,
                     border: const OutlineInputBorder(),
                   ),
                   validator: (value) => value == null || value.length < 4
