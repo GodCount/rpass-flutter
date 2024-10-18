@@ -93,7 +93,7 @@ class GroupsPageState extends State<GroupsPage>
 
   Widget _buildGroupItem(KdbxGroup kdbxGroup) {
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(4),
       width: 128,
       height: 128,
       child: Card(
@@ -126,24 +126,27 @@ class GroupsPageState extends State<GroupsPage>
                 ? () => _kdbxGroupDelete(kdbxGroup)
                 : null,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              KdbxIconWidget(
-                kdbxIcon: KdbxIconWidgetData(
-                  icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
-                  customIcon: kdbxGroup.customIcon,
+          child: Padding(
+            padding: const EdgeInsets.all(6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                KdbxIconWidget(
+                  kdbxIcon: KdbxIconWidgetData(
+                    icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
+                    customIcon: kdbxGroup.customIcon,
+                  ),
+                  size: 64,
                 ),
-                size: 64,
-              ),
-              Text(
-                kdbxGroup.name.get() ?? '',
-                softWrap: false,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              )
-            ],
+                Text(
+                  kdbxGroup.name.get() ?? '',
+                  softWrap: true,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                )
+              ],
+            ),
           ),
         ),
       ),

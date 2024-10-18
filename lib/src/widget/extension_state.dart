@@ -129,10 +129,13 @@ extension StateFulBottomSheet on State {
               Align(
                 alignment: Alignment.center,
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 6),
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                   child: Text(
                     title,
                     style: Theme.of(context).textTheme.titleLarge,
+                    maxLines: 1,
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),
