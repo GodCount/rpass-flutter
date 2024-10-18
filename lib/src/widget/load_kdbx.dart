@@ -7,6 +7,7 @@ import '../context/biometric.dart';
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
 import 'extension_state.dart';
+import 'shake_widget.dart';
 
 final _logger = Logger("widget:load_kdbx");
 
@@ -33,6 +34,7 @@ class LoadKdbx extends StatefulWidget {
 class _LoadKdbxState extends State<LoadKdbx> {
   final TextEditingController _passwordController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  final GlobalKey<ShakeWidgetState> _shakeKey = GlobalKey();
 
   bool _obscureText = true;
   bool _biometricDisable = false;
@@ -63,6 +65,7 @@ class _LoadKdbxState extends State<LoadKdbx> {
   void _verifyPassword() async {
     if (_passwordController.text.isNotEmpty) {
       try {
+        _errorMessage = null;
         final (filepath, data) = await _readKdbxFile();
 
         final kdbx = await Kdbx.loadBytes(
@@ -78,6 +81,9 @@ class _LoadKdbxState extends State<LoadKdbx> {
         _errorMessage = e.toString();
       } finally {
         setState(() {});
+        if (_errorMessage != null) {
+          _shakeKey.currentState?.shakeWidget();
+        }
       }
     }
   }
@@ -138,37 +144,38 @@ class _LoadKdbxState extends State<LoadKdbx> {
             Container(
               padding: const EdgeInsets.only(top: 24),
               constraints: const BoxConstraints(maxWidth: 264),
-              child: TextField(
-                focusNode: _focusNode,
-                controller: _passwordController,
-                keyboardType: TextInputType.number,
-                textInputAction: TextInputAction.done,
-                autofocus: true,
-                obscureText: _obscureText,
-                obscuringCharacter: "*",
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: InputDecoration(
-                  labelText: t.password,
-                  errorText: _errorMessage != null
-                      ? t.throw_message(_errorMessage!)
-                      : null,
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _obscureText = !_obscureText;
-                      });
-                    },
-                    icon: Icon(
-                      _obscureText
-                          ? Icons.remove_red_eye_outlined
-                          : Icons.visibility_off_outlined,
+              child: ShakeWidget(
+                key: _shakeKey,
+                child: TextField(
+                  focusNode: _focusNode,
+                  controller: _passwordController,
+                  textInputAction: TextInputAction.done,
+                  autofocus: true,
+                  obscureText: _obscureText,
+                  obscuringCharacter: "*",
+                  decoration: InputDecoration(
+                    labelText: t.password,
+                    errorText: _errorMessage != null
+                        ? t.throw_message(_errorMessage!)
+                        : null,
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _obscureText = !_obscureText;
+                        });
+                      },
+                      icon: Icon(
+                        _obscureText
+                            ? Icons.remove_red_eye_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
                     ),
                   ),
+                  onSubmitted: (value) {
+                    _verifyPassword();
+                  },
                 ),
-                onSubmitted: (value) {
-                  _verifyPassword();
-                },
               ),
             ),
             Container(

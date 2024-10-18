@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
+import 'shake_widget.dart';
 
 typedef OnCreatedKdbx = void Function(Kdbx kdbx);
 
@@ -61,50 +61,52 @@ class CreateKdbxState extends State<CreateKdbx> {
               padding: const EdgeInsets.only(top: 24),
               child: Form(
                 key: _globalKey,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
                       constraints: const BoxConstraints(maxWidth: 264),
-                      child: TextFormField(
-                        controller: _passwordController,
-                        keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.next,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        decoration: InputDecoration(
-                          labelText: t.password,
-                          border: const OutlineInputBorder(),
-                        ),
+                      child: ShakeFormField<String>(
                         validator: (value) => value == null || value.length < 4
                             ? t.at_least_4digits
                             : null,
+                        builder: (context, validator) {
+                          return TextFormField(
+                            validator: validator,
+                            controller: _passwordController,
+                            autofocus: true,
+                            textInputAction: TextInputAction.next,
+                            decoration: InputDecoration(
+                              labelText: t.password,
+                              border: const OutlineInputBorder(),
+                            ),
+                          );
+                        },
                       ),
                     ),
                     Container(
                       padding: const EdgeInsets.only(top: 12),
                       constraints: const BoxConstraints(maxWidth: 264),
-                      child: TextFormField(
-                        keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.done,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        decoration: InputDecoration(
-                          labelText: t.confirm_password,
-                          border: const OutlineInputBorder(),
-                        ),
+                      child: ShakeFormField<String>(
                         validator: (value) => value == null ||
                                 value.isEmpty ||
                                 value == _passwordController.text
                             ? null
                             : t.password_not_equal,
-                        onFieldSubmitted: (value) {
-                          if (_globalKey.currentState!.validate()) {
-                            _createKdbx();
-                          }
+                        builder: (context, validator) {
+                          return TextFormField(
+                            validator: validator,
+                            textInputAction: TextInputAction.done,
+                            decoration: InputDecoration(
+                              labelText: t.confirm_password,
+                              border: const OutlineInputBorder(),
+                            ),
+                            onFieldSubmitted: (value) {
+                              if (_globalKey.currentState!.validate()) {
+                                _createKdbx();
+                              }
+                            },
+                          );
                         },
                       ),
                     ),

@@ -1,6 +1,5 @@
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:rpass/src/kdbx/kdbx.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -11,6 +10,7 @@ import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../rpass.dart';
 import '../../widget/extension_state.dart';
+import '../../widget/shake_widget.dart';
 import '../page.dart';
 
 final _logger = Logger("page:settings");
@@ -366,40 +366,44 @@ class SettingsPageState extends State<SettingsPage>
           title: Text(t.modify_password),
           content: Form(
             key: formState,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextFormField(
-                  onChanged: (text) => newPassword = text,
-                  keyboardType: TextInputType.number,
-                  textInputAction: TextInputAction.next,
-                  autofocus: true,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: InputDecoration(
-                    labelText: t.password,
-                    border: const OutlineInputBorder(),
-                  ),
+                ShakeFormField<String>(
                   validator: (value) => value == null || value.length < 4
                       ? t.at_least_4digits
                       : null,
+                  builder: (context, validator) {
+                    return TextFormField(
+                      validator: validator,
+                      onChanged: (text) => newPassword = text,
+                      textInputAction: TextInputAction.next,
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        labelText: t.password,
+                        border: const OutlineInputBorder(),
+                      ),
+                    );
+                  },
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
-                  child: TextFormField(
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.done,
-                    autofocus: true,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: InputDecoration(
-                      labelText: t.confirm_password,
-                      border: const OutlineInputBorder(),
-                    ),
+                  child: ShakeFormField<String>(
                     validator: (value) =>
                         value == null || value.isEmpty || value == newPassword
                             ? null
                             : t.password_not_equal,
-                    onFieldSubmitted: (value) => onSetPassword(),
+                    builder: (context, validator) {
+                      return TextFormField(
+                        validator: validator,
+                        textInputAction: TextInputAction.done,
+                        decoration: InputDecoration(
+                          labelText: t.confirm_password,
+                          border: const OutlineInputBorder(),
+                        ),
+                        onFieldSubmitted: (value) => onSetPassword(),
+                      );
+                    },
                   ),
                 )
               ],

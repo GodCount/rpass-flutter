@@ -15,6 +15,7 @@ import '../../util/file.dart';
 import '../../widget/chip_list.dart';
 import '../../widget/common.dart';
 import '../../widget/extension_state.dart';
+import '../../widget/shake_widget.dart';
 
 final _logger = Logger("page:edit_account");
 
@@ -511,14 +512,20 @@ class _EntryFieldState extends State<EntryField> {
       case KdbxKeyCommon.KEY_URL:
       case KdbxKeyCommon.KEY_USER_NAME:
       case KdbxKeyCommon.KEY_EMAIL:
-        return DropdownMenuFormField(
-          initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
-          items: kdbx.fieldStatistic.getStatistic(widget.kdbxKey)!.toList(),
-          label: _kdbKey2I18n(),
-          onSaved: _kdbxTextFieldSaved,
-          expandedInsets: const EdgeInsets.all(0),
+        return ShakeFormField<String>(
           validator: _entryFieldValidator(),
-          menuHeight: 150,
+          builder: (context, validator) {
+            return DropdownMenuFormField(
+              initialValue:
+                  widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
+              items: kdbx.fieldStatistic.getStatistic(widget.kdbxKey)!.toList(),
+              label: _kdbKey2I18n(),
+              onSaved: _kdbxTextFieldSaved,
+              expandedInsets: const EdgeInsets.all(0),
+              validator: validator,
+              menuHeight: 150,
+            );
+          },
         );
       case KdbxKeyCommon.KEY_PASSWORD:
         return EntryTextFormField(
@@ -777,15 +784,18 @@ class _EntryTextFormFieldState extends State<EntryTextFormField> {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
+    return ShakeFormField<String>(
       validator: widget.validator,
-      controller: _controller,
-      onSaved: widget.onSaved,
-      decoration: InputDecoration(
-        labelText: widget.label,
-        border: const OutlineInputBorder(),
-        suffixIcon:
-            (widget.trailingIcon != null && widget.onTrailingTap != null)
+      builder: (context, validator) {
+        return TextFormField(
+          validator: validator,
+          controller: _controller,
+          onSaved: widget.onSaved,
+          decoration: InputDecoration(
+            labelText: widget.label,
+            border: const OutlineInputBorder(),
+            suffixIcon: (widget.trailingIcon != null &&
+                    widget.onTrailingTap != null)
                 ? Padding(
                     padding: const EdgeInsets.all(4.0),
                     child: IconButton(
@@ -797,7 +807,9 @@ class _EntryTextFormFieldState extends State<EntryTextFormField> {
                     ),
                   )
                 : null,
-      ),
+          ),
+        );
+      },
     );
   }
 }
