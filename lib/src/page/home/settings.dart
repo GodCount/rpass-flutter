@@ -257,8 +257,10 @@ class SettingsPageState extends State<SettingsPage>
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(top: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        child: OverflowBar(
+                          spacing: 8,
+                          alignment: MainAxisAlignment.end,
+                          overflowAlignment: OverflowBarAlignment.end,
                           children: [
                             TextButton(
                               onPressed: () async => await launchUrl(

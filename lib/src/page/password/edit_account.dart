@@ -435,6 +435,7 @@ class _EntryFieldState extends State<EntryField> {
       case KdbxKeySpecial.KEY_TAGS:
         return t.label;
       case KdbxKeySpecial.KEY_ATTACH:
+        return t.attachment;
       default:
         return _renameKdbxKey?.key ?? widget.kdbxKey.key;
     }

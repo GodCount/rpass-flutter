@@ -64,7 +64,7 @@ class GroupsPageState extends State<GroupsPage>
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(t.setting),
+        title: Text(t.group),
       ),
       body: GridView.count(
         crossAxisCount: width ~/ 128,

@@ -71,6 +71,8 @@ class _ManageGroupEntryState extends State<ManageGroupEntry> {
           },
         ),
         ListTile(
+          iconColor: Theme.of(context).colorScheme.error,
+          textColor: Theme.of(context).colorScheme.error,
           leading: const Icon(Icons.delete),
           title: Text(t.delete),
           onTap: () {
