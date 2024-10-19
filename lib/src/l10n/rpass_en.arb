@@ -187,5 +187,19 @@
     "timeline": "Timeline",
     "not_history_record": "No history records!",
     "password_error": "Password Error!",
-    "data_migrate_hint": "Data migration and upgrade is currently underway. After decrypting the data, it will be entirely migrated to a new database (kdbx) for storage. This new system offers improved performance, greater stability, enhanced security, and a wider range of features."
+    "data_migrate_hint": "Data migration and upgrade is currently underway. After decrypting the data, it will be entirely migrated to a new database (kdbx) for storage. This new system offers improved performance, greater stability, enhanced security, and a wider range of features.",
+    "search": "Search",
+    "all_select": "Select ALL ({matchCount} / {totalCount})",
+    "@all_select": {
+        "description": "With search match count",
+        "placeholders": {
+            "matchCount": {
+                "type": "int"
+            },
+            "totalCount": {
+                "type": "int"
+            }
+        }
+    },
+    "invert_select": "Select Invert"
 }

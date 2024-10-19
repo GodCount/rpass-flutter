@@ -15,7 +15,7 @@ ThemeData theme(Brightness brightness) {
       backgroundColor: scheme.secondaryContainer,
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: scheme.secondaryContainer,
+      backgroundColor: scheme.surfaceContainer,
     ),
     bottomSheetTheme: const BottomSheetThemeData(
       shape: RoundedRectangleBorder(

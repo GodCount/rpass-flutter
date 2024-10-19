@@ -21,6 +21,12 @@ class LookAccountPage extends StatefulWidget {
   const LookAccountPage({super.key});
 
   static const routeName = "/look_account";
+  /// 我暂时不得不妥协
+  /// RouteSettings arguments 的传值没有设计好, 对后续扩展出现了冲突
+  /// 计划更改为构建参数传参, 改动颇大, 所以暂时妥协
+  /// TODO! 更改传参方式, 去除通过路由名称确定状态的方式
+  static const routeName_readOnly = "/look_account_readonly";
+
 
   @override
   State<LookAccountPage> createState() => _LookAccountPageState();
@@ -34,7 +40,9 @@ class _LookAccountPageState extends State<LookAccountPage>
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
 
-    _kdbxEntry ??= ModalRoute.of(context)!.settings.arguments as KdbxEntry?;
+    final settings = ModalRoute.of(context)!.settings;
+
+    _kdbxEntry ??= settings.arguments as KdbxEntry?;
 
     if (_kdbxEntry == null) {
       _logger.warning("open look account page _kdbxEntry is null");
@@ -47,6 +55,8 @@ class _LookAccountPageState extends State<LookAccountPage>
         ),
       );
     }
+
+    final readOnly = settings.name == LookAccountPage.routeName_readOnly ||  _kdbxEntry!.isHistoryEntry;
 
     final defaultFields = [
       ...KdbxKeyCommon.all,
@@ -67,13 +77,13 @@ class _LookAccountPageState extends State<LookAccountPage>
         actions: [
           IconButton(
             onPressed:
-                !_kdbxEntry!.isHistoryEntry && !_kdbxEntry!.isInRecycleBin()
+                !readOnly && !_kdbxEntry!.isInRecycleBin()
                     ? _deleteAccount
                     : null,
             icon: const Icon(Icons.delete),
           ),
           IconButton(
-            onPressed: !_kdbxEntry!.isHistoryEntry
+            onPressed: !readOnly
                 ? () => showEntryHistoryList(_kdbxEntry!)
                 : null,
             icon: const Icon(Icons.history_rounded),
@@ -374,7 +384,7 @@ class _LookAccountPageState extends State<LookAccountPage>
             ListTile(
               shape: shape,
               title: Padding(
-                padding: EdgeInsets.only(left: 6),
+                padding: const EdgeInsets.only(left: 6),
                 child: Text(t.create),
               ),
               subtitle: Padding(
@@ -385,7 +395,7 @@ class _LookAccountPageState extends State<LookAccountPage>
             ListTile(
               shape: shape,
               title: Padding(
-                padding: EdgeInsets.only(left: 6),
+                padding: const EdgeInsets.only(left: 6),
                 child: Text(t.last_modify),
               ),
               subtitle: Padding(
@@ -409,7 +419,7 @@ class _LookAccountPageState extends State<LookAccountPage>
           const SizedBox(height: 42)
         ],
       ),
-      floatingActionButton: !_kdbxEntry!.isHistoryEntry
+      floatingActionButton: !readOnly
           ? FloatingActionButton(
               onPressed: () async {
                 if (_kdbxEntry!.isInRecycleBin()) {

@@ -33,7 +33,7 @@ class PasswordsPageState extends State<PasswordsPage>
     _searchController = widget.searchController ?? TextEditingController();
     _searchController.addListener(_searchAccounts);
     Future.delayed(Duration.zero, () {
-      KdbxProvider.of(context)!.addListener(_searchAccounts);
+      KdbxProvider.of(context)!.addListener(_onKdbxSave);
     });
     _searchAccounts();
     super.initState();
@@ -42,29 +42,24 @@ class PasswordsPageState extends State<PasswordsPage>
   @override
   void dispose() {
     _searchController.dispose();
-    KdbxProvider.of(context)!.removeListener(_searchAccounts);
+    KdbxProvider.of(context)!.removeListener(_onKdbxSave);
     super.dispose();
+  }
+
+  void _onKdbxSave() {
+    final kdbx = KdbxProvider.of(context)!;
+    _kbdxSearchHandler.setFieldOther(kdbx.fieldStatistic.customFields);
+    _searchAccounts();
   }
 
   void _searchAccounts() {
     _totalEntry.clear();
     final kdbx = KdbxProvider.of(context)!;
 
-    _kbdxSearchHandler.setFieldOther(kdbx.fieldStatistic.customFields);
-
-    if (_searchController.text.isNotEmpty) {
-      _totalEntry.addAll(_kbdxSearchHandler.search(
-        _searchController.text,
-        kdbx.totalEntry,
-      ));
-    } else {
-      _totalEntry
-        ..addAll(kdbx.totalEntry)
-        ..sort((a, b) => b.times.lastModificationTime
-            .get()!
-            .compareTo(a.times.lastModificationTime.get()!));
-    }
-
+    _totalEntry.addAll(_kbdxSearchHandler.search(
+      _searchController.text,
+      kdbx.totalEntry,
+    ));
     setState(() {});
   }
 

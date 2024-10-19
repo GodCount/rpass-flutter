@@ -187,5 +187,19 @@
     "timeline": "时间线",
     "not_history_record":"没有历史记录！",
     "password_error": "密码错误！",
-    "data_migrate_hint": "正在进行软件数据迁移升级，解密数据后，将全部迁移到新的数据库 (kdbx) 存储数据，更好，更稳定，更安全，更多功能．"
+    "data_migrate_hint": "正在进行软件数据迁移升级，解密数据后，将全部迁移到新的数据库 (kdbx) 存储数据，更好，更稳定，更安全，更多功能．",
+    "search": "搜索",
+    "all_select": "全选 ({matchCount} / {totalCount})",
+    "@all_select": {
+        "description": "带有搜索匹配数的",
+        "placeholders": {
+            "matchCount": {
+                "type": "int"
+            },
+            "totalCount": {
+                "type": "int"
+            }
+        }
+    },
+    "invert_select": "反选"
 }
