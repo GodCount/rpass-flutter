@@ -127,10 +127,10 @@ class GroupsPageState extends State<GroupsPage>
                 : null,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(6),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 KdbxIconWidget(
                   kdbxIcon: KdbxIconWidgetData(

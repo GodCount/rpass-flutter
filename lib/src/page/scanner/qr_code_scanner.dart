@@ -19,8 +19,11 @@ class _QrCodeScannerPageState extends State<QrCodeScannerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: Text(I18n.of(context)!.scan_code),
+        elevation: 0.0,
       ),
       backgroundColor: Colors.black,
       body: Stack(

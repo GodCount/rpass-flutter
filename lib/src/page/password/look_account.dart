@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:logging/logging.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../page.dart';
 import '../../context/kdbx.dart';
@@ -21,12 +22,12 @@ class LookAccountPage extends StatefulWidget {
   const LookAccountPage({super.key});
 
   static const routeName = "/look_account";
+
   /// 我暂时不得不妥协
   /// RouteSettings arguments 的传值没有设计好, 对后续扩展出现了冲突
   /// 计划更改为构建参数传参, 改动颇大, 所以暂时妥协
   /// TODO! 更改传参方式, 去除通过路由名称确定状态的方式
   static const routeName_readOnly = "/look_account_readonly";
-
 
   @override
   State<LookAccountPage> createState() => _LookAccountPageState();
@@ -35,6 +36,13 @@ class LookAccountPage extends StatefulWidget {
 class _LookAccountPageState extends State<LookAccountPage>
     with HintEmptyTextUtil {
   KdbxEntry? _kdbxEntry;
+
+  _launchUrl(String url) {
+    launchUrl(
+      Uri.parse(url.startsWith(RegExp(r"^https*://")) ? url : "http://$url"),
+      mode: LaunchMode.externalApplication,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +64,8 @@ class _LookAccountPageState extends State<LookAccountPage>
       );
     }
 
-    final readOnly = settings.name == LookAccountPage.routeName_readOnly ||  _kdbxEntry!.isHistoryEntry;
+    final readOnly = settings.name == LookAccountPage.routeName_readOnly ||
+        _kdbxEntry!.isHistoryEntry;
 
     final defaultFields = [
       ...KdbxKeyCommon.all,
@@ -71,21 +80,26 @@ class _LookAccountPageState extends State<LookAccountPage>
           bottomLeft: Radius.circular(6.0), bottomRight: Radius.circular(6.0)),
     );
 
+    final title = _kdbxEntry!.getNonNullString(KdbxKeyCommon.TITLE);
+    final url = _kdbxEntry!.getNonNullString(KdbxKeyCommon.URL);
+    final username = _kdbxEntry!.getNonNullString(KdbxKeyCommon.USER_NAME);
+    final password = _kdbxEntry!.getNonNullString(KdbxKeyCommon.PASSWORD);
+    final email = _kdbxEntry!.getNonNullString(KdbxKeyCommon.EMAIL);
+    final notes = _kdbxEntry!.getNonNullString(KdbxKeyCommon.NOTES);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(t.lookup),
         actions: [
           IconButton(
-            onPressed:
-                !readOnly && !_kdbxEntry!.isInRecycleBin()
-                    ? _deleteAccount
-                    : null,
+            onPressed: !readOnly && !_kdbxEntry!.isInRecycleBin()
+                ? _deleteAccount
+                : null,
             icon: const Icon(Icons.delete),
           ),
           IconButton(
-            onPressed: !readOnly
-                ? () => showEntryHistoryList(_kdbxEntry!)
-                : null,
+            onPressed:
+                !readOnly ? () => showEntryHistoryList(_kdbxEntry!) : null,
             icon: const Icon(Icons.history_rounded),
           ),
         ],
@@ -141,7 +155,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                   ),
                   Expanded(
                     child: Text(
-                      _kdbxEntry!.getNonNullString(KdbxKeyCommon.TITLE),
+                      title,
                       softWrap: false,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
@@ -159,19 +173,22 @@ class _LookAccountPageState extends State<LookAccountPage>
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: hintEmptyText(
-                  _kdbxEntry!.getNonNullString(KdbxKeyCommon.URL).isEmpty,
+                  url.isEmpty,
                   Text(
-                    _kdbxEntry!.getNonNullString(KdbxKeyCommon.URL),
+                    url,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
               ),
-              onLongPress:
-                  _kdbxEntry!.getNonNullString(KdbxKeyCommon.URL).isNotEmpty
-                      ? () => writeClipboard(
-                            _kdbxEntry!.getNonNullString(KdbxKeyCommon.URL),
-                          )
-                      : null,
+              trailing: IconButton(
+                onPressed: url.isNotEmpty ? () => _launchUrl(url) : null,
+                icon: const Icon(Icons.open_in_new),
+              ),
+              onLongPress: url.isNotEmpty
+                  ? () => writeClipboard(
+                        url,
+                      )
+                  : null,
             ),
             ListTile(
               title: Padding(
@@ -181,19 +198,15 @@ class _LookAccountPageState extends State<LookAccountPage>
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: hintEmptyText(
-                  _kdbxEntry!.getNonNullString(KdbxKeyCommon.USER_NAME).isEmpty,
+                  username.isEmpty,
                   Text(
-                    _kdbxEntry!.getNonNullString(KdbxKeyCommon.USER_NAME),
+                    username,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
               ),
-              onLongPress: _kdbxEntry!
-                      .getNonNullString(KdbxKeyCommon.USER_NAME)
-                      .isNotEmpty
-                  ? () => writeClipboard(
-                      _kdbxEntry!.getNonNullString(KdbxKeyCommon.USER_NAME))
-                  : null,
+              onLongPress:
+                  username.isNotEmpty ? () => writeClipboard(username) : null,
             ),
             ListTile(
               title: Padding(
@@ -203,24 +216,20 @@ class _LookAccountPageState extends State<LookAccountPage>
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: hintEmptyText(
-                  _kdbxEntry!.getNonNullString(KdbxKeyCommon.EMAIL).isEmpty,
+                  email.isEmpty,
                   Text(
-                    _kdbxEntry!.getNonNullString(KdbxKeyCommon.EMAIL),
+                    email,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
               ),
               onLongPress:
-                  _kdbxEntry!.getNonNullString(KdbxKeyCommon.EMAIL).isNotEmpty
-                      ? () => writeClipboard(
-                          _kdbxEntry!.getNonNullString(KdbxKeyCommon.EMAIL))
-                      : null,
+                  email.isNotEmpty ? () => writeClipboard(email) : null,
             ),
             _LookPasswordListTile(
               shape: shape,
-              password: _kdbxEntry!.getNonNullString(KdbxKeyCommon.PASSWORD),
-              onLongPress: () => writeClipboard(
-                  _kdbxEntry!.getNonNullString(KdbxKeyCommon.PASSWORD)),
+              password: password,
+              onLongPress: () => writeClipboard(password),
             ),
           ]),
           _otp(shape),
@@ -293,19 +302,16 @@ class _LookAccountPageState extends State<LookAccountPage>
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: hintEmptyText(
-                  _kdbxEntry!.getNonNullString(KdbxKeyCommon.NOTES).isEmpty,
+                  notes.isEmpty,
                   Text(
-                    _kdbxEntry!.getNonNullString(KdbxKeyCommon.NOTES),
+                    notes,
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
               ),
-              onTap:
-                  _kdbxEntry!.getNonNullString(KdbxKeyCommon.NOTES).isNotEmpty
-                      ? _showDescriptionDialog
-                      : null,
+              onTap: notes.isNotEmpty ? _showDescriptionDialog : null,
             ),
             ListTile(
               shape: shape,
