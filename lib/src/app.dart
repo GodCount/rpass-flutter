@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
+import 'package:privacy_screen/privacy_screen.dart';
 import 'package:rpass/src/i18n.dart';
 
 import './store/index.dart';
@@ -8,6 +12,8 @@ import 'context/store.dart';
 import 'old/page/verify/verify.dart';
 import 'old/store/index.dart';
 import 'theme/theme.dart';
+
+final _logger = Logger("mobile:app");
 
 class UnfocusNavigatorRoute extends NavigatorObserver {
   UnfocusNavigatorRoute();
@@ -33,8 +39,37 @@ class UnfocusNavigatorRoute extends NavigatorObserver {
   }
 }
 
-class RpassApp extends StatelessWidget {
+class RpassApp extends StatefulWidget {
   const RpassApp({super.key});
+
+  @override
+  State<RpassApp> createState() => _RpassAppState();
+}
+
+class _RpassAppState extends State<RpassApp> {
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  @override
+  void initState() {
+    if (Platform.isAndroid || Platform.isIOS) {
+      PrivacyScreen.instance
+          .enable(
+            androidOptions: const PrivacyAndroidOptions(
+              enableSecure: true,
+              autoLockAfterSeconds: 5,
+            ),
+            backgroundColor: Colors.transparent,
+            blurEffect: PrivacyBlurEffect.extraLight,
+          )
+          .then(
+            (value) => _logger.finest("enable privacy screen result: $value"),
+            onError: (error) =>
+                _logger.fine("enable privacy screen error: ", error),
+          );
+    }
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +84,7 @@ class RpassApp extends StatelessWidget {
 
           return MaterialApp(
             restorationScopeId: 'app',
+            navigatorKey: navigatorKey,
             theme: theme(Brightness.light),
             darkTheme: theme(Brightness.dark),
             themeMode: store.settings.themeMode,
@@ -95,6 +131,12 @@ class RpassApp extends StatelessWidget {
               // 旧版数据迁移,验证界面
               VerifyPassword.routeName: (context) => const VerifyPassword(),
             },
+            builder: Platform.isAndroid || Platform.isIOS
+                ? (_, child) => PrivacyGate(
+                      navigatorKey: navigatorKey,
+                      child: child,
+                    )
+                : null,
           );
         },
       ),
