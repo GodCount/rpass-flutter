@@ -102,14 +102,13 @@ class _LoadKdbxState extends State<LoadKdbx> {
         );
         widget.onLoadedKdbx(kdbx);
       }
-    } on AuthException catch (e) {
-      if (e.code == AuthExceptionCode.userCanceled ||
-          e.code == AuthExceptionCode.canceled ||
-          e.code == AuthExceptionCode.timeout) {
+    } catch (e) {
+      if (e is AuthException &&
+          (e.code == AuthExceptionCode.userCanceled ||
+              e.code == AuthExceptionCode.canceled ||
+              e.code == AuthExceptionCode.timeout)) {
         return;
       }
-      rethrow;
-    } catch (e) {
       _logger.warning("load kdbx by biometric fail!", e);
       showError(e);
       setState(() {

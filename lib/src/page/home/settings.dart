@@ -180,14 +180,13 @@ class SettingsPageState extends State<SettingsPage>
                     );
                     store.settings.seEnableBiometric(enableBiometric);
                     _logger.finest("biometric status is $enableBiometric");
-                  } on AuthException catch (e) {
-                    if (e.code == AuthExceptionCode.userCanceled ||
-                        e.code == AuthExceptionCode.canceled ||
-                        e.code == AuthExceptionCode.timeout) {
+                  } catch (e, s) {
+                    if (e is AuthException &&
+                        (e.code == AuthExceptionCode.userCanceled ||
+                            e.code == AuthExceptionCode.canceled ||
+                            e.code == AuthExceptionCode.timeout)) {
                       return;
                     }
-                    rethrow;
-                  } catch (e, s) {
                     _logger.severe("set biometric exception!", e, s);
                     showError(e);
                   } finally {
@@ -322,14 +321,13 @@ class SettingsPageState extends State<SettingsPage>
                 credentials.getHash(),
               );
               _logger.finest("update credentials to biometric done!");
-            } on AuthException catch (e) {
-              if (e.code == AuthExceptionCode.userCanceled ||
-                  e.code == AuthExceptionCode.canceled ||
-                  e.code == AuthExceptionCode.timeout) {
+            } catch (e, s) {
+              if (e is AuthException &&
+                  (e.code == AuthExceptionCode.userCanceled ||
+                      e.code == AuthExceptionCode.canceled ||
+                      e.code == AuthExceptionCode.timeout)) {
                 return;
               }
-              rethrow;
-            } catch (e, s) {
               _logger.severe("update credentials to biometric fail!", e, s);
               rethrow;
             }
