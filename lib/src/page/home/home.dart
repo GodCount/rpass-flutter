@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
-import '../../context/kdbx.dart';
 import '../../i18n.dart';
-import '../../kdbx/kdbx.dart';
-import '../../old/store/index.dart';
-import '../../widget/extension_state.dart';
 import 'groups.dart';
 import 'settings.dart';
 import 'passwords.dart';
@@ -40,30 +36,6 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   bool get wantKeepAlive => true;
 
   @override
-  void initState() {
-    super.initState();
-    Future.delayed(Duration.zero, _initMigrate);
-  }
-
-  void _initMigrate() async {
-    final oldStore = OldStore();
-    if (oldStore.accounts.accountList.isNotEmpty) {
-      final kdbx = KdbxProvider.of(context)!;
-      try {
-        kdbx.import(OldRpassAdapter().import(oldStore.accounts.accountList));
-        await kdbxSave(kdbx);
-        await oldStore.clear();
-        showToast(I18n.of(context)!.data_migrate_done);
-        setState(() {});
-        _logger.finest("old data migrate done.");
-      } catch (e, s) {
-        _logger.severe("old data migrate fial!", e, s);
-        showError(e);
-      }
-    }
-  }
-
-  @override
   void dispose() {
     _controller.dispose();
     _searchController.dispose();
@@ -83,24 +55,17 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     super.build(context);
 
-    return OldStore().accounts.accountList.isEmpty
-        ? Scaffold(
-            body: PageView(
-              controller: _controller,
-              children: [
-                PasswordsPage(searchController: _searchController),
-                const GroupsPage(),
-                const SettingsPage(),
-              ],
-            ),
-            bottomNavigationBar:
-                _MyBottomNavigationBar(controller: _controller),
-          )
-        : const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
+    return Scaffold(
+      body: PageView(
+        controller: _controller,
+        children: [
+          PasswordsPage(searchController: _searchController),
+          const GroupsPage(),
+          const SettingsPage(),
+        ],
+      ),
+      bottomNavigationBar: _MyBottomNavigationBar(controller: _controller),
+    );
   }
 }
 

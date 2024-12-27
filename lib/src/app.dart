@@ -9,8 +9,6 @@ import './store/index.dart';
 import './page/page.dart';
 import 'context/kdbx.dart';
 import 'context/store.dart';
-import 'old/page/verify/verify.dart';
-import 'old/store/index.dart';
 import 'theme/theme.dart';
 
 final _logger = Logger("mobile:app");
@@ -74,7 +72,6 @@ class _RpassAppState extends State<RpassApp> {
   @override
   Widget build(BuildContext context) {
     final store = Store();
-    final oldStore = OldStore();
     return StoreProvider(
       store: store,
       child: ListenableBuilder(
@@ -99,11 +96,8 @@ class _RpassAppState extends State<RpassApp> {
               }
               return null;
             },
-            initialRoute: oldStore.accounts.isExistAccount
-                ? VerifyPassword.routeName
-                : kdbx == null
-                    ? InitKdbxPage.routeName
-                    : Home.routeName,
+            initialRoute:
+                kdbx == null ? InitKdbxPage.routeName : Home.routeName,
             navigatorObservers: [UnfocusNavigatorRoute()],
             routes: {
               Home.routeName: (context) => const Home(),
@@ -114,12 +108,10 @@ class _RpassAppState extends State<RpassApp> {
               RecycleBinPage.routeName: (context) => const RecycleBinPage(),
               KdbxSettingPage.routeName: (context) => const KdbxSettingPage(),
               ManageGroupEntry.routeName: (context) => const ManageGroupEntry(),
-
               EditAccountPage.routeName: (context) => const EditAccountPage(),
               GenPassword.routeName: (context) => const GenPassword(),
               EditNotes.routeName: (context) => const EditNotes(),
               LookAccountPage.routeName: (context) => const LookAccountPage(),
-
               QrCodeScannerPage.routeName: (context) =>
                   const QrCodeScannerPage(),
               ChangeLocalePage.routeName: (context) => const ChangeLocalePage(),
@@ -127,9 +119,6 @@ class _RpassAppState extends State<RpassApp> {
                   const ExportAccountPage(),
               ImportAccountPage.routeName: (context) =>
                   const ImportAccountPage(),
-
-              // 旧版数据迁移,验证界面
-              VerifyPassword.routeName: (context) => const VerifyPassword(),
             },
             builder: Platform.isAndroid || Platform.isIOS
                 ? (_, child) => PrivacyGate(
