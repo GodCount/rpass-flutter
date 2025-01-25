@@ -1,10 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:rpass/src/theme/theme.dart';
+import 'package:window_manager/window_manager.dart';
 
+import 'page/desktop_layout.dart';
 import 'page/shake_test.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // 必须加上这一行。
+  await windowManager.ensureInitialized();
+
+  WindowOptions windowOptions = const WindowOptions(
+    size: Size(531, 632),
+    minimumSize: Size(354, 540),
+    center: true,
+    skipTaskbar: false,
+  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+  });
   runApp(const _WidgetTestApp());
 }
 
@@ -13,6 +28,7 @@ class _WidgetTestApp extends StatelessWidget {
 
   static final Map<String, WidgetBuilder> routes = {
     ShakeTestPage.routeName: (context) => const ShakeTestPage(),
+    DesktopLayoutPage.routeName: (context) => const DesktopLayoutPage(),
   };
 
   @override

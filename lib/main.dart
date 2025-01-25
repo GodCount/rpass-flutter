@@ -3,7 +3,6 @@ import 'package:logging/logging.dart';
 
 import 'src/context/biometric.dart';
 import 'src/log.dart';
-import 'src/old/store/index.dart';
 import 'src/rpass.dart';
 import 'src/app.dart';
 import 'src/store/index.dart';
@@ -20,7 +19,6 @@ void main() async {
   try {
     await RpassInfo.init();
     await Store().loadStore();
-    await OldStore().loadStore();
   } catch (e, s) {
     _logger.severe("init fail!", e, s);
     return runApp(InitAppFail(error: e));
