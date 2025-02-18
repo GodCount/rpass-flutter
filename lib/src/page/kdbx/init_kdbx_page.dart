@@ -22,10 +22,22 @@ class InitKdbxPage extends StatefulWidget {
 class _InitKdbxPageState extends State<InitKdbxPage> {
   void _addPresetGroup(Kdbx kdbx) {
     final t = I18n.of(context)!;
-    final general = kdbx.createGroup(t.common);
-    kdbx.customData[KdbxCustomDataKey.GENERAL_GROUP_UUID] = general.uuid.uuid;
-    kdbx.createGroup(t.email).icon.set(KdbxIcon.EMail);
+
     kdbx.kdbxFile.body.rootGroup.name.set(t.default_);
+
+    String? uuid = kdbx.customData[KdbxCustomDataKey.GENERAL_GROUP_UUID];
+    if (uuid == null || kdbx.findGroupByUuid(KdbxUuid(uuid)) == null) {
+      final general = kdbx.createGroup(t.common);
+      kdbx.customData[KdbxCustomDataKey.GENERAL_GROUP_UUID] = general.uuid.uuid;
+    }
+
+    uuid = kdbx.customData[KdbxCustomDataKey.EMAIL_GROUP_UUID];
+
+    if (uuid == null || kdbx.findGroupByUuid(KdbxUuid(uuid)) == null) {
+      final email = kdbx.createGroup(t.email)..icon.set(KdbxIcon.EMail);
+      kdbx.customData[KdbxCustomDataKey.EMAIL_GROUP_UUID] = email.uuid.uuid;
+    }
+
     kdbxSave(kdbx);
   }
 

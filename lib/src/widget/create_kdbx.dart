@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
+import '../page/page.dart';
+import '../util/file.dart';
 import 'shake_widget.dart';
 
 typedef OnCreatedKdbx = void Function(Kdbx kdbx);
@@ -36,6 +38,20 @@ class CreateKdbxState extends State<CreateKdbx> {
       name: widget.kdbxName,
     );
     widget.onCreatedKdbx(kdbx);
+  }
+
+  void _importKdbx() async {
+    final file = await SimpleFile.openFile(allowedExtensions: ["kdbx"]);
+    final kdbx = await Navigator.pushNamed(
+      context,
+      LoadKdbxPage.routeName,
+      arguments: LoadKdbxPageArguments(
+        readKdbxFile: () async => file,
+      ),
+    );
+    if (kdbx != null && kdbx is Kdbx) {
+      widget.onCreatedKdbx(kdbx);
+    }
   }
 
   @override
@@ -120,6 +136,14 @@ class CreateKdbxState extends State<CreateKdbx> {
                           }
                         },
                         child: Text(t.init),
+                      ),
+                    ),
+                    Container(
+                      width: 180,
+                      padding: const EdgeInsets.only(top: 24),
+                      child: ElevatedButton(
+                        onPressed: _importKdbx,
+                        child: Text(t.import),
                       ),
                     ),
                   ],

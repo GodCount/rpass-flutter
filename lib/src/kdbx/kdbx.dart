@@ -30,6 +30,7 @@ abstract class KdbxBase {
 
 class KdbxCustomDataKey {
   static const GENERAL_GROUP_UUID = 'general_group_uuid';
+  static const EMAIL_GROUP_UUID = 'email_group_uuid';
 }
 
 class KdbxKeySpecial {
