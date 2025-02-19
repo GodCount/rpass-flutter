@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:privacy_screen/privacy_screen.dart';
 import 'package:rpass/src/i18n.dart';
 
 import './store/index.dart';
@@ -37,37 +34,8 @@ class UnfocusNavigatorRoute extends NavigatorObserver {
   }
 }
 
-class RpassApp extends StatefulWidget {
+class RpassApp extends StatelessWidget {
   const RpassApp({super.key});
-
-  @override
-  State<RpassApp> createState() => _RpassAppState();
-}
-
-class _RpassAppState extends State<RpassApp> {
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
-  @override
-  void initState() {
-    if (Platform.isAndroid || Platform.isIOS) {
-      PrivacyScreen.instance
-          .enable(
-            androidOptions: const PrivacyAndroidOptions(
-              enableSecure: true,
-              autoLockAfterSeconds: 5,
-            ),
-            backgroundColor: Colors.transparent,
-            blurEffect: PrivacyBlurEffect.extraLight,
-          )
-          .then(
-            (value) => _logger.finest("enable privacy screen result: $value"),
-            onError: (error) =>
-                _logger.fine("enable privacy screen error: ", error),
-          );
-    }
-
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +49,6 @@ class _RpassAppState extends State<RpassApp> {
 
           return MaterialApp(
             restorationScopeId: 'app',
-            navigatorKey: navigatorKey,
             theme: theme(Brightness.light),
             darkTheme: theme(Brightness.dark),
             themeMode: store.settings.themeMode,
@@ -120,12 +87,6 @@ class _RpassAppState extends State<RpassApp> {
               ImportAccountPage.routeName: (context) =>
                   const ImportAccountPage(),
             },
-            builder: Platform.isAndroid || Platform.isIOS
-                ? (_, child) => PrivacyGate(
-                      navigatorKey: navigatorKey,
-                      child: child,
-                    )
-                : null,
           );
         },
       ),
