@@ -10,12 +10,13 @@ class SettingsController with ChangeNotifier {
 
   late ThemeMode _themeMode;
   Locale? _locale;
-
   late bool _enableBiometric;
+  Duration? _lockDelay;
 
   ThemeMode get themeMode => _themeMode;
   Locale? get locale => _locale;
   bool get enableBiometric => _enableBiometric;
+  Duration? get lockDelay => _lockDelay;
 
   Future<void> setThemeMode(ThemeMode? mode) async {
     if (mode == null) return;
@@ -54,11 +55,22 @@ class SettingsController with ChangeNotifier {
     await _store.loadStore();
   }
 
+  Future<void> setLockDelay(Duration? delay) async {
+    if (delay == _lockDelay) return;
+
+    _lockDelay = delay;
+
+    notifyListeners();
+
+    await _settingsService.setLockDelay(delay);
+  }
+
   Future<void> init(Store store) async {
     _store = store;
     _themeMode = await _settingsService.getThemeMode();
     _locale = await _settingsService.getLocale();
     _enableBiometric = await _settingsService.getEnableBiometric();
+    _lockDelay = await _settingsService.getLockDelay();
     notifyListeners();
   }
 }

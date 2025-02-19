@@ -198,6 +198,14 @@ class SettingsPageState extends State<SettingsPage>
               title: Text(t.modify_password),
               onTap: _modifyPassword,
             ),
+            ListTile(
+              shape: shape,
+              title: Text(t.more_settings),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () {
+                Navigator.of(context).pushNamed(MoreSecurityPage.routeName);
+              },
+            ),
           ]),
           _cardColumn([
             Padding(

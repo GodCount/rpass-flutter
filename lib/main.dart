@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
@@ -14,7 +16,10 @@ void main() async {
 
   await Log.setupLogging(true);
 
-  await BiometricState.initCanAuthenticate();
+  // TODO！桌面端未进行测试
+  if (Platform.isAndroid || Platform.isIOS) {
+    await BiometricState.initCanAuthenticate();
+  }
 
   try {
     await RpassInfo.init();

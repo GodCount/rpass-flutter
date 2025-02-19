@@ -35,6 +35,19 @@ class SettingsService with SharedPreferencesService {
     return await setBool("enable_biometric", enable);
   }
 
+  Future<Duration?> getLockDelay() async {
+    final delay = await getInt("lock_delay_seconds");
+    return delay != null ? Duration(seconds: delay) : null;
+  }
+
+  Future<bool> setLockDelay(Duration? delay) async {
+    if (delay != null) {
+      return setInt("lock_delay_seconds", delay.inSeconds);
+    } else {
+      return remove("lock_delay_seconds");
+    }
+  }
+
   @override
   Future<bool> clear() => super.clear();
 }

@@ -201,5 +201,27 @@
             }
         }
     },
-    "invert_select": "Select Invert"
+    "invert_select": "Select Invert",
+    "more_settings": "More Settings",
+    "lock": "Lock",
+    "lock_subtitle": "The program will lock itself after a period of time when running in the background or losing focus (desktop).",
+    "never": "Never",
+    "seconds": "{sec} seconds",
+    "@seconds": {
+        "description": "diaplsy seconds",
+        "placeholders": {
+            "sec": {
+                "type": "int"
+            }
+        }
+    },
+    "minutes": "{min} minutes",
+    "@minutes": {
+        "description": "diaplsy minutes",
+        "placeholders": {
+            "min": {
+                "type": "int"
+            }
+        }
+    }
 }

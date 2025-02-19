@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:biometric_storage/biometric_storage.dart';
@@ -41,13 +42,20 @@ class Biometric extends StatefulWidget {
   State<Biometric> createState() => BiometricState();
 }
 
+enum BiometricStorageKey {
+  // 存储 kdbx 解密密钥
+  credentials,
+  // 用来验证指纹的，执行一下危险操作时确认权限
+  owner,
+}
+
 class BiometricState extends State<Biometric> {
   static CanAuthenticateResponse _authenticateResponse =
       CanAuthenticateResponse.unsupported;
 
-  final BiometricStorage _biometric = BiometricStorage();
+  static final BiometricStorage _biometric = BiometricStorage();
 
-  BiometricStorageFile? _storageFile;
+  final Map<String, BiometricStorageFile> _storageMap = HashMap();
 
   bool get isSupport =>
       _authenticateResponse == CanAuthenticateResponse.success ||
@@ -58,7 +66,7 @@ class BiometricState extends State<Biometric> {
 
   static Future<void> initCanAuthenticate() async {
     try {
-      _authenticateResponse = await BiometricStorage().canAuthenticate();
+      _authenticateResponse = await _biometric.canAuthenticate();
     } catch (e) {
       _logger.warning("unsupport biometric!", e);
     }
@@ -89,12 +97,23 @@ class BiometricState extends State<Biometric> {
     }
   }
 
-  Future<BiometricStorageFile> _getStorageFile(BuildContext context) async {
+  Future<BiometricStorageFile> _getStorageFile(
+    BuildContext context,
+    BiometricStorageKey key, {
+    // 只有第一次初始化时才有效
+    StorageFileInitOptions? options,
+  }) async {
     _assertBiometric();
-    if (_storageFile != null) return _storageFile!;
-    _storageFile = await _biometric.getStorage("credentials",
-        promptInfo: _getPromptInfo(context));
-    return _storageFile!;
+
+    if (_storageMap.containsKey(key.name)) return _storageMap[key.name]!;
+
+    _storageMap[key.name] = await _biometric.getStorage(
+      key.name,
+      options: options,
+      promptInfo: _getPromptInfo(context),
+    );
+
+    return _storageMap[key.name]!;
   }
 
   String _encode(Uint8List data) {
@@ -112,8 +131,9 @@ class BiometricState extends State<Biometric> {
       throw Exception("not enabled biometric");
     }
 
-    final credentials = await (await _getStorageFile(context))
-        .read(promptInfo: _getPromptInfo(context));
+    final credentials =
+        await (await _getStorageFile(context, BiometricStorageKey.credentials))
+            .read(promptInfo: _getPromptInfo(context));
     if (credentials == null || credentials.isEmpty) {
       StoreProvider.of(context).settings.seEnableBiometric(false);
       throw Exception("no record token from biometric");
@@ -122,16 +142,37 @@ class BiometricState extends State<Biometric> {
     return _decode(credentials);
   }
 
+  Future<bool> verifyOwner(BuildContext context) async {
+    try {
+      _assertBiometric();
+
+      // 通过写入触发生物识别以验证权限
+      await (await _getStorageFile(context, BiometricStorageKey.owner)).write(
+        "owner",
+        promptInfo: _getPromptInfo(context),
+      );
+
+      return true;
+    } catch (e) {
+      _logger.finest("verify owner", e);
+      return false;
+    }
+  }
+
   Future<void> updateCredentials(
     BuildContext context,
     Uint8List? credentials,
   ) async {
     _assertBiometric();
+
     if (credentials == null) {
-      await (await _getStorageFile(context))
+      await (await _getStorageFile(context, BiometricStorageKey.credentials))
           .delete(promptInfo: _getPromptInfo(context));
     } else {
-      await (await _getStorageFile(context))
+      await (await _getStorageFile(
+        context,
+        BiometricStorageKey.credentials,
+      ))
           .write(_encode(credentials), promptInfo: _getPromptInfo(context));
     }
   }

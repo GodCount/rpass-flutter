@@ -201,5 +201,27 @@
             }
         }
     },
-    "invert_select": "反选"
+    "invert_select": "反选",
+    "more_settings": "更多设置",
+    "lock": "锁定",
+    "lock_subtitle": "程序后台运行或者失去焦点（桌面端），一段时间后锁定程序。",
+    "never": "永不",
+    "seconds": "{sec} 秒",
+    "@seconds": {
+        "description": "显示秒",
+        "placeholders": {
+            "sec": {
+                "type": "int"
+            }
+        }
+    },
+    "minutes": "{min} 分钟",
+    "@minutes": {
+        "description": "显示分钟",
+        "placeholders": {
+            "min": {
+                "type": "int"
+            }
+        }
+    }
 }
