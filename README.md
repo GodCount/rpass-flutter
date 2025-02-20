@@ -25,56 +25,53 @@
 ```
 flutter doctor -v
 
-[√] Flutter (Channel stable, 3.22.2, on Microsoft Windows [版本 10.0.26120.1542], locale zh-CN)
-    • Flutter version 3.22.2 on channel stable at E:\flutter\flutter
+[✓] Flutter (Channel stable, 3.29.0, on macOS 13.6.5 22G621 darwin-arm64, locale zh-Hans-CN) [387ms]
+    • Flutter version 3.29.0 on channel stable at /Users/admin/flutter
     • Upstream repository https://github.com/flutter/flutter.git
-    • Framework revision 761747bfc5 (5 months ago), 2024-06-05 22:15:13 +0200
-    • Engine revision edd8546116
-    • Dart version 3.4.3
-    • DevTools version 2.34.3
+    • Framework revision 35c388afb5 (9 days ago), 2025-02-10 12:48:41 -0800
+    • Engine revision f73bfc4522
+    • Dart version 3.7.0
+    • DevTools version 2.42.2
 
-[√] Windows Version (Installed version of Windows is version 10 or higher)
-
-[√] Android toolchain - develop for Android devices (Android SDK version 34.0.0)
-    • Android SDK at E:\Android\Sdk
-    • Platform android-34, build-tools 34.0.0
-    • Java binary at: C:\Program Files\Android\Android Studio\jbr\bin\java
-    • Java version OpenJDK Runtime Environment (build 17.0.10+0--11609105)
+[✓] Android toolchain - develop for Android devices (Android SDK version 35.0.1) [2.4s]
+    • Android SDK at /Volumes/extend/Android/sdk
+    • Platform android-35, build-tools 35.0.1
+    • Java binary at: /Volumes/extend/Application/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+      This is the JDK bundled with the latest Android Studio installation on this machine.
+      To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`.
+    • Java version OpenJDK Runtime Environment (build 21.0.5+-12932927-b750.29)
     • All Android licenses accepted.
 
-[√] Chrome - develop for the web
-    • Chrome at C:\Program Files\Google\Chrome\Application\chrome.exe
+[!] Xcode - develop for iOS and macOS (Xcode 15.2) [864ms]
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • Build 15C500b
+    ✗ Unable to get list of installed Simulator runtimes.
+    • CocoaPods version 1.16.2
 
-[√] Visual Studio - develop Windows apps (Visual Studio Community 2022 17.10.3)
-    • Visual Studio at C:\Program Files\Microsoft Visual Studio\2022\Community
-    • Visual Studio Community 2022 version 17.10.35013.160
-    • Windows 10 SDK version 10.0.22621.0
+[✓] Chrome - develop for the web [10ms]
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
 
-[√] Android Studio (version 2024.1)
-    • Android Studio at C:\Program Files\Android\Android Studio
+[✓] Android Studio (version 2024.2) [9ms]
+    • Android Studio at /Volumes/extend/Application/Android Studio.app/Contents
     • Flutter plugin can be installed from:
-       https://plugins.jetbrains.com/plugin/9212-flutter
+      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
     • Dart plugin can be installed from:
-       https://plugins.jetbrains.com/plugin/6351-dart
-    • Java version OpenJDK Runtime Environment (build 17.0.10+0--11609105)
+      🔨 https://plugins.jetbrains.com/plugin/6351-dart
+    • android-studio-dir = /Volumes/extend/Application/Android Studio.app
+    • Java version OpenJDK Runtime Environment (build 21.0.5+-12932927-b750.29)
 
-[√] IntelliJ IDEA Community Edition (version 2024.1)
-    • IntelliJ at C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2024.1.4
-    • Flutter plugin can be installed from:
-       https://plugins.jetbrains.com/plugin/9212-flutter
-    • Dart plugin version 241.17890.8
+[✓] VS Code (version 1.97.2) [8ms]
+    • VS Code at /Applications/Visual Studio Code.app/Contents
+    • Flutter extension version 3.104.0
 
-[√] VS Code (version 1.94.2)
-    • VS Code at C:\Users\<user>\AppData\Local\Programs\Microsoft VS Code
-    • Flutter extension version 3.98.0
+[✓] Connected device (3 available) [7.0s]
+    • macOS (desktop)                 • macos                 • darwin-arm64   • macOS 13.6.5 22G621 darwin-arm64
+    • Mac Designed for iPad (desktop) • mac-designed-for-ipad • darwin         • macOS 13.6.5 22G621 darwin-arm64
+    • Chrome (web)                    • chrome                • web-javascript • Google Chrome 133.0.6943.99
 
-[√] Connected device (3 available)
-    • Windows (desktop) • windows • windows-x64    • Microsoft Windows [版本 10.0.26120.1542]
-    • Chrome (web)      • chrome  • web-javascript • Google Chrome 128.0.6613.84
-    • Edge (web)        • edge    • web-javascript • Microsoft Edge 130.0.2849.46
+[✓] Network resources [2.0s]
+    • All expected network resources are available.
 
-[!] Network resources
-    X A network error occurred while checking "https://maven.google.com/": 信号灯超时时间已到
 ```
 
 -   安装依赖
