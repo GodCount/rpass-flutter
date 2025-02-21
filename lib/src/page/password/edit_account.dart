@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_cupertino_datetime_picker/flutter_cupertino_datetime_picker.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
@@ -285,6 +286,10 @@ class EntryTagsFieldSaved extends EntryFieldSaved<List<String>> {
 class EntryBinaryFieldSaved
     extends EntryFieldSaved<List<MapEntry<KdbxKey, KdbxBinary>>> {
   EntryBinaryFieldSaved({required super.key, required super.value});
+}
+
+class EntryExpiresFieldSaved extends EntryFieldSaved<(bool, DateTime)> {
+  EntryExpiresFieldSaved({required super.key, required super.value});
 }
 
 typedef OnEntryFidleDeleted = void Function(KdbxKey key);
@@ -638,6 +643,12 @@ class _EntryFieldState extends State<EntryField> {
             ));
           },
         );
+      case KdbxKeySpecial.KEY_EXPIRES:
+        return EntryExpiresFormField(initialValue: (
+          widget.kdbxEntry.times.expires.get() ?? false,
+          widget.kdbxEntry.times.expiryTime.get() ??
+              DateTime(4001, 01, 01, 0, 0),
+        ), onSaved: (value) {});
       default:
         return EntryTextFormField(
           initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
@@ -839,7 +850,7 @@ class EntryNotesFormField extends FormField<String> {
                 border: const OutlineInputBorder(),
               ),
               child: field.value != null && field.value!.isNotEmpty
-                  ? Text(field.value!)
+                  ? Text(field.value!, maxLines: 3)
                   : null,
             ),
           );
@@ -984,4 +995,29 @@ class _DropdownMenuFormFieldState extends FormFieldState<String> {
       didChange(controller.text);
     }
   }
+}
+
+class EntryExpiresFormField extends FormField<(bool, DateTime)> {
+  EntryExpiresFormField({
+    super.key,
+    String? label,
+    super.initialValue,
+    super.onSaved,
+  }) : super(builder: (field) {
+          return GestureDetector(
+            onTap: () async {
+              // TODO! 弹出自定义日期选择
+              DatePicker.showDatePicker(field.context);
+            },
+            child: InputDecorator(
+              isEmpty: field.value == null,
+              decoration: InputDecoration(
+                labelText: label,
+                border: const OutlineInputBorder(),
+              ),
+              child:
+                  field.value != null ? Text(field.value!.$2.toString()) : null,
+            ),
+          );
+        });
 }

@@ -1,13 +1,9 @@
-import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 
 import '../context/biometric.dart';
-import '../i18n.dart';
 import '../kdbx/kdbx.dart';
-import 'extension_state.dart';
-import 'shake_widget.dart';
 import 'verify_password.dart';
 
 // ignore: unused_element

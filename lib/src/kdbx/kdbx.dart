@@ -23,7 +23,8 @@ export 'package:kdbx/kdbx.dart'
         KdbxCustomIcon,
         KdbxDao,
         KdbxUuid,
-        KdbxInvalidKeyException;
+        KdbxInvalidKeyException,
+        KeyFileCredentials;
 
 abstract class KdbxBase {
   abstract final KdbxFile kdbxFile;
@@ -37,13 +38,17 @@ class KdbxCustomDataKey {
 class KdbxKeySpecial {
   static const KEY_TAGS = 'Tags';
   static const KEY_ATTACH = 'Attach';
+  static const KEY_EXPIRES = "expires";
 
   static KdbxKey TAGS = KdbxKey(KEY_TAGS);
   static KdbxKey ATTACH = KdbxKey(KEY_ATTACH);
+  static KdbxKey EXPIRES = KdbxKey(KEY_EXPIRES);
+
 
   static List<KdbxKey> all = [
     TAGS,
     ATTACH,
+    EXPIRES
   ];
 }
 

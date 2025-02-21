@@ -29,11 +29,10 @@ class _VerifyOwnerPageState extends State<VerifyOwnerPage>
     }
   }
 
-  Future<void> _verifyPassword(String? password) async {
+  Future<void> _verifyPassword(Kdbx kdbx, String? password) async {
     if (password == null || password.isEmpty) {
       throw Exception("password is empty");
     }
-    final kdbx = KdbxProvider.of(context)!;
     final credentials = kdbx.createCredentials(password);
 
     if (credentials.toBase64() != kdbx.credentials.toBase64()) {
@@ -41,8 +40,7 @@ class _VerifyOwnerPageState extends State<VerifyOwnerPage>
     }
   }
 
-  Future<void> _verifyBiometric() async {
-    final biometric = Biometric.of(context);
+  Future<void> _verifyBiometric(BiometricState biometric) async {
     if (!await biometric.verifyOwner(context)) {
       throw Exception("biometric verify error");
     }
@@ -53,6 +51,7 @@ class _VerifyOwnerPageState extends State<VerifyOwnerPage>
     String? password,
   ]) async {
     final kdbx = KdbxProvider.of(context);
+    final biometric = Biometric.of(context);
 
     if (kdbx == null) {
       Navigator.popUntil(
@@ -65,9 +64,14 @@ class _VerifyOwnerPageState extends State<VerifyOwnerPage>
 
     switch (type) {
       case VerifyType.password:
-        await _verifyPassword(password);
+        await _verifyPassword(kdbx, password);
+        break;
       case VerifyType.biometric:
-        await _verifyBiometric();
+        if (!biometric.enable) {
+          return;
+        }
+        await _verifyBiometric(biometric);
+        break;
     }
 
     Navigator.pop(context);

@@ -160,17 +160,23 @@ class KbdxSearchHandler {
         case KdbxKeySpecial.KEY_TAGS:
           if (!kdbxEntry.tagList
               .map((item) => item.toLowerCase())
-              .contains(item.value.toLowerCase())) return false;
+              .contains(item.value.toLowerCase())) {
+            return false;
+          }
           break;
         case "Group":
           if (item.value.isNotEmpty &&
-              kdbxEntry.parent?.name.get() != item.value) return false;
+              kdbxEntry.parent?.name.get() != item.value) {
+            return false;
+          }
           break;
         default:
           if (!kdbxEntry
               .getNonNullString(KdbxKey(item.field!))
               .toLowerCase()
-              .contains(item.value.toLowerCase())) return false;
+              .contains(item.value.toLowerCase())) {
+            return false;
+          }
           break;
       }
     }
