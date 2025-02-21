@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
+import '../../context/store.dart';
 import '../../i18n.dart';
+import '../page.dart';
 import 'groups.dart';
 import 'settings.dart';
 import 'passwords.dart';
@@ -28,18 +32,56 @@ class Home extends StatefulWidget {
   State<Home> createState() => HomeState();
 }
 
-class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
+class HomeState extends State<Home>
+    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   final PageController _controller = PageController(initialPage: 0);
   final TextEditingController _searchController = TextEditingController();
+
+  Timer? _timer;
+  bool _verificationStart = false;
 
   @override
   bool get wantKeepAlive => true;
 
   @override
-  void dispose() {
-    _controller.dispose();
-    _searchController.dispose();
-    super.dispose();
+  void initState() {
+    WidgetsBinding.instance.addObserver(this);
+    super.initState();
+  }
+
+  void _startTimer() {
+    final settings = StoreProvider.of(context).settings;
+    if (settings.lockDelay != null && !_verificationStart) {
+      _cancelTimer();
+      _timer = Timer(settings.lockDelay!, () async {
+        _verificationStart = true;
+        await Navigator.of(context).pushNamed(VerifyOwnerPage.routeName);
+        _verificationStart = false;
+      });
+    }
+  }
+
+  void _cancelTimer() {
+    if (_timer != null) {
+      _timer!.cancel();
+      _timer = null;
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+        _startTimer();
+        break;
+      case AppLifecycleState.resumed:
+        _cancelTimer();
+        break;
+      case AppLifecycleState.detached:
+        break;
+    }
   }
 
   void toPasswordPageSearch(String text) async {
@@ -49,6 +91,15 @@ class HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
       curve: Curves.easeIn,
     );
     _searchController.text = text;
+  }
+
+  @override
+  void dispose() {
+    _cancelTimer();
+    _controller.dispose();
+    _searchController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override

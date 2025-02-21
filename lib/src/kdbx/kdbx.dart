@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -246,6 +247,12 @@ extension KdbxRecycleBinExt on KdbxBase {
     }
 
     kdbxFile.move(object, prveGroup);
+  }
+}
+
+extension Base64Credentials on Credentials {
+  String toBase64() {
+    return base64.encode(getHash());
   }
 }
 

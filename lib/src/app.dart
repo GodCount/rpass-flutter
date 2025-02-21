@@ -87,6 +87,7 @@ class RpassApp extends StatelessWidget {
               ImportAccountPage.routeName: (context) =>
                   const ImportAccountPage(),
               MoreSecurityPage.routeName: (context) => const MoreSecurityPage(),
+              VerifyOwnerPage.routeName: (context) => const VerifyOwnerPage(),
             },
           );
         },

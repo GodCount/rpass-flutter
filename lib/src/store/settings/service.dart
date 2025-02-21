@@ -37,15 +37,13 @@ class SettingsService with SharedPreferencesService {
 
   Future<Duration?> getLockDelay() async {
     final delay = await getInt("lock_delay_seconds");
-    return delay != null ? Duration(seconds: delay) : null;
+    // 默认值 30秒
+    // 小于0则表示永不
+    return delay == null || delay > 0 ? Duration(seconds: delay ?? 30) : null;
   }
 
   Future<bool> setLockDelay(Duration? delay) async {
-    if (delay != null) {
-      return setInt("lock_delay_seconds", delay.inSeconds);
-    } else {
-      return remove("lock_delay_seconds");
-    }
+    return setInt("lock_delay_seconds", delay != null ? delay.inSeconds : -1);
   }
 
   @override
