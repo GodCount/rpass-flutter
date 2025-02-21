@@ -74,6 +74,7 @@ class _LoadKdbxState extends State<LoadKdbx> {
   Widget build(BuildContext context) {
     return VerifyPassword(
       biometric: widget.biometric,
+      autoPopUpBiometric: true,
       onVerifyPassword: (type, [password]) async {
         switch (type) {
           case VerifyType.password:

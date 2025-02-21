@@ -18,7 +18,17 @@ class VerifyOwnerPage extends StatefulWidget {
   State<VerifyOwnerPage> createState() => _VerifyOwnerPageState();
 }
 
-class _VerifyOwnerPageState extends State<VerifyOwnerPage> {
+class _VerifyOwnerPageState extends State<VerifyOwnerPage>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+      _onVerifyPassword(VerifyType.biometric);
+    }
+  }
+
   Future<void> _verifyPassword(String? password) async {
     if (password == null || password.isEmpty) {
       throw Exception("password is empty");
@@ -38,31 +48,54 @@ class _VerifyOwnerPageState extends State<VerifyOwnerPage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Future<void> _onVerifyPassword(
+    VerifyType type, [
+    String? password,
+  ]) async {
     final kdbx = KdbxProvider.of(context);
 
+    if (kdbx == null) {
+      Navigator.popUntil(
+        context,
+        ModalRoute.withName(InitKdbxPage.routeName),
+      );
+      _logger.warning("verify owner but kdbx is null");
+      return;
+    }
+
+    switch (type) {
+      case VerifyType.password:
+        await _verifyPassword(password);
+      case VerifyType.biometric:
+        await _verifyBiometric();
+    }
+
+    Navigator.pop(context);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _onVerifyPassword(VerifyType.biometric);
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Center(
-        child: VerifyPassword(onVerifyPassword: (type, [password]) async {
-          if (kdbx == null) {
-            Navigator.popUntil(
-              context,
-              ModalRoute.withName(InitKdbxPage.routeName),
-            );
-            _logger.warning("verify owner but kdbx is null");
-            return;
-          }
-
-          switch (type) {
-            case VerifyType.password:
-              await _verifyPassword(password);
-            case VerifyType.biometric:
-              await _verifyBiometric();
-          }
-          Navigator.pop(context);
-        }),
+        child: VerifyPassword(
+          biometric: true,
+          autoPopUpBiometric: false,
+          onVerifyPassword: _onVerifyPassword,
+        ),
       ),
     );
   }

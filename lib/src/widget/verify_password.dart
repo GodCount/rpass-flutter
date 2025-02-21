@@ -22,10 +22,12 @@ class VerifyPassword extends StatefulWidget {
     super.key,
     required this.onVerifyPassword,
     this.biometric = false,
+    this.autoPopUpBiometric = false
   });
 
   final OnVerifyPassword onVerifyPassword;
   final bool biometric;
+  final bool autoPopUpBiometric;
 
   @override
   State<VerifyPassword> createState() => _VerifyPasswordState();
@@ -49,7 +51,7 @@ class _VerifyPasswordState extends State<VerifyPassword> {
         });
       }
     });
-    if (widget.biometric) {
+    if (widget.biometric && widget.autoPopUpBiometric) {
       _verifyBiometric();
     }
     super.initState();
@@ -128,7 +130,6 @@ class _VerifyPasswordState extends State<VerifyPassword> {
                   focusNode: _focusNode,
                   controller: _passwordController,
                   textInputAction: TextInputAction.done,
-                  autofocus: true,
                   obscureText: _obscureText,
                   obscuringCharacter: "*",
                   decoration: InputDecoration(
