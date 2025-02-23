@@ -226,3 +226,20 @@ String dateFormat(DateTime date, [bool time = true]) {
   if (time) return DateFormat("yyyy.MM.dd HH:mm:ss").format(date);
   return DateFormat("yyyy.MM.dd").format(date);
 }
+
+typedef RunOnceFunc<T> = Future<void> Function(T args);
+
+RunOnceFunc<T> runOnceFunc<T>(RunOnceFunc<T> func) {
+  bool run = false;
+  return (T arg1) async {
+    if (run) {
+      return;
+    }
+    run = true;
+    try {
+      await func(arg1);
+    } finally {
+      run = false;
+    }
+  };
+}

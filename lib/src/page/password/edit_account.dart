@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_cupertino_datetime_picker/flutter_cupertino_datetime_picker.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
@@ -100,6 +99,9 @@ class _EditAccountPageState extends State<EditAccountPage> {
         _kdbxEntry!.customIcon = null;
       }
       _kdbxEntry!.setString(field.key, field.value);
+    } else if (field is EntryExpiresFieldSaved) {
+      _kdbxEntry!.times.expires.set(field.value.$1);
+      _kdbxEntry!.times.expiryTime.set(field.value.$2.toUtc());
     } else {
       _logger.warning("untreated class $field");
     }
@@ -442,6 +444,8 @@ class _EntryFieldState extends State<EntryField> {
         return t.label;
       case KdbxKeySpecial.KEY_ATTACH:
         return t.attachment;
+      case KdbxKeySpecial.KEY_EXPIRES:
+        return t.expires_time;
       default:
         return _renameKdbxKey?.key ?? widget.kdbxKey.key;
     }
@@ -644,11 +648,20 @@ class _EntryFieldState extends State<EntryField> {
           },
         );
       case KdbxKeySpecial.KEY_EXPIRES:
-        return EntryExpiresFormField(initialValue: (
-          widget.kdbxEntry.times.expires.get() ?? false,
-          widget.kdbxEntry.times.expiryTime.get() ??
-              DateTime(4001, 01, 01, 0, 0),
-        ), onSaved: (value) {});
+        return EntryExpiresFormField(
+          label: _kdbKey2I18n(),
+          initialValue: (
+            widget.kdbxEntry.times.expires.get() ?? false,
+            widget.kdbxEntry.times.expiryTime.get()?.toLocal() ??
+                DateTime(4001, 7, 1, 18, 11, 58),
+          ),
+          onSaved: (value) {
+            widget.onSaved(EntryExpiresFieldSaved(
+              key: widget.kdbxKey,
+              value: value!,
+            ));
+          },
+        );
       default:
         return EntryTextFormField(
           initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
@@ -1006,17 +1019,36 @@ class EntryExpiresFormField extends FormField<(bool, DateTime)> {
   }) : super(builder: (field) {
           return GestureDetector(
             onTap: () async {
-              // TODO! 弹出自定义日期选择
-              DatePicker.showDatePicker(field.context);
+              final result = await field.showDateTimePicker(
+                field.context,
+                minimumDate: DateTime(2024, 7, 1, 18, 11, 58),
+                maximumDate: DateTime(4001, 7, 1, 18, 11, 58),
+                initialDateTime: field.value?.$2,
+              );
+              if (result != null) {
+                field.didChange((field.value?.$1 ?? false, result));
+              }
             },
             child: InputDecorator(
-              isEmpty: field.value == null,
+              isEmpty: false,
               decoration: InputDecoration(
                 labelText: label,
                 border: const OutlineInputBorder(),
+                suffixIcon: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Checkbox(
+                    value: field.value?.$1 ?? false,
+                    onChanged: (value) {
+                      if (field.value != null) {
+                        field.didChange((value ?? false, field.value!.$2));
+                      }
+                    },
+                  ),
+                ),
               ),
-              child:
-                  field.value != null ? Text(field.value!.$2.toString()) : null,
+              child: field.value != null
+                  ? Text(dateFormat(field.value!.$2.toLocal()))
+                  : null,
             ),
           );
         });

@@ -142,21 +142,14 @@ class BiometricState extends State<Biometric> {
     return _decode(credentials);
   }
 
-  Future<bool> verifyOwner(BuildContext context) async {
-    try {
-      _assertBiometric();
+  Future<void> verifyOwner(BuildContext context) async {
+    _assertBiometric();
 
-      // 通过写入触发生物识别以验证权限
-      await (await _getStorageFile(context, BiometricStorageKey.owner)).write(
-        "owner",
-        promptInfo: _getPromptInfo(context),
-      );
-
-      return true;
-    } catch (e) {
-      _logger.finest("verify owner", e);
-      return false;
-    }
+    // 通过写入触发生物识别以验证权限
+    await (await _getStorageFile(context, BiometricStorageKey.owner)).write(
+      "owner",
+      promptInfo: _getPromptInfo(context),
+    );
   }
 
   Future<void> updateCredentials(

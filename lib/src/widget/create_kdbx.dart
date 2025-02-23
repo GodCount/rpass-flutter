@@ -1,10 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
 import '../page/page.dart';
 import '../util/file.dart';
 import 'shake_widget.dart';
+import './extension_state.dart';
+
+
+final _logger = Logger("widget:create_kdbx");
 
 typedef OnCreatedKdbx = void Function(Kdbx kdbx);
 
@@ -41,16 +48,31 @@ class CreateKdbxState extends State<CreateKdbx> {
   }
 
   void _importKdbx() async {
-    final file = await SimpleFile.openFile(allowedExtensions: ["kdbx"]);
-    final kdbx = await Navigator.pushNamed(
-      context,
-      LoadKdbxPage.routeName,
-      arguments: LoadKdbxPageArguments(
-        readKdbxFile: () async => file,
-      ),
-    );
-    if (kdbx != null && kdbx is Kdbx) {
-      widget.onCreatedKdbx(kdbx);
+    try {
+      // 安卓不支持指定 kdbx 后缀
+      final file = await SimpleFile.openFile(
+        allowedExtensions: !Platform.isAndroid ? ["kdbx"] : null,
+      );
+
+      if (!file.$1.endsWith(".kdbx")) {
+        throw Exception("Invalid file extension");
+      }
+
+      final kdbx = await Navigator.pushNamed(
+        context,
+        LoadKdbxPage.routeName,
+        arguments: LoadKdbxPageArguments(
+          readKdbxFile: () async => file,
+        ),
+      );
+      if (kdbx != null && kdbx is Kdbx) {
+        widget.onCreatedKdbx(kdbx);
+      }
+    } catch (e) {
+      if (e is! CancelException) {
+        _logger.warning("open file fail!", e);
+        showError(e);
+      }
     }
   }
 

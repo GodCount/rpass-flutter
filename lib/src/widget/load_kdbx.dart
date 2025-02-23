@@ -71,10 +71,10 @@ class _LoadKdbxState extends State<LoadKdbx> {
     return VerifyPassword(
       biometric: widget.biometric,
       autoPopUpBiometric: true,
-      onVerifyPassword: (type, [password]) async {
-        switch (type) {
+      onVerifyPassword: (param) async {
+        switch (param.type) {
           case VerifyType.password:
-            return _verifyPassword(password);
+            return _verifyPassword(param.password);
           case VerifyType.biometric:
             return _verifyBiometric();
         }

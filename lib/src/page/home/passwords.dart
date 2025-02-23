@@ -399,8 +399,15 @@ class _PasswordItemState extends State<_PasswordItem> {
         ),
       ),
       title: Text(
-        kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE),
-        style: Theme.of(context).textTheme.titleLarge,
+        kdbxEntry.isExpiry()
+            ? "${kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE)} (${t.expires})"
+            : kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE),
+        style: kdbxEntry.isExpiry()
+            ? Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(color: Theme.of(context).colorScheme.error)
+            : Theme.of(context).textTheme.titleLarge,
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Column(

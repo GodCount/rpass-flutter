@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -129,7 +130,8 @@ extension StateFulBottomSheet on State {
               Align(
                 alignment: Alignment.center,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                   child: Text(
                     title,
                     style: Theme.of(context).textTheme.titleLarge,
@@ -286,6 +288,74 @@ extension StateFulBottomSheet on State {
         );
       },
     );
+  }
+
+  Future<DateTime?> showDateTimePicker(
+    BuildContext context, {
+    DateTime? minimumDate,
+    DateTime? maximumDate,
+    DateTime? initialDateTime,
+  }) async {
+    if (initialDateTime != null &&
+        minimumDate != null &&
+        initialDateTime.isBefore(minimumDate)) {
+      initialDateTime = minimumDate;
+    }
+
+    if (initialDateTime != null &&
+        maximumDate != null &&
+        initialDateTime.isAfter(maximumDate)) {
+      initialDateTime = maximumDate;
+    }
+
+    final result = await showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        final t = I18n.of(context)!;
+
+        DateTime? dateTime = initialDateTime;
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 12, right: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox(
+                    width: 40,
+                  ),
+                  Text(
+                    t.expires_time,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(dateTime);
+                    },
+                    icon: const Icon(Icons.done),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                minimumDate: minimumDate,
+                maximumDate: maximumDate,
+                initialDateTime: initialDateTime,
+                dateOrder: DatePickerDateOrder.ymd,
+                onDateTimeChanged: (value) {
+                  dateTime = value;
+                },
+              ),
+            )
+          ],
+        );
+      },
+    );
+    return result is DateTime ? result : null;
   }
 }
 

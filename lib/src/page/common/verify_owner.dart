@@ -6,6 +6,7 @@ import '../../context/kdbx.dart';
 import '../../page/page.dart';
 import '../../kdbx/kdbx.dart';
 import '../../context/biometric.dart';
+import '../../util/common.dart';
 
 final _logger = Logger("page:verify_owner");
 
@@ -18,15 +19,19 @@ class VerifyOwnerPage extends StatefulWidget {
   State<VerifyOwnerPage> createState() => _VerifyOwnerPageState();
 }
 
-class _VerifyOwnerPageState extends State<VerifyOwnerPage>
-    with WidgetsBindingObserver {
+class _VerifyOwnerPageState extends State<VerifyOwnerPage> {
+  late final RunOnceFunc<OnVerifyPasswordParam> _onceVerifyPassword;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
-      _onVerifyPassword(VerifyType.biometric);
-    }
+    _onceVerifyPassword = runOnceFunc(_onVerifyPassword);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+        _onceVerifyPassword(OnVerifyPasswordParam(type: VerifyType.biometric));
+      }
+    });
   }
 
   Future<void> _verifyPassword(Kdbx kdbx, String? password) async {
@@ -41,15 +46,10 @@ class _VerifyOwnerPageState extends State<VerifyOwnerPage>
   }
 
   Future<void> _verifyBiometric(BiometricState biometric) async {
-    if (!await biometric.verifyOwner(context)) {
-      throw Exception("biometric verify error");
-    }
+    await biometric.verifyOwner(context);
   }
 
-  Future<void> _onVerifyPassword(
-    VerifyType type, [
-    String? password,
-  ]) async {
+  Future<void> _onVerifyPassword(OnVerifyPasswordParam param) async {
     final kdbx = KdbxProvider.of(context);
     final biometric = Biometric.of(context);
 
@@ -62,9 +62,9 @@ class _VerifyOwnerPageState extends State<VerifyOwnerPage>
       return;
     }
 
-    switch (type) {
+    switch (param.type) {
       case VerifyType.password:
-        await _verifyPassword(kdbx, password);
+        await _verifyPassword(kdbx, param.password);
         break;
       case VerifyType.biometric:
         if (!biometric.enable) {
@@ -78,27 +78,13 @@ class _VerifyOwnerPageState extends State<VerifyOwnerPage>
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _onVerifyPassword(VerifyType.biometric);
-    }
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Center(
         child: VerifyPassword(
           biometric: true,
-          autoPopUpBiometric: false,
-          onVerifyPassword: _onVerifyPassword,
+          onVerifyPassword: _onceVerifyPassword,
         ),
       ),
     );

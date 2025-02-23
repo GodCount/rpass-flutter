@@ -155,11 +155,14 @@ class _LookAccountPageState extends State<LookAccountPage>
                   ),
                   Expanded(
                     child: Text(
-                      title,
+                      _kdbxEntry!.isExpiry() ? "$title (${t.expires})" : title,
                       softWrap: false,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
-                      style: Theme.of(context).textTheme.titleLarge,
+                      style: _kdbxEntry!.isExpiry()
+                          ? Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: Theme.of(context).colorScheme.error)
+                          : Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
                 ],
@@ -395,7 +398,9 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(dateFormat(_kdbxEntry!.times.creationTime.get()!)),
+                child: Text(dateFormat(
+                  _kdbxEntry!.times.creationTime.get()!.toLocal(),
+                )),
               ),
             ),
             ListTile(
@@ -406,10 +411,26 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(
-                    dateFormat(_kdbxEntry!.times.lastModificationTime.get()!)),
+                child: Text(dateFormat(
+                  _kdbxEntry!.times.lastModificationTime.get()!.toLocal(),
+                )),
               ),
             ),
+            if (_kdbxEntry!.times.expires.get() == true &&
+                _kdbxEntry!.times.expiryTime.get() != null)
+              ListTile(
+                shape: shape,
+                title: Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: Text(t.expires_time),
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: Text(dateFormat(
+                    _kdbxEntry!.times.expiryTime.get()!.toLocal(),
+                  )),
+                ),
+              ),
             ListTile(
               shape: shape,
               title: Padding(

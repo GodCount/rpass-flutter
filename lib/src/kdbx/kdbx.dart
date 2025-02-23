@@ -44,12 +44,7 @@ class KdbxKeySpecial {
   static KdbxKey ATTACH = KdbxKey(KEY_ATTACH);
   static KdbxKey EXPIRES = KdbxKey(KEY_EXPIRES);
 
-
-  static List<KdbxKey> all = [
-    TAGS,
-    ATTACH,
-    EXPIRES
-  ];
+  static List<KdbxKey> all = [TAGS, ATTACH, EXPIRES];
 }
 
 class KdbxKeyCommon {
@@ -464,5 +459,13 @@ extension KdbxEntryTagExt on KdbxEntry {
     return Map.fromEntries(KdbxKeyCommon.all.map(
       (item) => MapEntry(item, getNonNullString(item)),
     ));
+  }
+}
+
+extension KdbxEntryCommon on KdbxEntry {
+  bool isExpiry() {
+    return times.expires.get() == true &&
+        times.expiryTime.get() != null &&
+        times.expiryTime.get()!.isBefore(DateTime.now());
   }
 }

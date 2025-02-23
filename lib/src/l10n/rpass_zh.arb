@@ -223,5 +223,7 @@
                 "type": "int"
             }
         }
-    }
+    },
+    "expires_time": "过期时间",
+    "expires": "过期"
 }

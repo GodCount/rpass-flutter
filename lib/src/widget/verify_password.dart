@@ -12,17 +12,21 @@ final _logger = Logger("widget:verify_password");
 
 enum VerifyType { password, biometric }
 
-typedef OnVerifyPassword = Future<void> Function(
-  VerifyType type, [
-  String? password,
-]);
+class OnVerifyPasswordParam {
+  OnVerifyPasswordParam({required this.type, this.password});
+
+  final VerifyType type;
+  final String? password;
+}
+
+typedef OnVerifyPassword = Future<void> Function(OnVerifyPasswordParam param);
 
 class VerifyPassword extends StatefulWidget {
   const VerifyPassword({
     super.key,
     required this.onVerifyPassword,
     this.biometric = false,
-    this.autoPopUpBiometric = false
+    this.autoPopUpBiometric = false,
   });
 
   final OnVerifyPassword onVerifyPassword;
@@ -61,8 +65,10 @@ class _VerifyPasswordState extends State<VerifyPassword> {
     if (_passwordController.text.isNotEmpty) {
       try {
         _errorMessage = null;
-        await widget.onVerifyPassword(
-            VerifyType.password, _passwordController.text);
+        await widget.onVerifyPassword(OnVerifyPasswordParam(
+          type: VerifyType.password,
+          password: _passwordController.text,
+        ));
       } on KdbxInvalidKeyException {
         _errorMessage = I18n.of(context)!.password_error;
       } catch (e) {
@@ -81,7 +87,9 @@ class _VerifyPasswordState extends State<VerifyPassword> {
     try {
       final biometric = Biometric.of(context);
       if (biometric.enable) {
-        await widget.onVerifyPassword(VerifyType.biometric);
+        await widget.onVerifyPassword(OnVerifyPasswordParam(
+          type: VerifyType.biometric,
+        ));
       }
     } catch (e) {
       if (e is AuthException &&

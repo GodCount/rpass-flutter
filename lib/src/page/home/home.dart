@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -70,15 +71,20 @@ class HomeState extends State<Home>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    print("AppLifecycleState {$state}");
     switch (state) {
       case AppLifecycleState.inactive:
+        // 只有桌面端才回调 （inactive == bulr）?
+        if (!Platform.isMacOS || !Platform.isWindows) {
+          break;
+        }
       case AppLifecycleState.hidden:
-      case AppLifecycleState.paused:
         _startTimer();
         break;
       case AppLifecycleState.resumed:
         _cancelTimer();
         break;
+      case AppLifecycleState.paused:
       case AppLifecycleState.detached:
         break;
     }
