@@ -225,5 +225,6 @@
         }
     },
      "expires_time": "Expires Time",
-    "expires": "Expires"
+    "expires": "Expires",
+    "key_file": "Key File"
 }

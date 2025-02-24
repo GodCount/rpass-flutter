@@ -225,5 +225,6 @@
         }
     },
     "expires_time": "过期时间",
-    "expires": "过期"
+    "expires": "过期",
+    "key_file": "密钥文件"
 }
