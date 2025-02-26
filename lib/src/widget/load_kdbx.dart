@@ -38,18 +38,18 @@ class _LoadKdbxState extends State<LoadKdbx> {
     return _kdbxFile!;
   }
 
-  Future<void> _verifyPassword(String? password) async {
-    if (password == null || password.isEmpty) {
-      throw Exception("password is empty!");
+  Future<void> _verifyPassword(OnVerifyPasswordParam param) async {
+    if (param.password == null && param.keyFile == null) {
+      throw Exception("password is empty and key file is empty");
     }
 
     final (filepath, data) = await _readKdbxFile();
 
-    final kdbx = await Kdbx.loadBytes(
+    Kdbx kdbx = await Kdbx.loadBytesFromCredentials(
       data: data,
-      password: password,
-      filepath: filepath,
+      credentials: Kdbx.createCredentials(param.password, param.keyFile),
     );
+
     widget.onLoadedKdbx(kdbx);
   }
 
@@ -60,7 +60,7 @@ class _LoadKdbxState extends State<LoadKdbx> {
     final hash = await biometric.getCredentials(context);
     final kdbx = await Kdbx.loadBytesFromHash(
       data: data,
-      password: hash,
+      token: hash,
       filepath: filepath,
     );
     widget.onLoadedKdbx(kdbx);
@@ -74,7 +74,7 @@ class _LoadKdbxState extends State<LoadKdbx> {
       onVerifyPassword: (param) async {
         switch (param.type) {
           case VerifyType.password:
-            return _verifyPassword(param.password);
+            return _verifyPassword(param);
           case VerifyType.biometric:
             return _verifyBiometric();
         }

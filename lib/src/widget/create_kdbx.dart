@@ -1,15 +1,17 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
+import '../context/store.dart';
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
 import '../page/page.dart';
 import '../util/file.dart';
 import 'shake_widget.dart';
 import './extension_state.dart';
-
+import 'verify_password.dart';
 
 final _logger = Logger("widget:create_kdbx");
 
@@ -33,6 +35,10 @@ class CreateKdbxState extends State<CreateKdbx> {
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _globalKey = GlobalKey<FormState>();
 
+  bool _obscureText = true;
+  bool _isPassword = true;
+  Uint8List? keyFile;
+
   @override
   void dispose() {
     _passwordController.dispose();
@@ -41,10 +47,22 @@ class CreateKdbxState extends State<CreateKdbx> {
 
   void _createKdbx() {
     final kdbx = Kdbx.create(
-      password: _passwordController.text,
+      credentials: Kdbx.createCredentials(
+        _isPassword ? _passwordController.text : null,
+        keyFile,
+      ),
       name: widget.kdbxName,
     );
     widget.onCreatedKdbx(kdbx);
+  }
+
+  void _onKdbxKeyFileResault((String, Uint8List)? value) {
+    final store = StoreProvider.of(context);
+
+    if (store.settings.enableRecordKeyFilePath) {
+      store.settings.setKeyFilePath(value?.$1);
+    }
+    keyFile = value?.$2;
   }
 
   void _importKdbx() async {
@@ -80,6 +98,8 @@ class CreateKdbxState extends State<CreateKdbx> {
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
 
+    final store = StoreProvider.of(context);
+
     return Card(
       margin: const EdgeInsets.all(24),
       child: Padding(
@@ -112,11 +132,33 @@ class CreateKdbxState extends State<CreateKdbx> {
                           return TextFormField(
                             validator: validator,
                             controller: _passwordController,
+                            obscureText: _obscureText,
+                            enabled: _isPassword,
                             autofocus: true,
                             textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
                               labelText: t.password,
                               border: const OutlineInputBorder(),
+                              prefixIcon: Checkbox(
+                                value: _isPassword,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _isPassword = value ?? true;
+                                  });
+                                },
+                              ),
+                              suffixIcon: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _obscureText = !_obscureText;
+                                  });
+                                },
+                                icon: Icon(
+                                  _obscureText
+                                      ? Icons.remove_red_eye_outlined
+                                      : Icons.visibility_off_outlined,
+                                ),
+                              ),
                             ),
                           );
                         },
@@ -135,6 +177,8 @@ class CreateKdbxState extends State<CreateKdbx> {
                           return TextFormField(
                             validator: validator,
                             textInputAction: TextInputAction.done,
+                            obscureText: _obscureText,
+                            enabled: _isPassword,
                             decoration: InputDecoration(
                               labelText: t.confirm_password,
                               border: const OutlineInputBorder(),
@@ -146,6 +190,17 @@ class CreateKdbxState extends State<CreateKdbx> {
                             },
                           );
                         },
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.only(top: 12),
+                      constraints: const BoxConstraints(maxWidth: 264),
+                      child: KdbxKeyFileWidget(
+                        generateKeyFile: false,
+                        keyFilePath: store.settings.enableRecordKeyFilePath
+                            ? store.settings.keyFilePath
+                            : null,
+                        onKdbxKeyFileResault: _onKdbxKeyFileResault,
                       ),
                     ),
                     Container(

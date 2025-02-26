@@ -22,6 +22,7 @@
     "verify_password": "Verify password",
     "forget_password": "Forgot password",
     "password": "Password",
+    "none_password": "None Password",
     "setting": "Settings",
     "search_match_count": "Search: {matchCount}/{totalCount}",
     "@search_match_count": {
@@ -226,5 +227,7 @@
     },
      "expires_time": "Expires Time",
     "expires": "Expires",
-    "key_file": "Key File"
+    "key_file": "Key File",
+    "record_key_file_path": "Record Key File Path"
+
 }

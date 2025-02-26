@@ -46,6 +46,24 @@ class SettingsService with SharedPreferencesService {
     return setInt("lock_delay_seconds", delay != null ? delay.inSeconds : -1);
   }
 
+  Future<bool> getEnableRecordKeyFilePath() async {
+    return await getBool("record_key_file_path") ?? true;
+  }
+
+  Future<bool> setEnableRecordKeyFilePath(bool enable) async {
+    return setBool("record_key_file_path", enable);
+  }
+
+  Future<String?> getKeyFilePath() async {
+    return await getString("key_file_path");
+  }
+
+  Future<bool> setKeyFilePath(String? path) async {
+    return path == null
+        ? remove("key_file_path")
+        : setString("key_file_path", path);
+  }
+
   @override
   Future<bool> clear() => super.clear();
 }

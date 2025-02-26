@@ -23,8 +23,7 @@ export 'package:kdbx/kdbx.dart'
         KdbxCustomIcon,
         KdbxDao,
         KdbxUuid,
-        KdbxInvalidKeyException,
-        KeyFileCredentials;
+        KdbxInvalidKeyException;
 
 abstract class KdbxBase {
   abstract final KdbxFile kdbxFile;
@@ -361,54 +360,59 @@ class Kdbx extends KdbxBase
   String? filepath;
 
   static Kdbx create({
-    required String password,
+    required Credentials credentials,
     required String name,
     String? generator,
   }) {
     return Kdbx(
       kdbxFile: KdbxFormat().create(
-        Credentials(ProtectedValue.fromString(password)),
+        credentials,
         name,
         generator: generator ?? RpassInfo.appName,
       ),
     );
   }
 
-  static Future<Kdbx> loadFile({
-    required String filepath,
-    required String password,
-  }) async {
-    return Kdbx.loadBytes(
-      data: await File(filepath).readAsBytes(),
-      password: password,
-      filepath: filepath,
+  static Credentials createCredentials(String? password, Uint8List? keyFile) {
+    assert(
+      !(password == null && keyFile == null),
+      "Must include a password / key file.",
+    );
+
+    return Credentials.composite(
+      password != null ? ProtectedValue.fromString(password) : null,
+      keyFile,
     );
   }
 
-  static Future<Kdbx> loadBytes({
+  static Uint8List randomKeyFile() {
+    return KeyFileCredentials.random().getBinary();
+  }
+
+  static Future<Kdbx> loadBytesFromCredentials({
     required Uint8List data,
-    required String password,
+    required Credentials credentials,
     String? filepath,
   }) async {
     return Kdbx(
       filepath: filepath,
       kdbxFile: await KdbxFormat().read(
         data,
-        Credentials(ProtectedValue.fromString(password)),
+        credentials,
       ),
     );
   }
 
   static Future<Kdbx> loadBytesFromHash({
     required Uint8List data,
-    required Uint8List password,
+    required Uint8List token,
     String? filepath,
   }) async {
     return Kdbx(
       filepath: filepath,
       kdbxFile: await KdbxFormat().read(
         data,
-        Credentials.fromHash(password),
+        Credentials.fromHash(token),
       ),
     );
   }

@@ -12,11 +12,15 @@ class SettingsController with ChangeNotifier {
   Locale? _locale;
   late bool _enableBiometric;
   Duration? _lockDelay;
+  late bool _enableRecordKeyFilePath;
+  String? _keyFilePath;
 
   ThemeMode get themeMode => _themeMode;
   Locale? get locale => _locale;
   bool get enableBiometric => _enableBiometric;
   Duration? get lockDelay => _lockDelay;
+  bool get enableRecordKeyFilePath => _enableRecordKeyFilePath;
+  String? get keyFilePath => _keyFilePath;
 
   Future<void> setThemeMode(ThemeMode? mode) async {
     if (mode == null) return;
@@ -65,12 +69,36 @@ class SettingsController with ChangeNotifier {
     await _settingsService.setLockDelay(delay);
   }
 
+  Future<void> settEnableRecordKeyFilePath(bool enable) async {
+    if (enable == _enableRecordKeyFilePath) return;
+
+    _enableRecordKeyFilePath = enable;
+
+    notifyListeners();
+
+    await _settingsService.setEnableRecordKeyFilePath(enable);
+  }
+
+  Future<void> setKeyFilePath(String? path) async {
+    if (path == _keyFilePath) return;
+
+    _keyFilePath = path;
+
+    notifyListeners();
+
+    await _settingsService.setKeyFilePath(path);
+  }
+
   Future<void> init(Store store) async {
     _store = store;
     _themeMode = await _settingsService.getThemeMode();
     _locale = await _settingsService.getLocale();
     _enableBiometric = await _settingsService.getEnableBiometric();
     _lockDelay = await _settingsService.getLockDelay();
+    _enableRecordKeyFilePath =
+        await _settingsService.getEnableRecordKeyFilePath();
+    _keyFilePath = await _settingsService.getKeyFilePath();
+
     notifyListeners();
   }
 }

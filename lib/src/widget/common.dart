@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
 
 import '../context/kdbx.dart';
 import '../i18n.dart';
 import '../kdbx/icons.dart';
 import '../kdbx/kdbx.dart';
-import '../util/file.dart';
 import 'extension_state.dart';
 
-final _logger = Logger("widget:common");
 
 mixin HintEmptyTextUtil<T extends StatefulWidget> on State<T> {
   Widget hintEmptyText(bool isEmpty, Widget widget) {
@@ -422,99 +419,6 @@ class TimeLineListWidget extends StatelessWidget {
             ],
           );
         }).toList(),
-      ),
-    );
-  }
-}
-
-typedef OnKdbxKeyFileResault = void Function(
-  (String keyFilePath, KeyFileCredentials keyFile)?,
-);
-
-class KdbxKeyFileWidget extends StatefulWidget {
-  const KdbxKeyFileWidget({
-    super.key,
-    this.generateKeyFile = true,
-    required this.onKdbxKeyFileResault,
-  });
-
-  final bool generateKeyFile;
-  final OnKdbxKeyFileResault onKdbxKeyFileResault;
-
-  @override
-  State<KdbxKeyFileWidget> createState() => KdbxKeyFileWidgetState();
-}
-
-class KdbxKeyFileWidgetState extends State<KdbxKeyFileWidget> {
-  String? keyFilePath;
-
-  IconData _getSuffixIcons() {
-    if (keyFilePath != null) return Icons.close;
-    if (widget.generateKeyFile) return Icons.create;
-    return Icons.open_in_browser;
-  }
-
-  void _choiceKeyFile() async {
-    try {
-      final file = await SimpleFile.openFile(allowedExtensions: ["keyx"]);
-      final keyFile = KeyFileCredentials.fromBytes(file.$2);
-      keyFilePath = file.$1;
-      widget.onKdbxKeyFileResault((file.$1, keyFile));
-      setState(() {});
-    } catch (e) {
-      if (e is! CancelException) {
-        _logger.warning("open key file fail!", e);
-        showError(e);
-      }
-    }
-  }
-
-  void _saveKeyFile() async {
-    try {
-      final keyFile = KeyFileCredentials.random();
-      keyFilePath = await SimpleFile.saveFile(
-        data: keyFile.getBinary(),
-        filename: "rpass.keyx",
-      );
-      widget.onKdbxKeyFileResault((keyFilePath!, keyFile));
-      setState(() {});
-    } catch (e) {
-      if (e is! CancelException) {
-        _logger.warning("open key file fail!", e);
-        showError(e);
-      }
-    }
-  }
-
-  void _suffix() {
-    if (keyFilePath != null) {
-      keyFilePath = null;
-      widget.onKdbxKeyFileResault(null);
-      setState(() {});
-    } else if (widget.generateKeyFile) {
-      _saveKeyFile();
-    } else {
-      _choiceKeyFile();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final t = I18n.of(context)!;
-
-    return InputDecorator(
-      isEmpty: keyFilePath == null,
-      decoration: InputDecoration(
-        labelText: t.key_file,
-        border: const OutlineInputBorder(),
-        suffixIcon: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: IconButton(onPressed: _suffix, icon: Icon(_getSuffixIcons())),
-        ),
-      ),
-      child: GestureDetector(
-        onTap: _choiceKeyFile,
-        child: keyFilePath != null ? Text(keyFilePath!) : null,
       ),
     );
   }
