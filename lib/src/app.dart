@@ -47,6 +47,16 @@ class RpassApp extends StatelessWidget {
         builder: (context, child) {
           final kdbx = KdbxProvider.of(context);
 
+          final String initialRoute;
+
+          if (kdbx == null) {
+            initialRoute = store.localInfo.localKdbxFileExists
+                ? LoadKdbxPage.routeName
+                : InitialPage.routeName;
+          } else {
+            initialRoute = Home.routeName;
+          }
+
           return MaterialApp(
             restorationScopeId: 'app',
             theme: theme(Brightness.light),
@@ -63,14 +73,17 @@ class RpassApp extends StatelessWidget {
               }
               return null;
             },
-            initialRoute:
-                kdbx == null ? InitKdbxPage.routeName : Home.routeName,
+            initialRoute: initialRoute,
             navigatorObservers: [UnfocusNavigatorRoute()],
             routes: {
               Home.routeName: (context) => const Home(),
-              CreateKdbxPage.routeName: (context) => const CreateKdbxPage(),
+              InitialPage.routeName: (context) => const InitialPage(),
               LoadKdbxPage.routeName: (context) => const LoadKdbxPage(),
-              InitKdbxPage.routeName: (context) => const InitKdbxPage(),
+              LoadExternalKdbxPage.routeName: (context) =>
+                  const LoadExternalKdbxPage(),
+              ModifyPasswordPage.routeName: (context) =>
+                  const ModifyPasswordPage(),
+              VerifyOwnerPage.routeName: (context) => const VerifyOwnerPage(),
               SelectIconPage.routeName: (context) => const SelectIconPage(),
               RecycleBinPage.routeName: (context) => const RecycleBinPage(),
               KdbxSettingPage.routeName: (context) => const KdbxSettingPage(),
@@ -87,7 +100,6 @@ class RpassApp extends StatelessWidget {
               ImportAccountPage.routeName: (context) =>
                   const ImportAccountPage(),
               MoreSecurityPage.routeName: (context) => const MoreSecurityPage(),
-              VerifyOwnerPage.routeName: (context) => const VerifyOwnerPage(),
             },
           );
         },

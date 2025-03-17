@@ -71,7 +71,6 @@ class HomeState extends State<Home>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print("AppLifecycleState {$state}");
     switch (state) {
       case AppLifecycleState.inactive:
         // 只有桌面端才回调 （inactive == bulr）?

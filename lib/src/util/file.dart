@@ -10,6 +10,10 @@ export 'package:file_picker/file_picker.dart' show FileType;
 
 class CancelException implements Exception {}
 
+
+// TODO! 桌面端，能重复触发
+// 选择文件，应该只能弹出一次，
+
 class SimpleFile {
   static Future<Directory> applicationDocumentsDirectory =
       getApplicationDocumentsDirectory();

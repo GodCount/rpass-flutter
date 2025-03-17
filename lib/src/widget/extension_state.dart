@@ -115,7 +115,7 @@ extension StatefulDialog on State {
   }
 }
 
-extension StateFulBottomSheet on State {
+extension StatefulBottomSheet on State {
   void showBottomSheetList({
     String? title,
     required List<ListTile> children,

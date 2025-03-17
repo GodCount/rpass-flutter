@@ -47,7 +47,7 @@ class SettingsService with SharedPreferencesService {
   }
 
   Future<bool> getEnableRecordKeyFilePath() async {
-    return await getBool("record_key_file_path") ?? true;
+    return await getBool("record_key_file_path") ?? false;
   }
 
   Future<bool> setEnableRecordKeyFilePath(bool enable) async {

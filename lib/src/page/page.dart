@@ -1,7 +1,4 @@
 export 'home/home.dart';
-export 'kdbx/create_kdbx_page.dart';
-export 'kdbx/load_kdbx_page.dart';
-export 'kdbx/init_kdbx_page.dart';
 export 'kdbx/select_icon_page.dart';
 export 'kdbx/recycle_bin_page.dart';
 export 'kdbx/kdbx_setting_page.dart';
@@ -22,5 +19,7 @@ export 'setting/change_locale.dart';
 export 'setting/more_security.dart';
 
 
-export 'common/verify_owner.dart';
-
+export 'auth_kdbx/initial_page.dart';
+export 'auth_kdbx/load_page.dart';
+export 'auth_kdbx/modify_password_page.dart';
+export 'auth_kdbx/verify_owner_page.dart';

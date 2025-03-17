@@ -228,5 +228,6 @@
     "expires_time": "过期时间",
     "expires": "过期",
     "key_file": "密钥文件",
-    "record_key_file_path": "记录密钥文件路径"
+    "record_key_file_path": "记录密钥文件路径",
+    "lack_key_file": "缺少密钥文件"
 }

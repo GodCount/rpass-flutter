@@ -196,7 +196,9 @@ class SettingsPageState extends State<SettingsPage>
               ),
             ListTile(
               title: Text(t.modify_password),
-              onTap: _modifyPassword,
+              onTap: () {
+                Navigator.of(context).pushNamed(ModifyPasswordPage.routeName);
+              } ,
             ),
             ListTile(
               shape: shape,
@@ -304,131 +306,6 @@ class SettingsPageState extends State<SettingsPage>
       child: Column(
         children: children,
       ),
-    );
-  }
-
-  void _modifyPassword() {
-    final GlobalKey<FormState> formState = GlobalKey<FormState>();
-    String newPassword = "";
-
-    final t = I18n.of(context)!;
-
-    void onSetPassword() async {
-      if (formState.currentState!.validate()) {
-        try {
-          final biometric = Biometric.of(context);
-          final kdbx = KdbxProvider.of(context)!;
-
-          final oldCredentials = kdbx.credentials;
-          final credentials = kdbx.createCredentials(newPassword);
-
-          if (biometric.enable) {
-            try {
-              await biometric.updateCredentials(
-                context,
-                credentials.getHash(),
-              );
-              _logger.finest("update credentials to biometric done!");
-            } catch (e, s) {
-              if (e is AuthException &&
-                  (e.code == AuthExceptionCode.userCanceled ||
-                      e.code == AuthExceptionCode.canceled ||
-                      e.code == AuthExceptionCode.timeout)) {
-                return;
-              }
-              _logger.severe("update credentials to biometric fail!", e, s);
-              rethrow;
-            }
-          }
-
-          try {
-            kdbx
-              ..modifyCredentials(credentials)
-              ..save();
-            _logger.finest("update credentials done!");
-          } catch (e, s) {
-            kdbx.modifyCredentials(oldCredentials);
-            await biometric.updateCredentials(
-              context,
-              oldCredentials.getHash(),
-            );
-            _logger.severe("update credentials fail!", e, s);
-            rethrow;
-          }
-
-          if (mounted) {
-            Navigator.of(context).pop();
-          }
-        } catch (e) {
-          showError(e);
-        }
-      }
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(t.modify_password),
-          content: Form(
-            key: formState,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ShakeFormField<String>(
-                  validator: (value) => value == null || value.length < 4
-                      ? t.at_least_4digits
-                      : null,
-                  builder: (context, validator) {
-                    return TextFormField(
-                      validator: validator,
-                      onChanged: (text) => newPassword = text,
-                      textInputAction: TextInputAction.next,
-                      autofocus: true,
-                      decoration: InputDecoration(
-                        labelText: t.password,
-                        border: const OutlineInputBorder(),
-                      ),
-                    );
-                  },
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: ShakeFormField<String>(
-                    validator: (value) =>
-                        value == null || value.isEmpty || value == newPassword
-                            ? null
-                            : t.password_not_equal,
-                    builder: (context, validator) {
-                      return TextFormField(
-                        validator: validator,
-                        textInputAction: TextInputAction.done,
-                        decoration: InputDecoration(
-                          labelText: t.confirm_password,
-                          border: const OutlineInputBorder(),
-                        ),
-                        onFieldSubmitted: (value) => onSetPassword(),
-                      );
-                    },
-                  ),
-                )
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(t.cancel),
-            ),
-            TextButton(
-              onPressed: onSetPassword,
-              child: Text(t.modify),
-            ),
-          ],
-        );
-      },
     );
   }
 }

@@ -66,7 +66,7 @@ class _MoreSecurityPageState extends State<MoreSecurityPage> {
         children: [
           ListTile(
             onTap: _setLockDelay,
-            title: Text(t.record_key_file_path),
+            title: Text(t.lock),
             trailing: Text(
               lockDelay == null
                   ? t.never
@@ -80,10 +80,12 @@ class _MoreSecurityPageState extends State<MoreSecurityPage> {
             ),
           ),
           ListTile(
-            onTap: () => store.settings.settEnableRecordKeyFilePath(
-              !store.settings.enableRecordKeyFilePath,
-            ),
-            title: Text(t.lock),
+            onTap: () async {
+              await store.settings.settEnableRecordKeyFilePath(
+                  !store.settings.enableRecordKeyFilePath);
+              setState(() {});
+            },
+            title: Text(t.record_key_file_path),
             trailing: store.settings.enableRecordKeyFilePath
                 ? const Icon(Icons.check)
                 : null,

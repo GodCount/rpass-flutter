@@ -228,6 +228,6 @@
      "expires_time": "Expires Time",
     "expires": "Expires",
     "key_file": "Key File",
-    "record_key_file_path": "Record Key File Path"
-
+    "record_key_file_path": "Record Key File Path",
+    "lack_key_file": "Lack of key file"
 }
