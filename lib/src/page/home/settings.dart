@@ -10,7 +10,6 @@ import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../rpass.dart';
 import '../../widget/extension_state.dart';
-import '../../widget/shake_widget.dart';
 import '../page.dart';
 
 final _logger = Logger("page:settings");

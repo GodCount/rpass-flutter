@@ -49,4 +49,12 @@ class VerifyOwnerPageState extends AuthorizedPageState {
     await Biometric.of(context).verifyOwner(context);
     Navigator.of(context).pop();
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      child: super.build(context),
+    );
+  }
 }
