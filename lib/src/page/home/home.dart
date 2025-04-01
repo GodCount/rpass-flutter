@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
@@ -35,9 +36,6 @@ class Home extends StatefulWidget {
 
 class HomeState extends State<Home>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
-  final PageController _controller = PageController(initialPage: 0);
-  final TextEditingController _searchController = TextEditingController();
-
   Timer? _timer;
   bool _verificationStart = false;
 
@@ -90,19 +88,19 @@ class HomeState extends State<Home>
   }
 
   void toPasswordPageSearch(String text) async {
-    await _controller.animateToPage(
-      0,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeIn,
-    );
-    _searchController.text = text;
+    // await _controller.animateToPage(
+    //   0,
+    //   duration: const Duration(milliseconds: 300),
+    //   curve: Curves.easeIn,
+    // );
+    // _searchController.text = text;
   }
 
   @override
   void dispose() {
     _cancelTimer();
-    _controller.dispose();
-    _searchController.dispose();
+    // _controller.dispose();
+    // _searchController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -111,16 +109,38 @@ class HomeState extends State<Home>
   Widget build(BuildContext context) {
     super.build(context);
 
-    return Scaffold(
-      body: PageView(
-        controller: _controller,
-        children: [
-          PasswordsPage(searchController: _searchController),
-          const GroupsPage(),
-          const SettingsPage(),
-        ],
-      ),
-      bottomNavigationBar: _MyBottomNavigationBar(controller: _controller),
+    return AutoTabsRouter.pageView(
+      scrollDirection: Axis.horizontal,
+      routes: const [
+        NamedRoute("PasswordsPage"),
+        NamedRoute("GroupsPage"),
+        NamedRoute("SettingsPage"),
+      ],
+      builder: (context, child, _) {
+        final t = I18n.of(context)!;
+
+        return Scaffold(
+          body: child,
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: context.tabsRouter.activeIndex,
+            onTap: context.tabsRouter.setActiveIndex,
+            items: [
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.account_box_outlined),
+                label: t.password,
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.groups_2_rounded),
+                label: t.group,
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.settings),
+                label: t.setting,
+              )
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -10,9 +10,7 @@ import '../../widget/common.dart';
 import '../page.dart';
 
 class PasswordsPage extends StatefulWidget {
-  const PasswordsPage({super.key, this.searchController});
-
-  final TextEditingController? searchController;
+  const PasswordsPage({super.key});
 
   @override
   State<PasswordsPage> createState() => PasswordsPageState();
@@ -20,7 +18,7 @@ class PasswordsPage extends StatefulWidget {
 
 class PasswordsPageState extends State<PasswordsPage>
     with AutomaticKeepAliveClientMixin {
-  late TextEditingController _searchController;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   bool get wantKeepAlive => true;
@@ -30,7 +28,6 @@ class PasswordsPageState extends State<PasswordsPage>
 
   @override
   void initState() {
-    _searchController = widget.searchController ?? TextEditingController();
     _searchController.addListener(_searchAccounts);
     Future.delayed(Duration.zero, () {
       KdbxProvider.of(context)!.addListener(_onKdbxSave);

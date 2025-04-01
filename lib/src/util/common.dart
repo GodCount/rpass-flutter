@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:crypto/crypto.dart' as crypto;
@@ -243,3 +244,7 @@ RunOnceFunc<T> runOnceFunc<T>(RunOnceFunc<T> func) {
     }
   };
 }
+
+final bool isMobile = Platform.isAndroid || Platform.isIOS;
+
+final bool isDesktop = !isMobile;

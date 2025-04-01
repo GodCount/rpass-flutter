@@ -1,4 +1,9 @@
 export 'home/home.dart';
+export 'home/passwords.dart';
+export 'home/groups.dart';
+export 'home/settings.dart';
+
+
 export 'kdbx/select_icon_page.dart';
 export 'kdbx/recycle_bin_page.dart';
 export 'kdbx/kdbx_setting_page.dart';
