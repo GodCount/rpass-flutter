@@ -128,9 +128,11 @@ class _GroupsPageState extends State<GroupsPage>
         child: InkWell(
           borderRadius: const BorderRadius.all(Radius.circular(6.0)),
           onTap: () {
-            // TODO! 新的跳转搜索方式
-            // Home.of(context)!
-            //     .toPasswordPageSearch('g:"${kdbxGroup.name.get() ?? ''}"');
+            context.router.navigate(
+              PasswordsRoute(
+                search: 'g:"${kdbxGroup.name.get() ?? ''}"',
+              ),
+            );
           },
           onLongPress: () => showKdbxGroupAction(
             kdbxGroup.name.get() ?? '',

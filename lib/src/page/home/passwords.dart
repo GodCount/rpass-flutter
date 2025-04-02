@@ -13,15 +13,20 @@ import '../password/edit_account.dart';
 import '../password/look_account.dart';
 
 class _PasswordsArgs extends PageRouteArgs {
-  _PasswordsArgs({super.key});
+  _PasswordsArgs({super.key, this.search});
+  final String? search;
 }
 
 class PasswordsRoute extends PageRouteInfo<_PasswordsArgs> {
   PasswordsRoute({
     Key? key,
+    String? search,
   }) : super(
           name,
-          args: _PasswordsArgs(key: key),
+          args: _PasswordsArgs(
+            key: key,
+            search: search,
+          ),
         );
 
   static const name = "PasswordsRoute";
@@ -30,13 +35,18 @@ class PasswordsRoute extends PageRouteInfo<_PasswordsArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<_PasswordsArgs>();
-      return PasswordsPage(key: args.key);
+      return PasswordsPage(
+        key: args.key,
+        search: args.search,
+      );
     },
   );
 }
 
 class PasswordsPage extends StatefulWidget {
-  const PasswordsPage({super.key});
+  const PasswordsPage({super.key, this.search});
+
+  final String? search;
 
   @override
   State<PasswordsPage> createState() => _PasswordsPageState();
@@ -51,6 +61,14 @@ class _PasswordsPageState extends State<PasswordsPage>
 
   final KbdxSearchHandler _kbdxSearchHandler = KbdxSearchHandler();
   final List<KdbxEntry> _totalEntry = [];
+
+  @override
+  void didUpdateWidget(covariant PasswordsPage oldWidget) {
+    if (widget.search != null && oldWidget.search != widget.search) {
+      _searchController.text = widget.search!;
+    }
+    super.didUpdateWidget(oldWidget);
+  }
 
   @override
   void initState() {

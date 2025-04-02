@@ -73,6 +73,12 @@ android {
             resValue "string", "app_name", "Rpass"
         }
 
+        profile {
+            signingConfig signingConfigs.debug
+            applicationIdSuffix ".profile"
+            resValue "string", "app_name", "Rpass(P)"
+        }
+
         debug {
             signingConfig signingConfigs.debug
             applicationIdSuffix ".debug"

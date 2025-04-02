@@ -95,20 +95,9 @@ class _HomePageState extends State<HomePage>
     }
   }
 
-  void toPasswordPageSearch(String text) async {
-    // await _controller.animateToPage(
-    //   0,
-    //   duration: const Duration(milliseconds: 300),
-    //   curve: Curves.easeIn,
-    // );
-    // _searchController.text = text;
-  }
-
   @override
   void dispose() {
     _cancelTimer();
-    // _controller.dispose();
-    // _searchController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -129,19 +118,20 @@ class _HomePageState extends State<HomePage>
 
         return Scaffold(
           body: child,
-          bottomNavigationBar: BottomNavigationBar(
-            currentIndex: context.tabsRouter.activeIndex,
-            onTap: context.tabsRouter.setActiveIndex,
-            items: [
-              BottomNavigationBarItem(
+          bottomNavigationBar: NavigationBar(
+            selectedIndex: context.tabsRouter.activeIndex,
+            labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+            onDestinationSelected: context.tabsRouter.setActiveIndex,
+            destinations: [
+              NavigationDestination(
                 icon: const Icon(Icons.account_box_outlined),
                 label: t.password,
               ),
-              BottomNavigationBarItem(
+              NavigationDestination(
                 icon: const Icon(Icons.groups_2_rounded),
                 label: t.group,
               ),
-              BottomNavigationBarItem(
+              NavigationDestination(
                 icon: const Icon(Icons.settings),
                 label: t.setting,
               )
@@ -149,71 +139,6 @@ class _HomePageState extends State<HomePage>
           ),
         );
       },
-    );
-  }
-}
-
-class _MyBottomNavigationBar extends StatefulWidget {
-  const _MyBottomNavigationBar({
-    required this.controller,
-  });
-
-  final PageController controller;
-
-  @override
-  State<StatefulWidget> createState() => _MyBottomNavigationBarState();
-}
-
-class _MyBottomNavigationBarState extends State<_MyBottomNavigationBar> {
-  int get _pageIndex =>
-      widget.controller.positions.isNotEmpty && widget.controller.page != null
-          ? widget.controller.page!.round()
-          : 0;
-
-  late int _index;
-
-  @override
-  void initState() {
-    _index = _pageIndex;
-    widget.controller.addListener(() {
-      if (_pageIndex != _index) {
-        setState(() {
-          _index = _pageIndex;
-        });
-      }
-    });
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final t = I18n.of(context)!;
-
-    return NavigationBar(
-      selectedIndex: _index,
-      labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-      animationDuration: const Duration(milliseconds: 300),
-      onDestinationSelected: (value) async {
-        widget.controller.animateToPage(
-          value,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeIn,
-        );
-      },
-      destinations: [
-        NavigationDestination(
-          icon: const Icon(Icons.account_box_outlined),
-          label: t.password,
-        ),
-        NavigationDestination(
-          icon: const Icon(Icons.groups_2_rounded),
-          label: t.group,
-        ),
-        NavigationDestination(
-          icon: const Icon(Icons.settings),
-          label: t.setting,
-        )
-      ],
     );
   }
 }
