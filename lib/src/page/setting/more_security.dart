@@ -1,13 +1,36 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../../context/store.dart';
 import '../../i18n.dart';
+import '../../util/route.dart';
 import '../../widget/extension_state.dart';
+
+class _MoreSecurityArgs extends PageRouteArgs {
+  _MoreSecurityArgs({super.key});
+}
+
+class MoreSecurityRoute extends PageRouteInfo<_MoreSecurityArgs> {
+  MoreSecurityRoute({
+    Key? key,
+  }) : super(
+          name,
+          args: _MoreSecurityArgs(key: key),
+        );
+
+  static const name = "MoreSecurityRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_MoreSecurityArgs>();
+      return MoreSecurityPage(key: args.key);
+    },
+  );
+}
 
 class MoreSecurityPage extends StatefulWidget {
   const MoreSecurityPage({super.key});
-
-  static const routeName = "/more_security";
 
   @override
   State<MoreSecurityPage> createState() => _MoreSecurityPageState();
@@ -22,7 +45,7 @@ class _MoreSecurityPageState extends State<MoreSecurityPage> {
     GestureTapCallback? autoSavePop(Duration? delay) {
       return () {
         settings.setLockDelay(delay);
-        Navigator.of(context).pop();
+        context.router.pop();
         setState(() {});
       };
     }

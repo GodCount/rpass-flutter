@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -26,7 +27,7 @@ abstract class AuthorizedPage extends StatefulWidget {
   const AuthorizedPage({super.key});
 }
 
-abstract class AuthorizedPageState extends State<AuthorizedPage> {
+abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
   @protected
   final GlobalKey<FormState> form = GlobalKey<FormState>();
   @protected
@@ -98,7 +99,7 @@ abstract class AuthorizedPageState extends State<AuthorizedPage> {
 
   @protected
   void back() {
-    Navigator.of(context).pop();
+    context.router.back();
   }
 
   void _confirm() async {
@@ -399,10 +400,10 @@ class KeyFileFormField extends StatefulWidget {
   final FormFieldValidator<(String, Uint8List)>? validator;
 
   @override
-  State<KeyFileFormField> createState() => KeyFileFormFieldState();
+  State<KeyFileFormField> createState() => _KeyFileFormFieldState();
 }
 
-class KeyFileFormFieldState extends State<KeyFileFormField> {
+class _KeyFileFormFieldState extends State<KeyFileFormField> {
   final TextEditingController _controller = TextEditingController();
 
   @override

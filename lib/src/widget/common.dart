@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../context/kdbx.dart';
@@ -5,7 +6,6 @@ import '../i18n.dart';
 import '../kdbx/icons.dart';
 import '../kdbx/kdbx.dart';
 import 'extension_state.dart';
-
 
 mixin HintEmptyTextUtil<T extends StatefulWidget> on State<T> {
   Widget hintEmptyText(bool isEmpty, Widget widget) {
@@ -92,7 +92,7 @@ class InputDialog extends StatefulWidget {
           limitItems: limitItems,
           promptItmes: promptItmes,
           onResult: (value) {
-            Navigator.of(context).pop(value);
+            context.router.pop(value);
           },
           leadingBuilder: leadingBuilder,
         );
@@ -230,7 +230,7 @@ class GroupSelectorDialog extends StatefulWidget {
         return GroupSelectorDialog(
           value: value,
           onResult: (value) {
-            Navigator.of(context).pop(value);
+            context.router.pop(value);
           },
         );
       },

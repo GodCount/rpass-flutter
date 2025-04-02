@@ -1,14 +1,37 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:rpass/src/kdbx/kdbx.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
+import '../../util/route.dart';
 import '../../widget/extension_state.dart';
+
+class _KdbxSettingArgs extends PageRouteArgs {
+  _KdbxSettingArgs({super.key});
+}
+
+class KdbxSettingRoute extends PageRouteInfo<_KdbxSettingArgs> {
+  KdbxSettingRoute({
+    Key? key,
+  }) : super(
+          name,
+          args: _KdbxSettingArgs(key: key),
+        );
+
+  static const name = "KdbxSettingRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_KdbxSettingArgs>();
+      return KdbxSettingPage(key: args.key);
+    },
+  );
+}
 
 class KdbxSettingPage extends StatefulWidget {
   const KdbxSettingPage({super.key});
-
-  static const routeName = "/kdbx_setting";
 
   @override
   State<KdbxSettingPage> createState() => _KdbxSettingPageState();
@@ -44,7 +67,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage> {
     kdbx.historyMaxItems = _historyMaxItems;
     kdbx.historyMaxSize = _mb2b(_historyMaxSize).toInt();
     if (await kdbxSave(kdbx)) {
-      Navigator.of(context).pop();
+      context.router.pop();
     }
   }
 

@@ -103,10 +103,10 @@ class ShakeFormField<T> extends StatefulWidget {
   final Duration shakeDuration;
 
   @override
-  State<ShakeFormField<T>> createState() => ShakeFormFieldState<T>();
+  State<ShakeFormField<T>> createState() => _ShakeFormFieldState<T>();
 }
 
-class ShakeFormFieldState<T> extends State<ShakeFormField<T>> {
+class _ShakeFormFieldState<T> extends State<ShakeFormField<T>> {
   final GlobalKey<ShakeWidgetState> _shakeKey = GlobalKey();
 
   String? _validator(T? value) {

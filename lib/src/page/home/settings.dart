@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -9,19 +10,43 @@ import '../../context/kdbx.dart';
 import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../rpass.dart';
+import '../../util/route.dart';
 import '../../widget/extension_state.dart';
-import '../page.dart';
+import '../route.dart';
 
 final _logger = Logger("page:settings");
+
+class _SettingsArgs extends PageRouteArgs {
+  _SettingsArgs({super.key});
+}
+
+class SettingsRoute extends PageRouteInfo<_SettingsArgs> {
+  SettingsRoute({
+    Key? key,
+  }) : super(
+          name,
+          args: _SettingsArgs(key: key),
+        );
+
+  static const name = "SettingsRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_SettingsArgs>();
+      return SettingsPage(key: args.key);
+    },
+  );
+}
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  State<SettingsPage> createState() => SettingsPageState();
+  State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class SettingsPageState extends State<SettingsPage>
+class _SettingsPageState extends State<SettingsPage>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
@@ -111,7 +136,7 @@ class SettingsPageState extends State<SettingsPage>
               title: Text(t.recycle_bin),
               trailing: const Icon(Icons.recycling_rounded),
               onTap: () {
-                Navigator.of(context).pushNamed(RecycleBinPage.routeName);
+                context.router.push(RecycleBinRoute());
               },
             ),
             // TODO! 上游 kdbx.dart 还没实现
@@ -120,7 +145,7 @@ class SettingsPageState extends State<SettingsPage>
             //   title: const Text("更多设置"),
             //   trailing: const Icon(Icons.chevron_right_rounded),
             //   onTap: () {
-            //     Navigator.of(context).pushNamed(KdbxSettingPage.routeName);
+            //      context.router.push(KdbxSettingRoute());
             //   },
             // ),
           ]),
@@ -144,7 +169,7 @@ class SettingsPageState extends State<SettingsPage>
                   store.settings.locale != null ? t.locale_name : t.system),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () {
-                Navigator.of(context).pushNamed(ChangeLocalePage.routeName);
+                context.router.push(ChangeLocaleRoute());
               },
             ),
           ]),
@@ -196,15 +221,15 @@ class SettingsPageState extends State<SettingsPage>
             ListTile(
               title: Text(t.modify_password),
               onTap: () {
-                Navigator.of(context).pushNamed(ModifyPasswordPage.routeName);
-              } ,
+                context.router.push(ModifyPasswordRoute());
+              },
             ),
             ListTile(
               shape: shape,
               title: Text(t.more_settings),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () {
-                Navigator.of(context).pushNamed(MoreSecurityPage.routeName);
+                context.router.push(MoreSecurityRoute());
               },
             ),
           ]),
@@ -224,14 +249,14 @@ class SettingsPageState extends State<SettingsPage>
             ListTile(
               title: Text(t.import),
               onTap: () {
-                Navigator.of(context).pushNamed(ImportAccountPage.routeName);
+                context.router.push(ImportAccountRoute());
               },
             ),
             ListTile(
               shape: shape,
               title: Text(t.export),
               onTap: () {
-                Navigator.of(context).pushNamed(ExportAccountPage.routeName);
+                context.router.push(ExportAccountRoute());
               },
             ),
           ]),

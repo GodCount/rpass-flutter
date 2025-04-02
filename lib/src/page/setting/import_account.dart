@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import '../../context/kdbx.dart';
@@ -5,14 +6,36 @@ import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../util/common.dart';
 import '../../util/file.dart';
+import '../../util/route.dart';
 import '../../widget/extension_state.dart';
 
 final _logger = Logger("pagr:import_account");
 
+class _ImportAccountArgs extends PageRouteArgs {
+  _ImportAccountArgs({super.key});
+}
+
+class ImportAccountRoute extends PageRouteInfo<_ImportAccountArgs> {
+  ImportAccountRoute({
+    Key? key,
+  }) : super(
+          name,
+          args: _ImportAccountArgs(key: key),
+        );
+
+  static const name = "ImportAccountRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_ImportAccountArgs>();
+      return ImportAccountPage(key: args.key);
+    },
+  );
+}
+
 class ImportAccountPage extends StatefulWidget {
   const ImportAccountPage({super.key});
-
-  static const routeName = "/import_account";
 
   @override
   State<ImportAccountPage> createState() => _ImportAccountPageState();

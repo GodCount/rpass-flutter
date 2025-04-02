@@ -1,12 +1,14 @@
 import 'dart:async';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:logging/logging.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../page.dart';
+import '../../util/route.dart';
+import '../route.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
@@ -18,16 +20,54 @@ import '../../widget/extension_state.dart';
 
 final _logger = Logger("page:look_account");
 
+class _LookAccountArgs extends PageRouteArgs {
+  _LookAccountArgs({
+    super.key,
+    this.readOnly = true,
+    required this.kdbxEntry,
+  });
+  final bool readOnly;
+  final KdbxEntry kdbxEntry;
+}
+
+class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
+  LookAccountRoute({
+    Key? key,
+    bool readOnly = true,
+    required KdbxEntry kdbxEntry,
+  }) : super(
+          name,
+          args: _LookAccountArgs(
+            key: key,
+            readOnly: readOnly,
+            kdbxEntry: kdbxEntry,
+          ),
+        );
+
+  static const name = "LookAccountRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_LookAccountArgs>();
+      return LookAccountPage(
+        key: args.key,
+        readOnly: args.readOnly,
+        kdbxEntry: args.kdbxEntry,
+      );
+    },
+  );
+}
+
 class LookAccountPage extends StatefulWidget {
-  const LookAccountPage({super.key});
+  const LookAccountPage({
+    super.key,
+    this.readOnly = false,
+    required this.kdbxEntry,
+  });
 
-  static const routeName = "/look_account";
-
-  /// 我暂时不得不妥协
-  /// RouteSettings arguments 的传值没有设计好, 对后续扩展出现了冲突
-  /// 计划更改为构建参数传参, 改动颇大, 所以暂时妥协
-  /// TODO! 更改传参方式, 去除通过路由名称确定状态的方式
-  static const routeName_readOnly = "/look_account_readonly";
+  final bool readOnly;
+  final KdbxEntry kdbxEntry;
 
   @override
   State<LookAccountPage> createState() => _LookAccountPageState();
@@ -35,8 +75,6 @@ class LookAccountPage extends StatefulWidget {
 
 class _LookAccountPageState extends State<LookAccountPage>
     with HintEmptyTextUtil {
-  KdbxEntry? _kdbxEntry;
-
   _launchUrl(String url) {
     launchUrl(
       Uri.parse(url.startsWith(RegExp(r"^https*://")) ? url : "http://$url"),
@@ -48,31 +86,15 @@ class _LookAccountPageState extends State<LookAccountPage>
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
 
-    final settings = ModalRoute.of(context)!.settings;
-
-    _kdbxEntry ??= settings.arguments as KdbxEntry?;
-
-    if (_kdbxEntry == null) {
-      _logger.warning("open look account page _kdbxEntry is null");
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(t.lookup),
-        ),
-        body: Center(
-          child: Text(t.not_found_entry),
-        ),
-      );
-    }
-
-    final readOnly = settings.name == LookAccountPage.routeName_readOnly ||
-        _kdbxEntry!.isHistoryEntry;
+    final kdbxEntry = widget.kdbxEntry;
+    final readOnly = widget.readOnly;
 
     final defaultFields = [
       ...KdbxKeyCommon.all,
       ...KdbxKeySpecial.all,
     ];
 
-    final customFields = _kdbxEntry!.stringEntries
+    final customFields = kdbxEntry.stringEntries
         .where((item) => !defaultFields.contains(item.key));
 
     const shape = RoundedRectangleBorder(
@@ -80,26 +102,25 @@ class _LookAccountPageState extends State<LookAccountPage>
           bottomLeft: Radius.circular(6.0), bottomRight: Radius.circular(6.0)),
     );
 
-    final title = _kdbxEntry!.getNonNullString(KdbxKeyCommon.TITLE);
-    final url = _kdbxEntry!.getNonNullString(KdbxKeyCommon.URL);
-    final username = _kdbxEntry!.getNonNullString(KdbxKeyCommon.USER_NAME);
-    final password = _kdbxEntry!.getNonNullString(KdbxKeyCommon.PASSWORD);
-    final email = _kdbxEntry!.getNonNullString(KdbxKeyCommon.EMAIL);
-    final notes = _kdbxEntry!.getNonNullString(KdbxKeyCommon.NOTES);
+    final title = kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE);
+    final url = kdbxEntry.getNonNullString(KdbxKeyCommon.URL);
+    final username = kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME);
+    final password = kdbxEntry.getNonNullString(KdbxKeyCommon.PASSWORD);
+    final email = kdbxEntry.getNonNullString(KdbxKeyCommon.EMAIL);
+    final notes = kdbxEntry.getNonNullString(KdbxKeyCommon.NOTES);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(t.lookup),
         actions: [
           IconButton(
-            onPressed: !readOnly && !_kdbxEntry!.isInRecycleBin()
+            onPressed: !readOnly && !kdbxEntry.isInRecycleBin()
                 ? _deleteAccount
                 : null,
             icon: const Icon(Icons.delete),
           ),
           IconButton(
-            onPressed:
-                !readOnly ? () => showEntryHistoryList(_kdbxEntry!) : null,
+            onPressed: !readOnly ? () => showEntryHistoryList(kdbxEntry) : null,
             icon: const Icon(Icons.history_rounded),
           ),
         ],
@@ -116,17 +137,17 @@ class _LookAccountPageState extends State<LookAccountPage>
                     padding: const EdgeInsets.only(right: 6),
                     child: KdbxIconWidget(
                       kdbxIcon: KdbxIconWidgetData(
-                        icon: _kdbxEntry!.parent?.icon.get() ?? KdbxIcon.Key,
-                        customIcon: _kdbxEntry!.parent?.customIcon,
+                        icon: kdbxEntry.parent?.icon.get() ?? KdbxIcon.Key,
+                        customIcon: kdbxEntry.parent?.customIcon,
                       ),
                       size: 24,
                     ),
                   ),
                   hintEmptyText(
-                    (_kdbxEntry!.parent?.name.get() ?? '').isEmpty,
+                    (kdbxEntry.parent?.name.get() ?? '').isEmpty,
                     Expanded(
                       child: Text(
-                        _kdbxEntry!.parent?.name.get() ?? '',
+                        kdbxEntry.parent?.name.get() ?? '',
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
@@ -147,19 +168,19 @@ class _LookAccountPageState extends State<LookAccountPage>
                     padding: const EdgeInsets.only(right: 6),
                     child: KdbxIconWidget(
                       kdbxIcon: KdbxIconWidgetData(
-                        icon: _kdbxEntry!.icon.get() ?? KdbxIcon.Key,
-                        customIcon: _kdbxEntry!.customIcon,
+                        icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
+                        customIcon: kdbxEntry.customIcon,
                       ),
                       size: 24,
                     ),
                   ),
                   Expanded(
                     child: Text(
-                      _kdbxEntry!.isExpiry() ? "$title (${t.expires})" : title,
+                      kdbxEntry.isExpiry() ? "$title (${t.expires})" : title,
                       softWrap: false,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
-                      style: _kdbxEntry!.isExpiry()
+                      style: kdbxEntry.isExpiry()
                           ? Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: Theme.of(context).colorScheme.error)
                           : Theme.of(context).textTheme.titleLarge,
@@ -265,16 +286,16 @@ class _LookAccountPageState extends State<LookAccountPage>
                   subtitle: Padding(
                     padding: const EdgeInsets.only(left: 12),
                     child: hintEmptyText(
-                      _kdbxEntry!.getNonNullString(item.key).isEmpty,
+                      kdbxEntry.getNonNullString(item.key).isEmpty,
                       Text(
-                        _kdbxEntry!.getNonNullString(item.key),
+                        kdbxEntry.getNonNullString(item.key),
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                     ),
                   ),
-                  onLongPress: _kdbxEntry!.getNonNullString(item.key).isNotEmpty
+                  onLongPress: kdbxEntry.getNonNullString(item.key).isNotEmpty
                       ? () =>
-                          writeClipboard(_kdbxEntry!.getNonNullString(item.key))
+                          writeClipboard(kdbxEntry.getNonNullString(item.key))
                       : null,
                 ),
               ),
@@ -325,10 +346,10 @@ class _LookAccountPageState extends State<LookAccountPage>
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: hintEmptyText(
-                  _kdbxEntry!.tagList.isEmpty,
+                  kdbxEntry.tagList.isEmpty,
                   ChipList(
                     maxHeight: 150,
-                    items: _kdbxEntry!.tagList
+                    items: kdbxEntry.tagList
                         .map(
                           (item) => ChipListItem(
                             label: item,
@@ -351,13 +372,13 @@ class _LookAccountPageState extends State<LookAccountPage>
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: hintEmptyText(
-                  _kdbxEntry!.binaryEntries.isEmpty,
+                  kdbxEntry.binaryEntries.isEmpty,
                   ChipList(
                     maxHeight: 150,
                     onChipTap: (binary) {
                       showBinaryAction(binary);
                     },
-                    items: _kdbxEntry!.binaryEntries
+                    items: kdbxEntry.binaryEntries
                         .map(
                           (item) => ChipListItem(
                             label: item.key.key,
@@ -399,7 +420,7 @@ class _LookAccountPageState extends State<LookAccountPage>
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: Text(dateFormat(
-                  _kdbxEntry!.times.creationTime.get()!.toLocal(),
+                  kdbxEntry.times.creationTime.get()!.toLocal(),
                 )),
               ),
             ),
@@ -412,12 +433,12 @@ class _LookAccountPageState extends State<LookAccountPage>
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: Text(dateFormat(
-                  _kdbxEntry!.times.lastModificationTime.get()!.toLocal(),
+                  kdbxEntry.times.lastModificationTime.get()!.toLocal(),
                 )),
               ),
             ),
-            if (_kdbxEntry!.times.expires.get() == true &&
-                _kdbxEntry!.times.expiryTime.get() != null)
+            if (kdbxEntry.times.expires.get() == true &&
+                kdbxEntry.times.expiryTime.get() != null)
               ListTile(
                 shape: shape,
                 title: Padding(
@@ -427,7 +448,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                 subtitle: Padding(
                   padding: const EdgeInsets.only(left: 12),
                   child: Text(dateFormat(
-                    _kdbxEntry!.times.expiryTime.get()!.toLocal(),
+                    kdbxEntry.times.expiryTime.get()!.toLocal(),
                   )),
                 ),
               ),
@@ -439,7 +460,7 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(_kdbxEntry!.uuid.uuid),
+                child: Text(kdbxEntry.uuid.uuid),
               ),
             ),
           ]),
@@ -449,16 +470,15 @@ class _LookAccountPageState extends State<LookAccountPage>
       floatingActionButton: !readOnly
           ? FloatingActionButton(
               onPressed: () async {
-                if (_kdbxEntry!.isInRecycleBin()) {
+                if (kdbxEntry.isInRecycleBin()) {
                   final kdbx = KdbxProvider.of(context)!;
-                  kdbx.restoreObject(_kdbxEntry!);
+                  kdbx.restoreObject(kdbxEntry);
                   if (await kdbxSave(kdbx)) {
-                    Navigator.of(context).pop();
+                    context.router.pop();
                   }
                 } else {
-                  Navigator.of(context)
-                      .pushNamed(EditAccountPage.routeName,
-                          arguments: _kdbxEntry)
+                  context.router
+                      .push(EditAccountRoute(kdbxEntry: kdbxEntry))
                       .then((value) {
                     if (value is bool && value) {
                       setState(() {});
@@ -471,7 +491,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                   Radius.circular(56 / 2),
                 ),
               ),
-              child: _kdbxEntry!.isInRecycleBin()
+              child: kdbxEntry.isInRecycleBin()
                   ? const Icon(Icons.restore_from_trash)
                   : const Icon(Icons.edit),
             )
@@ -486,9 +506,9 @@ class _LookAccountPageState extends State<LookAccountPage>
       message: t.is_move_recycle,
     )) {
       final kdbx = KdbxProvider.of(context)!;
-      kdbx.deleteEntry(_kdbxEntry!);
+      kdbx.deleteEntry(widget.kdbxEntry);
       if (await kdbxSave(kdbx)) {
-        Navigator.of(context).pop();
+        context.router.pop();
       }
     }
   }
@@ -506,7 +526,7 @@ class _LookAccountPageState extends State<LookAccountPage>
   }
 
   Widget _otp(ShapeBorder? shape) {
-    return _kdbxEntry!.getNonNullString(KdbxKeyCommon.OTP).isNotEmpty
+    return widget.kdbxEntry.getNonNullString(KdbxKeyCommon.OTP).isNotEmpty
         ? _cardColumn([
             Padding(
               padding: const EdgeInsets.all(12),
@@ -527,17 +547,17 @@ class _LookAccountPageState extends State<LookAccountPage>
             ),
             _LookOtPasswordListTile(
               shape: shape,
-              oneTimePassword: _kdbxEntry!.getNonNullString(KdbxKeyCommon.OTP),
+              oneTimePassword:
+                  widget.kdbxEntry.getNonNullString(KdbxKeyCommon.OTP),
             ),
           ])
         : const SizedBox.shrink();
   }
 
   void _showDescriptionDialog() {
-    Navigator.of(context).pushNamed(
-      EditNotes.routeName,
-      arguments: EditNotesArgs(
-        text: _kdbxEntry!.getNonNullString(KdbxKeyCommon.NOTES),
+    context.router.push(
+      EditNotesRoute(
+        text: widget.kdbxEntry.getNonNullString(KdbxKeyCommon.NOTES),
         readOnly: true,
       ),
     );

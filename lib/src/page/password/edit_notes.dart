@@ -1,7 +1,13 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../../i18n.dart';
+import '../../util/route.dart';
 
+@Deprecated(
+  '使用构造函数传参'
+  '弃用 Arguments 路由传参',
+)
 class EditNotesArgs {
   EditNotesArgs({required this.text, this.readOnly = false});
 
@@ -9,27 +15,69 @@ class EditNotesArgs {
   final bool readOnly;
 }
 
-class EditNotes extends StatefulWidget {
-  const EditNotes({super.key});
-
-  static const routeName = "/edit_notes";
-
-  @override
-  State<EditNotes> createState() => _EditNotesState();
+class _EditNotesArgs extends PageRouteArgs {
+  _EditNotesArgs({
+    super.key,
+    required this.text,
+    this.readOnly = false,
+  });
+  final String text;
+  final bool readOnly;
 }
 
-class _EditNotesState extends State<EditNotes> {
+class EditNotesRoute extends PageRouteInfo<_EditNotesArgs> {
+  EditNotesRoute({
+    Key? key,
+    required String text,
+    bool readOnly = false,
+  }) : super(
+          name,
+          args: _EditNotesArgs(
+            key: key,
+            text: text,
+            readOnly: readOnly,
+          ),
+        );
+
+  static const name = "EditNotesRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_EditNotesArgs>();
+      return EditNotesPage(
+        key: args.key,
+        text: args.text,
+        readOnly: args.readOnly,
+      );
+    },
+  );
+}
+
+class EditNotesPage extends StatefulWidget {
+  const EditNotesPage({
+    super.key,
+    required this.text,
+    this.readOnly = false,
+  });
+
+  final String text;
+  final bool readOnly;
+
+  @override
+  State<EditNotesPage> createState() => _EditNotesPageState();
+}
+
+class _EditNotesPageState extends State<EditNotesPage> {
   String? _text;
 
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
 
-    final args = ModalRoute.of(context)!.settings.arguments as EditNotesArgs;
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(args.readOnly ? t.look_notes : t.edit_notes),
+        title: Text(widget.readOnly ? t.look_notes : t.edit_notes),
       ),
       body: Card(
         margin: const EdgeInsets.all(6),
@@ -43,8 +91,8 @@ class _EditNotesState extends State<EditNotes> {
             maxLines: null,
             minLines: 6,
             keyboardType: TextInputType.multiline,
-            initialValue: args.text,
-            readOnly: args.readOnly,
+            initialValue: widget.text,
+            readOnly: widget.readOnly,
             decoration: const InputDecoration(
               border: InputBorder.none,
             ),
@@ -63,7 +111,7 @@ class _EditNotesState extends State<EditNotes> {
       floatingActionButton: _text != null
           ? FloatingActionButton(
               onPressed: () {
-                Navigator.of(context).pop(_text);
+                context.router.pop(_text);
               },
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(

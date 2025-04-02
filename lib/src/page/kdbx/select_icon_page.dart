@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:rpass/src/widget/extension_state.dart';
@@ -6,14 +7,36 @@ import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../util/file.dart';
+import '../../util/route.dart';
 import '../../widget/common.dart';
 
 final _logger = Logger("page:select_icon_page");
 
+class _SelectIconArgs extends PageRouteArgs {
+  _SelectIconArgs({super.key});
+}
+
+class SelectIconRoute extends PageRouteInfo<_SelectIconArgs> {
+  SelectIconRoute({
+    Key? key,
+  }) : super(
+          name,
+          args: _SelectIconArgs(key: key),
+        );
+
+  static const name = "SelectIconRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_SelectIconArgs>();
+      return SelectIconPage(key: args.key);
+    },
+  );
+}
+
 class SelectIconPage extends StatefulWidget {
   const SelectIconPage({super.key});
-
-  static const routeName = "/select_icon";
 
   @override
   State<SelectIconPage> createState() => _SelectIconPageState();
@@ -21,7 +44,7 @@ class SelectIconPage extends StatefulWidget {
 
 class _SelectIconPageState extends State<SelectIconPage> {
   void _onIconTap(KdbxIconWidgetData icon) {
-    Navigator.of(context).pop(icon);
+    context.router.pop(icon);
   }
 
   @override

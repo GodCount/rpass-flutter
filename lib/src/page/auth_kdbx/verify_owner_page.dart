@@ -1,20 +1,43 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
 import '../../kdbx/kdbx.dart';
+import '../../util/route.dart';
 import 'authorized_page.dart';
+
+class _VerifyOwnerArgs extends PageRouteArgs {
+  _VerifyOwnerArgs({super.key});
+}
+
+class VerifyOwnerRoute extends PageRouteInfo<_VerifyOwnerArgs> {
+  VerifyOwnerRoute({
+    Key? key,
+  }) : super(
+          name,
+          args: _VerifyOwnerArgs(key: key),
+        );
+
+  static const name = "VerifyOwnerRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_VerifyOwnerArgs>();
+      return VerifyOwnerPage(key: args.key);
+    },
+  );
+}
 
 class VerifyOwnerPage extends AuthorizedPage {
   const VerifyOwnerPage({super.key});
 
-  static const routeName = "/verify_owner";
-
   @override
-  VerifyOwnerPageState createState() => VerifyOwnerPageState();
+  AuthorizedPageState<VerifyOwnerPage> createState() => _VerifyOwnerPageState();
 }
 
-class VerifyOwnerPageState extends AuthorizedPageState {
+class _VerifyOwnerPageState extends AuthorizedPageState<VerifyOwnerPage> {
   @override
   AuthorizedType get authType => AuthorizedType.verify_owner;
 
@@ -40,14 +63,14 @@ class VerifyOwnerPageState extends AuthorizedPageState {
         throw Exception("password verify error");
       }
 
-      Navigator.of(context).pop();
+      context.router.pop();
     }
   }
 
   @override
   Future<void> verifyBiometric() async {
     await Biometric.of(context).verifyOwner(context);
-    Navigator.of(context).pop();
+    context.router.pop();
   }
 
   @override

@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
-import '../page.dart';
+import '../../util/route.dart';
+import '../route.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
@@ -19,10 +21,46 @@ import '../../widget/shake_widget.dart';
 
 final _logger = Logger("page:edit_account");
 
-class EditAccountPage extends StatefulWidget {
-  const EditAccountPage({super.key});
+class _EditAccountArgs extends PageRouteArgs {
+  _EditAccountArgs({
+    super.key,
+    this.kdbxEntry,
+  });
 
-  static const routeName = "/edit_account";
+  final KdbxEntry? kdbxEntry;
+}
+
+class EditAccountRoute extends PageRouteInfo<_EditAccountArgs> {
+  EditAccountRoute({Key? key, KdbxEntry? kdbxEntry})
+      : super(
+          name,
+          args: _EditAccountArgs(
+            key: key,
+            kdbxEntry: kdbxEntry,
+          ),
+        );
+
+  static const name = "EditAccountRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_EditAccountArgs>();
+      return EditAccountPage(
+        key: args.key,
+        kdbxEntry: args.kdbxEntry,
+      );
+    },
+  );
+}
+
+class EditAccountPage extends StatefulWidget {
+  const EditAccountPage({
+    super.key,
+    this.kdbxEntry,
+  });
+
+  final KdbxEntry? kdbxEntry;
 
   @override
   State<EditAccountPage> createState() => _EditAccountPageState();
@@ -33,25 +71,22 @@ class _EditAccountPageState extends State<EditAccountPage> {
 
   Set<KdbxKey>? _entryFields;
 
-  KdbxEntry? _kdbxEntry;
+  late final KdbxEntry _kdbxEntry =
+      widget.kdbxEntry ?? KdbxProvider.of(context)!.createVirtualEntry()
+        ..setString(
+          KdbxKeyCommon.PASSWORD,
+          PlainValue(
+            randomPassword(length: 10),
+          ),
+        );
 
   bool _isDirty = false;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   void _kdbxEntrySave() async {
     if (_from.currentState!.validate()) {
       _from.currentState!.save();
       if (await kdbxSave(KdbxProvider.of(context)!)) {
-        Navigator.of(context).pop(true);
+        context.router.pop(true);
       }
     }
   }
@@ -59,25 +94,25 @@ class _EditAccountPageState extends State<EditAccountPage> {
   void _kdbxEntryGroupSave(KdbxGroup? group) {
     final kdbx = KdbxProvider.of(context)!;
 
-    if (group != null && _kdbxEntry!.parent != group) {
-      kdbx.kdbxFile.move(_kdbxEntry!, group);
+    if (group != null && _kdbxEntry.parent != group) {
+      kdbx.kdbxFile.move(_kdbxEntry, group);
     }
   }
 
   void _entryFieldSaved(EntryFieldSaved field) {
     if (field is EntryBinaryFieldSaved) {
       final binarys = field.value;
-      final oldBinaryKeys = _kdbxEntry!.binaryEntries.map((item) => item.key);
+      final oldBinaryKeys = _kdbxEntry.binaryEntries.map((item) => item.key);
       // 删除不包含
       for (var key in oldBinaryKeys) {
         if (!binarys.any((item) => item.key == key)) {
-          _kdbxEntry!.removeBinary(key);
+          _kdbxEntry.removeBinary(key);
         }
       }
       for (var binary in binarys) {
-        if (_kdbxEntry!.getBinary(binary.key) == null) {
+        if (_kdbxEntry.getBinary(binary.key) == null) {
           // TODO! isProtected 应该怎么设置
-          _kdbxEntry!.createBinary(
+          _kdbxEntry.createBinary(
             isProtected: binary.value.isProtected,
             name: binary.key.key,
             bytes: binary.value.value,
@@ -85,23 +120,23 @@ class _EditAccountPageState extends State<EditAccountPage> {
         }
       }
     } else if (field is EntryTagsFieldSaved) {
-      _kdbxEntry!.tagList = field.value;
+      _kdbxEntry.tagList = field.value;
     } else if (field is EntryTextFieldSaved) {
       if (field.renameKdbxKey != null) {
-        _kdbxEntry!.renameKey(field.key, field.renameKdbxKey!);
+        _kdbxEntry.renameKey(field.key, field.renameKdbxKey!);
       }
-      _kdbxEntry!.setString(field.renameKdbxKey ?? field.key, field.value);
+      _kdbxEntry.setString(field.renameKdbxKey ?? field.key, field.value);
     } else if (field is EntryTitleFieldSaved) {
       if (field.customIcon != null) {
-        _kdbxEntry!.customIcon = field.customIcon;
+        _kdbxEntry.customIcon = field.customIcon;
       } else {
-        _kdbxEntry!.icon.set(field.icon);
-        _kdbxEntry!.customIcon = null;
+        _kdbxEntry.icon.set(field.icon);
+        _kdbxEntry.customIcon = null;
       }
-      _kdbxEntry!.setString(field.key, field.value);
+      _kdbxEntry.setString(field.key, field.value);
     } else if (field is EntryExpiresFieldSaved) {
-      _kdbxEntry!.times.expires.set(field.value.$1);
-      _kdbxEntry!.times.expiryTime.set(field.value.$2.toUtc());
+      _kdbxEntry.times.expires.set(field.value.$1);
+      _kdbxEntry.times.expiryTime.set(field.value.$2.toUtc());
     } else {
       _logger.warning("untreated class $field");
     }
@@ -144,38 +179,28 @@ class _EditAccountPageState extends State<EditAccountPage> {
     final t = I18n.of(context)!;
     final kdbx = KdbxProvider.of(context)!;
 
-    _kdbxEntry ??= ModalRoute.of(context)!.settings.arguments as KdbxEntry?;
-
-    _kdbxEntry ??= kdbx.createVirtualEntry()
-      ..setString(
-        KdbxKeyCommon.PASSWORD,
-        PlainValue(
-          randomPassword(length: 10),
-        ),
-      );
-
     final defaultFields = [
       ...KdbxKeyCommon.all,
       ...KdbxKeySpecial.all,
     ];
 
-    _entryFields ??= _kdbxEntry!.stringEntries
+    _entryFields ??= _kdbxEntry.stringEntries
         .where((item) => !defaultFields.contains(item.key))
         .map((item) => item.key)
         .toSet();
 
     final children = [
       KdbxEntryGroup(
-        initialValue: _kdbxEntry!.parent != null &&
-                _kdbxEntry!.parent != kdbx.virtualGroup
-            ? _kdbxEntry!.parent
-            : kdbx.kdbxFile.body.rootGroup,
+        initialValue:
+            _kdbxEntry.parent != null && _kdbxEntry.parent != kdbx.virtualGroup
+                ? _kdbxEntry.parent
+                : kdbx.kdbxFile.body.rootGroup,
         onSaved: _kdbxEntryGroupSave,
       ),
       ...KdbxKeyCommon.all.map(
         (item) => EntryField(
           kdbxKey: item,
-          kdbxEntry: _kdbxEntry!,
+          kdbxEntry: _kdbxEntry,
           slidableEnabled: false,
           onSaved: _entryFieldSaved,
         ),
@@ -183,7 +208,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
       ..._entryFields!.map(
         (item) => EntryField(
           kdbxKey: item,
-          kdbxEntry: _kdbxEntry!,
+          kdbxEntry: _kdbxEntry,
           onDeleted: _entryFieldDelete,
           onSaved: _entryFieldSaved,
         ),
@@ -192,7 +217,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
       ...KdbxKeySpecial.all.map(
         (item) => EntryField(
           kdbxKey: item,
-          kdbxEntry: _kdbxEntry!,
+          kdbxEntry: _kdbxEntry,
           slidableEnabled: false,
           onSaved: _entryFieldSaved,
         ),
@@ -542,8 +567,9 @@ class _EntryFieldState extends State<EntryField> {
           label: _kdbKey2I18n(),
           trailingIcon: const Icon(Icons.create),
           onTrailingTap: () async {
-            final password = await Navigator.of(context)
-                .pushNamed(GenPassword.routeName, arguments: true);
+            final password = await context.router.push(
+              GenPasswordRoute(popPassword: true),
+            );
             if (password != null && password is String) {
               return password;
             }
@@ -559,8 +585,9 @@ class _EntryFieldState extends State<EntryField> {
               _displayScanner ? const Icon(Icons.qr_code_scanner) : null,
           onTrailingTap: _displayScanner
               ? () async {
-                  final optUrl = await Navigator.of(context)
-                      .pushNamed(QrCodeScannerPage.routeName);
+                  final optUrl = await context.router.push(
+                    QrCodeScannerRoute(),
+                  );
                   if (optUrl != null && optUrl is String) {
                     return optUrl;
                   }
@@ -748,8 +775,7 @@ class _EntryTitleFormFieldState extends State<EntryTitleFormField> {
         border: const OutlineInputBorder(),
         prefixIcon: IconButton(
           onPressed: () async {
-            final reslut =
-                await Navigator.of(context).pushNamed(SelectIconPage.routeName);
+            final reslut = await context.router.push(SelectIconRoute());
             if (reslut != null && reslut is KdbxIconWidgetData) {
               setState(() {
                 _kdbxIcon = reslut;
@@ -847,11 +873,10 @@ class EntryNotesFormField extends FormField<String> {
   }) : super(builder: (field) {
           return GestureDetector(
             onTap: () async {
-              final text = await Navigator.of(field.context)
-                  .pushNamed(EditNotes.routeName,
-                      arguments: EditNotesArgs(
-                        text: field.value ?? '',
-                      ));
+              final text = await field.context.router.push(EditNotesRoute(
+                text: field.value ?? "",
+              ));
+
               if (text != null && text is String) {
                 field.didChange(text);
               }

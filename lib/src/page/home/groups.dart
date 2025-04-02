@@ -1,20 +1,45 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../util/route.dart';
 import '../../widget/common.dart';
 import '../../widget/extension_state.dart';
-import '../page.dart';
+import '../route.dart';
+
+class _GroupsArgs extends PageRouteArgs {
+  _GroupsArgs({super.key});
+}
+
+class GroupsRoute extends PageRouteInfo<_GroupsArgs> {
+  GroupsRoute({
+    Key? key,
+  }) : super(
+          name,
+          args: _GroupsArgs(key: key),
+        );
+
+  static const name = "GroupsRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_GroupsArgs>();
+      return GroupsPage(key: args.key);
+    },
+  );
+}
 
 class GroupsPage extends StatefulWidget {
   const GroupsPage({super.key});
 
   @override
-  State<GroupsPage> createState() => GroupsPageState();
+  State<GroupsPage> createState() => _GroupsPageState();
 }
 
-class GroupsPageState extends State<GroupsPage>
+class _GroupsPageState extends State<GroupsPage>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
@@ -103,14 +128,14 @@ class GroupsPageState extends State<GroupsPage>
         child: InkWell(
           borderRadius: const BorderRadius.all(Radius.circular(6.0)),
           onTap: () {
-            Home.of(context)!
-                .toPasswordPageSearch('g:"${kdbxGroup.name.get() ?? ''}"');
+            // TODO! 新的跳转搜索方式
+            // Home.of(context)!
+            //     .toPasswordPageSearch('g:"${kdbxGroup.name.get() ?? ''}"');
           },
           onLongPress: () => showKdbxGroupAction(
             kdbxGroup.name.get() ?? '',
             onManageTap: () {
-              Navigator.of(context)
-                  .pushNamed(ManageGroupEntry.routeName, arguments: kdbxGroup);
+              context.router.push(ManageGroupEntryRoute(kdbxGroup: kdbxGroup));
             },
             onModifyTap: () => setKdbxGroup(
               KdbxGroupData(

@@ -1,24 +1,47 @@
 import 'dart:typed_data';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
 import '../../context/store.dart';
 import '../../kdbx/kdbx.dart';
-import '../page.dart';
+import '../../util/route.dart';
+import '../route.dart';
 import 'authorized_page.dart';
+
+class _LoadKdbxArgs extends PageRouteArgs {
+  _LoadKdbxArgs({super.key});
+}
+
+class LoadKdbxRoute extends PageRouteInfo<_LoadKdbxArgs> {
+  LoadKdbxRoute({
+    Key? key,
+  }) : super(
+          name,
+          args: _LoadKdbxArgs(key: key),
+        );
+
+  static const name = "LoadKdbxRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_LoadKdbxArgs>();
+      return LoadKdbxPage(key: args.key);
+    },
+  );
+}
 
 class LoadKdbxPage extends AuthorizedPage {
   const LoadKdbxPage({super.key});
 
-  static const routeName = "/load_kdbx";
-
   @override
-  LoadKdbxPageState createState() => LoadKdbxPageState();
+  AuthorizedPageState<LoadKdbxPage> createState() => _LoadKdbxPageState();
 }
 
-class LoadKdbxPageState extends AuthorizedPageState {
+class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
   @override
   AuthorizedType get authType => AuthorizedType.load;
 
@@ -32,9 +55,6 @@ class LoadKdbxPageState extends AuthorizedPageState {
     super.initState();
     startBiometric();
   }
-
-
-
 
   @override
   Future<void> confirm() async {
@@ -63,7 +83,7 @@ class LoadKdbxPageState extends AuthorizedPageState {
       }
 
       KdbxProvider.setKdbx(context, kdbx);
-      Navigator.of(context).pushReplacementNamed(Home.routeName);
+      context.router.replace(HomeRoute());
     }
   }
 
@@ -85,65 +105,12 @@ class LoadKdbxPageState extends AuthorizedPageState {
     );
 
     KdbxProvider.setKdbx(context, kdbx);
-    Navigator.of(context).pushReplacementNamed(Home.routeName);
+    context.router.replace(HomeRoute());
   }
 
   @override
   void dispose() {
     kdbxFile = null;
     super.dispose();
-  }
-}
-
-class LoadExternalKdbxPageArguments {
-  LoadExternalKdbxPageArguments({
-    required this.kdbxFile,
-    this.kdbxFilePath,
-  });
-
-  final Uint8List kdbxFile;
-  final String? kdbxFilePath;
-}
-
-class LoadExternalKdbxPage extends AuthorizedPage {
-  const LoadExternalKdbxPage({super.key});
-
-  static const routeName = "/load_external_kdbx";
-
-  @override
-  LoadExternalKdbxPageState createState() => LoadExternalKdbxPageState();
-}
-
-class LoadExternalKdbxPageState extends AuthorizedPageState {
-  @override
-  AuthorizedType get authType => AuthorizedType.load;
-
-  @override
-  bool get enableBack => true;
-
-  @override
-  bool get readHistoryKeyFile => false;
-
-  @override
-  Future<void> confirm() async {
-    if (form.currentState!.validate()) {
-      final args = ModalRoute.of(context)!.settings.arguments
-          as LoadExternalKdbxPageArguments;
-
-      final passowrd = passwordController.text;
-      final keyFile = keyFilecontroller.keyFile;
-
-      if (!isPassword && keyFile == null) {
-        throw Exception("Lack of key file.");
-      }
-
-      Kdbx kdbx = await Kdbx.loadBytesFromCredentials(
-        data: args.kdbxFile,
-        credentials:
-            Kdbx.createCredentials(isPassword ? passowrd : null, keyFile?.$2),
-      );
-
-      Navigator.of(context).pop((kdbx, keyFile?.$1));
-    }
   }
 }

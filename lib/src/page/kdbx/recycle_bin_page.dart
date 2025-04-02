@@ -1,16 +1,39 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
-import '../page.dart';
+import '../../util/route.dart';
+import '../route.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../widget/common.dart';
 import '../../widget/extension_state.dart';
 
+class _RecycleBinArgs extends PageRouteArgs {
+  _RecycleBinArgs({super.key});
+}
+
+class RecycleBinRoute extends PageRouteInfo<_RecycleBinArgs> {
+  RecycleBinRoute({
+    Key? key,
+  }) : super(
+          name,
+          args: _RecycleBinArgs(key: key),
+        );
+
+  static const name = "RecycleBinRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_RecycleBinArgs>();
+      return RecycleBinPage(key: args.key);
+    },
+  );
+}
+
 class RecycleBinPage extends StatefulWidget {
   const RecycleBinPage({super.key});
-
-  static const routeName = "/recycle_bin";
 
   @override
   State<RecycleBinPage> createState() => _RecycleBinPageState();
@@ -47,9 +70,8 @@ class _RecycleBinPageState extends State<RecycleBinPage> {
             leading: const Icon(Icons.person_search),
             title: Text(t.lookup),
             onTap: () async {
-              await Navigator.of(context).popAndPushNamed(
-                LookAccountPage.routeName,
-                arguments: kdbxObject,
+              await context.router.popAndPush(
+                LookAccountRoute(kdbxEntry: kdbxObject),
               );
               setState(() {});
             },
@@ -62,7 +84,7 @@ class _RecycleBinPageState extends State<RecycleBinPage> {
           onTap: () {
             KdbxProvider.of(context)!.restoreObject(kdbxObject);
             _save();
-            Navigator.of(context).pop();
+            context.router.pop();
           },
         ),
         ListTile(
@@ -74,7 +96,7 @@ class _RecycleBinPageState extends State<RecycleBinPage> {
             () {
               KdbxProvider.of(context)!.deletePermanently(kdbxObject);
               _save();
-              Navigator.of(context).pop();
+              context.router.pop();
             },
           ),
         ),

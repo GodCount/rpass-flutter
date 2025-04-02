@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
@@ -6,20 +7,43 @@ import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
 import '../../context/store.dart';
 import '../../kdbx/kdbx.dart';
+import '../../util/route.dart';
 import 'authorized_page.dart';
 
 final _logger = Logger("page:auth:modify");
 
+class _ModifyPasswordArgs extends PageRouteArgs {
+  _ModifyPasswordArgs({super.key});
+}
+
+class ModifyPasswordRoute extends PageRouteInfo<_ModifyPasswordArgs> {
+  ModifyPasswordRoute({
+    Key? key,
+  }) : super(
+          name,
+          args: _ModifyPasswordArgs(key: key),
+        );
+
+  static const name = "ModifyPasswordRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_ModifyPasswordArgs>();
+      return ModifyPasswordPage(key: args.key);
+    },
+  );
+}
+
 class ModifyPasswordPage extends AuthorizedPage {
   const ModifyPasswordPage({super.key});
 
-  static const routeName = "/modify_password";
-
   @override
-  ModifyPasswordPageState createState() => ModifyPasswordPageState();
+  AuthorizedPageState<ModifyPasswordPage> createState() =>
+      _ModifyPasswordPageState();
 }
 
-class ModifyPasswordPageState extends AuthorizedPageState {
+class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
   @override
   AuthorizedType get authType => AuthorizedType.modify_password;
 
@@ -90,7 +114,7 @@ class ModifyPasswordPageState extends AuthorizedPageState {
         await store.settings.setKeyFilePath(keyFile?.$1);
       }
 
-      Navigator.of(context).pop();
+      context.router.pop();
     }
   }
 }

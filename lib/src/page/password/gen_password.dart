@@ -1,20 +1,59 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
+import '../../util/route.dart';
 import '../../widget/match_text.dart';
 import '../../i18n.dart';
 import '../../util/common.dart';
 import '../../widget/extension_state.dart';
 
-class GenPassword extends StatefulWidget {
-  const GenPassword({super.key});
-
-  static const routeName = "/gen_password";
-
-  @override
-  State<GenPassword> createState() => _GenPasswordState();
+class _GenPasswordArgs extends PageRouteArgs {
+  _GenPasswordArgs({
+    super.key,
+    this.popPassword = false,
+  });
+  final bool popPassword;
 }
 
-class _GenPasswordState extends State<GenPassword> {
+class GenPasswordRoute extends PageRouteInfo<_GenPasswordArgs> {
+  GenPasswordRoute({
+    Key? key,
+    bool popPassword = false,
+  }) : super(
+          name,
+          args: _GenPasswordArgs(
+            key: key,
+            popPassword: popPassword,
+          ),
+        );
+
+  static const name = "GenPasswordRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_GenPasswordArgs>();
+      return GenPasswordPage(
+        key: args.key,
+        popPassword: args.popPassword,
+      );
+    },
+  );
+}
+
+class GenPasswordPage extends StatefulWidget {
+  const GenPasswordPage({
+    super.key,
+    this.popPassword = false,
+  });
+
+  final bool popPassword;
+
+  @override
+  State<GenPasswordPage> createState() => _GenPasswordPageState();
+}
+
+class _GenPasswordPageState extends State<GenPasswordPage> {
   bool _enableLetter = true;
   bool _enableNumber = true;
   bool _enableSymbol = true;
@@ -61,10 +100,6 @@ class _GenPasswordState extends State<GenPassword> {
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
 
-    final returnPassword = ModalRoute.of(context)!.settings.arguments is bool
-        ? ModalRoute.of(context)!.settings.arguments as bool? ?? false
-        : false;
-
     const shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(6.0), bottomRight: Radius.circular(6.0)),
@@ -72,7 +107,7 @@ class _GenPasswordState extends State<GenPassword> {
 
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: returnPassword,
+        automaticallyImplyLeading: widget.popPassword,
         title: Text(t.gen_password),
       ),
       body: ListView(
@@ -194,8 +229,8 @@ class _GenPasswordState extends State<GenPassword> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          if (returnPassword) {
-            Navigator.of(context).pop(password);
+          if (widget.popPassword) {
+            context.router.pop(password);
           } else {
             writeClipboard(password);
           }
@@ -205,7 +240,7 @@ class _GenPasswordState extends State<GenPassword> {
             Radius.circular(56 / 2),
           ),
         ),
-        child: Icon(returnPassword ? Icons.done : Icons.copy),
+        child: Icon(widget.popPassword ? Icons.done : Icons.copy),
       ),
     );
   }

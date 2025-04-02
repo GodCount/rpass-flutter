@@ -1,28 +1,51 @@
 import 'dart:io';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../util/file.dart';
+import '../../util/route.dart';
 import '../home/home.dart';
 import 'authorized_page.dart';
 import '../../widget/extension_state.dart';
 import '../../kdbx/kdbx.dart';
 import '../../context/store.dart';
 import '../../rpass.dart';
-import 'load_page.dart';
+import 'load_ext_page.dart';
+
+class _InitialArgs extends PageRouteArgs {
+  _InitialArgs({super.key});
+}
+
+class InitialRoute extends PageRouteInfo<_InitialArgs> {
+  InitialRoute({
+    Key? key,
+  }) : super(
+          name,
+          args: _InitialArgs(key: key),
+        );
+
+  static const name = "InitialRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_InitialArgs>();
+      return InitialPage(key: args.key);
+    },
+  );
+}
 
 class InitialPage extends AuthorizedPage {
   const InitialPage({super.key});
 
-  static const routeName = "/initial";
-
   @override
-  InitialPageState createState() => InitialPageState();
+  AuthorizedPageState<InitialPage> createState() => _InitialPageState();
 }
 
-class InitialPageState extends AuthorizedPageState {
+class _InitialPageState extends AuthorizedPageState<InitialPage> {
   @override
   AuthorizedType get authType => AuthorizedType.initial;
 
@@ -77,7 +100,7 @@ class InitialPageState extends AuthorizedPageState {
       }
 
       KdbxProvider.setKdbx(context, kdbx);
-      Navigator.of(context).pushReplacementNamed(Home.routeName);
+      context.router.replace(HomeRoute());
     }
   }
 
@@ -92,14 +115,10 @@ class InitialPageState extends AuthorizedPageState {
       throw Exception("Invalid file extension");
     }
 
-    final result = await Navigator.pushNamed(
-      context,
-      LoadExternalKdbxPage.routeName,
-      arguments: LoadExternalKdbxPageArguments(
-        kdbxFile: file.$2,
-        kdbxFilePath: file.$1,
-      ),
-    );
+    final result = await context.router.push(LoadExternalKdbxRoute(
+      kdbxFile: file.$2,
+      kdbxFilePath: file.$1,
+    ));
 
     if (result != null && result is (Kdbx, String?)) {
       final store = StoreProvider.of(context);
@@ -113,7 +132,7 @@ class InitialPageState extends AuthorizedPageState {
       }
 
       KdbxProvider.setKdbx(context, kdbx);
-      Navigator.of(context).pushReplacementNamed(Home.routeName);
+      context.router.replace(HomeRoute());
     }
   }
 }

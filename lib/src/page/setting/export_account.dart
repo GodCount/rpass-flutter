@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
@@ -7,20 +8,42 @@ import '../../kdbx/kdbx.dart';
 import '../../rpass.dart';
 import '../../util/common.dart';
 import '../../util/file.dart';
+import '../../util/route.dart';
 import '../../widget/extension_state.dart';
 
 final _logger = Logger("page:export_account");
 
+class _ExportAccountArgs extends PageRouteArgs {
+  _ExportAccountArgs({super.key});
+}
+
+class ExportAccountRoute extends PageRouteInfo<_ExportAccountArgs> {
+  ExportAccountRoute({
+    Key? key,
+  }) : super(
+          name,
+          args: _ExportAccountArgs(key: key),
+        );
+
+  static const name = "ExportAccountRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_ExportAccountArgs>();
+      return ExportAccountPage(key: args.key);
+    },
+  );
+}
+
 class ExportAccountPage extends StatefulWidget {
   const ExportAccountPage({super.key});
 
-  static const routeName = "/export_account";
-
   @override
-  ExportAccountPageState createState() => ExportAccountPageState();
+  State<ExportAccountPage> createState() => _ExportAccountPageState();
 }
 
-class ExportAccountPageState extends State<ExportAccountPage> {
+class _ExportAccountPageState extends State<ExportAccountPage> {
   void _exportKdbxFile() async {
     final kdbx = KdbxProvider.of(context)!;
     try {

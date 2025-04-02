@@ -7,34 +7,42 @@ import 'package:logging/logging.dart';
 
 import '../../context/store.dart';
 import '../../i18n.dart';
-import '../page.dart';
-import 'groups.dart';
-import 'settings.dart';
-import 'passwords.dart';
+import '../../util/route.dart';
+import '../route.dart';
 
 final _logger = Logger("page:home");
 
-class Home extends StatefulWidget {
-  const Home({super.key});
-
-  static const routeName = "/home";
-
-  static HomeState? of(BuildContext context) {
-    HomeState? home;
-    if (context is StatefulElement && context.state is HomeState) {
-      home = context.state as HomeState;
-    }
-
-    home = home ?? context.findAncestorStateOfType<HomeState>();
-
-    return home;
-  }
-
-  @override
-  State<Home> createState() => HomeState();
+class _HomeArgs extends PageRouteArgs {
+  _HomeArgs({super.key});
 }
 
-class HomeState extends State<Home>
+class HomeRoute extends PageRouteInfo<_HomeArgs> {
+  HomeRoute({
+    Key? key,
+  }) : super(
+          name,
+          args: _HomeArgs(key: key),
+        );
+
+  static const name = "HomeRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_HomeArgs>();
+      return HomePage(key: args.key);
+    },
+  );
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   Timer? _timer;
   bool _verificationStart = false;
@@ -54,7 +62,7 @@ class HomeState extends State<Home>
       _cancelTimer();
       _timer = Timer(settings.lockDelay!, () async {
         _verificationStart = true;
-        await Navigator.of(context).pushNamed(VerifyOwnerPage.routeName);
+        await context.router.push(VerifyOwnerRoute());
         _verificationStart = false;
       });
     }
@@ -111,10 +119,10 @@ class HomeState extends State<Home>
 
     return AutoTabsRouter.pageView(
       scrollDirection: Axis.horizontal,
-      routes: const [
-        NamedRoute("PasswordsPage"),
-        NamedRoute("GroupsPage"),
-        NamedRoute("SettingsPage"),
+      routes: [
+        PasswordsRoute(),
+        GroupsRoute(),
+        SettingsRoute(),
       ],
       builder: (context, child, _) {
         final t = I18n.of(context)!;

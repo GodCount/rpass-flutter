@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,7 +10,7 @@ import 'package:logging/logging.dart';
 import '../context/kdbx.dart';
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
-import '../page/page.dart';
+import '../page/route.dart';
 import '../util/common.dart';
 import '../util/file.dart';
 import 'chip_list.dart';
@@ -38,7 +39,7 @@ extension StatefulDialog on State {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                context.router.pop();
               },
               child: Text(I18n.of(context)!.confirm),
             )
@@ -58,7 +59,7 @@ extension StatefulDialog on State {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                context.router.pop();
               },
               child: Text(I18n.of(context)!.confirm),
             )
@@ -93,13 +94,13 @@ extension StatefulDialog on State {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                context.router.pop();
               },
               child: Text(cancel ?? t.cancel),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(true);
+                context.router.pop(true);
               },
               child: Text(confirm ?? t.confirm),
             ),
@@ -166,7 +167,7 @@ extension StatefulBottomSheet on State {
               showError(e);
             }
           } finally {
-            Navigator.of(context).pop();
+            context.router.pop();
           }
         },
       )
@@ -188,7 +189,7 @@ extension StatefulBottomSheet on State {
           title: Text(t.manage),
           onTap: onManageTap != null
               ? () {
-                  Navigator.of(context).pop();
+                  context.router.pop();
                   onManageTap();
                 }
               : null,
@@ -200,7 +201,7 @@ extension StatefulBottomSheet on State {
           title: Text(t.modify),
           onTap: onModifyTap != null
               ? () {
-                  Navigator.of(context).pop();
+                  context.router.pop();
                   onModifyTap();
                 }
               : null,
@@ -213,7 +214,7 @@ extension StatefulBottomSheet on State {
           enabled: onDeleteTap != null,
           onTap: onDeleteTap != null
               ? () {
-                  Navigator.of(context).pop();
+                  context.router.pop();
                   onDeleteTap();
                 }
               : null,
@@ -259,9 +260,8 @@ extension StatefulBottomSheet on State {
                               borderRadius:
                                   const BorderRadius.all(Radius.circular(6.0)),
                               onTap: () {
-                                Navigator.of(context).popAndPushNamed(
-                                  LookAccountPage.routeName,
-                                  arguments: entry,
+                                context.router.popAndPush(
+                                  LookAccountRoute(kdbxEntry: entry),
                                 );
                               },
                               child: Padding(
@@ -332,7 +332,7 @@ extension StatefulBottomSheet on State {
                   ),
                   IconButton(
                     onPressed: () {
-                      Navigator.of(context).pop(dateTime);
+                      context.router.pop(dateTime);
                     },
                     icon: const Icon(Icons.done),
                   ),
@@ -427,8 +427,7 @@ extension StatefulKdbx on State {
       leadingBuilder: (state) {
         return IconButton(
           onPressed: () async {
-            final reslut =
-                await Navigator.of(context).pushNamed(SelectIconPage.routeName);
+            final reslut = await context.router.push(SettingsRoute());
             if (reslut != null && reslut is KdbxIconWidgetData) {
               data.kdbxIcon = reslut;
               state.update();

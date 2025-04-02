@@ -1,12 +1,35 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../../context/store.dart';
 import '../../i18n.dart';
+import '../../util/route.dart';
+
+class _ChangeLocaleArgs extends PageRouteArgs {
+  _ChangeLocaleArgs({super.key});
+}
+
+class ChangeLocaleRoute extends PageRouteInfo<_ChangeLocaleArgs> {
+  ChangeLocaleRoute({
+    Key? key,
+  }) : super(
+          name,
+          args: _ChangeLocaleArgs(key: key),
+        );
+
+  static const name = "ChangeLocaleRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_ChangeLocaleArgs>();
+      return ChangeLocalePage(key: args.key);
+    },
+  );
+}
 
 class ChangeLocalePage extends StatefulWidget {
   const ChangeLocalePage({super.key});
-
-  static const routeName = "/change_locale";
 
   @override
   State<ChangeLocalePage> createState() => _ChangeLocalePageState();

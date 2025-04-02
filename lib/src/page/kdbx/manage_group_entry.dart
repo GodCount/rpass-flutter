@@ -1,29 +1,65 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../util/route.dart';
 import '../../widget/common.dart';
 import '../../widget/extension_state.dart';
-import '../page.dart';
+import '../password/look_account.dart';
 
-class ManageGroupEntry extends StatefulWidget {
-  const ManageGroupEntry({super.key});
+class _ManageGroupEntryArgs extends PageRouteArgs {
+  _ManageGroupEntryArgs({
+    super.key,
+    required this.kdbxGroup,
+  });
 
-  static const routeName = "/manage_group_entry";
-
-  @override
-  State<ManageGroupEntry> createState() => _ManageGroupEntryState();
+  final KdbxGroup kdbxGroup;
 }
 
-class _ManageGroupEntryState extends State<ManageGroupEntry> {
+class ManageGroupEntryRoute extends PageRouteInfo<_ManageGroupEntryArgs> {
+  ManageGroupEntryRoute({
+    Key? key,
+    required KdbxGroup kdbxGroup,
+  }) : super(
+          name,
+          args: _ManageGroupEntryArgs(
+            key: key,
+            kdbxGroup: kdbxGroup,
+          ),
+        );
+
+  static const name = "ManageGroupEntryRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_ManageGroupEntryArgs>();
+      return ManageGroupEntryPage(
+        key: args.key,
+        kdbxGroup: args.kdbxGroup,
+      );
+    },
+  );
+}
+
+class ManageGroupEntryPage extends StatefulWidget {
+  const ManageGroupEntryPage({super.key, required this.kdbxGroup});
+
+  final KdbxGroup kdbxGroup;
+
+  @override
+  State<ManageGroupEntryPage> createState() => _ManageGroupEntryPageState();
+}
+
+class _ManageGroupEntryPageState extends State<ManageGroupEntryPage> {
   final TextEditingController _searchController = TextEditingController();
 
   final KbdxSearchHandler _kbdxSearchHandler = KbdxSearchHandler();
 
   // 总选中
   final List<KdbxEntry> _selecteds = [];
-  KdbxGroup? _kdbxGroup;
 
   final List<KdbxEntry> _totalEntry = [];
 
@@ -37,8 +73,10 @@ class _ManageGroupEntryState extends State<ManageGroupEntry> {
   void initState() {
     _searchController.addListener(_search);
     Future.delayed(Duration.zero, () {
-      _kbdxSearchHandler
-          .setFieldOther(KdbxProvider.of(context)!.fieldStatistic.customFields);
+      _kbdxSearchHandler.setFieldOther(
+        KdbxProvider.of(context)!.fieldStatistic.customFields,
+      );
+      _search();
     });
     super.initState();
   }
@@ -54,7 +92,7 @@ class _ManageGroupEntryState extends State<ManageGroupEntry> {
     _totalEntry.clear();
     _totalEntry.addAll(_kbdxSearchHandler.search(
       _searchController.text,
-      _kdbxGroup?.entries ?? [],
+      widget.kdbxGroup.entries,
     ));
     setState(() {});
   }
@@ -85,7 +123,7 @@ class _ManageGroupEntryState extends State<ManageGroupEntry> {
   }
 
   void _moveSelecteds() async {
-    final group = await showGroupSelectorDialog(_kdbxGroup);
+    final group = await showGroupSelectorDialog(widget.kdbxGroup);
     if (group != null) {
       final kdbx = KdbxProvider.of(context)!;
       for (var item in _selecteds) {
@@ -106,7 +144,7 @@ class _ManageGroupEntryState extends State<ManageGroupEntry> {
           leading: const Icon(Icons.drive_file_move_rounded),
           title: Text(t.move),
           onTap: () {
-            Navigator.of(context).pop();
+            context.router.pop();
             _moveSelecteds();
           },
         ),
@@ -116,7 +154,7 @@ class _ManageGroupEntryState extends State<ManageGroupEntry> {
           leading: const Icon(Icons.delete),
           title: Text(t.delete),
           onTap: () {
-            Navigator.of(context).pop();
+            context.router.pop();
             _deleteSelecteds();
           },
         ),
@@ -147,25 +185,6 @@ class _ManageGroupEntryState extends State<ManageGroupEntry> {
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-
-    bool isFirst = _kdbxGroup == null;
-
-    _kdbxGroup ??= ModalRoute.of(context)!.settings.arguments as KdbxGroup?;
-
-    if (_kdbxGroup == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(t.man_group_pass),
-        ),
-        body: Center(
-          child: Text(t.empty_group),
-        ),
-      );
-    }
-
-    if (isFirst) {
-      _search();
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -246,11 +265,10 @@ class _ManageGroupEntryState extends State<ManageGroupEntry> {
       onLongPress: () {
         showModalBottomSheet(
           context: context,
-          routeSettings: RouteSettings(
-            name: LookAccountPage.routeName_readOnly,
-            arguments: kdbxEntry,
+          builder: (context) => LookAccountPage(
+            kdbxEntry: kdbxEntry,
+            readOnly: true,
           ),
-          builder: (context) => const LookAccountPage(),
         );
       },
       leading: KdbxIconWidget(

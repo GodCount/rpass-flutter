@@ -1,22 +1,48 @@
 import 'dart:async';
 
 import 'package:animations/animations.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../util/route.dart';
 import '../../widget/common.dart';
-import '../page.dart';
+import '../password/edit_account.dart';
+import '../password/look_account.dart';
+
+class _PasswordsArgs extends PageRouteArgs {
+  _PasswordsArgs({super.key});
+}
+
+class PasswordsRoute extends PageRouteInfo<_PasswordsArgs> {
+  PasswordsRoute({
+    Key? key,
+  }) : super(
+          name,
+          args: _PasswordsArgs(key: key),
+        );
+
+  static const name = "PasswordsRoute";
+
+  static final PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<_PasswordsArgs>();
+      return PasswordsPage(key: args.key);
+    },
+  );
+}
 
 class PasswordsPage extends StatefulWidget {
   const PasswordsPage({super.key});
 
   @override
-  State<PasswordsPage> createState() => PasswordsPageState();
+  State<PasswordsPage> createState() => _PasswordsPageState();
 }
 
-class PasswordsPageState extends State<PasswordsPage>
+class _PasswordsPageState extends State<PasswordsPage>
     with AutomaticKeepAliveClientMixin {
   final TextEditingController _searchController = TextEditingController();
 
@@ -300,7 +326,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                context.router.pop();
               },
               child: Text(t.confirm),
             ),
@@ -331,12 +357,14 @@ class _OpenContainerPasswordItem extends StatelessWidget {
       openColor: mainColor,
       closedColor: mainColor,
       middleColor: mainColor,
-      routeSettings: RouteSettings(arguments: kdbxEntry),
       openBuilder: (BuildContext context, VoidCallback _) {
-        if (isLogPress) {
-          return const EditAccountPage();
-        }
-        return const LookAccountPage();
+        return isLogPress
+            ? EditAccountPage(
+                kdbxEntry: kdbxEntry,
+              )
+            : LookAccountPage(
+                kdbxEntry: kdbxEntry,
+              );
       },
       closedElevation: 2,
       closedShape: const RoundedRectangleBorder(
