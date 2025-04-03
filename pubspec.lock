@@ -250,7 +250,7 @@ packages:
     source: hosted
     version: "3.0.1"
   dio:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: dio
       sha256: "253a18bbd4851fecba42f7343a1df3a9a4c1d31a2c1b37e221086b4fa8c8dbc9"
@@ -417,10 +417,10 @@ packages:
     dependency: "direct main"
     description:
       name: intl
-      sha256: "3df61194eb431efc39c4ceba583b95633a403f46c9fd341e550ce0bfa50e9aa5"
+      sha256: d6f56758b7d3014a48af9701c085700aac781a92a87a62b1333b46d8879661cf
       url: "https://pub.dev"
     source: hosted
-    version: "0.20.2"
+    version: "0.19.0"
   io:
     dependency: transitive
     description:
@@ -558,14 +558,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.6"
-  multi_split_view:
-    dependency: "direct main"
-    description:
-      name: multi_split_view
-      sha256: "99c02f128e7423818d13b8f2e01e3027e953b35508019dcee214791bd0525db5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.6.0"
   otp:
     dependency: "direct main"
     description:
@@ -1035,6 +1027,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  webdav_client:
+    dependency: "direct main"
+    description:
+      name: webdav_client
+      sha256: "682fffc50b61dc0e8f46717171db03bf9caaa17347be41c0c91e297553bf86b2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.2"
   win32:
     dependency: transitive
     description:
