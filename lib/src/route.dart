@@ -23,7 +23,9 @@ class AuthGuard extends AutoRouteGuard {
 
 RootStackRouter createAutoRoute() {
   return RootStackRouter.build(
-    defaultRouteType: const RouteType.material(),
+    // TODO! FlutterFragmentActivity 暂不支持预测返回，但根路由的预测返回能正常生效
+    // https://github.com/flutter/flutter/issues/149753
+    defaultRouteType: const RouteType.material(enablePredictiveBackGesture: true),
     guards: [AuthGuard()],
     routes: [
       AutoRoute(
