@@ -151,47 +151,51 @@ RootStackRouter _createDesktopAutoRoute() {
             page: PasswordsRoute.page,
             children: [
               AutoRoute(
-                path: "/edit_account",
+                path: "edit_account",
                 page: EditAccountRoute.page,
               ),
               AutoRoute(
-                path: "/look_account",
+                path: "look_account",
                 page: LookAccountRoute.page,
               ),
             ],
           ),
-          AutoRoute(path: "groups", page: GroupsRoute.page, children: [
-            AutoRoute(
-              path: "/manage_group_entry",
-              page: ManageGroupEntryRoute.page,
-            ),
-          ]),
+          AutoRoute(
+            path: "groups",
+            page: GroupsRoute.page,
+            children: [
+              AutoRoute(
+                path: "manage_group_entry",
+                page: ManageGroupEntryRoute.page,
+              ),
+            ],
+          ),
           AutoRoute(
             path: "settings",
             page: SettingsRoute.page,
             children: [
               AutoRoute(
-                path: "/recycle_bin",
+                path: "recycle_bin",
                 page: RecycleBinRoute.page,
               ),
               AutoRoute(
-                path: "/change_locale",
+                path: "change_locale",
                 page: ChangeLocaleRoute.page,
               ),
               AutoRoute(
-                path: "/more_security",
+                path: "more_security",
                 page: MoreSecurityRoute.page,
               ),
               AutoRoute(
-                path: "/export_account",
+                path: "export_account",
                 page: ExportAccountRoute.page,
               ),
               AutoRoute(
-                path: "/import_account",
+                path: "import_account",
                 page: ImportAccountRoute.page,
               ),
               AutoRoute(
-                path: "/kdbx_setting",
+                path: "kdbx_setting",
                 page: KdbxSettingRoute.page,
               ),
             ],

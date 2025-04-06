@@ -43,7 +43,8 @@ class ExportAccountPage extends StatefulWidget {
   State<ExportAccountPage> createState() => _ExportAccountPageState();
 }
 
-class _ExportAccountPageState extends State<ExportAccountPage> {
+class _ExportAccountPageState extends State<ExportAccountPage>
+    with SecondLevelPageAutoBack<ExportAccountPage> {
   void _exportKdbxFile() async {
     final kdbx = KdbxProvider.of(context)!;
     try {
@@ -92,6 +93,7 @@ class _ExportAccountPageState extends State<ExportAccountPage> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: autoBack(),
         title: Text(t.export),
       ),
       body: Center(

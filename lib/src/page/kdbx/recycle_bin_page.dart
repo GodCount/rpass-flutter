@@ -39,13 +39,13 @@ class RecycleBinPage extends StatefulWidget {
   State<RecycleBinPage> createState() => _RecycleBinPageState();
 }
 
-class _RecycleBinPageState extends State<RecycleBinPage> {
+class _RecycleBinPageState extends State<RecycleBinPage>
+    with SecondLevelPageAutoBack<RecycleBinPage> {
   final List<KdbxObject> _selecteds = [];
   bool _isLongPress = false;
 
   void _save() async {
     await kdbxSave(KdbxProvider.of(context)!);
-    setState(() {});
   }
 
   void _deleteWarnDialog(VoidCallback confirmCallback) async {
@@ -157,8 +157,21 @@ class _RecycleBinPageState extends State<RecycleBinPage> {
   }
 
   @override
+  void initState() {
+    Future.delayed(Duration.zero, () {
+      KdbxProvider.of(context)!.addListener(_onKdbxSave);
+    });
+    super.initState();
+  }
+
+  void _onKdbxSave() {
+    setState(() {});
+  }
+
+  @override
   void dispose() {
     _selecteds.clear();
+    KdbxProvider.of(context)!.removeListener(_onKdbxSave);
     super.dispose();
   }
 
@@ -182,7 +195,7 @@ class _RecycleBinPageState extends State<RecycleBinPage> {
                 },
                 icon: const Icon(Icons.close_rounded),
               )
-            : null,
+            : autoBack(),
         actions: _isLongPress
             ? [
                 IconButton(

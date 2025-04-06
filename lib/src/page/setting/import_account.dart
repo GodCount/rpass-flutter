@@ -41,7 +41,8 @@ class ImportAccountPage extends StatefulWidget {
   State<ImportAccountPage> createState() => _ImportAccountPageState();
 }
 
-class _ImportAccountPageState extends State<ImportAccountPage> {
+class _ImportAccountPageState extends State<ImportAccountPage>
+    with SecondLevelPageAutoBack<ImportAccountPage> {
   void _csvImport(FormatTransform adapter) async {
     final t = I18n.of(context)!;
 
@@ -66,6 +67,7 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
     final t = I18n.of(context)!;
     return Scaffold(
       appBar: AppBar(
+        leading: autoBack(),
         title: Text(t.import),
       ),
       body: Center(

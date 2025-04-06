@@ -66,7 +66,8 @@ class EditAccountPage extends StatefulWidget {
   State<EditAccountPage> createState() => _EditAccountPageState();
 }
 
-class _EditAccountPageState extends State<EditAccountPage> {
+class _EditAccountPageState extends State<EditAccountPage>
+    with SecondLevelPageAutoBack<EditAccountPage> {
   final GlobalKey<FormState> _from = GlobalKey();
 
   Set<KdbxKey>? _entryFields;
@@ -227,6 +228,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: autoBack(),
         title: Text(t.edit_account),
       ),
       body: Form(

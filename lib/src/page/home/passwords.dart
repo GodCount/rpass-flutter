@@ -7,10 +7,13 @@ import 'package:flutter/material.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/common.dart';
 import '../password/edit_account.dart';
 import '../password/look_account.dart';
+import 'route_wrap.dart';
+import '../../widget/extension_state.dart';
 
 class _PasswordsArgs extends PageRouteArgs {
   _PasswordsArgs({super.key, this.search});
@@ -107,7 +110,10 @@ class _PasswordsPageState extends State<PasswordsPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    return isDesktop ? RouteWrap(child: _buildDesktop()) : _buildMobile();
+  }
 
+  Widget _buildMobile() {
     final kdbx = KdbxProvider.of(context)!;
 
     final mainColor = Theme.of(context).colorScheme.primaryContainer;
@@ -158,6 +164,113 @@ class _PasswordsPageState extends State<PasswordsPage>
               onTap: openContainer,
               child: const Icon(Icons.add),
             ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildDesktop() {
+    final t = I18n.of(context)!;
+
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        titleSpacing: 6,
+        title: Padding(
+          padding: const EdgeInsets.only(left: 12),
+          child: TextField(
+            controller: _searchController,
+            cursorHeight: 16,
+            style: Theme.of(context).textTheme.bodyMedium,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              isCollapsed: true,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 4,
+                vertical: 12,
+              ),
+              hintText: t.search,
+              prefixIcon: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: IconButton(
+                  iconSize: 16,
+                  padding: const EdgeInsets.all(4),
+                  onPressed: showSearchHelpDialog,
+                  icon: const Icon(
+                    Icons.help_outline_rounded,
+                    size: 16,
+                  ),
+                ),
+              ),
+              prefixIconConstraints: const BoxConstraints(
+                minWidth: 30,
+                maxWidth: 30,
+                minHeight: 24,
+                maxHeight: 24,
+              ),
+              suffixIcon: Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        iconSize: 16,
+                        padding: const EdgeInsets.all(4),
+                        onPressed: () {
+                          _searchController.text = "";
+                        },
+                        icon: const Icon(
+                          Icons.close,
+                          size: 16,
+                        ),
+                      )
+                    : null,
+              ),
+              suffixIconConstraints: const BoxConstraints(
+                minWidth: 30,
+                maxWidth: 30,
+                minHeight: 24,
+                maxHeight: 24,
+              ),
+            ),
+          ),
+        ),
+        actionsPadding: const EdgeInsets.only(right: 6),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.router.push(EditAccountRoute());
+            },
+            icon: const Icon(Icons.add),
+          ),
+        ],
+      ),
+      body: ListView.separated(
+        shrinkWrap: true,
+        padding: const EdgeInsets.all(12),
+        itemCount: _totalEntry.length,
+        separatorBuilder: (context, index) {
+          return const SizedBox(
+            height: 12,
+          );
+        },
+        itemBuilder: (context, index) {
+          return _PasswordItem(
+            kdbxEntry: _totalEntry[index],
+            onTop: () {
+              context.router.push(
+                LookAccountRoute(
+                  kdbxEntry: _totalEntry[index],
+                  readOnly: false,
+                ),
+              );
+            },
+            onLongPress: () {
+              context.router.push(
+                EditAccountRoute(
+                  kdbxEntry: _totalEntry[index],
+                ),
+              );
+            },
           );
         },
       ),
@@ -244,7 +357,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
                 : Text(t.password),
           ),
           prefixIcon: IconButton(
-            onPressed: _showSearchHelp,
+            onPressed: showSearchHelpDialog,
             icon: AnimatedOpacity(
               opacity: _hasFocus ? 1 : 0,
               duration: const Duration(milliseconds: 300),
@@ -278,79 +391,6 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
           ),
         ),
       ),
-    );
-  }
-
-  void _showSearchHelp() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        final t = I18n.of(context)!;
-
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(
-                title: Text(t.search_rule),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(left: 6),
-                  child: Text(t.rule_detail),
-                ),
-              ),
-              ListTile(
-                isThreeLine: true,
-                title: Text(t.field_name),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(left: 6),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('title(t) url'),
-                      const SizedBox(height: 6),
-                      const Text('user(u) email(e)'),
-                      const SizedBox(height: 6),
-                      const Text('note(n) password(p)'),
-                      const SizedBox(height: 6),
-                      const Text('OTPAuth(otp) tag'),
-                      const SizedBox(height: 6),
-                      const Text('group(g)'),
-                      const SizedBox(height: 6),
-                      Text(t.custom_field),
-                    ],
-                  ),
-                ),
-              ),
-              ListTile(
-                isThreeLine: true,
-                title: Text(t.search_eg),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(left: 6),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(t.search_eg_1),
-                      const SizedBox(height: 6),
-                      Text(t.search_eg_2),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                context.router.pop();
-              },
-              child: Text(t.confirm),
-            ),
-          ],
-        );
-      },
     );
   }
 }

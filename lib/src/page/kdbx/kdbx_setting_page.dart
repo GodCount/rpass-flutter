@@ -37,7 +37,8 @@ class KdbxSettingPage extends StatefulWidget {
   State<KdbxSettingPage> createState() => _KdbxSettingPageState();
 }
 
-class _KdbxSettingPageState extends State<KdbxSettingPage> {
+class _KdbxSettingPageState extends State<KdbxSettingPage>
+    with SecondLevelPageAutoBack<KdbxSettingPage> {
   int _historyMaxItems = 20;
   int _historyMaxSize = 10;
 
@@ -77,6 +78,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: autoBack(),
         title: Text(t.pass_lib_setting),
       ),
       body: ListView(

@@ -53,7 +53,8 @@ class ManageGroupEntryPage extends StatefulWidget {
   State<ManageGroupEntryPage> createState() => _ManageGroupEntryPageState();
 }
 
-class _ManageGroupEntryPageState extends State<ManageGroupEntryPage> {
+class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
+    with SecondLevelPageAutoBack<ManageGroupEntryPage> {
   final TextEditingController _searchController = TextEditingController();
 
   final KbdxSearchHandler _kbdxSearchHandler = KbdxSearchHandler();
@@ -188,26 +189,65 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: TextField(
-          controller: _searchController,
-          decoration: InputDecoration(
-            isDense: true,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 12.0, horizontal: 18.0),
-            border: const OutlineInputBorder(
-              borderRadius: BorderRadius.horizontal(
-                left: Radius.circular(999),
-                right: Radius.circular(999),
+        titleSpacing: 0,
+        leading: autoBack(),
+        title: Padding(
+          padding: const EdgeInsets.only(left: 12, right: 12),
+          child: TextField(
+            controller: _searchController,
+            cursorHeight: 16,
+            style: Theme.of(context).textTheme.bodyMedium,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              isCollapsed: true,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 4,
+                vertical: 12,
+              ),
+              hintText: t.search,
+              prefixIcon: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: IconButton(
+                  iconSize: 16,
+                  padding: const EdgeInsets.all(4),
+                  onPressed: showSearchHelpDialog,
+                  icon: const Icon(
+                    Icons.help_outline_rounded,
+                    size: 16,
+                  ),
+                ),
+              ),
+              prefixIconConstraints: const BoxConstraints(
+                minWidth: 30,
+                maxWidth: 30,
+                minHeight: 24,
+                maxHeight: 24,
+              ),
+              suffixIcon: Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        iconSize: 16,
+                        padding: const EdgeInsets.all(4),
+                        onPressed: () {
+                          _searchController.text = "";
+                        },
+                        icon: const Icon(
+                          Icons.close,
+                          size: 16,
+                        ),
+                      )
+                    : null,
+              ),
+              suffixIconConstraints: const BoxConstraints(
+                minWidth: 30,
+                maxWidth: 30,
+                minHeight: 24,
+                maxHeight: 24,
               ),
             ),
-            hintText: t.search,
           ),
         ),
-        actions: const [
-          SizedBox(
-            width: 56.0,
-          ),
-        ],
       ),
       body: ListView.builder(
         itemCount: _totalEntry.length,
@@ -265,16 +305,21 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage> {
       onLongPress: () {
         showModalBottomSheet(
           context: context,
-          builder: (context) => LookAccountPage(
-            kdbxEntry: kdbxEntry,
-            readOnly: true,
+          builder: (context) => ClipRRect(
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(16.0)),
+            child: LookAccountPage(
+              kdbxEntry: kdbxEntry,
+              readOnly: true,
+            ),
           ),
         );
       },
       leading: KdbxIconWidget(
         kdbxIcon: KdbxIconWidgetData(
-            icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
-            customIcon: kdbxEntry.customIcon),
+          icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
+          customIcon: kdbxEntry.customIcon,
+        ),
       ),
       trailing: _selecteds.contains(kdbxEntry) ? const Icon(Icons.done) : null,
       title: Text(getKdbxObjectTitle(kdbxEntry)),

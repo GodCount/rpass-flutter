@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:rpass/src/util/common.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
@@ -8,6 +9,7 @@ import '../../util/route.dart';
 import '../../widget/common.dart';
 import '../../widget/extension_state.dart';
 import '../route.dart';
+import 'route_wrap.dart';
 
 class _GroupsArgs extends PageRouteArgs {
   _GroupsArgs({super.key});
@@ -78,10 +80,12 @@ class _GroupsPageState extends State<GroupsPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    return isDesktop ? RouteWrap(child: _buildMobile()) : _buildMobile();
+  }
+
+  Widget _buildMobile() {
     final t = I18n.of(context)!;
 
-    final mediaQuery = MediaQuery.of(context);
-    final width = mediaQuery.size.width;
     final kdbx = KdbxProvider.of(context)!;
 
     final groups = [kdbx.kdbxFile.body.rootGroup, ...kdbx.rootGroups];
@@ -91,11 +95,60 @@ class _GroupsPageState extends State<GroupsPage>
         automaticallyImplyLeading: false,
         title: Text(t.group),
       ),
-      body: GridView.count(
-        crossAxisCount: width ~/ 128,
-        mainAxisSpacing: 8.0,
-        crossAxisSpacing: 8.0,
-        children: groups.map((item) => _buildGroupItem(item)).toList(),
+      body: ListView.builder(
+        itemBuilder: (context, i) {
+          final kdbxGroup = groups[i];
+          return ListTile(
+            isThreeLine: true,
+            leading: KdbxIconWidget(
+              kdbxIcon: KdbxIconWidgetData(
+                icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
+                customIcon: kdbxGroup.customIcon,
+              ),
+              size: 24,
+            ),
+            title: Text(
+              kdbxGroup.name.get() ?? "",
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: kdbxGroup.times.creationTime.get() != null
+                ? Text(
+                    dateFormat(kdbxGroup.times.creationTime.get()!.toLocal()),
+                    overflow: TextOverflow.ellipsis,
+                  )
+                : null,
+            onTap: () {
+              context.router.navigate(
+                PasswordsRoute(
+                  search: 'g:"${kdbxGroup.name.get() ?? ''}"',
+                ),
+              );
+            },
+            onLongPress: () => showKdbxGroupAction(
+              kdbxGroup.name.get() ?? '',
+              onManageTap: () {
+                context.router.push(ManageGroupEntryRoute(
+                  kdbxGroup: kdbxGroup,
+                ));
+              },
+              onModifyTap: () => setKdbxGroup(
+                KdbxGroupData(
+                  name: kdbxGroup.name.get() ?? '',
+                  kdbxIcon: KdbxIconWidgetData(
+                    icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
+                    customIcon: kdbxGroup.customIcon,
+                  ),
+                  kdbxGroup: kdbxGroup,
+                ),
+              ),
+              onDeleteTap: kdbxGroup.parent != null
+                  ? () => _kdbxGroupDelete(kdbxGroup)
+                  : null,
+            ),
+          );
+        },
+        itemCount: groups.length,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => setKdbxGroup(
@@ -112,70 +165,6 @@ class _GroupsPageState extends State<GroupsPage>
           ),
         ),
         child: const Icon(Icons.group_add_rounded),
-      ),
-    );
-  }
-
-  Widget _buildGroupItem(KdbxGroup kdbxGroup) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      width: 128,
-      height: 128,
-      child: Card(
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(6.0)),
-        ),
-        child: InkWell(
-          borderRadius: const BorderRadius.all(Radius.circular(6.0)),
-          onTap: () {
-            context.router.navigate(
-              PasswordsRoute(
-                search: 'g:"${kdbxGroup.name.get() ?? ''}"',
-              ),
-            );
-          },
-          onLongPress: () => showKdbxGroupAction(
-            kdbxGroup.name.get() ?? '',
-            onManageTap: () {
-              context.router.push(ManageGroupEntryRoute(kdbxGroup: kdbxGroup));
-            },
-            onModifyTap: () => setKdbxGroup(
-              KdbxGroupData(
-                name: kdbxGroup.name.get() ?? '',
-                kdbxIcon: KdbxIconWidgetData(
-                  icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
-                  customIcon: kdbxGroup.customIcon,
-                ),
-                kdbxGroup: kdbxGroup,
-              ),
-            ),
-            onDeleteTap: kdbxGroup.parent != null
-                ? () => _kdbxGroupDelete(kdbxGroup)
-                : null,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                KdbxIconWidget(
-                  kdbxIcon: KdbxIconWidgetData(
-                    icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
-                    customIcon: kdbxGroup.customIcon,
-                  ),
-                  size: 64,
-                ),
-                Text(
-                  kdbxGroup.name.get() ?? '',
-                  softWrap: true,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                )
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

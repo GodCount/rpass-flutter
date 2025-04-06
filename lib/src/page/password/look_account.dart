@@ -74,7 +74,7 @@ class LookAccountPage extends StatefulWidget {
 }
 
 class _LookAccountPageState extends State<LookAccountPage>
-    with HintEmptyTextUtil {
+    with HintEmptyTextUtil, SecondLevelPageAutoBack<LookAccountPage> {
   _launchUrl(String url) {
     launchUrl(
       Uri.parse(url.startsWith(RegExp(r"^https*://")) ? url : "http://$url"),
@@ -111,6 +111,7 @@ class _LookAccountPageState extends State<LookAccountPage>
 
     return Scaffold(
       appBar: AppBar(
+        leading: autoBack(),
         title: Text(t.lookup),
         actions: [
           IconButton(

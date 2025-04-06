@@ -10,9 +10,11 @@ import '../../context/kdbx.dart';
 import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../rpass.dart';
+import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
 import '../route.dart';
+import 'route_wrap.dart';
 
 final _logger = Logger("page:settings");
 
@@ -55,6 +57,10 @@ class _SettingsPageState extends State<SettingsPage>
   Widget build(BuildContext context) {
     super.build(context);
 
+    return isDesktop ? RouteWrap(child: _buildMobile()) : _buildMobile();
+  }
+
+  Widget _buildMobile() {
     const shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(6.0), bottomRight: Radius.circular(6.0)),

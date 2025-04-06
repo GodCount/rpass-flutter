@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
@@ -113,6 +114,79 @@ extension StatefulDialog on State {
 
   Future<KdbxGroup?> showGroupSelectorDialog(KdbxGroup? kdbxGroup) {
     return GroupSelectorDialog.openDialog(context, value: kdbxGroup);
+  }
+
+  void showSearchHelpDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final t = I18n.of(context)!;
+
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ListTile(
+                title: Text(t.search_rule),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: Text(t.rule_detail),
+                ),
+              ),
+              ListTile(
+                isThreeLine: true,
+                title: Text(t.field_name),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('title(t) url'),
+                      const SizedBox(height: 6),
+                      const Text('user(u) email(e)'),
+                      const SizedBox(height: 6),
+                      const Text('note(n) password(p)'),
+                      const SizedBox(height: 6),
+                      const Text('OTPAuth(otp) tag'),
+                      const SizedBox(height: 6),
+                      const Text('group(g)'),
+                      const SizedBox(height: 6),
+                      Text(t.custom_field),
+                    ],
+                  ),
+                ),
+              ),
+              ListTile(
+                isThreeLine: true,
+                title: Text(t.search_eg),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(t.search_eg_1),
+                      const SizedBox(height: 6),
+                      Text(t.search_eg_2),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.router.pop();
+              },
+              child: Text(t.confirm),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -427,7 +501,7 @@ extension StatefulKdbx on State {
       leadingBuilder: (state) {
         return IconButton(
           onPressed: () async {
-            final reslut = await context.router.push(SettingsRoute());
+            final reslut = await context.router.push(SelectIconRoute());
             if (reslut != null && reslut is KdbxIconWidgetData) {
               data.kdbxIcon = reslut;
               state.update();
@@ -445,5 +519,185 @@ extension StatefulKdbx on State {
       return _kdbxGroupSave(data);
     }
     return false;
+  }
+}
+
+typedef OnDidChangeAppLifecycleState = void Function(AppLifecycleState state);
+
+class CallbackBindingObserver extends WidgetsBindingObserver {
+  CallbackBindingObserver({
+    VoidCallback? didChangeMetrics,
+    OnDidChangeAppLifecycleState? didChangeAppLifecycleState,
+  })  : _didChangeMetrics = didChangeMetrics,
+        _didChangeAppLifecycleState = didChangeAppLifecycleState;
+
+  final VoidCallback? _didChangeMetrics;
+
+  final OnDidChangeAppLifecycleState? _didChangeAppLifecycleState;
+
+  @override
+  void didChangeMetrics() {
+    _didChangeMetrics?.call();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _didChangeAppLifecycleState?.call(state);
+  }
+}
+
+abstract mixin class SrceenResizeObserver {
+  void didSrceenSizeChange() {}
+
+  void didCriticalChange({
+    required bool oldIsIdeaSrceen,
+    required bool oldIsSingleScreen,
+  }) {}
+}
+
+class SrceenResize {
+  SrceenResize._() {
+    WidgetsBinding.instance.addObserver(_srceenObserver);
+  }
+
+  static final SrceenResize _instance = SrceenResize._();
+
+  static SrceenResize get instance => _instance;
+
+  static const double ideaSrceenWidth = 814;
+  static const double singleSrceenWidth = 564;
+
+  late Size srceenSize;
+  bool isIdeaSrceen = false;
+  bool isSingleScreen = false;
+
+  late final _srceenObserver = CallbackBindingObserver(
+    didChangeMetrics: _didChangeMetrics,
+  );
+
+  final List<SrceenResizeObserver> _observers = <SrceenResizeObserver>[];
+
+  void _didChangeMetrics() {
+    final view = WidgetsBinding.instance.platformDispatcher.views.first;
+    srceenSize = view.physicalSize / view.devicePixelRatio;
+
+    final oldIsIdeaSrceen = isIdeaSrceen;
+    final oldIsSingleScreen = isSingleScreen;
+
+    isIdeaSrceen = srceenSize.width > ideaSrceenWidth;
+    isSingleScreen = srceenSize.width <= singleSrceenWidth;
+
+    for (final SrceenResizeObserver observer in List<SrceenResizeObserver>.of(
+      _observers,
+    )) {
+      observer.didSrceenSizeChange();
+
+      if (oldIsIdeaSrceen != isIdeaSrceen ||
+          oldIsSingleScreen != isSingleScreen) {
+        observer.didCriticalChange(
+          oldIsIdeaSrceen: oldIsIdeaSrceen,
+          oldIsSingleScreen: oldIsSingleScreen,
+        );
+      }
+    }
+  }
+
+  void addObserver(SrceenResizeObserver observer) {
+    _observers.add(observer);
+    if (_observers.length == 1) {
+      _didChangeMetrics();
+    }
+  }
+
+  bool removeObserver(SrceenResizeObserver observer) {
+    return _observers.remove(observer);
+  }
+}
+
+mixin SecondLevelRouteUtil<T extends StatefulWidget> on State<T>
+    implements SrceenResizeObserver {
+  bool isEmptyRouter = true;
+
+  bool get isSingleScreen => SrceenResize.instance.isSingleScreen;
+  bool get isIdeaSrceen => SrceenResize.instance.isIdeaSrceen;
+
+  @override
+  void initState() {
+    super.initState();
+    SrceenResize.instance.addObserver(this);
+    context.router.navigationHistory.addListener(_navigationHistory);
+  }
+
+  void _navigationHistory() {
+    if (context.router.currentPath.startsWith("/home")) {
+      final isEmptyRouter = context.router.currentPath.endsWith("passwords") ||
+          context.router.currentPath.endsWith("groups") ||
+          context.router.currentPath.endsWith("settings");
+
+      if (this.isEmptyRouter != isEmptyRouter) {
+        this.isEmptyRouter = isEmptyRouter;
+        didEmptyRouteChange();
+      }
+    }
+  }
+
+  void didEmptyRouteChange() {}
+
+  @override
+  void didSrceenSizeChange() {}
+
+  @override
+  void didCriticalChange({
+    required bool oldIsIdeaSrceen,
+    required bool oldIsSingleScreen,
+  }) {}
+
+  @override
+  void dispose() {
+    SrceenResize.instance.removeObserver(this);
+    context.router.navigationHistory.removeListener(_navigationHistory);
+    super.dispose();
+  }
+}
+
+mixin SecondLevelPageAutoBack<T extends StatefulWidget> on State<T>
+    implements SrceenResizeObserver {
+  @override
+  void initState() {
+    if (isDesktop) {
+      SrceenResize.instance.addObserver(this);
+    }
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    if (isDesktop) {
+      SrceenResize.instance.removeObserver(this);
+    }
+    super.dispose();
+  }
+
+  @override
+  didCriticalChange({
+    required bool oldIsIdeaSrceen,
+    required bool oldIsSingleScreen,
+  }) {
+    if (SrceenResize.instance.isSingleScreen != oldIsSingleScreen) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void didSrceenSizeChange() {}
+
+  Widget? autoBack() {
+    if (!isDesktop) return null;
+
+    return SrceenResize.instance.isSingleScreen
+        ? BackButton(onPressed: () {
+            context.router.pop();
+          })
+        : null;
   }
 }

@@ -36,7 +36,8 @@ class MoreSecurityPage extends StatefulWidget {
   State<MoreSecurityPage> createState() => _MoreSecurityPageState();
 }
 
-class _MoreSecurityPageState extends State<MoreSecurityPage> {
+class _MoreSecurityPageState extends State<MoreSecurityPage>
+    with SecondLevelPageAutoBack<MoreSecurityPage> {
   void _setLockDelay() {
     final t = I18n.of(context)!;
 
@@ -83,6 +84,7 @@ class _MoreSecurityPageState extends State<MoreSecurityPage> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: autoBack(),
         title: Text(t.security),
       ),
       body: ListView(
