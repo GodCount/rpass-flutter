@@ -470,6 +470,7 @@ class _LookAccountPageState extends State<LookAccountPage>
       ),
       floatingActionButton: !readOnly
           ? FloatingActionButton(
+              heroTag: const ValueKey("look_account_float"),
               onPressed: () async {
                 if (kdbxEntry.isInRecycleBin()) {
                   final kdbx = KdbxProvider.of(context)!;

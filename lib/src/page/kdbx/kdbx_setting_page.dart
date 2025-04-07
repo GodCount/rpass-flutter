@@ -147,6 +147,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
       ),
       floatingActionButton: _isDirty
           ? FloatingActionButton(
+              heroTag: const ValueKey("kdbx_setting_float"),
               onPressed: _save,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(

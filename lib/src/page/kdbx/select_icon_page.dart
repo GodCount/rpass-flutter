@@ -102,6 +102,7 @@ class _SelectIconPageState extends State<SelectIconPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: const ValueKey("select_icon_float"),
         onPressed: () async {
           try {
             final (_, bytes) = await SimpleFile.openFile(type: FileType.image);

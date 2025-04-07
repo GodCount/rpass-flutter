@@ -228,6 +228,7 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: const ValueKey("gen_password_float"),
         onPressed: () {
           if (widget.popPassword) {
             context.router.pop(password);

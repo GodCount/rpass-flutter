@@ -110,6 +110,7 @@ class _EditNotesPageState extends State<EditNotesPage> {
       ),
       floatingActionButton: _text != null
           ? FloatingActionButton(
+              heroTag: const ValueKey("edit_notes_float"),
               onPressed: () {
                 context.router.pop(_text);
               },

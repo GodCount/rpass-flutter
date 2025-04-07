@@ -255,6 +255,7 @@ class _EditAccountPageState extends State<EditAccountPage>
       ),
       floatingActionButton: _isDirty
           ? FloatingActionButton(
+              heroTag: const ValueKey("edit_account_float"),
               onPressed: _kdbxEntrySave,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(
@@ -484,17 +485,17 @@ class _EntryFieldState extends State<EntryField> {
     switch (widget.kdbxKey.key) {
       case KdbxKeyCommon.KEY_URL:
         return (value) =>
-            value!.isNotEmpty && !CommonRegExp.domain.hasMatch(value)
+            value != null && value.isNotEmpty && !CommonRegExp.domain.hasMatch(value)
                 ? t.format_error(CommonRegExp.domain.pattern)
                 : null;
       case KdbxKeyCommon.KEY_EMAIL:
         return (value) =>
-            value!.isNotEmpty && !CommonRegExp.email.hasMatch(value)
+            value != null && value.isNotEmpty && !CommonRegExp.email.hasMatch(value)
                 ? t.format_error(CommonRegExp.email.pattern)
                 : null;
       case KdbxKeyCommon.KEY_OTP:
         return (value) =>
-            value!.isNotEmpty && !CommonRegExp.oneTimePassword.hasMatch(value)
+            value != null && value.isNotEmpty && !CommonRegExp.oneTimePassword.hasMatch(value)
                 ? t.format_error(CommonRegExp.oneTimePassword.pattern)
                 : null;
       default:
