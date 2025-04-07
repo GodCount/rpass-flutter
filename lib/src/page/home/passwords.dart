@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:animations/animations.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
@@ -251,7 +249,7 @@ class _PasswordsPageState extends State<PasswordsPage>
         actions: [
           IconButton(
             onPressed: () {
-              context.router.replaceAll([EditAccountRoute()]);
+              context.router.platformNavigate(EditAccountRoute());
             },
             icon: const Icon(Icons.add),
           ),
@@ -269,25 +267,21 @@ class _PasswordsPageState extends State<PasswordsPage>
         itemBuilder: (context, index) {
           return _PasswordItem(
             kdbxEntry: _totalEntry[index],
-            onTop: () {
-              context.router.replaceAll(
-                [
-                  LookAccountRoute(
-                    kdbxEntry: _totalEntry[index],
-                    uuid: _totalEntry[index].uuid,
-                    readOnly: false,
-                  )
-                ],
+            onTap: () {
+              context.router.platformNavigate(
+                LookAccountRoute(
+                  kdbxEntry: _totalEntry[index],
+                  uuid: _totalEntry[index].uuid,
+                  readOnly: false,
+                ),
               );
             },
             onLongPress: () {
-              context.router.replaceAll(
-                [
-                  EditAccountRoute(
-                    kdbxEntry: _totalEntry[index],
-                    uuid: _totalEntry[index].uuid,
-                  )
-                ],
+              context.router.platformNavigate(
+                EditAccountRoute(
+                  kdbxEntry: _totalEntry[index],
+                  uuid: _totalEntry[index].uuid,
+                ),
               );
             },
           );
@@ -335,7 +329,6 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
 
   @override
   void dispose() {
-    widget.controller.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -450,7 +443,7 @@ class _OpenContainerPasswordItem extends StatelessWidget {
       closedBuilder: (BuildContext context, VoidCallback openContainer) {
         return _PasswordItem(
           kdbxEntry: kdbxEntry,
-          onTop: () {
+          onTap: () {
             isLogPress = false;
             openContainer();
           },
@@ -467,19 +460,41 @@ class _OpenContainerPasswordItem extends StatelessWidget {
 class _PasswordItem extends StatefulWidget {
   const _PasswordItem({
     required this.kdbxEntry,
-    this.onTop,
+    this.onTap,
     this.onLongPress,
   });
 
   final KdbxEntry kdbxEntry;
-  final GestureTapCallback? onTop;
+  final GestureTapCallback? onTap;
   final GestureLongPressCallback? onLongPress;
 
   @override
   State<_PasswordItem> createState() => _PasswordItemState();
 }
 
-class _PasswordItemState extends State<_PasswordItem> {
+class _PasswordItemState extends State<_PasswordItem>
+    with NavigationHistoryObserver<_PasswordItem> {
+  bool _selected = false;
+
+  @override
+  void didNavigationHistory() {
+    if (context.topRoute.name == LookAccountRoute.name ||
+        context.topRoute.name == EditAccountRoute.name) {
+      final selected = context.topRoute.inheritedPathParams.optString("uuid") ==
+          widget.kdbxEntry.uuid.deBase64Uuid;
+
+      if (selected != _selected) {
+        setState(() {
+          _selected = selected;
+        });
+      }
+    } else if (_selected) {
+      setState(() {
+        _selected = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
@@ -490,6 +505,7 @@ class _PasswordItemState extends State<_PasswordItem> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(8.0)),
       ),
+      selected: _selected,
       leading: Padding(
         padding: const EdgeInsets.only(top: 6),
         child: KdbxIconWidget(
@@ -543,7 +559,7 @@ class _PasswordItemState extends State<_PasswordItem> {
           ),
         ],
       ),
-      onTap: widget.onTop,
+      onTap: widget.onTap,
       onLongPress: widget.onLongPress,
     );
   }

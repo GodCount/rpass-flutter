@@ -90,6 +90,7 @@ RootStackRouter _createMobileAutoRoute() {
       ),
       AutoRoute(
         path: "/edit_account/:uuid",
+        usesPathAsKey: true,
         page: EditAccountRoute.page,
       ),
       AutoRoute(
@@ -152,6 +153,7 @@ RootStackRouter _createDesktopAutoRoute() {
             children: [
               AutoRoute(
                 path: "edit_account/:uuid",
+                usesPathAsKey: true,
                 page: EditAccountRoute.page,
               ),
               AutoRoute(

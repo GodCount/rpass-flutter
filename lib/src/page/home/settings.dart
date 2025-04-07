@@ -144,7 +144,7 @@ class _SettingsPageState extends State<SettingsPage>
               title: Text(t.recycle_bin),
               trailing: const Icon(Icons.recycling_rounded),
               onTap: () {
-                context.router.replaceAll([RecycleBinRoute()]);
+                context.router.platformNavigate(RecycleBinRoute());
               },
             ),
             // TODO! 上游 kdbx.dart 还没实现
@@ -153,7 +153,7 @@ class _SettingsPageState extends State<SettingsPage>
             //   title: const Text("更多设置"),
             //   trailing: const Icon(Icons.chevron_right_rounded),
             //   onTap: () {
-            //      context.router.replaceAll(KdbxSettingRoute());
+            //      context.router.platformNavigate(KdbxSettingRoute());
             //   },
             // ),
           ]),
@@ -177,7 +177,7 @@ class _SettingsPageState extends State<SettingsPage>
                   store.settings.locale != null ? t.locale_name : t.system),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () {
-                context.router.replaceAll([ChangeLocaleRoute()]);
+                context.router.platformNavigate(ChangeLocaleRoute());
               },
             ),
           ]),
@@ -229,7 +229,7 @@ class _SettingsPageState extends State<SettingsPage>
             ListTile(
               title: Text(t.modify_password),
               onTap: () {
-                context.router.replaceAll([ModifyPasswordRoute()]);
+                context.router.platformNavigate(ModifyPasswordRoute());
               },
             ),
             ListTile(
@@ -237,7 +237,7 @@ class _SettingsPageState extends State<SettingsPage>
               title: Text(t.more_settings),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () {
-                context.router.replaceAll([MoreSecurityRoute()]);
+                context.router.platformNavigate(MoreSecurityRoute());
               },
             ),
           ]),
@@ -257,14 +257,14 @@ class _SettingsPageState extends State<SettingsPage>
             ListTile(
               title: Text(t.import),
               onTap: () {
-                context.router.replaceAll([ImportAccountRoute()]);
+                context.router.platformNavigate(ImportAccountRoute());
               },
             ),
             ListTile(
               shape: shape,
               title: Text(t.export),
               onTap: () {
-                context.router.replaceAll([ExportAccountRoute()]);
+                context.router.platformNavigate(ExportAccountRoute());
               },
             ),
           ]),

@@ -103,26 +103,8 @@ class _GroupsPageState extends State<GroupsPage>
       body: ListView.builder(
         itemBuilder: (context, i) {
           final kdbxGroup = groups[i];
-          return ListTile(
-            isThreeLine: true,
-            leading: KdbxIconWidget(
-              kdbxIcon: KdbxIconWidgetData(
-                icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
-                customIcon: kdbxGroup.customIcon,
-              ),
-              size: 24,
-            ),
-            title: Text(
-              kdbxGroup.name.get() ?? "",
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: kdbxGroup.times.creationTime.get() != null
-                ? Text(
-                    dateFormat(kdbxGroup.times.creationTime.get()!.toLocal()),
-                    overflow: TextOverflow.ellipsis,
-                  )
-                : null,
+          return _GroupsItem(
+            kdbxGroup: kdbxGroup,
             onTap: () {
               context.router.navigate(
                 PasswordsRoute(
@@ -133,12 +115,12 @@ class _GroupsPageState extends State<GroupsPage>
             onLongPress: () => showKdbxGroupAction(
               kdbxGroup.name.get() ?? '',
               onManageTap: () {
-                context.router.replaceAll([
+                context.router.platformNavigate(
                   ManageGroupEntryRoute(
                     kdbxGroup: kdbxGroup,
                     uuid: kdbxGroup.uuid,
-                  )
-                ]);
+                  ),
+                );
               },
               onModifyTap: () => setKdbxGroup(
                 KdbxGroupData(
@@ -174,6 +156,72 @@ class _GroupsPageState extends State<GroupsPage>
         ),
         child: const Icon(Icons.group_add_rounded),
       ),
+    );
+  }
+}
+
+class _GroupsItem extends StatefulWidget {
+  const _GroupsItem({
+    required this.kdbxGroup,
+    this.onTap,
+    this.onLongPress,
+  });
+
+  final KdbxGroup kdbxGroup;
+  final GestureTapCallback? onTap;
+  final GestureLongPressCallback? onLongPress;
+
+  @override
+  State<_GroupsItem> createState() => _GroupsItemState();
+}
+
+class _GroupsItemState extends State<_GroupsItem>
+    with NavigationHistoryObserver<_GroupsItem> {
+  bool _selected = false;
+
+  @override
+  void didNavigationHistory() {
+    if (context.topRoute.name == ManageGroupEntryRoute.name) {
+      final selected = context.topRoute.inheritedPathParams.optString("uuid") ==
+          widget.kdbxGroup.uuid.deBase64Uuid;
+
+      if (selected != _selected) {
+        setState(() {
+          _selected = selected;
+        });
+      }
+    } else if (_selected) {
+      setState(() {
+        _selected = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final kdbxGroup = widget.kdbxGroup;
+    return ListTile(
+      selected: _selected,
+      leading: KdbxIconWidget(
+        kdbxIcon: KdbxIconWidgetData(
+          icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
+          customIcon: kdbxGroup.customIcon,
+        ),
+        size: 24,
+      ),
+      title: Text(
+        kdbxGroup.name.get() ?? "",
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: kdbxGroup.times.creationTime.get() != null
+          ? Text(
+              dateFormat(kdbxGroup.times.creationTime.get()!.toLocal()),
+              overflow: TextOverflow.ellipsis,
+            )
+          : null,
+      onTap: widget.onTap,
+      onLongPress: !_selected ? widget.onLongPress : null,
     );
   }
 }

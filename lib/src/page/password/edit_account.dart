@@ -105,27 +105,6 @@ class _EditAccountPageState extends State<EditAccountPage>
     super.initState();
   }
 
-  @override
-  void didUpdateWidget(covariant EditAccountPage oldWidget) {
-    if (oldWidget.kdbxEntry == null && widget.kdbxEntry == null) return;
-
-    if (widget.kdbxEntry == null ||
-        oldWidget.kdbxEntry?.uuid != widget.kdbxEntry!.uuid) {
-      setState(() {
-        _isDirty = false;
-        _kdbxEntry =
-            widget.kdbxEntry ?? KdbxProvider.of(context)!.createVirtualEntry()
-              ..setString(
-                KdbxKeyCommon.PASSWORD,
-                PlainValue(
-                  randomPassword(length: 10),
-                ),
-              );
-      });
-    }
-    super.didUpdateWidget(oldWidget);
-  }
-
   void _kdbxEntrySave() async {
     if (_from.currentState!.validate()) {
       _from.currentState!.save();
@@ -1009,8 +988,6 @@ class DropdownMenuFormField extends FormField<String> {
     super.key,
     double? width,
     double? menuHeight,
-    Widget? trailingIcon,
-    OnTrailingTap? onTrailingTap,
     String? label,
     super.initialValue,
     EdgeInsets? expandedInsets,
@@ -1021,25 +998,11 @@ class DropdownMenuFormField extends FormField<String> {
   }) : super(builder: (FormFieldState<String> field) {
           final state = field as _DropdownMenuFormFieldState;
 
-          final Widget? trailing = trailingIcon != null
-              ? GestureDetector(
-                  onTap: onTrailingTap != null
-                      ? () async {
-                          state.controller.text =
-                              await onTrailingTap() ?? state.controller.text;
-                        }
-                      : null,
-                  child: trailingIcon,
-                )
-              : null;
-
           return DropdownMenu(
             width: width,
             menuHeight: menuHeight,
-            trailingIcon: trailing,
             label: label != null ? Text(label) : null,
             errorText: state.errorText,
-            selectedTrailingIcon: trailing,
             enableFilter: true,
             enableSearch: true,
             controller: state.controller,
@@ -1087,8 +1050,7 @@ class _DropdownMenuFormFieldState extends FormFieldState<String> {
 
   void _handleControllerChanged() {
     if (controller.text != value) {
-      // TODO! 状态更新导致重渲错误
-      // didChange(controller.text);
+      didChange(controller.text);
     }
   }
 }

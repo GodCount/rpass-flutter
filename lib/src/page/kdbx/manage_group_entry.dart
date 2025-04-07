@@ -101,9 +101,13 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
 
   @override
   void didUpdateWidget(covariant ManageGroupEntryPage oldWidget) {
-    if(oldWidget.kdbxGroup.uuid != widget.kdbxGroup.uuid){
+    if (oldWidget.kdbxGroup.uuid != widget.kdbxGroup.uuid) {
       _selecteds.clear();
-      _searchController.text = "";
+      if (_searchController.text.isNotEmpty) {
+        _searchController.text = "";
+      } else {
+        _search();
+      }
     }
     super.didUpdateWidget(oldWidget);
   }

@@ -669,6 +669,28 @@ mixin SecondLevelRouteUtil<T extends StatefulWidget> on State<T>
   }
 }
 
+mixin NavigationHistoryObserver<T extends StatefulWidget> on State<T> {
+  VoidCallback? _removeNavHistoryListener;
+
+  @override
+  void initState() {
+    final navigationHistory = context.router.navigationHistory;
+    navigationHistory.addListener(didNavigationHistory);
+    _removeNavHistoryListener =
+        () => navigationHistory.removeListener(didNavigationHistory);
+    super.initState();
+  }
+
+  void didNavigationHistory() {}
+
+  @override
+  void dispose() {
+    _removeNavHistoryListener?.call();
+    _removeNavHistoryListener = null;
+    super.dispose();
+  }
+}
+
 mixin SecondLevelPageAutoBack<T extends StatefulWidget> on State<T>
     implements SrceenResizeObserver {
   @override
@@ -708,5 +730,16 @@ mixin SecondLevelPageAutoBack<T extends StatefulWidget> on State<T>
             context.router.pop();
           })
         : null;
+  }
+}
+
+extension PlatformStackRouter on StackRouter {
+  Future<void> platformNavigate(
+    PageRouteInfo<Object?> route, {
+    OnNavigationFailure? onFailure,
+  }) async {
+    return isDesktop
+        ? await replaceAll([route], onFailure: onFailure)
+        : await push(route, onFailure: onFailure);
   }
 }

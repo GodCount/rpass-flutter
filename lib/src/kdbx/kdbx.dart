@@ -486,7 +486,14 @@ extension KdbxEntryCommon on KdbxEntry {
 }
 
 extension KdbxUuidCommon on KdbxUuid {
-  String get deBase64Uuid => Uuid.unparse(toBytes());
+  static final _uuids = <String, String>{};
+  String get deBase64Uuid {
+    if (_uuids[uuid] != null) {
+      return _uuids[uuid]!;
+    }
+    _uuids[uuid] = Uuid.unparse(toBytes());
+    return _uuids[uuid]!;
+  }
 }
 
 extension KdbxUuidString on String {
