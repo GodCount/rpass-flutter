@@ -24,7 +24,9 @@ class VerifyOwnerRoute extends PageRouteInfo<_VerifyOwnerArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_VerifyOwnerArgs>();
+      final args = data.argsAs<_VerifyOwnerArgs>(
+        orElse: () => _VerifyOwnerArgs(),
+      );
       return VerifyOwnerPage(key: args.key);
     },
   );

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:kdbx/kdbx.dart' hide KdbxException, KdbxKeyCommon;
+import 'package:uuid/uuid.dart';
 
 import '../rpass.dart';
 import 'icons.dart';
@@ -216,6 +217,16 @@ extension KdbxEntryExt on KdbxBase {
     }
     parent.addEntry(entry);
     return entry;
+  }
+
+  KdbxEntry? findEntryByUuid(KdbxUuid uuid) {
+    try {
+      return kdbxFile.body.rootGroup
+          .getAllEntries()
+          .firstWhere((group) => group.uuid == uuid);
+    } catch (e) {
+      return null;
+    }
   }
 
   void deleteEntry(KdbxEntry entry) {
@@ -472,4 +483,14 @@ extension KdbxEntryCommon on KdbxEntry {
         times.expiryTime.get() != null &&
         times.expiryTime.get()!.isBefore(DateTime.now());
   }
+}
+
+extension KdbxUuidCommon on KdbxUuid {
+  String get deBase64Uuid => Uuid.unparse(toBytes());
+}
+
+extension KdbxUuidString on String {
+  KdbxUuid get kdbxUuid => KdbxUuid.fromBytes(
+        Uint8List.fromList(Uuid.parse(this)),
+      );
 }

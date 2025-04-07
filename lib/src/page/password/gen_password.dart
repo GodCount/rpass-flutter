@@ -32,7 +32,9 @@ class GenPasswordRoute extends PageRouteInfo<_GenPasswordArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_GenPasswordArgs>();
+      final args = data.argsAs<_GenPasswordArgs>(
+        orElse: () => _GenPasswordArgs(),
+      );
       return GenPasswordPage(
         key: args.key,
         popPassword: args.popPassword,

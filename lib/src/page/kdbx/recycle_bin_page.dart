@@ -26,7 +26,9 @@ class RecycleBinRoute extends PageRouteInfo<_RecycleBinArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_RecycleBinArgs>();
+      final args = data.argsAs<_RecycleBinArgs>(
+        orElse: () => _RecycleBinArgs(),
+      );
       return RecycleBinPage(key: args.key);
     },
   );
@@ -43,6 +45,8 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     with SecondLevelPageAutoBack<RecycleBinPage> {
   final List<KdbxObject> _selecteds = [];
   bool _isLongPress = false;
+
+  VoidCallback? _removeKdbxListener;
 
   void _save() async {
     await kdbxSave(KdbxProvider.of(context)!);
@@ -71,7 +75,10 @@ class _RecycleBinPageState extends State<RecycleBinPage>
             title: Text(t.lookup),
             onTap: () async {
               await context.router.popAndPush(
-                LookAccountRoute(kdbxEntry: kdbxObject),
+                LookAccountRoute(
+                  kdbxEntry: kdbxObject,
+                  uuid: kdbxObject.uuid,
+                ),
               );
               setState(() {});
             },
@@ -158,20 +165,22 @@ class _RecycleBinPageState extends State<RecycleBinPage>
 
   @override
   void initState() {
-    Future.delayed(Duration.zero, () {
-      KdbxProvider.of(context)!.addListener(_onKdbxSave);
-    });
+    final kdbx = KdbxProvider.of(context)!;
+    kdbx.addListener(_update);
+    _removeKdbxListener = () => kdbx.removeListener(_update);
+
     super.initState();
   }
 
-  void _onKdbxSave() {
+  void _update() {
     setState(() {});
   }
 
   @override
   void dispose() {
     _selecteds.clear();
-    KdbxProvider.of(context)!.removeListener(_onKdbxSave);
+    _removeKdbxListener?.call();
+    _removeKdbxListener = null;
     super.dispose();
   }
 

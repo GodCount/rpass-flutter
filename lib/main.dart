@@ -8,6 +8,7 @@ import 'src/log.dart';
 import 'src/rpass.dart';
 import 'src/app.dart';
 import 'src/store/index.dart';
+import 'src/widget/error_widget.dart';
 
 final _logger = Logger("main");
 
@@ -21,14 +22,19 @@ void main() async {
     await BiometricState.initCanAuthenticate();
   }
 
+  customErrorWidget();
+
   try {
     await RpassInfo.init();
     await Store().loadStore();
   } catch (e, s) {
     _logger.severe("init fail!", e, s);
-    return runApp(InitAppFail(error: e));
+    return runApp(ErrorWidget.builder(FlutterErrorDetails(
+      library: "Rpass framework",
+      exception: e,
+      stack: s,
+    )));
   }
-
   runApp(const RpassApp());
 }
 

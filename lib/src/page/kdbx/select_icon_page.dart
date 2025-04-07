@@ -29,7 +29,9 @@ class SelectIconRoute extends PageRouteInfo<_SelectIconArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_SelectIconArgs>();
+      final args = data.argsAs<_SelectIconArgs>(
+        orElse: () => _SelectIconArgs(),
+      );
       return SelectIconPage(key: args.key);
     },
   );

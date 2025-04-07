@@ -28,7 +28,9 @@ class GroupsRoute extends PageRouteInfo<_GroupsArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_GroupsArgs>();
+      final args = data.argsAs<_GroupsArgs>(
+        orElse: () => _GroupsArgs(),
+      );
       return GroupsPage(key: args.key);
     },
   );
@@ -46,21 +48,24 @@ class _GroupsPageState extends State<GroupsPage>
   @override
   bool get wantKeepAlive => true;
 
+  VoidCallback? _removeKdbxListener;
+
   void _update() {
     setState(() {});
   }
 
   @override
   void initState() {
-    Future.delayed(Duration.zero, () {
-      KdbxProvider.of(context)!.addListener(_update);
-    });
+    final kdbx = KdbxProvider.of(context)!;
+    kdbx.addListener(_update);
+    _removeKdbxListener = () => kdbx.removeListener(_update);
     super.initState();
   }
 
   @override
   void dispose() {
-    KdbxProvider.of(context)!.removeListener(_update);
+    _removeKdbxListener?.call();
+    _removeKdbxListener = null;
     super.dispose();
   }
 
@@ -128,9 +133,12 @@ class _GroupsPageState extends State<GroupsPage>
             onLongPress: () => showKdbxGroupAction(
               kdbxGroup.name.get() ?? '',
               onManageTap: () {
-                context.router.push(ManageGroupEntryRoute(
-                  kdbxGroup: kdbxGroup,
-                ));
+                context.router.replaceAll([
+                  ManageGroupEntryRoute(
+                    kdbxGroup: kdbxGroup,
+                    uuid: kdbxGroup.uuid,
+                  )
+                ]);
               },
               onModifyTap: () => setKdbxGroup(
                 KdbxGroupData(

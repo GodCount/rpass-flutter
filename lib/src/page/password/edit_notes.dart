@@ -44,7 +44,12 @@ class EditNotesRoute extends PageRouteInfo<_EditNotesArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_EditNotesArgs>();
+      final args = data.argsAs<_EditNotesArgs>(
+        orElse: () => _EditNotesArgs(
+          text: "",
+          readOnly: true,
+        ),
+      );
       return EditNotesPage(
         key: args.key,
         text: args.text,

@@ -31,21 +31,37 @@ class _EditAccountArgs extends PageRouteArgs {
 }
 
 class EditAccountRoute extends PageRouteInfo<_EditAccountArgs> {
-  EditAccountRoute({Key? key, KdbxEntry? kdbxEntry})
-      : super(
+  EditAccountRoute({
+    Key? key,
+    KdbxEntry? kdbxEntry,
+    KdbxUuid? uuid,
+  }) : super(
           name,
           args: _EditAccountArgs(
             key: key,
             kdbxEntry: kdbxEntry,
           ),
+          rawPathParams: {
+            "uuid": uuid?.deBase64Uuid,
+          },
         );
 
   static const name = "EditAccountRoute";
 
-  static final PageInfo page = PageInfo(
+  static final PageInfo page = PageInfo.builder(
     name,
-    builder: (data) {
-      final args = data.argsAs<_EditAccountArgs>();
+    builder: (context, data) {
+      final args = data.argsAs<_EditAccountArgs>(
+        orElse: () {
+          final kdbx = KdbxProvider.of(context)!;
+          final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
+          final kdbxEntry = uuid != null ? kdbx.findEntryByUuid(uuid) : null;
+
+          return _EditAccountArgs(
+            kdbxEntry: kdbxEntry,
+          );
+        },
+      );
       return EditAccountPage(
         key: args.key,
         kdbxEntry: args.kdbxEntry,
@@ -72,16 +88,43 @@ class _EditAccountPageState extends State<EditAccountPage>
 
   Set<KdbxKey>? _entryFields;
 
-  late final KdbxEntry _kdbxEntry =
-      widget.kdbxEntry ?? KdbxProvider.of(context)!.createVirtualEntry()
-        ..setString(
-          KdbxKeyCommon.PASSWORD,
-          PlainValue(
-            randomPassword(length: 10),
-          ),
-        );
+  late KdbxEntry _kdbxEntry;
 
   bool _isDirty = false;
+
+  @override
+  void initState() {
+    _kdbxEntry =
+        widget.kdbxEntry ?? KdbxProvider.of(context)!.createVirtualEntry()
+          ..setString(
+            KdbxKeyCommon.PASSWORD,
+            PlainValue(
+              randomPassword(length: 10),
+            ),
+          );
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant EditAccountPage oldWidget) {
+    if (oldWidget.kdbxEntry == null && widget.kdbxEntry == null) return;
+
+    if (widget.kdbxEntry == null ||
+        oldWidget.kdbxEntry?.uuid != widget.kdbxEntry!.uuid) {
+      setState(() {
+        _isDirty = false;
+        _kdbxEntry =
+            widget.kdbxEntry ?? KdbxProvider.of(context)!.createVirtualEntry()
+              ..setString(
+                KdbxKeyCommon.PASSWORD,
+                PlainValue(
+                  randomPassword(length: 10),
+                ),
+              );
+      });
+    }
+    super.didUpdateWidget(oldWidget);
+  }
 
   void _kdbxEntrySave() async {
     if (_from.currentState!.validate()) {
@@ -234,9 +277,11 @@ class _EditAccountPageState extends State<EditAccountPage>
       body: Form(
         key: _from,
         onChanged: () {
-          setState(() {
-            _isDirty = true;
-          });
+          if (!_isDirty) {
+            setState(() {
+              _isDirty = true;
+            });
+          }
         },
         child: SlidableAutoCloseBehavior(
           child: ListView.separated(
@@ -484,20 +529,23 @@ class _EntryFieldState extends State<EntryField> {
 
     switch (widget.kdbxKey.key) {
       case KdbxKeyCommon.KEY_URL:
-        return (value) =>
-            value != null && value.isNotEmpty && !CommonRegExp.domain.hasMatch(value)
-                ? t.format_error(CommonRegExp.domain.pattern)
-                : null;
+        return (value) => value != null &&
+                value.isNotEmpty &&
+                !CommonRegExp.domain.hasMatch(value)
+            ? t.format_error(CommonRegExp.domain.pattern)
+            : null;
       case KdbxKeyCommon.KEY_EMAIL:
-        return (value) =>
-            value != null && value.isNotEmpty && !CommonRegExp.email.hasMatch(value)
-                ? t.format_error(CommonRegExp.email.pattern)
-                : null;
+        return (value) => value != null &&
+                value.isNotEmpty &&
+                !CommonRegExp.email.hasMatch(value)
+            ? t.format_error(CommonRegExp.email.pattern)
+            : null;
       case KdbxKeyCommon.KEY_OTP:
-        return (value) =>
-            value != null && value.isNotEmpty && !CommonRegExp.oneTimePassword.hasMatch(value)
-                ? t.format_error(CommonRegExp.oneTimePassword.pattern)
-                : null;
+        return (value) => value != null &&
+                value.isNotEmpty &&
+                !CommonRegExp.oneTimePassword.hasMatch(value)
+            ? t.format_error(CommonRegExp.oneTimePassword.pattern)
+            : null;
       default:
         return null;
     }
@@ -1019,6 +1067,12 @@ class _DropdownMenuFormFieldState extends FormFieldState<String> {
   }
 
   @override
+  void didUpdateWidget(covariant FormField<String> oldWidget) {
+    controller.text = widget.initialValue ?? "";
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   void dispose() {
     controller.removeListener(_handleControllerChanged);
     controller.dispose();
@@ -1033,7 +1087,8 @@ class _DropdownMenuFormFieldState extends FormFieldState<String> {
 
   void _handleControllerChanged() {
     if (controller.text != value) {
-      didChange(controller.text);
+      // TODO! 状态更新导致重渲错误
+      // didChange(controller.text);
     }
   }
 }

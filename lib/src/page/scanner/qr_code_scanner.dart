@@ -23,7 +23,9 @@ class QrCodeScannerRoute extends PageRouteInfo<_QrCodeScannerArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_QrCodeScannerArgs>();
+      final args = data.argsAs<_QrCodeScannerArgs>(
+        orElse: () => _QrCodeScannerArgs(),
+      );
       return QrCodeScannerPage(key: args.key);
     },
   );

@@ -30,6 +30,9 @@ class PasswordsRoute extends PageRouteInfo<_PasswordsArgs> {
             key: key,
             search: search,
           ),
+          rawQueryParams: {
+            "search": search,
+          },
         );
 
   static const name = "PasswordsRoute";
@@ -37,7 +40,11 @@ class PasswordsRoute extends PageRouteInfo<_PasswordsArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_PasswordsArgs>();
+      final args = data.argsAs<_PasswordsArgs>(
+        orElse: () => _PasswordsArgs(
+          search: data.queryParams.optString("search"),
+        ),
+      );
       return PasswordsPage(
         key: args.key,
         search: args.search,
@@ -65,6 +72,8 @@ class _PasswordsPageState extends State<PasswordsPage>
   final KbdxSearchHandler _kbdxSearchHandler = KbdxSearchHandler();
   final List<KdbxEntry> _totalEntry = [];
 
+  VoidCallback? _removeKdbxListener;
+
   @override
   void didUpdateWidget(covariant PasswordsPage oldWidget) {
     if (widget.search != null && oldWidget.search != widget.search) {
@@ -75,18 +84,22 @@ class _PasswordsPageState extends State<PasswordsPage>
 
   @override
   void initState() {
+    final kdbx = KdbxProvider.of(context)!;
     _searchController.addListener(_searchAccounts);
-    Future.delayed(Duration.zero, () {
-      KdbxProvider.of(context)!.addListener(_onKdbxSave);
-    });
     _searchAccounts();
+
+    kdbx.addListener(_onKdbxSave);
+    _removeKdbxListener = () => kdbx.removeListener(_onKdbxSave);
+
     super.initState();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
-    KdbxProvider.of(context)!.removeListener(_onKdbxSave);
+    _removeKdbxListener?.call();
+    _removeKdbxListener = null;
+    _totalEntry.clear();
     super.dispose();
   }
 
@@ -238,7 +251,7 @@ class _PasswordsPageState extends State<PasswordsPage>
         actions: [
           IconButton(
             onPressed: () {
-              context.router.push(EditAccountRoute());
+              context.router.replaceAll([EditAccountRoute()]);
             },
             icon: const Icon(Icons.add),
           ),
@@ -257,18 +270,24 @@ class _PasswordsPageState extends State<PasswordsPage>
           return _PasswordItem(
             kdbxEntry: _totalEntry[index],
             onTop: () {
-              context.router.push(
-                LookAccountRoute(
-                  kdbxEntry: _totalEntry[index],
-                  readOnly: false,
-                ),
+              context.router.replaceAll(
+                [
+                  LookAccountRoute(
+                    kdbxEntry: _totalEntry[index],
+                    uuid: _totalEntry[index].uuid,
+                    readOnly: false,
+                  )
+                ],
               );
             },
             onLongPress: () {
-              context.router.push(
-                EditAccountRoute(
-                  kdbxEntry: _totalEntry[index],
-                ),
+              context.router.replaceAll(
+                [
+                  EditAccountRoute(
+                    kdbxEntry: _totalEntry[index],
+                    uuid: _totalEntry[index].uuid,
+                  )
+                ],
               );
             },
           );

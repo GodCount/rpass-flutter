@@ -22,20 +22,37 @@ class ManageGroupEntryRoute extends PageRouteInfo<_ManageGroupEntryArgs> {
   ManageGroupEntryRoute({
     Key? key,
     required KdbxGroup kdbxGroup,
+    KdbxUuid? uuid,
   }) : super(
           name,
           args: _ManageGroupEntryArgs(
             key: key,
             kdbxGroup: kdbxGroup,
           ),
+          rawPathParams: {
+            "uuid": uuid?.deBase64Uuid,
+          },
         );
 
   static const name = "ManageGroupEntryRoute";
 
-  static final PageInfo page = PageInfo(
+  static final PageInfo page = PageInfo.builder(
     name,
-    builder: (data) {
-      final args = data.argsAs<_ManageGroupEntryArgs>();
+    builder: (context, data) {
+      final args = data.argsAs<_ManageGroupEntryArgs>(
+        orElse: () {
+          final kdbx = KdbxProvider.of(context)!;
+          final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
+          final kdbxGroup = uuid != null ? kdbx.findGroupByUuid(uuid) : null;
+
+          if (kdbxGroup == null) {
+            throw Exception("kdbxGroup is null, Not found by uuid: $uuid");
+          }
+          return _ManageGroupEntryArgs(
+            kdbxGroup: kdbxGroup,
+          );
+        },
+      );
       return ManageGroupEntryPage(
         key: args.key,
         kdbxGroup: args.kdbxGroup,
@@ -80,6 +97,15 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
       _search();
     });
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant ManageGroupEntryPage oldWidget) {
+    if(oldWidget.kdbxGroup.uuid != widget.kdbxGroup.uuid){
+      _selecteds.clear();
+      _searchController.text = "";
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override

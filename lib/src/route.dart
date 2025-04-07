@@ -85,15 +85,15 @@ RootStackRouter _createMobileAutoRoute() {
         page: KdbxSettingRoute.page,
       ),
       AutoRoute(
-        path: "/manage_group_entry",
+        path: "/manage_group_entry/:uuid",
         page: ManageGroupEntryRoute.page,
       ),
       AutoRoute(
-        path: "/edit_account",
+        path: "/edit_account/:uuid",
         page: EditAccountRoute.page,
       ),
       AutoRoute(
-        path: "/look_account",
+        path: "/look_account/:uuid",
         page: LookAccountRoute.page,
       ),
       AutoRoute(
@@ -151,11 +151,11 @@ RootStackRouter _createDesktopAutoRoute() {
             page: PasswordsRoute.page,
             children: [
               AutoRoute(
-                path: "edit_account",
+                path: "edit_account/:uuid",
                 page: EditAccountRoute.page,
               ),
               AutoRoute(
-                path: "look_account",
+                path: "look_account/:uuid",
                 page: LookAccountRoute.page,
               ),
             ],
@@ -165,7 +165,7 @@ RootStackRouter _createDesktopAutoRoute() {
             page: GroupsRoute.page,
             children: [
               AutoRoute(
-                path: "manage_group_entry",
+                path: "manage_group_entry/:uuid",
                 page: ManageGroupEntryRoute.page,
               ),
             ],

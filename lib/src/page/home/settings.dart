@@ -35,7 +35,9 @@ class SettingsRoute extends PageRouteInfo<_SettingsArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_SettingsArgs>();
+      final args = data.argsAs<_SettingsArgs>(
+        orElse: () => _SettingsArgs(),
+      );
       return SettingsPage(key: args.key);
     },
   );
@@ -142,7 +144,7 @@ class _SettingsPageState extends State<SettingsPage>
               title: Text(t.recycle_bin),
               trailing: const Icon(Icons.recycling_rounded),
               onTap: () {
-                context.router.push(RecycleBinRoute());
+                context.router.replaceAll([RecycleBinRoute()]);
               },
             ),
             // TODO! 上游 kdbx.dart 还没实现
@@ -151,7 +153,7 @@ class _SettingsPageState extends State<SettingsPage>
             //   title: const Text("更多设置"),
             //   trailing: const Icon(Icons.chevron_right_rounded),
             //   onTap: () {
-            //      context.router.push(KdbxSettingRoute());
+            //      context.router.replaceAll(KdbxSettingRoute());
             //   },
             // ),
           ]),
@@ -175,7 +177,7 @@ class _SettingsPageState extends State<SettingsPage>
                   store.settings.locale != null ? t.locale_name : t.system),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () {
-                context.router.push(ChangeLocaleRoute());
+                context.router.replaceAll([ChangeLocaleRoute()]);
               },
             ),
           ]),
@@ -227,7 +229,7 @@ class _SettingsPageState extends State<SettingsPage>
             ListTile(
               title: Text(t.modify_password),
               onTap: () {
-                context.router.push(ModifyPasswordRoute());
+                context.router.replaceAll([ModifyPasswordRoute()]);
               },
             ),
             ListTile(
@@ -235,7 +237,7 @@ class _SettingsPageState extends State<SettingsPage>
               title: Text(t.more_settings),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () {
-                context.router.push(MoreSecurityRoute());
+                context.router.replaceAll([MoreSecurityRoute()]);
               },
             ),
           ]),
@@ -255,14 +257,14 @@ class _SettingsPageState extends State<SettingsPage>
             ListTile(
               title: Text(t.import),
               onTap: () {
-                context.router.push(ImportAccountRoute());
+                context.router.replaceAll([ImportAccountRoute()]);
               },
             ),
             ListTile(
               shape: shape,
               title: Text(t.export),
               onTap: () {
-                context.router.push(ExportAccountRoute());
+                context.router.replaceAll([ExportAccountRoute()]);
               },
             ),
           ]),

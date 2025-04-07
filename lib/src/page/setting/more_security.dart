@@ -23,7 +23,9 @@ class MoreSecurityRoute extends PageRouteInfo<_MoreSecurityArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_MoreSecurityArgs>();
+      final args = data.argsAs<_MoreSecurityArgs>(
+        orElse: () => _MoreSecurityArgs(),
+      );
       return MoreSecurityPage(key: args.key);
     },
   );

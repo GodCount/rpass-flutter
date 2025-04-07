@@ -32,7 +32,9 @@ class InitialRoute extends PageRouteInfo<_InitialArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_InitialArgs>();
+      final args = data.argsAs<_InitialArgs>(
+        orElse: () => _InitialArgs(),
+      );
       return InitialPage(key: args.key);
     },
   );

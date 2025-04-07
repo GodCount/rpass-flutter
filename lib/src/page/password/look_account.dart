@@ -35,6 +35,7 @@ class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
     Key? key,
     bool readOnly = true,
     required KdbxEntry kdbxEntry,
+    KdbxUuid? uuid,
   }) : super(
           name,
           args: _LookAccountArgs(
@@ -42,14 +43,36 @@ class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
             readOnly: readOnly,
             kdbxEntry: kdbxEntry,
           ),
+          rawQueryParams: {
+            "readOnly": readOnly,
+          },
+          rawPathParams: {
+            "uuid": uuid?.deBase64Uuid,
+          },
         );
 
   static const name = "LookAccountRoute";
 
-  static final PageInfo page = PageInfo(
+  static final PageInfo page = PageInfo.builder(
     name,
-    builder: (data) {
-      final args = data.argsAs<_LookAccountArgs>();
+    builder: (context, data) {
+      final args = data.argsAs<_LookAccountArgs>(
+        orElse: () {
+          final kdbx = KdbxProvider.of(context)!;
+          final readOnly = data.queryParams.getBool("readOnly", true);
+          final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
+          final kdbxEntry = uuid != null ? kdbx.findEntryByUuid(uuid) : null;
+
+          if (kdbxEntry == null) {
+            throw Exception("kdbxEntry is null, Not found by uuid: $uuid");
+          }
+          return _LookAccountArgs(
+            kdbxEntry: kdbxEntry,
+            readOnly: readOnly,
+          );
+        },
+      );
+
       return LookAccountPage(
         key: args.key,
         readOnly: args.readOnly,
@@ -479,13 +502,15 @@ class _LookAccountPageState extends State<LookAccountPage>
                     context.router.pop();
                   }
                 } else {
-                  context.router
-                      .push(EditAccountRoute(kdbxEntry: kdbxEntry))
-                      .then((value) {
-                    if (value is bool && value) {
-                      setState(() {});
-                    }
-                  });
+                  final result = await context.router.push(
+                    EditAccountRoute(
+                      kdbxEntry: kdbxEntry,
+                      uuid: kdbxEntry.uuid,
+                    ),
+                  );
+                  if (result is bool && result) {
+                    setState(() {});
+                  }
                 }
               },
               shape: const RoundedRectangleBorder(

@@ -24,7 +24,9 @@ class KdbxSettingRoute extends PageRouteInfo<_KdbxSettingArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_KdbxSettingArgs>();
+      final args = data.argsAs<_KdbxSettingArgs>(
+        orElse: () => _KdbxSettingArgs(),
+      );
       return KdbxSettingPage(key: args.key);
     },
   );

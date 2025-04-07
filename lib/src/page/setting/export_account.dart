@@ -30,7 +30,9 @@ class ExportAccountRoute extends PageRouteInfo<_ExportAccountArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_ExportAccountArgs>();
+      final args = data.argsAs<_ExportAccountArgs>(
+        orElse: () => _ExportAccountArgs(),
+      );
       return ExportAccountPage(key: args.key);
     },
   );

@@ -28,7 +28,9 @@ class ImportAccountRoute extends PageRouteInfo<_ImportAccountArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_ImportAccountArgs>();
+      final args = data.argsAs<_ImportAccountArgs>(
+        orElse: () => _ImportAccountArgs(),
+      );
       return ImportAccountPage(key: args.key);
     },
   );

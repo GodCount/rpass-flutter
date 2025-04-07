@@ -335,7 +335,10 @@ extension StatefulBottomSheet on State {
                                   const BorderRadius.all(Radius.circular(6.0)),
                               onTap: () {
                                 context.router.popAndPush(
-                                  LookAccountRoute(kdbxEntry: entry),
+                                  LookAccountRoute(
+                                    kdbxEntry: entry,
+                                    uuid: entry.uuid,
+                                  ),
                                 );
                               },
                               child: Padding(
@@ -621,11 +624,16 @@ mixin SecondLevelRouteUtil<T extends StatefulWidget> on State<T>
   bool get isSingleScreen => SrceenResize.instance.isSingleScreen;
   bool get isIdeaSrceen => SrceenResize.instance.isIdeaSrceen;
 
+  VoidCallback? _removeNavHistoryListener;
+
   @override
   void initState() {
     super.initState();
     SrceenResize.instance.addObserver(this);
-    context.router.navigationHistory.addListener(_navigationHistory);
+    final navigationHistory = context.router.navigationHistory;
+    navigationHistory.addListener(_navigationHistory);
+    _removeNavHistoryListener =
+        () => navigationHistory.removeListener(_navigationHistory);
   }
 
   void _navigationHistory() {
@@ -655,7 +663,8 @@ mixin SecondLevelRouteUtil<T extends StatefulWidget> on State<T>
   @override
   void dispose() {
     SrceenResize.instance.removeObserver(this);
-    context.router.navigationHistory.removeListener(_navigationHistory);
+    _removeNavHistoryListener?.call();
+    _removeNavHistoryListener = null;
     super.dispose();
   }
 }

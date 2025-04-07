@@ -23,7 +23,9 @@ class ChangeLocaleRoute extends PageRouteInfo<_ChangeLocaleArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_ChangeLocaleArgs>();
+      final args = data.argsAs<_ChangeLocaleArgs>(
+        orElse: () => _ChangeLocaleArgs(),
+      );
       return ChangeLocalePage(key: args.key);
     },
   );
