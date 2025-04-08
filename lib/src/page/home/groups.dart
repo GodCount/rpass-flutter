@@ -1,15 +1,17 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:rpass/src/util/common.dart';
+import 'package:flutter_context_menu/flutter_context_menu.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/common.dart';
 import '../../widget/extension_state.dart';
 import '../route.dart';
 import 'route_wrap.dart';
+
 
 class _GroupsArgs extends PageRouteArgs {
   _GroupsArgs({super.key});
@@ -69,19 +71,6 @@ class _GroupsPageState extends State<GroupsPage>
     super.dispose();
   }
 
-  void _kdbxGroupDelete(KdbxGroup kdbxGroup) async {
-    final t = I18n.of(context)!;
-
-    if (await showConfirmDialog(
-      title: t.delete,
-      message: t.is_move_recycle,
-    )) {
-      final kdbx = KdbxProvider.of(context)!;
-      kdbx.deleteGroup(kdbxGroup);
-      await kdbxSave(kdbx);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -102,41 +91,7 @@ class _GroupsPageState extends State<GroupsPage>
       ),
       body: ListView.builder(
         itemBuilder: (context, i) {
-          final kdbxGroup = groups[i];
-          return _GroupsItem(
-            kdbxGroup: kdbxGroup,
-            onTap: () {
-              context.router.navigate(
-                PasswordsRoute(
-                  search: 'g:"${kdbxGroup.name.get() ?? ''}"',
-                ),
-              );
-            },
-            onLongPress: () => showKdbxGroupAction(
-              kdbxGroup.name.get() ?? '',
-              onManageTap: () {
-                context.router.platformNavigate(
-                  ManageGroupEntryRoute(
-                    kdbxGroup: kdbxGroup,
-                    uuid: kdbxGroup.uuid,
-                  ),
-                );
-              },
-              onModifyTap: () => setKdbxGroup(
-                KdbxGroupData(
-                  name: kdbxGroup.name.get() ?? '',
-                  kdbxIcon: KdbxIconWidgetData(
-                    icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
-                    customIcon: kdbxGroup.customIcon,
-                  ),
-                  kdbxGroup: kdbxGroup,
-                ),
-              ),
-              onDeleteTap: kdbxGroup.parent != null
-                  ? () => _kdbxGroupDelete(kdbxGroup)
-                  : null,
-            ),
-          );
+          return _GroupsItem(kdbxGroup: groups[i]);
         },
         itemCount: groups.length,
       ),
@@ -163,13 +118,9 @@ class _GroupsPageState extends State<GroupsPage>
 class _GroupsItem extends StatefulWidget {
   const _GroupsItem({
     required this.kdbxGroup,
-    this.onTap,
-    this.onLongPress,
   });
 
   final KdbxGroup kdbxGroup;
-  final GestureTapCallback? onTap;
-  final GestureLongPressCallback? onLongPress;
 
   @override
   State<_GroupsItem> createState() => _GroupsItemState();
@@ -178,6 +129,7 @@ class _GroupsItem extends StatefulWidget {
 class _GroupsItemState extends State<_GroupsItem>
     with NavigationHistoryObserver<_GroupsItem> {
   bool _selected = false;
+  bool _showMenu = false;
 
   @override
   void didNavigationHistory() {
@@ -197,31 +149,140 @@ class _GroupsItemState extends State<_GroupsItem>
     }
   }
 
+  void _kdbxGroupDelete(KdbxGroup kdbxGroup) async {
+    final t = I18n.of(context)!;
+
+    if (await showConfirmDialog(
+      title: t.delete,
+      message: t.is_move_recycle,
+    )) {
+      final kdbx = KdbxProvider.of(context)!;
+      kdbx.deleteGroup(kdbxGroup);
+      await kdbxSave(kdbx);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final kdbxGroup = widget.kdbxGroup;
-    return ListTile(
-      selected: _selected,
-      leading: KdbxIconWidget(
-        kdbxIcon: KdbxIconWidgetData(
-          icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
-          customIcon: kdbxGroup.customIcon,
+    return CustomContextMenuRegion<GroupsItemMenu>(
+      enabled: isDesktop,
+      onItemSelected: (type) {
+        setState(() {
+          _showMenu = false;
+        });
+        if (type == null) {
+          return;
+        }
+        switch (type) {
+          case GroupsItemMenu.search:
+            context.router.navigate(
+              PasswordsRoute(
+                search: 'g:"${kdbxGroup.name.get() ?? ''}"',
+              ),
+            );
+            break;
+          case GroupsItemMenu.modify:
+            setKdbxGroup(
+              KdbxGroupData(
+                name: kdbxGroup.name.get() ?? '',
+                kdbxIcon: KdbxIconWidgetData(
+                  icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
+                  customIcon: kdbxGroup.customIcon,
+                ),
+                kdbxGroup: kdbxGroup,
+              ),
+            );
+            break;
+          case GroupsItemMenu.delete:
+            _kdbxGroupDelete(kdbxGroup);
+            break;
+        }
+      },
+      builder: (context) {
+        final t = I18n.of(context)!;
+
+        setState(() {
+          _showMenu = true;
+        });
+
+        return ContextMenu(
+          entries: [
+            MenuItem(
+              label: t.search,
+              icon: Icons.search,
+              value: GroupsItemMenu.search,
+            ),
+            MenuItem(
+              label: t.modify,
+              icon: Icons.edit,
+              value: GroupsItemMenu.modify,
+            ),
+            const MenuDivider(),
+            MenuItem(
+              label: t.delete,
+              enabled: kdbxGroup.parent != null,
+              icon: Icons.delete,
+              value: GroupsItemMenu.delete,
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ],
+        );
+      },
+      child: ListTile(
+        selected: _selected || _showMenu,
+        leading: KdbxIconWidget(
+          kdbxIcon: KdbxIconWidgetData(
+            icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
+            customIcon: kdbxGroup.customIcon,
+          ),
+          size: 24,
         ),
-        size: 24,
+        title: Text(
+          kdbxGroup.name.get() ?? "",
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: kdbxGroup.times.creationTime.get() != null
+            ? Text(
+                dateFormat(kdbxGroup.times.creationTime.get()!.toLocal()),
+                overflow: TextOverflow.ellipsis,
+              )
+            : null,
+        onTap: () {
+          context.router.platformNavigate(
+            ManageGroupEntryRoute(
+              kdbxGroup: kdbxGroup,
+              uuid: kdbxGroup.uuid,
+            ),
+          );
+        },
+        onLongPress: isMobile
+            ? () => showKdbxGroupAction(
+                  kdbxGroup.name.get() ?? '',
+                  onSearchTap: () {
+                    context.router.navigate(
+                      PasswordsRoute(
+                        search: 'g:"${kdbxGroup.name.get() ?? ''}"',
+                      ),
+                    );
+                  },
+                  onModifyTap: () => setKdbxGroup(
+                    KdbxGroupData(
+                      name: kdbxGroup.name.get() ?? '',
+                      kdbxIcon: KdbxIconWidgetData(
+                        icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
+                        customIcon: kdbxGroup.customIcon,
+                      ),
+                      kdbxGroup: kdbxGroup,
+                    ),
+                  ),
+                  onDeleteTap: kdbxGroup.parent != null
+                      ? () => _kdbxGroupDelete(kdbxGroup)
+                      : null,
+                )
+            : null,
       ),
-      title: Text(
-        kdbxGroup.name.get() ?? "",
-        maxLines: 3,
-        overflow: TextOverflow.ellipsis,
-      ),
-      subtitle: kdbxGroup.times.creationTime.get() != null
-          ? Text(
-              dateFormat(kdbxGroup.times.creationTime.get()!.toLocal()),
-              overflow: TextOverflow.ellipsis,
-            )
-          : null,
-      onTap: widget.onTap,
-      onLongPress: !_selected ? widget.onLongPress : null,
     );
   }
 }

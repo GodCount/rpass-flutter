@@ -79,6 +79,7 @@
     "symbol": "Symbol",
     "remark": "Remark",
     "save": "Save",
+    "copy": "Copy",
     "copy_done": "Copy Completed",
     "lookup": "View",
     "source": "Source",

@@ -1,6 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_context_menu/flutter_context_menu.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
@@ -276,14 +277,6 @@ class _PasswordsPageState extends State<PasswordsPage>
                 ),
               );
             },
-            onLongPress: () {
-              context.router.platformNavigate(
-                EditAccountRoute(
-                  kdbxEntry: _totalEntry[index],
-                  uuid: _totalEntry[index].uuid,
-                ),
-              );
-            },
           );
         },
       ),
@@ -475,6 +468,7 @@ class _PasswordItem extends StatefulWidget {
 class _PasswordItemState extends State<_PasswordItem>
     with NavigationHistoryObserver<_PasswordItem> {
   bool _selected = false;
+  bool _showMenu = false;
 
   @override
   void didNavigationHistory() {
@@ -495,72 +489,140 @@ class _PasswordItemState extends State<_PasswordItem>
     }
   }
 
+  void _deletePassword() async {
+    final t = I18n.of(context)!;
+    if (await showConfirmDialog(
+      title: t.delete,
+      message: t.is_move_recycle,
+    )) {
+      final kdbx = KdbxProvider.of(context)!;
+      kdbx.deleteEntry(widget.kdbxEntry);
+      await kdbxSave(kdbx);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
 
     final kdbxEntry = widget.kdbxEntry;
-    return ListTile(
-      isThreeLine: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8.0)),
-      ),
-      selected: _selected,
-      leading: Padding(
-        padding: const EdgeInsets.only(top: 6),
-        child: KdbxIconWidget(
-          kdbxIcon: KdbxIconWidgetData(
-            icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
-            customIcon: kdbxEntry.customIcon,
-          ),
-          size: 24,
+    return CustomContextMenuRegion<PasswordsItemMenu>(
+      enabled: isDesktop,
+      onItemSelected: (type) {
+        setState(() {
+          _showMenu = false;
+        });
+        if (type == null) {
+          return;
+        }
+        switch (type) {
+          case PasswordsItemMenu.edit:
+            context.router.platformNavigate(
+              EditAccountRoute(
+                kdbxEntry: kdbxEntry,
+                uuid: kdbxEntry.uuid,
+              ),
+            );
+            break;
+          case PasswordsItemMenu.copy:
+            writeClipboard(kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME));
+            break;
+          case PasswordsItemMenu.delete:
+            _deletePassword();
+            break;
+        }
+      },
+      builder: (context) {
+        setState(() {
+          _showMenu = true;
+        });
+
+        return ContextMenu(
+          entries: [
+            MenuItem(
+              label: t.edit_account,
+              icon: Icons.edit,
+              enabled:
+                  context.topRoute.name != EditAccountRoute.name || !_selected,
+              value: PasswordsItemMenu.edit,
+            ),
+            MenuItem(
+              label: t.copy,
+              icon: Icons.copy,
+              value: PasswordsItemMenu.copy,
+            ),
+            const MenuDivider(),
+            MenuItem(
+              label: t.delete,
+              icon: Icons.delete,
+              value: PasswordsItemMenu.delete,
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ],
+        );
+      },
+      child: ListTile(
+        isThreeLine: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
         ),
-      ),
-      title: Text(
-        kdbxEntry.isExpiry()
-            ? "${kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE)} (${t.expires})"
-            : kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE),
-        style: kdbxEntry.isExpiry()
-            ? Theme.of(context)
-                .textTheme
-                .titleLarge
-                ?.copyWith(color: Theme.of(context).colorScheme.error)
-            : Theme.of(context).textTheme.titleLarge,
-        overflow: TextOverflow.ellipsis,
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 12),
-            child: Text(
-              kdbxEntry.getNonNullString(KdbxKeyCommon.URL),
-              style: Theme.of(context).textTheme.bodySmall,
+        selected: _selected || _showMenu,
+        leading: Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: KdbxIconWidget(
+            kdbxIcon: KdbxIconWidgetData(
+              icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
+              customIcon: kdbxEntry.customIcon,
             ),
+            size: 24,
           ),
-          _subtitleText(
-            t.account_ab,
-            kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME),
-          ),
-          _subtitleText(
-            t.email_ab,
-            kdbxEntry.getNonNullString(KdbxKeyCommon.EMAIL),
-          ),
-          _subtitleText(
-            t.label_ab,
-            kdbxEntry.tagList.join(", "),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              kdbxEntry.parent?.name.get() ?? '',
-              overflow: TextOverflow.ellipsis,
+        ),
+        title: Text(
+          kdbxEntry.isExpiry()
+              ? "${kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE)} (${t.expires})"
+              : kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE),
+          style: kdbxEntry.isExpiry()
+              ? Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(color: Theme.of(context).colorScheme.error)
+              : Theme.of(context).textTheme.titleLarge,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 12),
+              child: Text(
+                kdbxEntry.getNonNullString(KdbxKeyCommon.URL),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ),
-          ),
-        ],
+            _subtitleText(
+              t.account_ab,
+              kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME),
+            ),
+            _subtitleText(
+              t.email_ab,
+              kdbxEntry.getNonNullString(KdbxKeyCommon.EMAIL),
+            ),
+            _subtitleText(
+              t.label_ab,
+              kdbxEntry.tagList.join(", "),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                kdbxEntry.parent?.name.get() ?? '',
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        onTap: widget.onTap,
+        onLongPress: widget.onLongPress,
       ),
-      onTap: widget.onTap,
-      onLongPress: widget.onLongPress,
     );
   }
 

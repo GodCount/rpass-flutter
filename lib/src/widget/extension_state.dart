@@ -17,7 +17,10 @@ import '../util/file.dart';
 import 'chip_list.dart';
 import 'common.dart';
 
+export "context_menu.dart";
+
 final _logger = Logger("widget:extension_state");
+
 
 extension StatefulClipboard on State {
   void writeClipboard(String text) {
@@ -250,7 +253,7 @@ extension StatefulBottomSheet on State {
 
   void showKdbxGroupAction(
     String title, {
-    GestureTapCallback? onManageTap,
+    GestureTapCallback? onSearchTap,
     GestureTapCallback? onModifyTap,
     GestureTapCallback? onDeleteTap,
   }) {
@@ -259,12 +262,12 @@ extension StatefulBottomSheet on State {
       title: title,
       children: [
         ListTile(
-          leading: const Icon(Icons.manage_accounts_rounded),
-          title: Text(t.manage),
-          onTap: onManageTap != null
+          leading: const Icon(Icons.search),
+          title: Text(t.search),
+          onTap: onSearchTap != null
               ? () {
                   context.router.pop();
-                  onManageTap();
+                  onSearchTap();
                 }
               : null,
         ),
