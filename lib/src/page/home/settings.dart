@@ -43,6 +43,14 @@ class SettingsRoute extends PageRouteInfo<_SettingsArgs> {
   );
 }
 
+final List<String> childRouteNames = [
+  RecycleBinRoute.name,
+  ChangeLocaleRoute.name,
+  MoreSecurityRoute.name,
+  ImportAccountRoute.name,
+  ExportAccountRoute.name,
+];
+
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
@@ -51,9 +59,24 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, NavigationHistoryObserver {
+  String? childRouteName;
+
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void didNavigationHistory() {
+    if (childRouteNames.contains(context.topRoute.name)) {
+      setState(() {
+        childRouteName = context.topRoute.name;
+      });
+    } else if (childRouteName != null) {
+      setState(() {
+        childRouteName = null;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,6 +166,7 @@ class _SettingsPageState extends State<SettingsPage>
               shape: shape,
               title: Text(t.recycle_bin),
               trailing: const Icon(Icons.recycling_rounded),
+              selected: childRouteName == RecycleBinRoute.name,
               onTap: () {
                 context.router.platformNavigate(RecycleBinRoute());
               },
@@ -176,6 +200,7 @@ class _SettingsPageState extends State<SettingsPage>
               title: Text(
                   store.settings.locale != null ? t.locale_name : t.system),
               trailing: const Icon(Icons.chevron_right_rounded),
+              selected: childRouteName == ChangeLocaleRoute.name,
               onTap: () {
                 context.router.platformNavigate(ChangeLocaleRoute());
               },
@@ -228,14 +253,16 @@ class _SettingsPageState extends State<SettingsPage>
               ),
             ListTile(
               title: Text(t.modify_password),
+              selected: childRouteName == ModifyPasswordRoute.name,
               onTap: () {
-                context.router.platformNavigate(ModifyPasswordRoute());
+                context.router.push(ModifyPasswordRoute());
               },
             ),
             ListTile(
               shape: shape,
               title: Text(t.more_settings),
               trailing: const Icon(Icons.chevron_right_rounded),
+              selected: childRouteName == MoreSecurityRoute.name,
               onTap: () {
                 context.router.platformNavigate(MoreSecurityRoute());
               },
@@ -256,6 +283,7 @@ class _SettingsPageState extends State<SettingsPage>
             ),
             ListTile(
               title: Text(t.import),
+              selected: childRouteName == ImportAccountRoute.name,
               onTap: () {
                 context.router.platformNavigate(ImportAccountRoute());
               },
@@ -263,6 +291,7 @@ class _SettingsPageState extends State<SettingsPage>
             ListTile(
               shape: shape,
               title: Text(t.export),
+              selected: childRouteName == ExportAccountRoute.name,
               onTap: () {
                 context.router.platformNavigate(ExportAccountRoute());
               },

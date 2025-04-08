@@ -138,7 +138,7 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
         children: [
           NavigationRail(
             minWidth: 64,
-            minExtendedWidth: 128,
+            minExtendedWidth: 132,
             extended: isIdeaSrceen,
             selectedIndex: tabsRouter.activeIndex,
             onDestinationSelected: tabsRouter.setActiveIndex,
