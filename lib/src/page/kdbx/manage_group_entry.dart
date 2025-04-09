@@ -1,13 +1,15 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_context_menu/flutter_context_menu.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/common.dart';
 import '../../widget/extension_state.dart';
-import '../password/look_account.dart';
+import '../route.dart';
 
 class _ManageGroupEntryArgs extends PageRouteArgs {
   _ManageGroupEntryArgs({
@@ -81,11 +83,9 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
 
   final List<KdbxEntry> _totalEntry = [];
 
-  bool get _isAllSelect => _selecteds.length == _totalEntry.length;
+  KdbxEntry? _showMenu;
 
-  // 搜索选中
-  List<KdbxEntry> get _selectedList =>
-      _selecteds.where((item) => _totalEntry.contains(item)).toList();
+  bool get _isAllSelect => _selecteds.length == _totalEntry.length;
 
   @override
   void initState() {
@@ -137,56 +137,69 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
     setState(() {});
   }
 
-  void _deleteSelecteds() async {
+  void _delete(List<KdbxEntry> kdbxEntrys) async {
     final t = I18n.of(context)!;
     if (await showConfirmDialog(
       title: t.delete,
       message: t.is_move_recycle,
     )) {
       final kdbx = KdbxProvider.of(context)!;
-      for (var item in _selecteds) {
+      for (var item in kdbxEntrys) {
         kdbx.deleteEntry(item);
       }
       await kdbxSave(kdbx);
-      _selecteds.clear();
+      kdbxEntrys.clear();
       _search();
     }
   }
 
-  void _moveSelecteds() async {
+  void _move(List<KdbxEntry> kdbxEntrys) async {
     final group = await showGroupSelectorDialog(widget.kdbxGroup);
     if (group != null) {
       final kdbx = KdbxProvider.of(context)!;
-      for (var item in _selecteds) {
+      for (var item in kdbxEntrys) {
         kdbx.kdbxFile.move(item, group);
       }
       await kdbxSave(kdbx);
-      _selecteds.clear();
+      kdbxEntrys.clear();
       _search();
     }
   }
 
-  void _showSelectorEntryAction() {
+  void _showSelectorEntryAction(KdbxEntry kdbxEntry) {
     final t = I18n.of(context)!;
     showBottomSheetList(
       title: t.man_selected_pass,
       children: [
         ListTile(
-          leading: const Icon(Icons.drive_file_move_rounded),
-          title: Text(t.move),
+          leading: const Icon(Icons.view_list),
+          title: Text(t.lookup),
           onTap: () {
             context.router.pop();
-            _moveSelecteds();
+            context.router.root.platformNavigate(LookAccountRoute(
+              kdbxEntry: kdbxEntry,
+              uuid: kdbxEntry.uuid,
+            ));
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.drive_file_move_rounded),
+          title: Text(t.move_selected),
+          enabled: _selecteds.isNotEmpty,
+          onTap: () {
+            context.router.pop();
+            _move(_selecteds);
           },
         ),
         ListTile(
           iconColor: Theme.of(context).colorScheme.error,
           textColor: Theme.of(context).colorScheme.error,
           leading: const Icon(Icons.delete),
-          title: Text(t.delete),
+          title: Text(t.move_selected),
+          enabled: _selecteds.isNotEmpty,
           onTap: () {
             context.router.pop();
-            _deleteSelecteds();
+            _delete(_selecteds);
           },
         ),
       ],
@@ -278,6 +291,19 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
             ),
           ),
         ),
+        actions: [
+          Checkbox(
+            value: _isAllSelect,
+            onChanged: _totalEntry.isNotEmpty
+                ? (value) => _allSelect(value ?? false)
+                : null,
+          ),
+          IconButton(
+            tooltip: t.invert_select,
+            onPressed: _totalEntry.isNotEmpty ? _invertSelect : null,
+            icon: const Icon(Icons.swap_vert),
+          ),
+        ],
       ),
       body: ListView.builder(
         itemCount: _totalEntry.length,
@@ -285,74 +311,119 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
           return _buildListItem(_totalEntry[index]);
         },
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
-        color: NavigationBarTheme.of(context).backgroundColor ??
-            Theme.of(context).colorScheme.surfaceContainer,
-        child: Row(
-          children: [
-            Checkbox(
-              value: _isAllSelect,
-              onChanged: _totalEntry.isNotEmpty
-                  ? (value) => _allSelect(value ?? false)
-                  : null,
-            ),
-            const SizedBox(width: 6),
-            GestureDetector(
-              onTap: _totalEntry.isNotEmpty
-                  ? () => _allSelect(!_isAllSelect)
-                  : null,
-              child: Opacity(
-                opacity: _totalEntry.isNotEmpty ? 1.0 : 0.45,
-                child: Text(
-                  t.all_select(
-                    _selectedList.length,
-                    _totalEntry.length,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            TextButton(
-              onPressed: _totalEntry.isNotEmpty ? _invertSelect : null,
-              child: Text(t.invert_select),
-            ),
-            const Expanded(child: SizedBox()),
-            IconButton(
-              onPressed:
-                  _selecteds.isNotEmpty ? _showSelectorEntryAction : null,
-              icon: const Icon(Icons.menu_open_rounded),
-            )
-          ],
-        ),
-      ),
     );
   }
 
   Widget _buildListItem(KdbxEntry kdbxEntry) {
-    return ListTile(
-      onTap: () => _onItemTap(kdbxEntry),
-      onLongPress: () {
-        showModalBottomSheet(
-          context: context,
-          builder: (context) => ClipRRect(
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(16.0)),
-            child: LookAccountPage(
+    return CustomContextMenuRegion<GroupsManageItemMenu>(
+      enabled: isDesktop,
+      onItemSelected: (type) {
+        setState(() {
+          _showMenu = null;
+        });
+
+        if (type == null) {
+          return;
+        }
+        switch (type) {
+          case GroupsManageItemMenu.view:
+            context.router.root.platformNavigate(LookAccountRoute(
               kdbxEntry: kdbxEntry,
-              readOnly: true,
+              uuid: kdbxEntry.uuid,
+            ));
+            break;
+          case GroupsManageItemMenu.edit:
+            context.router.root.platformNavigate(EditAccountRoute(
+              kdbxEntry: kdbxEntry,
+              uuid: kdbxEntry.uuid,
+            ));
+            break;
+          case GroupsManageItemMenu.copy:
+            writeClipboard(kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME));
+            break;
+          case GroupsManageItemMenu.move:
+            _move([kdbxEntry]);
+            break;
+          case GroupsManageItemMenu.move_selected:
+            _move(_selecteds);
+            break;
+          case GroupsManageItemMenu.delete:
+            _delete([kdbxEntry]);
+            break;
+          case GroupsManageItemMenu.delete_selected:
+            _delete(_selecteds);
+            break;
+        }
+      },
+      builder: (context) {
+        final t = I18n.of(context)!;
+
+        setState(() {
+          _showMenu = kdbxEntry;
+        });
+
+        return ContextMenu(
+          entries: [
+            MenuItem(
+              label: t.lookup,
+              icon: Icons.view_list,
+              value: GroupsManageItemMenu.view,
             ),
-          ),
+            MenuItem(
+              label: t.edit_account,
+              icon: Icons.edit,
+              value: GroupsManageItemMenu.edit,
+            ),
+            const MenuDivider(),
+            MenuItem(
+              label: t.copy,
+              icon: Icons.copy,
+              value: GroupsManageItemMenu.copy,
+            ),
+            const MenuDivider(),
+            MenuItem(
+              label: t.move,
+              icon: Icons.move_down,
+              value: GroupsManageItemMenu.move,
+            ),
+            MenuItem(
+              label: t.delete,
+              icon: Icons.delete,
+              value: GroupsManageItemMenu.delete,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const MenuDivider(),
+            MenuItem(
+              label: t.move_selected,
+              enabled: _selecteds.isNotEmpty,
+              icon: Icons.move_down,
+              value: GroupsManageItemMenu.move_selected,
+            ),
+            MenuItem(
+              label: t.delete_selected,
+              enabled: _selecteds.isNotEmpty,
+              icon: Icons.delete,
+              value: GroupsManageItemMenu.delete_selected,
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ],
         );
       },
-      leading: KdbxIconWidget(
-        kdbxIcon: KdbxIconWidgetData(
-          icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
-          customIcon: kdbxEntry.customIcon,
+      child: ListTile(
+        selected: _showMenu == kdbxEntry,
+        onTap: () => _onItemTap(kdbxEntry),
+        onLongPress:
+            isMobile ? () => _showSelectorEntryAction(kdbxEntry) : null,
+        leading: KdbxIconWidget(
+          kdbxIcon: KdbxIconWidgetData(
+            icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
+            customIcon: kdbxEntry.customIcon,
+          ),
         ),
+        trailing:
+            _selecteds.contains(kdbxEntry) ? const Icon(Icons.done) : null,
+        title: Text(getKdbxObjectTitle(kdbxEntry)),
       ),
-      trailing: _selecteds.contains(kdbxEntry) ? const Icon(Icons.done) : null,
-      title: Text(getKdbxObjectTitle(kdbxEntry)),
     );
   }
 }

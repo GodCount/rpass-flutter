@@ -230,5 +230,7 @@
     "expires": "过期",
     "key_file": "密钥文件",
     "record_key_file_path": "记录密钥文件路径",
-    "lack_key_file": "缺少密钥文件"
+    "lack_key_file": "缺少密钥文件",
+    "move_selected": "移动选中",
+    "delete_selected": "删除选中"
 }

@@ -18,7 +18,9 @@ enum GroupsManageItemMenu {
   edit,
   copy,
   move,
+  move_selected,
   delete,
+  delete_selected
 }
 
 typedef BuilderContextMenu<T> = ContextMenu<T> Function(BuildContext context);
@@ -39,7 +41,10 @@ class CustomContextMenuRegion<T> extends StatelessWidget {
 
   void _showMenu(BuildContext context, Offset position) async {
     final menu = builder(context).copyWith(position: position);
-    final value = await showContextMenu(context, contextMenu: menu);
+    final value = await showContextMenu(
+      Navigator.of(context, rootNavigator: true).context,
+      contextMenu: menu,
+    );
     onItemSelected?.call(value);
   }
 
