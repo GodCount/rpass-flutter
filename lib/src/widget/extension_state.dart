@@ -14,13 +14,13 @@ import '../kdbx/kdbx.dart';
 import '../page/route.dart';
 import '../util/common.dart';
 import '../util/file.dart';
+import '../util/route.dart';
 import 'chip_list.dart';
 import 'common.dart';
 
 export "context_menu.dart";
 
 final _logger = Logger("widget:extension_state");
-
 
 extension StatefulClipboard on State {
   void writeClipboard(String text) {
@@ -640,10 +640,14 @@ mixin SecondLevelRouteUtil<T extends StatefulWidget> on State<T>
   }
 
   void _navigationHistory() {
+    print(context.router.currentPath);
     if (context.router.currentPath.startsWith("/home")) {
-      final isEmptyRouter = context.router.currentPath.endsWith("passwords") ||
-          context.router.currentPath.endsWith("groups") ||
-          context.router.currentPath.endsWith("settings");
+      final isEmptyRouter = context.router.currentSegments.length <= 2 ||
+          context.router.currentSegments.last.name == "EmptyPageRoute";
+
+      // context.router.currentPath.endsWith("passwords") ||
+      //     context.router.currentPath.endsWith("groups") ||
+      //     context.router.currentPath.endsWith("settings");
 
       if (this.isEmptyRouter != isEmptyRouter) {
         this.isEmptyRouter = isEmptyRouter;
@@ -741,8 +745,18 @@ extension PlatformStackRouter on StackRouter {
     PageRouteInfo<Object?> route, {
     OnNavigationFailure? onFailure,
   }) async {
-    return isDesktop
-        ? await replaceAll([route], onFailure: onFailure)
-        : await push(route, onFailure: onFailure);
+    if (isDesktop) {
+      final router = findStackScope(route);
+      print(router);
+      await router.replaceAll(
+        [
+          const NamedRoute("EmptyPageRoute"),
+          route,
+        ],
+        onFailure: onFailure,
+      );
+    } else {
+      await push(route, onFailure: onFailure);
+    }
   }
 }

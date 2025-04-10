@@ -79,12 +79,14 @@ class _RouteWrapState extends State<RouteWrap>
                     vertical: 6,
                     horizontal: 3,
                   ),
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(12)),
-                    child: IndexedStack(
-                      index: isEmptyRouter ? 1 : 0,
-                      children: [const AutoRouter(), widget.empty],
-                    ),
+                  child: const ClipRRect(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    child: AutoRouter(),
+
+                    // IndexedStack(
+                    //   index: isEmptyRouter ? 1 : 0,
+                    //   children: [const AutoRouter(), widget.empty],
+                    // ),
                   ),
                 ),
               ),
