@@ -80,6 +80,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: automaticallyImplyLeading,
         leading: autoBack(),
         title: Text(t.pass_lib_setting),
       ),

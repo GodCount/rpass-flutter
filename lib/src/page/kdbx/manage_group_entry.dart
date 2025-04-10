@@ -176,7 +176,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
           title: Text(t.lookup),
           onTap: () {
             context.router.pop();
-            context.router.root.platformNavigate(LookAccountRoute(
+            context.router.platformNavigate(LookAccountRoute(
               kdbxEntry: kdbxEntry,
               uuid: kdbxEntry.uuid,
             ));
@@ -233,6 +233,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 0,
+        automaticallyImplyLeading: automaticallyImplyLeading,
         leading: autoBack(),
         title: Padding(
           padding: const EdgeInsets.only(left: 12, right: 12),
@@ -300,7 +301,11 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
           ),
           IconButton(
             tooltip: t.invert_select,
-            onPressed: _totalEntry.isNotEmpty ? _invertSelect : null,
+            onPressed: _totalEntry.isNotEmpty &&
+                    _selecteds.isNotEmpty &&
+                    _selecteds.length < _totalEntry.length
+                ? _invertSelect
+                : null,
             icon: const Icon(Icons.swap_vert),
           ),
         ],
@@ -327,13 +332,13 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
         }
         switch (type) {
           case GroupsManageItemMenu.view:
-            context.router.root.platformNavigate(LookAccountRoute(
+            context.router.platformNavigate(LookAccountRoute(
               kdbxEntry: kdbxEntry,
               uuid: kdbxEntry.uuid,
             ));
             break;
           case GroupsManageItemMenu.edit:
-            context.router.root.platformNavigate(EditAccountRoute(
+            context.router.platformNavigate(EditAccountRoute(
               kdbxEntry: kdbxEntry,
               uuid: kdbxEntry.uuid,
             ));

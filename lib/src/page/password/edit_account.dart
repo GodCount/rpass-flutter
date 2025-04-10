@@ -250,6 +250,7 @@ class _EditAccountPageState extends State<EditAccountPage>
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: automaticallyImplyLeading,
         leading: autoBack(),
         title: Text(t.edit_account),
       ),

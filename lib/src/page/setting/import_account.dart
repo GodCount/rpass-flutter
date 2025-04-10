@@ -69,6 +69,7 @@ class _ImportAccountPageState extends State<ImportAccountPage>
     final t = I18n.of(context)!;
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: automaticallyImplyLeading,
         leading: autoBack(),
         title: Text(t.import),
       ),

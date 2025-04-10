@@ -134,6 +134,7 @@ class _LookAccountPageState extends State<LookAccountPage>
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: automaticallyImplyLeading,
         leading: autoBack(),
         title: Text(t.lookup),
         actions: [

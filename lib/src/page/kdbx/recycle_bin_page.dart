@@ -193,7 +193,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     return Scaffold(
       appBar: AppBar(
         title: Text(t.recycle_bin),
-        automaticallyImplyLeading: !_isLongPress,
+        automaticallyImplyLeading: !_isLongPress && automaticallyImplyLeading,
         leading: _isLongPress
             ? IconButton(
                 onPressed: () {

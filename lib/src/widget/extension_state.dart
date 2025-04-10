@@ -700,6 +700,9 @@ mixin NavigationHistoryObserver<T extends StatefulWidget> on State<T> {
 
 mixin SecondLevelPageAutoBack<T extends StatefulWidget> on State<T>
     implements SrceenResizeObserver {
+  bool get automaticallyImplyLeading =>
+      !isDesktop || context.router.pageCount > 2;
+
   @override
   void initState() {
     if (isDesktop) {
@@ -741,13 +744,29 @@ mixin SecondLevelPageAutoBack<T extends StatefulWidget> on State<T>
 }
 
 extension PlatformStackRouter on StackRouter {
+  void _updateTabs(StackRouter router) {
+    if (this != router) {
+      final parent = router.parent();
+
+      if (parent != null &&
+          parent is TabsRouter &&
+          parent.stack[parent.activeIndex].routeKey != router.key) {
+        final i =
+            parent.stack.indexWhere((item) => item.routeKey == router.key);
+        if (i != -1) {
+          parent.setActiveIndex(i);
+        }
+      }
+    }
+  }
+
   Future<void> platformNavigate(
     PageRouteInfo<Object?> route, {
     OnNavigationFailure? onFailure,
   }) async {
     if (isDesktop) {
       final router = findStackScope(route);
-      print(router);
+      _updateTabs(router);
       await router.replaceAll(
         [
           const NamedRoute("EmptyPageRoute"),

@@ -95,6 +95,7 @@ class _ExportAccountPageState extends State<ExportAccountPage>
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: automaticallyImplyLeading,
         leading: autoBack(),
         title: Text(t.export),
       ),

@@ -57,6 +57,7 @@ class _ChangeLocalePageState extends State<ChangeLocalePage>
     final store = StoreProvider.of(context);
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: automaticallyImplyLeading,
         leading: autoBack(),
         title: Text(t.language_setting),
       ),
