@@ -341,6 +341,7 @@ extension StatefulBottomSheet on State {
                                   LookAccountRoute(
                                     kdbxEntry: entry,
                                     uuid: entry.uuid,
+                                    readOnly: true
                                   ),
                                 );
                               },

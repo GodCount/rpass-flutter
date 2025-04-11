@@ -232,5 +232,7 @@
     "record_key_file_path": "记录密钥文件路径",
     "lack_key_file": "缺少密钥文件",
     "move_selected": "移动选中",
-    "delete_selected": "删除选中"
+    "delete_selected": "删除选中",
+    "revert_selected": "恢复选中",
+    "completely_delete_selected": "彻底删除选中"
 }

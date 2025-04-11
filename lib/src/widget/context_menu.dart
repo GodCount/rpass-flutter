@@ -23,6 +23,14 @@ enum GroupsManageItemMenu {
   delete_selected
 }
 
+enum RecycleBinItemMenu {
+  view,
+  revert,
+  revert_selected,
+  delete,
+  delete_selected
+}
+
 typedef BuilderContextMenu<T> = ContextMenu<T> Function(BuildContext context);
 
 class CustomContextMenuRegion<T> extends StatelessWidget {

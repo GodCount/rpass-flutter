@@ -23,7 +23,7 @@ final _logger = Logger("page:look_account");
 class _LookAccountArgs extends PageRouteArgs {
   _LookAccountArgs({
     super.key,
-    this.readOnly = true,
+    this.readOnly = false,
     required this.kdbxEntry,
   });
   final bool readOnly;
@@ -33,7 +33,7 @@ class _LookAccountArgs extends PageRouteArgs {
 class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
   LookAccountRoute({
     Key? key,
-    bool readOnly = true,
+    bool readOnly = false,
     required KdbxEntry kdbxEntry,
     KdbxUuid? uuid,
   }) : super(
@@ -59,7 +59,7 @@ class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
       final args = data.argsAs<_LookAccountArgs>(
         orElse: () {
           final kdbx = KdbxProvider.of(context)!;
-          final readOnly = data.queryParams.getBool("readOnly", true);
+          final readOnly = data.queryParams.getBool("readOnly", false);
           final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
           final kdbxEntry = uuid != null ? kdbx.findEntryByUuid(uuid) : null;
 

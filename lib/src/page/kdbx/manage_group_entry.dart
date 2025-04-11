@@ -172,7 +172,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
       title: t.man_selected_pass,
       children: [
         ListTile(
-          leading: const Icon(Icons.view_list),
+          leading: const Icon(Icons.person_search),
           title: Text(t.lookup),
           onTap: () {
             context.router.pop();
@@ -371,7 +371,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
           entries: [
             MenuItem(
               label: t.lookup,
-              icon: Icons.view_list,
+              icon: Icons.person_search,
               value: GroupsManageItemMenu.view,
             ),
             MenuItem(

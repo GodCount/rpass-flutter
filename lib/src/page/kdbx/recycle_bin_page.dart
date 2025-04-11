@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_context_menu/flutter_context_menu.dart';
 
+import '../../util/common.dart';
 import '../../util/route.dart';
 import '../route.dart';
 import '../../context/kdbx.dart';
@@ -8,6 +10,7 @@ import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../widget/common.dart';
 import '../../widget/extension_state.dart';
+import '../password/look_account.dart';
 
 class _RecycleBinArgs extends PageRouteArgs {
   _RecycleBinArgs({super.key});
@@ -44,9 +47,10 @@ class RecycleBinPage extends StatefulWidget {
 class _RecycleBinPageState extends State<RecycleBinPage>
     with SecondLevelPageAutoBack<RecycleBinPage> {
   final List<KdbxObject> _selecteds = [];
-  bool _isLongPress = false;
 
   VoidCallback? _removeKdbxListener;
+
+  KdbxObject? _showMenu;
 
   void _save() async {
     await kdbxSave(KdbxProvider.of(context)!);
@@ -69,28 +73,29 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     showBottomSheetList(
       title: getKdbxObjectTitle(kdbxObject),
       children: [
-        if (kdbxObject is KdbxEntry)
-          ListTile(
-            leading: const Icon(Icons.person_search),
-            title: Text(t.lookup),
-            onTap: () async {
+        ListTile(
+          leading: const Icon(Icons.person_search),
+          title: Text(t.lookup),
+          enabled: kdbxObject is KdbxEntry,
+          onTap: () async {
+            if (kdbxObject is KdbxEntry) {
               await context.router.popAndPush(
                 LookAccountRoute(
                   kdbxEntry: kdbxObject,
                   uuid: kdbxObject.uuid,
+                  readOnly: true
                 ),
               );
-              setState(() {});
-            },
-          ),
+            }
+          },
+        ),
         ListTile(
           iconColor: Theme.of(context).colorScheme.primary,
           textColor: Theme.of(context).colorScheme.primary,
           leading: const Icon(Icons.restore_from_trash),
           title: Text(t.revert),
           onTap: () {
-            KdbxProvider.of(context)!.restoreObject(kdbxObject);
-            _save();
+            _restoreObjects([kdbxObject]);
             context.router.pop();
           },
         ),
@@ -101,8 +106,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
           title: Text(t.completely_delete),
           onTap: () => _deleteWarnDialog(
             () {
-              KdbxProvider.of(context)!.deletePermanently(kdbxObject);
-              _save();
+              _deletePermanentlys([kdbxObject]);
               context.router.pop();
             },
           ),
@@ -111,56 +115,38 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     );
   }
 
-  void _clearLongPress() {
-    _isLongPress = false;
-    _selecteds.clear();
-  }
-
-  void _restoreObjects() {
-    if (_selecteds.isEmpty) return;
+  void _restoreObjects(List<KdbxObject> values) {
+    if (values.isEmpty) return;
     final kdbx = KdbxProvider.of(context)!;
-    for (var item in _selecteds) {
+    for (var item in values) {
       kdbx.restoreObject(item);
     }
-    _clearLongPress();
+    values.clear();
     _save();
   }
 
-  void _deletePermanentlys() {
-    if (_selecteds.isEmpty) return;
+  void _deletePermanentlys(List<KdbxObject> values) {
+    if (values.isEmpty) return;
     final kdbx = KdbxProvider.of(context)!;
-    for (var item in _selecteds) {
+    for (var item in values) {
       kdbx.deletePermanently(item);
     }
-    _clearLongPress();
+    values.clear();
     _save();
   }
 
   void _onItemTap(KdbxObject kdbxObject) {
-    if (_isLongPress) {
+    setState(() {
       if (_selecteds.contains(kdbxObject)) {
         _selecteds.remove(kdbxObject);
-        if (_selecteds.isEmpty) {
-          _isLongPress = false;
-        }
       } else {
-        _selecteds.add(kdbxObject);
-      }
-      setState(() {});
-    } else {
-      _showRecycleBinAction(kdbxObject);
-    }
-  }
-
-  void _onItemLongPress(KdbxObject kdbxObject) {
-    setState(() {
-      if (_isLongPress) {
-        _clearLongPress();
-      } else {
-        _isLongPress = true;
         _selecteds.add(kdbxObject);
       }
     });
+  }
+
+  void _onItemLongPress(KdbxObject kdbxObject) {
+    _showRecycleBinAction(kdbxObject);
   }
 
   @override
@@ -168,7 +154,6 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     final kdbx = KdbxProvider.of(context)!;
     kdbx.addListener(_update);
     _removeKdbxListener = () => kdbx.removeListener(_update);
-
     super.initState();
   }
 
@@ -193,28 +178,29 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     return Scaffold(
       appBar: AppBar(
         title: Text(t.recycle_bin),
-        automaticallyImplyLeading: !_isLongPress && automaticallyImplyLeading,
-        leading: _isLongPress
+        automaticallyImplyLeading:
+            _selecteds.isEmpty && automaticallyImplyLeading,
+        leading: _selecteds.isNotEmpty
             ? IconButton(
                 onPressed: () {
                   setState(() {
-                    _isLongPress = false;
                     _selecteds.clear();
                   });
                 },
                 icon: const Icon(Icons.close_rounded),
               )
             : autoBack(),
-        actions: _isLongPress
+        actions: _selecteds.isNotEmpty
             ? [
                 IconButton(
                   color: Theme.of(context).colorScheme.primary,
-                  onPressed: _restoreObjects,
+                  onPressed: () => _restoreObjects(_selecteds),
                   icon: const Icon(Icons.restore_from_trash),
                 ),
                 IconButton(
                   color: Theme.of(context).colorScheme.error,
-                  onPressed: () => _deleteWarnDialog(_deletePermanentlys),
+                  onPressed: () =>
+                      _deleteWarnDialog(() => _deletePermanentlys(_selecteds)),
                   icon: const Icon(Icons.delete_forever),
                 )
               ]
@@ -230,18 +216,104 @@ class _RecycleBinPageState extends State<RecycleBinPage>
   }
 
   Widget _buildListItem(KdbxObject kdbxObject) {
-    return ListTile(
-      onTap: () => _onItemTap(kdbxObject),
-      onLongPress: () => _onItemLongPress(kdbxObject),
-      leading: KdbxIconWidget(
-        kdbxIcon: KdbxIconWidgetData(
-          icon: kdbxObject is KdbxEntry ? KdbxIcon.Key : KdbxIcon.Folder,
+    return CustomContextMenuRegion<RecycleBinItemMenu>(
+      enabled: isDesktop,
+      onItemSelected: (type) {
+        setState(() {
+          _showMenu = null;
+        });
+
+        if (type == null) {
+          return;
+        }
+        switch (type) {
+          case RecycleBinItemMenu.view:
+            if (kdbxObject is KdbxEntry) {
+              showModalBottomSheet(
+                context: context,
+                builder: (context) {
+                  return ClipRRect(
+                    borderRadius: const BorderRadius.all(Radius.circular(12)),
+                    child: LookAccountPage(
+                      kdbxEntry: kdbxObject,
+                      readOnly: true,
+                    ),
+                  );
+                },
+              );
+            }
+            break;
+          case RecycleBinItemMenu.revert:
+            _restoreObjects([kdbxObject]);
+            break;
+          case RecycleBinItemMenu.revert_selected:
+            _restoreObjects(_selecteds);
+            break;
+          case RecycleBinItemMenu.delete:
+            _deleteWarnDialog(() => _deletePermanentlys([kdbxObject]));
+            break;
+          case RecycleBinItemMenu.delete_selected:
+            _deleteWarnDialog(() => _deletePermanentlys(_selecteds));
+            break;
+        }
+      },
+      builder: (context) {
+        final t = I18n.of(context)!;
+
+        setState(() {
+          _showMenu = kdbxObject;
+        });
+
+        return ContextMenu(
+          entries: [
+            MenuItem(
+              label: t.lookup,
+              icon: Icons.person_search,
+              enabled: kdbxObject is KdbxEntry,
+              value: RecycleBinItemMenu.view,
+            ),
+            const MenuDivider(),
+            MenuItem(
+              label: t.revert,
+              icon: Icons.restore_from_trash,
+              value: RecycleBinItemMenu.revert,
+            ),
+            MenuItem(
+              label: t.completely_delete,
+              icon: Icons.delete_forever,
+              value: RecycleBinItemMenu.delete,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const MenuDivider(),
+            MenuItem(
+              label: t.revert_selected,
+              enabled: _selecteds.isNotEmpty,
+              icon: Icons.restore_from_trash,
+              value: RecycleBinItemMenu.revert_selected,
+            ),
+            MenuItem(
+              label: t.completely_delete_selected,
+              enabled: _selecteds.isNotEmpty,
+              icon: Icons.delete_forever,
+              value: RecycleBinItemMenu.delete_selected,
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ],
+        );
+      },
+      child: ListTile(
+        onTap: () => _onItemTap(kdbxObject),
+        onLongPress: isMobile ? () => _onItemLongPress(kdbxObject) : null,
+        selected: _showMenu == kdbxObject,
+        leading: KdbxIconWidget(
+          kdbxIcon: KdbxIconWidgetData(
+            icon: kdbxObject is KdbxEntry ? KdbxIcon.Key : KdbxIcon.Folder,
+          ),
         ),
+        trailing:
+            _selecteds.contains(kdbxObject) ? const Icon(Icons.done) : null,
+        title: Text(getKdbxObjectTitle(kdbxObject)),
       ),
-      trailing: _isLongPress && _selecteds.contains(kdbxObject)
-          ? const Icon(Icons.done)
-          : null,
-      title: Text(getKdbxObjectTitle(kdbxObject)),
     );
   }
 }

@@ -273,7 +273,6 @@ class _PasswordsPageState extends State<PasswordsPage>
                 LookAccountRoute(
                   kdbxEntry: _totalEntry[index],
                   uuid: _totalEntry[index].uuid,
-                  readOnly: false,
                 ),
               );
             },
