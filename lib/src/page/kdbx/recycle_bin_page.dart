@@ -83,7 +83,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
                 LookAccountRoute(
                   kdbxEntry: kdbxObject,
                   uuid: kdbxObject.uuid,
-                  readOnly: true
+                  readOnly: true,
                 ),
               );
             }
@@ -121,7 +121,6 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     for (var item in values) {
       kdbx.restoreObject(item);
     }
-    values.clear();
     _save();
   }
 
@@ -131,7 +130,6 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     for (var item in values) {
       kdbx.deletePermanently(item);
     }
-    values.clear();
     _save();
   }
 
@@ -158,7 +156,11 @@ class _RecycleBinPageState extends State<RecycleBinPage>
   }
 
   void _update() {
-    setState(() {});
+    setState(() {
+      final kdbx = KdbxProvider.of(context)!;
+      final allObjects = kdbx.recycleBinObjects;
+      _selecteds.removeWhere(((item) => !allObjects.contains(item)));
+    });
   }
 
   @override

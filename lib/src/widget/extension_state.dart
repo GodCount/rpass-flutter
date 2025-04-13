@@ -463,6 +463,7 @@ extension StatefulKdbx on State {
 
   Future<bool> kdbxSave(Kdbx kdbx) async {
     try {
+      debugPrint("kdbxSave ${DateTime.now()}");
       await kdbx.save();
       return true;
     } catch (e, s) {

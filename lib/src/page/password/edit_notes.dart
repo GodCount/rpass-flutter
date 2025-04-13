@@ -84,33 +84,28 @@ class _EditNotesPageState extends State<EditNotesPage> {
       appBar: AppBar(
         title: Text(widget.readOnly ? t.look_notes : t.edit_notes),
       ),
-      body: Card(
+      body: Container(
+        height: double.infinity,
         margin: const EdgeInsets.all(6),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(6.0)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(left: 6, right: 6),
-          child: TextFormField(
-            autofocus: true,
-            maxLines: null,
-            minLines: 6,
-            keyboardType: TextInputType.multiline,
-            initialValue: widget.text,
-            readOnly: widget.readOnly,
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-            ),
-            onChanged: (value) {
-              if (_text == null) {
-                setState(() {
-                  _text = value;
-                });
-              } else {
-                _text = value;
-              }
-            },
+        child: TextFormField(
+          autofocus: true,
+          maxLines: null,
+          minLines: 6,
+          keyboardType: TextInputType.multiline,
+          initialValue: widget.text,
+          readOnly: widget.readOnly,
+          decoration: const InputDecoration(
+            border: InputBorder.none,
           ),
+          onChanged: (value) {
+            if (_text == null) {
+              setState(() {
+                _text = value;
+              });
+            } else {
+              _text = value;
+            }
+          },
         ),
       ),
       floatingActionButton: _text != null

@@ -125,6 +125,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
       _searchController.text,
       widget.kdbxGroup.entries,
     ));
+    _selecteds.removeWhere(((item) => !_totalEntry.contains(item)));
     setState(() {});
   }
 
@@ -166,7 +167,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
     }
   }
 
-  void _showSelectorEntryAction(KdbxEntry kdbxEntry) {
+  void _showSelectorEntryAction([KdbxEntry? kdbxEntry]) {
     final t = I18n.of(context)!;
     showBottomSheetList(
       title: t.man_selected_pass,
@@ -174,10 +175,11 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
         ListTile(
           leading: const Icon(Icons.person_search),
           title: Text(t.lookup),
+          enabled: kdbxEntry != null,
           onTap: () {
             context.router.pop();
             context.router.platformNavigate(LookAccountRoute(
-              kdbxEntry: kdbxEntry,
+              kdbxEntry: kdbxEntry!,
               uuid: kdbxEntry.uuid,
             ));
           },
@@ -195,7 +197,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
           iconColor: Theme.of(context).colorScheme.error,
           textColor: Theme.of(context).colorScheme.error,
           leading: const Icon(Icons.delete),
-          title: Text(t.move_selected),
+          title: Text(t.delete_selected),
           enabled: _selecteds.isNotEmpty,
           onTap: () {
             context.router.pop();
@@ -214,15 +216,6 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
     } else {
       _selecteds.clear();
     }
-    setState(() {});
-  }
-
-  void _invertSelect() {
-    final uuids = _selecteds.map((item) => item.uuid).toList();
-    final result = _totalEntry.where((item) => !uuids.contains(item.uuid));
-    _selecteds
-      ..clear()
-      ..addAll(result);
     setState(() {});
   }
 
@@ -301,12 +294,10 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
           ),
           IconButton(
             tooltip: t.invert_select,
-            onPressed: _totalEntry.isNotEmpty &&
-                    _selecteds.isNotEmpty &&
-                    _selecteds.length < _totalEntry.length
-                ? _invertSelect
+            onPressed: _totalEntry.isNotEmpty && _selecteds.isNotEmpty
+                ? _showSelectorEntryAction
                 : null,
-            icon: const Icon(Icons.swap_vert),
+            icon: const Icon(Icons.menu_open_rounded),
           ),
         ],
       ),

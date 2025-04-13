@@ -84,25 +84,34 @@ class EditAccountPage extends StatefulWidget {
 
 class _EditAccountPageState extends State<EditAccountPage>
     with SecondLevelPageAutoBack<EditAccountPage> {
-  final GlobalKey<FormState> _from = GlobalKey();
+  GlobalKey<FormState> _from = GlobalKey();
 
-  Set<KdbxKey>? _entryFields;
+  late KdbxEntry _kdbxEntry = widget.kdbxEntry ?? _createKdbxEntry();
 
-  late KdbxEntry _kdbxEntry;
+  late Set<KdbxKey> _entryFields =
+      _kdbxEntry.customEntries.map((item) => item.key).toSet();
 
   bool _isDirty = false;
 
   @override
-  void initState() {
-    _kdbxEntry =
-        widget.kdbxEntry ?? KdbxProvider.of(context)!.createVirtualEntry()
-          ..setString(
-            KdbxKeyCommon.PASSWORD,
-            PlainValue(
-              randomPassword(length: 10),
-            ),
-          );
-    super.initState();
+  void didUpdateWidget(covariant EditAccountPage oldWidget) {
+    /// 触发整个 form 表进行重建
+    if (widget.kdbxEntry != null && widget.kdbxEntry != oldWidget.kdbxEntry) {
+      _kdbxEntry = widget.kdbxEntry ?? _createKdbxEntry();
+      _entryFields = _kdbxEntry.customEntries.map((item) => item.key).toSet();
+      _from = GlobalKey();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  KdbxEntry _createKdbxEntry() {
+    return KdbxProvider.of(context)!.createVirtualEntry()
+      ..setString(
+        KdbxKeyCommon.PASSWORD,
+        PlainValue(
+          randomPassword(length: 10),
+        ),
+      );
   }
 
   void _kdbxEntrySave() async {
@@ -116,7 +125,6 @@ class _EditAccountPageState extends State<EditAccountPage>
 
   void _kdbxEntryGroupSave(KdbxGroup? group) {
     final kdbx = KdbxProvider.of(context)!;
-
     if (group != null && _kdbxEntry.parent != group) {
       kdbx.kdbxFile.move(_kdbxEntry, group);
     }
@@ -163,11 +171,15 @@ class _EditAccountPageState extends State<EditAccountPage>
     } else {
       _logger.warning("untreated class $field");
     }
+    debugPrint("_entryFieldSaved ${DateTime.now()}");
   }
 
   void _entryFieldDelete(KdbxKey key) {
     setState(() {
-      _entryFields!.remove(key);
+      _entryFields.remove(key);
+      if (_kdbxEntry.stringEntries.any((item) => item.key == key)) {
+        _isDirty = true;
+      }
     });
   }
 
@@ -176,9 +188,8 @@ class _EditAccountPageState extends State<EditAccountPage>
     final kdbx = KdbxProvider.of(context)!;
 
     final limitItmes = [
-      ...KdbxKeyCommon.all,
-      ...KdbxKeySpecial.all,
-      ..._entryFields!
+      ...defaultKdbxKeys,
+      ..._entryFields,
     ].map((item) => item.key).toList();
 
     final result = await InputDialog.openDialog(
@@ -192,7 +203,7 @@ class _EditAccountPageState extends State<EditAccountPage>
     );
     if (result != null && result is String) {
       setState(() {
-        _entryFields!.add(KdbxKey(result));
+        _entryFields.add(KdbxKey(result));
       });
     }
   }
@@ -201,16 +212,6 @@ class _EditAccountPageState extends State<EditAccountPage>
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
     final kdbx = KdbxProvider.of(context)!;
-
-    final defaultFields = [
-      ...KdbxKeyCommon.all,
-      ...KdbxKeySpecial.all,
-    ];
-
-    _entryFields ??= _kdbxEntry.stringEntries
-        .where((item) => !defaultFields.contains(item.key))
-        .map((item) => item.key)
-        .toSet();
 
     final children = [
       KdbxEntryGroup(
@@ -224,11 +225,10 @@ class _EditAccountPageState extends State<EditAccountPage>
         (item) => EntryField(
           kdbxKey: item,
           kdbxEntry: _kdbxEntry,
-          slidableEnabled: false,
           onSaved: _entryFieldSaved,
         ),
       ),
-      ..._entryFields!.map(
+      ..._entryFields.map(
         (item) => EntryField(
           kdbxKey: item,
           kdbxEntry: _kdbxEntry,
@@ -241,12 +241,24 @@ class _EditAccountPageState extends State<EditAccountPage>
         (item) => EntryField(
           kdbxKey: item,
           kdbxEntry: _kdbxEntry,
-          slidableEnabled: false,
           onSaved: _entryFieldSaved,
         ),
       ),
       const SizedBox(height: 42)
     ];
+
+    final child = ListView.separated(
+      padding: const EdgeInsets.only(top: 24, bottom: 24),
+      separatorBuilder: (context, index) {
+        return const SizedBox(
+          height: 12,
+        );
+      },
+      itemBuilder: (context, index) {
+        return children[index];
+      },
+      itemCount: children.length,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -263,20 +275,7 @@ class _EditAccountPageState extends State<EditAccountPage>
             });
           }
         },
-        child: SlidableAutoCloseBehavior(
-          child: ListView.separated(
-            padding: const EdgeInsets.only(top: 24, bottom: 24),
-            separatorBuilder: (context, index) {
-              return const SizedBox(
-                height: 12,
-              );
-            },
-            itemBuilder: (context, index) {
-              return children[index];
-            },
-            itemCount: children.length,
-          ),
-        ),
+        child: isMobile ? SlidableAutoCloseBehavior(child: child) : child,
       ),
       floatingActionButton: _isDirty
           ? FloatingActionButton(
@@ -389,13 +388,11 @@ class EntryField extends StatefulWidget {
     required this.kdbxKey,
     required this.kdbxEntry,
     this.onDeleted,
-    this.slidableEnabled = true,
     required this.onSaved,
   });
 
   final KdbxKey kdbxKey;
   final KdbxEntry kdbxEntry;
-  final bool slidableEnabled;
   final OnEntryFidleDeleted? onDeleted;
   final OnEntryFieldSaved onSaved;
 
@@ -413,8 +410,7 @@ class _EntryFieldState extends State<EntryField> {
     final t = I18n.of(context)!;
     final kdbx = KdbxProvider.of(context)!;
     final limitItmes = {
-      ...KdbxKeyCommon.all,
-      ...KdbxKeySpecial.all,
+      ...defaultKdbxKeys,
       ...widget.kdbxEntry.stringEntries.map((item) => item.key)
     }.map((item) => item.key).toList();
 
@@ -443,37 +439,41 @@ class _EntryFieldState extends State<EntryField> {
 
   @override
   Widget build(BuildContext context) {
-    return Slidable(
-      groupTag: "0",
-      enabled: widget.slidableEnabled,
-      endActionPane: ActionPane(
-        motion: const ScrollMotion(),
-        children: [
-          SlidableAction(
-            icon: Icons.drive_file_rename_outline,
-            borderRadius: BorderRadius.circular(99),
-            backgroundColor: Colors.transparent,
-            foregroundColor: Theme.of(context).colorScheme.secondary,
-            onPressed: (context) => _onRenameKdbxKey(),
-          ),
-          if (widget.onDeleted != null)
-            SlidableAction(
-              icon: Icons.delete_rounded,
-              borderRadius: BorderRadius.circular(99),
-              backgroundColor: Colors.transparent,
-              foregroundColor: Theme.of(context).colorScheme.error,
-              onPressed: (context) => widget.onDeleted!(widget.kdbxKey),
-            ),
-          const SizedBox(
-            width: 16,
-          )
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16),
-        child: _buildFormFieldFactory(),
-      ),
+    final child = Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16),
+      child: _buildFormFieldFactory(),
     );
+
+    return isMobile
+        ? Slidable(
+            groupTag: "0",
+            enabled: widget.kdbxEntry.isCustomKey(widget.kdbxKey),
+            endActionPane: ActionPane(
+              motion: const ScrollMotion(),
+              children: [
+                SlidableAction(
+                  icon: Icons.drive_file_rename_outline,
+                  borderRadius: BorderRadius.circular(99),
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Theme.of(context).colorScheme.secondary,
+                  onPressed: (context) => _onRenameKdbxKey(),
+                ),
+                if (widget.onDeleted != null)
+                  SlidableAction(
+                    icon: Icons.delete_rounded,
+                    borderRadius: BorderRadius.circular(99),
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Theme.of(context).colorScheme.error,
+                    onPressed: (context) => widget.onDeleted!(widget.kdbxKey),
+                  ),
+                const SizedBox(
+                  width: 16,
+                )
+              ],
+            ),
+            child: child,
+          )
+        : child;
   }
 
   String _kdbKey2I18n() {
@@ -552,6 +552,35 @@ class _EntryFieldState extends State<EntryField> {
       }
     }
     throw StateError('Unable to find unique name for $fileName');
+  }
+
+  Widget _contextMenuBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    if (widget.kdbxEntry.isCustomKey(widget.kdbxKey)) {
+      final t = I18n.of(context)!;
+
+      return AdaptiveTextSelectionToolbar.buttonItems(
+        buttonItems: [
+          ...editableTextState.contextMenuButtonItems,
+          ContextMenuButtonItem(
+            label: t.rename_field,
+            onPressed: _onRenameKdbxKey,
+          ),
+          if (widget.onDeleted != null)
+            ContextMenuButtonItem(
+              label: t.delete_field,
+              onPressed: () => widget.onDeleted?.call(widget.kdbxKey),
+            ),
+        ],
+        anchors: editableTextState.contextMenuAnchors,
+      );
+    }
+
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
+    );
   }
 
   Widget _buildFormFieldFactory() {
@@ -725,6 +754,7 @@ class _EntryFieldState extends State<EntryField> {
           initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
           label: _kdbKey2I18n(),
           onSaved: _kdbxTextFieldSaved,
+          contextMenuBuilder: _contextMenuBuilder,
         );
     }
   }
@@ -777,27 +807,13 @@ class EntryTitleFormField extends StatefulWidget {
 class _EntryTitleFormFieldState extends State<EntryTitleFormField> {
   final GlobalKey<FormFieldState<String>> _globalKey = GlobalKey();
 
-  late TextEditingController _controller;
-  late KdbxIconWidgetData _kdbxIcon;
-
-  @override
-  void initState() {
-    _controller = TextEditingController(text: widget.initialValue);
-    _kdbxIcon = widget.kdbxIcon;
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  late KdbxIconWidgetData _kdbxIcon = widget.kdbxIcon;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       key: _globalKey,
-      controller: _controller,
+      initialValue: widget.initialValue,
       onSaved: (value) {
         widget.onSaved((value!, _kdbxIcon.icon, _kdbxIcon.customIcon));
       },
@@ -811,7 +827,9 @@ class _EntryTitleFormFieldState extends State<EntryTitleFormField> {
               setState(() {
                 _kdbxIcon = reslut;
                 // 使 textform 触发 from 的 onChange
-                _globalKey.currentState?.didChange(_controller.text);
+                _globalKey.currentState?.didChange(
+                  _globalKey.currentState?.value,
+                );
               });
             }
           },
@@ -834,6 +852,7 @@ class EntryTextFormField extends StatefulWidget {
     this.onTrailingTap,
     this.onSaved,
     this.validator,
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
   });
 
   final String? label;
@@ -843,6 +862,16 @@ class EntryTextFormField extends StatefulWidget {
 
   final FormFieldSetter<String>? onSaved;
   final FormFieldValidator<String>? validator;
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+
+  static Widget _defaultContextMenuBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
+    );
+  }
 
   @override
   State<EntryTextFormField> createState() => _EntryTextFormFieldState();
@@ -872,6 +901,7 @@ class _EntryTextFormFieldState extends State<EntryTextFormField> {
           validator: validator,
           controller: _controller,
           onSaved: widget.onSaved,
+          contextMenuBuilder: widget.contextMenuBuilder,
           decoration: InputDecoration(
             labelText: widget.label,
             border: const OutlineInputBorder(),
@@ -1021,19 +1051,13 @@ class DropdownMenuFormField extends FormField<String> {
 }
 
 class _DropdownMenuFormFieldState extends FormFieldState<String> {
-  late TextEditingController controller;
+  late TextEditingController controller =
+      TextEditingController(text: widget.initialValue);
 
   @override
   void initState() {
-    controller = TextEditingController(text: widget.initialValue);
     controller.addListener(_handleControllerChanged);
     super.initState();
-  }
-
-  @override
-  void didUpdateWidget(covariant FormField<String> oldWidget) {
-    controller.text = widget.initialValue ?? "";
-    super.didUpdateWidget(oldWidget);
   }
 
   @override

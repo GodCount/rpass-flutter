@@ -234,5 +234,7 @@
     "move_selected": "移动选中",
     "delete_selected": "删除选中",
     "revert_selected": "恢复选中",
-    "completely_delete_selected": "彻底删除选中"
+    "completely_delete_selected": "彻底删除选中",
+    "rename_field": "重命名字段",
+    "delete_field": "删除字段"
 }

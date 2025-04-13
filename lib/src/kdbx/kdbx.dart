@@ -76,6 +76,11 @@ class KdbxKeyCommon {
   ];
 }
 
+final defaultKdbxKeys = [
+  ...KdbxKeyCommon.all,
+  ...KdbxKeySpecial.all,
+];
+
 class FieldStatistic {
   FieldStatistic({
     Set<String>? urls,
@@ -478,6 +483,13 @@ extension KdbxEntryTagExt on KdbxEntry {
 }
 
 extension KdbxEntryCommon on KdbxEntry {
+  Iterable<MapEntry<KdbxKey, StringValue?>> get customEntries =>
+      stringEntries.where((item) => isCustomKey(item.key));
+
+  bool isDefaultKey(KdbxKey key) => defaultKdbxKeys.contains(key);
+
+  bool isCustomKey(KdbxKey key) => !isDefaultKey(key);
+
   bool isExpiry() {
     return times.expires.get() == true &&
         times.expiryTime.get() != null &&

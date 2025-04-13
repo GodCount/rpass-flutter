@@ -234,5 +234,7 @@
     "move_selected": "Move Selected",
     "delete_selected": "Delete Selected",
     "revert_selected": "Revert Selected",
-    "completely_delete_selected": "Completely Delete Selected"
+    "completely_delete_selected": "Completely Delete Selected",
+    "rename_field": "Rename Field",
+    "delete_field": "Delete Field"
 }
