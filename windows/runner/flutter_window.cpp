@@ -4,6 +4,9 @@
 
 #include "flutter/generated_plugin_registrant.h"
 
+// #include "native_channel.h"
+
+
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
 
@@ -24,6 +27,7 @@ bool FlutterWindow::OnCreate() {
   if (!flutter_controller_->engine() || !flutter_controller_->view()) {
     return false;
   }
+  // RegisterMethodHandler(flutter_controller_->engine());
   RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
