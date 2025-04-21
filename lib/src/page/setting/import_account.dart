@@ -28,7 +28,9 @@ class ImportAccountRoute extends PageRouteInfo<_ImportAccountArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_ImportAccountArgs>();
+      final args = data.argsAs<_ImportAccountArgs>(
+        orElse: () => _ImportAccountArgs(),
+      );
       return ImportAccountPage(key: args.key);
     },
   );
@@ -41,7 +43,8 @@ class ImportAccountPage extends StatefulWidget {
   State<ImportAccountPage> createState() => _ImportAccountPageState();
 }
 
-class _ImportAccountPageState extends State<ImportAccountPage> {
+class _ImportAccountPageState extends State<ImportAccountPage>
+    with SecondLevelPageAutoBack<ImportAccountPage> {
   void _csvImport(FormatTransform adapter) async {
     final t = I18n.of(context)!;
 
@@ -66,6 +69,8 @@ class _ImportAccountPageState extends State<ImportAccountPage> {
     final t = I18n.of(context)!;
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: automaticallyImplyLeading,
+        leading: autoBack(),
         title: Text(t.import),
       ),
       body: Center(

@@ -1,13 +1,17 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_context_menu/flutter_context_menu.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/common.dart';
 import '../../widget/extension_state.dart';
 import '../route.dart';
+import 'route_wrap.dart';
+
 
 class _GroupsArgs extends PageRouteArgs {
   _GroupsArgs({super.key});
@@ -26,7 +30,9 @@ class GroupsRoute extends PageRouteInfo<_GroupsArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_GroupsArgs>();
+      final args = data.argsAs<_GroupsArgs>(
+        orElse: () => _GroupsArgs(),
+      );
       return GroupsPage(key: args.key);
     },
   );
@@ -44,44 +50,36 @@ class _GroupsPageState extends State<GroupsPage>
   @override
   bool get wantKeepAlive => true;
 
+  VoidCallback? _removeKdbxListener;
+
   void _update() {
     setState(() {});
   }
 
   @override
   void initState() {
-    Future.delayed(Duration.zero, () {
-      KdbxProvider.of(context)!.addListener(_update);
-    });
+    final kdbx = KdbxProvider.of(context)!;
+    kdbx.addListener(_update);
+    _removeKdbxListener = () => kdbx.removeListener(_update);
     super.initState();
   }
 
   @override
   void dispose() {
-    KdbxProvider.of(context)!.removeListener(_update);
+    _removeKdbxListener?.call();
+    _removeKdbxListener = null;
     super.dispose();
-  }
-
-  void _kdbxGroupDelete(KdbxGroup kdbxGroup) async {
-    final t = I18n.of(context)!;
-
-    if (await showConfirmDialog(
-      title: t.delete,
-      message: t.is_move_recycle,
-    )) {
-      final kdbx = KdbxProvider.of(context)!;
-      kdbx.deleteGroup(kdbxGroup);
-      await kdbxSave(kdbx);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    return isDesktop ? RouteWrap(child: _buildMobile()) : _buildMobile();
+  }
+
+  Widget _buildMobile() {
     final t = I18n.of(context)!;
 
-    final mediaQuery = MediaQuery.of(context);
-    final width = mediaQuery.size.width;
     final kdbx = KdbxProvider.of(context)!;
 
     final groups = [kdbx.kdbxFile.body.rootGroup, ...kdbx.rootGroups];
@@ -91,11 +89,11 @@ class _GroupsPageState extends State<GroupsPage>
         automaticallyImplyLeading: false,
         title: Text(t.group),
       ),
-      body: GridView.count(
-        crossAxisCount: width ~/ 128,
-        mainAxisSpacing: 8.0,
-        crossAxisSpacing: 8.0,
-        children: groups.map((item) => _buildGroupItem(item)).toList(),
+      body: ListView.builder(
+        itemBuilder: (context, i) {
+          return _GroupsItem(kdbxGroup: groups[i]);
+        },
+        itemCount: groups.length,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => setKdbxGroup(
@@ -115,31 +113,77 @@ class _GroupsPageState extends State<GroupsPage>
       ),
     );
   }
+}
 
-  Widget _buildGroupItem(KdbxGroup kdbxGroup) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      width: 128,
-      height: 128,
-      child: Card(
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(6.0)),
-        ),
-        child: InkWell(
-          borderRadius: const BorderRadius.all(Radius.circular(6.0)),
-          onTap: () {
+class _GroupsItem extends StatefulWidget {
+  const _GroupsItem({
+    required this.kdbxGroup,
+  });
+
+  final KdbxGroup kdbxGroup;
+
+  @override
+  State<_GroupsItem> createState() => _GroupsItemState();
+}
+
+class _GroupsItemState extends State<_GroupsItem>
+    with NavigationHistoryObserver<_GroupsItem> {
+  bool _selected = false;
+  bool _showMenu = false;
+
+  @override
+  void didNavigationHistory() {
+    if (context.topRoute.name == ManageGroupEntryRoute.name) {
+      final selected = context.topRoute.inheritedPathParams.optString("uuid") ==
+          widget.kdbxGroup.uuid.deBase64Uuid;
+
+      if (selected != _selected) {
+        setState(() {
+          _selected = selected;
+        });
+      }
+    } else if (_selected) {
+      setState(() {
+        _selected = false;
+      });
+    }
+  }
+
+  void _kdbxGroupDelete(KdbxGroup kdbxGroup) async {
+    final t = I18n.of(context)!;
+
+    if (await showConfirmDialog(
+      title: t.delete,
+      message: t.is_move_recycle,
+    )) {
+      final kdbx = KdbxProvider.of(context)!;
+      kdbx.deleteGroup(kdbxGroup);
+      await kdbxSave(kdbx);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final kdbxGroup = widget.kdbxGroup;
+    return CustomContextMenuRegion<GroupsItemMenu>(
+      enabled: isDesktop,
+      onItemSelected: (type) {
+        setState(() {
+          _showMenu = false;
+        });
+        if (type == null) {
+          return;
+        }
+        switch (type) {
+          case GroupsItemMenu.search:
             context.router.navigate(
               PasswordsRoute(
                 search: 'g:"${kdbxGroup.name.get() ?? ''}"',
               ),
             );
-          },
-          onLongPress: () => showKdbxGroupAction(
-            kdbxGroup.name.get() ?? '',
-            onManageTap: () {
-              context.router.push(ManageGroupEntryRoute(kdbxGroup: kdbxGroup));
-            },
-            onModifyTap: () => setKdbxGroup(
+            break;
+          case GroupsItemMenu.modify:
+            setKdbxGroup(
               KdbxGroupData(
                 name: kdbxGroup.name.get() ?? '',
                 kdbxIcon: KdbxIconWidgetData(
@@ -148,34 +192,96 @@ class _GroupsPageState extends State<GroupsPage>
                 ),
                 kdbxGroup: kdbxGroup,
               ),
+            );
+            break;
+          case GroupsItemMenu.delete:
+            _kdbxGroupDelete(kdbxGroup);
+            break;
+        }
+      },
+      builder: (context) {
+        final t = I18n.of(context)!;
+
+        setState(() {
+          _showMenu = true;
+        });
+
+        return ContextMenu(
+          entries: [
+            MenuItem(
+              label: t.search,
+              icon: Icons.search,
+              value: GroupsItemMenu.search,
             ),
-            onDeleteTap: kdbxGroup.parent != null
-                ? () => _kdbxGroupDelete(kdbxGroup)
-                : null,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                KdbxIconWidget(
-                  kdbxIcon: KdbxIconWidgetData(
-                    icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
-                    customIcon: kdbxGroup.customIcon,
-                  ),
-                  size: 64,
-                ),
-                Text(
-                  kdbxGroup.name.get() ?? '',
-                  softWrap: true,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                )
-              ],
+            MenuItem(
+              label: t.modify,
+              icon: Icons.edit,
+              value: GroupsItemMenu.modify,
             ),
+            const MenuDivider(),
+            MenuItem(
+              label: t.delete,
+              enabled: kdbxGroup.parent != null,
+              icon: Icons.delete,
+              value: GroupsItemMenu.delete,
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ],
+        );
+      },
+      child: ListTile(
+        selected: _selected || _showMenu,
+        leading: KdbxIconWidget(
+          kdbxIcon: KdbxIconWidgetData(
+            icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
+            customIcon: kdbxGroup.customIcon,
           ),
+          size: 24,
         ),
+        title: Text(
+          kdbxGroup.name.get() ?? "",
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: kdbxGroup.times.creationTime.get() != null
+            ? Text(
+                dateFormat(kdbxGroup.times.creationTime.get()!.toLocal()),
+                overflow: TextOverflow.ellipsis,
+              )
+            : null,
+        onTap: () {
+          context.router.platformNavigate(
+            ManageGroupEntryRoute(
+              kdbxGroup: kdbxGroup,
+              uuid: kdbxGroup.uuid,
+            ),
+          );
+        },
+        onLongPress: isMobile
+            ? () => showKdbxGroupAction(
+                  kdbxGroup.name.get() ?? '',
+                  onSearchTap: () {
+                    context.router.navigate(
+                      PasswordsRoute(
+                        search: 'g:"${kdbxGroup.name.get() ?? ''}"',
+                      ),
+                    );
+                  },
+                  onModifyTap: () => setKdbxGroup(
+                    KdbxGroupData(
+                      name: kdbxGroup.name.get() ?? '',
+                      kdbxIcon: KdbxIconWidgetData(
+                        icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
+                        customIcon: kdbxGroup.customIcon,
+                      ),
+                      kdbxGroup: kdbxGroup,
+                    ),
+                  ),
+                  onDeleteTap: kdbxGroup.parent != null
+                      ? () => _kdbxGroupDelete(kdbxGroup)
+                      : null,
+                )
+            : null,
       ),
     );
   }

@@ -19,7 +19,11 @@ ThemeData theme(Brightness brightness) {
     ),
     bottomSheetTheme: const BottomSheetThemeData(
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+    ),
+    listTileTheme: ListTileThemeData(
+      selectedTileColor: scheme.primaryContainer,
     ),
   );
 }

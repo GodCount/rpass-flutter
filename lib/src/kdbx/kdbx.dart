@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:kdbx/kdbx.dart' hide KdbxException, KdbxKeyCommon;
+import 'package:uuid/uuid.dart';
 
 import '../rpass.dart';
 import 'icons.dart';
@@ -74,6 +75,11 @@ class KdbxKeyCommon {
     NOTES
   ];
 }
+
+final defaultKdbxKeys = [
+  ...KdbxKeyCommon.all,
+  ...KdbxKeySpecial.all,
+];
 
 class FieldStatistic {
   FieldStatistic({
@@ -216,6 +222,16 @@ extension KdbxEntryExt on KdbxBase {
     }
     parent.addEntry(entry);
     return entry;
+  }
+
+  KdbxEntry? findEntryByUuid(KdbxUuid uuid) {
+    try {
+      return kdbxFile.body.rootGroup
+          .getAllEntries()
+          .firstWhere((group) => group.uuid == uuid);
+    } catch (e) {
+      return null;
+    }
   }
 
   void deleteEntry(KdbxEntry entry) {
@@ -467,9 +483,33 @@ extension KdbxEntryTagExt on KdbxEntry {
 }
 
 extension KdbxEntryCommon on KdbxEntry {
+  Iterable<MapEntry<KdbxKey, StringValue?>> get customEntries =>
+      stringEntries.where((item) => isCustomKey(item.key));
+
+  bool isDefaultKey(KdbxKey key) => defaultKdbxKeys.contains(key);
+
+  bool isCustomKey(KdbxKey key) => !isDefaultKey(key);
+
   bool isExpiry() {
     return times.expires.get() == true &&
         times.expiryTime.get() != null &&
         times.expiryTime.get()!.isBefore(DateTime.now());
   }
+}
+
+extension KdbxUuidCommon on KdbxUuid {
+  static final _uuids = <String, String>{};
+  String get deBase64Uuid {
+    if (_uuids[uuid] != null) {
+      return _uuids[uuid]!;
+    }
+    _uuids[uuid] = Uuid.unparse(toBytes());
+    return _uuids[uuid]!;
+  }
+}
+
+extension KdbxUuidString on String {
+  KdbxUuid get kdbxUuid => KdbxUuid.fromBytes(
+        Uint8List.fromList(Uuid.parse(this)),
+      );
 }

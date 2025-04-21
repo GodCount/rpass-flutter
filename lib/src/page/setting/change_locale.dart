@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../util/route.dart';
+import '../../widget/extension_state.dart';
 
 class _ChangeLocaleArgs extends PageRouteArgs {
   _ChangeLocaleArgs({super.key});
@@ -22,7 +23,9 @@ class ChangeLocaleRoute extends PageRouteInfo<_ChangeLocaleArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_ChangeLocaleArgs>();
+      final args = data.argsAs<_ChangeLocaleArgs>(
+        orElse: () => _ChangeLocaleArgs(),
+      );
       return ChangeLocalePage(key: args.key);
     },
   );
@@ -35,7 +38,8 @@ class ChangeLocalePage extends StatefulWidget {
   State<ChangeLocalePage> createState() => _ChangeLocalePageState();
 }
 
-class _ChangeLocalePageState extends State<ChangeLocalePage> {
+class _ChangeLocalePageState extends State<ChangeLocalePage>
+    with SecondLevelPageAutoBack<ChangeLocalePage> {
   final Map<String, String> _locales = {};
 
   @override
@@ -53,6 +57,8 @@ class _ChangeLocalePageState extends State<ChangeLocalePage> {
     final store = StoreProvider.of(context);
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: automaticallyImplyLeading,
+        leading: autoBack(),
         title: Text(t.language_setting),
       ),
       body: ListView(

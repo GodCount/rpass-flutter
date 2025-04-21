@@ -23,7 +23,9 @@ class MoreSecurityRoute extends PageRouteInfo<_MoreSecurityArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_MoreSecurityArgs>();
+      final args = data.argsAs<_MoreSecurityArgs>(
+        orElse: () => _MoreSecurityArgs(),
+      );
       return MoreSecurityPage(key: args.key);
     },
   );
@@ -36,7 +38,8 @@ class MoreSecurityPage extends StatefulWidget {
   State<MoreSecurityPage> createState() => _MoreSecurityPageState();
 }
 
-class _MoreSecurityPageState extends State<MoreSecurityPage> {
+class _MoreSecurityPageState extends State<MoreSecurityPage>
+    with SecondLevelPageAutoBack<MoreSecurityPage> {
   void _setLockDelay() {
     final t = I18n.of(context)!;
 
@@ -83,6 +86,8 @@ class _MoreSecurityPageState extends State<MoreSecurityPage> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: automaticallyImplyLeading,
+        leading: autoBack(),
         title: Text(t.security),
       ),
       body: ListView(

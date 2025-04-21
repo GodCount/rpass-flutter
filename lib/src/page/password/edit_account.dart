@@ -31,21 +31,37 @@ class _EditAccountArgs extends PageRouteArgs {
 }
 
 class EditAccountRoute extends PageRouteInfo<_EditAccountArgs> {
-  EditAccountRoute({Key? key, KdbxEntry? kdbxEntry})
-      : super(
+  EditAccountRoute({
+    Key? key,
+    KdbxEntry? kdbxEntry,
+    KdbxUuid? uuid,
+  }) : super(
           name,
           args: _EditAccountArgs(
             key: key,
             kdbxEntry: kdbxEntry,
           ),
+          rawPathParams: {
+            "uuid": uuid?.deBase64Uuid,
+          },
         );
 
   static const name = "EditAccountRoute";
 
-  static final PageInfo page = PageInfo(
+  static final PageInfo page = PageInfo.builder(
     name,
-    builder: (data) {
-      final args = data.argsAs<_EditAccountArgs>();
+    builder: (context, data) {
+      final args = data.argsAs<_EditAccountArgs>(
+        orElse: () {
+          final kdbx = KdbxProvider.of(context)!;
+          final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
+          final kdbxEntry = uuid != null ? kdbx.findEntryByUuid(uuid) : null;
+
+          return _EditAccountArgs(
+            kdbxEntry: kdbxEntry,
+          );
+        },
+      );
       return EditAccountPage(
         key: args.key,
         kdbxEntry: args.kdbxEntry,
@@ -66,21 +82,37 @@ class EditAccountPage extends StatefulWidget {
   State<EditAccountPage> createState() => _EditAccountPageState();
 }
 
-class _EditAccountPageState extends State<EditAccountPage> {
-  final GlobalKey<FormState> _from = GlobalKey();
+class _EditAccountPageState extends State<EditAccountPage>
+    with SecondLevelPageAutoBack<EditAccountPage> {
+  GlobalKey<FormState> _from = GlobalKey();
 
-  Set<KdbxKey>? _entryFields;
+  late KdbxEntry _kdbxEntry = widget.kdbxEntry ?? _createKdbxEntry();
 
-  late final KdbxEntry _kdbxEntry =
-      widget.kdbxEntry ?? KdbxProvider.of(context)!.createVirtualEntry()
-        ..setString(
-          KdbxKeyCommon.PASSWORD,
-          PlainValue(
-            randomPassword(length: 10),
-          ),
-        );
+  late Set<KdbxKey> _entryFields =
+      _kdbxEntry.customEntries.map((item) => item.key).toSet();
 
   bool _isDirty = false;
+
+  @override
+  void didUpdateWidget(covariant EditAccountPage oldWidget) {
+    /// 触发整个 form 表进行重建
+    if (widget.kdbxEntry != null && widget.kdbxEntry != oldWidget.kdbxEntry) {
+      _kdbxEntry = widget.kdbxEntry ?? _createKdbxEntry();
+      _entryFields = _kdbxEntry.customEntries.map((item) => item.key).toSet();
+      _from = GlobalKey();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  KdbxEntry _createKdbxEntry() {
+    return KdbxProvider.of(context)!.createVirtualEntry()
+      ..setString(
+        KdbxKeyCommon.PASSWORD,
+        PlainValue(
+          randomPassword(length: 10),
+        ),
+      );
+  }
 
   void _kdbxEntrySave() async {
     if (_from.currentState!.validate()) {
@@ -93,7 +125,6 @@ class _EditAccountPageState extends State<EditAccountPage> {
 
   void _kdbxEntryGroupSave(KdbxGroup? group) {
     final kdbx = KdbxProvider.of(context)!;
-
     if (group != null && _kdbxEntry.parent != group) {
       kdbx.kdbxFile.move(_kdbxEntry, group);
     }
@@ -140,11 +171,15 @@ class _EditAccountPageState extends State<EditAccountPage> {
     } else {
       _logger.warning("untreated class $field");
     }
+    debugPrint("_entryFieldSaved ${DateTime.now()}");
   }
 
   void _entryFieldDelete(KdbxKey key) {
     setState(() {
-      _entryFields!.remove(key);
+      _entryFields.remove(key);
+      if (_kdbxEntry.stringEntries.any((item) => item.key == key)) {
+        _isDirty = true;
+      }
     });
   }
 
@@ -153,9 +188,8 @@ class _EditAccountPageState extends State<EditAccountPage> {
     final kdbx = KdbxProvider.of(context)!;
 
     final limitItmes = [
-      ...KdbxKeyCommon.all,
-      ...KdbxKeySpecial.all,
-      ..._entryFields!
+      ...defaultKdbxKeys,
+      ..._entryFields,
     ].map((item) => item.key).toList();
 
     final result = await InputDialog.openDialog(
@@ -169,7 +203,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
     );
     if (result != null && result is String) {
       setState(() {
-        _entryFields!.add(KdbxKey(result));
+        _entryFields.add(KdbxKey(result));
       });
     }
   }
@@ -178,16 +212,6 @@ class _EditAccountPageState extends State<EditAccountPage> {
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
     final kdbx = KdbxProvider.of(context)!;
-
-    final defaultFields = [
-      ...KdbxKeyCommon.all,
-      ...KdbxKeySpecial.all,
-    ];
-
-    _entryFields ??= _kdbxEntry.stringEntries
-        .where((item) => !defaultFields.contains(item.key))
-        .map((item) => item.key)
-        .toSet();
 
     final children = [
       KdbxEntryGroup(
@@ -201,11 +225,10 @@ class _EditAccountPageState extends State<EditAccountPage> {
         (item) => EntryField(
           kdbxKey: item,
           kdbxEntry: _kdbxEntry,
-          slidableEnabled: false,
           onSaved: _entryFieldSaved,
         ),
       ),
-      ..._entryFields!.map(
+      ..._entryFields.map(
         (item) => EntryField(
           kdbxKey: item,
           kdbxEntry: _kdbxEntry,
@@ -218,41 +241,45 @@ class _EditAccountPageState extends State<EditAccountPage> {
         (item) => EntryField(
           kdbxKey: item,
           kdbxEntry: _kdbxEntry,
-          slidableEnabled: false,
           onSaved: _entryFieldSaved,
         ),
       ),
       const SizedBox(height: 42)
     ];
 
+    final child = ListView.separated(
+      padding: const EdgeInsets.only(top: 24, bottom: 24),
+      separatorBuilder: (context, index) {
+        return const SizedBox(
+          height: 12,
+        );
+      },
+      itemBuilder: (context, index) {
+        return children[index];
+      },
+      itemCount: children.length,
+    );
+
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: automaticallyImplyLeading,
+        leading: autoBack(),
         title: Text(t.edit_account),
       ),
       body: Form(
         key: _from,
         onChanged: () {
-          setState(() {
-            _isDirty = true;
-          });
+          if (!_isDirty) {
+            setState(() {
+              _isDirty = true;
+            });
+          }
         },
-        child: SlidableAutoCloseBehavior(
-          child: ListView.separated(
-            padding: const EdgeInsets.only(top: 24, bottom: 24),
-            separatorBuilder: (context, index) {
-              return const SizedBox(
-                height: 12,
-              );
-            },
-            itemBuilder: (context, index) {
-              return children[index];
-            },
-            itemCount: children.length,
-          ),
-        ),
+        child: isMobile ? SlidableAutoCloseBehavior(child: child) : child,
       ),
       floatingActionButton: _isDirty
           ? FloatingActionButton(
+              heroTag: const ValueKey("edit_account_float"),
               onPressed: _kdbxEntrySave,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(
@@ -361,13 +388,11 @@ class EntryField extends StatefulWidget {
     required this.kdbxKey,
     required this.kdbxEntry,
     this.onDeleted,
-    this.slidableEnabled = true,
     required this.onSaved,
   });
 
   final KdbxKey kdbxKey;
   final KdbxEntry kdbxEntry;
-  final bool slidableEnabled;
   final OnEntryFidleDeleted? onDeleted;
   final OnEntryFieldSaved onSaved;
 
@@ -385,8 +410,7 @@ class _EntryFieldState extends State<EntryField> {
     final t = I18n.of(context)!;
     final kdbx = KdbxProvider.of(context)!;
     final limitItmes = {
-      ...KdbxKeyCommon.all,
-      ...KdbxKeySpecial.all,
+      ...defaultKdbxKeys,
       ...widget.kdbxEntry.stringEntries.map((item) => item.key)
     }.map((item) => item.key).toList();
 
@@ -415,37 +439,41 @@ class _EntryFieldState extends State<EntryField> {
 
   @override
   Widget build(BuildContext context) {
-    return Slidable(
-      groupTag: "0",
-      enabled: widget.slidableEnabled,
-      endActionPane: ActionPane(
-        motion: const ScrollMotion(),
-        children: [
-          SlidableAction(
-            icon: Icons.drive_file_rename_outline,
-            borderRadius: BorderRadius.circular(99),
-            backgroundColor: Colors.transparent,
-            foregroundColor: Theme.of(context).colorScheme.secondary,
-            onPressed: (context) => _onRenameKdbxKey(),
-          ),
-          if (widget.onDeleted != null)
-            SlidableAction(
-              icon: Icons.delete_rounded,
-              borderRadius: BorderRadius.circular(99),
-              backgroundColor: Colors.transparent,
-              foregroundColor: Theme.of(context).colorScheme.error,
-              onPressed: (context) => widget.onDeleted!(widget.kdbxKey),
-            ),
-          const SizedBox(
-            width: 16,
-          )
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16),
-        child: _buildFormFieldFactory(),
-      ),
+    final child = Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16),
+      child: _buildFormFieldFactory(),
     );
+
+    return isMobile
+        ? Slidable(
+            groupTag: "0",
+            enabled: widget.kdbxEntry.isCustomKey(widget.kdbxKey),
+            endActionPane: ActionPane(
+              motion: const ScrollMotion(),
+              children: [
+                SlidableAction(
+                  icon: Icons.drive_file_rename_outline,
+                  borderRadius: BorderRadius.circular(99),
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Theme.of(context).colorScheme.secondary,
+                  onPressed: (context) => _onRenameKdbxKey(),
+                ),
+                if (widget.onDeleted != null)
+                  SlidableAction(
+                    icon: Icons.delete_rounded,
+                    borderRadius: BorderRadius.circular(99),
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Theme.of(context).colorScheme.error,
+                    onPressed: (context) => widget.onDeleted!(widget.kdbxKey),
+                  ),
+                const SizedBox(
+                  width: 16,
+                )
+              ],
+            ),
+            child: child,
+          )
+        : child;
   }
 
   String _kdbKey2I18n() {
@@ -481,20 +509,23 @@ class _EntryFieldState extends State<EntryField> {
 
     switch (widget.kdbxKey.key) {
       case KdbxKeyCommon.KEY_URL:
-        return (value) =>
-            value!.isNotEmpty && !CommonRegExp.domain.hasMatch(value)
-                ? t.format_error(CommonRegExp.domain.pattern)
-                : null;
+        return (value) => value != null &&
+                value.isNotEmpty &&
+                !CommonRegExp.domain.hasMatch(value)
+            ? t.format_error(CommonRegExp.domain.pattern)
+            : null;
       case KdbxKeyCommon.KEY_EMAIL:
-        return (value) =>
-            value!.isNotEmpty && !CommonRegExp.email.hasMatch(value)
-                ? t.format_error(CommonRegExp.email.pattern)
-                : null;
+        return (value) => value != null &&
+                value.isNotEmpty &&
+                !CommonRegExp.email.hasMatch(value)
+            ? t.format_error(CommonRegExp.email.pattern)
+            : null;
       case KdbxKeyCommon.KEY_OTP:
-        return (value) =>
-            value!.isNotEmpty && !CommonRegExp.oneTimePassword.hasMatch(value)
-                ? t.format_error(CommonRegExp.oneTimePassword.pattern)
-                : null;
+        return (value) => value != null &&
+                value.isNotEmpty &&
+                !CommonRegExp.oneTimePassword.hasMatch(value)
+            ? t.format_error(CommonRegExp.oneTimePassword.pattern)
+            : null;
       default:
         return null;
     }
@@ -521,6 +552,35 @@ class _EntryFieldState extends State<EntryField> {
       }
     }
     throw StateError('Unable to find unique name for $fileName');
+  }
+
+  Widget _contextMenuBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    if (widget.kdbxEntry.isCustomKey(widget.kdbxKey)) {
+      final t = I18n.of(context)!;
+
+      return AdaptiveTextSelectionToolbar.buttonItems(
+        buttonItems: [
+          ...editableTextState.contextMenuButtonItems,
+          ContextMenuButtonItem(
+            label: t.rename_field,
+            onPressed: _onRenameKdbxKey,
+          ),
+          if (widget.onDeleted != null)
+            ContextMenuButtonItem(
+              label: t.delete_field,
+              onPressed: () => widget.onDeleted?.call(widget.kdbxKey),
+            ),
+        ],
+        anchors: editableTextState.contextMenuAnchors,
+      );
+    }
+
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
+    );
   }
 
   Widget _buildFormFieldFactory() {
@@ -694,6 +754,7 @@ class _EntryFieldState extends State<EntryField> {
           initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
           label: _kdbKey2I18n(),
           onSaved: _kdbxTextFieldSaved,
+          contextMenuBuilder: _contextMenuBuilder,
         );
     }
   }
@@ -746,27 +807,13 @@ class EntryTitleFormField extends StatefulWidget {
 class _EntryTitleFormFieldState extends State<EntryTitleFormField> {
   final GlobalKey<FormFieldState<String>> _globalKey = GlobalKey();
 
-  late TextEditingController _controller;
-  late KdbxIconWidgetData _kdbxIcon;
-
-  @override
-  void initState() {
-    _controller = TextEditingController(text: widget.initialValue);
-    _kdbxIcon = widget.kdbxIcon;
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  late KdbxIconWidgetData _kdbxIcon = widget.kdbxIcon;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       key: _globalKey,
-      controller: _controller,
+      initialValue: widget.initialValue,
       onSaved: (value) {
         widget.onSaved((value!, _kdbxIcon.icon, _kdbxIcon.customIcon));
       },
@@ -780,7 +827,9 @@ class _EntryTitleFormFieldState extends State<EntryTitleFormField> {
               setState(() {
                 _kdbxIcon = reslut;
                 // 使 textform 触发 from 的 onChange
-                _globalKey.currentState?.didChange(_controller.text);
+                _globalKey.currentState?.didChange(
+                  _globalKey.currentState?.value,
+                );
               });
             }
           },
@@ -803,6 +852,7 @@ class EntryTextFormField extends StatefulWidget {
     this.onTrailingTap,
     this.onSaved,
     this.validator,
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
   });
 
   final String? label;
@@ -812,6 +862,16 @@ class EntryTextFormField extends StatefulWidget {
 
   final FormFieldSetter<String>? onSaved;
   final FormFieldValidator<String>? validator;
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+
+  static Widget _defaultContextMenuBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
+    );
+  }
 
   @override
   State<EntryTextFormField> createState() => _EntryTextFormFieldState();
@@ -841,6 +901,7 @@ class _EntryTextFormFieldState extends State<EntryTextFormField> {
           validator: validator,
           controller: _controller,
           onSaved: widget.onSaved,
+          contextMenuBuilder: widget.contextMenuBuilder,
           decoration: InputDecoration(
             labelText: widget.label,
             border: const OutlineInputBorder(),
@@ -958,8 +1019,6 @@ class DropdownMenuFormField extends FormField<String> {
     super.key,
     double? width,
     double? menuHeight,
-    Widget? trailingIcon,
-    OnTrailingTap? onTrailingTap,
     String? label,
     super.initialValue,
     EdgeInsets? expandedInsets,
@@ -970,25 +1029,11 @@ class DropdownMenuFormField extends FormField<String> {
   }) : super(builder: (FormFieldState<String> field) {
           final state = field as _DropdownMenuFormFieldState;
 
-          final Widget? trailing = trailingIcon != null
-              ? GestureDetector(
-                  onTap: onTrailingTap != null
-                      ? () async {
-                          state.controller.text =
-                              await onTrailingTap() ?? state.controller.text;
-                        }
-                      : null,
-                  child: trailingIcon,
-                )
-              : null;
-
           return DropdownMenu(
             width: width,
             menuHeight: menuHeight,
-            trailingIcon: trailing,
             label: label != null ? Text(label) : null,
             errorText: state.errorText,
-            selectedTrailingIcon: trailing,
             enableFilter: true,
             enableSearch: true,
             controller: state.controller,
@@ -1006,11 +1051,11 @@ class DropdownMenuFormField extends FormField<String> {
 }
 
 class _DropdownMenuFormFieldState extends FormFieldState<String> {
-  late TextEditingController controller;
+  late TextEditingController controller =
+      TextEditingController(text: widget.initialValue);
 
   @override
   void initState() {
-    controller = TextEditingController(text: widget.initialValue);
     controller.addListener(_handleControllerChanged);
     super.initState();
   }

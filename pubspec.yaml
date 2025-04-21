@@ -65,6 +65,7 @@ dependencies:
   auto_route: ^10.0.1
   webdav_client: ^1.2.2
   dio: ^5.8.0+1
+  flutter_context_menu: ^0.2.2
 
 dev_dependencies:
   flutter_test:

@@ -166,6 +166,7 @@ class InputDialogState extends State<InputDialog> {
             trailingIcon: limitIcon,
             selectedTrailingIcon: limitIcon,
             controller: _controller,
+            requestFocusOnTap: true,
             expandedInsets: const EdgeInsets.all(0),
             dropdownMenuEntries: widget.promptItmes!
                 .map((value) => DropdownMenuEntry(value: value, label: value))

@@ -29,7 +29,9 @@ class ModifyPasswordRoute extends PageRouteInfo<_ModifyPasswordArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_ModifyPasswordArgs>();
+      final args = data.argsAs<_ModifyPasswordArgs>(
+        orElse: () => _ModifyPasswordArgs(),
+      );
       return ModifyPasswordPage(key: args.key);
     },
   );

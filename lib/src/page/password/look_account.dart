@@ -23,7 +23,7 @@ final _logger = Logger("page:look_account");
 class _LookAccountArgs extends PageRouteArgs {
   _LookAccountArgs({
     super.key,
-    this.readOnly = true,
+    this.readOnly = false,
     required this.kdbxEntry,
   });
   final bool readOnly;
@@ -33,8 +33,9 @@ class _LookAccountArgs extends PageRouteArgs {
 class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
   LookAccountRoute({
     Key? key,
-    bool readOnly = true,
+    bool readOnly = false,
     required KdbxEntry kdbxEntry,
+    KdbxUuid? uuid,
   }) : super(
           name,
           args: _LookAccountArgs(
@@ -42,14 +43,36 @@ class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
             readOnly: readOnly,
             kdbxEntry: kdbxEntry,
           ),
+          rawQueryParams: {
+            "readOnly": readOnly,
+          },
+          rawPathParams: {
+            "uuid": uuid?.deBase64Uuid,
+          },
         );
 
   static const name = "LookAccountRoute";
 
-  static final PageInfo page = PageInfo(
+  static final PageInfo page = PageInfo.builder(
     name,
-    builder: (data) {
-      final args = data.argsAs<_LookAccountArgs>();
+    builder: (context, data) {
+      final args = data.argsAs<_LookAccountArgs>(
+        orElse: () {
+          final kdbx = KdbxProvider.of(context)!;
+          final readOnly = data.queryParams.getBool("readOnly", false);
+          final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
+          final kdbxEntry = uuid != null ? kdbx.findEntryByUuid(uuid) : null;
+
+          if (kdbxEntry == null) {
+            throw Exception("kdbxEntry is null, Not found by uuid: $uuid");
+          }
+          return _LookAccountArgs(
+            kdbxEntry: kdbxEntry,
+            readOnly: readOnly,
+          );
+        },
+      );
+
       return LookAccountPage(
         key: args.key,
         readOnly: args.readOnly,
@@ -74,7 +97,7 @@ class LookAccountPage extends StatefulWidget {
 }
 
 class _LookAccountPageState extends State<LookAccountPage>
-    with HintEmptyTextUtil {
+    with HintEmptyTextUtil, SecondLevelPageAutoBack<LookAccountPage> {
   _launchUrl(String url) {
     launchUrl(
       Uri.parse(url.startsWith(RegExp(r"^https*://")) ? url : "http://$url"),
@@ -111,6 +134,8 @@ class _LookAccountPageState extends State<LookAccountPage>
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: automaticallyImplyLeading,
+        leading: autoBack(),
         title: Text(t.lookup),
         actions: [
           IconButton(
@@ -469,6 +494,7 @@ class _LookAccountPageState extends State<LookAccountPage>
       ),
       floatingActionButton: !readOnly
           ? FloatingActionButton(
+              heroTag: const ValueKey("look_account_float"),
               onPressed: () async {
                 if (kdbxEntry.isInRecycleBin()) {
                   final kdbx = KdbxProvider.of(context)!;
@@ -477,13 +503,15 @@ class _LookAccountPageState extends State<LookAccountPage>
                     context.router.pop();
                   }
                 } else {
-                  context.router
-                      .push(EditAccountRoute(kdbxEntry: kdbxEntry))
-                      .then((value) {
-                    if (value is bool && value) {
-                      setState(() {});
-                    }
-                  });
+                  final result = await context.router.push(
+                    EditAccountRoute(
+                      kdbxEntry: kdbxEntry,
+                      uuid: kdbxEntry.uuid,
+                    ),
+                  );
+                  if (result is bool && result) {
+                    setState(() {});
+                  }
                 }
               },
               shape: const RoundedRectangleBorder(

@@ -10,9 +10,11 @@ import '../../context/kdbx.dart';
 import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../rpass.dart';
+import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
 import '../route.dart';
+import 'route_wrap.dart';
 
 final _logger = Logger("page:settings");
 
@@ -33,11 +35,21 @@ class SettingsRoute extends PageRouteInfo<_SettingsArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_SettingsArgs>();
+      final args = data.argsAs<_SettingsArgs>(
+        orElse: () => _SettingsArgs(),
+      );
       return SettingsPage(key: args.key);
     },
   );
 }
+
+final List<String> childRouteNames = [
+  RecycleBinRoute.name,
+  ChangeLocaleRoute.name,
+  MoreSecurityRoute.name,
+  ImportAccountRoute.name,
+  ExportAccountRoute.name,
+];
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -47,14 +59,33 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, NavigationHistoryObserver {
+  String? childRouteName;
+
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void didNavigationHistory() {
+    if (childRouteNames.contains(context.topRoute.name)) {
+      setState(() {
+        childRouteName = context.topRoute.name;
+      });
+    } else if (childRouteName != null) {
+      setState(() {
+        childRouteName = null;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
+    return isDesktop ? RouteWrap(child: _buildMobile()) : _buildMobile();
+  }
+
+  Widget _buildMobile() {
     const shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(6.0), bottomRight: Radius.circular(6.0)),
@@ -135,8 +166,9 @@ class _SettingsPageState extends State<SettingsPage>
               shape: shape,
               title: Text(t.recycle_bin),
               trailing: const Icon(Icons.recycling_rounded),
+              selected: childRouteName == RecycleBinRoute.name,
               onTap: () {
-                context.router.push(RecycleBinRoute());
+                context.router.platformNavigate(RecycleBinRoute());
               },
             ),
             // TODO! 上游 kdbx.dart 还没实现
@@ -145,7 +177,7 @@ class _SettingsPageState extends State<SettingsPage>
             //   title: const Text("更多设置"),
             //   trailing: const Icon(Icons.chevron_right_rounded),
             //   onTap: () {
-            //      context.router.push(KdbxSettingRoute());
+            //      context.router.platformNavigate(KdbxSettingRoute());
             //   },
             // ),
           ]),
@@ -168,8 +200,9 @@ class _SettingsPageState extends State<SettingsPage>
               title: Text(
                   store.settings.locale != null ? t.locale_name : t.system),
               trailing: const Icon(Icons.chevron_right_rounded),
+              selected: childRouteName == ChangeLocaleRoute.name,
               onTap: () {
-                context.router.push(ChangeLocaleRoute());
+                context.router.platformNavigate(ChangeLocaleRoute());
               },
             ),
           ]),
@@ -220,6 +253,7 @@ class _SettingsPageState extends State<SettingsPage>
               ),
             ListTile(
               title: Text(t.modify_password),
+              selected: childRouteName == ModifyPasswordRoute.name,
               onTap: () {
                 context.router.push(ModifyPasswordRoute());
               },
@@ -228,8 +262,9 @@ class _SettingsPageState extends State<SettingsPage>
               shape: shape,
               title: Text(t.more_settings),
               trailing: const Icon(Icons.chevron_right_rounded),
+              selected: childRouteName == MoreSecurityRoute.name,
               onTap: () {
-                context.router.push(MoreSecurityRoute());
+                context.router.platformNavigate(MoreSecurityRoute());
               },
             ),
           ]),
@@ -248,15 +283,17 @@ class _SettingsPageState extends State<SettingsPage>
             ),
             ListTile(
               title: Text(t.import),
+              selected: childRouteName == ImportAccountRoute.name,
               onTap: () {
-                context.router.push(ImportAccountRoute());
+                context.router.platformNavigate(ImportAccountRoute());
               },
             ),
             ListTile(
               shape: shape,
               title: Text(t.export),
+              selected: childRouteName == ExportAccountRoute.name,
               onTap: () {
-                context.router.push(ExportAccountRoute());
+                context.router.platformNavigate(ExportAccountRoute());
               },
             ),
           ]),

@@ -28,7 +28,7 @@ class LoadKdbxRoute extends PageRouteInfo<_LoadKdbxArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_LoadKdbxArgs>();
+      final args = data.argsAs<_LoadKdbxArgs>(orElse: () => _LoadKdbxArgs());
       return LoadKdbxPage(key: args.key);
     },
   );

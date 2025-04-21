@@ -44,6 +44,9 @@ class LoadExternalKdbxRoute extends PageRouteInfo<_LoadExternalKdbxArgs> {
             kdbxFile: kdbxFile,
             kdbxFilePath: kdbxFilePath,
           ),
+          rawQueryParams: {
+            "kdbxFilePath": kdbxFilePath,
+          },
         );
 
   static const name = "LoadExternalKdbxRoute";

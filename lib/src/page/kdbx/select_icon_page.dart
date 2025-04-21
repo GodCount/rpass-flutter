@@ -29,7 +29,9 @@ class SelectIconRoute extends PageRouteInfo<_SelectIconArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_SelectIconArgs>();
+      final args = data.argsAs<_SelectIconArgs>(
+        orElse: () => _SelectIconArgs(),
+      );
       return SelectIconPage(key: args.key);
     },
   );
@@ -102,6 +104,7 @@ class _SelectIconPageState extends State<SelectIconPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: const ValueKey("select_icon_float"),
         onPressed: () async {
           try {
             final (_, bytes) = await SimpleFile.openFile(type: FileType.image);

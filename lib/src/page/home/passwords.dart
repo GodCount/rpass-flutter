@@ -1,16 +1,18 @@
-import 'dart:async';
-
 import 'package:animations/animations.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_context_menu/flutter_context_menu.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/common.dart';
 import '../password/edit_account.dart';
 import '../password/look_account.dart';
+import 'route_wrap.dart';
+import '../../widget/extension_state.dart';
 
 class _PasswordsArgs extends PageRouteArgs {
   _PasswordsArgs({super.key, this.search});
@@ -27,6 +29,9 @@ class PasswordsRoute extends PageRouteInfo<_PasswordsArgs> {
             key: key,
             search: search,
           ),
+          rawQueryParams: {
+            "search": search,
+          },
         );
 
   static const name = "PasswordsRoute";
@@ -34,7 +39,11 @@ class PasswordsRoute extends PageRouteInfo<_PasswordsArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_PasswordsArgs>();
+      final args = data.argsAs<_PasswordsArgs>(
+        orElse: () => _PasswordsArgs(
+          search: data.queryParams.optString("search"),
+        ),
+      );
       return PasswordsPage(
         key: args.key,
         search: args.search,
@@ -62,6 +71,8 @@ class _PasswordsPageState extends State<PasswordsPage>
   final KbdxSearchHandler _kbdxSearchHandler = KbdxSearchHandler();
   final List<KdbxEntry> _totalEntry = [];
 
+  VoidCallback? _removeKdbxListener;
+
   @override
   void didUpdateWidget(covariant PasswordsPage oldWidget) {
     if (widget.search != null && oldWidget.search != widget.search) {
@@ -72,18 +83,22 @@ class _PasswordsPageState extends State<PasswordsPage>
 
   @override
   void initState() {
+    final kdbx = KdbxProvider.of(context)!;
     _searchController.addListener(_searchAccounts);
-    Future.delayed(Duration.zero, () {
-      KdbxProvider.of(context)!.addListener(_onKdbxSave);
-    });
     _searchAccounts();
+
+    kdbx.addListener(_onKdbxSave);
+    _removeKdbxListener = () => kdbx.removeListener(_onKdbxSave);
+
     super.initState();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
-    KdbxProvider.of(context)!.removeListener(_onKdbxSave);
+    _removeKdbxListener?.call();
+    _removeKdbxListener = null;
+    _totalEntry.clear();
     super.dispose();
   }
 
@@ -107,7 +122,10 @@ class _PasswordsPageState extends State<PasswordsPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    return isDesktop ? RouteWrap(child: _buildDesktop()) : _buildMobile();
+  }
 
+  Widget _buildMobile() {
     final kdbx = KdbxProvider.of(context)!;
 
     final mainColor = Theme.of(context).colorScheme.primaryContainer;
@@ -163,6 +181,106 @@ class _PasswordsPageState extends State<PasswordsPage>
       ),
     );
   }
+
+  Widget _buildDesktop() {
+    final t = I18n.of(context)!;
+
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        titleSpacing: 6,
+        title: Padding(
+          padding: const EdgeInsets.only(left: 12),
+          child: TextField(
+            controller: _searchController,
+            cursorHeight: 16,
+            style: Theme.of(context).textTheme.bodyMedium,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              isCollapsed: true,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 4,
+                vertical: 12,
+              ),
+              hintText: t.search,
+              prefixIcon: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: IconButton(
+                  iconSize: 16,
+                  padding: const EdgeInsets.all(4),
+                  onPressed: showSearchHelpDialog,
+                  icon: const Icon(
+                    Icons.help_outline_rounded,
+                    size: 16,
+                  ),
+                ),
+              ),
+              prefixIconConstraints: const BoxConstraints(
+                minWidth: 30,
+                maxWidth: 30,
+                minHeight: 24,
+                maxHeight: 24,
+              ),
+              suffixIcon: Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        iconSize: 16,
+                        padding: const EdgeInsets.all(4),
+                        onPressed: () {
+                          _searchController.text = "";
+                        },
+                        icon: const Icon(
+                          Icons.close,
+                          size: 16,
+                        ),
+                      )
+                    : null,
+              ),
+              suffixIconConstraints: const BoxConstraints(
+                minWidth: 30,
+                maxWidth: 30,
+                minHeight: 24,
+                maxHeight: 24,
+              ),
+            ),
+          ),
+        ),
+        actionsPadding: const EdgeInsets.only(right: 6),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.router.platformNavigate(EditAccountRoute());
+            },
+            icon: const Icon(Icons.add),
+          ),
+        ],
+      ),
+      body: ListView.separated(
+        shrinkWrap: true,
+        padding: const EdgeInsets.all(12),
+        itemCount: _totalEntry.length,
+        separatorBuilder: (context, index) {
+          return const SizedBox(
+            height: 12,
+          );
+        },
+        itemBuilder: (context, index) {
+          return _PasswordItem(
+            kdbxEntry: _totalEntry[index],
+            onTap: () {
+              context.router.platformNavigate(
+                LookAccountRoute(
+                  kdbxEntry: _totalEntry[index],
+                  uuid: _totalEntry[index].uuid,
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
 }
 
 class _AppBarTitleToSearch extends StatefulWidget {
@@ -203,7 +321,6 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
 
   @override
   void dispose() {
-    widget.controller.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -244,7 +361,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
                 : Text(t.password),
           ),
           prefixIcon: IconButton(
-            onPressed: _showSearchHelp,
+            onPressed: showSearchHelpDialog,
             icon: AnimatedOpacity(
               opacity: _hasFocus ? 1 : 0,
               duration: const Duration(milliseconds: 300),
@@ -278,79 +395,6 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
           ),
         ),
       ),
-    );
-  }
-
-  void _showSearchHelp() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        final t = I18n.of(context)!;
-
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(
-                title: Text(t.search_rule),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(left: 6),
-                  child: Text(t.rule_detail),
-                ),
-              ),
-              ListTile(
-                isThreeLine: true,
-                title: Text(t.field_name),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(left: 6),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('title(t) url'),
-                      const SizedBox(height: 6),
-                      const Text('user(u) email(e)'),
-                      const SizedBox(height: 6),
-                      const Text('note(n) password(p)'),
-                      const SizedBox(height: 6),
-                      const Text('OTPAuth(otp) tag'),
-                      const SizedBox(height: 6),
-                      const Text('group(g)'),
-                      const SizedBox(height: 6),
-                      Text(t.custom_field),
-                    ],
-                  ),
-                ),
-              ),
-              ListTile(
-                isThreeLine: true,
-                title: Text(t.search_eg),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(left: 6),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(t.search_eg_1),
-                      const SizedBox(height: 6),
-                      Text(t.search_eg_2),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                context.router.pop();
-              },
-              child: Text(t.confirm),
-            ),
-          ],
-        );
-      },
     );
   }
 }
@@ -391,7 +435,7 @@ class _OpenContainerPasswordItem extends StatelessWidget {
       closedBuilder: (BuildContext context, VoidCallback openContainer) {
         return _PasswordItem(
           kdbxEntry: kdbxEntry,
-          onTop: () {
+          onTap: () {
             isLogPress = false;
             openContainer();
           },
@@ -408,84 +452,176 @@ class _OpenContainerPasswordItem extends StatelessWidget {
 class _PasswordItem extends StatefulWidget {
   const _PasswordItem({
     required this.kdbxEntry,
-    this.onTop,
+    this.onTap,
     this.onLongPress,
   });
 
   final KdbxEntry kdbxEntry;
-  final GestureTapCallback? onTop;
+  final GestureTapCallback? onTap;
   final GestureLongPressCallback? onLongPress;
 
   @override
   State<_PasswordItem> createState() => _PasswordItemState();
 }
 
-class _PasswordItemState extends State<_PasswordItem> {
+class _PasswordItemState extends State<_PasswordItem>
+    with NavigationHistoryObserver<_PasswordItem> {
+  bool _selected = false;
+  bool _showMenu = false;
+
+  @override
+  void didNavigationHistory() {
+    if (context.topRoute.name == LookAccountRoute.name ||
+        context.topRoute.name == EditAccountRoute.name) {
+      final selected = context.topRoute.inheritedPathParams.optString("uuid") ==
+          widget.kdbxEntry.uuid.deBase64Uuid;
+
+      if (selected != _selected) {
+        setState(() {
+          _selected = selected;
+        });
+      }
+    } else if (_selected) {
+      setState(() {
+        _selected = false;
+      });
+    }
+  }
+
+  void _deletePassword() async {
+    final t = I18n.of(context)!;
+    if (await showConfirmDialog(
+      title: t.delete,
+      message: t.is_move_recycle,
+    )) {
+      final kdbx = KdbxProvider.of(context)!;
+      kdbx.deleteEntry(widget.kdbxEntry);
+      await kdbxSave(kdbx);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
 
     final kdbxEntry = widget.kdbxEntry;
-    return ListTile(
-      isThreeLine: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8.0)),
-      ),
-      leading: Padding(
-        padding: const EdgeInsets.only(top: 6),
-        child: KdbxIconWidget(
-          kdbxIcon: KdbxIconWidgetData(
-            icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
-            customIcon: kdbxEntry.customIcon,
-          ),
-          size: 24,
+    return CustomContextMenuRegion<PasswordsItemMenu>(
+      enabled: isDesktop,
+      onItemSelected: (type) {
+        setState(() {
+          _showMenu = false;
+        });
+        if (type == null) {
+          return;
+        }
+        switch (type) {
+          case PasswordsItemMenu.edit:
+            context.router.platformNavigate(
+              EditAccountRoute(
+                kdbxEntry: kdbxEntry,
+                uuid: kdbxEntry.uuid,
+              ),
+            );
+            break;
+          case PasswordsItemMenu.copy:
+            writeClipboard(kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME));
+            break;
+          case PasswordsItemMenu.delete:
+            _deletePassword();
+            break;
+        }
+      },
+      builder: (context) {
+        setState(() {
+          _showMenu = true;
+        });
+
+        return ContextMenu(
+          entries: [
+            MenuItem(
+              label: t.edit_account,
+              icon: Icons.edit,
+              enabled:
+                  context.topRoute.name != EditAccountRoute.name || !_selected,
+              value: PasswordsItemMenu.edit,
+            ),
+            MenuItem(
+              label: t.copy,
+              icon: Icons.copy,
+              value: PasswordsItemMenu.copy,
+            ),
+            const MenuDivider(),
+            MenuItem(
+              label: t.delete,
+              icon: Icons.delete,
+              value: PasswordsItemMenu.delete,
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ],
+        );
+      },
+      child: ListTile(
+        isThreeLine: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
         ),
-      ),
-      title: Text(
-        kdbxEntry.isExpiry()
-            ? "${kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE)} (${t.expires})"
-            : kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE),
-        style: kdbxEntry.isExpiry()
-            ? Theme.of(context)
-                .textTheme
-                .titleLarge
-                ?.copyWith(color: Theme.of(context).colorScheme.error)
-            : Theme.of(context).textTheme.titleLarge,
-        overflow: TextOverflow.ellipsis,
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 12),
-            child: Text(
-              kdbxEntry.getNonNullString(KdbxKeyCommon.URL),
-              style: Theme.of(context).textTheme.bodySmall,
+        selected: _selected || _showMenu,
+        leading: Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: KdbxIconWidget(
+            kdbxIcon: KdbxIconWidgetData(
+              icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
+              customIcon: kdbxEntry.customIcon,
             ),
+            size: 24,
           ),
-          _subtitleText(
-            t.account_ab,
-            kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME),
-          ),
-          _subtitleText(
-            t.email_ab,
-            kdbxEntry.getNonNullString(KdbxKeyCommon.EMAIL),
-          ),
-          _subtitleText(
-            t.label_ab,
-            kdbxEntry.tagList.join(", "),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              kdbxEntry.parent?.name.get() ?? '',
-              overflow: TextOverflow.ellipsis,
+        ),
+        title: Text(
+          kdbxEntry.isExpiry()
+              ? "${kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE)} (${t.expires})"
+              : kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE),
+          style: kdbxEntry.isExpiry()
+              ? Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(color: Theme.of(context).colorScheme.error)
+              : Theme.of(context).textTheme.titleLarge,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 12),
+              child: Text(
+                kdbxEntry.getNonNullString(KdbxKeyCommon.URL),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ),
-          ),
-        ],
+            _subtitleText(
+              t.account_ab,
+              kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME),
+            ),
+            _subtitleText(
+              t.email_ab,
+              kdbxEntry.getNonNullString(KdbxKeyCommon.EMAIL),
+            ),
+            _subtitleText(
+              t.label_ab,
+              kdbxEntry.tagList.join(", "),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                kdbxEntry.parent?.name.get() ?? '',
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        onTap: widget.onTap,
+        onLongPress: widget.onLongPress,
       ),
-      onTap: widget.onTop,
-      onLongPress: widget.onLongPress,
     );
   }
 

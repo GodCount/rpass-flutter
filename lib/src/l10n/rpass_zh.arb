@@ -79,6 +79,7 @@
     "symbol": "符号",
     "remark": "备注",
     "save": "保存",
+    "copy": "复制",
     "copy_done": "复制完成",
     "lookup": "查看",
     "source": "来源",
@@ -229,5 +230,11 @@
     "expires": "过期",
     "key_file": "密钥文件",
     "record_key_file_path": "记录密钥文件路径",
-    "lack_key_file": "缺少密钥文件"
+    "lack_key_file": "缺少密钥文件",
+    "move_selected": "移动选中",
+    "delete_selected": "删除选中",
+    "revert_selected": "恢复选中",
+    "completely_delete_selected": "彻底删除选中",
+    "rename_field": "重命名字段",
+    "delete_field": "删除字段"
 }

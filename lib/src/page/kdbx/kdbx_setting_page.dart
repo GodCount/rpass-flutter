@@ -24,7 +24,9 @@ class KdbxSettingRoute extends PageRouteInfo<_KdbxSettingArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_KdbxSettingArgs>();
+      final args = data.argsAs<_KdbxSettingArgs>(
+        orElse: () => _KdbxSettingArgs(),
+      );
       return KdbxSettingPage(key: args.key);
     },
   );
@@ -37,7 +39,8 @@ class KdbxSettingPage extends StatefulWidget {
   State<KdbxSettingPage> createState() => _KdbxSettingPageState();
 }
 
-class _KdbxSettingPageState extends State<KdbxSettingPage> {
+class _KdbxSettingPageState extends State<KdbxSettingPage>
+    with SecondLevelPageAutoBack<KdbxSettingPage> {
   int _historyMaxItems = 20;
   int _historyMaxSize = 10;
 
@@ -77,6 +80,8 @@ class _KdbxSettingPageState extends State<KdbxSettingPage> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: automaticallyImplyLeading,
+        leading: autoBack(),
         title: Text(t.pass_lib_setting),
       ),
       body: ListView(
@@ -145,6 +150,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage> {
       ),
       floatingActionButton: _isDirty
           ? FloatingActionButton(
+              heroTag: const ValueKey("kdbx_setting_float"),
               onPressed: _save,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(

@@ -30,7 +30,9 @@ class ExportAccountRoute extends PageRouteInfo<_ExportAccountArgs> {
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_ExportAccountArgs>();
+      final args = data.argsAs<_ExportAccountArgs>(
+        orElse: () => _ExportAccountArgs(),
+      );
       return ExportAccountPage(key: args.key);
     },
   );
@@ -43,7 +45,8 @@ class ExportAccountPage extends StatefulWidget {
   State<ExportAccountPage> createState() => _ExportAccountPageState();
 }
 
-class _ExportAccountPageState extends State<ExportAccountPage> {
+class _ExportAccountPageState extends State<ExportAccountPage>
+    with SecondLevelPageAutoBack<ExportAccountPage> {
   void _exportKdbxFile() async {
     final kdbx = KdbxProvider.of(context)!;
     try {
@@ -92,6 +95,8 @@ class _ExportAccountPageState extends State<ExportAccountPage> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: automaticallyImplyLeading,
+        leading: autoBack(),
         title: Text(t.export),
       ),
       body: Center(
