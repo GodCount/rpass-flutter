@@ -239,10 +239,10 @@ class GroupSelectorDialog extends StatefulWidget {
   }
 
   @override
-  State<GroupSelectorDialog> createState() => GroupSelectorDialogState();
+  State<GroupSelectorDialog> createState() => _GroupSelectorDialogState();
 }
 
-class GroupSelectorDialogState extends State<GroupSelectorDialog> {
+class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
@@ -274,8 +274,9 @@ class GroupSelectorDialogState extends State<GroupSelectorDialog> {
         bottom: 24.0,
         left: 0,
       ),
-      content: SizedBox(
+      content: Container(
         width: double.maxFinite,
+        constraints: const BoxConstraints(maxWidth: 312),
         child: ListView(
           shrinkWrap: true,
           children: [kdbx.kdbxFile.body.rootGroup, ...kdbx.rootGroups]
@@ -301,6 +302,173 @@ class GroupSelectorDialogState extends State<GroupSelectorDialog> {
             widget.onResult(null);
           },
           child: Text(t.cancel),
+        ),
+      ],
+    );
+  }
+}
+
+class KdbxEntrySelectorDialog extends StatefulWidget {
+  const KdbxEntrySelectorDialog({
+    super.key,
+    this.value,
+    this.title,
+    required this.onResult,
+  });
+
+  final KdbxEntry? value;
+  final String? title;
+  final FormFieldSetter<KdbxEntry> onResult;
+
+  static Future<KdbxEntry?> openDialog(
+    BuildContext context, {
+    KdbxEntry? value,
+    String? title,
+  }) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return KdbxEntrySelectorDialog(
+          value: value,
+          title: title,
+          onResult: (value) {
+            context.router.pop(value);
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  State<KdbxEntrySelectorDialog> createState() =>
+      _KdbxEntrySelectorDialogState();
+}
+
+class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
+  final TextEditingController _searchController = TextEditingController();
+  final KbdxSearchHandler _kbdxSearchHandler = KbdxSearchHandler();
+  final List<KdbxEntry> _totalEntry = [];
+
+  late KdbxEntry? _selectedKdbxEntry = widget.value;
+
+  @override
+  void initState() {
+    _searchController.addListener(_searchAccounts);
+    _searchAccounts();
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _totalEntry.clear();
+    super.dispose();
+  }
+
+  void _searchAccounts() {
+    _totalEntry.clear();
+    final kdbx = KdbxProvider.of(context)!;
+
+    _totalEntry.addAll(_kbdxSearchHandler.search(
+      _searchController.text,
+      kdbx.totalEntry,
+    ));
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = I18n.of(context)!;
+
+    return AlertDialog(
+      title: TextField(
+        controller: _searchController,
+        autofocus: false,
+        style: Theme.of(context).textTheme.bodySmall,
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          label: Text(widget.title != null ? widget.title! : t.select_account),
+          hintText: t.search,
+          prefixIcon: IconButton(
+            onPressed: showSearchHelpDialog,
+            icon: const Icon(Icons.help_outline_rounded),
+          ),
+        ),
+      ),
+      contentPadding: EdgeInsets.only(
+        top: Theme.of(context).useMaterial3 ? 16.0 : 20.0,
+        right: 0,
+        bottom: 24.0,
+        left: 0,
+      ),
+      content: Container(
+        width: double.maxFinite,
+        constraints: const BoxConstraints(maxWidth: 312),
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: _totalEntry.length,
+          itemBuilder: (context, index) {
+            KdbxEntry kdbxEntry = _totalEntry[index];
+            return ListTile(
+              leading: Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: KdbxIconWidget(
+                  kdbxIcon: KdbxIconWidgetData(
+                    icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
+                    customIcon: kdbxEntry.customIcon,
+                  ),
+                  size: 24,
+                ),
+              ),
+              title: Text(
+                kdbxEntry.isExpiry()
+                    ? "${kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE)} (${t.expires})"
+                    : kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE),
+                style: kdbxEntry.isExpiry()
+                    ? Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(color: Theme.of(context).colorScheme.error)
+                    : Theme.of(context).textTheme.titleLarge,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(left: 12),
+                child: Text(
+                  kdbxEntry.getNonNullString(KdbxKeyCommon.URL),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+              trailing: _selectedKdbxEntry == kdbxEntry
+                  ? const Icon(Icons.check)
+                  : null,
+              onTap: () {
+                setState(() {
+                  if (_selectedKdbxEntry == kdbxEntry) {
+                    _selectedKdbxEntry = null;
+                  } else {
+                    _selectedKdbxEntry = kdbxEntry;
+                  }
+                });
+              },
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            widget.onResult(widget.value);
+          },
+          child: Text(t.cancel),
+        ),
+        TextButton(
+          onPressed: () {
+            widget.onResult(_selectedKdbxEntry);
+          },
+          child: Text(t.confirm),
         ),
       ],
     );

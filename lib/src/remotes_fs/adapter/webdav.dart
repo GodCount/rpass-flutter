@@ -3,64 +3,93 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:webdav_client/webdav_client.dart';
 
+import '../../kdbx/kdbx.dart';
 import '../auth_field.dart';
 import '../remote_fs.dart';
+import '../../util/common.dart';
 
 class WebdavConfig extends RemoteClientConfig {
+  static final kdbxKeyType = KdbxKey("webdav_type");
+
   WebdavConfig({
-    required this.uri,
-    required this.user,
-    required this.password,
-    required this.type,
+    this.uri = "",
+    this.user = "",
+    this.password = "",
+    this.type = AuthType.NoAuth,
   });
 
-  static final Map<String, AuthField> authFields = {
-    "uri": TextAuthField(
-      key: "uri",
-      description: "webdav api uri",
-      value: "",
-    ),
-    "user": TextAuthField(
-      key: "user",
-      description: "webdav user",
-      value: "",
-    ),
-    "password": PasswordAuthField(
-      key: "password",
-      description: "webdav user password",
-      value: "",
-    ),
-    "type": OptionAuthField(
-      key: "type",
-      description: "auth type",
-      value: AuthType.NoAuth.name,
-      optionList: AuthType.values.map((item) => item.name).toList(),
-    )
-  };
+  String uri;
+  String user;
+  String password;
+  AuthType type;
 
-  factory WebdavConfig.formAuthField(Map<String, AuthField> formData) {
-    return WebdavConfig(
-      uri: getField<TextAuthField>(formData, "uri").value,
-      user: getField<TextAuthField>(formData, "user").value,
-      password: getField<PasswordAuthField>(formData, "password").value,
-      type: switch (getField<OptionAuthField>(formData, "type").value) {
-        "BasicAuth" => AuthType.BasicAuth,
-        "DigestAuth" => AuthType.DigestAuth,
-        _ => AuthType.NoAuth
-      },
+  @override
+  Map<String, AuthField> toAuthFields() {
+    return {
+      "uri": TextAuthField(
+        key: "uri",
+        description: "WebDAV Api Uri",
+        value: uri,
+      ),
+      "user": TextAuthField(
+        key: "user",
+        description: "WebDAV User",
+        value: user,
+      ),
+      "password": PasswordAuthField(
+        key: "password",
+        description: "WebDAV User Password",
+        value: password,
+      ),
+      "type": OptionAuthField(
+        key: "type",
+        description: "Auth Type",
+        value: type.name,
+        optionList: AuthType.values.map((item) => item.name).toList(),
+      )
+    };
+  }
+
+  @override
+  Map<KdbxKey, StringValue> toKdbx() {
+    return {
+      KdbxKeyCommon.URL: PlainValue(uri),
+      KdbxKeyCommon.USER_NAME: PlainValue(user),
+      KdbxKeyCommon.PASSWORD: PlainValue(password),
+      kdbxKeyType: PlainValue(type.name),
+    };
+  }
+
+  @override
+  void updateAuthField(Map<String, AuthField> formData) {
+    uri = getField<TextAuthField>(formData, "uri").value;
+    user = getField<TextAuthField>(formData, "user").value;
+    password = getField<PasswordAuthField>(formData, "password").value;
+    type = AuthType.values.toEnum(
+      getField<OptionAuthField>(formData, "type").value,
+      AuthType.NoAuth,
     );
   }
 
-  final String uri;
-  final String user;
-  final String password;
-  final AuthType type;
+  @override
+  void updateByKdbx(KdbxEntry kdbxEntry) {
+    uri = kdbxEntry.getNonNullString(KdbxKeyCommon.URL);
+    user = kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME);
+    password = kdbxEntry.getNonNullString(KdbxKeyCommon.PASSWORD);
+    type = AuthType.values.toEnum(
+      kdbxEntry.getNonNullString(kdbxKeyType),
+      AuthType.NoAuth,
+    );
+  }
+
+  @override
+  Future<WebdavClient> buildClient() {
+    return WebdavClient._createByConfig(this);
+  }
 }
 
 class WebdavClient extends RemoteClient<WebdavConfig> {
-  static Future<WebdavClient> create(Map<String, AuthField> formData) async {
-    final WebdavConfig config = WebdavConfig.formAuthField(formData);
-
+  static Future<WebdavClient> _createByConfig(WebdavConfig config) async {
     final client = newClient(
       config.uri,
       user: config.user,

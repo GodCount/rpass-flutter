@@ -31,3 +31,9 @@ export 'setting/export_account.dart' show ExportAccountRoute;
 export 'setting/import_account.dart' show ImportAccountRoute;
 export 'setting/change_locale.dart' show ChangeLocaleRoute;
 export 'setting/more_security.dart' show MoreSecurityRoute;
+export 'setting/sync_account.dart' show SyncAccountRoute;
+
+
+export 'remotes_fs/auth_remote_fs.dart' show AuthRemoteFsRoute, AuthRemoteRouteType;
+export 'remotes_fs/import_remote_kdbx.dart' show ImportRemoteKdbxRoute;
+

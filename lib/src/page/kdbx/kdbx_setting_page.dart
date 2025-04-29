@@ -1,11 +1,12 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:rpass/src/kdbx/kdbx.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
+import '../../kdbx/kdbx.dart';
+
 
 class _KdbxSettingArgs extends PageRouteArgs {
   _KdbxSettingArgs({super.key});

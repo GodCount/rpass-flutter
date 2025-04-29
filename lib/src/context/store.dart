@@ -4,45 +4,24 @@ import '../store/index.dart';
 import 'biometric.dart';
 import 'kdbx.dart';
 
-class StoreProvider extends StatefulWidget {
-  const StoreProvider({super.key, required this.store, required this.child});
+class StoreProvider extends StatelessWidget {
+  const StoreProvider({super.key, required this.child});
 
-  final Store store;
   final Widget child;
 
+  @Deprecated(
+    'Use Store.instance instead.'
+    'Deprecated Store of.',
+  )
   static Store of(BuildContext context) {
-    StoreProviderState? storeProvider;
-    if (context is StatefulElement && context.state is StoreProviderState) {
-      storeProvider = context.state as StoreProviderState;
-    }
-
-    storeProvider =
-        storeProvider ?? context.findAncestorStateOfType<StoreProviderState>();
-
-    assert(() {
-      if (storeProvider == null) {
-        throw FlutterError(
-          'StoreProvider operation requested with a context that does not include a StoreProvider.\n'
-          'The context used to store from the StoreProvider must be that of a '
-          'widget that is a descendant of a StoreProvider widget.',
-        );
-      }
-      return true;
-    }());
-
-    return storeProvider!.widget.store;
+    return Store.instance;
   }
 
-  @override
-  State<StoreProvider> createState() => StoreProviderState();
-}
-
-class StoreProviderState extends State<StoreProvider> {
   @override
   Widget build(BuildContext context) {
     return KdbxProvider(
       child: Biometric(
-        child: widget.child,
+        child: child,
       ),
     );
   }

@@ -236,5 +236,30 @@
     "revert_selected": "恢复选中",
     "completely_delete_selected": "彻底删除选中",
     "rename_field": "重命名字段",
-    "delete_field": "删除字段"
+    "delete_field": "删除字段",
+    "more": "更多",
+    "local_import": "本地导入",
+    "sync": "同步",
+    "sync_settings": "同步设置",
+    "from_import": "从 {name} 中导入",
+    "@from_import": {
+        "description": "从哪个远程服务器导入",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "save_as": "保存到",
+    "selected_sync_account_subtitle": "从数据库中选择账号",
+    "save_sync_account_subtitle": "将登录信息保存到数据库中",
+    "logined_sync": "登录后同步数据",
+    "import_remote_kdbx": "导入远程数据库",
+    "close_local_sync_subtitle": "关闭当前设备同步功能",
+    "sync_note_subtitle": "如果远程文件被第三方 kdbx 管理器修改过，则需要长按同步按钮进行强制合并。",
+    "sync_error_log": "同步错误日志",
+    "sync_merge_log": "同步合并日志",
+    "change": "更改",
+    "remove": "移除",
+    "select_account": "选择账号"
 }

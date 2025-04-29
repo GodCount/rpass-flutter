@@ -56,10 +56,10 @@ extension StatefulDialog on State {
   Future<void> showError(Object? error) async {
     await showDialog(
       context: context,
-      barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          content: Text(I18n.of(context)!.throw_message(error.toString())),
+          content:
+              SelectableText(I18n.of(context)!.throw_message(error.toString())),
           actions: [
             TextButton(
               onPressed: () {
@@ -330,27 +330,27 @@ extension StatefulBottomSheet on State {
                             elevation: 4.0,
                             margin: const EdgeInsets.only(left: 12, right: 12),
                             shape: const RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(6.0)),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(6.0),
+                              ),
                             ),
                             child: InkWell(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(6.0)),
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(6.0),
+                              ),
                               onTap: () {
-                                context.router.popAndPush(
-                                  LookAccountRoute(
-                                    kdbxEntry: entry,
-                                    uuid: entry.uuid,
-                                    readOnly: true
-                                  ),
-                                );
+                                context.router.popAndPush(LookAccountRoute(
+                                  kdbxEntry: entry,
+                                  uuid: entry.uuid,
+                                  readOnly: true,
+                                ));
                               },
                               child: Padding(
                                 padding: const EdgeInsets.all(8),
                                 child: Text(
-                                  dateFormat(
-                                    entry.times.lastModificationTime.get()!,
-                                  ),
+                                  entry.times.lastModificationTime
+                                      .get()!
+                                      .formatDate,
                                 ),
                               ),
                             ),
@@ -642,14 +642,9 @@ mixin SecondLevelRouteUtil<T extends StatefulWidget> on State<T>
   }
 
   void _navigationHistory() {
-    print(context.router.currentPath);
     if (context.router.currentPath.startsWith("/home")) {
       final isEmptyRouter = context.router.currentSegments.length <= 2 ||
           context.router.currentSegments.last.name == "EmptyPageRoute";
-
-      // context.router.currentPath.endsWith("passwords") ||
-      //     context.router.currentPath.endsWith("groups") ||
-      //     context.router.currentPath.endsWith("settings");
 
       if (this.isEmptyRouter != isEmptyRouter) {
         this.isEmptyRouter = isEmptyRouter;

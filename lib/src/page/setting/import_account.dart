@@ -9,7 +9,7 @@ import '../../util/file.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
 
-final _logger = Logger("pagr:import_account");
+final _logger = Logger("page:import_account");
 
 class _ImportAccountArgs extends PageRouteArgs {
   _ImportAccountArgs({super.key});

@@ -236,5 +236,30 @@
     "revert_selected": "Revert Selected",
     "completely_delete_selected": "Completely Delete Selected",
     "rename_field": "Rename Field",
-    "delete_field": "Delete Field"
+    "delete_field": "Delete Field",
+    "more": "More",
+    "local_import": "Local Import",
+    "sync": "Sync",
+    "sync_settings": "Sync Settings",
+    "from_import": "Import from {name}",
+    "@from_import": {
+        "description": "Which remote server to import from",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "save_as": "Save As",
+    "selected_sync_account_subtitle": "Select account from database",
+    "save_sync_account_subtitle": "Save login info to database",
+    "logined_sync": "Sync data after login",
+    "import_remote_kdbx": "Import remote database",
+    "close_local_sync_subtitle": "Disable sync on this device",
+    "sync_note_subtitle": "If the remote file is modified by a third-party kdbx manager, long-press the sync button to force a merge.",
+    "sync_error_log": "Sync Error Log",
+    "sync_merge_log": "Sync Merge Log",
+    "change": "Change",
+    "remove": "Remove",
+    "select_account": "Select Account"
 }

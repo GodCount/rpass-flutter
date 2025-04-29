@@ -24,7 +24,8 @@ export 'package:kdbx/kdbx.dart'
         KdbxCustomIcon,
         KdbxDao,
         KdbxUuid,
-        KdbxInvalidKeyException;
+        KdbxInvalidKeyException,
+        MergeContext;
 
 abstract class KdbxBase {
   abstract final KdbxFile kdbxFile;
@@ -33,6 +34,8 @@ abstract class KdbxBase {
 class KdbxCustomDataKey {
   static const GENERAL_GROUP_UUID = 'general_group_uuid';
   static const EMAIL_GROUP_UUID = 'email_group_uuid';
+
+  static const SYNC_ACCPUNT_UUID = "sync_account_uuid";
 }
 
 class KdbxKeySpecial {
@@ -121,7 +124,11 @@ class FieldStatistic {
   }
 }
 
-extension KdbxMetaExt on KdbxBase {
+extension KdbxMetaExt on KdbxMeta {
+  DateTimeUtcNode get lastSaveTime => DateTimeUtcNode(this, 'LastSaveTime');
+}
+
+extension KdbxMetaCommon on KdbxBase {
   String get version => kdbxFile.header.version.toString();
   String get generator => kdbxFile.body.meta.generator.get() ?? '';
   String get databaseName => kdbxFile.body.meta.databaseName.get() ?? '';
@@ -140,6 +147,8 @@ extension KdbxMetaExt on KdbxBase {
       kdbxFile.body.meta.customIcons.values;
 
   KdbxCustomData get customData => kdbxFile.body.meta.customData;
+
+  DateTime? get lastSaveTime => kdbxFile.body.meta.lastSaveTime.get();
 
   set databaseName(String value) {
     kdbxFile.body.meta.databaseName.set(value);
@@ -366,6 +375,20 @@ extension KdbxExternalImport on KdbxBase {
   }
 }
 
+extension KdbxSync on KdbxBase {
+  KdbxEntry? get syncAccountEntry =>
+      customData[KdbxCustomDataKey.SYNC_ACCPUNT_UUID] != null
+          ? findEntryByUuid(
+              KdbxUuid(customData[KdbxCustomDataKey.SYNC_ACCPUNT_UUID]!),
+            )
+          : null;
+
+  set syncAccountEntry(KdbxEntry? entry) {
+    customData[KdbxCustomDataKey.SYNC_ACCPUNT_UUID] =
+        entry != null ? entry.uuid.uuid : KdbxUuid.NIL.uuid;
+  }
+}
+
 class Kdbx extends KdbxBase
     with KdbxEntryFieldStatistic, KdbxVirtualObject, ChangeNotifier {
   Kdbx({required this.kdbxFile, this.filepath});
@@ -433,22 +456,24 @@ class Kdbx extends KdbxBase
     );
   }
 
-  Future<void> save([String? filepath]) async {
+  Future<Uint8List> save([String? filepath]) async {
     this.filepath ??= filepath;
     if (this.filepath != null) {
-      await File(this.filepath!).writeAsBytes(await getKdbxFileBytes());
+      kdbxFile.body.meta.lastSaveTime.setToNow();
+
+      final data = await kdbxFile.save();
+
+      await File(this.filepath!).writeAsBytes(data);
+
       notifyListeners();
+      return data;
     } else {
       throw Exception("filepath is null");
     }
   }
 
-  Future<Uint8List> getKdbxFileBytes() {
-    return kdbxFile.save();
-  }
-
-  merge(Kdbx kdbx) {
-    kdbxFile.merge(kdbx.kdbxFile);
+  MergeContext merge(Kdbx kdbx) {
+    return kdbxFile.merge(kdbx.kdbxFile);
   }
 }
 

@@ -474,7 +474,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "4700e8d4e37e6e4b90834126fd3d5c2f1d70053b"
+      resolved-ref: "65708ac89dcff80dc2bc521b34b947b4302a7687"
       url: "https://github.com/rongyu-zhen/kdbx.dart.git"
     source: git
     version: "2.4.1"
@@ -1038,10 +1038,11 @@ packages:
   webdav_client:
     dependency: "direct main"
     description:
-      name: webdav_client
-      sha256: "682fffc50b61dc0e8f46717171db03bf9caaa17347be41c0c91e297553bf86b2"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: main
+      resolved-ref: bd7d06ec16c3ca881c759f0d1c003dc694524118
+      url: "https://github.com/rongyu-zhen/webdav_client.git"
+    source: git
     version: "1.2.2"
   win32:
     dependency: transitive

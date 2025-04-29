@@ -1117,7 +1117,7 @@ class EntryExpiresFormField extends FormField<(bool, DateTime)> {
                 ),
               ),
               child: field.value != null
-                  ? Text(dateFormat(field.value!.$2.toLocal()))
+                  ? Text(field.value!.$2.toLocal().formatDate)
                   : null,
             ),
           );

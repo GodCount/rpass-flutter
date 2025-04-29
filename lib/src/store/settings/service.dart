@@ -64,6 +64,14 @@ class SettingsService with SharedPreferencesService {
         : setString("key_file_path", path);
   }
 
+  Future<bool> getEnableRemoteSync() async {
+    return await getBool("remote_sync_kdbx") ?? true;
+  }
+
+  Future<bool> setEnableRemoteSync(bool enbale) async {
+    return setBool("remote_sync_kdbx", enbale);
+  }
+
   @override
   Future<bool> clear() => super.clear();
 }

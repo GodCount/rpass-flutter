@@ -1,19 +1,28 @@
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:rpass/src/util/common.dart';
 
-import './page/route.dart';
+import 'page/route.dart';
 import 'context/kdbx.dart';
 import 'context/store.dart';
 import 'page/home/route_wrap.dart';
+import 'util/common.dart';
+
+
+final skipAuthGuard = [
+  LoadKdbxRoute.name,
+  InitialRoute.name,
+  // 初始化时从外部导入 kdbx
+  LoadExternalKdbxRoute.name,
+  AuthRemoteFsRoute.name,
+  ImportRemoteKdbxRoute.name,
+];
 
 class AuthGuard extends AutoRouteGuard {
   @override
   void onNavigation(NavigationResolver resolver, StackRouter router) {
     final kdbx = KdbxProvider.of(resolver.context);
-    if (kdbx == null &&
-        ![LoadKdbxRoute.name, InitialRoute.name].contains(resolver.routeName)) {
+    if (kdbx == null && !skipAuthGuard.contains(resolver.routeName)) {
       final store = StoreProvider.of(resolver.context);
       resolver.redirectUntil(
         store.localInfo.localKdbxFileExists ? LoadKdbxRoute() : InitialRoute(),
@@ -125,6 +134,18 @@ RootStackRouter _createMobileAutoRoute() {
         path: "/more_security",
         page: MoreSecurityRoute.page,
       ),
+      AutoRoute(
+        path: "sync_account",
+        page: SyncAccountRoute.page,
+      ),
+      AutoRoute(
+        path: "/auth_remote_fs/:type",
+        page: AuthRemoteFsRoute.page,
+      ),
+      AutoRoute(
+        path: "/import_remote_file",
+        page: ImportRemoteKdbxRoute.page,
+      ),
     ],
   );
 }
@@ -223,6 +244,10 @@ RootStackRouter _createDesktopAutoRoute() {
                 path: "kdbx_setting",
                 page: KdbxSettingRoute.page,
               ),
+              AutoRoute(
+                path: "sync_account",
+                page: SyncAccountRoute.page,
+              ),
             ],
           ),
         ],
@@ -254,6 +279,14 @@ RootStackRouter _createDesktopAutoRoute() {
       AutoRoute(
         path: "/scanner_code",
         page: QrCodeScannerRoute.page,
+      ),
+      AutoRoute(
+        path: "/auth_remote_fs/:type",
+        page: AuthRemoteFsRoute.page,
+      ),
+      AutoRoute(
+        path: "/import_remote_kdbx",
+        page: ImportRemoteKdbxRoute.page,
       ),
     ],
   );

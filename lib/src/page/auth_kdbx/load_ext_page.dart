@@ -7,20 +7,6 @@ import '../../kdbx/kdbx.dart';
 import '../../util/route.dart';
 import 'authorized_page.dart';
 
-@Deprecated(
-  '使用构造函数传参'
-  '弃用 Arguments 路由传参',
-)
-class LoadExternalKdbxPageArguments {
-  LoadExternalKdbxPageArguments({
-    required this.kdbxFile,
-    this.kdbxFilePath,
-  });
-
-  final Uint8List kdbxFile;
-  final String? kdbxFilePath;
-}
-
 class _LoadExternalKdbxArgs extends PageRouteArgs {
   _LoadExternalKdbxArgs({
     super.key,
@@ -44,9 +30,6 @@ class LoadExternalKdbxRoute extends PageRouteInfo<_LoadExternalKdbxArgs> {
             kdbxFile: kdbxFile,
             kdbxFilePath: kdbxFilePath,
           ),
-          rawQueryParams: {
-            "kdbxFilePath": kdbxFilePath,
-          },
         );
 
   static const name = "LoadExternalKdbxRoute";
@@ -99,8 +82,10 @@ class _LoadExternalKdbxPageState
 
       Kdbx kdbx = await Kdbx.loadBytesFromCredentials(
         data: widget.kdbxFile,
-        credentials:
-            Kdbx.createCredentials(isPassword ? passowrd : null, keyFile?.$2),
+        credentials: Kdbx.createCredentials(
+          isPassword ? passowrd : null,
+          keyFile?.$2,
+        ),
       );
       context.router.pop((kdbx, keyFile?.$1));
     }

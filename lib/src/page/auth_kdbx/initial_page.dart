@@ -1,19 +1,21 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
+import '../../remotes_fs/adapter/webdav.dart';
+import '../../store/index.dart';
 import '../../util/file.dart';
 import '../../util/route.dart';
-import '../home/home.dart';
+import '../route.dart';
 import 'authorized_page.dart';
 import '../../widget/extension_state.dart';
 import '../../kdbx/kdbx.dart';
 import '../../context/store.dart';
 import '../../rpass.dart';
-import 'load_ext_page.dart';
 
 class _InitialArgs extends PageRouteArgs {
   _InitialArgs({super.key});
@@ -54,25 +56,36 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
   @override
   bool get enableImport => true;
 
+  @override
+  bool get enableRemoteImport => true;
+
   void _addPresetGroup(Kdbx kdbx) {
     final t = I18n.of(context)!;
 
-    kdbx.kdbxFile.body.rootGroup.name.set(t.default_);
+    bool isSave = false;
+
+    if (kdbx.kdbxFile.body.rootGroup.name.get() != t.default_) {
+      kdbx.kdbxFile.body.rootGroup.name.set(t.default_);
+      isSave = true;
+    }
 
     String? uuid = kdbx.customData[KdbxCustomDataKey.GENERAL_GROUP_UUID];
     if (uuid == null || kdbx.findGroupByUuid(KdbxUuid(uuid)) == null) {
       final general = kdbx.createGroup(t.common);
       kdbx.customData[KdbxCustomDataKey.GENERAL_GROUP_UUID] = general.uuid.uuid;
+      isSave = true;
     }
 
     uuid = kdbx.customData[KdbxCustomDataKey.EMAIL_GROUP_UUID];
-
     if (uuid == null || kdbx.findGroupByUuid(KdbxUuid(uuid)) == null) {
       final email = kdbx.createGroup(t.email)..icon.set(KdbxIcon.EMail);
       kdbx.customData[KdbxCustomDataKey.EMAIL_GROUP_UUID] = email.uuid.uuid;
+      isSave = true;
     }
 
-    kdbxSave(kdbx);
+    if (isSave) {
+      kdbxSave(kdbx);
+    }
   }
 
   @override
@@ -106,6 +119,21 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
     }
   }
 
+  void _setInitKdbx((Kdbx, String?) result) async {
+    final store = StoreProvider.of(context);
+
+    final kdbx = result.$1;
+    kdbx.filepath = store.localInfo.localKdbxFile.path;
+    _addPresetGroup(kdbx);
+
+    if (store.settings.enableRecordKeyFilePath) {
+      await store.settings.setKeyFilePath(result.$2);
+    }
+
+    KdbxProvider.setKdbx(context, kdbx);
+    context.router.replace(HomeRoute());
+  }
+
   @override
   Future<void> importKdbx() async {
     // 安卓不支持指定 kdbx 后缀
@@ -123,18 +151,28 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
     ));
 
     if (result != null && result is (Kdbx, String?)) {
-      final store = StoreProvider.of(context);
+      _setInitKdbx(result);
+    }
+  }
 
-      final kdbx = result.$1;
-      kdbx.filepath = store.localInfo.localKdbxFile.path;
-      _addPresetGroup(kdbx);
+  @override
+  Future<void> importKdbxByWebDav() async {
+    // 登录 webdav
+    final result = await context.router.push(AuthRemoteFsRoute(
+      config: WebdavConfig(),
+      type: AuthRemoteRouteType.import,
+    ));
 
-      if (store.settings.enableRecordKeyFilePath) {
-        await store.settings.setKeyFilePath(result.$2);
+    if (result != null && result is WebdavClient) {
+      // 导入 kdbx 文件
+      final result2 = await context.router.push(ImportRemoteKdbxRoute(
+        client: result,
+      ));
+
+      if (result2 != null && result2 is ((Kdbx, String?), Uint8List)) {
+        await Store.instance.localInfo.localKdbxFile.writeAsBytes(result2.$2);
+        _setInitKdbx(result2.$1);
       }
-
-      KdbxProvider.setKdbx(context, kdbx);
-      context.router.replace(HomeRoute());
     }
   }
 }

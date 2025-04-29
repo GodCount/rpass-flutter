@@ -43,10 +43,15 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
 
   @protected
   bool get enableBiometric => false;
+
   @protected
   bool get enableBack => false;
+
   @protected
   bool get enableImport => false;
+
+  @protected
+  bool get enableRemoteImport => false;
 
   @protected
   bool get readHistoryKeyFile => true;
@@ -89,7 +94,12 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
 
   @protected
   Future<void> importKdbx() {
-    throw UnimplementedError('signUp() has not been implemented.');
+    throw UnimplementedError('importKdbx() has not been implemented.');
+  }
+
+  @protected
+  Future<void> importKdbxByWebDav() {
+    throw UnimplementedError('importKdbxByWebDav() has not been implemented.');
   }
 
   @protected
@@ -99,7 +109,7 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
 
   @protected
   void back() {
-    context.router.back();
+    context.router.pop();
   }
 
   void _confirm() async {
@@ -117,9 +127,18 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
       await importKdbx();
     } catch (error) {
       if (error is! CancelException) {
-        _logger.warning("open file fail!", error);
+        _logger.warning("import file fail!", error);
         showError(error);
       }
+    }
+  }
+
+  void _importKdbxByWebDav() async {
+    try {
+      await importKdbxByWebDav();
+    } catch (error) {
+      _logger.warning("import remote file fail!", error);
+      showError(error);
     }
   }
 
@@ -141,6 +160,33 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
         disableClickBiometric = true;
       });
     }
+  }
+
+  void _moreImport() {
+    final t = I18n.of(context)!;
+    showBottomSheetList(
+      title: t.more,
+      children: [
+        ListTile(
+          leading: const Icon(Icons.storage),
+          title: Text(t.local_import),
+          enabled: enableImport,
+          onTap: () async {
+            context.pop();
+            _importKdbx();
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.cloud),
+          title: Text(t.from_import("WebDAV")),
+          enabled: enableRemoteImport,
+          onTap: () async {
+            context.pop();
+            _importKdbxByWebDav();
+          },
+        ),
+      ],
+    );
   }
 
   @override
@@ -298,13 +344,13 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
                             child: Text(t.confirm),
                           ),
                         ),
-                        if (authType == AuthorizedType.initial && enableImport)
+                        if (authType == AuthorizedType.initial)
                           Container(
                             width: 180,
                             padding: const EdgeInsets.only(top: 24),
                             child: ElevatedButton(
-                              onPressed: _importKdbx,
-                              child: Text(t.import),
+                              onPressed: _moreImport,
+                              child: Text(t.more),
                             ),
                           ),
                         if (enableBiometric && biometric.enable)
@@ -371,7 +417,7 @@ class KeyFileController with ChangeNotifier {
     final keyFile = Kdbx.randomKeyFile();
     final keyFilePath = await SimpleFile.saveFile(
       data: keyFile,
-      filename: "rpass.keyx",
+      filename: "rpass.key",
     );
     _keyFile = (keyFilePath, keyFile);
     notifyListeners();
@@ -423,10 +469,7 @@ class _KeyFileFormFieldState extends State<KeyFileFormField> {
 
   void _choiceKeyFile() async {
     try {
-      // 安卓不支持指定 keyx 后缀
-      final file = await SimpleFile.openFile(
-        allowedExtensions: !Platform.isAndroid ? ["keyx"] : null,
-      );
+      final file = await SimpleFile.openFile();
       await widget.controller.setKeyFile(file.$1, file.$2);
     } catch (e) {
       if (e is! CancelException) {

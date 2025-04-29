@@ -100,10 +100,13 @@ class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
         _logger.finest("update credentials done!");
       } catch (error, stackTrace) {
         kdbx.modifyCredentials(oldCredentials);
-        await biometric.updateCredentials(
-          context,
-          oldCredentials.getHash(),
-        );
+        if (biometric.enable) {
+          await biometric.updateCredentials(
+            context,
+            oldCredentials.getHash(),
+          );
+        }
+
         _logger.severe(
           "update credentials fail!",
           error,

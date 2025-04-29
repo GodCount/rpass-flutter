@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../kdbx/kdbx.dart';
 import 'auth_field.dart';
 
 class CancelSignalException implements Exception {
@@ -107,6 +108,9 @@ class RemoteFile {
   bool get dir => _dir;
   int get size => _size;
   String get path => _path;
+  String get name => path.endsWith("/")
+      ? path.substring(0, path.length - 1).split("/").last
+      : path.split("/").last;
   DateTime? get cTime => _cTime;
   DateTime? get mTime => _mTime;
 
@@ -167,8 +171,7 @@ class RemoteFile {
     );
   }
 
-  Future<List<RemoteFile>> readdir(
-    String path, [
+  Future<List<RemoteFile>> readdir([
     CancelSignal? cancelSignal,
   ]) {
     assert(dir, "this not dir");
@@ -185,6 +188,17 @@ class RemoteFile {
   String toString() {
     return "RemoteFile {path: $path, dir: $dir, size:$size, cTime:$cTime, mTime:$mTime}";
   }
+}
+
+abstract class RemoteClientConfig {
+  Map<String, AuthField> toAuthFields();
+
+  Map<KdbxKey, StringValue> toKdbx();
+
+  void updateAuthField(Map<String, AuthField> data);
+  void updateByKdbx(KdbxEntry kdbxEntry);
+
+  Future<RemoteClient> buildClient();
 }
 
 abstract class RemoteClient<T extends RemoteClientConfig>

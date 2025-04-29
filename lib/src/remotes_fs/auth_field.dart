@@ -113,5 +113,3 @@ T getField<T extends AuthField>(Map<String, AuthField> formData, String key) {
   assert(formData[key] is T, "$key type not is $T");
   return formData[key] as T;
 }
-
-abstract class RemoteClientConfig {}

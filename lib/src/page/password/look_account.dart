@@ -444,9 +444,9 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(dateFormat(
-                  kdbxEntry.times.creationTime.get()!.toLocal(),
-                )),
+                child: Text(
+                  kdbxEntry.times.creationTime.get()!.toLocal().formatDate,
+                ),
               ),
             ),
             ListTile(
@@ -457,9 +457,12 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(dateFormat(
-                  kdbxEntry.times.lastModificationTime.get()!.toLocal(),
-                )),
+                child: Text(
+                  kdbxEntry.times.lastModificationTime
+                      .get()!
+                      .toLocal()
+                      .formatDate,
+                ),
               ),
             ),
             if (kdbxEntry.times.expires.get() == true &&
@@ -472,9 +475,9 @@ class _LookAccountPageState extends State<LookAccountPage>
                 ),
                 subtitle: Padding(
                   padding: const EdgeInsets.only(left: 12),
-                  child: Text(dateFormat(
-                    kdbxEntry.times.expiryTime.get()!.toLocal(),
-                  )),
+                  child: Text(
+                    kdbxEntry.times.expiryTime.get()!.toLocal().formatDate,
+                  ),
                 ),
               ),
             ListTile(

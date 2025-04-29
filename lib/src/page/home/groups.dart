@@ -12,7 +12,6 @@ import '../../widget/extension_state.dart';
 import '../route.dart';
 import 'route_wrap.dart';
 
-
 class _GroupsArgs extends PageRouteArgs {
   _GroupsArgs({super.key});
 }
@@ -245,7 +244,7 @@ class _GroupsItemState extends State<_GroupsItem>
         ),
         subtitle: kdbxGroup.times.creationTime.get() != null
             ? Text(
-                dateFormat(kdbxGroup.times.creationTime.get()!.toLocal()),
+                kdbxGroup.times.creationTime.get()!.toLocal().formatDate,
                 overflow: TextOverflow.ellipsis,
               )
             : null,

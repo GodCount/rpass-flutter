@@ -1,23 +1,20 @@
-
-
-import './settings/controller.dart';
 import 'loacal_info/contrller.dart';
-
+import 'settings/controller.dart';
+import 'sync_kdbx/controller.dart';
 
 final class Store {
-  static Store? _instance;
+  Store._();
 
-  factory Store() => _instance ?? Store._internal();
+  static final Store _instance = Store._();
 
-  Store._internal() {
-    _instance = this;
-  }
+  static Store get instance => _instance;
 
   final settings = SettingsController();
   final localInfo = LocalInfoContrller();
+  final syncKdbx = SyncKdbxController();
 
   Future<void> loadStore() async {
-    await settings.init(this);
-    await localInfo.init(this);
+    await settings.init();
+    await localInfo.init();
   }
 }

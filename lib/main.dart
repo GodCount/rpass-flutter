@@ -26,7 +26,7 @@ void main() async {
 
   try {
     await RpassInfo.init();
-    await Store().loadStore();
+    await Store.instance.loadStore();
   } catch (e, s) {
     _logger.severe("init fail!", e, s);
     return runApp(ErrorWidget.builder(FlutterErrorDetails(

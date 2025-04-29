@@ -4,13 +4,15 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:rpass/src/util/common.dart';
 
+import '../route.dart';
 import '../../context/store.dart';
 import '../../i18n.dart';
+import '../../store/index.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
-import '../route.dart';
+import '../../widget/infinite_rotate.dart';
+import '../../util/common.dart';
 
 final _logger = Logger("page:home");
 
@@ -56,6 +58,26 @@ class _HomePageState extends State<HomePage>
 
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    Store.instance.settings.addListener(_settingsListener);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _settingsListener());
+  }
+
+  void _settingsListener() {
+    if (Store.instance.settings.enableRemoteSync &&
+        Store.instance.syncKdbx.client == null) {
+      Store.instance.syncKdbx.init(context);
+    }
+  }
+
+  @override
+  void dispose() {
+    Store.instance.settings.removeListener(_settingsListener);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -133,6 +155,8 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
 
     final tabsRouter = AutoTabsRouter.of(context);
 
+    final store = Store.instance;
+
     return Scaffold(
       body: Row(
         children: [
@@ -144,6 +168,40 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
             onDestinationSelected: tabsRouter.setActiveIndex,
             backgroundColor:
                 Theme.of(context).colorScheme.surfaceContainerHighest,
+            leading: Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: ListenableBuilder(
+                listenable: Listenable.merge([store.syncKdbx, store.settings]),
+                builder: (context, _) {
+                  return InfiniteRotateWidget(
+                    enabled: store.syncKdbx.isSyncing,
+                    child: IconButton(
+                      disabledColor: store.settings.enableRemoteSync
+                          ? Theme.of(context).iconTheme.color
+                          : null,
+                      color: store.settings.enableRemoteSync &&
+                              !store.syncKdbx.isSyncing &&
+                              store.syncKdbx.lastError != null
+                          ? Theme.of(context).colorScheme.error
+                          : null,
+                      onPressed: store.settings.enableRemoteSync &&
+                              !store.syncKdbx.isSyncing &&
+                              store.syncKdbx.lastError != null
+                          ? () {
+                              showError(store.syncKdbx.lastError);
+                            }
+                          : null,
+                      icon: store.settings.enableRemoteSync
+                          ? !store.syncKdbx.isSyncing &&
+                                  store.syncKdbx.lastError != null
+                              ? const Icon(Icons.sync_problem)
+                              : const Icon(Icons.sync)
+                          : const Icon(Icons.sync_disabled),
+                    ),
+                  );
+                },
+              ),
+            ),
             destinations: [
               NavigationRailDestination(
                 icon: const Icon(Icons.account_box_outlined),

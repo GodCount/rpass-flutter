@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:rpass/src/kdbx/kdbx.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../context/biometric.dart';
@@ -15,6 +14,8 @@ import '../../util/route.dart';
 import '../../widget/extension_state.dart';
 import '../route.dart';
 import 'route_wrap.dart';
+import '../../kdbx/kdbx.dart';
+
 
 final _logger = Logger("page:settings");
 
@@ -49,6 +50,7 @@ final List<String> childRouteNames = [
   MoreSecurityRoute.name,
   ImportAccountRoute.name,
   ExportAccountRoute.name,
+  SyncAccountRoute.name,
 ];
 
 class SettingsPage extends StatefulWidget {
@@ -282,6 +284,13 @@ class _SettingsPageState extends State<SettingsPage>
               ),
             ),
             ListTile(
+              title: Text(t.sync_settings),
+              selected: childRouteName == SyncAccountRoute.name,
+              onTap: () {
+                context.router.platformNavigate(SyncAccountRoute());
+              },
+            ),
+            ListTile(
               title: Text(t.import),
               selected: childRouteName == ImportAccountRoute.name,
               onTap: () {
@@ -315,41 +324,42 @@ class _SettingsPageState extends State<SettingsPage>
               title: Text(t.about),
               onTap: () {
                 showAboutDialog(
-                    context: context,
-                    applicationName: RpassInfo.appName,
-                    applicationVersion: RpassInfo.version,
-                    applicationIcon: const Image(
-                      image: AssetImage('assets/icons/logo.png'),
-                      width: 72,
-                      height: 72,
-                    ),
-                    applicationLegalese: t.app_description,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16),
-                        child: OverflowBar(
-                          spacing: 8,
-                          alignment: MainAxisAlignment.end,
-                          overflowAlignment: OverflowBarAlignment.end,
-                          children: [
-                            TextButton(
-                              onPressed: () async => await launchUrl(
-                                  Uri.parse(
-                                      "https://github.com/GodCount/rpass-flutter"),
-                                  mode: LaunchMode.externalApplication),
-                              child: Text(t.source_code_location("Github")),
-                            ),
-                            TextButton(
-                              onPressed: () async => await launchUrl(
-                                  Uri.parse(
-                                      "https://gitee.com/do_yzr/rpass-flutter"),
-                                  mode: LaunchMode.externalApplication),
-                              child: Text(t.source_code_location("Gitee")),
-                            ),
-                          ],
-                        ),
-                      )
-                    ]);
+                  context: context,
+                  applicationName: RpassInfo.appName,
+                  applicationVersion: RpassInfo.version,
+                  applicationIcon: const Image(
+                    image: AssetImage('assets/icons/logo.png'),
+                    width: 72,
+                    height: 72,
+                  ),
+                  applicationLegalese: t.app_description,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: OverflowBar(
+                        spacing: 8,
+                        alignment: MainAxisAlignment.end,
+                        overflowAlignment: OverflowBarAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () async => await launchUrl(
+                                Uri.parse(
+                                    "https://github.com/GodCount/rpass-flutter"),
+                                mode: LaunchMode.externalApplication),
+                            child: Text(t.source_code_location("Github")),
+                          ),
+                          TextButton(
+                            onPressed: () async => await launchUrl(
+                                Uri.parse(
+                                    "https://gitee.com/do_yzr/rpass-flutter"),
+                                mode: LaunchMode.externalApplication),
+                            child: Text(t.source_code_location("Gitee")),
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                );
               },
             ),
           ]),

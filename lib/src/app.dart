@@ -1,13 +1,14 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:rpass/src/i18n.dart';
-import 'package:rpass/src/util/common.dart';
+
 
 import './store/index.dart';
 import 'context/store.dart';
 import 'route.dart';
 import 'theme/theme.dart';
+import 'i18n.dart';
+import 'util/common.dart';
 
 final _logger = Logger("mobile:app");
 
@@ -44,9 +45,8 @@ class RpassApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final store = Store();
+    final store = Store.instance;
     return StoreProvider(
-      store: store,
       child: ListenableBuilder(
         listenable: store.settings,
         builder: (context, child) {

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../index.dart';
 import './service.dart';
 
 class SettingsController with ChangeNotifier {
-  late Store _store;
-
   final SettingsService _settingsService = SettingsService();
 
   late ThemeMode _themeMode;
@@ -14,6 +11,7 @@ class SettingsController with ChangeNotifier {
   Duration? _lockDelay;
   late bool _enableRecordKeyFilePath;
   String? _keyFilePath;
+  late bool _enableRemoteSync;
 
   ThemeMode get themeMode => _themeMode;
   Locale? get locale => _locale;
@@ -21,6 +19,7 @@ class SettingsController with ChangeNotifier {
   Duration? get lockDelay => _lockDelay;
   bool get enableRecordKeyFilePath => _enableRecordKeyFilePath;
   String? get keyFilePath => _keyFilePath;
+  bool get enableRemoteSync => _enableRemoteSync;
 
   Future<void> setThemeMode(ThemeMode? mode) async {
     if (mode == null) return;
@@ -54,11 +53,6 @@ class SettingsController with ChangeNotifier {
     await _settingsService.setEnableBiometric(enable);
   }
 
-  Future<void> clear() async {
-    await _settingsService.clear();
-    await _store.loadStore();
-  }
-
   Future<void> setLockDelay(Duration? delay) async {
     if (delay == _lockDelay) return;
 
@@ -89,8 +83,17 @@ class SettingsController with ChangeNotifier {
     await _settingsService.setKeyFilePath(path);
   }
 
-  Future<void> init(Store store) async {
-    _store = store;
+  Future<void> setEnableRemoteSync(bool enable) async {
+    if (enable == _enableRemoteSync) return;
+
+    _enableRemoteSync = enable;
+
+    notifyListeners();
+
+    await _settingsService.setEnableRemoteSync(enable);
+  }
+
+  Future<void> init() async {
     _themeMode = await _settingsService.getThemeMode();
     _locale = await _settingsService.getLocale();
     _enableBiometric = await _settingsService.getEnableBiometric();
@@ -98,6 +101,7 @@ class SettingsController with ChangeNotifier {
     _enableRecordKeyFilePath =
         await _settingsService.getEnableRecordKeyFilePath();
     _keyFilePath = await _settingsService.getKeyFilePath();
+    _enableRemoteSync = await _settingsService.getEnableRemoteSync();
 
     notifyListeners();
   }

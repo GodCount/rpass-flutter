@@ -6,6 +6,7 @@ import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../rpass.dart';
+import '../../store/index.dart';
 import '../../util/common.dart';
 import '../../util/file.dart';
 import '../../util/route.dart';
@@ -48,10 +49,9 @@ class ExportAccountPage extends StatefulWidget {
 class _ExportAccountPageState extends State<ExportAccountPage>
     with SecondLevelPageAutoBack<ExportAccountPage> {
   void _exportKdbxFile() async {
-    final kdbx = KdbxProvider.of(context)!;
     try {
       final filepath = await SimpleFile.saveFile(
-        data: await kdbx.getKdbxFileBytes(),
+        data: await Store.instance.localInfo.localKdbxFile.readAsBytes(),
         filename: "${RpassInfo.appName}.kdbx",
       );
       showToast(I18n.of(context)!.export_done_location(filepath));
@@ -59,6 +59,30 @@ class _ExportAccountPageState extends State<ExportAccountPage>
       if (e is! CancelException) {
         _logger.warning("export kdbx file fail!", e);
         showError(e);
+      }
+    }
+  }
+
+  void _exportKdbxXml() async {
+    final t = I18n.of(context)!;
+
+    if (await showConfirmDialog(
+      title: t.warn,
+      message: t.plaintext_export_warn,
+    )) {
+      final kdbx = KdbxProvider.of(context)!;
+      try {
+        final filepath = await SimpleFile.saveText(
+          data:
+              '<?xml version="1.0" encoding="UTF-8"?>\n${kdbx.kdbxFile.body.toXml().toXmlString(pretty: true)}',
+          filename: "${RpassInfo.appName}.xml",
+        );
+        showToast(t.export_done_location(filepath));
+      } catch (e) {
+        if (e is! CancelException) {
+          _logger.warning("export file file fail!", e);
+          showError(e);
+        }
       }
     }
   }
@@ -112,7 +136,11 @@ class _ExportAccountPageState extends State<ExportAccountPage>
             onTap: _exportKdbxFile,
           ),
           ListTile(
-            title: Text(t.export_n_file("csv (chrome)")),
+            title: Text(t.export_n_file("XML")),
+            onTap: _exportKdbxXml,
+          ),
+          ListTile(
+            title: Text(t.export_n_file("CSV (Chrome)")),
             onTap: () => _otherExportAlert(ChromeCsvAdapter()),
           ),
           ListTile(
@@ -122,7 +150,7 @@ class _ExportAccountPageState extends State<ExportAccountPage>
                 bottomRight: Radius.circular(6.0),
               ),
             ),
-            title: Text(t.export_n_file("csv (firefox)")),
+            title: Text(t.export_n_file("CSV (Firefox)")),
             onTap: () => _otherExportAlert(FirefoxCsvAdapter()),
           ),
         ]),

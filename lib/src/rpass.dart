@@ -16,4 +16,6 @@ class RpassInfo {
   static String get buildNumber => _packageInfo?.buildNumber ?? "1";
   static String get buildSignature => _packageInfo?.buildSignature ?? "??";
   static String get installerStore => _packageInfo?.installerStore ?? "??";
+
+  static String get defaultSyncKdbxFileName => "$appName.kdbx";
 }
