@@ -9,9 +9,14 @@ class NativeChannel {
 
   final MethodChannel _channel = const MethodChannel('native_channel_rpass');
 
+  void ensureInitialized() {}
+
   Future<void> _methodCallHandler(MethodCall call) async {
-    switch(call.method) {
-      
-    }
+    print("${call.method}, ${call.arguments}");
+    // switch (call.method) {}
+  }
+
+  Future<bool> activatePrevWindow() async {
+    return await _channel.invokeMethod<bool>("activate_prev_application") ?? false;
   }
 }
