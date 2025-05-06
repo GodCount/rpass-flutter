@@ -69,7 +69,7 @@ class _HomePageState extends State<HomePage>
   void _settingsListener() {
     if (Store.instance.settings.enableRemoteSync &&
         Store.instance.syncKdbx.client == null) {
-      Store.instance.syncKdbx.init(context);
+      Store.instance.syncKdbx.sync(context);
     }
   }
 
@@ -168,38 +168,46 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
             onDestinationSelected: tabsRouter.setActiveIndex,
             backgroundColor:
                 Theme.of(context).colorScheme.surfaceContainerHighest,
-            leading: Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: ListenableBuilder(
-                listenable: Listenable.merge([store.syncKdbx, store.settings]),
-                builder: (context, _) {
-                  return InfiniteRotateWidget(
-                    enabled: store.syncKdbx.isSyncing,
-                    child: IconButton(
-                      disabledColor: store.settings.enableRemoteSync
-                          ? Theme.of(context).iconTheme.color
-                          : null,
-                      color: store.settings.enableRemoteSync &&
-                              !store.syncKdbx.isSyncing &&
-                              store.syncKdbx.lastError != null
-                          ? Theme.of(context).colorScheme.error
-                          : null,
-                      onPressed: store.settings.enableRemoteSync &&
-                              !store.syncKdbx.isSyncing &&
-                              store.syncKdbx.lastError != null
-                          ? () {
-                              showError(store.syncKdbx.lastError);
-                            }
-                          : null,
-                      icon: store.settings.enableRemoteSync
-                          ? !store.syncKdbx.isSyncing &&
-                                  store.syncKdbx.lastError != null
-                              ? const Icon(Icons.sync_problem)
-                              : const Icon(Icons.sync)
-                          : const Icon(Icons.sync_disabled),
-                    ),
-                  );
-                },
+            leading: const SizedBox(height: 42),
+            trailing: Expanded(
+              child: Align(
+                alignment: Alignment.bottomLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: ListenableBuilder(
+                    listenable: Listenable.merge([
+                      store.syncKdbx,
+                      store.settings,
+                    ]),
+                    builder: (context, _) {
+                      return store.settings.enableRemoteSync &&
+                              (store.syncKdbx.isSyncing ||
+                                  store.syncKdbx.lastError != null)
+                          ? InfiniteRotateWidget(
+                              enabled: store.syncKdbx.isSyncing,
+                              child: IconButton(
+                                disabledColor:
+                                    Theme.of(context).iconTheme.color,
+                                color: !store.syncKdbx.isSyncing &&
+                                        store.syncKdbx.lastError != null
+                                    ? Theme.of(context).colorScheme.error
+                                    : null,
+                                onPressed: !store.syncKdbx.isSyncing &&
+                                        store.syncKdbx.lastError != null
+                                    ? () {
+                                        showError(store.syncKdbx.lastError);
+                                      }
+                                    : null,
+                                icon: !store.syncKdbx.isSyncing &&
+                                        store.syncKdbx.lastError != null
+                                    ? const Icon(Icons.sync_problem)
+                                    : const Icon(Icons.sync),
+                              ),
+                            )
+                          : const SizedBox();
+                    },
+                  ),
+                ),
               ),
             ),
             destinations: [

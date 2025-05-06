@@ -13,6 +13,9 @@ import '../index.dart';
 final _logger = Logger("store:sync_kdbx");
 
 class SyncKdbxController with ChangeNotifier {
+  WebdavConfig? _config;
+  WebdavConfig? get config => _config;
+
   WebdavClient? _client;
   WebdavClient? get client => _client;
 
@@ -25,38 +28,11 @@ class SyncKdbxController with ChangeNotifier {
   bool _isSyncing = false;
   bool get isSyncing => _isSyncing;
 
-  Future<void> init(BuildContext context) async {
-    final kdbx = KdbxProvider.of(context)!;
-
-    await _initClient(kdbx);
-
-    if (_client == null) {
-      return;
-    }
-
-    return sync(context);
-  }
-
-  Future<void> _initClient(Kdbx kdbx) async {
-    final entry = kdbx.syncAccountEntry;
-
-    if (entry == null) {
-      _logger.info("kdbx not find remote client config");
-      return;
-    }
-
-    try {
-      final config = WebdavConfig()..updateByKdbx(entry);
-      _client = await config.buildClient();
-    } catch (e) {
-      _logger.warning("Unable to build client", e);
-    }
-  }
-
   Future<void> setWebdavClient(
     BuildContext context,
-    WebdavClient? client,
+    WebdavClient client,
   ) async {
+    _config = client.config;
     _client = client;
     return sync(context);
   }
@@ -71,15 +47,21 @@ class SyncKdbxController with ChangeNotifier {
       _lastError = null;
       _lastMergeContext = null;
 
+      _isSyncing = true;
+      notifyListeners();
+
+      final kdbx = KdbxProvider.of(context)!;
+
+      if (kdbx.syncAccountEntry != null) {
+        _config ??= WebdavConfig()..updateByKdbx(kdbx.syncAccountEntry!);
+      }
+
+      _client ??= await _config?.buildClient();
+
       if (_client == null) {
         _logger.info("Remote client is null, Unable to synchronize.");
         return;
       }
-
-      final kdbx = KdbxProvider.of(context)!;
-
-      _isSyncing = true;
-      notifyListeners();
 
       final isKdbxExt = _client!.config.uri.endsWith(".kdbx");
       final localFile = Store.instance.localInfo.localKdbxFile;

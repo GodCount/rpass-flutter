@@ -83,7 +83,7 @@ class _SyncAccountPageState extends State<SyncAccountPage>
                 onTap: () async {
                   final result = await context.router.push(
                     AuthRemoteFsRoute(
-                      config: store.syncKdbx.client?.config ?? WebdavConfig(),
+                      config: store.syncKdbx.config ?? WebdavConfig(),
                     ),
                   );
 
@@ -96,12 +96,12 @@ class _SyncAccountPageState extends State<SyncAccountPage>
                   child: IconButton(
                     onPressed: !store.syncKdbx.isSyncing &&
                             store.settings.enableRemoteSync &&
-                            store.syncKdbx.client != null
+                            store.syncKdbx.config != null
                         ? () => store.syncKdbx.sync(context)
                         : null,
                     onLongPress: !store.syncKdbx.isSyncing &&
                             store.settings.enableRemoteSync &&
-                            store.syncKdbx.client != null
+                            store.syncKdbx.config != null
                         ? () => store.syncKdbx.sync(context, forceMerge: true)
                         : null,
                     icon: const Icon(Icons.sync),

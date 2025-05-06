@@ -235,9 +235,7 @@ extension KdbxEntryExt on KdbxBase {
 
   KdbxEntry? findEntryByUuid(KdbxUuid uuid) {
     try {
-      return kdbxFile.body.rootGroup
-          .getAllEntries()
-          .firstWhere((group) => group.uuid == uuid);
+      return totalEntry.firstWhere((group) => group.uuid == uuid);
     } catch (e) {
       return null;
     }

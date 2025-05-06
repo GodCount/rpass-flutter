@@ -93,22 +93,26 @@ class _AuthRemoteFsState extends State<AuthRemoteFsPage> {
     if (widget.type == AuthRemoteRouteType.sync && kdbx != null) {
       _syncAccountEntry = kdbx.syncAccountEntry;
 
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        if (_syncAccountEntry == null &&
-            await showConfirmDialog(title: "选择账号", message: "从数据库中选择账号")) {
-          _syncAccountEntry = await KdbxEntrySelectorDialog.openDialog(
-            context,
-            value: _syncAccountEntry,
-          );
-          if (_syncAccountEntry != null) {
-            // 必须 强制重新渲染
-            _form = GlobalKey();
-            _config.updateByKdbx(_syncAccountEntry!);
-            _formData = _config.toAuthFields();
-            setState(() {});
+      if (_syncAccountEntry != null) {
+        _config.updateByKdbx(_syncAccountEntry!);
+        _formData = _config.toAuthFields();
+      } else {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          if (await showConfirmDialog(title: "选择账号", message: "从数据库中选择账号")) {
+            _syncAccountEntry = await KdbxEntrySelectorDialog.openDialog(
+              context,
+              value: _syncAccountEntry,
+            );
+            if (_syncAccountEntry != null) {
+              // 必须 强制重新渲染
+              _form = GlobalKey();
+              _config.updateByKdbx(_syncAccountEntry!);
+              _formData = _config.toAuthFields();
+              setState(() {});
+            }
           }
-        }
-      });
+        });
+      }
     }
 
     super.initState();
@@ -175,7 +179,7 @@ class _AuthRemoteFsState extends State<AuthRemoteFsPage> {
 
     if (result == _syncAccountEntry) return;
 
-    if (result != null && result != _syncAccountEntry) {
+    if (result != null) {
       // 必须 强制重新渲染
       _form = GlobalKey();
       _config.updateByKdbx(result);

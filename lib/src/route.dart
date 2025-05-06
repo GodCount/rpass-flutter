@@ -135,7 +135,7 @@ RootStackRouter _createMobileAutoRoute() {
         page: MoreSecurityRoute.page,
       ),
       AutoRoute(
-        path: "sync_account",
+        path: "/sync_account",
         page: SyncAccountRoute.page,
       ),
       AutoRoute(

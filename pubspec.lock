@@ -1040,7 +1040,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: bd7d06ec16c3ca881c759f0d1c003dc694524118
+      resolved-ref: a3c04a4960b9161c1fbf6c470d14d711fc5bcd5c
       url: "https://github.com/rongyu-zhen/webdav_client.git"
     source: git
     version: "1.2.2"

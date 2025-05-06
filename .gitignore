@@ -12,6 +12,8 @@
 .swiftpm/
 migrate_working_dir/
 .vscode/
+windows/.vs/
+windows/out/
 
 # IntelliJ related
 *.iml
