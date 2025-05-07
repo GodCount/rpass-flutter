@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 
 import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
-import '../../context/store.dart';
 import '../../kdbx/kdbx.dart';
+import '../../store/index.dart';
 import '../../util/route.dart';
 import '../route.dart';
 import 'authorized_page.dart';
@@ -59,7 +59,7 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
   @override
   Future<void> confirm() async {
     if (form.currentState!.validate()) {
-      final store = StoreProvider.of(context);
+      final store = Store.instance;
       final passowrd = passwordController.text;
       final keyFile = keyFilecontroller.keyFile;
 
@@ -93,7 +93,7 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
 
     if (!biometric.enable) return;
 
-    final store = StoreProvider.of(context);
+    final store = Store.instance;
 
     kdbxFile = kdbxFile ?? await store.localInfo.localKdbxFile.readAsBytes();
 

@@ -1,8 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
-import '../../context/store.dart';
 import '../../i18n.dart';
+import '../../store/index.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
 
@@ -54,7 +54,7 @@ class _ChangeLocalePageState extends State<ChangeLocalePage>
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-    final store = StoreProvider.of(context);
+    final store = Store.instance;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: automaticallyImplyLeading,

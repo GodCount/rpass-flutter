@@ -4,10 +4,9 @@ import 'package:auto_route/auto_route.dart';
 
 import 'page/route.dart';
 import 'context/kdbx.dart';
-import 'context/store.dart';
 import 'page/home/route_wrap.dart';
+import 'store/index.dart';
 import 'util/common.dart';
-
 
 final skipAuthGuard = [
   LoadKdbxRoute.name,
@@ -23,9 +22,10 @@ class AuthGuard extends AutoRouteGuard {
   void onNavigation(NavigationResolver resolver, StackRouter router) {
     final kdbx = KdbxProvider.of(resolver.context);
     if (kdbx == null && !skipAuthGuard.contains(resolver.routeName)) {
-      final store = StoreProvider.of(resolver.context);
       resolver.redirectUntil(
-        store.localInfo.localKdbxFileExists ? LoadKdbxRoute() : InitialRoute(),
+        Store.instance.localInfo.localKdbxFileExists
+            ? LoadKdbxRoute()
+            : InitialRoute(),
         replace: true,
       );
     } else {

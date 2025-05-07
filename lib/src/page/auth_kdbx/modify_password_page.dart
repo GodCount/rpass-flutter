@@ -5,8 +5,8 @@ import 'package:logging/logging.dart';
 
 import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
-import '../../context/store.dart';
 import '../../kdbx/kdbx.dart';
+import '../../store/index.dart';
 import '../../util/route.dart';
 import 'authorized_page.dart';
 
@@ -62,7 +62,7 @@ class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
         throw Exception("Lack of key file.");
       }
 
-      final store = StoreProvider.of(context);
+      final store = Store.instance;
       final kdbx = KdbxProvider.of(context)!;
       final biometric = Biometric.of(context);
 

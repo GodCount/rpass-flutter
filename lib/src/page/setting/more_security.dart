@@ -1,8 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
-import '../../context/store.dart';
 import '../../i18n.dart';
+import '../../store/index.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
 
@@ -43,7 +43,7 @@ class _MoreSecurityPageState extends State<MoreSecurityPage>
   void _setLockDelay() {
     final t = I18n.of(context)!;
 
-    final settings = StoreProvider.of(context).settings;
+    final settings = Store.instance.settings;
 
     GestureTapCallback? autoSavePop(Duration? delay) {
       return () {
@@ -80,7 +80,7 @@ class _MoreSecurityPageState extends State<MoreSecurityPage>
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-    final store = StoreProvider.of(context);
+    final store = Store.instance;
 
     final lockDelay = store.settings.lockDelay;
 

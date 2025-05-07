@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 import '../../context/biometric.dart';
-import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../store/index.dart';
 import '../../util/file.dart';
 import '../../widget/shake_widget.dart';
 import '../../widget/extension_state.dart';
@@ -75,7 +75,7 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
         authType == AuthorizedType.modify_password;
 
     if (readHistoryKeyFile) {
-      final store = StoreProvider.of(context);
+      final store = Store.instance;
       if (store.settings.enableRecordKeyFilePath &&
           store.settings.keyFilePath != null) {
         try {

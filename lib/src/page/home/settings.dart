@@ -6,9 +6,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
-import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../rpass.dart';
+import '../../store/index.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
@@ -95,7 +95,7 @@ class _SettingsPageState extends State<SettingsPage>
 
     final t = I18n.of(context)!;
 
-    final store = StoreProvider.of(context);
+    final store = Store.instance;
     final biometric = Biometric.of(context);
 
     return Scaffold(

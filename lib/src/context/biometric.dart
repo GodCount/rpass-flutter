@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 import '../i18n.dart';
-import 'store.dart';
+import '../store/index.dart';
 
 final _logger = Logger("context:biometric");
 
@@ -61,8 +61,7 @@ class BiometricState extends State<Biometric> {
       _authenticateResponse == CanAuthenticateResponse.success ||
       _authenticateResponse == CanAuthenticateResponse.statusUnknown;
 
-  bool get enable =>
-      isSupport && StoreProvider.of(context).settings.enableBiometric;
+  bool get enable => isSupport && Store.instance.settings.enableBiometric;
 
   static Future<void> initCanAuthenticate() async {
     try {
@@ -135,7 +134,7 @@ class BiometricState extends State<Biometric> {
         await (await _getStorageFile(context, BiometricStorageKey.credentials))
             .read(promptInfo: _getPromptInfo(context));
     if (credentials == null || credentials.isEmpty) {
-      StoreProvider.of(context).settings.seEnableBiometric(false);
+      Store.instance.settings.seEnableBiometric(false);
       throw Exception("no record token from biometric");
     }
 

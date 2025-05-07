@@ -14,7 +14,6 @@ import '../route.dart';
 import 'authorized_page.dart';
 import '../../widget/extension_state.dart';
 import '../../kdbx/kdbx.dart';
-import '../../context/store.dart';
 import '../../rpass.dart';
 
 class _InitialArgs extends PageRouteArgs {
@@ -91,7 +90,7 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
   @override
   Future<void> confirm() async {
     if (form.currentState!.validate()) {
-      final store = StoreProvider.of(context);
+      final store = Store.instance;
       final passowrd = passwordController.text;
       final keyFile = keyFilecontroller.keyFile;
 
@@ -120,7 +119,7 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
   }
 
   void _setInitKdbx((Kdbx, String?) result) async {
-    final store = StoreProvider.of(context);
+    final store = Store.instance;
 
     final kdbx = result.$1;
     kdbx.filepath = store.localInfo.localKdbxFile.path;

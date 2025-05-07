@@ -5,8 +5,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
+import '../../rpass.dart';
 import '../route.dart';
-import '../../context/store.dart';
 import '../../i18n.dart';
 import '../../store/index.dart';
 import '../../util/route.dart';
@@ -168,7 +168,13 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
             onDestinationSelected: tabsRouter.setActiveIndex,
             backgroundColor:
                 Theme.of(context).colorScheme.surfaceContainerHighest,
-            leading: const SizedBox(height: 42),
+            // leading: Padding(
+            //   padding: const EdgeInsets.only(top: 8),
+            //   child: Text(
+            //     RpassInfo.appName,
+            //     style: Theme.of(context).textTheme.titleLarge,
+            //   ),
+            // ),
             trailing: Expanded(
               child: Align(
                 alignment: Alignment.bottomLeft,
@@ -252,7 +258,7 @@ mixin BackgroundLock on State<HomePage> {
   }
 
   void _startTimer() {
-    final settings = StoreProvider.of(context).settings;
+    final settings = Store.instance.settings;
     if (settings.lockDelay != null && !_verificationStart) {
       _cancelTimer();
       _timer = Timer(settings.lockDelay!, () async {

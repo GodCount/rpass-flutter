@@ -2,9 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
-
 import './store/index.dart';
-import 'context/store.dart';
+import 'context/biometric.dart';
+import 'context/kdbx.dart';
 import 'route.dart';
 import 'theme/theme.dart';
 import 'i18n.dart';
@@ -46,33 +46,35 @@ class RpassApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final store = Store.instance;
-    return StoreProvider(
-      child: ListenableBuilder(
-        listenable: store.settings,
-        builder: (context, child) {
-          return MaterialApp.router(
-            restorationScopeId: 'app',
-            theme: theme(Brightness.light),
-            darkTheme: theme(Brightness.dark),
-            themeMode: store.settings.themeMode,
-            locale: store.settings.locale,
-            localizationsDelegates: I18n.localizationsDelegates,
-            supportedLocales: I18n.supportedLocales,
-            localeResolutionCallback: (locale, locales) {
-              if (locale != null &&
-                  store.settings.locale == null &&
-                  I18n.delegate.isSupported(locale)) {
-                return locale;
-              }
-              return null;
-            },
-            routerConfig: router.config(
-              navigatorObservers: () => [
-                if (isMobile) UnfocusNavigatorRoute(),
-              ],
-            ),
-          );
-        },
+    return KdbxProvider(
+      child: Biometric(
+        child: ListenableBuilder(
+          listenable: store.settings,
+          builder: (context, child) {
+            return MaterialApp.router(
+              restorationScopeId: 'app',
+              theme: theme(Brightness.light),
+              darkTheme: theme(Brightness.dark),
+              themeMode: store.settings.themeMode,
+              locale: store.settings.locale,
+              localizationsDelegates: I18n.localizationsDelegates,
+              supportedLocales: I18n.supportedLocales,
+              localeResolutionCallback: (locale, locales) {
+                if (locale != null &&
+                    store.settings.locale == null &&
+                    I18n.delegate.isSupported(locale)) {
+                  return locale;
+                }
+                return null;
+              },
+              routerConfig: router.config(
+                navigatorObservers: () => [
+                  if (isMobile) UnfocusNavigatorRoute(),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
