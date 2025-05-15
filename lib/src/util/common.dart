@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -90,59 +89,74 @@ String timeBasedUuid() {
 
 int randomInt(int min, int max) => min + math.Random().nextInt(max - min);
 
-String randomPassword({
+int passwordEntropy(int length, int charSetLength) =>
+    (length * (math.log(charSetLength) / math.log(2))).round();
+
+/// (Random Password, Password Entropy)
+(String, int) randomPassword({
   required int length,
   bool enableNumber = true,
   bool enableSymbol = true,
   bool enableLetterUppercase = true,
   bool enableLetterLowercase = true,
+  String? customText,
 }) {
   final List<String> values = [];
 
-  final List<String> cahrs = [];
+  final List<String> chars = customText != null ? customText.split("") : [];
+
+  if (chars.isNotEmpty) {
+    values.add(chars[randomInt(0, chars.length)]);
+  }
 
   if (enableLetterUppercase) {
     final list = letters.toUpperCase().split("");
-    cahrs.addAll(list);
+    chars.addAll(list);
     values.add(list[randomInt(0, list.length)]);
   }
 
   if (enableLetterLowercase) {
     final list = letters.split("");
-    cahrs.addAll(list);
+    chars.addAll(list);
     values.add(list[randomInt(0, list.length)]);
   }
 
   if (enableNumber) {
     final list = numbers.split("");
-    cahrs.addAll(list);
+    chars.addAll(list);
     values.add(list[randomInt(0, list.length)]);
   }
 
   if (enableSymbol) {
     final list = symbols.split("");
-    cahrs.addAll(list);
+    chars.addAll(list);
     values.add(list[randomInt(0, list.length)]);
   }
 
-  if (cahrs.isEmpty) {
+  if (chars.isEmpty) {
     throw Exception("enable at least one type");
   }
 
-  cahrs.sort((a, b) => math.Random().nextInt(2));
+  chars.sort((a, b) => math.Random().nextInt(2));
 
   if (values.length >= length) {
     values.sort((a, b) => math.Random().nextInt(2));
-    return values.sublist(0, length).join("");
+    return (
+      values.sublist(0, length).join(""),
+      passwordEntropy(length, chars.length),
+    );
   }
 
   length -= values.length;
   for (var i = 0; i < length; i++) {
-    values.add(cahrs[randomInt(0, cahrs.length)]);
+    values.add(chars[randomInt(0, chars.length)]);
   }
   values.sort((a, b) => math.Random().nextInt(2));
 
-  return values.join("");
+  return (
+    values.join(""),
+    passwordEntropy(values.length, chars.length),
+  );
 }
 
 List<Map<String, dynamic>> csvToJson(
@@ -268,5 +282,11 @@ extension RepeatObject<T> on T {
   List<T> repeat(int len) {
     if (len <= 0) return [];
     return List.filled(len, this);
+  }
+}
+
+extension CommonString on String {
+  bool isRepeatChar() {
+    return Set.from(split("")).length != length;
   }
 }

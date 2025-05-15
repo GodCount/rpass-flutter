@@ -109,7 +109,7 @@ class _EditAccountPageState extends State<EditAccountPage>
       ..setString(
         KdbxKeyCommon.PASSWORD,
         PlainValue(
-          randomPassword(length: 10),
+          randomPassword(length: 10).$1,
         ),
       );
   }

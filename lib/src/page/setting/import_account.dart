@@ -82,7 +82,7 @@ class _ImportAccountPageState extends State<ImportAccountPage>
                 topRight: Radius.circular(6.0),
               ),
             ),
-            title: Text(t.import_n_file("csv (chrome)")),
+            title: Text(t.import_n_file("CSV (Chrome)")),
             onTap: () => _csvImport(FirefoxCsvAdapter()),
           ),
           ListTile(
@@ -92,7 +92,7 @@ class _ImportAccountPageState extends State<ImportAccountPage>
                 bottomRight: Radius.circular(6.0),
               ),
             ),
-            title: Text(t.import_n_file("csv (firefox)")),
+            title: Text(t.import_n_file("CSV (Firefox)")),
             onTap: () => _csvImport(FirefoxCsvAdapter()),
           ),
         ]),

@@ -118,7 +118,7 @@ class FieldStatistic {
       case "CustomFields":
         return customFields;
       case "CustomIcons":
-        return customFields;
+        return customIcons;
     }
     return null;
   }

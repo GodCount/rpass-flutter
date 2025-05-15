@@ -4,7 +4,6 @@ import 'package:flutter_context_menu/flutter_context_menu.dart';
 
 import '../../util/common.dart';
 import '../../util/route.dart';
-import '../route.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';

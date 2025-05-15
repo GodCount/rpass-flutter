@@ -132,7 +132,7 @@ class _ExportAccountPageState extends State<ExportAccountPage>
                 topRight: Radius.circular(6.0),
               ),
             ),
-            title: Text(t.export_n_file("kdbx")),
+            title: Text(t.export_n_file("KDBX")),
             onTap: _exportKdbxFile,
           ),
           ListTile(

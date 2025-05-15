@@ -261,5 +261,6 @@
     "sync_merge_log": "Sync Merge Log",
     "change": "Change",
     "remove": "Remove",
-    "select_account": "Select Account"
+    "select_account": "Select Account",
+    "custom": "Customize"
 }

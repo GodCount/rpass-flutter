@@ -56,46 +56,65 @@ class GenPasswordPage extends StatefulWidget {
 }
 
 class _GenPasswordPageState extends State<GenPasswordPage> {
-  bool _enableLetter = true;
+  bool _enableLetterLow = true;
+  bool _enableLetterUp = true;
   bool _enableNumber = true;
   bool _enableSymbol = true;
+  bool _enableCustom = false;
+  String _customText = "";
+
   double _length = 10;
 
   late String password;
+  late int entropy;
 
   void _updatePassword() {
-    password = randomPassword(
+    final value = randomPassword(
       length: _length.toInt(),
       enableNumber: _enableNumber,
       enableSymbol: _enableSymbol,
-      enableLetterLowercase: _enableLetter,
-      enableLetterUppercase: _enableLetter,
+      enableLetterLowercase: _enableLetterLow,
+      enableLetterUppercase: _enableLetterUp,
+      customText: _enableCustom ? _customText : null,
     );
+    password = value.$1;
+    entropy = value.$2;
     setState(() {});
   }
 
   void _cahnged({
     bool? enableNumber,
     bool? enableSymbol,
-    bool? enableLetter,
+    bool? enableLetterLow,
+    bool? enableLetterUp,
+    bool? enableCustom,
   }) {
     enableNumber ??= _enableNumber;
     enableSymbol ??= _enableSymbol;
-    enableLetter ??= _enableLetter;
+    enableLetterLow ??= _enableLetterLow;
+    enableLetterUp ??= _enableLetterUp;
+    enableCustom ??= _enableCustom;
 
-    if (!enableNumber && !enableSymbol && !enableLetter) {
+    if (!enableNumber &&
+        !enableSymbol &&
+        !enableLetterLow &&
+        !enableLetterUp &&
+        !enableCustom) {
       return;
     }
+
     _enableNumber = enableNumber;
-    _enableLetter = enableLetter;
+    _enableLetterLow = enableLetterLow;
+    _enableLetterUp = enableLetterUp;
     _enableSymbol = enableSymbol;
+    _enableCustom = enableCustom;
     _updatePassword();
   }
 
   @override
   void initState() {
-    password = randomPassword(length: _length.toInt());
     super.initState();
+    _updatePassword();
   }
 
   @override
@@ -124,38 +143,78 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.password_rounded),
                   ),
-                  Text(t.password,
-                      style: Theme.of(context).textTheme.bodyLarge),
+                  Text(
+                    t.password,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
                 ],
               ),
             ),
             ListTile(
               shape: shape,
               isThreeLine: true,
-              title: MatchText(
-                text: password,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyLarge!
-                    .copyWith(color: Colors.red),
-                matchs: [
-                  MatchHighlight(
-                    regExp: RegExp(r"[a-zA-Z]+"),
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  MatchHighlight(
-                    regExp: RegExp(r"\d+"),
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyLarge!
-                        .copyWith(color: Colors.blue),
-                  )
-                ],
+              title: Container(
+                alignment: Alignment.centerLeft,
+                constraints: const BoxConstraints(minWidth: 56),
+                child: MatchText(
+                  text: password,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge!
+                      .copyWith(color: Colors.red),
+                  matchs: [
+                    MatchHighlightItem(
+                      regExp: RegExp(r"[a-zA-Z]+"),
+                      style: Theme.of(context).textTheme.bodyLarge!,
+                    ),
+                    MatchHighlightItem(
+                      regExp: RegExp(r"\d+"),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge!
+                          .copyWith(color: Colors.blue),
+                    ),
+                    if (_customText.isNotEmpty)
+                      MatchHighlightItem(
+                        regExp: RegExp(
+                          "[${Set.from(_customText.split("")).join()}]+",
+                        ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyLarge!
+                            .copyWith(color: Colors.green),
+                      )
+                  ],
+                ),
               ),
-              subtitle: const Text(""),
+              subtitle: const SizedBox(),
               trailing: IconButton(
                 icon: const Icon(Icons.refresh),
                 onPressed: _updatePassword,
+              ),
+            ),
+          ]),
+          _cardColumn([
+            ListTile(
+              shape: shape,
+              title: LinearProgressIndicator(
+                value: entropy.toDouble() / 100,
+                minHeight: 24,
+                color: entropy < 32
+                    ? Colors.red
+                    : entropy < 56
+                        ? Colors.amber
+                        : Colors.green,
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(4),
+                ),
+              ),
+              trailing: SizedBox(
+                width: 64,
+                child: Text(
+                  "$entropy bit",
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
               ),
             ),
           ]),
@@ -168,8 +227,10 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.straighten),
                   ),
-                  Text(t.pass_length,
-                      style: Theme.of(context).textTheme.bodyLarge),
+                  Text(
+                    t.pass_length,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
                 ],
               ),
             ),
@@ -190,43 +251,88 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
               trailing: Text("${_length.toInt()}"),
             ),
           ]),
-          _cardColumn([
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(right: 6),
-                    child: Icon(Icons.onetwothree),
-                  ),
-                  Text(t.include_cahr,
-                      style: Theme.of(context).textTheme.bodyLarge),
-                ],
+          _cardColumn(
+            [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(right: 6),
+                      child: Icon(Icons.onetwothree),
+                    ),
+                    Text(
+                      t.include_cahr,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            ListTile(
-              title: Text("${t.letter} (aA)"),
-              trailing: _enableLetter ? const Icon(Icons.check) : null,
-              onTap: () {
-                _cahnged(enableLetter: !_enableLetter);
-              },
-            ),
-            ListTile(
-              title: Text("${t.number} (01)"),
-              trailing: _enableNumber ? const Icon(Icons.check) : null,
-              onTap: () {
-                _cahnged(enableNumber: !_enableNumber);
-              },
-            ),
-            ListTile(
-              shape: shape,
-              title: Text("${t.special_char} (!@)"),
-              trailing: _enableSymbol ? const Icon(Icons.check) : null,
-              onTap: () {
-                _cahnged(enableSymbol: !_enableSymbol);
-              },
-            ),
-          ])
+              ListTile(
+                title: Text("${t.letter} (abc)"),
+                trailing: _enableLetterLow ? const Icon(Icons.check) : null,
+                onTap: () {
+                  _cahnged(enableLetterLow: !_enableLetterLow);
+                },
+              ),
+              ListTile(
+                title: Text("${t.letter} (ABC)"),
+                trailing: _enableLetterUp ? const Icon(Icons.check) : null,
+                onTap: () {
+                  _cahnged(enableLetterUp: !_enableLetterUp);
+                },
+              ),
+              ListTile(
+                title: Text("${t.number} (01)"),
+                trailing: _enableNumber ? const Icon(Icons.check) : null,
+                onTap: () {
+                  _cahnged(enableNumber: !_enableNumber);
+                },
+              ),
+              ListTile(
+                title: Text("${t.special_char} (!@)"),
+                trailing: _enableSymbol ? const Icon(Icons.check) : null,
+                onTap: () {
+                  _cahnged(enableSymbol: !_enableSymbol);
+                },
+              ),
+              ListTile(
+                title: Text(t.custom),
+                trailing: _enableCustom ? const Icon(Icons.check) : null,
+                onTap: () {
+                  _cahnged(enableCustom: !_enableCustom);
+                },
+              ),
+              ListTile(
+                shape: shape,
+                title: TextField(
+                  onEditingComplete: () {
+                    if (_customText.isEmpty &&
+                        !_enableNumber &&
+                        !_enableSymbol &&
+                        !_enableLetterLow &&
+                        !_enableLetterUp) {
+                      _cahnged(
+                        enableNumber: true,
+                        enableSymbol: true,
+                        enableLetterLow: true,
+                        enableLetterUp: true,
+                        enableCustom: false,
+                      );
+                    } else {
+                      _updatePassword();
+                    }
+                  },
+                  onChanged: (value) => _customText = value,
+                  enabled: _enableCustom,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              )
+            ],
+          ),
+          const SizedBox(height: 56)
         ],
       ),
       floatingActionButton: FloatingActionButton(

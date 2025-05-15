@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
-class MatchHighlight {
-  const MatchHighlight({required this.regExp, this.style});
+class MatchHighlightItem {
+  const MatchHighlightItem({
+    required this.regExp,
+    required this.style,
+  });
+
   final RegExp regExp;
-  final TextStyle? style;
+  final TextStyle style;
 
   bool hasMatch(String text) => regExp.hasMatch(text);
 
@@ -19,89 +23,79 @@ class MatchText extends StatelessWidget {
     required this.text,
     required this.matchs,
     this.style,
-    this.textAlign = TextAlign.start,
-    this.textDirection,
-    this.overflow = TextOverflow.clip,
-    this.textScaler = TextScaler.noScaling,
-    this.maxLines,
   });
 
   final String text;
-  final List<MatchHighlight> matchs;
+  final List<MatchHighlightItem> matchs;
   final TextStyle? style;
-
-  final TextAlign textAlign;
-  final TextDirection? textDirection;
-  final TextOverflow overflow;
-  final TextScaler textScaler;
-  final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
     return RichText(
-      textAlign: textAlign,
-      textDirection: textDirection,
-      overflow: overflow,
-      textScaler: textScaler,
-      maxLines: maxLines,
       text: TextSpan(
         style: style,
-        children: matchTexts(),
+        children: _matchText(),
       ),
     );
   }
 
-  @protected
-  List<TextSpan> matchTexts({List<MatchHighlight>? matchs, TextStyle? style}) {
-    matchs ??= this.matchs;
-    style ??= this.style;
+  List<TextSpan> _matchText() {
+    final List<TextSpan> children = [];
 
-    final list = matchs.where((item) => item.hasMatch(text));
-    if (list.isEmpty) return [TextSpan(text: text)];
+    final matchList = matchs.where((item) => item.hasMatch(text));
 
-    final regexps = list.map((item) => item.allMatches(text)).toList();
+    final regexp = _mergeRegexp(matchList);
 
-    final List<((int, int), TextSpan)> results = [];
+    final allMatches = regexp.allMatches(text);
 
-    for (var item in regexps) {
-      for (var postion in item.$1) {
-        results.add((
-          postion,
-          TextSpan(style: item.$2, text: text.substring(postion.$1, postion.$2))
-        ));
+    int lastMatchEnd = 0;
+
+    for (final item in allMatches) {
+      final matchStart = item.start;
+      final matchEnd = item.end;
+
+      if (matchStart < 0 || matchEnd > text.length) continue;
+
+      if (matchStart > lastMatchEnd) {
+        final nonMatchText = text.substring(lastMatchEnd, matchStart);
+        children.add(TextSpan(text: nonMatchText));
       }
+
+      final matchText = item.group(0)!;
+
+      final matchedItem = _findMatchedByText(matchText, matchList);
+      children.add(TextSpan(text: matchText, style: matchedItem.style));
+
+      lastMatchEnd = matchEnd;
     }
 
-    results.sort((a, b) => a.$1.$1 - b.$1.$1);
-
-    if (results.first.$1.$1 != 0) {
-      results.insert(0, (
-        (0, results.first.$1.$1),
-        TextSpan(style: style, text: text.substring(0, results.first.$1.$1))
-      ));
+    if (lastMatchEnd < text.length) {
+      final remainingText = text.substring(lastMatchEnd);
+      children.add(TextSpan(text: remainingText));
     }
 
-    if (results.last.$1.$2 != text.length) {
-      results.add((
-        (results.last.$1.$2, text.length),
-        TextSpan(
-          style: style,
-          text: text.substring(results.last.$1.$2, text.length),
-        )
-      ));
-    }
+    return children;
+  }
 
-    for (var i = results.length - 2; i >= 0; i--) {
-      if (results[i].$1.$2 != results[i + 1].$1.$1) {
-        results.insert(i + 1, (
-          (results[i].$1.$2, results[i + 1].$1.$1),
-          TextSpan(
-            style: style,
-            text: text.substring(results[i].$1.$2, results[i + 1].$1.$1),
-          )
-        ));
-      }
+  RegExp _mergeRegexp(Iterable<MatchHighlightItem> matchs) {
+    if (matchs.length == 1) return matchs.first.regExp;
+
+    final StringBuffer buffer = StringBuffer();
+    bool first = true;
+
+    for (final item in matchs) {
+      if (!first) buffer.write('|');
+      buffer.write('(${item.regExp.pattern})');
+      first = false;
     }
-    return results.map((item) => item.$2).toList();
+    return RegExp(buffer.toString());
+  }
+
+  MatchHighlightItem _findMatchedByText(
+    String text,
+    Iterable<MatchHighlightItem> matchs,
+  ) {
+    return matchs.where((item) => item.hasMatch(text)).firstOrNull ??
+        matchs.first;
   }
 }

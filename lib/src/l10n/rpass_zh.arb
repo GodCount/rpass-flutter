@@ -261,5 +261,6 @@
     "sync_merge_log": "同步合并日志",
     "change": "更改",
     "remove": "移除",
-    "select_account": "选择账号"
+    "select_account": "选择账号",
+    "custom": "自定义"
 }
