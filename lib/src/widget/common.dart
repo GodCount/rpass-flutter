@@ -321,7 +321,9 @@ class SetKdbxGroupDialog extends StatefulWidget {
   final FormFieldSetter<KdbxGroupData> onResult;
 
   static Future<Object?> openDialog(
-      BuildContext context, KdbxGroupData kdbxGroupData) {
+    BuildContext context,
+    KdbxGroupData kdbxGroupData,
+  ) {
     return showDialog(
       context: context,
       builder: (context) {
@@ -341,6 +343,16 @@ class SetKdbxGroupDialog extends StatefulWidget {
 
 class SetKdbxGroupDialogState extends State<SetKdbxGroupDialog> {
   late final KdbxGroupData _kdbxGroupData = widget.kdbxGroupData.clone();
+
+  bool _isDirty() {
+    return _kdbxGroupData.kdbxIcon.icon != widget.kdbxGroupData.kdbxIcon.icon ||
+        _kdbxGroupData.kdbxIcon.customIcon?.uuid !=
+            widget.kdbxGroupData.kdbxIcon.customIcon?.uuid ||
+        _kdbxGroupData.name != widget.kdbxGroupData.name ||
+        _kdbxGroupData.notes != widget.kdbxGroupData.notes ||
+        _kdbxGroupData.enableDisplay != widget.kdbxGroupData.enableDisplay ||
+        _kdbxGroupData.enableSearching != widget.kdbxGroupData.enableSearching;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -434,9 +446,11 @@ class SetKdbxGroupDialogState extends State<SetKdbxGroupDialog> {
           child: Text(t.cancel),
         ),
         TextButton(
-          onPressed: () {
-            widget.onResult(_kdbxGroupData);
-          },
+          onPressed: _isDirty()
+              ? () {
+                  widget.onResult(_kdbxGroupData);
+                }
+              : null,
           child: Text(t.confirm),
         ),
       ],

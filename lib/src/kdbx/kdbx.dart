@@ -505,6 +505,8 @@ extension KdbxEntryTagExt on KdbxEntry {
   }
 }
 
+enum _FindEnabledType { display, Searching }
+
 extension KdbxEntryCommon on KdbxEntry {
   Iterable<MapEntry<KdbxKey, StringValue?>> get customEntries =>
       stringEntries.where((item) => isCustomKey(item.key));
@@ -518,6 +520,33 @@ extension KdbxEntryCommon on KdbxEntry {
         times.expiryTime.get() != null &&
         times.expiryTime.get()!.isBefore(DateTime.now());
   }
+
+  bool _findEnabled(_FindEnabledType type, [KdbxGroup? group]) {
+    if (group == null) return true;
+
+    switch (type) {
+      case _FindEnabledType.display:
+        if (group.enableDisplay.get() != null) {
+          return group.enableDisplay.get()!;
+        }
+        break;
+      case _FindEnabledType.Searching:
+        if (group.enableSearching.get() != null) {
+          return group.enableSearching.get()!;
+        }
+        break;
+    }
+
+    return _findEnabled(type, group.parent);
+  }
+
+  /// 当前 Entry 是否包含在首页列表中
+  /// 默认 包含
+  bool enableDisplay() => _findEnabled(_FindEnabledType.display, parent);
+
+  /// 当前 Entry 是否包含在搜索结果中
+  /// 默认 包含
+  bool enableSearching() => _findEnabled(_FindEnabledType.Searching, parent);
 }
 
 extension KdbxUuidCommon on KdbxUuid {

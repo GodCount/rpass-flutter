@@ -114,7 +114,9 @@ class InputParse {
 }
 
 class KbdxSearchHandler {
-  KbdxSearchHandler();
+  KbdxSearchHandler({
+    this.useKdbxEntryConfig = false,
+  });
 
   /// 对指定字段进行匹配
   /// 字段映射表, 可以缩写映射到完整字段
@@ -138,6 +140,9 @@ class KbdxSearchHandler {
     "g": "Group",
     "group": "Group",
   };
+
+  /// 使用 enableDisplay , enableSearching 过滤列表
+  final bool useKdbxEntryConfig;
 
   final Map<String, String> _customFieldTable = {};
 
@@ -190,14 +195,28 @@ class KbdxSearchHandler {
     }
   }
 
-  List<KdbxEntry> search(String input, List<KdbxEntry> sourceList) {
-    final inputParse = InputParse.parse(
-      input,
-      Map.from(MAP_FIELD_TABLE)..addAll(_customFieldTable),
-    );
-    return sourceList
-        .where((item) => _fieldContains(inputParse.objects, item))
-        .toList()
+  List<KdbxEntry> search(String input, Iterable<KdbxEntry> sourceList) {
+    final isSearch = input.isNotEmpty;
+
+    Iterable<KdbxEntry> result = sourceList;
+
+    if (isSearch) {
+      final inputParse = InputParse.parse(
+        input,
+        Map.from(MAP_FIELD_TABLE)..addAll(_customFieldTable),
+      );
+
+      sourceList.where((item) {
+        if (useKdbxEntryConfig && !item.enableSearching()) {
+          return false;
+        }
+        return _fieldContains(inputParse.objects, item);
+      });
+    } else if (useKdbxEntryConfig) {
+      result = sourceList.where((item) => item.enableDisplay());
+    }
+
+    return result.toList()
       ..sort((a, b) => b.times.lastModificationTime
           .get()!
           .compareTo(a.times.lastModificationTime.get()!));

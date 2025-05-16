@@ -496,21 +496,13 @@ extension StatefulKdbx on State {
 
     final kdbxGroup = data.kdbxGroup ?? kdbx.createGroup(data.name);
 
-    if (data.name != kdbxGroup.name.get()) {
-      kdbxGroup.name.set(data.name);
-    }
+    kdbxGroup.name.set(data.name);
 
-    if (data.notes != kdbxGroup.notes.get()) {
-      kdbxGroup.notes.set(data.notes);
-    }
+    kdbxGroup.notes.set(data.notes);
 
-    if (data.enableDisplay != kdbxGroup.enableDisplay.get()) {
-      kdbxGroup.enableDisplay.set(data.enableDisplay);
-    }
+    kdbxGroup.enableDisplay.set(data.enableDisplay);
 
-    if (data.enableSearching != kdbxGroup.enableSearching.get()) {
-      kdbxGroup.enableSearching.set(data.enableSearching);
-    }
+    kdbxGroup.enableSearching.set(data.enableSearching);
 
     if (data.kdbxIcon.customIcon != null) {
       kdbxGroup.customIcon = data.kdbxIcon.customIcon;
@@ -523,9 +515,8 @@ extension StatefulKdbx on State {
 
   Future<bool> setKdbxGroup(KdbxGroupData data) async {
     final result = await SetKdbxGroupDialog.openDialog(context, data);
-    if (result is String) {
-      data.name = result;
-      return _kdbxGroupSave(data);
+    if (result is KdbxGroupData) {
+      return _kdbxGroupSave(result);
     }
     return false;
   }

@@ -68,7 +68,7 @@ class _PasswordsPageState extends State<PasswordsPage>
   @override
   bool get wantKeepAlive => true;
 
-  final KbdxSearchHandler _kbdxSearchHandler = KbdxSearchHandler();
+  final KbdxSearchHandler _kbdxSearchHandler = KbdxSearchHandler(useKdbxEntryConfig: true);
   final List<KdbxEntry> _totalEntry = [];
 
   VoidCallback? _removeKdbxListener;
