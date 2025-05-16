@@ -98,6 +98,7 @@ class _GroupsPageState extends State<GroupsPage>
         onPressed: () => setKdbxGroup(
           KdbxGroupData(
             name: '',
+            notes: '',
             kdbxIcon: KdbxIconWidgetData(
               icon: KdbxIcon.Folder,
             ),
@@ -185,6 +186,9 @@ class _GroupsItemState extends State<_GroupsItem>
             setKdbxGroup(
               KdbxGroupData(
                 name: kdbxGroup.name.get() ?? '',
+                notes: kdbxGroup.notes.get() ?? '',
+                enableSearching: kdbxGroup.enableSearching.get(),
+                enableDisplay: kdbxGroup.enableDisplay.get(),
                 kdbxIcon: KdbxIconWidgetData(
                   icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
                   customIcon: kdbxGroup.customIcon,
@@ -269,6 +273,9 @@ class _GroupsItemState extends State<_GroupsItem>
                   onModifyTap: () => setKdbxGroup(
                     KdbxGroupData(
                       name: kdbxGroup.name.get() ?? '',
+                      notes: kdbxGroup.notes.get() ?? '',
+                      enableSearching: kdbxGroup.enableSearching.get(),
+                      enableDisplay: kdbxGroup.enableDisplay.get(),
                       kdbxIcon: KdbxIconWidgetData(
                         icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
                         customIcon: kdbxGroup.customIcon,

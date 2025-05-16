@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
@@ -443,13 +444,30 @@ extension StatefulBottomSheet on State {
 class KdbxGroupData {
   KdbxGroupData({
     required this.name,
+    required this.notes,
+    this.enableDisplay,
+    this.enableSearching,
     required this.kdbxIcon,
     this.kdbxGroup,
   });
 
   String name;
+  String notes;
+  bool? enableDisplay;
+  bool? enableSearching;
   KdbxIconWidgetData kdbxIcon;
   KdbxGroup? kdbxGroup;
+
+  KdbxGroupData clone() {
+    return KdbxGroupData(
+      name: name,
+      notes: notes,
+      enableDisplay: enableDisplay,
+      enableSearching: enableSearching,
+      kdbxIcon: kdbxIcon,
+      kdbxGroup: kdbxGroup,
+    );
+  }
 }
 
 extension StatefulKdbx on State {
@@ -482,6 +500,18 @@ extension StatefulKdbx on State {
       kdbxGroup.name.set(data.name);
     }
 
+    if (data.notes != kdbxGroup.notes.get()) {
+      kdbxGroup.notes.set(data.notes);
+    }
+
+    if (data.enableDisplay != kdbxGroup.enableDisplay.get()) {
+      kdbxGroup.enableDisplay.set(data.enableDisplay);
+    }
+
+    if (data.enableSearching != kdbxGroup.enableSearching.get()) {
+      kdbxGroup.enableSearching.set(data.enableSearching);
+    }
+
     if (data.kdbxIcon.customIcon != null) {
       kdbxGroup.customIcon = data.kdbxIcon.customIcon;
     } else if (data.kdbxIcon.icon != kdbxGroup.icon.get()) {
@@ -492,36 +522,7 @@ extension StatefulKdbx on State {
   }
 
   Future<bool> setKdbxGroup(KdbxGroupData data) async {
-    final t = I18n.of(context)!;
-
-    final kdbx = KdbxProvider.of(context)!;
-
-    final result = await InputDialog.openDialog(
-      context,
-      title: data.kdbxGroup != null ? t.modify : t.create,
-      label: t.title,
-      initialValue: data.name,
-      limitItems: kdbx.rootGroups
-          .map((item) => item.name.get() ?? '')
-          .where((item) => item.isNotEmpty && item != data.name)
-          .toSet()
-          .toList(),
-      leadingBuilder: (state) {
-        return IconButton(
-          onPressed: () async {
-            final reslut = await context.router.push(SelectIconRoute());
-            if (reslut != null && reslut is KdbxIconWidgetData) {
-              data.kdbxIcon = reslut;
-              state.update();
-            }
-          },
-          icon: KdbxIconWidget(
-            kdbxIcon: data.kdbxIcon,
-            size: 24,
-          ),
-        );
-      },
-    );
+    final result = await SetKdbxGroupDialog.openDialog(context, data);
     if (result is String) {
       data.name = result;
       return _kdbxGroupSave(data);

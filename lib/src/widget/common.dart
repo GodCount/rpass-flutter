@@ -5,6 +5,7 @@ import '../context/kdbx.dart';
 import '../i18n.dart';
 import '../kdbx/icons.dart';
 import '../kdbx/kdbx.dart';
+import '../page/route.dart';
 import 'extension_state.dart';
 
 mixin HintEmptyTextUtil<T extends StatefulWidget> on State<T> {
@@ -257,6 +258,7 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
               await setKdbxGroup(
                 KdbxGroupData(
                   name: '',
+                  notes: '',
                   kdbxIcon: KdbxIconWidgetData(
                     icon: KdbxIcon.Folder,
                   ),
@@ -302,6 +304,140 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
             widget.onResult(null);
           },
           child: Text(t.cancel),
+        ),
+      ],
+    );
+  }
+}
+
+class SetKdbxGroupDialog extends StatefulWidget {
+  const SetKdbxGroupDialog({
+    super.key,
+    required this.kdbxGroupData,
+    required this.onResult,
+  });
+
+  final KdbxGroupData kdbxGroupData;
+  final FormFieldSetter<KdbxGroupData> onResult;
+
+  static Future<Object?> openDialog(
+      BuildContext context, KdbxGroupData kdbxGroupData) {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return SetKdbxGroupDialog(
+          kdbxGroupData: kdbxGroupData,
+          onResult: (value) {
+            context.router.pop(value);
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  State<SetKdbxGroupDialog> createState() => SetKdbxGroupDialogState();
+}
+
+class SetKdbxGroupDialogState extends State<SetKdbxGroupDialog> {
+  late final KdbxGroupData _kdbxGroupData = widget.kdbxGroupData.clone();
+
+  @override
+  Widget build(BuildContext context) {
+    final t = I18n.of(context)!;
+
+    return AlertDialog(
+      title: Text(_kdbxGroupData.kdbxGroup != null ? t.modify : t.create),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            autofocus: true,
+            initialValue: _kdbxGroupData.name,
+            textInputAction: TextInputAction.done,
+            onChanged: (value) {
+              _kdbxGroupData.name = value;
+              setState(() {});
+            },
+            decoration: InputDecoration(
+              label: Text(t.title),
+              border: const OutlineInputBorder(),
+              prefixIcon: IconButton(
+                onPressed: () async {
+                  final reslut = await context.router.push(SelectIconRoute());
+                  if (reslut != null && reslut is KdbxIconWidgetData) {
+                    _kdbxGroupData.kdbxIcon = reslut;
+                    setState(() {});
+                  }
+                },
+                icon: KdbxIconWidget(
+                  kdbxIcon: _kdbxGroupData.kdbxIcon,
+                  size: 24,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: () async {
+              final text = await context.router.push(EditNotesRoute(
+                text: _kdbxGroupData.notes,
+              ));
+
+              if (text != null && text is String) {
+                _kdbxGroupData.notes = text;
+                setState(() {});
+              }
+            },
+            child: InputDecorator(
+              isEmpty: _kdbxGroupData.notes.isEmpty,
+              decoration: InputDecoration(
+                labelText: t.description,
+                border: const OutlineInputBorder(),
+              ),
+              child: _kdbxGroupData.notes.isNotEmpty
+                  ? Text(_kdbxGroupData.notes, maxLines: 3)
+                  : null,
+            ),
+          ),
+          ListTile(
+            trailing: Checkbox(
+              tristate: true,
+              value: _kdbxGroupData.enableDisplay,
+              onChanged: (value) {
+                _kdbxGroupData.enableDisplay = value;
+                setState(() {});
+              },
+            ),
+            title: Text("data"),
+            subtitle: Text("data"),
+          ),
+          ListTile(
+            trailing: Checkbox(
+              tristate: true,
+              value: _kdbxGroupData.enableSearching,
+              onChanged: (value) {
+                _kdbxGroupData.enableSearching = value;
+                setState(() {});
+              },
+            ),
+            title: Text("data"),
+            subtitle: Text("data"),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            widget.onResult(null);
+          },
+          child: Text(t.cancel),
+        ),
+        TextButton(
+          onPressed: () {
+            widget.onResult(_kdbxGroupData);
+          },
+          child: Text(t.confirm),
         ),
       ],
     );
