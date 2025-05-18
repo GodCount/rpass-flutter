@@ -124,6 +124,7 @@ class WebdavClient extends RemoteClient<WebdavConfig> {
     return RemoteFile(
       client: this,
       path: file.path!,
+      name: file.name,
       dir: file.isDir ?? false,
       size: file.size ?? 0,
       cTime: file.cTime,

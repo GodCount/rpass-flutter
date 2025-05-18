@@ -79,12 +79,19 @@ class _ImportRemoteKdbxState extends State<ImportRemoteKdbxPage> {
 
       if (_currentFileNode.file == null && node == null) {
         // 根目录
-        _currentFileNode.children = (await widget.client.readdir(""))
-            .map((item) => RemoteFileNode(
-                  file: item,
-                  parent: _currentFileNode,
-                ))
-            .toList();
+
+        final info = await widget.client.readFileInfo("");
+
+        if (info.dir) {
+          _currentFileNode.children = (await widget.client.readdir(""))
+              .map((item) => RemoteFileNode(
+                    file: item,
+                    parent: _currentFileNode,
+                  ))
+              .toList();
+        } else {
+          _currentFileNode.children = [RemoteFileNode(file: info)];
+        }
       } else if (node == null) {
         // 刷新
         _currentFileNode.children = (await _currentFileNode.file!.readdir())

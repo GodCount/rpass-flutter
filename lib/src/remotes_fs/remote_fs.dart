@@ -90,8 +90,12 @@ class RemoteFile {
     int size = 0,
     DateTime? cTime,
     DateTime? mTime,
+    String? name,
   })  : _client = client,
         _path = path,
+        _name = name ?? (path.endsWith("/")
+                ? path.substring(0, path.length - 1).split("/").last
+                : path.split("/").last),
         _dir = dir,
         _size = size,
         _cTime = cTime,
@@ -102,15 +106,14 @@ class RemoteFile {
   late bool _dir;
   late int _size;
   late String _path;
+  late String _name;
   late DateTime? _cTime;
   late DateTime? _mTime;
 
   bool get dir => _dir;
   int get size => _size;
   String get path => _path;
-  String get name => path.endsWith("/")
-      ? path.substring(0, path.length - 1).split("/").last
-      : path.split("/").last;
+  String get name => _name;
   DateTime? get cTime => _cTime;
   DateTime? get mTime => _mTime;
 
@@ -120,6 +123,7 @@ class RemoteFile {
     _path = file.path;
     _cTime = file.cTime;
     _mTime = file.mTime;
+    _name = file.name;
   }
 
   Future<void> write(
