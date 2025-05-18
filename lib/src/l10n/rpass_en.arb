@@ -262,5 +262,12 @@
     "change": "Change",
     "remove": "Remove",
     "select_account": "Select Account",
-    "custom": "Customize"
+    "custom": "Customize",
+    "display": "Display",
+    "enable_display_true_subtitle": "Included in the home page list",
+    "enable_display_false_subtitle": "Excluded from the home page list",
+    "enable_display_null_subtitle": "Inherit display settings",
+    "enable_searching_true_subtitle": "Included in search",
+    "enable_searching_false_subtitle": "Excluded from search",
+    "enable_searching_null_subtitle": "Inherit search settings"
 }

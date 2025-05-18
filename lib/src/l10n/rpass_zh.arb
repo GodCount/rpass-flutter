@@ -262,5 +262,12 @@
     "change": "更改",
     "remove": "移除",
     "select_account": "选择账号",
-    "custom": "自定义"
+    "custom": "自定义",
+    "display": "显示",
+    "enable_display_true_subtitle": "包含在主页列表中",
+    "enable_display_false_subtitle": "排除在主页列表外",
+    "enable_display_null_subtitle": "继承显示设置",
+    "enable_searching_true_subtitle": "包含在搜索中",
+    "enable_searching_false_subtitle": "排除在搜索外",
+    "enable_searching_null_subtitle": "继承搜索设置"
 }

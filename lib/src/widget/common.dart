@@ -421,8 +421,12 @@ class SetKdbxGroupDialogState extends State<SetKdbxGroupDialog> {
                 setState(() {});
               },
             ),
-            title: Text("data"),
-            subtitle: Text("data"),
+            title: Text(t.display),
+            subtitle: Text(switch (_kdbxGroupData.enableDisplay) {
+              true => t.enable_display_true_subtitle,
+              false => t.enable_display_false_subtitle,
+              null => t.enable_display_null_subtitle
+            }),
           ),
           ListTile(
             trailing: Checkbox(
@@ -433,8 +437,12 @@ class SetKdbxGroupDialogState extends State<SetKdbxGroupDialog> {
                 setState(() {});
               },
             ),
-            title: Text("data"),
-            subtitle: Text("data"),
+            title: Text(t.search),
+            subtitle: Text(switch (_kdbxGroupData.enableSearching) {
+              true => t.enable_searching_true_subtitle,
+              false => t.enable_searching_false_subtitle,
+              null => t.enable_searching_null_subtitle
+            }),
           ),
         ],
       ),

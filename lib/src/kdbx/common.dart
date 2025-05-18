@@ -206,7 +206,7 @@ class KbdxSearchHandler {
         Map.from(MAP_FIELD_TABLE)..addAll(_customFieldTable),
       );
 
-      sourceList.where((item) {
+      result = sourceList.where((item) {
         if (useKdbxEntryConfig && !item.enableSearching()) {
           return false;
         }
