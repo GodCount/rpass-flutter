@@ -259,6 +259,11 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
                                 readOnly: !isPassword,
                                 autofocus: true,
                                 textInputAction: TextInputAction.next,
+                                onEditingComplete:
+                                    authType == AuthorizedType.verify_owner ||
+                                            authType == AuthorizedType.load
+                                        ? _confirm
+                                        : null,
                                 decoration: InputDecoration(
                                   labelText:
                                       isPassword ? t.password : t.none_password,

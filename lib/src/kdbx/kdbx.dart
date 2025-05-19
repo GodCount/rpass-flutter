@@ -124,10 +124,6 @@ class FieldStatistic {
   }
 }
 
-extension KdbxMetaExt on KdbxMeta {
-  DateTimeUtcNode get lastSaveTime => DateTimeUtcNode(this, 'LastSaveTime');
-}
-
 extension KdbxMetaCommon on KdbxBase {
   String get version => kdbxFile.header.version.toString();
   String get generator => kdbxFile.body.meta.generator.get() ?? '';
@@ -147,8 +143,6 @@ extension KdbxMetaCommon on KdbxBase {
       kdbxFile.body.meta.customIcons.values;
 
   KdbxCustomData get customData => kdbxFile.body.meta.customData;
-
-  DateTime? get lastSaveTime => kdbxFile.body.meta.lastSaveTime.get();
 
   set databaseName(String value) {
     kdbxFile.body.meta.databaseName.set(value);
@@ -457,8 +451,6 @@ class Kdbx extends KdbxBase
   Future<Uint8List> save([String? filepath]) async {
     this.filepath ??= filepath;
     if (this.filepath != null) {
-      kdbxFile.body.meta.lastSaveTime.setToNow();
-
       final data = await kdbxFile.save();
 
       await File(this.filepath!).writeAsBytes(data);

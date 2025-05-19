@@ -39,8 +39,6 @@ class SyncKdbxController with ChangeNotifier {
 
   Future<void> sync(
     BuildContext context, {
-    // 通过 lastSaveTime 判断是否需要合并
-    // forceMerge is true 跳过 lastSaveTime 判断
     bool forceMerge = false,
   }) async {
     try {
@@ -114,43 +112,57 @@ class SyncKdbxController with ChangeNotifier {
         }
       }
 
-      final lastSaveEqual = kdbx.lastSaveTime != null &&
-          kdbx.lastSaveTime == remoteKdbx.lastSaveTime;
+      final isUpdateMasterKey = remoteKdbx.kdbxFile.body.meta.masterKeyChanged
+          .isAfter(kdbx.kdbxFile.body.meta.masterKeyChanged);
 
-      if (!forceMerge && lastSaveEqual) {
-        _logger.info("last save uuid equal skip merge");
-        return;
-      }
+      final masterKeyChanged = isUpdateMasterKey ||
+          remoteKdbx.kdbxFile.body.meta.masterKeyChanged.get() !=
+              kdbx.kdbxFile.body.meta.masterKeyChanged.get();
 
-      if (forceMerge) {
-        _logger.info("force merge, lastSaveTime: $lastSaveEqual");
-      }
+      final kdbxObjectTotalBefore =
+          kdbx.kdbxFile.body.rootGroup.getAllGroupsAndEntries().length;
+      final remoteKdbxObjectTotal =
+          remoteKdbx.kdbxFile.body.rootGroup.getAllGroupsAndEntries().length;
 
       _lastMergeContext = kdbx.merge(remoteKdbx);
 
+      final kdbxObjectTotalAfter =
+          kdbx.kdbxFile.body.rootGroup.getAllGroupsAndEntries().length;
+
+      // 本地和远程增删变化
+      final totalChanged = kdbxObjectTotalBefore != kdbxObjectTotalAfter ||
+          kdbxObjectTotalAfter != remoteKdbxObjectTotal;
+      final fieldChanged = _lastMergeContext!.changes.isNotEmpty;
+
       // 密钥不相等
       // 如果远程的比本地的新，则覆盖本地的
-      if (kdbx.credentials != remoteKdbx.credentials) {
+      if (isUpdateMasterKey) {
         _logger.info("credentials not equal!");
 
-        // TODO! 更新本地密钥
-        // 更新指纹识别
-
-        // if (remoteKdbx.lastSaveTime != null &&
-        //     kdbx.lastSaveTime != null &&
-        //     remoteKdbx.lastSaveTime!.isAfter(kdbx.lastSaveTime!)) {
-        //   _logger.info("remote credentials override local");
-        //   kdbx.modifyCredentials(remoteKdbx.credentials);
-        // }
+        // TODO! 更新指纹识别
       }
 
       final newlyData = await kdbx.save();
 
       _logger.info("merge save in local.");
 
-      await remoteFile.write(newlyData);
+      _logger.info(
+        "{masterKeyChanged=$masterKeyChanged, totalChanged=$totalChanged, "
+        "fieldChanged=$fieldChanged}, forceMerge={$forceMerge}",
+      );
 
-      _logger.info("sync data write to remote file, done.");
+      // 在这种情况下需要更新远程文件
+      if (masterKeyChanged || totalChanged || fieldChanged || forceMerge) {
+        // TODO！上传因意外中断可能会导致远程数据丢失
+        // 解决 先上传为一个临时文件
+        // 成功后，删除原文件，再重命名临时文件为原文件
+        await remoteFile.write(newlyData);
+
+        _logger.info("sync data write to remote file, done.");
+      } else {
+        // 没有变化
+        _lastMergeContext = null;
+      }
     } catch (e) {
       _lastError = e;
       // rethrow;

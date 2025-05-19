@@ -85,17 +85,22 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
 
   KdbxEntry? _showMenu;
 
+  VoidCallback? _removeKdbxListener;
+
   bool get _isAllSelect => _selecteds.length == _totalEntry.length;
 
   @override
   void initState() {
+    final kdbx = KdbxProvider.of(context)!;
+
+    _kbdxSearchHandler.setFieldOther(kdbx.fieldStatistic.customFields);
+
+    kdbx.addListener(_search);
+    _removeKdbxListener = () => kdbx.removeListener(_search);
+
     _searchController.addListener(_search);
-    Future.delayed(Duration.zero, () {
-      _kbdxSearchHandler.setFieldOther(
-        KdbxProvider.of(context)!.fieldStatistic.customFields,
-      );
-      _search();
-    });
+
+    _search();
     super.initState();
   }
 
@@ -116,6 +121,8 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
   void dispose() {
     _searchController.dispose();
     _selecteds.clear();
+    _removeKdbxListener?.call();
+    _removeKdbxListener = null;
     super.dispose();
   }
 
