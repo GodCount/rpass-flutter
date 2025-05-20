@@ -171,7 +171,7 @@ class KbdxSearchHandler {
           break;
         case "Group":
           if (item.value.isNotEmpty &&
-              kdbxEntry.parent?.name.get() != item.value) {
+              kdbxEntry.parent.name.get() != item.value) {
             return false;
           }
           break;

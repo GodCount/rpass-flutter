@@ -216,7 +216,7 @@ class _EditAccountPageState extends State<EditAccountPage>
     final children = [
       KdbxEntryGroup(
         initialValue:
-            _kdbxEntry.parent != null && _kdbxEntry.parent != kdbx.virtualGroup
+            _kdbxEntry.parent != kdbx.virtualGroup
                 ? _kdbxEntry.parent
                 : kdbx.kdbxFile.body.rootGroup,
         onSaved: _kdbxEntryGroupSave,

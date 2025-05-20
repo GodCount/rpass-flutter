@@ -613,7 +613,7 @@ class _PasswordItemState extends State<_PasswordItem>
             Align(
               alignment: Alignment.centerRight,
               child: Text(
-                kdbxEntry.parent?.name.get() ?? '',
+                kdbxEntry.parent.name.get() ?? '',
                 overflow: TextOverflow.ellipsis,
               ),
             ),

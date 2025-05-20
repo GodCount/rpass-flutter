@@ -148,7 +148,7 @@ class _SyncAccountPageState extends State<SyncAccountPage>
               spacing: 6,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: merge.changes.map((item) {
-                return Text("${item.object}");
+                return Text("[${item.debug}] ${item.object}");
               }).toList(),
             ),
           ),
@@ -179,9 +179,7 @@ class _SyncAccountPageState extends State<SyncAccountPage>
             child: Column(
               spacing: 6,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: merge.deletedObjects.entries
-                  .where((item) => item.key != null)
-                  .map((item) {
+              children: merge.deletedObjects.entries.map((item) {
                 return Text("${item.key}");
               }).toList(),
             ),

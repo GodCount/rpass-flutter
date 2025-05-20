@@ -162,17 +162,17 @@ class _LookAccountPageState extends State<LookAccountPage>
                     padding: const EdgeInsets.only(right: 6),
                     child: KdbxIconWidget(
                       kdbxIcon: KdbxIconWidgetData(
-                        icon: kdbxEntry.parent?.icon.get() ?? KdbxIcon.Key,
-                        customIcon: kdbxEntry.parent?.customIcon,
+                        icon: kdbxEntry.parent.icon.get() ?? KdbxIcon.Key,
+                        customIcon: kdbxEntry.parent.customIcon,
                       ),
                       size: 24,
                     ),
                   ),
                   hintEmptyText(
-                    (kdbxEntry.parent?.name.get() ?? '').isEmpty,
+                    (kdbxEntry.parent.name.get() ?? '').isEmpty,
                     Expanded(
                       child: Text(
-                        kdbxEntry.parent?.name.get() ?? '',
+                        kdbxEntry.parent.name.get() ?? '',
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,

@@ -112,51 +112,29 @@ class SyncKdbxController with ChangeNotifier {
         }
       }
 
-      final isUpdateMasterKey = remoteKdbx.kdbxFile.body.meta.masterKeyChanged
-          .isAfter(kdbx.kdbxFile.body.meta.masterKeyChanged);
-
-      final masterKeyChanged = isUpdateMasterKey ||
-          remoteKdbx.kdbxFile.body.meta.masterKeyChanged.get() !=
-              kdbx.kdbxFile.body.meta.masterKeyChanged.get();
-
-      final kdbxObjectTotalBefore =
-          kdbx.kdbxFile.body.rootGroup.getAllGroupsAndEntries().length;
-      final remoteKdbxObjectTotal =
-          remoteKdbx.kdbxFile.body.rootGroup.getAllGroupsAndEntries().length;
-
-      _lastMergeContext = kdbx.merge(remoteKdbx);
-
-      final kdbxObjectTotalAfter =
-          kdbx.kdbxFile.body.rootGroup.getAllGroupsAndEntries().length;
-
-      // 本地和远程增删变化
-      final totalChanged = kdbxObjectTotalBefore != kdbxObjectTotalAfter ||
-          kdbxObjectTotalAfter != remoteKdbxObjectTotal;
-      final fieldChanged = _lastMergeContext!.changes.isNotEmpty;
-
-      // 密钥不相等
-      // 如果远程的比本地的新，则覆盖本地的
-      if (isUpdateMasterKey) {
-        _logger.info("credentials not equal!");
-
-        // TODO! 更新指纹识别
-      }
-
-      final newlyData = await kdbx.save();
+      final syncMergeContext = await kdbx.sync(remoteKdbx);
+      _lastMergeContext = syncMergeContext.mergeContext;
 
       _logger.info("merge save in local.");
 
+      // 如果远程的比本地的新，则覆盖本地的
+      if (syncMergeContext.isUpdateMasterKey) {
+        // TODO! 更新指纹识别
+      }
+
       _logger.info(
-        "{masterKeyChanged=$masterKeyChanged, totalChanged=$totalChanged, "
-        "fieldChanged=$fieldChanged}, forceMerge={$forceMerge}",
+        "{masterKeyChanged=${syncMergeContext.masterKeyChanged}, "
+        "fieldChanged=${syncMergeContext.fieldChanged}, forceMerge=$forceMerge}",
       );
 
       // 在这种情况下需要更新远程文件
-      if (masterKeyChanged || totalChanged || fieldChanged || forceMerge) {
+      if (syncMergeContext.masterKeyChanged ||
+          syncMergeContext.fieldChanged ||
+          forceMerge) {
         // TODO！上传因意外中断可能会导致远程数据丢失
         // 解决 先上传为一个临时文件
         // 成功后，删除原文件，再重命名临时文件为原文件
-        await remoteFile.write(newlyData);
+        await remoteFile.write(syncMergeContext.data!);
 
         _logger.info("sync data write to remote file, done.");
       } else {
@@ -165,7 +143,6 @@ class SyncKdbxController with ChangeNotifier {
       }
     } catch (e) {
       _lastError = e;
-      // rethrow;
     } finally {
       _isSyncing = false;
       notifyListeners();

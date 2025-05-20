@@ -28,7 +28,7 @@ export 'package:kdbx/kdbx.dart'
         MergeContext;
 
 abstract class KdbxBase {
-  abstract final KdbxFile kdbxFile;
+  KdbxFile get kdbxFile;
 }
 
 class KdbxCustomDataKey {
@@ -381,14 +381,38 @@ extension KdbxSync on KdbxBase {
   }
 }
 
+class SyncMergeContext {
+  SyncMergeContext({
+    required this.mergeContext,
+    this.isUpdateMasterKey = false,
+    this.masterKeyChanged = false,
+  });
+
+  final MergeContext mergeContext;
+
+  /// 当远程 kdbx 密钥是新的，则需要更新本地 指纹密钥
+  final bool isUpdateMasterKey;
+
+  /// 本地和远程密钥不一致
+  final bool masterKeyChanged;
+
+  /// 字段有变化
+  bool get fieldChanged => mergeContext.changes.isNotEmpty;
+
+  /// kdbx 文件
+  Uint8List? data;
+}
+
 class Kdbx extends KdbxBase
     with KdbxEntryFieldStatistic, KdbxVirtualObject, ChangeNotifier {
-  Kdbx({required this.kdbxFile, this.filepath});
+  Kdbx({required KdbxFile kdbxFile, this.filepath}) : _kdbxFile = kdbxFile;
 
-  @override
-  final KdbxFile kdbxFile;
+  KdbxFile _kdbxFile;
 
   String? filepath;
+
+  @override
+  KdbxFile get kdbxFile => _kdbxFile;
 
   static Kdbx create({
     required Credentials credentials,
@@ -462,8 +486,36 @@ class Kdbx extends KdbxBase
     }
   }
 
-  MergeContext merge(Kdbx kdbx) {
-    return kdbxFile.merge(kdbx.kdbxFile);
+  Future<SyncMergeContext> sync(Kdbx remoteKdbx) async {
+    final isUpdateMasterKey = remoteKdbx.kdbxFile.body.meta.masterKeyChanged
+        .isAfter(kdbxFile.body.meta.masterKeyChanged);
+
+    final masterKeyChanged = isUpdateMasterKey ||
+        remoteKdbx.kdbxFile.body.meta.masterKeyChanged.get() !=
+            kdbxFile.body.meta.masterKeyChanged.get();
+
+    // 以远程的为基准
+    // 从远程的 合并 本地的
+    // 始终保持本地和远程数据一致
+    final syncMergeContext = SyncMergeContext(
+      // TODO! changes 只记录了本地的更改，远程更改没有记录
+      // 影响日志展示
+      mergeContext: remoteKdbx.kdbxFile.merge(kdbxFile),
+      isUpdateMasterKey: isUpdateMasterKey,
+      masterKeyChanged: masterKeyChanged,
+    );
+
+    final tmpKdbxFile = kdbxFile;
+
+    try {
+      _kdbxFile = remoteKdbx.kdbxFile;
+      syncMergeContext.data = await save();
+    } catch (e) {
+      _kdbxFile = tmpKdbxFile;
+      rethrow;
+    }
+
+    return syncMergeContext;
   }
 }
 
