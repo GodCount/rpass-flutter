@@ -234,6 +234,7 @@ class _GroupsItemState extends State<_GroupsItem>
       },
       child: ListTile(
         selected: _selected || _showMenu,
+        isThreeLine: true,
         leading: KdbxIconWidget(
           kdbxIcon: KdbxIconWidgetData(
             icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
@@ -246,12 +247,23 @@ class _GroupsItemState extends State<_GroupsItem>
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
         ),
-        subtitle: kdbxGroup.times.creationTime.get() != null
-            ? Text(
-                kdbxGroup.times.creationTime.get()!.toLocal().formatDate,
-                overflow: TextOverflow.ellipsis,
+        subtitle: Column(
+          children: [
+            Text(
+              kdbxGroup.notes.get() ?? "",
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (kdbxGroup.times.creationTime.get() != null)
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  kdbxGroup.times.creationTime.get()!.toLocal().formatDate,
+                  overflow: TextOverflow.ellipsis,
+                ),
               )
-            : null,
+          ],
+        ),
         onTap: () {
           context.router.platformNavigate(
             ManageGroupEntryRoute(

@@ -6,6 +6,7 @@ import '../i18n.dart';
 import '../kdbx/icons.dart';
 import '../kdbx/kdbx.dart';
 import '../page/route.dart';
+import '../util/common.dart';
 import 'extension_state.dart';
 
 mixin HintEmptyTextUtil<T extends StatefulWidget> on State<T> {
@@ -360,91 +361,99 @@ class SetKdbxGroupDialogState extends State<SetKdbxGroupDialog> {
 
     return AlertDialog(
       title: Text(_kdbxGroupData.kdbxGroup != null ? t.modify : t.create),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextFormField(
-            autofocus: true,
-            initialValue: _kdbxGroupData.name,
-            textInputAction: TextInputAction.done,
-            onChanged: (value) {
-              _kdbxGroupData.name = value;
-              setState(() {});
-            },
-            decoration: InputDecoration(
-              label: Text(t.title),
-              border: const OutlineInputBorder(),
-              prefixIcon: IconButton(
-                onPressed: () async {
-                  final reslut = await context.router.push(SelectIconRoute());
-                  if (reslut != null && reslut is KdbxIconWidgetData) {
-                    _kdbxGroupData.kdbxIcon = reslut;
-                    setState(() {});
-                  }
-                },
-                icon: KdbxIconWidget(
-                  kdbxIcon: _kdbxGroupData.kdbxIcon,
-                  size: 24,
+      content: SizedBox(
+        // 移动端不需要限制宽度
+        width: isDesktop ? 375 : null,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              autofocus: true,
+              initialValue: _kdbxGroupData.name,
+              textInputAction: TextInputAction.done,
+              onChanged: (value) {
+                _kdbxGroupData.name = value;
+                setState(() {});
+              },
+              decoration: InputDecoration(
+                label: Text(t.title),
+                border: const OutlineInputBorder(),
+                prefixIcon: IconButton(
+                  onPressed: () async {
+                    final reslut = await context.router.push(SelectIconRoute());
+                    if (reslut != null && reslut is KdbxIconWidgetData) {
+                      _kdbxGroupData.kdbxIcon = reslut;
+                      setState(() {});
+                    }
+                  },
+                  icon: KdbxIconWidget(
+                    kdbxIcon: _kdbxGroupData.kdbxIcon,
+                    size: 24,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          GestureDetector(
-            onTap: () async {
-              final text = await context.router.push(EditNotesRoute(
-                text: _kdbxGroupData.notes,
-              ));
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: () async {
+                final text = await context.router.push(EditNotesRoute(
+                  text: _kdbxGroupData.notes,
+                ));
 
-              if (text != null && text is String) {
-                _kdbxGroupData.notes = text;
-                setState(() {});
-              }
-            },
-            child: InputDecorator(
-              isEmpty: _kdbxGroupData.notes.isEmpty,
-              decoration: InputDecoration(
-                labelText: t.description,
-                border: const OutlineInputBorder(),
+                if (text != null && text is String) {
+                  _kdbxGroupData.notes = text;
+                  setState(() {});
+                }
+              },
+              child: InputDecorator(
+                isEmpty: _kdbxGroupData.notes.isEmpty,
+                decoration: InputDecoration(
+                  labelText: t.description,
+                  border: const OutlineInputBorder(),
+                ),
+                child: _kdbxGroupData.notes.isNotEmpty
+                    ? Text(
+                        _kdbxGroupData.notes,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      )
+                    : null,
               ),
-              child: _kdbxGroupData.notes.isNotEmpty
-                  ? Text(_kdbxGroupData.notes, maxLines: 3)
-                  : null,
             ),
-          ),
-          ListTile(
-            trailing: Checkbox(
-              tristate: true,
-              value: _kdbxGroupData.enableDisplay,
-              onChanged: (value) {
-                _kdbxGroupData.enableDisplay = value;
-                setState(() {});
-              },
+            ListTile(
+              trailing: Checkbox(
+                tristate: true,
+                value: _kdbxGroupData.enableDisplay,
+                onChanged: (value) {
+                  _kdbxGroupData.enableDisplay = value;
+                  setState(() {});
+                },
+              ),
+              title: Text(t.display),
+              subtitle: Text(switch (_kdbxGroupData.enableDisplay) {
+                true => t.enable_display_true_subtitle,
+                false => t.enable_display_false_subtitle,
+                null => t.enable_display_null_subtitle
+              }),
             ),
-            title: Text(t.display),
-            subtitle: Text(switch (_kdbxGroupData.enableDisplay) {
-              true => t.enable_display_true_subtitle,
-              false => t.enable_display_false_subtitle,
-              null => t.enable_display_null_subtitle
-            }),
-          ),
-          ListTile(
-            trailing: Checkbox(
-              tristate: true,
-              value: _kdbxGroupData.enableSearching,
-              onChanged: (value) {
-                _kdbxGroupData.enableSearching = value;
-                setState(() {});
-              },
+            ListTile(
+              trailing: Checkbox(
+                tristate: true,
+                value: _kdbxGroupData.enableSearching,
+                onChanged: (value) {
+                  _kdbxGroupData.enableSearching = value;
+                  setState(() {});
+                },
+              ),
+              title: Text(t.search),
+              subtitle: Text(switch (_kdbxGroupData.enableSearching) {
+                true => t.enable_searching_true_subtitle,
+                false => t.enable_searching_false_subtitle,
+                null => t.enable_searching_null_subtitle
+              }),
             ),
-            title: Text(t.search),
-            subtitle: Text(switch (_kdbxGroupData.enableSearching) {
-              true => t.enable_searching_true_subtitle,
-              false => t.enable_searching_false_subtitle,
-              null => t.enable_searching_null_subtitle
-            }),
-          ),
-        ],
+          ],
+        ),
       ),
       actions: [
         TextButton(

@@ -215,10 +215,9 @@ class _EditAccountPageState extends State<EditAccountPage>
 
     final children = [
       KdbxEntryGroup(
-        initialValue:
-            _kdbxEntry.parent != kdbx.virtualGroup
-                ? _kdbxEntry.parent
-                : kdbx.kdbxFile.body.rootGroup,
+        initialValue: _kdbxEntry.parent != kdbx.virtualGroup
+            ? _kdbxEntry.parent
+            : kdbx.kdbxFile.body.rootGroup,
         onSaved: _kdbxEntryGroupSave,
       ),
       ...KdbxKeyCommon.all.map(
@@ -663,6 +662,8 @@ class _EntryFieldState extends State<EntryField> {
           label: _kdbKey2I18n(),
           onSaved: _kdbxTextFieldSaved,
         );
+      // case KdbxKeySpecial.KEY_AUTO_TYPE:
+      //   return ;
       case KdbxKeySpecial.KEY_TAGS:
         final tags = widget.kdbxEntry.tagList;
         return ChipListFormField(

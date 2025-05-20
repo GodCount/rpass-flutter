@@ -27,6 +27,8 @@ export 'package:kdbx/kdbx.dart'
         KdbxInvalidKeyException,
         MergeContext;
 
+const defaultAutoTypeSequence = "{USERNAME}{TAB}{PASSWORD}{ENTER}";
+
 abstract class KdbxBase {
   KdbxFile get kdbxFile;
 }
@@ -42,12 +44,14 @@ class KdbxKeySpecial {
   static const KEY_TAGS = 'Tags';
   static const KEY_ATTACH = 'Attach';
   static const KEY_EXPIRES = "expires";
+  static const KEY_AUTO_TYPE = "AutoType";
 
   static KdbxKey TAGS = KdbxKey(KEY_TAGS);
   static KdbxKey ATTACH = KdbxKey(KEY_ATTACH);
   static KdbxKey EXPIRES = KdbxKey(KEY_EXPIRES);
+  static KdbxKey AUTO_TYPE = KdbxKey(KEY_AUTO_TYPE);
 
-  static List<KdbxKey> all = [TAGS, ATTACH, EXPIRES];
+  static List<KdbxKey> all = [AUTO_TYPE, TAGS, ATTACH, EXPIRES];
 }
 
 class KdbxKeyCommon {
@@ -591,6 +595,28 @@ extension KdbxEntryCommon on KdbxEntry {
   /// 当前 Entry 是否包含在搜索结果中
   /// 默认 包含
   bool enableSearching() => _findEnabled(_FindEnabledType.Searching, parent);
+}
+
+extension KdbxEntryAutoType on KdbxEntry {
+  String _findAutoTypeSequence(KdbxGroup? group) {
+    if (group == null) return defaultAutoTypeSequence;
+
+    final sequence = group.defaultAutoTypeSequence.get();
+    if (sequence != null && sequence.isNotEmpty) {
+      return sequence;
+    }
+
+    return _findAutoTypeSequence(group.parent);
+  }
+
+  String getAutoTypeSequence() {
+    String sequence = autoType.defaultSequence.get() ?? "";
+    return sequence.isNotEmpty ? sequence : _findAutoTypeSequence(parent);
+  }
+
+  void setAutoTyprSequence(String sequence) {
+    autoType.defaultSequence.set(sequence);
+  }
 }
 
 extension KdbxUuidCommon on KdbxUuid {

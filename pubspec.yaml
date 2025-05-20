@@ -69,6 +69,7 @@ dependencies:
       ref: main
   dio: ^5.8.0+1
   flutter_context_menu: ^0.2.2
+  rich_text_controller: ^3.0.1
 
 dev_dependencies:
   flutter_test:
