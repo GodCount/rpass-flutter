@@ -76,27 +76,25 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
   }
 
   void _insertTextAtCursor(String textToInsert) {
-    final text = _controller!.text;
-    TextSelection selection = _controller!.selection;
+    final selection = _controller!.selection;
 
-    final newText = text.replaceRange(
+    _controller!.text = _controller!.text.replaceRange(
       selection.start,
       selection.end,
       textToInsert,
     );
 
-    selection = TextSelection.collapsed(
-      offset: selection.start + textToInsert.length,
-    );
-
-    // TODO! 会导致文本全选
-
     _focusNode.requestFocus();
 
-    _controller!.value = TextEditingValue(
-      text: newText,
-      selection: selection,
-    );
+    /// 请求焦点时,会全选文本 !!!!
+    /// 在下一帧移动光标到指定位置
+    /// TODO! 可能会因为全选文本后又移动光标导致闪烁
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _controller!.selection = TextSelection.collapsed(
+        offset: selection.start + textToInsert.length,
+      );
+    });
   }
 
   @override
