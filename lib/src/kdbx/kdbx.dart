@@ -11,6 +11,7 @@ import 'icons.dart';
 
 export 'common.dart';
 export 'adapter/adapter.dart';
+export 'auto_type.dart';
 export 'package:kdbx/kdbx.dart'
     show
         KdbxEntry,
@@ -27,7 +28,7 @@ export 'package:kdbx/kdbx.dart'
         KdbxInvalidKeyException,
         MergeContext;
 
-const defaultAutoTypeSequence = "{USERNAME}{TAB}{PASSWORD}{ENTER}";
+const defaultAutoTypeSequence = "{UserName}{TAB}{Password}{ENTER}";
 
 abstract class KdbxBase {
   KdbxFile get kdbxFile;

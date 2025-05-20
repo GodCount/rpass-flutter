@@ -111,6 +111,10 @@ RootStackRouter _createMobileAutoRoute() {
         page: EditNotesRoute.page,
       ),
       AutoRoute(
+        path: "/edit_auto_type",
+        page: EditAutoTypeRoute.page,
+      ),
+      AutoRoute(
         path: "/gen_password",
         page: GenPasswordRoute.page,
       ),
@@ -271,6 +275,10 @@ RootStackRouter _createDesktopAutoRoute() {
       AutoRoute(
         path: "/edit_notes",
         page: EditNotesRoute.page,
+      ),
+      AutoRoute(
+        path: "/edit_auto_type",
+        page: EditAutoTypeRoute.page,
       ),
       AutoRoute(
         path: "/gen_password",

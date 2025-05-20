@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
+import 'package:rich_text_controller/rich_text_controller.dart';
 
 import '../../util/route.dart';
 import '../route.dart';
@@ -150,6 +151,8 @@ class _EditAccountPageState extends State<EditAccountPage>
           );
         }
       }
+    } else if (field is EntryAutoTypeFieldSaved) {
+      _kdbxEntry.setAutoTyprSequence(field.value);
     } else if (field is EntryTagsFieldSaved) {
       _kdbxEntry.tagList = field.value;
     } else if (field is EntryTextFieldSaved) {
@@ -332,6 +335,10 @@ class EntryTextFieldSaved extends EntryFieldSaved<StringValue> {
   final KdbxKey? renameKdbxKey;
 }
 
+class EntryAutoTypeFieldSaved extends EntryFieldSaved<String> {
+  EntryAutoTypeFieldSaved({required super.key, required super.value});
+}
+
 class EntryTagsFieldSaved extends EntryFieldSaved<List<String>> {
   EntryTagsFieldSaved({required super.key, required super.value});
 }
@@ -492,6 +499,9 @@ class _EntryFieldState extends State<EntryField> {
         return t.otp;
       case KdbxKeyCommon.KEY_NOTES:
         return t.description;
+      case KdbxKeySpecial.KEY_AUTO_TYPE:
+        // TODO! 翻译
+        return "填充序列";
       case KdbxKeySpecial.KEY_TAGS:
         return t.label;
       case KdbxKeySpecial.KEY_ATTACH:
@@ -662,8 +672,17 @@ class _EntryFieldState extends State<EntryField> {
           label: _kdbKey2I18n(),
           onSaved: _kdbxTextFieldSaved,
         );
-      // case KdbxKeySpecial.KEY_AUTO_TYPE:
-      //   return ;
+      case KdbxKeySpecial.KEY_AUTO_TYPE:
+        return EntryAutoTypeFormField(
+          initialValue: widget.kdbxEntry.getAutoTypeSequence(),
+          label: _kdbKey2I18n(),
+          onSaved: (value) {
+            widget.onSaved(EntryAutoTypeFieldSaved(
+              key: widget.kdbxKey,
+              value: value!,
+            ));
+          },
+        );
       case KdbxKeySpecial.KEY_TAGS:
         final tags = widget.kdbxEntry.tagList;
         return ChipListFormField(
@@ -1123,4 +1142,72 @@ class EntryExpiresFormField extends FormField<(bool, DateTime)> {
             ),
           );
         });
+}
+
+class EntryAutoTypeFormField extends StatelessWidget {
+  const EntryAutoTypeFormField({
+    super.key,
+    this.label,
+    required this.initialValue,
+    this.onSaved,
+  });
+
+  final String? label;
+
+  final String initialValue;
+
+  final FormFieldSetter<String>? onSaved;
+
+  @override
+  Widget build(BuildContext context) {
+    return RichWrapper(
+      initialText: initialValue,
+      targetMatches: [
+        MatchTargetItem.pattern(
+          AutoTypeRichPattern.BUTTON,
+          allowInlineMatching: true,
+          style: Theme.of(context)
+              .textTheme
+              .bodyLarge!
+              .copyWith(color: Colors.blueAccent),
+        ),
+        MatchTargetItem.pattern(
+          AutoTypeRichPattern.KDBX_KEY,
+          allowInlineMatching: true,
+          style: Theme.of(context)
+              .textTheme
+              .bodyLarge!
+              .copyWith(color: Colors.green),
+        ),
+        MatchTargetItem.pattern(
+          AutoTypeRichPattern.SHORTCUT_KEY,
+          allowInlineMatching: true,
+          style: Theme.of(context)
+              .textTheme
+              .bodyLarge!
+              .copyWith(color: Colors.orangeAccent),
+        )
+      ],
+      child: (controller) {
+        return TextFormField(
+          controller: controller,
+          onSaved: onSaved,
+          readOnly: true,
+          decoration: InputDecoration(
+            labelText: label,
+            border: const OutlineInputBorder(),
+          ),
+          onTap: () async {
+            final text = await context.router.push(EditAutoTypeRoute(
+              text: controller.text,
+            ));
+
+            if (text != null && text is String) {
+              controller.text = text;
+            }
+          },
+        );
+      },
+    );
+  }
 }
