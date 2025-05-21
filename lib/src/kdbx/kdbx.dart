@@ -7,6 +7,7 @@ import 'package:kdbx/kdbx.dart' hide KdbxException, KdbxKeyCommon;
 import 'package:uuid/uuid.dart';
 
 import '../rpass.dart';
+import 'auto_type.dart';
 import 'icons.dart';
 
 export 'common.dart';
@@ -44,7 +45,7 @@ class KdbxCustomDataKey {
 class KdbxKeySpecial {
   static const KEY_TAGS = 'Tags';
   static const KEY_ATTACH = 'Attach';
-  static const KEY_EXPIRES = "expires";
+  static const KEY_EXPIRES = "Expires";
   static const KEY_AUTO_TYPE = "AutoType";
 
   static KdbxKey TAGS = KdbxKey(KEY_TAGS);
@@ -617,6 +618,10 @@ extension KdbxEntryAutoType on KdbxEntry {
 
   void setAutoTyprSequence(String sequence) {
     autoType.defaultSequence.set(sequence);
+  }
+
+  AutoTypeSequenceParse parseAutoTypeSequence() {
+    return AutoTypeSequenceParse.parse(getAutoTypeSequence());
   }
 }
 

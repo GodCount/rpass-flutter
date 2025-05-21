@@ -91,8 +91,6 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
 
     _focusNode.requestFocus();
 
-    setState(() {});
-
     /// 请求焦点时,会全选文本 !!!!
     /// 在下一帧移动光标到指定位置
     /// TODO! 可能会因为全选文本后又移动光标导致闪烁
@@ -211,20 +209,22 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
           )
         ],
       ),
-      floatingActionButton: _controller!.text != widget.text
-          ? FloatingActionButton(
-              heroTag: const ValueKey("edit_auto_type_float"),
-              onPressed: () {
-                context.router.pop(_controller!.text);
-              },
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(56 / 2),
-                ),
-              ),
-              child: const Icon(Icons.done),
-            )
-          : null,
+      floatingActionButton: FloatingActionButton(
+        heroTag: const ValueKey("edit_auto_type_float"),
+        onPressed: () {
+          if (_controller!.text != widget.text) {
+            context.router.pop(_controller!.text);
+          } else {
+            context.router.pop();
+          }
+        },
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(56 / 2),
+          ),
+        ),
+        child: const Icon(Icons.done),
+      ),
     );
   }
 }

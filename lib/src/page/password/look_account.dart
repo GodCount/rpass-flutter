@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:logging/logging.dart';
+import 'package:rich_text_controller/rich_text_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../util/route.dart';
@@ -209,6 +210,65 @@ class _LookAccountPageState extends State<LookAccountPage>
                 ],
               ),
             ),
+            if (isDesktop)
+              ListTile(
+                // TODO! 翻译
+                title: const Padding(
+                  padding: EdgeInsets.only(left: 6),
+                  child: Text("自动填充"),
+                ),
+
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: RichWrapper(
+                    initialText: kdbxEntry.getAutoTypeSequence(),
+                    targetMatches: [
+                      MatchTargetItem.pattern(
+                        AutoTypeRichPattern.BUTTON,
+                        allowInlineMatching: true,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall!
+                            .copyWith(color: Colors.blueAccent),
+                      ),
+                      MatchTargetItem.pattern(
+                        AutoTypeRichPattern.KDBX_KEY,
+                        allowInlineMatching: true,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall!
+                            .copyWith(color: Colors.green),
+                      ),
+                      MatchTargetItem.pattern(
+                        AutoTypeRichPattern.SHORTCUT_KEY,
+                        allowInlineMatching: true,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall!
+                            .copyWith(color: Colors.orangeAccent),
+                      )
+                    ],
+                    child: (controller) {
+                      return RichText(
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        text: controller.buildTextSpan(
+                          context: context,
+                          style: Theme.of(context).textTheme.titleSmall,
+                          withComposing: true,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                trailing: IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.ads_click),
+                ),
+                onLongPress: () => writeClipboard(
+                  kdbxEntry.getAutoTypeSequence(),
+                ),
+              ),
             ListTile(
               title: Padding(
                 padding: const EdgeInsets.only(left: 6),

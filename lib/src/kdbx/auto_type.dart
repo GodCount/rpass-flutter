@@ -71,8 +71,8 @@ class AutoTypeRichPattern {
       r")})"
       r"|~";
 
-  static const SHORTCUT_KEY =
-      r"(?=.*[\^\+%])((\^?\+?%?)|(\^?%?\+?)|(\+?\^?%?)|(\+?%?\^?)|(%?\^?\+?)|(%?\+?\^?))[a-zA-Z\d]";
+  // TODO! 需要修复重复出现的问题
+  static const SHORTCUT_KEY = r"[%^+]{1,3}[a-zA-Z\d]";
 
   static const KDBX_KEY =
       r"({(Title|URL|UserName|Email|Password|OTPAuth|Notes)})"
@@ -98,6 +98,11 @@ class TextSequenceItem {
       return false;
     }
     return other is TextSequenceItem && other.value == value;
+  }
+
+  @override
+  String toString() {
+    return "TextSequenceItem{value=$value}";
   }
 }
 
@@ -162,6 +167,12 @@ class ButtonSequenceItem extends TextSequenceItem {
           _ => null,
         };
 
+  factory ButtonSequenceItem.parse(String value) {
+    return ButtonSequenceItem(
+      value != "~" ? value.substring(1, value.length - 1) : value,
+    );
+  }
+
   final PhysicalKeyboardKey? button;
 
   @override
@@ -176,6 +187,11 @@ class ButtonSequenceItem extends TextSequenceItem {
       return false;
     }
     return other is ButtonSequenceItem && other.button == button;
+  }
+
+  @override
+  String toString() {
+    return "ButtonSequenceItem{value=$value,button=$button}";
   }
 }
 
@@ -208,19 +224,8 @@ class ShortcutSequenceItem extends TextSequenceItem {
               _ => _findKeyByCode(item)
             })
         .whereType<PhysicalKeyboardKey>()
+        .toSet()
         .toList();
-
-    if ([
-      PhysicalKeyboardKey.controlLeft,
-      PhysicalKeyboardKey.shiftLeft,
-      PhysicalKeyboardKey.altLeft
-    ].contains(values.last)) {
-      throw Exception("last not button key, is modifiers key $value");
-    }
-
-    if (values.length != values.toSet().length) {
-      throw Exception("repeat key $value");
-    }
 
     if (values.length > 4) {
       throw Exception("exceeded length $value");
@@ -250,6 +255,11 @@ class ShortcutSequenceItem extends TextSequenceItem {
     }
     return other is ShortcutSequenceItem && other.value == value;
   }
+
+  @override
+  String toString() {
+    return "ShortcutSequenceItem{value=$value,key=$key,modifiers=$modifiers}";
+  }
 }
 
 class KdbxSequenceItem extends TextSequenceItem {
@@ -270,6 +280,11 @@ class KdbxSequenceItem extends TextSequenceItem {
       return false;
     }
     return other is KdbxSequenceItem && other.value == value;
+  }
+
+  @override
+  String toString() {
+    return "KdbxSequenceItem{value=$value,key=$key}";
   }
 }
 
@@ -319,7 +334,7 @@ class AutoTypeSequenceParse {
 
   static TextSequenceItem _createTextSequenceItem(String value) {
     if (RegExp(AutoTypeRichPattern.BUTTON).hasMatch(value)) {
-      return ButtonSequenceItem(value.substring(1, value.length - 1));
+      return ButtonSequenceItem.parse(value);
     } else if (RegExp(AutoTypeRichPattern.SHORTCUT_KEY).hasMatch(value)) {
       return ShortcutSequenceItem.parse(value);
     } else if (RegExp(AutoTypeRichPattern.KDBX_KEY).hasMatch(value)) {
