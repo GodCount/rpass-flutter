@@ -674,8 +674,8 @@ class _EntryFieldState extends State<EntryField> {
         );
       case KdbxKeySpecial.KEY_AUTO_TYPE:
         return EntryAutoTypeFormField(
-          initialValue: widget.kdbxEntry.getAutoTypeSequence(),
           label: _kdbKey2I18n(),
+          kdbxEntry: widget.kdbxEntry,
           onSaved: (value) {
             widget.onSaved(EntryAutoTypeFieldSaved(
               key: widget.kdbxKey,
@@ -1148,20 +1148,20 @@ class EntryAutoTypeFormField extends StatelessWidget {
   const EntryAutoTypeFormField({
     super.key,
     this.label,
-    required this.initialValue,
+    required this.kdbxEntry,
     this.onSaved,
   });
 
   final String? label;
 
-  final String initialValue;
+  final KdbxEntry kdbxEntry;
 
   final FormFieldSetter<String>? onSaved;
 
   @override
   Widget build(BuildContext context) {
     return RichWrapper(
-      initialText: initialValue,
+      initialText: kdbxEntry.getAutoTypeSequence(),
       targetMatches: [
         MatchTargetItem.pattern(
           AutoTypeRichPattern.BUTTON,
@@ -1200,6 +1200,7 @@ class EntryAutoTypeFormField extends StatelessWidget {
           onTap: () async {
             final text = await context.router.push(EditAutoTypeRoute(
               text: controller.text,
+              kdbxEntry: kdbxEntry,
             ));
 
             if (text != null && text is String) {

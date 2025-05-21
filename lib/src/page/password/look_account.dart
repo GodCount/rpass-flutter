@@ -112,13 +112,8 @@ class _LookAccountPageState extends State<LookAccountPage>
     final kdbxEntry = widget.kdbxEntry;
     final readOnly = widget.readOnly;
 
-    final defaultFields = [
-      ...KdbxKeyCommon.all,
-      ...KdbxKeySpecial.all,
-    ];
-
     final customFields = kdbxEntry.stringEntries
-        .where((item) => !defaultFields.contains(item.key));
+        .where((item) => !defaultKdbxKeys.contains(item.key));
 
     const shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.only(

@@ -78,13 +78,20 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
   void _insertTextAtCursor(String textToInsert) {
     final selection = _controller!.selection;
 
+    final start =
+        selection.start == -1 ? _controller!.text.length : selection.start;
+
+    final end = selection.end == -1 ? start : selection.end;
+
     _controller!.text = _controller!.text.replaceRange(
-      selection.start,
-      selection.end,
+      start,
+      end,
       textToInsert,
     );
 
     _focusNode.requestFocus();
+
+    setState(() {});
 
     /// 请求焦点时,会全选文本 !!!!
     /// 在下一帧移动光标到指定位置
@@ -92,7 +99,7 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _controller!.selection = TextSelection.collapsed(
-        offset: selection.start + textToInsert.length,
+        offset: start + textToInsert.length,
       );
     });
   }
@@ -132,6 +139,15 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
       ],
     );
 
+    List<String> customFields = [];
+
+    if (widget.kdbxEntry != null) {
+      customFields = widget.kdbxEntry!.stringEntries
+          .where((item) => !defaultKdbxKeys.contains(item.key))
+          .map((item) => item.key.key)
+          .toList();
+    }
+
     return Scaffold(
       appBar: AppBar(
         // TODO! 翻译
@@ -165,6 +181,19 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
                         .toList(),
                   ),
                 ),
+                if (customFields.isNotEmpty)
+                  ListTile(
+                    title: Text("自定义字段"),
+                    subtitle: ChipList(
+                      onChipTap: (item) => _insertTextAtCursor(item.value),
+                      items: customFields
+                          .map((item) => ChipListItem(
+                                label: "{S:$item}",
+                                value: "{S:$item}",
+                              ))
+                          .toList(),
+                    ),
+                  ),
                 ListTile(
                   title: Text("键盘键"),
                   subtitle: ChipList(
