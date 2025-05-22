@@ -105,6 +105,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.2"
+  build_cli_annotations:
+    dependency: transitive
+    description:
+      name: build_cli_annotations
+      sha256: b59d2769769efd6c9ff6d4c4cede0be115a566afc591705c2040b707534b1172
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   build_config:
     dependency: transitive
     description:
@@ -273,6 +281,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.3"
+  enigo_flutter:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: main
+      resolved-ref: dc7537470abd2d8f80aa04dfc528952f841ecdb3
+      url: "https://github.com/GodCount/enigo_flutter.git"
+    source: git
+    version: "0.0.1"
   fake_async:
     dependency: transitive
     description:
@@ -347,6 +364,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.24"
+  flutter_rust_bridge:
+    dependency: transitive
+    description:
+      name: flutter_rust_bridge
+      sha256: b416ff56002789e636244fb4cc449f587656eff995e5a7169457eb0593fcaddb
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.10.0"
   flutter_slidable:
     dependency: "direct main"
     description:

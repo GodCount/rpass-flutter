@@ -42,15 +42,14 @@ class RpassFultterPlugin: NSObject, FlutterPlugin {
         {
             if !application.isCurrentApplication {
                 self.prevActivedApplication = application
-                let args: NSDictionary = [
-                    "name": application.localizedName ?? "",
-                    "bundleId": application.bundleIdentifier ?? "",
-
+                let args = [
+                    "name": application.localizedName
                 ]
                 self.channel.invokeMethod("prev_actived_application", arguments: args)
             }
         } else {
             self.prevActivedApplication = nil
+            self.channel.invokeMethod("prev_actived_application", arguments: ["name": nil])
         }
     }
 
@@ -59,7 +58,13 @@ class RpassFultterPlugin: NSObject, FlutterPlugin {
         // let args: [String: Any] = call.arguments as? [String: Any] ?? [:]
         switch methodName {
         case "activate_prev_application":
-            result(self.prevActivedApplication?.activate(options: .activateAllWindows) ?? false)
+            if let application = self.prevActivedApplication {
+                if !application.isTerminated {
+                    return result(application.activate(options: .activateAllWindows))
+                }
+            }
+            self.prevActivedApplication = nil
+            result(false)
             break
         default:
             result(FlutterMethodNotImplemented)

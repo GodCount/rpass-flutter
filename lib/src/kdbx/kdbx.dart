@@ -7,7 +7,7 @@ import 'package:kdbx/kdbx.dart' hide KdbxException, KdbxKeyCommon;
 import 'package:uuid/uuid.dart';
 
 import '../rpass.dart';
-import 'auto_type.dart';
+import 'auto_fill.dart';
 import 'icons.dart';
 
 export 'common.dart';
@@ -620,8 +620,8 @@ extension KdbxEntryAutoType on KdbxEntry {
     autoType.defaultSequence.set(sequence);
   }
 
-  AutoTypeSequenceParse parseAutoTypeSequence() {
-    return AutoTypeSequenceParse.parse(getAutoTypeSequence());
+  Future<void> autoFill() {
+    return autoFillSequence(this);
   }
 }
 

@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:enigo_flutter/enigo_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 import 'src/context/biometric.dart';
 import 'src/log.dart';
+import 'src/native/channel.dart';
 import 'src/rpass.dart';
 import 'src/app.dart';
 import 'src/store/index.dart';
@@ -20,6 +22,12 @@ void main() async {
   // TODO！桌面端未进行测试
   if (Platform.isAndroid || Platform.isIOS) {
     await BiometricState.initCanAuthenticate();
+  }
+
+  NativeInstancePlatform.ensureInitialized();
+
+  if (Platform.isMacOS || Platform.isWindows) {
+    await RustLib.init();
   }
 
   customErrorWidget();

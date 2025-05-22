@@ -1,6 +1,8 @@
 PODS:
   - biometric_storage (0.0.1):
     - FlutterMacOS
+  - enigo_flutter (0.0.1):
+    - FlutterMacOS
   - file_picker (0.0.1):
     - FlutterMacOS
   - FlutterMacOS (1.0.0)
@@ -19,6 +21,7 @@ PODS:
 
 DEPENDENCIES:
   - biometric_storage (from `Flutter/ephemeral/.symlinks/plugins/biometric_storage/macos`)
+  - enigo_flutter (from `Flutter/ephemeral/.symlinks/plugins/enigo_flutter/macos`)
   - file_picker (from `Flutter/ephemeral/.symlinks/plugins/file_picker/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - mobile_scanner (from `Flutter/ephemeral/.symlinks/plugins/mobile_scanner/macos`)
@@ -30,6 +33,8 @@ DEPENDENCIES:
 EXTERNAL SOURCES:
   biometric_storage:
     :path: Flutter/ephemeral/.symlinks/plugins/biometric_storage/macos
+  enigo_flutter:
+    :path: Flutter/ephemeral/.symlinks/plugins/enigo_flutter/macos
   file_picker:
     :path: Flutter/ephemeral/.symlinks/plugins/file_picker/macos
   FlutterMacOS:
@@ -47,6 +52,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   biometric_storage: 9de0cb4e591e52329ca0da7df42e964db6c526cf
+  enigo_flutter: ea1826845e6fff9e1717a286aa68565ed292c870
   file_picker: 7584aae6fa07a041af2b36a2655122d42f578c1a
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   mobile_scanner: 0e365ed56cad24f28c0fd858ca04edefb40dfac3

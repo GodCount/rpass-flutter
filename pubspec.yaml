@@ -70,6 +70,10 @@ dependencies:
   dio: ^5.8.0+1
   flutter_context_menu: ^0.2.2
   rich_text_controller: ^3.0.1
+  enigo_flutter:
+    git:
+      url: https://github.com/GodCount/enigo_flutter.git
+      ref: main
 
 dev_dependencies:
   flutter_test:

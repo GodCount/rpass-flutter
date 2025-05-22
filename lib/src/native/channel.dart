@@ -1,22 +1,46 @@
-import 'package:flutter/services.dart';
+import 'dart:io';
 
-class NativeChannel {
-  NativeChannel._() {
-    _channel.setMethodCallHandler(_methodCallHandler);
+import 'package:flutter/foundation.dart';
+
+import 'platform/desktop.dart';
+
+abstract mixin class NativeChannelListener {
+  void onTargetAppChange(String? name) {}
+}
+
+class NativeInstancePlatform {
+  static NativeInstancePlatform get instance => _instance!;
+  static NativeInstancePlatform? _instance;
+
+  static void ensureInitialized() {
+    NativeInstancePlatform._instance ??= Platform.isMacOS || Platform.isWindows
+        ? DesktopNativeInstancePlatform()
+        : NativeInstancePlatform();
   }
 
-  static final NativeChannel instance = NativeChannel._();
+  final ObserverList<NativeChannelListener> _listeners =
+      ObserverList<NativeChannelListener>();
 
-  final MethodChannel _channel = const MethodChannel('native_channel_rpass');
+  List<NativeChannelListener> get listeners => List.unmodifiable(_listeners);
 
-  void ensureInitialized() {}
-
-  Future<void> _methodCallHandler(MethodCall call) async {
-    print("${call.method}, ${call.arguments}");
-    // switch (call.method) {}
+  bool get hasListeners {
+    return _listeners.isNotEmpty;
   }
 
+  void addListener(NativeChannelListener listener) {
+    _listeners.add(listener);
+  }
+
+  void removeListener(NativeChannelListener listener) {
+    _listeners.remove(listener);
+  }
+
+  String? get targetAppName => null;
+
+  bool get isTargetAppExist => targetAppName != null;
+
+  /// 激活上一个窗口的焦点
   Future<bool> activatePrevWindow() async {
-    return await _channel.invokeMethod<bool>("activate_prev_application") ?? false;
+    return false;
   }
 }

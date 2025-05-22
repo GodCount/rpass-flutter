@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../native/channel.dart';
 import '../../util/route.dart';
 import '../route.dart';
 import '../../context/kdbx.dart';
@@ -98,12 +99,32 @@ class LookAccountPage extends StatefulWidget {
 }
 
 class _LookAccountPageState extends State<LookAccountPage>
-    with HintEmptyTextUtil, SecondLevelPageAutoBack<LookAccountPage> {
+    with
+        HintEmptyTextUtil,
+        SecondLevelPageAutoBack<LookAccountPage>,
+        NativeChannelListener {
+  @override
+  void initState() {
+    NativeInstancePlatform.instance.addListener(this);
+    super.initState();
+  }
+
+  @override
+  void onTargetAppChange(String? name) {
+    setState(() {});
+  }
+
   _launchUrl(String url) {
     launchUrl(
       Uri.parse(url.startsWith(RegExp(r"^https*://")) ? url : "http://$url"),
       mode: LaunchMode.externalApplication,
     );
+  }
+
+  @override
+  void dispose() {
+    NativeInstancePlatform.instance.removeListener(this);
+    super.dispose();
   }
 
   @override
@@ -213,11 +234,14 @@ class _LookAccountPageState extends State<LookAccountPage>
             if (isDesktop)
               ListTile(
                 // TODO! 翻译
-                title: const Padding(
-                  padding: EdgeInsets.only(left: 6),
-                  child: Text("自动填充"),
+                title: Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: NativeInstancePlatform.instance.isTargetAppExist
+                      ? Text(
+                          "自动填充 (${NativeInstancePlatform.instance.targetAppName})",
+                        )
+                      : const Text("自动填充"),
                 ),
-
                 subtitle: Padding(
                   padding: const EdgeInsets.only(left: 12),
                   child: RichWrapper(
@@ -262,12 +286,16 @@ class _LookAccountPageState extends State<LookAccountPage>
                   ),
                 ),
                 trailing: IconButton(
-                  onPressed: () {},
+                  onPressed: NativeInstancePlatform.instance.isTargetAppExist
+                      ? () async {
+                          await kdbxEntry.autoFill();
+                        }
+                      : null,
                   icon: const Icon(Icons.ads_click),
                 ),
-                onLongPress: () => writeClipboard(
-                  kdbxEntry.getAutoTypeSequence(),
-                ),
+                // onLongPress: () => writeClipboard(
+                //   kdbxEntry.getAutoTypeSequence(),
+                // ),
               ),
             ListTile(
               title: Padding(
