@@ -4,6 +4,7 @@ import 'package:flutter_context_menu/flutter_context_menu.dart';
 enum PasswordsItemMenu {
   edit,
   copy,
+  auto_fill,
   delete,
 }
 
@@ -17,6 +18,7 @@ enum GroupsManageItemMenu {
   view,
   edit,
   copy,
+  auto_fill,
   move,
   move_selected,
   delete,

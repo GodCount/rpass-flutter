@@ -500,8 +500,7 @@ class _EntryFieldState extends State<EntryField> {
       case KdbxKeyCommon.KEY_NOTES:
         return t.description;
       case KdbxKeySpecial.KEY_AUTO_TYPE:
-        // TODO! 翻译
-        return "填充序列";
+        return t.fill_sequence;
       case KdbxKeySpecial.KEY_TAGS:
         return t.label;
       case KdbxKeySpecial.KEY_ATTACH:

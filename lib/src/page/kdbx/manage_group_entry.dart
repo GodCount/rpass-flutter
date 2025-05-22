@@ -5,6 +5,7 @@ import 'package:flutter_context_menu/flutter_context_menu.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../native/channel.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/common.dart';
@@ -73,7 +74,7 @@ class ManageGroupEntryPage extends StatefulWidget {
 }
 
 class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
-    with SecondLevelPageAutoBack<ManageGroupEntryPage> {
+    with SecondLevelPageAutoBack<ManageGroupEntryPage>, NativeChannelListener {
   final TextEditingController _searchController = TextEditingController();
 
   final KbdxSearchHandler _kbdxSearchHandler = KbdxSearchHandler();
@@ -100,8 +101,15 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
 
     _searchController.addListener(_search);
 
+    NativeInstancePlatform.instance.addListener(this);
+
     _search();
     super.initState();
+  }
+
+  @override
+  void onTargetAppChange(String? name) {
+    setState(() {});
   }
 
   @override
@@ -123,6 +131,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
     _selecteds.clear();
     _removeKdbxListener?.call();
     _removeKdbxListener = null;
+    NativeInstancePlatform.instance.addListener(this);
     super.dispose();
   }
 
@@ -344,6 +353,9 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
           case GroupsManageItemMenu.copy:
             writeClipboard(kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME));
             break;
+          case GroupsManageItemMenu.auto_fill:
+            kdbxEntry.autoFill();
+            break;
           case GroupsManageItemMenu.move:
             _move([kdbxEntry]);
             break;
@@ -378,6 +390,12 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
               value: GroupsManageItemMenu.edit,
             ),
             const MenuDivider(),
+            MenuItem(
+              enabled: NativeInstancePlatform.instance.isTargetAppExist,
+              label: "${t.auto_fill} (${NativeInstancePlatform.instance.targetAppName})",
+              icon: Icons.ads_click,
+              value: GroupsManageItemMenu.auto_fill,
+            ),
             MenuItem(
               label: t.copy,
               icon: Icons.copy,

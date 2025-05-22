@@ -269,5 +269,10 @@
     "enable_display_null_subtitle": "继承显示设置",
     "enable_searching_true_subtitle": "包含在搜索中",
     "enable_searching_false_subtitle": "排除在搜索外",
-    "enable_searching_null_subtitle": "继承搜索设置"
+    "enable_searching_null_subtitle": "继承搜索设置",
+    "edit_auto_fill_sequence": "编辑自动填充序列",
+    "default_field": "默认字段",
+    "auto_fill": "自动填充",
+    "keyboard_key": "键盘键",
+    "fill_sequence": "填充序列"
 }

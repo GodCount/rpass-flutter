@@ -233,14 +233,11 @@ class _LookAccountPageState extends State<LookAccountPage>
             ),
             if (isDesktop)
               ListTile(
-                // TODO! 翻译
                 title: Padding(
                   padding: const EdgeInsets.only(left: 6),
-                  child: NativeInstancePlatform.instance.isTargetAppExist
-                      ? Text(
-                          "自动填充 (${NativeInstancePlatform.instance.targetAppName})",
-                        )
-                      : const Text("自动填充"),
+                  child: Text(
+                    "${t.auto_fill}${NativeInstancePlatform.instance.isTargetAppExist ? " (${NativeInstancePlatform.instance.targetAppName})" : ""})",
+                  ),
                 ),
                 subtitle: Padding(
                   padding: const EdgeInsets.only(left: 12),

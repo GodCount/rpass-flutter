@@ -148,8 +148,7 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
 
     return Scaffold(
       appBar: AppBar(
-        // TODO! 翻译
-        title: Text("编辑自动填充序列"),
+        title: Text(t.edit_auto_fill_sequence),
       ),
       body: Column(
         mainAxisSize: MainAxisSize.min,
@@ -168,7 +167,7 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
             child: ListView(
               children: [
                 ListTile(
-                  title: Text("默认字段"),
+                  title: Text(t.default_field),
                   subtitle: ChipList(
                     onChipTap: (item) => _insertTextAtCursor(item.value),
                     items: KdbxKeyCommon.all
@@ -181,7 +180,7 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
                 ),
                 if (customFields.isNotEmpty)
                   ListTile(
-                    title: Text("自定义字段"),
+                    title: Text(t.custom_field),
                     subtitle: ChipList(
                       onChipTap: (item) => _insertTextAtCursor(item.value),
                       items: customFields
@@ -193,7 +192,7 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
                     ),
                   ),
                 ListTile(
-                  title: Text("键盘键"),
+                  title: Text(t.keyboard_key),
                   subtitle: ChipList(
                     onChipTap: (item) => _insertTextAtCursor(item.value),
                     items: AutoTypeKeys.BUTTON

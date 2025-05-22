@@ -50,7 +50,7 @@ Future<void> autoFillSequence(KdbxEntry kdbxEntry) async {
           } else if (item is KdbxSequenceItem) {
             final text = kdbxEntry.getNonNullString(KdbxKey(item.key));
             if (text.isNotEmpty) {
-              debugPrint("[KdbxSequenceItem] $text");
+              debugPrint("[KdbxSequenceItem] ${item.key}");
               enigo.text(text: text);
             }
           } else {

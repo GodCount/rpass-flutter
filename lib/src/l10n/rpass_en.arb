@@ -269,5 +269,10 @@
     "enable_display_null_subtitle": "Inherit display settings",
     "enable_searching_true_subtitle": "Included in search",
     "enable_searching_false_subtitle": "Excluded from search",
-    "enable_searching_null_subtitle": "Inherit search settings"
+    "enable_searching_null_subtitle": "Inherit search settings",
+    "edit_auto_fill_sequence": "Edit Auto Fill Sequence",
+    "default_field": "Default Field",
+    "auto_fill": "Auto Fill",
+    "keyboard_key": "Keyboard Key",
+    "fill_sequence": "Fill Sequence"
 }

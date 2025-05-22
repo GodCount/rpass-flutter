@@ -6,6 +6,7 @@ import 'package:flutter_context_menu/flutter_context_menu.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../native/channel.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/common.dart';
@@ -68,7 +69,8 @@ class _PasswordsPageState extends State<PasswordsPage>
   @override
   bool get wantKeepAlive => true;
 
-  final KbdxSearchHandler _kbdxSearchHandler = KbdxSearchHandler(useKdbxEntryConfig: true);
+  final KbdxSearchHandler _kbdxSearchHandler =
+      KbdxSearchHandler(useKdbxEntryConfig: true);
   final List<KdbxEntry> _totalEntry = [];
 
   VoidCallback? _removeKdbxListener;
@@ -465,9 +467,20 @@ class _PasswordItem extends StatefulWidget {
 }
 
 class _PasswordItemState extends State<_PasswordItem>
-    with NavigationHistoryObserver<_PasswordItem> {
+    with NavigationHistoryObserver<_PasswordItem>, NativeChannelListener {
   bool _selected = false;
   bool _showMenu = false;
+
+  @override
+  void initState() {
+    NativeInstancePlatform.instance.addListener(this);
+    super.initState();
+  }
+
+  @override
+  void onTargetAppChange(String? name) {
+    setState(() {});
+  }
 
   @override
   void didNavigationHistory() {
@@ -501,6 +514,12 @@ class _PasswordItemState extends State<_PasswordItem>
   }
 
   @override
+  void dispose() {
+    NativeInstancePlatform.instance.removeListener(this);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
 
@@ -526,6 +545,9 @@ class _PasswordItemState extends State<_PasswordItem>
           case PasswordsItemMenu.copy:
             writeClipboard(kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME));
             break;
+          case PasswordsItemMenu.auto_fill:
+            widget.kdbxEntry.autoFill();
+            break;
           case PasswordsItemMenu.delete:
             _deletePassword();
             break;
@@ -544,6 +566,12 @@ class _PasswordItemState extends State<_PasswordItem>
               enabled:
                   context.topRoute.name != EditAccountRoute.name || !_selected,
               value: PasswordsItemMenu.edit,
+            ),
+            MenuItem(
+              enabled: NativeInstancePlatform.instance.isTargetAppExist,
+              label: "${t.auto_fill} (${NativeInstancePlatform.instance.targetAppName})",
+              icon: Icons.ads_click,
+              value: PasswordsItemMenu.auto_fill,
             ),
             MenuItem(
               label: t.copy,
