@@ -97,7 +97,7 @@ class _EditAccountPageState extends State<EditAccountPage>
   @override
   void didUpdateWidget(covariant EditAccountPage oldWidget) {
     /// 触发整个 form 表进行重建
-    if (widget.kdbxEntry != null && widget.kdbxEntry != oldWidget.kdbxEntry) {
+    if (widget.kdbxEntry != oldWidget.kdbxEntry) {
       _kdbxEntry = widget.kdbxEntry ?? _createKdbxEntry();
       _entryFields = _kdbxEntry.customEntries.map((item) => item.key).toSet();
       _from = GlobalKey();
@@ -174,7 +174,6 @@ class _EditAccountPageState extends State<EditAccountPage>
     } else {
       _logger.warning("untreated class $field");
     }
-    debugPrint("_entryFieldSaved ${DateTime.now()}");
   }
 
   void _entryFieldDelete(KdbxKey key) {
@@ -217,49 +216,60 @@ class _EditAccountPageState extends State<EditAccountPage>
     final kdbx = KdbxProvider.of(context)!;
 
     final children = [
-      KdbxEntryGroup(
-        initialValue: _kdbxEntry.parent != kdbx.virtualGroup
-            ? _kdbxEntry.parent
-            : kdbx.kdbxFile.body.rootGroup,
-        onSaved: _kdbxEntryGroupSave,
+      Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: KdbxEntryGroup(
+          initialValue: _kdbxEntry.parent != kdbx.virtualGroup
+              ? _kdbxEntry.parent
+              : kdbx.kdbxFile.body.rootGroup,
+          onSaved: _kdbxEntryGroupSave,
+        ),
       ),
       ...KdbxKeyCommon.all.map(
-        (item) => EntryField(
-          kdbxKey: item,
-          kdbxEntry: _kdbxEntry,
-          onSaved: _entryFieldSaved,
+        (item) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: EntryField(
+            kdbxKey: item,
+            kdbxEntry: _kdbxEntry,
+            onSaved: _entryFieldSaved,
+          ),
         ),
       ),
       ..._entryFields.map(
-        (item) => EntryField(
-          kdbxKey: item,
-          kdbxEntry: _kdbxEntry,
-          onDeleted: _entryFieldDelete,
-          onSaved: _entryFieldSaved,
+        (item) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: EntryField(
+            kdbxKey: item,
+            kdbxEntry: _kdbxEntry,
+            onDeleted: _entryFieldDelete,
+            onSaved: _entryFieldSaved,
+          ),
         ),
       ),
-      _buildAddFieldWidget(),
+      Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: _buildAddFieldWidget(),
+      ),
       ...KdbxKeySpecial.all.map(
-        (item) => EntryField(
-          kdbxKey: item,
-          kdbxEntry: _kdbxEntry,
-          onSaved: _entryFieldSaved,
+        (item) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: EntryField(
+            kdbxKey: item,
+            kdbxEntry: _kdbxEntry,
+            onSaved: _entryFieldSaved,
+          ),
         ),
       ),
       const SizedBox(height: 42)
     ];
 
-    final child = ListView.separated(
-      padding: const EdgeInsets.only(top: 24, bottom: 24),
-      separatorBuilder: (context, index) {
-        return const SizedBox(
-          height: 12,
-        );
-      },
-      itemBuilder: (context, index) {
-        return children[index];
-      },
-      itemCount: children.length,
+    final child = SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 24, bottom: 24),
+        child: Column(
+          children: children,
+        ),
+      ),
     );
 
     return Scaffold(
