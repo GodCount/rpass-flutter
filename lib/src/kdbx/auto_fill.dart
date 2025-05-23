@@ -9,11 +9,17 @@ import 'kdbx.dart';
 
 final _logger = Logger("kdbx:auto_fill");
 
+bool _runing = false;
+
 Future<void> autoFillSequence(KdbxEntry kdbxEntry) async {
   if (!Platform.isMacOS && !Platform.isWindows) return;
 
   if (NativeInstancePlatform.instance.targetAppName != null) {
     try {
+      // 在运行中不要重复触发
+      if (_runing) return;
+      _runing = true;
+
       if (await NativeInstancePlatform.instance.activatePrevWindow()) {
         final parse = AutoTypeSequenceParse.parse(
           kdbxEntry.getAutoTypeSequence(),
@@ -48,13 +54,16 @@ Future<void> autoFillSequence(KdbxEntry kdbxEntry) async {
               enigo.key(key: key, direction: Direction.release);
             }
           } else if (item is KdbxSequenceItem) {
-            final text = kdbxEntry.getNonNullString(KdbxKey(item.key));
+            final text = item.key == KdbxKeyCommon.KEY_OTP
+                ? kdbxEntry.getOTPCode() ?? ''
+                : kdbxEntry.getNonNullString(KdbxKey(item.key));
+
             if (text.isNotEmpty) {
               debugPrint("[KdbxSequenceItem] ${item.key}");
               enigo.text(text: text);
             }
           } else {
-            debugPrint("[KdbxSTextSequenceItemequenceItem] $item.value");
+            debugPrint("[TextSequenceItem] ${item.value}");
             enigo.text(text: item.value);
           }
           await Future.delayed(const Duration(milliseconds: 60));
@@ -62,6 +71,8 @@ Future<void> autoFillSequence(KdbxEntry kdbxEntry) async {
       }
     } catch (e) {
       _logger.warning("fill fail", e);
+    } finally {
+      _runing = false;
     }
   }
 }

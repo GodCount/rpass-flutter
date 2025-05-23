@@ -7,6 +7,7 @@ import 'package:kdbx/kdbx.dart' hide KdbxException, KdbxKeyCommon;
 import 'package:uuid/uuid.dart';
 
 import '../rpass.dart';
+import '../util/one_time_password.dart';
 import 'auto_fill.dart';
 import 'icons.dart';
 
@@ -544,10 +545,6 @@ extension KdbxEntryTagExt on KdbxEntry {
     }
   }
 
-  String getNonNullString(KdbxKey key) {
-    return getString(key)?.getText() ?? '';
-  }
-
   Map<KdbxKey, String> toPlainMapEntry() {
     return Map.fromEntries(KdbxKeyCommon.all.map(
       (item) => MapEntry(item, getNonNullString(item)),
@@ -569,6 +566,21 @@ extension KdbxEntryCommon on KdbxEntry {
     return times.expires.get() == true &&
         times.expiryTime.get() != null &&
         times.expiryTime.get()!.isBefore(DateTime.now());
+  }
+
+  String getNonNullString(KdbxKey key) {
+    return getString(key)?.getText() ?? '';
+  }
+
+  String? getOTPCode() {
+    try {
+      final url = getString(KdbxKeyCommon.OTP)?.getText();
+      return url != null
+          ? AuthOneTimePassword.parse(url).code().toString()
+          : null;
+    } catch (e) {
+      return null;
+    }
   }
 
   bool _findEnabled(_FindEnabledType type, [KdbxGroup? group]) {

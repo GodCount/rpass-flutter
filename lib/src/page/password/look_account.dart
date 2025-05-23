@@ -236,7 +236,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                 title: Padding(
                   padding: const EdgeInsets.only(left: 6),
                   child: Text(
-                    "${t.auto_fill}${NativeInstancePlatform.instance.isTargetAppExist ? " (${NativeInstancePlatform.instance.targetAppName})" : ""})",
+                    "${t.auto_fill}${NativeInstancePlatform.instance.isTargetAppExist ? " (${NativeInstancePlatform.instance.targetAppName})" : ""}",
                   ),
                 ),
                 subtitle: Padding(
