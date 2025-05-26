@@ -274,5 +274,16 @@
     "default_field": "默认字段",
     "auto_fill": "自动填充",
     "keyboard_key": "键盘键",
-    "fill_sequence": "填充序列"
+    "fill_sequence": "填充序列",
+    "sync_cycle": "同步周期",
+    "each_startup": "每次启动",
+    "days": "{day} 天",
+    "@days": {
+        "description": "显示天",
+        "placeholders": {
+            "day": {
+                "type": "int"
+            }
+        }
+    }
 }

@@ -274,5 +274,16 @@
     "default_field": "Default Field",
     "auto_fill": "Auto Fill",
     "keyboard_key": "Keyboard Key",
-    "fill_sequence": "Fill Sequence"
+    "fill_sequence": "Fill Sequence",
+    "sync_cycle": "Synchronous Cycle",
+    "each_startup": "Each Startup",
+    "days": "{day, plural, =1{1 Day} other{{day} Days}}",
+    "@days": {
+        "description": "Displsy day",
+        "placeholders": {
+            "day": {
+                "type": "int"
+            }
+        }
+    }
 }

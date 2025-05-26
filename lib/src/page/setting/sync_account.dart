@@ -44,10 +44,49 @@ class SyncAccountPage extends StatefulWidget {
 
 class _SyncAccountPageState extends State<SyncAccountPage>
     with SecondLevelPageAutoBack<SyncAccountPage> {
+  void _setRemoteSyncCycle() {
+    final t = I18n.of(context)!;
+
+    final settings = Store.instance.settings;
+
+    GestureTapCallback? autoSavePop(Duration? delay) {
+      return () {
+        settings.setRemoteSyncCycle(delay);
+        context.router.pop();
+        setState(() {});
+      };
+    }
+
+    showBottomSheetList(title: t.sync_cycle, children: [
+      ListTile(
+        title: Text(t.each_startup),
+        enabled: settings.remoteSyncCycle != null,
+        onTap: autoSavePop(null),
+      ),
+      ListTile(
+        title: Text(t.days(1)),
+        enabled: settings.remoteSyncCycle != const Duration(days: 1),
+        onTap: autoSavePop(const Duration(days: 1)),
+      ),
+      ListTile(
+        title: Text(t.days(7)),
+        enabled: settings.remoteSyncCycle != const Duration(days: 7),
+        onTap: autoSavePop(const Duration(days: 7)),
+      ),
+      ListTile(
+        title: Text(t.days(30)),
+        enabled: settings.remoteSyncCycle != const Duration(days: 30),
+        onTap: autoSavePop(const Duration(days: 30)),
+      ),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
     final store = Store.instance;
+
+    final remoteSyncCycle = store.settings.remoteSyncCycle;
 
     return Scaffold(
       appBar: AppBar(
@@ -73,6 +112,23 @@ class _SyncAccountPageState extends State<SyncAccountPage>
                 trailing: store.settings.enableRemoteSync
                     ? const Icon(Icons.check)
                     : null,
+              ),
+              ListTile(
+                onTap: _setRemoteSyncCycle,
+                enabled: store.settings.enableRemoteSync,
+                title: Text(t.sync_cycle),
+                trailing: Text(
+                  remoteSyncCycle == null
+                      ? t.each_startup
+                      : t.days(remoteSyncCycle.inDays),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: store.settings.enableRemoteSync
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withValues(alpha: 0.6)),
+                ),
               ),
               ListTile(
                 title: const Text("WebDAV"),

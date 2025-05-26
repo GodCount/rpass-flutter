@@ -12,6 +12,8 @@ class SettingsController with ChangeNotifier {
   late bool _enableRecordKeyFilePath;
   String? _keyFilePath;
   late bool _enableRemoteSync;
+  Duration? _remoteSyncCycle;
+  DateTime? _lastSyncTime;
 
   ThemeMode get themeMode => _themeMode;
   Locale? get locale => _locale;
@@ -20,6 +22,8 @@ class SettingsController with ChangeNotifier {
   bool get enableRecordKeyFilePath => _enableRecordKeyFilePath;
   String? get keyFilePath => _keyFilePath;
   bool get enableRemoteSync => _enableRemoteSync;
+  Duration? get remoteSyncCycle => _remoteSyncCycle;
+  DateTime? get lastSyncTime => _lastSyncTime;
 
   Future<void> setThemeMode(ThemeMode? mode) async {
     if (mode == null) return;
@@ -93,6 +97,26 @@ class SettingsController with ChangeNotifier {
     await _settingsService.setEnableRemoteSync(enable);
   }
 
+  Future<void> setRemoteSyncCycle(Duration? cycle) async {
+    if (cycle == _remoteSyncCycle) return;
+
+    _remoteSyncCycle = cycle;
+
+    notifyListeners();
+
+    await _settingsService.setRemoteSyncCycle(cycle);
+  }
+
+  Future<void> setLastSyncTime(DateTime? time) async {
+    if (time == _lastSyncTime) return;
+
+    _lastSyncTime = time;
+
+    notifyListeners();
+
+    await _settingsService.setLastSyncTime(time);
+  }
+
   Future<void> init() async {
     _themeMode = await _settingsService.getThemeMode();
     _locale = await _settingsService.getLocale();
@@ -102,6 +126,8 @@ class SettingsController with ChangeNotifier {
         await _settingsService.getEnableRecordKeyFilePath();
     _keyFilePath = await _settingsService.getKeyFilePath();
     _enableRemoteSync = await _settingsService.getEnableRemoteSync();
+    _remoteSyncCycle = await _settingsService.getRemoteSyncCycle();
+    _lastSyncTime = await _settingsService.getLastSyncTime();
 
     notifyListeners();
   }

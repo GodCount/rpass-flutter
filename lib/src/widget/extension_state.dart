@@ -349,6 +349,7 @@ extension StatefulBottomSheet on State {
                                 child: Text(
                                   entry.times.lastModificationTime
                                       .get()!
+                                      .toLocal()
                                       .formatDate,
                                 ),
                               ),

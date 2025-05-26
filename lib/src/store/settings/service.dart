@@ -20,19 +20,17 @@ class SettingsService with SharedPreferencesService {
   }
 
   Future<bool> setLocale(Locale? locale) {
-    if (locale != null) {
-      return setString("locale", locale.toString());
-    } else {
-      return remove("locale");
-    }
+    return locale != null
+        ? setString("locale", locale.toString())
+        : remove("locale");
   }
 
   Future<bool> getEnableBiometric() async {
     return await getBool("enable_biometric") ?? false;
   }
 
-  Future<bool> setEnableBiometric(bool enable) async {
-    return await setBool("enable_biometric", enable);
+  Future<bool> setEnableBiometric(bool enable) {
+    return setBool("enable_biometric", enable);
   }
 
   Future<Duration?> getLockDelay() async {
@@ -42,7 +40,7 @@ class SettingsService with SharedPreferencesService {
     return delay == null || delay > 0 ? Duration(seconds: delay ?? 30) : null;
   }
 
-  Future<bool> setLockDelay(Duration? delay) async {
+  Future<bool> setLockDelay(Duration? delay) {
     return setInt("lock_delay_seconds", delay != null ? delay.inSeconds : -1);
   }
 
@@ -50,15 +48,15 @@ class SettingsService with SharedPreferencesService {
     return await getBool("record_key_file_path") ?? false;
   }
 
-  Future<bool> setEnableRecordKeyFilePath(bool enable) async {
+  Future<bool> setEnableRecordKeyFilePath(bool enable) {
     return setBool("record_key_file_path", enable);
   }
 
-  Future<String?> getKeyFilePath() async {
-    return await getString("key_file_path");
+  Future<String?> getKeyFilePath() {
+    return getString("key_file_path");
   }
 
-  Future<bool> setKeyFilePath(String? path) async {
+  Future<bool> setKeyFilePath(String? path) {
     return path == null
         ? remove("key_file_path")
         : setString("key_file_path", path);
@@ -68,8 +66,30 @@ class SettingsService with SharedPreferencesService {
     return await getBool("remote_sync_kdbx") ?? true;
   }
 
-  Future<bool> setEnableRemoteSync(bool enbale) async {
+  Future<bool> setEnableRemoteSync(bool enbale) {
     return setBool("remote_sync_kdbx", enbale);
+  }
+
+  Future<Duration?> getRemoteSyncCycle() async {
+    final cycle = await getInt("remote_sync_cycle");
+    // 默认值 1天
+    // 小于0则表示每次启动
+    return cycle == null || cycle > 0 ? Duration(days: cycle ?? 1) : null;
+  }
+
+  Future<bool> setRemoteSyncCycle(Duration? cycle) {
+    return setInt("remote_sync_cycle", cycle != null ? cycle.inSeconds : -1);
+  }
+
+  Future<DateTime?> getLastSyncTime() async {
+    final time = await getInt("last_sync_time");
+    return time != null ? DateTime.fromMillisecondsSinceEpoch(time) : null;
+  }
+
+  Future<bool> setLastSyncTime(DateTime? time) {
+    return time == null
+        ? remove("last_sync_time")
+        : setInt("last_sync_time", time.millisecondsSinceEpoch);
   }
 
   @override

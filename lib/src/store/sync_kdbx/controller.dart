@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
+import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
 import '../../page/route.dart';
 import '../../rpass.dart';
@@ -87,6 +88,7 @@ class SyncKdbxController with ChangeNotifier {
           path: isKdbxExt ? "" : RpassInfo.defaultSyncKdbxFileName,
           data: await localFile.readAsBytes(),
         );
+        Store.instance.settings.setLastSyncTime(DateTime.now());
         return;
       }
 
@@ -115,11 +117,26 @@ class SyncKdbxController with ChangeNotifier {
       final syncMergeContext = await kdbx.sync(remoteKdbx);
       _lastMergeContext = syncMergeContext.mergeContext;
 
+      Store.instance.settings.setLastSyncTime(DateTime.now());
+
       _logger.info("merge save in local.");
 
-      // 如果远程的比本地的新，则覆盖本地的
       if (syncMergeContext.isUpdateMasterKey) {
-        // TODO! 更新指纹识别
+        final biometric = Biometric.of(context);
+
+        if (biometric.enable) {
+          try {
+            _logger.info("update biometric");
+            await biometric.updateCredentials(
+              context,
+              kdbx.credentials.getHash(),
+            );
+          } catch (e) {
+            _logger.warning("update biometric failed! remove biometric data");
+            Store.instance.settings.seEnableBiometric(false);
+            await biometric.updateCredentials(context, null);
+          }
+        }
       }
 
       _logger.info(
@@ -135,7 +152,6 @@ class SyncKdbxController with ChangeNotifier {
         // 解决 先上传为一个临时文件
         // 成功后，删除原文件，再重命名临时文件为原文件
         await remoteFile.write(syncMergeContext.data!);
-
         _logger.info("sync data write to remote file, done.");
       } else {
         // 没有变化

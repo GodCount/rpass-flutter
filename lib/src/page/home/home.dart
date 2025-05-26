@@ -66,9 +66,14 @@ class _HomePageState extends State<HomePage>
   }
 
   void _settingsListener() {
-    if (Store.instance.settings.enableRemoteSync &&
-        Store.instance.syncKdbx.client == null) {
-      Store.instance.syncKdbx.sync(context);
+    if (Store.instance.settings.enableRemoteSync) {
+      final cycle = Store.instance.settings.remoteSyncCycle;
+      final time = Store.instance.settings.lastSyncTime;
+      if (cycle == null ||
+          time == null ||
+          time.add(cycle).isBefore(DateTime.now())) {
+        Store.instance.syncKdbx.sync(context);
+      }
     }
   }
 
