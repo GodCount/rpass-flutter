@@ -137,7 +137,10 @@ class _SyncAccountPageState extends State<SyncAccountPage>
     final t = I18n.of(context)!;
 
     return [
-      Text(merge.debugSummary()),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Text(merge.debugSummary()),
+      ),
       if (merge.changes.isNotEmpty)
         ListTile(
           isThreeLine: true,

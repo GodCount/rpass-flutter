@@ -624,12 +624,12 @@ extension KdbxEntryAutoType on KdbxEntry {
   }
 
   String getAutoTypeSequence() {
-    String sequence = autoType.defaultSequence.get() ?? "";
+    String sequence = defaultSequence.get() ?? "";
     return sequence.isNotEmpty ? sequence : _findAutoTypeSequence(parent);
   }
 
   void setAutoTyprSequence(String sequence) {
-    autoType.defaultSequence.set(sequence);
+    defaultSequence.set(sequence);
   }
 
   Future<void> autoFill() {
