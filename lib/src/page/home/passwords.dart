@@ -546,7 +546,7 @@ class _PasswordItemState extends State<_PasswordItem>
             writeClipboard(kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME));
             break;
           case PasswordsItemMenu.auto_fill:
-            widget.kdbxEntry.autoFill();
+            autoFill(widget.kdbxEntry);
             break;
           case PasswordsItemMenu.delete:
             _deletePassword();

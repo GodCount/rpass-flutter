@@ -11,15 +11,26 @@ final _logger = Logger("kdbx:auto_fill");
 
 bool _runing = false;
 
+class NoPermission implements Exception {
+  NoPermission(this.message);
+
+  final String message;
+
+  @override
+  String toString() {
+    return 'NoPermission{message: $message}';
+  }
+}
+
 Future<void> autoFillSequence(KdbxEntry kdbxEntry) async {
   if (!Platform.isMacOS && !Platform.isWindows) return;
 
   if (NativeInstancePlatform.instance.targetAppName != null) {
-    try {
-      // 在运行中不要重复触发
-      if (_runing) return;
-      _runing = true;
+    // 在运行中不要重复触发
+    if (_runing) return;
+    _runing = true;
 
+    try {
       if (await NativeInstancePlatform.instance.activatePrevWindow()) {
         final parse = AutoTypeSequenceParse.parse(
           kdbxEntry.getAutoTypeSequence(),
@@ -70,7 +81,11 @@ Future<void> autoFillSequence(KdbxEntry kdbxEntry) async {
         }
       }
     } catch (e) {
+      if (e.toString().contains("NoPermission")) {
+        throw NoPermission("Missing auxiliary permissions");
+      }
       _logger.warning("fill fail", e);
+      rethrow;
     } finally {
       _runing = false;
     }

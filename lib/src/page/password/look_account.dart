@@ -284,9 +284,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                 ),
                 trailing: IconButton(
                   onPressed: NativeInstancePlatform.instance.isTargetAppExist
-                      ? () async {
-                          await kdbxEntry.autoFill();
-                        }
+                      ? () => autoFill(kdbxEntry)
                       : null,
                   icon: const Icon(Icons.ads_click),
                 ),

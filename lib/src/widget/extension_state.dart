@@ -519,6 +519,14 @@ extension StatefulKdbx on State {
     }
     return false;
   }
+
+  Future<void> autoFill(KdbxEntry kdbxEntry) async {
+    try {
+      await kdbxEntry.autoFill();
+    } catch (e) {
+      showError(e);
+    }
+  }
 }
 
 typedef OnDidChangeAppLifecycleState = void Function(AppLifecycleState state);

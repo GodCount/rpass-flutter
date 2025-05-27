@@ -354,7 +354,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
             writeClipboard(kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME));
             break;
           case GroupsManageItemMenu.auto_fill:
-            kdbxEntry.autoFill();
+            autoFill(kdbxEntry);
             break;
           case GroupsManageItemMenu.move:
             _move([kdbxEntry]);
