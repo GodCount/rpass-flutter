@@ -1,8 +1,9 @@
 #ifndef RUNNER_NATIVE_CHANNEL_H_
 #define RUNNER_NATIVE_CHANNEL_H_
 
+#include <flutter_plugin_registrar.h>
 
-void RegisterMethodHandler(flutter::FlutterEngine* registry);
+void RegisterRpassPlugin(FlutterDesktopPluginRegistrarRef registrar);
 
 
 #endif  // RUNNER_NATIVE_CHANNEL_H_

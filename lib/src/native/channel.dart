@@ -37,7 +37,7 @@ class NativeInstancePlatform {
 
   String? get targetAppName => null;
 
-  bool get isTargetAppExist => targetAppName != null;
+  bool get isTargetAppExist => targetAppName != null && targetAppName!.isNotEmpty;
 
   /// 激活上一个窗口的焦点
   Future<bool> activatePrevWindow() async {

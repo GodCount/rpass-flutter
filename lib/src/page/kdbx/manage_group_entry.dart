@@ -392,7 +392,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
             const MenuDivider(),
             MenuItem(
               enabled: NativeInstancePlatform.instance.isTargetAppExist,
-              label: "${t.auto_fill} (${NativeInstancePlatform.instance.targetAppName})",
+              label: "${t.auto_fill}${NativeInstancePlatform.instance.isTargetAppExist ? " (${NativeInstancePlatform.instance.targetAppName})" : ""}",
               icon: Icons.ads_click,
               value: GroupsManageItemMenu.auto_fill,
             ),
