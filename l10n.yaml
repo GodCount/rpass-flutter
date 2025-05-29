@@ -1,5 +1,9 @@
 arb-dir: lib/src/l10n
-template-arb-file: rpass_zh.arb
-output-localization-file: rpass_localizations.dart
-output-class: RpassLocalizations
+template-arb-file: zh.arb
+output-localization-file: localizations.dart
+output-class: MyLocalizations
 use-escaping: true
+
+# https://docs.flutter.dev/release/breaking-changes/flutter-generate-i10n-source
+synthetic-package: false
+output-dir: lib/src/l10n/generated

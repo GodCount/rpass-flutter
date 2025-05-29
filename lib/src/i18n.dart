@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/rpass_localizations.dart';
-
-
+import 'l10n/generated/localizations.dart';
 
 class I18n {
-  static RpassLocalizations? of(BuildContext context) {
-    return RpassLocalizations.of(context);
+  static MyLocalizations? of(BuildContext context) {
+    return MyLocalizations.of(context);
   }
 
-  static RpassLocalizations lookupLocalizations(Locale locale) {
-    return lookupRpassLocalizations(locale);
+  static MyLocalizations lookupLocalizations(Locale locale) {
+    return lookupMyLocalizations(locale);
   }
 
-  static const LocalizationsDelegate<RpassLocalizations> delegate =
-      RpassLocalizations.delegate;
+  static const LocalizationsDelegate<MyLocalizations> delegate =
+      MyLocalizations.delegate;
 
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      RpassLocalizations.localizationsDelegates;
+      MyLocalizations.localizationsDelegates;
 
   static const List<Locale> supportedLocales =
-      RpassLocalizations.supportedLocales;
+      MyLocalizations.supportedLocales;
 }
