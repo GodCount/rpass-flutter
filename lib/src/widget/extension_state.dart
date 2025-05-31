@@ -33,24 +33,6 @@ extension StatefulClipboard on State {
 }
 
 extension StatefulDialog on State {
-  Future<void> showAlert(String msg) async {
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          content: Text(msg),
-          actions: [
-            TextButton(
-              onPressed: () {
-                context.router.pop();
-              },
-              child: Text(I18n.of(context)!.confirm),
-            )
-          ],
-        );
-      },
-    );
-  }
 
   Future<void> showError(Object? error) async {
     await showDialog(
@@ -76,7 +58,10 @@ extension StatefulDialog on State {
     if (Platform.isAndroid || Platform.isIOS) {
       await Fluttertoast.showToast(msg: msg);
     } else {
-      await showAlert(msg);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(msg),
+        duration: const Duration(seconds: 2)
+      ));
     }
   }
 
@@ -520,9 +505,9 @@ extension StatefulKdbx on State {
     return false;
   }
 
-  Future<void> autoFill(KdbxEntry kdbxEntry) async {
+  Future<void> autoFill(KdbxEntry kdbxEntry, [KdbxKey? key]) async {
     try {
-      await kdbxEntry.autoFill();
+      await kdbxEntry.autoFill(key);
     } catch (e) {
       showError(e);
     }

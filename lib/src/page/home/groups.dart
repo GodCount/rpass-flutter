@@ -165,7 +165,7 @@ class _GroupsItemState extends State<_GroupsItem>
   @override
   Widget build(BuildContext context) {
     final kdbxGroup = widget.kdbxGroup;
-    return CustomContextMenuRegion<GroupsItemMenu>(
+    return CustomContextMenuRegion<MyContextMenuItem>(
       enabled: isDesktop,
       onItemSelected: (type) {
         setState(() {
@@ -175,14 +175,14 @@ class _GroupsItemState extends State<_GroupsItem>
           return;
         }
         switch (type) {
-          case GroupsItemMenu.search:
+          case SearchContextMenuItem():
             context.router.navigate(
               PasswordsRoute(
                 search: 'g:"${kdbxGroup.name.get() ?? ''}"',
               ),
             );
             break;
-          case GroupsItemMenu.modify:
+          case ModifyContextMenuItem():
             setKdbxGroup(
               KdbxGroupData(
                 name: kdbxGroup.name.get() ?? '',
@@ -197,8 +197,10 @@ class _GroupsItemState extends State<_GroupsItem>
               ),
             );
             break;
-          case GroupsItemMenu.delete:
+          case DeleteContextMenuItem():
             _kdbxGroupDelete(kdbxGroup);
+            break;
+          default:
             break;
         }
       },
@@ -214,19 +216,19 @@ class _GroupsItemState extends State<_GroupsItem>
             MenuItem(
               label: t.search,
               icon: Icons.search,
-              value: GroupsItemMenu.search,
+              value: MyContextMenuItem.search(),
             ),
             MenuItem(
               label: t.modify,
               icon: Icons.edit,
-              value: GroupsItemMenu.modify,
+              value: MyContextMenuItem.modify(),
             ),
             const MenuDivider(),
             MenuItem(
               label: t.delete,
               enabled: kdbxGroup.parent != null,
               icon: Icons.delete,
-              value: GroupsItemMenu.delete,
+              value: MyContextMenuItem.delete(),
               color: Theme.of(context).colorScheme.error,
             ),
           ],

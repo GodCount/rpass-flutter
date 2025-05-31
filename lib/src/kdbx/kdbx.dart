@@ -112,8 +112,8 @@ class FieldStatistic {
   final Set<String> customFields;
   final Set<String> customIcons;
 
-  Set<String>? getStatistic(KdbxKey kdbKey) {
-    switch (kdbKey.key) {
+  Set<String>? getStatistic(KdbxKey kdbxKey) {
+    switch (kdbxKey.key) {
       case KdbxKeyCommon.KEY_URL:
         return urls;
       case KdbxKeyCommon.KEY_USER_NAME:
@@ -326,8 +326,8 @@ mixin KdbxEntryFieldStatistic on KdbxBase {
       _fieldStatistic!.tags.addAll(entry.tagList);
 
       _fieldStatistic!.customFields.addAll(entry.stringEntries
-          .where((kdbKey) => !KdbxKeyCommon.all.contains(kdbKey.key))
-          .map((kdbKey) => kdbKey.key.key));
+          .where((kdbxKey) => !KdbxKeyCommon.all.contains(kdbxKey.key))
+          .map((kdbxKey) => kdbxKey.key.key));
     }
 
     totalEntry.forEach(setFieldStatistic);
@@ -572,6 +572,10 @@ extension KdbxEntryCommon on KdbxEntry {
     return getString(key)?.getText() ?? '';
   }
 
+  String? getActualString(KdbxKey key) {
+    return key == KdbxKeyCommon.OTP ? getOTPCode() : getString(key)?.getText();
+  }
+
   String? getOTPCode() {
     try {
       final url = getString(KdbxKeyCommon.OTP)?.getText();
@@ -581,6 +585,14 @@ extension KdbxEntryCommon on KdbxEntry {
     } catch (e) {
       return null;
     }
+  }
+
+  String copyBasicString() {
+    return "title: ${getNonNullString(KdbxKeyCommon.TITLE)}\n"
+        "url: ${getNonNullString(KdbxKeyCommon.URL)}\n"
+        "username: ${getNonNullString(KdbxKeyCommon.USER_NAME)}\n"
+        "email: ${getNonNullString(KdbxKeyCommon.EMAIL)}\n"
+        "password: ${getNonNullString(KdbxKeyCommon.PASSWORD)}";
   }
 
   bool _findEnabled(_FindEnabledType type, [KdbxGroup? group]) {
@@ -632,8 +644,8 @@ extension KdbxEntryAutoType on KdbxEntry {
     defaultSequence.set(sequence);
   }
 
-  Future<void> autoFill() {
-    return autoFillSequence(this);
+  Future<void> autoFill([KdbxKey? key]) {
+    return autoFillSequence(this, key);
   }
 }
 

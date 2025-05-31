@@ -583,4 +583,10 @@ class MyLocalizationsEn extends MyLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get auto_fill_specified_field => 'Auto-fill Specified Field';
+
+  @override
+  String get copy_specified_field => 'Copy Specified Field';
 }

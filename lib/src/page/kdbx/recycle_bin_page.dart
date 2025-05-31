@@ -217,7 +217,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
   }
 
   Widget _buildListItem(KdbxObject kdbxObject) {
-    return CustomContextMenuRegion<RecycleBinItemMenu>(
+    return CustomContextMenuRegion<MyContextMenuItem>(
       enabled: isDesktop,
       onItemSelected: (type) {
         setState(() {
@@ -228,7 +228,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
           return;
         }
         switch (type) {
-          case RecycleBinItemMenu.view:
+          case ViewContextMenuItem():
             if (kdbxObject is KdbxEntry) {
               showModalBottomSheet(
                 context: context,
@@ -244,17 +244,15 @@ class _RecycleBinPageState extends State<RecycleBinPage>
               );
             }
             break;
-          case RecycleBinItemMenu.revert:
-            _restoreObjects([kdbxObject]);
+          case RevertContextMenuItem(selected: final selected):
+            _restoreObjects(selected ? _selecteds : [kdbxObject]);
             break;
-          case RecycleBinItemMenu.revert_selected:
-            _restoreObjects(_selecteds);
+          case DeleteContextMenuItem(selected: final selected):
+            _deleteWarnDialog(() => _deletePermanentlys(
+                  selected ? _selecteds : [kdbxObject],
+                ));
             break;
-          case RecycleBinItemMenu.delete:
-            _deleteWarnDialog(() => _deletePermanentlys([kdbxObject]));
-            break;
-          case RecycleBinItemMenu.delete_selected:
-            _deleteWarnDialog(() => _deletePermanentlys(_selecteds));
+          default:
             break;
         }
       },
@@ -271,18 +269,18 @@ class _RecycleBinPageState extends State<RecycleBinPage>
               label: t.lookup,
               icon: Icons.person_search,
               enabled: kdbxObject is KdbxEntry,
-              value: RecycleBinItemMenu.view,
+              value: MyContextMenuItem.view(),
             ),
             const MenuDivider(),
             MenuItem(
               label: t.revert,
               icon: Icons.restore_from_trash,
-              value: RecycleBinItemMenu.revert,
+              value: MyContextMenuItem.revert(),
             ),
             MenuItem(
               label: t.completely_delete,
               icon: Icons.delete_forever,
-              value: RecycleBinItemMenu.delete,
+              value: MyContextMenuItem.delete(),
               color: Theme.of(context).colorScheme.error,
             ),
             const MenuDivider(),
@@ -290,13 +288,13 @@ class _RecycleBinPageState extends State<RecycleBinPage>
               label: t.revert_selected,
               enabled: _selecteds.isNotEmpty,
               icon: Icons.restore_from_trash,
-              value: RecycleBinItemMenu.revert_selected,
+              value: MyContextMenuItem.revert(true),
             ),
             MenuItem(
               label: t.completely_delete_selected,
               enabled: _selecteds.isNotEmpty,
               icon: Icons.delete_forever,
-              value: RecycleBinItemMenu.delete_selected,
+              value: MyContextMenuItem.delete(true),
               color: Theme.of(context).colorScheme.error,
             ),
           ],

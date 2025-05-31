@@ -577,4 +577,10 @@ class MyLocalizationsZh extends MyLocalizations {
   String days(int day) {
     return '$day 天';
   }
+
+  @override
+  String get auto_fill_specified_field => '填充指定字段';
+
+  @override
+  String get copy_specified_field => '复制指定字段';
 }

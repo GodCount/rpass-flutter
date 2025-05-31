@@ -285,5 +285,7 @@
                 "type": "int"
             }
         }
-    }
+    },
+    "auto_fill_specified_field": "填充指定字段",
+    "copy_specified_field": "复制指定字段"
 }

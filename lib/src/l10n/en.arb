@@ -285,5 +285,7 @@
                 "type": "int"
             }
         }
-    }
+    },
+    "auto_fill_specified_field": "Auto-fill Specified Field",
+    "copy_specified_field": "Copy Specified Field"
 }

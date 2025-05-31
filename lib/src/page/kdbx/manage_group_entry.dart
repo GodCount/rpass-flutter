@@ -327,7 +327,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
   }
 
   Widget _buildListItem(KdbxEntry kdbxEntry) {
-    return CustomContextMenuRegion<GroupsManageItemMenu>(
+    return CustomContextMenuRegion<MyContextMenuItem>(
       enabled: isDesktop,
       onItemSelected: (type) {
         setState(() {
@@ -338,35 +338,35 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
           return;
         }
         switch (type) {
-          case GroupsManageItemMenu.view:
+          case ViewContextMenuItem():
             context.router.platformNavigate(LookAccountRoute(
               kdbxEntry: kdbxEntry,
               uuid: kdbxEntry.uuid,
             ));
             break;
-          case GroupsManageItemMenu.edit:
+          case EditContextMenuItem():
             context.router.platformNavigate(EditAccountRoute(
               kdbxEntry: kdbxEntry,
               uuid: kdbxEntry.uuid,
             ));
             break;
-          case GroupsManageItemMenu.copy:
-            writeClipboard(kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME));
+          case CopyContextMenuItem(kdbxKey: final kdbxKey):
+            writeClipboard(
+              kdbxKey != null
+                  ? kdbxEntry.getActualString(kdbxKey) ?? ''
+                  : kdbxEntry.copyBasicString(),
+            );
             break;
-          case GroupsManageItemMenu.auto_fill:
-            autoFill(kdbxEntry);
+          case AutoFillContextMenuItem(kdbxKey: final kdbxKey):
+            autoFill(kdbxEntry, kdbxKey);
             break;
-          case GroupsManageItemMenu.move:
-            _move([kdbxEntry]);
+          case MoveContextMenuItem(selected: final selected):
+            _move(selected ? _selecteds : [kdbxEntry]);
             break;
-          case GroupsManageItemMenu.move_selected:
-            _move(_selecteds);
+          case DeleteContextMenuItem(selected: final selected):
+            _delete(selected ? _selecteds : [kdbxEntry]);
             break;
-          case GroupsManageItemMenu.delete:
-            _delete([kdbxEntry]);
-            break;
-          case GroupsManageItemMenu.delete_selected:
-            _delete(_selecteds);
+          default:
             break;
         }
       },
@@ -382,35 +382,45 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
             MenuItem(
               label: t.lookup,
               icon: Icons.person_search,
-              value: GroupsManageItemMenu.view,
+              value: MyContextMenuItem.view(),
             ),
             MenuItem(
               label: t.edit_account,
               icon: Icons.edit,
-              value: GroupsManageItemMenu.edit,
+              value: MyContextMenuItem.edit(),
             ),
             const MenuDivider(),
             MenuItem(
               enabled: NativeInstancePlatform.instance.isTargetAppExist,
-              label: "${t.auto_fill}${NativeInstancePlatform.instance.isTargetAppExist ? " (${NativeInstancePlatform.instance.targetAppName})" : ""}",
+              label:
+                  "${t.auto_fill}${NativeInstancePlatform.instance.isTargetAppExist ? " (${NativeInstancePlatform.instance.targetAppName})" : ""}",
               icon: Icons.ads_click,
-              value: GroupsManageItemMenu.auto_fill,
+              value: MyContextMenuItem.autoFill(),
+            ),
+            MenuItem.submenu(
+              label: t.auto_fill_specified_field,
+              enabled: NativeInstancePlatform.instance.isTargetAppExist,
+              items: MyContextMenuItem.buildSubmenuAutoFill(context, kdbxEntry),
             ),
             MenuItem(
               label: t.copy,
               icon: Icons.copy,
-              value: GroupsManageItemMenu.copy,
+              value: MyContextMenuItem.copy(),
+            ),
+            MenuItem.submenu(
+              label: t.copy_specified_field,
+              items: MyContextMenuItem.buildSubmenuCopy(context, kdbxEntry),
             ),
             const MenuDivider(),
             MenuItem(
               label: t.move,
               icon: Icons.move_down,
-              value: GroupsManageItemMenu.move,
+              value: MyContextMenuItem.move(),
             ),
             MenuItem(
               label: t.delete,
               icon: Icons.delete,
-              value: GroupsManageItemMenu.delete,
+              value: MyContextMenuItem.delete(),
               color: Theme.of(context).colorScheme.error,
             ),
             const MenuDivider(),
@@ -418,13 +428,13 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
               label: t.move_selected,
               enabled: _selecteds.isNotEmpty,
               icon: Icons.move_down,
-              value: GroupsManageItemMenu.move_selected,
+              value: MyContextMenuItem.move(true),
             ),
             MenuItem(
               label: t.delete_selected,
               enabled: _selecteds.isNotEmpty,
               icon: Icons.delete,
-              value: GroupsManageItemMenu.delete_selected,
+              value: MyContextMenuItem.delete(true),
               color: Theme.of(context).colorScheme.error,
             ),
           ],

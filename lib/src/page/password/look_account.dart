@@ -134,8 +134,7 @@ class _LookAccountPageState extends State<LookAccountPage>
     final kdbxEntry = widget.kdbxEntry;
     final readOnly = widget.readOnly;
 
-    final customFields = kdbxEntry.stringEntries
-        .where((item) => !defaultKdbxKeys.contains(item.key));
+    final customFields = kdbxEntry.customEntries;
 
     const shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
@@ -237,6 +236,8 @@ class _LookAccountPageState extends State<LookAccountPage>
                   padding: const EdgeInsets.only(left: 6),
                   child: Text(
                     "${t.auto_fill}${NativeInstancePlatform.instance.isTargetAppExist ? " (${NativeInstancePlatform.instance.targetAppName})" : ""}",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 subtitle: Padding(

@@ -1186,6 +1186,18 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'{day} 天'**
   String days(int day);
+
+  /// No description provided for @auto_fill_specified_field.
+  ///
+  /// In zh, this message translates to:
+  /// **'填充指定字段'**
+  String get auto_fill_specified_field;
+
+  /// No description provided for @copy_specified_field.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制指定字段'**
+  String get copy_specified_field;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

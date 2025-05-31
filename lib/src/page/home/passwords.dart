@@ -524,7 +524,7 @@ class _PasswordItemState extends State<_PasswordItem>
     final t = I18n.of(context)!;
 
     final kdbxEntry = widget.kdbxEntry;
-    return CustomContextMenuRegion<PasswordsItemMenu>(
+    return CustomContextMenuRegion<MyContextMenuItem>(
       enabled: isDesktop,
       onItemSelected: (type) {
         setState(() {
@@ -534,7 +534,7 @@ class _PasswordItemState extends State<_PasswordItem>
           return;
         }
         switch (type) {
-          case PasswordsItemMenu.edit:
+          case EditContextMenuItem():
             context.router.platformNavigate(
               EditAccountRoute(
                 kdbxEntry: kdbxEntry,
@@ -542,14 +542,20 @@ class _PasswordItemState extends State<_PasswordItem>
               ),
             );
             break;
-          case PasswordsItemMenu.copy:
-            writeClipboard(kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME));
+          case CopyContextMenuItem(kdbxKey: final kdbxKey):
+            writeClipboard(
+              kdbxKey != null
+                  ? kdbxEntry.getActualString(kdbxKey) ?? ''
+                  : kdbxEntry.copyBasicString(),
+            );
             break;
-          case PasswordsItemMenu.auto_fill:
-            autoFill(widget.kdbxEntry);
+          case AutoFillContextMenuItem(kdbxKey: final kdbxKey):
+            autoFill(widget.kdbxEntry, kdbxKey);
             break;
-          case PasswordsItemMenu.delete:
+          case DeleteContextMenuItem():
             _deletePassword();
+            break;
+          default:
             break;
         }
       },
@@ -565,24 +571,35 @@ class _PasswordItemState extends State<_PasswordItem>
               icon: Icons.edit,
               enabled:
                   context.topRoute.name != EditAccountRoute.name || !_selected,
-              value: PasswordsItemMenu.edit,
+              value: MyContextMenuItem.edit(),
             ),
+            const MenuDivider(),
             MenuItem(
               enabled: NativeInstancePlatform.instance.isTargetAppExist,
-              label: "${t.auto_fill}${NativeInstancePlatform.instance.isTargetAppExist ? " (${NativeInstancePlatform.instance.targetAppName})" : ""}",
+              label:
+                  "${t.auto_fill}${NativeInstancePlatform.instance.isTargetAppExist ? " (${NativeInstancePlatform.instance.targetAppName})" : ""}",
               icon: Icons.ads_click,
-              value: PasswordsItemMenu.auto_fill,
+              value: MyContextMenuItem.autoFill(),
+            ),
+            MenuItem.submenu(
+              label: t.auto_fill_specified_field,
+              enabled: NativeInstancePlatform.instance.isTargetAppExist,
+              items: MyContextMenuItem.buildSubmenuAutoFill(context, kdbxEntry),
             ),
             MenuItem(
               label: t.copy,
               icon: Icons.copy,
-              value: PasswordsItemMenu.copy,
+              value: MyContextMenuItem.copy(),
+            ),
+            MenuItem.submenu(
+              label: t.copy_specified_field,
+              items: MyContextMenuItem.buildSubmenuCopy(context, kdbxEntry),
             ),
             const MenuDivider(),
             MenuItem(
               label: t.delete,
               icon: Icons.delete,
-              value: PasswordsItemMenu.delete,
+              value: MyContextMenuItem.delete(),
               color: Theme.of(context).colorScheme.error,
             ),
           ],

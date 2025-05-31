@@ -22,22 +22,31 @@ class NoPermission implements Exception {
   }
 }
 
-Future<void> autoFillSequence(KdbxEntry kdbxEntry) async {
+Future<void> autoFillSequence(KdbxEntry kdbxEntry, [KdbxKey? kdbxKey]) async {
   if (!Platform.isMacOS && !Platform.isWindows) return;
 
   if (NativeInstancePlatform.instance.targetAppName != null) {
     // 在运行中不要重复触发
-    if (_runing) return;
+    if (_runing) {
+      debugPrint("[auto fill runing]");
+      return;
+    }
     _runing = true;
 
     try {
       if (await NativeInstancePlatform.instance.activatePrevWindow()) {
-        final parse = AutoTypeSequenceParse.parse(
-          kdbxEntry.getAutoTypeSequence(),
-        );
+        final List<TextSequenceItem> items;
+
+        if (kdbxKey != null) {
+          // 填充单个字段
+          items = [KdbxSequenceItem(kdbxKey.key)];
+        } else {
+          items = AutoTypeSequenceParse.parse(kdbxEntry.getAutoTypeSequence())
+              .items;
+        }
 
         debugPrint("[start auto fill]");
-        for (final item in parse.items) {
+        for (final item in items) {
           if (item is ButtonSequenceItem) {
             if (item.button != null) {
               debugPrint("[ButtonSequenceItem] ${item.button!.debugName}");
@@ -65,11 +74,9 @@ Future<void> autoFillSequence(KdbxEntry kdbxEntry) async {
               enigo.key(key: key, direction: Direction.release);
             }
           } else if (item is KdbxSequenceItem) {
-            final text = item.key == KdbxKeyCommon.KEY_OTP
-                ? kdbxEntry.getOTPCode() ?? ''
-                : kdbxEntry.getNonNullString(KdbxKey(item.key));
+            final text = kdbxEntry.getActualString(KdbxKey(item.key));
 
-            if (text.isNotEmpty) {
+            if (text != null && text.isNotEmpty) {
               debugPrint("[KdbxSequenceItem] ${item.key}");
               enigo.text(text: text);
             }

@@ -286,7 +286,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: d62a839279c8af24710f38a72c1131dd122a7859
+      resolved-ref: "683233744879a84e32e7dc2bb814769e79001868"
       url: "https://github.com/GodCount/enigo_flutter.git"
     source: git
     version: "0.0.1"
