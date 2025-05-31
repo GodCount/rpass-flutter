@@ -5,6 +5,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
+import '../../context/kdbx.dart';
 import '../route.dart';
 import '../../i18n.dart';
 import '../../store/index.dart';
@@ -62,7 +63,10 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
     Store.instance.settings.addListener(_settingsListener);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _settingsListener());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Store.instance.syncKdbx.init(KdbxProvider.of(context)!);
+      _settingsListener();
+    });
   }
 
   void _settingsListener() {

@@ -29,6 +29,13 @@ class SyncKdbxController with ChangeNotifier {
   bool _isSyncing = false;
   bool get isSyncing => _isSyncing;
 
+  Future<void> init(Kdbx kdbx) async {
+    if (kdbx.syncAccountEntry != null) {
+      _config ??= WebdavConfig()..updateByKdbx(kdbx.syncAccountEntry!);
+      _client ??= await _config?.buildClient();
+    }
+  }
+
   Future<void> setWebdavClient(
     BuildContext context,
     WebdavClient client,
@@ -51,11 +58,7 @@ class SyncKdbxController with ChangeNotifier {
 
       final kdbx = KdbxProvider.of(context)!;
 
-      if (kdbx.syncAccountEntry != null) {
-        _config ??= WebdavConfig()..updateByKdbx(kdbx.syncAccountEntry!);
-      }
-
-      _client ??= await _config?.buildClient();
+      await init(kdbx);
 
       if (_client == null) {
         _logger.info("Remote client is null, Unable to synchronize.");
