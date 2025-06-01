@@ -1,165 +1,246 @@
 name: Release
 
 on:
-    workflow_dispatch:
-    push:
-        paths:
-          - "CHANGELOG.md"
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
 
 env:
-    FLUTTER_VERSION: "3.29.0"
+  FLUTTER_VERSION: "3.29.3"
 
 jobs:
-    build:
-        runs-on: ubuntu-20.04
-        outputs:
-            version: ${{ steps.get_version.outputs.version }}
+  build_android:
+    name: "Release for Android"
+    runs-on: ubuntu-latest
+    permissions: write-all
 
-        steps:
-            - uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-            - name: Get version from pubspec.yaml
-              id: get_version
-              run: |
-                  VERSION=$(sed -n 's/^version: \(.*\).*/\1/p' pubspec.yaml)
-                  echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Extract tag name
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        shell: bash
 
-    build_apk:
-        needs: build
-        runs-on: ubuntu-22.04
+      - name: Echo build progress
+        run: echo "Rpass-${{ env.tag }}.apk build progress"
+        shell: bash
 
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+      - name: Decode key.properties file
+        env:
+          ENCODED_STRING: ${{ secrets.ANDROID_KEY_PROPERTIES }}
+        run: echo $ENCODED_STRING | base64 -di > android/key.properties
 
-            - name: Decode key.properties file
-              env:
-                  ENCODED_STRING: ${{ secrets.ANDROID_KEY_PROPERTIES }}
-              run: echo $ENCODED_STRING | base64 -di > android/key.properties
+      - name: Decode android-keystore.jks file
+        env:
+          ENCODED_STRING: ${{ secrets.ANDROID_KEY_STORE }}
+        run: mkdir secrets && echo $ENCODED_STRING | base64 -di > android/android-keystore.jks
 
-            - name: Decode android-keystore.jks file
-              env:
-                  ENCODED_STRING: ${{ secrets.ANDROID_KEY_STORE }}
-              run: mkdir secrets && echo $ENCODED_STRING | base64 -di > android/android-keystore.jks
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
 
-            - name: Set up JDK 17
-              uses: actions/setup-java@v4
-              with:
-                  distribution: "temurin"
-                  java-version: "17"
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
 
-            - name: Install Flutter
-              uses: subosito/flutter-action@v2
-              with:
-                  flutter-version: ${{ env.FLUTTER_VERSION }}
+      - name: Dependencies
+        run: flutter pub get
 
-            - name: Dependencies
-              run: flutter pub get
+      - name: Build Android
+        run: flutter build apk --release --split-per-abi --target-platform android-arm,android-arm64,android-x64
 
-            - name: Build APK
-              run: flutter build apk --release --split-per-abi --target-platform android-arm,android-arm64,android-x64
+      - name: Move and Rename Apk
+        run: |
+          base_path=build/app/outputs/flutter-apk/
+          apk_name="Rpass-${{ env.tag }}"
+          mkdir -p build/dist/android
+          cp $base_path/app-arm64-v8a-release.apk build/dist/android/$apk_name-arm64-v8a.apk
+          cp $base_path/app-armeabi-v7a-release.apk build/dist/android/$apk_name-armeabi-v7a.apk
+          cp $base_path/app-x86_64-release.apk build/dist/android/$apk_name-x86_64.apk
 
-            - name: Move and Rename Apk
-              env:
-                  APK_NAME: "Rpass-${{ needs.build.outputs.version }}"
-              run: |
-                  base_path=build/app/outputs/flutter-apk/
-                  apk_name=${{ env.APK_NAME }}
-                  mkdir dist/apks -p
-                  rm -rf dist/apks/*
-                  cp $base_path/app-arm64-v8a-release.apk dist/apks/$apk_name-arm64-v8a.apk
-                  cp $base_path/app-armeabi-v7a-release.apk dist/apks/$apk_name-armeabi-v7a.apk
-                  cp $base_path/app-x86_64-release.apk dist/apks/$apk_name-x86_64.apk
+      - name: Upload Android
+        uses: actions/upload-artifact@v4
+        with:
+          name: android_outputs
+          path: build/dist/android/*
 
-            - name: Upload Apk
-              uses: actions/upload-artifact@v4
-              with:
-                  name: apks
-                  path: dist/apks/*
+  build_macos:
+    name: "Release for Macos"
+    runs-on: macos-latest
+    permissions: write-all
 
-    release:
-        needs:
-            - build
-            - build_apk
-        runs-on: ubuntu-20.04
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
 
-        steps:
-            - uses: actions/checkout@v4
+      - name: Extract tag name
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-            - name: Get latest Notes
-              uses: yashanand1910/standard-release-notes@v1.4.0
-              id: get_release_notes
-              with:
-                  version: ${{ needs.build.outputs.version }}
+      - name: Echo build progress
+        run: echo "Rpass-${{ env.tag }}.dmg build progress"
 
-            - name: Download Apk
-              uses: actions/download-artifact@v4
-              with:
-                  name: apks
-                  path: dist/apks
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
 
-            - name: Draft release
-              uses: softprops/action-gh-release@v2
-              with:
-                  files: dist/apks/*
-                  draft: false
-                  generate_release_notes: true
-                  fail_on_unmatched_files: true
-                  body: ${{ steps.get_release_notes.outputs.release_notes }}
-                  token: ${{ secrets.GITHUB_TOKEN }}
-                  tag_name: v${{ needs.build.outputs.version }}
+      - name: Dependencies
+        run: flutter pub get
 
-    sync_gitee:
-        needs:
-            - build
-            - build_apk
-            - release
-        runs-on: ubuntu-20.04
+      - name: Build MacOS
+        run: flutter build macos --release
 
-        steps:
-            - uses: actions/checkout@v4
+      - name: Create DMG
+        run: |
+          mkdir -p build/dist/macos
+          cp -a build/macos/Build/Products/Release/Rpass.app build/dist/macos
+          ln -s /Applications build/dist/macos/Applications
+          hdiutil create -format UDZO -srcfolder build/dist/macos -volname Rpass Rpass-${{ env.tag }}.dmg
 
-            - name: Get latest Notes
-              uses: yashanand1910/standard-release-notes@v1.5.0
-              id: get_release_notes
-              with:
-                  version: ${{ needs.build.outputs.version }}
+      - name: Upload MacOS
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos_outputs
+          path: Rpass-*.dmg
 
-            - name: Install Python
-              uses: actions/setup-python@v5
-              with:
-                  python-version: "3.10"
+  build-windows:
+    name: "Release for windows"
+    runs-on: "windows-latest"
+    permissions: write-all
 
-            - name: pip install requests
-              run: |
-                  python -m pip install requests
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+      - run: |
+          $tag = "${{ github.ref }}".Replace('refs/tags/', '')
+          echo "tag=$(echo $tag)" >> $env:GITHUB_ENV
 
-            - name: Download artifact
-              uses: actions/download-artifact@v4
-              with:
-                  name: apks
-                  path: dist/apks
+      - run: echo "Rpass_windows_${env:tag}.zip build progress"
 
-            - name: Sync Release Gitee
-              env:
-                  ACCESS_TOKEN: ${{ secrets.GITEE_ACCESS_TOKEN }}
-                  OWNER: do_yzr
-                  REPO: rpass-flutter
-                  TAG_NAME: v${{ needs.build.outputs.version }}
-                  NAME: ${{ needs.build.outputs.version }}
-                  BODY: ${{ steps.get_release_notes.outputs.release_notes }}
-                  PRERELEASE: 0
-                  TARGET_COMMITISH: master
-                  UPLOAD_DIR: ./dist/apks
+      - name: Enable Git longpaths
+        run: git config --system core.longpaths true
 
-              run: >
-                  python ./script/sync-gitee-release.py
-                  $ACCESS_TOKEN
-                  $OWNER
-                  $REPO
-                  $TAG_NAME
-                  $NAME
-                  "$BODY"
-                  $PRERELEASE
-                  $TARGET_COMMITISH
-                  $UPLOAD_DIR
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - run: flutter pub get
+      - run: flutter build windows
+      - run: Compress-Archive build/windows/x64/runner/Release/* Rpass_windows_${env:tag}.zip
+
+      - name: Upload windows outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows_outputs
+          path: |
+            Rpass_windows_*.zip
+
+  release:
+    needs:
+      - build_android
+      - build_macos
+      - build-windows
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract tag name
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Get latest Notes
+        uses: yashanand1910/standard-release-notes@v1.4.0
+        id: get_release_notes
+        with:
+          version: ${{ env.tag }}
+
+      - name: Download Android
+        uses: actions/download-artifact@v4
+        with:
+          name: android_outputs
+          path: dist
+
+      - name: Download MacOS
+        uses: actions/download-artifact@v4
+        with:
+          name: macos_outputs
+          path: dist
+
+      - name: Download Windows
+        uses: actions/download-artifact@v4
+        with:
+          name: windows_outputs
+          path: dist
+
+      - name: Draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.apk
+            dist/*.dmg
+            dist/*.zip
+          draft: false
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          body: ${{ steps.get_release_notes.outputs.release_notes }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  # sync_gitee:
+  #     needs:
+  #         - build
+  #         - build_apk
+  #         - release
+  #     runs-on: ubuntu-20.04
+
+  #     steps:
+  #         - uses: actions/checkout@v4
+
+  #         - name: Get latest Notes
+  #           uses: yashanand1910/standard-release-notes@v1.5.0
+  #           id: get_release_notes
+  #           with:
+  #               version: ${{ needs.build.outputs.version }}
+
+  #         - name: Install Python
+  #           uses: actions/setup-python@v5
+  #           with:
+  #               python-version: "3.10"
+  #         - name: pip install requests
+  #           run: |
+  #               python -m pip install requests
+
+  #         - name: Download artifact
+  #           uses: actions/download-artifact@v4
+  #           with:
+  #               name: apks
+  #               path: dist/apks
+
+  #         - name: Sync Release Gitee
+  #           env:
+  #               ACCESS_TOKEN: ${{ secrets.GITEE_ACCESS_TOKEN }}
+  #               OWNER: do_yzr
+  #               REPO: Rpass-flutter
+  #               TAG_NAME: v${{ needs.build.outputs.version }}
+  #               NAME: ${{ needs.build.outputs.version }}
+  #               BODY: ${{ steps.get_release_notes.outputs.release_notes }}
+  #               PRERELEASE: 0
+  #               TARGET_COMMITISH: master
+  #               UPLOAD_DIR: ./dist/apks
+
+  #           run: >
+  #               python ./script/sync-gitee-release.py
+  #               $ACCESS_TOKEN
+  #               $OWNER
+  #               $REPO
+  #               $TAG_NAME
+  #               $NAME
+  #               "$BODY"
+  #               $PRERELEASE
+  #               $TARGET_COMMITISH
+  #               $UPLOAD_DIR
