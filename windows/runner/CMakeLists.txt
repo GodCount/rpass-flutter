@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.14)
 project(runner LANGUAGES CXX)
 
+
+set(PRODUCT_NAME_DEBUG "Rpass(Debug)")
+set(PRODUCT_NAME_PROFILE "Rpass(Profile)")
+
+set(PRODUCT_NAME $<$<CONFIG:Debug>:${PRODUCT_NAME_DEBUG}>$<$<CONFIG:Profile>:${PRODUCT_NAME_PROFILE}>$<$<CONFIG:Release>:Rpass>)
+
+
 # Define the application target. To change its name, change BINARY_NAME in the
 # top-level CMakeLists.txt, not the value here, or `flutter run` will no longer
 # work.
@@ -22,6 +29,7 @@ add_executable(${BINARY_NAME} WIN32
 apply_standard_settings(${BINARY_NAME})
 
 # Add preprocessor definitions for the build version.
+target_compile_definitions(${BINARY_NAME} PRIVATE "PRODUCT_NAME=\"${PRODUCT_NAME}\"")
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION=\"${FLUTTER_VERSION}\"")
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MAJOR=${FLUTTER_VERSION_MAJOR}")
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MINOR=${FLUTTER_VERSION_MINOR}")
