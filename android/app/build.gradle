@@ -52,7 +52,7 @@ android {
 
     defaultConfig {
         applicationId = "com.godcount.rpass"
-        minSdk = 23
+        minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
@@ -71,18 +71,21 @@ android {
         release {
             signingConfig signingConfigs.release
             resValue "string", "app_name", "Rpass"
+            resValue "string", "autofill_service_label", "Rpass Autofill Service"
         }
 
         profile {
             signingConfig signingConfigs.debug
             applicationIdSuffix ".profile"
             resValue "string", "app_name", "Rpass(P)"
+            resValue "string", "autofill_service_label", "Rpass(P) Autofill Service"
         }
 
         debug {
             signingConfig signingConfigs.debug
             applicationIdSuffix ".debug"
             resValue "string", "app_name", "Rpass(D)"
+            resValue "string", "autofill_service_label", "Rpass(D) Autofill Service"
         }
     }
 }

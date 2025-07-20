@@ -589,4 +589,28 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get copy_specified_field => 'Copy Specified Field';
+
+  @override
+  String get show_system_apps => 'Show System Apps';
+
+  @override
+  String get hide_system_apps => 'Hide System Apps';
+
+  @override
+  String get none => 'None';
+
+  @override
+  String get auto_fill_apps_none_subtitle => 'Will be matched according to the domain name';
+
+  @override
+  String get enable_auto_fill_service => 'Enable Auto-fill Service';
+
+  @override
+  String get manual_select_fill_item => 'Manually Select Fill Item';
+
+  @override
+  String get manual_select_fill_item_subtitle => 'When the auto-matched fill dataset returns empty';
+
+  @override
+  String get auto_fill_match_app => 'Auto-fill Application';
 }

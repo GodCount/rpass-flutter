@@ -550,19 +550,25 @@ class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
     final t = I18n.of(context)!;
 
     return AlertDialog(
-      title: TextField(
-        controller: _searchController,
-        autofocus: false,
-        style: Theme.of(context).textTheme.bodySmall,
-        decoration: InputDecoration(
-          border: const OutlineInputBorder(),
-          label: Text(widget.title != null ? widget.title! : t.select_account),
-          hintText: t.search,
-          prefixIcon: IconButton(
-            onPressed: showSearchHelpDialog,
-            icon: const Icon(Icons.help_outline_rounded),
-          ),
-        ),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 16,
+        children: [
+          Text(widget.title != null ? widget.title! : t.select_account),
+          TextField(
+            controller: _searchController,
+            autofocus: false,
+            style: Theme.of(context).textTheme.bodySmall,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              hintText: t.search,
+              prefixIcon: IconButton(
+                onPressed: showSearchHelpDialog,
+                icon: const Icon(Icons.help_outline_rounded),
+              ),
+            ),
+          )
+        ],
       ),
       contentPadding: EdgeInsets.only(
         top: Theme.of(context).useMaterial3 ? 16.0 : 20.0,
@@ -579,38 +585,54 @@ class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
           itemBuilder: (context, index) {
             KdbxEntry kdbxEntry = _totalEntry[index];
             return ListTile(
-              leading: Padding(
-                padding: const EdgeInsets.only(top: 6),
-                child: KdbxIconWidget(
-                  kdbxIcon: KdbxIconWidgetData(
-                    icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
-                    customIcon: kdbxEntry.customIcon,
-                  ),
-                  size: 24,
+              isThreeLine: true,
+              selected: _selectedKdbxEntry == kdbxEntry,
+              leading: KdbxIconWidget(
+                kdbxIcon: KdbxIconWidgetData(
+                  icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
+                  customIcon: kdbxEntry.customIcon,
                 ),
+                size: 24,
               ),
+              titleTextStyle: kdbxEntry.isExpiry()
+                  ? Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(color: Theme.of(context).colorScheme.error)
+                  : Theme.of(context).textTheme.titleMedium,
               title: Text(
                 kdbxEntry.isExpiry()
                     ? "${kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE)} (${t.expires})"
                     : kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE),
-                style: kdbxEntry.isExpiry()
-                    ? Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(color: Theme.of(context).colorScheme.error)
-                    : Theme.of(context).textTheme.titleLarge,
                 overflow: TextOverflow.ellipsis,
               ),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(left: 12),
-                child: Text(
-                  kdbxEntry.getNonNullString(KdbxKeyCommon.URL),
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: Text(
+                      kdbxEntry.getNonNullString(KdbxKeyCommon.URL),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                  _subtitleText(
+                    t.account_ab,
+                    kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME),
+                  ),
+                  _subtitleText(
+                    t.email_ab,
+                    kdbxEntry.getNonNullString(KdbxKeyCommon.EMAIL),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      kdbxEntry.parent.name.get() ?? '',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
-              trailing: _selectedKdbxEntry == kdbxEntry
-                  ? const Icon(Icons.check)
-                  : null,
               onTap: () {
                 setState(() {
                   if (_selectedKdbxEntry == kdbxEntry) {
@@ -632,12 +654,30 @@ class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
           child: Text(t.cancel),
         ),
         TextButton(
-          onPressed: () {
-            widget.onResult(_selectedKdbxEntry);
-          },
+          onPressed: _selectedKdbxEntry != null
+              ? () {
+                  widget.onResult(_selectedKdbxEntry);
+                }
+              : null,
           child: Text(t.confirm),
         ),
       ],
+    );
+  }
+
+  Widget _subtitleText(String subLabel, String text) {
+    return RichText(
+      overflow: TextOverflow.ellipsis,
+      text: TextSpan(
+        style: Theme.of(context).textTheme.titleSmall,
+        text: "$subLabel ",
+        children: [
+          TextSpan(
+            style: Theme.of(context).textTheme.bodySmall,
+            text: text,
+          )
+        ],
+      ),
     );
   }
 }

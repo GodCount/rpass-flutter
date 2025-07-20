@@ -289,9 +289,6 @@ class _LookAccountPageState extends State<LookAccountPage>
                       : null,
                   icon: const Icon(Icons.ads_click),
                 ),
-                // onLongPress: () => writeClipboard(
-                //   kdbxEntry.getAutoTypeSequence(),
-                // ),
               ),
             ListTile(
               title: Padding(

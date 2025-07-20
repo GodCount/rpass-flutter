@@ -23,6 +23,7 @@ export 'password/gen_password.dart' show GenPasswordRoute;
 export 'password/edit_notes.dart' show EditNotesRoute;
 export 'password/look_account.dart' show LookAccountRoute;
 export 'password/edit_auto_type.dart' show EditAutoTypeRoute;
+export 'password/select_auto_fill_app.dart' show SelectAutoFillAppRoute;
 
 
 

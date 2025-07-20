@@ -6,8 +6,11 @@ import 'package:flutter/material.dart';
 import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
 import '../../kdbx/kdbx.dart';
+import '../../native/channel.dart';
+import '../../native/platform/android.dart';
 import '../../store/index.dart';
 import '../../util/route.dart';
+import '../../widget/common.dart';
 import '../route.dart';
 import 'authorized_page.dart';
 
@@ -83,8 +86,31 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
       }
 
       KdbxProvider.setKdbx(context, kdbx);
-      context.router.replace(HomeRoute());
+
+      if (!(await _isAutoFill(kdbx))) {
+        context.router.replace(HomeRoute());
+      }
     }
+  }
+
+  Future<bool> _isAutoFill(Kdbx kdbx) async {
+    final metadata =
+        await NativeInstancePlatform.instance.autofillService.metadata();
+
+    if (metadata == null) return false;
+
+    List<AutofillDataset> result = await kdbx.autofillSearch(metadata);
+
+    if (result.isEmpty && Store.instance.settings.manualSelectFillItem) {
+      final kdbxEntry = await KdbxEntrySelectorDialog.openDialog(context);
+      final dataset = kdbxEntry?.toAutofillDataset(metadata.fieldTypes);
+
+      if (dataset != null) result.add(dataset);
+    }
+
+    NativeInstancePlatform.instance.autofillService.responseDataset(result);
+
+    return true;
   }
 
   @override
@@ -105,7 +131,10 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
     );
 
     KdbxProvider.setKdbx(context, kdbx);
-    context.router.replace(HomeRoute());
+
+    if (!(await _isAutoFill(kdbx))) {
+      context.router.replace(HomeRoute());
+    }
   }
 
   @override

@@ -14,6 +14,7 @@ class SettingsController with ChangeNotifier {
   late bool _enableRemoteSync;
   Duration? _remoteSyncCycle;
   DateTime? _lastSyncTime;
+  late bool _manualSelectFillItem;
 
   ThemeMode get themeMode => _themeMode;
   Locale? get locale => _locale;
@@ -24,6 +25,7 @@ class SettingsController with ChangeNotifier {
   bool get enableRemoteSync => _enableRemoteSync;
   Duration? get remoteSyncCycle => _remoteSyncCycle;
   DateTime? get lastSyncTime => _lastSyncTime;
+  bool get manualSelectFillItem => _manualSelectFillItem;
 
   Future<void> setThemeMode(ThemeMode? mode) async {
     if (mode == null) return;
@@ -117,6 +119,16 @@ class SettingsController with ChangeNotifier {
     await _settingsService.setLastSyncTime(time);
   }
 
+  Future<void> setManualSelectFillItem(bool enable) async {
+    if (enable == _manualSelectFillItem) return;
+
+    _manualSelectFillItem = enable;
+
+    notifyListeners();
+
+    await _settingsService.setManualSelectFillItem(enable);
+  }
+
   Future<void> init() async {
     _themeMode = await _settingsService.getThemeMode();
     _locale = await _settingsService.getLocale();
@@ -128,6 +140,7 @@ class SettingsController with ChangeNotifier {
     _enableRemoteSync = await _settingsService.getEnableRemoteSync();
     _remoteSyncCycle = await _settingsService.getRemoteSyncCycle();
     _lastSyncTime = await _settingsService.getLastSyncTime();
+    _manualSelectFillItem = await _settingsService.getManualSelectFillItem();
 
     notifyListeners();
   }

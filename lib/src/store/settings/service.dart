@@ -74,7 +74,7 @@ class SettingsService with SharedPreferencesService {
     final cycle = await getInt("remote_sync_cycle");
     // 默认值 1天
     // 小于0则表示每次启动
-    return cycle == null || cycle > 0 ? Duration(days: cycle ?? 1) : null;
+    return cycle == null || cycle > 0 ? Duration(seconds: cycle ?? 86400) : null;
   }
 
   Future<bool> setRemoteSyncCycle(Duration? cycle) {
@@ -90,6 +90,14 @@ class SettingsService with SharedPreferencesService {
     return time == null
         ? remove("last_sync_time")
         : setInt("last_sync_time", time.millisecondsSinceEpoch);
+  }
+
+  Future<bool> getManualSelectFillItem() async {
+    return await getBool("manual_select_fill_item") ?? false;
+  }
+
+  Future<bool> setManualSelectFillItem(bool enbale) {
+    return setBool("manual_select_fill_item", enbale);
   }
 
   @override

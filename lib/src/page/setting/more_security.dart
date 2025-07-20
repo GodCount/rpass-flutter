@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../../i18n.dart';
+import '../../native/channel.dart';
+import '../../native/platform/android.dart';
 import '../../store/index.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
@@ -40,6 +44,17 @@ class MoreSecurityPage extends StatefulWidget {
 
 class _MoreSecurityPageState extends State<MoreSecurityPage>
     with SecondLevelPageAutoBack<MoreSecurityPage> {
+  AutofillServiceStatus _autofillServiceStatus =
+      AutofillServiceStatus.unsupported;
+
+  @override
+  void initState() {
+    super.initState();
+    NativeInstancePlatform.instance.autofillService
+        .status()
+        .then((value) => setState(() => _autofillServiceStatus = value));
+  }
+
   void _setLockDelay() {
     final t = I18n.of(context)!;
 
@@ -110,7 +125,8 @@ class _MoreSecurityPageState extends State<MoreSecurityPage>
           ListTile(
             onTap: () async {
               await store.settings.settEnableRecordKeyFilePath(
-                  !store.settings.enableRecordKeyFilePath);
+                !store.settings.enableRecordKeyFilePath,
+              );
               setState(() {});
             },
             title: Text(t.record_key_file_path),
@@ -118,6 +134,45 @@ class _MoreSecurityPageState extends State<MoreSecurityPage>
                 ? const Icon(Icons.check)
                 : null,
           ),
+          if (Platform.isAndroid) ...[
+            ListTile(
+              enabled:
+                  _autofillServiceStatus != AutofillServiceStatus.unsupported,
+              onTap: () async {
+                if (_autofillServiceStatus == AutofillServiceStatus.enabled) {
+                  await NativeInstancePlatform.instance.autofillService
+                      .disabled();
+                  _autofillServiceStatus = AutofillServiceStatus.disabled;
+                } else {
+                  final result = await NativeInstancePlatform
+                      .instance.autofillService
+                      .enabled();
+                  _autofillServiceStatus = result
+                      ? AutofillServiceStatus.enabled
+                      : AutofillServiceStatus.disabled;
+                }
+                setState(() {});
+              },
+              title: Text(t.enable_auto_fill_service),
+              trailing: _autofillServiceStatus == AutofillServiceStatus.enabled
+                  ? const Icon(Icons.check)
+                  : null,
+            ),
+            ListTile(
+              enabled: _autofillServiceStatus == AutofillServiceStatus.enabled,
+              onTap: () async {
+                await store.settings.setManualSelectFillItem(
+                  !store.settings.manualSelectFillItem,
+                );
+                setState(() {});
+              },
+              title: Text(t.manual_select_fill_item),
+              subtitle: Text(t.manual_select_fill_item_subtitle),
+              trailing: store.settings.manualSelectFillItem
+                  ? const Icon(Icons.check)
+                  : null,
+            ),
+          ]
         ],
       ),
     );

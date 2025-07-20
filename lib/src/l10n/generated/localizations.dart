@@ -1198,6 +1198,54 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'复制指定字段'**
   String get copy_specified_field;
+
+  /// No description provided for @show_system_apps.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示系统应用'**
+  String get show_system_apps;
+
+  /// No description provided for @hide_system_apps.
+  ///
+  /// In zh, this message translates to:
+  /// **'隐藏系统应用'**
+  String get hide_system_apps;
+
+  /// No description provided for @none.
+  ///
+  /// In zh, this message translates to:
+  /// **'无'**
+  String get none;
+
+  /// No description provided for @auto_fill_apps_none_subtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'将根据域名匹配'**
+  String get auto_fill_apps_none_subtitle;
+
+  /// No description provided for @enable_auto_fill_service.
+  ///
+  /// In zh, this message translates to:
+  /// **'启用自动填充服务'**
+  String get enable_auto_fill_service;
+
+  /// No description provided for @manual_select_fill_item.
+  ///
+  /// In zh, this message translates to:
+  /// **'手动选择填充数据项'**
+  String get manual_select_fill_item;
+
+  /// No description provided for @manual_select_fill_item_subtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'当自动匹配填充数据集返回为空时'**
+  String get manual_select_fill_item_subtitle;
+
+  /// No description provided for @auto_fill_match_app.
+  ///
+  /// In zh, this message translates to:
+  /// **'自动填充应用'**
+  String get auto_fill_match_app;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

@@ -150,6 +150,10 @@ RootStackRouter _createMobileAutoRoute() {
         path: "/import_remote_file",
         page: ImportRemoteKdbxRoute.page,
       ),
+      AutoRoute(
+        path: "/select_auto_fill_app",
+        page: SelectAutoFillAppRoute.page,
+      ),
     ],
   );
 }
@@ -295,6 +299,10 @@ RootStackRouter _createDesktopAutoRoute() {
       AutoRoute(
         path: "/import_remote_kdbx",
         page: ImportRemoteKdbxRoute.page,
+      ),
+      AutoRoute(
+        path: "/select_auto_fill_app",
+        page: SelectAutoFillAppRoute.page,
       ),
     ],
   );

@@ -446,6 +446,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  installed_apps:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: master
+      resolved-ref: bda7c13410fe78fafb9ee628df9395e32d4c6ea1
+      url: "https://github.com/rongyu-zhen/installed_apps.git"
+    source: git
+    version: "1.6.0"
   intl:
     dependency: "direct main"
     description:

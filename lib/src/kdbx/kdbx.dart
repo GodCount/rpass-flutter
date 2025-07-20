@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:kdbx/kdbx.dart' hide KdbxException, KdbxKeyCommon;
 import 'package:uuid/uuid.dart';
 
+import '../native/platform/android.dart';
 import '../rpass.dart';
 import '../util/one_time_password.dart';
 import 'auto_fill.dart';
@@ -48,13 +49,21 @@ class KdbxKeySpecial {
   static const KEY_ATTACH = 'Attach';
   static const KEY_EXPIRES = "Expires";
   static const KEY_AUTO_TYPE = "AutoType";
+  static const KEY_AUTO_FILL_PACKAGE_NAME = "AutoFillPackageName";
 
   static KdbxKey TAGS = KdbxKey(KEY_TAGS);
   static KdbxKey ATTACH = KdbxKey(KEY_ATTACH);
   static KdbxKey EXPIRES = KdbxKey(KEY_EXPIRES);
   static KdbxKey AUTO_TYPE = KdbxKey(KEY_AUTO_TYPE);
+  static KdbxKey AUTO_FILL_PACKAGE_NAME = KdbxKey(KEY_AUTO_FILL_PACKAGE_NAME);
 
-  static List<KdbxKey> all = [AUTO_TYPE, TAGS, ATTACH, EXPIRES];
+  static List<KdbxKey> all = [
+    AUTO_TYPE,
+    AUTO_FILL_PACKAGE_NAME,
+    TAGS,
+    ATTACH,
+    EXPIRES
+  ];
 }
 
 class KdbxKeyCommon {
@@ -408,6 +417,35 @@ class SyncMergeContext {
 
   /// kdbx 文件
   Uint8List? data;
+}
+
+extension KdbxAndroidAutoFill on KdbxBase {
+  Future<List<AutofillDataset>> autofillSearch(AutofillMetadata metadata) {
+    return androidAutofillSearch(metadata, totalEntry);
+  }
+}
+
+extension KdbxEntryAndroidAutoFill on KdbxEntry {
+  AutofillDataset toAutofillDataset(Set<String> fieldTypes) {
+    return AutofillDataset(
+      label: getActualString(KdbxKeyCommon.TITLE) ??
+          getActualString(KdbxKeyCommon.USER_NAME),
+      password: fieldTypes.contains(AutofillField.PASSWORD)
+          ? getActualString(KdbxKeyCommon.PASSWORD)
+          : null,
+      username: fieldTypes.contains(AutofillField.USERNAME) ||
+              fieldTypes.contains(AutofillField.EMAIL)
+          ? fieldTypes.contains(AutofillField.EMAIL) // 存在邮箱,优先返回邮箱
+              ? getActualString(KdbxKeyCommon.EMAIL) ??
+                  getActualString(KdbxKeyCommon.USER_NAME)
+              : getActualString(KdbxKeyCommon.USER_NAME) ??
+                  getActualString(KdbxKeyCommon.EMAIL)
+          : null,
+      otp: fieldTypes.contains(AutofillField.OTP)
+          ? getActualString(KdbxKeyCommon.OTP)
+          : null,
+    );
+  }
 }
 
 class Kdbx extends KdbxBase

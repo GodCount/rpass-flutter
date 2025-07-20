@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 
+import 'platform/android.dart';
 import 'platform/desktop.dart';
 
 abstract mixin class NativeChannelListener {
@@ -15,17 +16,26 @@ class NativeInstancePlatform {
   static void ensureInitialized() {
     NativeInstancePlatform._instance ??= Platform.isMacOS || Platform.isWindows
         ? DesktopNativeInstancePlatform()
-        : NativeInstancePlatform();
+        : Platform.isAndroid
+            ? AndroidNativeInstancePlatform()
+            : NativeInstancePlatform();
   }
 
   final ObserverList<NativeChannelListener> _listeners =
       ObserverList<NativeChannelListener>();
 
+  final AutofillService _autofillService = AutofillService();
+
+  AutofillService get autofillService => _autofillService;
+
   List<NativeChannelListener> get listeners => List.unmodifiable(_listeners);
 
-  bool get hasListeners {
-    return _listeners.isNotEmpty;
-  }
+  bool get hasListeners => _listeners.isNotEmpty;
+
+  String? get targetAppName => null;
+
+  bool get isTargetAppExist =>
+      targetAppName != null && targetAppName!.isNotEmpty;
 
   void addListener(NativeChannelListener listener) {
     _listeners.add(listener);
@@ -34,10 +44,6 @@ class NativeInstancePlatform {
   void removeListener(NativeChannelListener listener) {
     _listeners.remove(listener);
   }
-
-  String? get targetAppName => null;
-
-  bool get isTargetAppExist => targetAppName != null && targetAppName!.isNotEmpty;
 
   /// 激活上一个窗口的焦点
   Future<bool> activatePrevWindow() async {

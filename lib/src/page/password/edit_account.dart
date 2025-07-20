@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:installed_apps/index.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:rich_text_controller/rich_text_controller.dart';
@@ -153,6 +154,11 @@ class _EditAccountPageState extends State<EditAccountPage>
       }
     } else if (field is EntryAutoTypeFieldSaved) {
       _kdbxEntry.setAutoTyprSequence(field.value);
+    } else if (field is EntryAutoFillAppFieldSaved) {
+      _kdbxEntry.setString(
+        field.key,
+        field.value != null ? PlainValue(field.value) : null,
+      );
     } else if (field is EntryTagsFieldSaved) {
       _kdbxEntry.tagList = field.value;
     } else if (field is EntryTextFieldSaved) {
@@ -215,6 +221,24 @@ class _EditAccountPageState extends State<EditAccountPage>
     final t = I18n.of(context)!;
     final kdbx = KdbxProvider.of(context)!;
 
+    List<Widget> specialChildren = [];
+
+    for (final item in KdbxKeySpecial.all) {
+      if (isMobile && item == KdbxKeySpecial.AUTO_TYPE) continue;
+      if (isDesktop && item == KdbxKeySpecial.AUTO_FILL_PACKAGE_NAME) continue;
+
+      specialChildren.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: EntryField(
+            kdbxKey: item,
+            kdbxEntry: _kdbxEntry,
+            onSaved: _entryFieldSaved,
+          ),
+        ),
+      );
+    }
+
     final children = [
       Padding(
         padding: const EdgeInsets.only(bottom: 12),
@@ -250,16 +274,7 @@ class _EditAccountPageState extends State<EditAccountPage>
         padding: const EdgeInsets.only(bottom: 12),
         child: _buildAddFieldWidget(),
       ),
-      ...KdbxKeySpecial.all.map(
-        (item) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: EntryField(
-            kdbxKey: item,
-            kdbxEntry: _kdbxEntry,
-            onSaved: _entryFieldSaved,
-          ),
-        ),
-      ),
+      ...specialChildren,
       const SizedBox(height: 42)
     ];
 
@@ -347,6 +362,10 @@ class EntryTextFieldSaved extends EntryFieldSaved<StringValue> {
 
 class EntryAutoTypeFieldSaved extends EntryFieldSaved<String> {
   EntryAutoTypeFieldSaved({required super.key, required super.value});
+}
+
+class EntryAutoFillAppFieldSaved extends EntryFieldSaved<String?> {
+  EntryAutoFillAppFieldSaved({required super.key, required super.value});
 }
 
 class EntryTagsFieldSaved extends EntryFieldSaved<List<String>> {
@@ -511,6 +530,8 @@ class _EntryFieldState extends State<EntryField> {
         return t.description;
       case KdbxKeySpecial.KEY_AUTO_TYPE:
         return t.fill_sequence;
+      case KdbxKeySpecial.KEY_AUTO_FILL_PACKAGE_NAME:
+        return t.auto_fill_match_app;
       case KdbxKeySpecial.KEY_TAGS:
         return t.label;
       case KdbxKeySpecial.KEY_ATTACH:
@@ -689,6 +710,17 @@ class _EntryFieldState extends State<EntryField> {
             widget.onSaved(EntryAutoTypeFieldSaved(
               key: widget.kdbxKey,
               value: value!,
+            ));
+          },
+        );
+      case KdbxKeySpecial.KEY_AUTO_FILL_PACKAGE_NAME:
+        return EntryAutoFillAppFormField(
+          label: _kdbKey2I18n(),
+          initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
+          onSaved: (value) {
+            widget.onSaved(EntryAutoFillAppFieldSaved(
+              key: widget.kdbxKey,
+              value: value,
             ));
           },
         );
@@ -1220,4 +1252,57 @@ class EntryAutoTypeFormField extends StatelessWidget {
       },
     );
   }
+}
+
+class EntryAutoFillAppFormField extends FormField<String> {
+  EntryAutoFillAppFormField({
+    super.key,
+    String? label,
+    super.initialValue,
+    super.onSaved,
+  }) : super(builder: (field) {
+          return FutureBuilder<AppInfo?>(
+            future: field.value == null
+                ? Future.error("Empty")
+                : InstalledAppsInstance.instance.getAppInfo(field.value!),
+            builder: (context, snapshot) {
+              return GestureDetector(
+                onTap: () async {
+                  final packageName =
+                      await field.context.router.push(SelectAutoFillAppRoute());
+                  if (field.value == packageName ||
+                      field.value == null && packageName == "none") {
+                    return;
+                  }
+                  if (packageName != null && packageName is String) {
+                    field.didChange(packageName == "none" ? null : packageName);
+                  }
+                },
+                child: InputDecorator(
+                  isEmpty: field.value == null || field.value!.isEmpty,
+                  decoration: InputDecoration(
+                    labelText: label,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: IconButton(
+                      onPressed: null,
+                      icon: snapshot.hasData
+                          ? Image.memory(
+                              snapshot.data!.icon,
+                              width: 18,
+                              height: 18,
+                            )
+                          : const Icon(
+                              Icons.android_outlined,
+                              size: 18,
+                            ),
+                    ),
+                  ),
+                  child: snapshot.hasData || field.value != null
+                      ? Text(snapshot.data?.name ?? field.value ?? "")
+                      : null,
+                ),
+              );
+            },
+          );
+        });
 }

@@ -583,4 +583,28 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get copy_specified_field => '复制指定字段';
+
+  @override
+  String get show_system_apps => '显示系统应用';
+
+  @override
+  String get hide_system_apps => '隐藏系统应用';
+
+  @override
+  String get none => '无';
+
+  @override
+  String get auto_fill_apps_none_subtitle => '将根据域名匹配';
+
+  @override
+  String get enable_auto_fill_service => '启用自动填充服务';
+
+  @override
+  String get manual_select_fill_item => '手动选择填充数据项';
+
+  @override
+  String get manual_select_fill_item_subtitle => '当自动匹配填充数据集返回为空时';
+
+  @override
+  String get auto_fill_match_app => '自动填充应用';
 }

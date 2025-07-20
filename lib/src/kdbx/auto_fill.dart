@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:enigo_flutter/enigo_flutter.dart';
 
 import '../native/channel.dart';
+import '../native/platform/android.dart';
 import 'kdbx.dart';
 
 final _logger = Logger("kdbx:auto_fill");
@@ -22,6 +23,10 @@ class NoPermission implements Exception {
   }
 }
 
+///
+/// 桌面端 以模拟键盘输入的方式自动填充信息
+///
+///
 Future<void> autoFillSequence(KdbxEntry kdbxEntry, [KdbxKey? kdbxKey]) async {
   if (!Platform.isMacOS && !Platform.isWindows) return;
 
@@ -97,4 +102,32 @@ Future<void> autoFillSequence(KdbxEntry kdbxEntry, [KdbxKey? kdbxKey]) async {
       _runing = false;
     }
   }
+}
+
+///
+/// 安卓端
+/// 返回自动填充数据集
+/// 给 AutofillService 服务
+Future<List<AutofillDataset>> androidAutofillSearch(
+  AutofillMetadata metadata,
+  List<KdbxEntry> kdbxEntrys,
+) async {
+  final result = kdbxEntrys.where((it) {
+    final packageName =
+        it.getActualString(KdbxKeySpecial.AUTO_FILL_PACKAGE_NAME);
+
+    final url = it.getActualString(KdbxKeyCommon.URL);
+
+    if (packageName != null && metadata.packageNames.contains(packageName)) {
+      return url != null && url.isNotEmpty
+          ? metadata.webDomains.any((it) => url.contains(it.domain))
+          : true;
+    }
+
+    return url != null && url.isNotEmpty
+        ? metadata.webDomains.any((it) => url.contains(it.domain))
+        : false;
+  });
+
+  return result.map((it) => it.toAutofillDataset(metadata.fieldTypes)).toList();
 }

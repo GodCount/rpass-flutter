@@ -287,5 +287,13 @@
         }
     },
     "auto_fill_specified_field": "填充指定字段",
-    "copy_specified_field": "复制指定字段"
+    "copy_specified_field": "复制指定字段",
+    "show_system_apps": "显示系统应用",
+    "hide_system_apps": "隐藏系统应用",
+    "none": "无",
+    "auto_fill_apps_none_subtitle": "将根据域名匹配",
+    "enable_auto_fill_service": "启用自动填充服务",
+    "manual_select_fill_item": "手动选择填充数据项",
+    "manual_select_fill_item_subtitle": "当自动匹配填充数据集返回为空时",
+    "auto_fill_match_app": "自动填充应用"
 }
