@@ -24,6 +24,7 @@ import com.godcount.rpass.autofill.FieldType
 import com.godcount.rpass.autofill.ParsedStructure
 import com.godcount.rpass.autofill.RemoteViewsHelper
 
+@Suppress("DEPRECATION")
 class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHandler,
     PluginRegistry.ActivityResultListener, PluginRegistry.NewIntentListener {
 
@@ -171,7 +172,8 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
                     Dataset.Builder(
                         RemoteViewsHelper.viewsWithNoAuth(
                             activity.applicationContext.packageName,
-                            "${data.label} (${data.username})"
+                            data.label,
+                            data.username
                         )
                     ).apply {
                         setId("${data.label} (${data.username})")
@@ -183,7 +185,8 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
                                     AutofillValue.forText(data.password),
                                     RemoteViewsHelper.viewsWithNoAuth(
                                         activity.applicationContext.packageName,
-                                        "${data.label} (${data.username})"
+                                        data.label,
+                                        data.username
                                     )
                                 )
                             }
@@ -195,7 +198,8 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
                                     AutofillValue.forText(data.otp),
                                     RemoteViewsHelper.viewsWithNoAuth(
                                         activity.applicationContext.packageName,
-                                        "${data.label} (${data.username})"
+                                        data.label,
+                                        data.username
                                     )
                                 )
                             }
@@ -207,7 +211,8 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
                                     AutofillValue.forText(data.username),
                                     RemoteViewsHelper.viewsWithNoAuth(
                                         activity.applicationContext.packageName,
-                                        "${data.label} (${data.username})"
+                                        data.label,
+                                        data.username
                                     )
                                 )
                             }

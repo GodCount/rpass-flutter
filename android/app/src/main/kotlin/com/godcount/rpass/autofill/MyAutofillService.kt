@@ -59,7 +59,7 @@ class MyAutofillService : AutofillService() {
         val fillResponse = FillResponse.Builder().setAuthentication(
             parsedStructure.autoFillIds.distinct().toTypedArray(),
             sender,
-            RemoteViewsHelper.viewsWithAuth(packageName, unlockLabel)
+            RemoteViewsHelper.viewsWithAuth(packageName, unlockLabel, null)
         ).build()
 
         callback.onSuccess(fillResponse)
@@ -73,23 +73,31 @@ class MyAutofillService : AutofillService() {
 
 object RemoteViewsHelper {
 
-    fun viewsWithAuth(packageName: String, text: String): RemoteViews {
-        return simpleRemoteViews(packageName, text, R.drawable.ic_lock_black_24dp)
+    fun viewsWithAuth(packageName: String, title: String?, subtitle: String?): RemoteViews {
+        return simpleRemoteViews(packageName, R.drawable.ic_lock_black_24dp, title, subtitle)
     }
 
-    fun viewsWithNoAuth(packageName: String, text: String): RemoteViews {
-        return simpleRemoteViews(packageName, text, R.drawable.ic_person_black_24dp)
+    fun viewsWithNoAuth(packageName: String, title: String?, subtitle: String?): RemoteViews {
+        return simpleRemoteViews(packageName, R.drawable.ic_person_black_24dp, title, subtitle)
     }
 
     private fun simpleRemoteViews(
-        packageName: String, remoteViewsText: String,
-        @DrawableRes drawableId: Int
+        packageName: String, @DrawableRes drawableId: Int, title: String?, subtitle: String?,
     ): RemoteViews {
         val presentation = RemoteViews(
             packageName,
             R.layout.multidataset_service_list_item
         )
-        presentation.setTextViewText(R.id.text, remoteViewsText)
+
+        val text = title ?: subtitle ?: "Fill me"
+        presentation.setTextViewText(R.id.label, text)
+
+        if (title != null && subtitle != null) {
+            presentation.setTextViewText(R.id.subtitle, subtitle)
+        } else {
+            presentation.setViewVisibility(R.id.subtitle, View.GONE)
+        }
+
         presentation.setImageViewResource(R.id.icon, drawableId)
         return presentation
     }
@@ -199,8 +207,8 @@ class ParsedStructure(structure: AssistStructure) {
     private fun getFieldType(node: ViewNode): String {
         return when {
             isPasswordField(node) -> FieldType.PASSWORD
-            isUserNameField(node) -> FieldType.USERNAME
             isEmailField(node) -> FieldType.EMAIL
+            isUserNameField(node) -> FieldType.USERNAME
             isOtpField(node) -> FieldType.OTP
             else -> node.autofillHints?.joinToString("|")
                 ?: node.htmlInfo?.attributes?.joinToString("|") { "${it.first}:${it.second}" }

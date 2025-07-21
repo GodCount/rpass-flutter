@@ -433,14 +433,11 @@ extension KdbxEntryAndroidAutoFill on KdbxEntry {
       password: fieldTypes.contains(AutofillField.PASSWORD)
           ? getActualString(KdbxKeyCommon.PASSWORD)
           : null,
-      username: fieldTypes.contains(AutofillField.USERNAME) ||
-              fieldTypes.contains(AutofillField.EMAIL)
-          ? fieldTypes.contains(AutofillField.EMAIL) // 存在邮箱,优先返回邮箱
-              ? getActualString(KdbxKeyCommon.EMAIL) ??
-                  getActualString(KdbxKeyCommon.USER_NAME)
-              : getActualString(KdbxKeyCommon.USER_NAME) ??
-                  getActualString(KdbxKeyCommon.EMAIL)
-          : null,
+      username: fieldTypes.contains(AutofillField.EMAIL) // 存在邮箱,优先返回邮箱
+          ? getActualString(KdbxKeyCommon.EMAIL) ??
+              getActualString(KdbxKeyCommon.USER_NAME)
+          : getActualString(KdbxKeyCommon.USER_NAME) ??
+              getActualString(KdbxKeyCommon.EMAIL),
       otp: fieldTypes.contains(AutofillField.OTP)
           ? getActualString(KdbxKeyCommon.OTP)
           : null,

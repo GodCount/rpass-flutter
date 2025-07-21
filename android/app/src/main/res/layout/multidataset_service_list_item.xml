@@ -2,28 +2,48 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="#ffffff"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:gravity="center|start"
+    android:paddingVertical="6dp">
 
     <ImageView
         android:id="@+id/icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginEnd="?android:attr/listPreferredItemPaddingEnd"
+        android:layout_marginHorizontal="6dp"
+        android:importantForAccessibility="no"
         android:src="@drawable/ic_person_black_24dp" />
 
-    <TextView
-        android:id="@+id/text"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:minHeight="?android:attr/listPreferredItemHeightSmall"
-        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-        android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-        android:textAppearance="?android:attr/textAppearanceListItemSmall"
-        android:textColor="#ff000000"
-        tools:text="@tools:sample/lorem" />
+        android:layout_marginEnd="6dp"
+        android:gravity="center|start"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="#ff000000"
+            tools:text="@tools:sample/lorem" />
+
+        <TextView
+            android:id="@+id/subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="3dp"
+            android:gravity="center|start"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="#ff000000"
+            android:textSize="10sp"
+            tools:ignore="SmallSp"
+            tools:text="@tools:sample/lorem" />
+
+    </LinearLayout>
 
 </LinearLayout>
