@@ -427,20 +427,21 @@ extension KdbxAndroidAutoFill on KdbxBase {
 
 extension KdbxEntryAndroidAutoFill on KdbxEntry {
   AutofillDataset toAutofillDataset(Set<String> fieldTypes) {
+    final title = getActualString(KdbxKeyCommon.TITLE);
+    final password = getActualString(KdbxKeyCommon.PASSWORD);
+    final email = getActualString(KdbxKeyCommon.EMAIL);
+    final user = getActualString(KdbxKeyCommon.USER_NAME);
+    final otp = getActualString(KdbxKeyCommon.OTP);
+
     return AutofillDataset(
-      label: getActualString(KdbxKeyCommon.TITLE) ??
-          getActualString(KdbxKeyCommon.USER_NAME),
-      password: fieldTypes.contains(AutofillField.PASSWORD)
-          ? getActualString(KdbxKeyCommon.PASSWORD)
-          : null,
-      username: fieldTypes.contains(AutofillField.EMAIL) // 存在邮箱,优先返回邮箱
-          ? getActualString(KdbxKeyCommon.EMAIL) ??
-              getActualString(KdbxKeyCommon.USER_NAME)
-          : getActualString(KdbxKeyCommon.USER_NAME) ??
-              getActualString(KdbxKeyCommon.EMAIL),
-      otp: fieldTypes.contains(AutofillField.OTP)
-          ? getActualString(KdbxKeyCommon.OTP)
-          : null,
+      label: title != null && title.isNotEmpty ? title : user,
+      password: fieldTypes.contains(AutofillField.PASSWORD) ? password : null,
+      username: fieldTypes.contains(AutofillField.EMAIL) &&
+              email != null &&
+              email.isNotEmpty // 存在邮箱,优先返回邮箱
+          ? email
+          : user ?? email,
+      otp: fieldTypes.contains(AutofillField.OTP) ? otp : null,
     );
   }
 }
