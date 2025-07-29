@@ -16,7 +16,6 @@ import '../route.dart';
 import 'route_wrap.dart';
 import '../../kdbx/kdbx.dart';
 
-
 final _logger = Logger("page:settings");
 
 class _SettingsArgs extends PageRouteArgs {
@@ -256,8 +255,10 @@ class _SettingsPageState extends State<SettingsPage>
             ListTile(
               title: Text(t.modify_password),
               selected: childRouteName == ModifyPasswordRoute.name,
-              onTap: () {
-                context.router.push(ModifyPasswordRoute());
+              onTap: () async {
+                if (await operateConfirm()) {
+                  context.router.push(ModifyPasswordRoute());
+                }
               },
             ),
             ListTile(

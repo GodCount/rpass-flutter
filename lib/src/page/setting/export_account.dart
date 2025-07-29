@@ -50,11 +50,13 @@ class _ExportAccountPageState extends State<ExportAccountPage>
     with SecondLevelPageAutoBack<ExportAccountPage> {
   void _exportKdbxFile() async {
     try {
-      final filepath = await SimpleFile.saveFile(
-        data: await Store.instance.localInfo.localKdbxFile.readAsBytes(),
-        filename: "${RpassInfo.appName}.kdbx",
-      );
-      showToast(I18n.of(context)!.export_done_location(filepath));
+      if (await operateConfirm()) {
+        final filepath = await SimpleFile.saveFile(
+          data: await Store.instance.localInfo.localKdbxFile.readAsBytes(),
+          filename: "${RpassInfo.appName}.kdbx",
+        );
+        showToast(I18n.of(context)!.export_done_location(filepath));
+      }
     } catch (e) {
       if (e is! CancelException) {
         _logger.warning("export kdbx file fail!", e);
@@ -70,6 +72,8 @@ class _ExportAccountPageState extends State<ExportAccountPage>
       title: t.warn,
       message: t.plaintext_export_warn,
     )) {
+      if (!(await operateConfirm())) return;
+
       final kdbx = KdbxProvider.of(context)!;
       try {
         final filepath = await SimpleFile.saveText(
@@ -94,6 +98,8 @@ class _ExportAccountPageState extends State<ExportAccountPage>
       title: t.warn,
       message: t.plaintext_export_warn,
     )) {
+      if (!(await operateConfirm())) return;
+
       final kdbx = KdbxProvider.of(context)!;
       try {
         final result = jsonToCsv(adapter.export(

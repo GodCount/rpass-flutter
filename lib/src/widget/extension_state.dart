@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 
+import '../context/biometric.dart';
 import '../context/kdbx.dart';
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
@@ -33,7 +34,6 @@ extension StatefulClipboard on State {
 }
 
 extension StatefulDialog on State {
-
   Future<void> showError(Object? error) async {
     await showDialog(
       context: context,
@@ -60,7 +60,7 @@ extension StatefulDialog on State {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(msg),
-        duration: const Duration(seconds: 2)
+        duration: const Duration(seconds: 2),
       ));
     }
   }
@@ -757,6 +757,25 @@ extension PlatformStackRouter on StackRouter {
       );
     } else {
       await push(route, onFailure: onFailure);
+    }
+  }
+}
+
+extension OperateConfirmVerifyOwner on State {
+  Future<bool> operateConfirm() async {
+    final bimetric = Biometric.of(context);
+    if (bimetric.enable) {
+      try {
+        await bimetric.verifyOwner(context);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    } else {
+      final result = await context.pushRoute(VerifyOwnerRoute(
+        operateConfirm: true,
+      ));
+      return result != null && result is bool && result;
     }
   }
 }
