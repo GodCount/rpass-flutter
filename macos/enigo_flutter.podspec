@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.description      = <<-DESC
 A new Flutter FFI plugin project.
                        DESC
-  s.homepage         = 'https://github.com/GodCount/enigo-flutter'
+  s.homepage         = 'https://github.com/GodCount/enigo_flutter'
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'GodCount' => 'do_yzr@163.com' }
 

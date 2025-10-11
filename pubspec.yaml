@@ -1,27 +1,26 @@
 name: enigo_flutter
 description: "A binding rust enigo flutter plugin."
 version: 0.0.1
-homepage: https://github.com/GodCount/enigo-flutter
+homepage: https://github.com/GodCount/enigo_flutter
 
 environment:
   sdk: ^3.0.0
-  flutter: '>=3.3.0'
+  flutter: ">=3.3.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  flutter_rust_bridge: 2.10.0
+  flutter_rust_bridge: 2.11.1
   plugin_platform_interface: ^2.0.2
 
 dev_dependencies:
-  ffi: ^2.1.0
+  ffi: ^2.1.4
   ffigen: ^11.0.0
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
   integration_test:
     sdk: flutter
-
 
 flutter:
   plugin:
@@ -32,4 +31,3 @@ flutter:
         ffiPlugin: true
       windows:
         ffiPlugin: true
-

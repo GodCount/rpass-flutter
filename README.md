@@ -6,5 +6,5 @@
 # Test
 ```sh
 cargo install flutter_rust_bridge_codegen
-flutter_rust_bridge_codegen integrate
+flutter_rust_bridge_codegen generate
 ```

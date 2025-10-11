@@ -48,6 +48,7 @@ class Home extends StatefulWidget {
 }
 
 class HomeState extends State<Home> {
+  // ignore: unused_field
   String _text = "text";
   String _appName = "name";
 

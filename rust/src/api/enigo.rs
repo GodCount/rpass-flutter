@@ -168,9 +168,7 @@ impl _Button {
                 "left" => enigo::Button::Left,
                 "middle" => enigo::Button::Middle,
                 "right" => enigo::Button::Right,
-                #[cfg(any(target_os = "windows", all(unix, not(target_os = "macos"))))]
                 "back" => enigo::Button::Back,
-                #[cfg(any(target_os = "windows", all(unix, not(target_os = "macos"))))]
                 "forward" => enigo::Button::Forward,
                 "scroll_up" => enigo::Button::ScrollUp,
                 "scroll_down" => enigo::Button::ScrollDown,
@@ -225,9 +223,7 @@ impl _Button {
             enigo::Button::Left => "left",
             enigo::Button::Middle => "middle",
             enigo::Button::Right => "right",
-            #[cfg(any(target_os = "windows", all(unix, not(target_os = "macos"))))]
             enigo::Button::Back => "back",
-            #[cfg(any(target_os = "windows", all(unix, not(target_os = "macos"))))]
             enigo::Button::Forward => "forward",
             enigo::Button::ScrollUp => "scroll_up",
             enigo::Button::ScrollDown => "scroll_down",
@@ -237,6 +233,13 @@ impl _Button {
         .to_string()
     }
 }
+
+
+#[frb(sync)]
+pub fn test_key2key(key: Key) -> Key {
+    key
+}
+
 
 // key code corresponding table
 // https://github.com/flutter/flutter/blob/master/dev/tools/gen_keycodes/data/physical_key_data.g.json
