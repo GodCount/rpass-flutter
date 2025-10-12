@@ -61,36 +61,43 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
   void _addPresetGroup(Kdbx kdbx) {
     final t = I18n.of(context)!;
 
-    bool isSave = false;
-
     if (kdbx.kdbxFile.body.rootGroup.name.get() != t.default_) {
       kdbx.kdbxFile.body.rootGroup.name.set(t.default_);
-      isSave = true;
     }
 
     String? uuid = kdbx.customData[KdbxCustomDataKey.GENERAL_GROUP_UUID];
     if (uuid == null || kdbx.findGroupByUuid(KdbxUuid(uuid)) == null) {
       final general = kdbx.createGroup(t.common);
       kdbx.customData[KdbxCustomDataKey.GENERAL_GROUP_UUID] = general.uuid.uuid;
-      isSave = true;
     }
 
     uuid = kdbx.customData[KdbxCustomDataKey.EMAIL_GROUP_UUID];
     if (uuid == null || kdbx.findGroupByUuid(KdbxUuid(uuid)) == null) {
       final email = kdbx.createGroup(t.email)..icon.set(KdbxIcon.EMail);
       kdbx.customData[KdbxCustomDataKey.EMAIL_GROUP_UUID] = email.uuid.uuid;
-      isSave = true;
+    }
+  }
+
+  Future<void> _setInitKdbx((Kdbx, String?) result) async {
+    final store = Store.instance;
+
+    final kdbx = result.$1;
+    kdbx.filepath = store.localInfo.localKdbxFile.path;
+    _addPresetGroup(kdbx);
+
+    await kdbxSave(kdbx);
+
+    if (store.settings.enableRecordKeyFilePath) {
+      await store.settings.setKeyFilePath(result.$2);
     }
 
-    if (isSave) {
-      kdbxSave(kdbx);
-    }
+    KdbxProvider.setKdbx(context, kdbx);
+    context.router.replace(HomeRoute());
   }
 
   @override
   Future<void> confirm() async {
     if (form.currentState!.validate()) {
-      final store = Store.instance;
       final passowrd = passwordController.text;
       final keyFile = keyFilecontroller.keyFile;
 
@@ -106,31 +113,8 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
         name: RpassInfo.defaultKdbxName,
       );
 
-      kdbx.filepath = store.localInfo.localKdbxFile.path;
-      _addPresetGroup(kdbx);
-
-      if (store.settings.enableRecordKeyFilePath) {
-        await store.settings.setKeyFilePath(keyFile?.$1);
-      }
-
-      KdbxProvider.setKdbx(context, kdbx);
-      context.router.replace(HomeRoute());
+      await _setInitKdbx((kdbx, keyFile?.$1));
     }
-  }
-
-  void _setInitKdbx((Kdbx, String?) result) async {
-    final store = Store.instance;
-
-    final kdbx = result.$1;
-    kdbx.filepath = store.localInfo.localKdbxFile.path;
-    _addPresetGroup(kdbx);
-
-    if (store.settings.enableRecordKeyFilePath) {
-      await store.settings.setKeyFilePath(result.$2);
-    }
-
-    KdbxProvider.setKdbx(context, kdbx);
-    context.router.replace(HomeRoute());
   }
 
   @override
@@ -150,7 +134,7 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
     ));
 
     if (result != null && result is (Kdbx, String?)) {
-      _setInitKdbx(result);
+      await _setInitKdbx(result);
     }
   }
 
@@ -168,9 +152,8 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
         client: result,
       ));
 
-      if (result2 != null && result2 is ((Kdbx, String?), Uint8List)) {
-        await Store.instance.localInfo.localKdbxFile.writeAsBytes(result2.$2);
-        _setInitKdbx(result2.$1);
+      if (result2 != null && result2 is (Kdbx, String?)) {
+        await _setInitKdbx(result2);
       }
     }
   }

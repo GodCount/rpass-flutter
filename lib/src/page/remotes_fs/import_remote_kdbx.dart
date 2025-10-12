@@ -137,14 +137,12 @@ class _ImportRemoteKdbxState extends State<ImportRemoteKdbxPage> {
         throw Exception("Current file is empty, path a ${_selectedFile!.path}");
       }
 
-      final data = await _selectedFile!.readFile();
-
       final result = await context.router.push(LoadExternalKdbxRoute(
-        kdbxFile: data,
+        kdbxFile: await _selectedFile!.readFile(),
       ));
 
       if (result != null && result is (Kdbx, String?)) {
-        context.router.pop((result, data));
+        context.router.pop(result);
       }
     } catch (e) {
       showError(e);

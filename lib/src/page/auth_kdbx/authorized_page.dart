@@ -513,6 +513,7 @@ class _KeyFileFormFieldState extends State<KeyFileFormField> {
       onTap: _choiceKeyFile,
       controller: _controller,
       readOnly: true,
+      obscureText: true,
       validator: (_) => widget.validator != null
           ? widget.validator!(widget.controller.keyFile)
           : null,
