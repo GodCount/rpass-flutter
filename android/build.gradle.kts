@@ -5,8 +5,32 @@ allprojects {
     }
 }
 
-val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
+val newBuildDir: Directory =
+    rootProject.layout.buildDirectory
+        .dir("../../build")
+        .get()
 rootProject.layout.buildDirectory.value(newBuildDir)
+
+
+// FIX: https://github.com/flutter/flutter/issues/169215
+subprojects {
+    plugins.whenPluginAdded {
+        if(name != "app") {
+            when(this::class.simpleName) {
+                "AppPlugin","LibraryPlugin" -> {
+                    extensions.findByName("android")?.let { it as com.android.build.gradle.BaseExtension
+                        it.buildTypes.all {
+                            applicationIdSuffix = null
+                        }
+
+                    }
+                }
+            }
+        }
+
+    }
+}
+
 
 subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)

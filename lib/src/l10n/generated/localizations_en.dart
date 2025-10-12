@@ -54,7 +54,8 @@ class MyLocalizationsEn extends MyLocalizations {
   String get back => 'Back';
 
   @override
-  String get input_security_qa_hint => 'Answer security question to decrypt data!';
+  String get input_security_qa_hint =>
+      'Answer security question to decrypt data!';
 
   @override
   String get security_qa_error => 'That\'s not right, think again!';
@@ -193,7 +194,8 @@ class MyLocalizationsEn extends MyLocalizations {
   String get delete => 'Delete';
 
   @override
-  String get delete_warn_hit => 'Are you sure you want to delete? It cannot be recovered after deletion.';
+  String get delete_warn_hit =>
+      'Are you sure you want to delete? It cannot be recovered after deletion.';
 
   @override
   String get description => 'Description';
@@ -231,7 +233,8 @@ class MyLocalizationsEn extends MyLocalizations {
   String get other => 'Other';
 
   @override
-  String get app_description => 'Rpass is a free and open-source application that allows you to conveniently and concisely record password information';
+  String get app_description =>
+      'Rpass is a free and open-source application that allows you to conveniently and concisely record password information';
 
   @override
   String source_code_location(String location) {
@@ -245,7 +248,8 @@ class MyLocalizationsEn extends MyLocalizations {
   String get biometric_prompt_title => 'Verify your identity!';
 
   @override
-  String get biometric_prompt_subtitle => 'Use fingerprint to complete verification before continuing.';
+  String get biometric_prompt_subtitle =>
+      'Use fingerprint to complete verification before continuing.';
 
   @override
   String throw_message(String message) {
@@ -392,7 +396,8 @@ class MyLocalizationsEn extends MyLocalizations {
   String get warn => 'Warning';
 
   @override
-  String get plaintext_export_warn => 'Confirm to export data in plain text?\nNote that the exported data will only contain the corresponding key fields.';
+  String get plaintext_export_warn =>
+      'Confirm to export data in plain text?\nNote that the exported data will only contain the corresponding key fields.';
 
   @override
   String get manage => 'Manage';
@@ -407,7 +412,8 @@ class MyLocalizationsEn extends MyLocalizations {
   String get password_error => 'Password Error!';
 
   @override
-  String get data_migrate_hint => 'Data migration and upgrade is currently underway. After decrypting the data, it will be entirely migrated to a new database (kdbx) for storage. This new system offers improved performance, greater stability, enhanced security, and a wider range of features.';
+  String get data_migrate_hint =>
+      'Data migration and upgrade is currently underway. After decrypting the data, it will be entirely migrated to a new database (kdbx) for storage. This new system offers improved performance, greater stability, enhanced security, and a wider range of features.';
 
   @override
   String get search => 'Search';
@@ -427,7 +433,8 @@ class MyLocalizationsEn extends MyLocalizations {
   String get lock => 'Lock';
 
   @override
-  String get lock_subtitle => 'The program will lock itself after a period of time when running in the background or losing focus (desktop).';
+  String get lock_subtitle =>
+      'The program will lock itself after a period of time when running in the background or losing focus (desktop).';
 
   @override
   String get never => 'Never';
@@ -511,7 +518,8 @@ class MyLocalizationsEn extends MyLocalizations {
   String get close_local_sync_subtitle => 'Disable sync on this device';
 
   @override
-  String get sync_note_subtitle => 'If the remote file is modified by a third-party kdbx manager, long-press the sync button to force a merge.';
+  String get sync_note_subtitle =>
+      'If the remote file is modified by a third-party kdbx manager, long-press the sync button to force a merge.';
 
   @override
   String get sync_error_log => 'Sync Error Log';
@@ -538,7 +546,8 @@ class MyLocalizationsEn extends MyLocalizations {
   String get enable_display_true_subtitle => 'Included in the home page list';
 
   @override
-  String get enable_display_false_subtitle => 'Excluded from the home page list';
+  String get enable_display_false_subtitle =>
+      'Excluded from the home page list';
 
   @override
   String get enable_display_null_subtitle => 'Inherit display settings';
@@ -600,7 +609,8 @@ class MyLocalizationsEn extends MyLocalizations {
   String get none => 'None';
 
   @override
-  String get auto_fill_apps_none_subtitle => 'Will be matched according to the domain name';
+  String get auto_fill_apps_none_subtitle =>
+      'Will be matched according to the domain name';
 
   @override
   String get enable_auto_fill_service => 'Enable Auto-fill Service';
@@ -609,7 +619,8 @@ class MyLocalizationsEn extends MyLocalizations {
   String get manual_select_fill_item => 'Manually Select Fill Item';
 
   @override
-  String get manual_select_fill_item_subtitle => 'When the auto-matched fill dataset returns empty';
+  String get manual_select_fill_item_subtitle =>
+      'When the auto-matched fill dataset returns empty';
 
   @override
   String get auto_fill_match_app => 'Auto-fill Application';

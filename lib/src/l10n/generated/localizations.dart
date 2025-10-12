@@ -62,7 +62,8 @@ import 'localizations_zh.dart';
 /// be consistent with the languages listed in the MyLocalizations.supportedLocales
 /// property.
 abstract class MyLocalizations {
-  MyLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  MyLocalizations(String locale)
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -70,7 +71,8 @@ abstract class MyLocalizations {
     return Localizations.of<MyLocalizations>(context, MyLocalizations);
   }
 
-  static const LocalizationsDelegate<MyLocalizations> delegate = _MyLocalizationsDelegate();
+  static const LocalizationsDelegate<MyLocalizations> delegate =
+      _MyLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -82,7 +84,8 @@ abstract class MyLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -1257,25 +1260,25 @@ class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_MyLocalizationsDelegate old) => false;
 }
 
 MyLocalizations lookupMyLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en': return MyLocalizationsEn();
-    case 'zh': return MyLocalizationsZh();
+    case 'en':
+      return MyLocalizationsEn();
+    case 'zh':
+      return MyLocalizationsZh();
   }
 
   throw FlutterError(
-    'MyLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
-  );
+      'MyLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }

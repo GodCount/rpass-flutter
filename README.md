@@ -25,52 +25,62 @@
 ```
 flutter doctor -v
 
-[✓] Flutter (Channel stable, 3.29.0, on macOS 13.6.5 22G621 darwin-arm64, locale zh-Hans-CN) [387ms]
-    • Flutter version 3.29.0 on channel stable at /Users/admin/flutter
+[√] Flutter (Channel stable, 3.35.5, on Microsoft Windows [版本 10.0.26100.6584], locale zh-CN) [361ms]
+    • Flutter version 3.35.5 on channel stable at E:\flutter\flutter
     • Upstream repository https://github.com/flutter/flutter.git
-    • Framework revision 35c388afb5 (9 days ago), 2025-02-10 12:48:41 -0800
-    • Engine revision f73bfc4522
-    • Dart version 3.7.0
-    • DevTools version 2.42.2
+    • Framework revision ac4e799d23 (13 days ago), 2025-09-26 12:05:09 -0700
+    • Engine revision d3d45dcf25
+    • Dart version 3.9.2
+    • DevTools version 2.48.0
+    • Feature flags: enable-web, enable-linux-desktop, enable-macos-desktop, enable-windows-desktop, enable-android, enable-ios, cli-animations, enable-lldb-debugging
 
-[✓] Android toolchain - develop for Android devices (Android SDK version 35.0.1) [2.4s]
-    • Android SDK at /Volumes/extend/Android/sdk
-    • Platform android-35, build-tools 35.0.1
-    • Java binary at: /Volumes/extend/Application/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+[√] Windows Version (11 专业版 64-bit, 24H2, 2009) [1,281ms]
+
+[√] Android toolchain - develop for Android devices (Android SDK version 35.0.0) [18.4s]
+    • Android SDK at E:\Android\Sdk
+    • Emulator version 36.1.9.0 (build_id 13823996) (CL:N/A)
+    • Platform android-36, build-tools 35.0.0
+    • Java binary at: C:\Program Files\Android\Android Studio\jbr\bin\java
       This is the JDK bundled with the latest Android Studio installation on this machine.
       To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`.
-    • Java version OpenJDK Runtime Environment (build 21.0.5+-12932927-b750.29)
+    • Java version OpenJDK Runtime Environment (build 17.0.10+0--11609105)
     • All Android licenses accepted.
 
-[!] Xcode - develop for iOS and macOS (Xcode 15.2) [864ms]
-    • Xcode at /Applications/Xcode.app/Contents/Developer
-    • Build 15C500b
-    ✗ Unable to get list of installed Simulator runtimes.
-    • CocoaPods version 1.16.2
+[√] Chrome - develop for the web [130ms]
+    • Chrome at C:\Program Files\Google\Chrome\Application\chrome.exe
 
-[✓] Chrome - develop for the web [10ms]
-    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+[√] Visual Studio - develop Windows apps (Visual Studio Community 2022 17.10.3) [129ms]
+    • Visual Studio at C:\Program Files\Microsoft Visual Studio\2022\Community
+    • Visual Studio Community 2022 version 17.10.35013.160
+    • Windows 10 SDK version 10.0.22621.0
 
-[✓] Android Studio (version 2024.2) [9ms]
-    • Android Studio at /Volumes/extend/Application/Android Studio.app/Contents
+[√] Android Studio (version 2024.1) [40ms]
+    • Android Studio at C:\Program Files\Android\Android Studio
     • Flutter plugin can be installed from:
-      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
+       https://plugins.jetbrains.com/plugin/9212-flutter
     • Dart plugin can be installed from:
-      🔨 https://plugins.jetbrains.com/plugin/6351-dart
-    • android-studio-dir = /Volumes/extend/Application/Android Studio.app
-    • Java version OpenJDK Runtime Environment (build 21.0.5+-12932927-b750.29)
+       https://plugins.jetbrains.com/plugin/6351-dart
+    • Java version OpenJDK Runtime Environment (build 17.0.10+0--11609105)
 
-[✓] VS Code (version 1.97.2) [8ms]
-    • VS Code at /Applications/Visual Studio Code.app/Contents
-    • Flutter extension version 3.104.0
+[√] IntelliJ IDEA Community Edition (version 2024.1) [38ms]
+    • IntelliJ at C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2024.1.4
+    • Flutter plugin can be installed from:
+       https://plugins.jetbrains.com/plugin/9212-flutter
+    • Dart plugin version 241.17890.8
 
-[✓] Connected device (3 available) [7.0s]
-    • macOS (desktop)                 • macos                 • darwin-arm64   • macOS 13.6.5 22G621 darwin-arm64
-    • Mac Designed for iPad (desktop) • mac-designed-for-ipad • darwin         • macOS 13.6.5 22G621 darwin-arm64
-    • Chrome (web)                    • chrome                • web-javascript • Google Chrome 133.0.6943.99
+[√] VS Code (version 1.104.3) [8ms]
+    • VS Code at C:\Users\<user>\AppData\Local\Programs\Microsoft VS Code
+    • Flutter extension version 3.120.0
 
-[✓] Network resources [2.0s]
+[√] Connected device (3 available) [269ms]
+    • Windows (desktop) • windows • windows-x64    • Microsoft Windows [版本 10.0.26100.6584]
+    • Chrome (web)      • chrome  • web-javascript • Google Chrome 138.0.7204.101
+    • Edge (web)        • edge    • web-javascript • Microsoft Edge 141.0.3537.57
+
+[√] Network resources [11.8s]
     • All expected network resources are available.
+
+• No issues found!
 
 ```
 

@@ -4,6 +4,4 @@ output-localization-file: localizations.dart
 output-class: MyLocalizations
 use-escaping: true
 
-# https://docs.flutter.dev/release/breaking-changes/flutter-generate-i10n-source
-synthetic-package: false
 output-dir: lib/src/l10n/generated

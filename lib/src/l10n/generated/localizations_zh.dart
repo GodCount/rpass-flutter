@@ -407,7 +407,8 @@ class MyLocalizationsZh extends MyLocalizations {
   String get password_error => '密码错误！';
 
   @override
-  String get data_migrate_hint => '正在进行软件数据迁移升级，解密数据后，将全部迁移到新的数据库 (kdbx) 存储数据，更好，更稳定，更安全，更多功能．';
+  String get data_migrate_hint =>
+      '正在进行软件数据迁移升级，解密数据后，将全部迁移到新的数据库 (kdbx) 存储数据，更好，更稳定，更安全，更多功能．';
 
   @override
   String get search => '搜索';
