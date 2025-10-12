@@ -56,11 +56,26 @@ class MyAutofillService : AutofillService() {
         ).intentSender
 
 
-        val fillResponse = FillResponse.Builder().setAuthentication(
-            parsedStructure.autoFillIds.distinct().toTypedArray(),
-            sender,
-            RemoteViewsHelper.viewsWithAuth(packageName, unlockLabel, null)
-        ).build()
+        val fillResponse = FillResponse.Builder().apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                setAuthentication(
+                    parsedStructure.autoFillIds.distinct().toTypedArray(),
+                    sender,
+                    Presentations.Builder().setMenuPresentation(
+                        RemoteViewsHelper.viewsWithAuth(packageName, unlockLabel, null)
+                    ).build()
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                setAuthentication(
+                    parsedStructure.autoFillIds.distinct().toTypedArray(),
+                    sender,
+                    RemoteViewsHelper.viewsWithAuth(packageName, unlockLabel, null)
+                )
+            }
+
+        }.build()
+
 
         callback.onSuccess(fillResponse)
 
@@ -77,7 +92,7 @@ object RemoteViewsHelper {
         return simpleRemoteViews(packageName, R.drawable.ic_lock_black_24dp, title, subtitle)
     }
 
-    fun viewsWithNoAuth(packageName: String, title: String?, subtitle: String?): RemoteViews {
+    fun viewsWithUser(packageName: String, title: String?, subtitle: String?): RemoteViews {
         return simpleRemoteViews(packageName, R.drawable.ic_person_black_24dp, title, subtitle)
     }
 
@@ -101,6 +116,7 @@ object RemoteViewsHelper {
         presentation.setImageViewResource(R.id.icon, drawableId)
         return presentation
     }
+
 }
 
 class ParsedStructure(structure: AssistStructure) {

@@ -39,10 +39,15 @@ namespace {
 
 		if (event == EVENT_SYSTEM_FOREGROUND) {
 
+			std::string title = getWindowTitle(hwnd);
+
+			// exclude title is empty HWND
+			if (title.empty()) return;
+
 			prevForegroundWin = hwnd;
 
 			flutter::EncodableMap args = flutter::EncodableMap();
-			args[flutter::EncodableValue("name")] = flutter::EncodableValue(getWindowTitle(hwnd));
+			args[flutter::EncodableValue("name")] = flutter::EncodableValue(title);
 			channel->InvokeMethod("prev_actived_application", std::make_unique<flutter::EncodableValue>(args));
 		}
 	}

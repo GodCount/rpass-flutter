@@ -7,7 +7,9 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import android.service.autofill.Dataset
+import android.service.autofill.Field
 import android.service.autofill.FillResponse
+import android.service.autofill.Presentations
 import android.view.autofill.AutofillManager
 import android.view.autofill.AutofillManager.EXTRA_AUTHENTICATION_RESULT
 import android.view.autofill.AutofillValue
@@ -24,7 +26,6 @@ import com.godcount.rpass.autofill.FieldType
 import com.godcount.rpass.autofill.ParsedStructure
 import com.godcount.rpass.autofill.RemoteViewsHelper
 
-@Suppress("DEPRECATION")
 class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHandler,
     PluginRegistry.ActivityResultListener, PluginRegistry.NewIntentListener {
 
@@ -153,6 +154,7 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
                         AssistStructure::class.java
                     )
             } else {
+                @Suppress("DEPRECATION")
                 lastIntent?.getParcelableExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE)
                     ?: activity.intent.getParcelableExtra(
                         AutofillManager.EXTRA_ASSIST_STRUCTURE
@@ -169,57 +171,83 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
             dataset.forEach { data ->
 
                 addDataset(
-                    Dataset.Builder(
-                        RemoteViewsHelper.viewsWithNoAuth(
-                            activity.applicationContext.packageName,
-                            data.label,
-                            data.username
-                        )
-                    ).apply {
-                        setId("${data.label} (${data.username})")
-                        parsed.fields.forEach { field ->
-
-                            if (data.password != null && field.type == FieldType.PASSWORD) {
-                                setValue(
-                                    field.node.autofillId!!,
-                                    AutofillValue.forText(data.password),
-                                    RemoteViewsHelper.viewsWithNoAuth(
-                                        activity.applicationContext.packageName,
-                                        data.label,
-                                        data.username
-                                    )
+                    when {
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> Dataset.Builder(
+                            Presentations.Builder().setMenuPresentation(
+                                RemoteViewsHelper.viewsWithUser(
+                                    activity.applicationContext.packageName,
+                                    data.label,
+                                    data.username
                                 )
+                            ).build()
+                        ).apply {
+                            setId("${data.label} (${data.username})")
+
+
+                            val username = if (data.username != null)
+                                Field.Builder().setValue(AutofillValue.forText(data.username))
+                                    .build()
+                            else
+                                null
+
+                            val password = if (data.password != null)
+                                Field.Builder().setValue(AutofillValue.forText(data.password))
+                                    .build()
+                            else
+                                null
+
+                            val otp = if (data.otp != null)
+                                Field.Builder().setValue(AutofillValue.forText(data.otp))
+                                    .build()
+                            else
+                                null
+
+                            parsed.fields.forEach { field ->
+                                if (password != null && field.type == FieldType.PASSWORD) {
+                                    setField(field.autofillId, password)
+                                } else if (otp != null && field.type == FieldType.OTP) {
+                                    setField(field.autofillId, otp)
+                                } else if (username != null && (field.type == FieldType.USERNAME || field.type == FieldType.EMAIL)) {
+                                    setField(field.autofillId, username)
+                                } else {
+                                    println("unknown type: " + field.type)
+                                }
                             }
 
-                            if (data.otp != null && field.type == FieldType.OTP) {
+                        }.build()
 
-                                setValue(
-                                    field.node.autofillId!!,
-                                    AutofillValue.forText(data.otp),
-                                    RemoteViewsHelper.viewsWithNoAuth(
-                                        activity.applicationContext.packageName,
-                                        data.label,
-                                        data.username
+                        else -> @Suppress("DEPRECATION") Dataset.Builder(
+                            RemoteViewsHelper.viewsWithUser(
+                                activity.applicationContext.packageName,
+                                data.label,
+                                data.username
+                            )
+                        ).apply {
+                            setId("${data.label} (${data.username})")
+                            parsed.fields.forEach { field ->
+                                if (data.password != null && field.type == FieldType.PASSWORD) {
+                                    setValue(
+                                        field.autofillId,
+                                        AutofillValue.forText(data.password)
                                     )
-                                )
-                            }
-
-                            if (data.username != null && field.type != FieldType.PASSWORD && field.type != FieldType.OTP) {
-
-                                setValue(
-                                    field.node.autofillId!!,
-                                    AutofillValue.forText(data.username),
-                                    RemoteViewsHelper.viewsWithNoAuth(
-                                        activity.applicationContext.packageName,
-                                        data.label,
-                                        data.username
+                                } else if (data.otp != null && field.type == FieldType.OTP) {
+                                    setValue(
+                                        field.autofillId,
+                                        AutofillValue.forText(data.otp)
                                     )
-                                )
+                                } else if (data.username != null && (field.type == FieldType.USERNAME || field.type == FieldType.EMAIL)) {
+                                    setValue(
+                                        field.autofillId,
+                                        AutofillValue.forText(data.username)
+                                    )
+                                } else {
+                                    println("unknown type: " + field.type)
+                                }
                             }
-
-                        }
-                    }.build()
+                        }.build()
+                    }
                 )
+
             }
         }.build()
 

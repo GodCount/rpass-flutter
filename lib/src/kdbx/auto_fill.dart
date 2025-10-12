@@ -104,6 +104,21 @@ Future<void> autoFillSequence(KdbxEntry kdbxEntry, [KdbxKey? kdbxKey]) async {
   }
 }
 
+extension _MatchWebDomain on String {
+  String toUrlDomain() {
+    if (startsWith(RegExp(r"https?://"))) {
+      return split("/")[2].trim();
+    } else {
+      return split("/")[0].trim();
+    }
+  }
+
+  bool matchWebDomain(String url) {
+    final domain = url.toUrlDomain();
+    return contains(domain) || startsWith(domain) || endsWith(domain);
+  }
+}
+
 ///
 /// 安卓端
 /// 返回自动填充数据集
@@ -120,12 +135,12 @@ Future<List<AutofillDataset>> androidAutofillSearch(
 
     if (packageName != null && metadata.packageNames.contains(packageName)) {
       return url != null && url.isNotEmpty
-          ? metadata.webDomains.any((it) => url.contains(it.domain))
+          ? metadata.webDomains.any((it) => it.domain.matchWebDomain(url))
           : true;
     }
 
     return url != null && url.isNotEmpty
-        ? metadata.webDomains.any((it) => url.contains(it.domain))
+        ? metadata.webDomains.any((it) => it.domain.matchWebDomain(url))
         : false;
   });
 

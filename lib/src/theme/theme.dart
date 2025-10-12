@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 const color = Color(0x11659AFF);
 
 ThemeData theme(Brightness brightness) {
-  final scheme = ColorScheme.fromSeed(seedColor: color, brightness: brightness);
+  final scheme = ColorScheme.fromSeed(
+    seedColor: color,
+    brightness: brightness,
+  );
   return ThemeData(
     useMaterial3: true,
     brightness: brightness,
