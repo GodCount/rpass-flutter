@@ -327,7 +327,7 @@ class _SettingsPageState extends State<SettingsPage>
                 showAboutDialog(
                   context: context,
                   applicationName: RpassInfo.appName,
-                  applicationVersion: RpassInfo.version,
+                  applicationVersion: "${RpassInfo.version}+${RpassInfo.buildNumber}",
                   applicationIcon: const Image(
                     image: AssetImage('assets/icons/logo.png'),
                     width: 72,

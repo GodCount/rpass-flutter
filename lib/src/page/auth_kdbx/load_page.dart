@@ -108,7 +108,7 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
       if (dataset != null) result.add(dataset);
     }
 
-    NativeInstancePlatform.instance.autofillService.responseDataset(result);
+    await NativeInstancePlatform.instance.autofillService.responseDataset(result);
 
     return true;
   }

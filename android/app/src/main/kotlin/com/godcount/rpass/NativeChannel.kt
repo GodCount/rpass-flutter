@@ -10,6 +10,7 @@ import android.service.autofill.Dataset
 import android.service.autofill.Field
 import android.service.autofill.FillResponse
 import android.service.autofill.Presentations
+import android.view.autofill.AutofillId
 import android.view.autofill.AutofillManager
 import android.view.autofill.AutofillManager.EXTRA_AUTHENTICATION_RESULT
 import android.view.autofill.AutofillValue
@@ -120,19 +121,23 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
             }
 
             "response_autofill_dataset" -> {
-                result.success(
-                    activityBinding?.activity?.let { activity ->
-                        call.arguments<List<Map<String, String>>>()
-                            ?.takeIf { it.isNotEmpty() }
-                            ?.map { AutofillDataset.fromJson(it) }
-                            ?.filter { it.username != null || it.password != null || it.otp != null }
-                            ?.let { dataset ->
-                                responseDataset(dataset, activity)
-                            }
-                    } ?: false
-                )
-                // 只要是响应自动填充的,无论结果如何,都应该关闭这个 activity
-                activityBinding?.activity?.finish()
+                try {
+                    result.success(
+                        activityBinding?.activity?.let { activity ->
+                            call.arguments<List<Map<String, String>>>()
+                                ?.takeIf { it.isNotEmpty() }
+                                ?.map { AutofillDataset.fromJson(it) }
+                                ?.filter { it.username != null || it.password != null || it.otp != null }
+                                ?.let { dataset ->
+                                    responseDataset(dataset, activity)
+                                }
+                        } ?: false
+                    )
+                    activityBinding?.activity?.finish()
+                } catch (e: Exception) {
+                    result.error("unknown", e.message, e)
+                }
+
             }
 
             else -> result.notImplemented()
@@ -170,83 +175,61 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
         val response = FillResponse.Builder().apply {
             dataset.forEach { data ->
 
-                addDataset(
-                    when {
-                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> Dataset.Builder(
-                            Presentations.Builder().setMenuPresentation(
+                val map = HashMap<AutofillId, AutofillValue>()
+
+                parsed.fields.forEach { field ->
+                    if (data.password != null && field.type == FieldType.PASSWORD) {
+                        map[field.autofillId] = AutofillValue.forText(data.password)
+                    } else if (data.otp != null && field.type == FieldType.OTP) {
+                        map[field.autofillId] = AutofillValue.forText(data.otp)
+                    } else if (data.username != null && (field.type == FieldType.USERNAME || field.type == FieldType.EMAIL)) {
+                        map[field.autofillId] = AutofillValue.forText(data.username)
+                    } else {
+                        println("unknown type: " + field.type)
+                    }
+                }
+
+                if (map.isNotEmpty()) {
+                    addDataset(
+                        when {
+                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> Dataset.Builder(
+                                Presentations.Builder().setMenuPresentation(
+                                    RemoteViewsHelper.viewsWithUser(
+                                        activity.applicationContext.packageName,
+                                        data.label,
+                                        data.username
+                                    )
+                                ).build()
+                            ).apply {
+                                setId("${data.label} (${data.username})")
+
+                                map.forEach {
+                                    setField(
+                                        it.key, Field.Builder().setValue(it.value)
+                                            .build()
+                                    )
+                                }
+
+                            }.build()
+
+                            else -> @Suppress("DEPRECATION") Dataset.Builder(
                                 RemoteViewsHelper.viewsWithUser(
                                     activity.applicationContext.packageName,
                                     data.label,
                                     data.username
                                 )
-                            ).build()
-                        ).apply {
-                            setId("${data.label} (${data.username})")
-
-
-                            val username = if (data.username != null)
-                                Field.Builder().setValue(AutofillValue.forText(data.username))
-                                    .build()
-                            else
-                                null
-
-                            val password = if (data.password != null)
-                                Field.Builder().setValue(AutofillValue.forText(data.password))
-                                    .build()
-                            else
-                                null
-
-                            val otp = if (data.otp != null)
-                                Field.Builder().setValue(AutofillValue.forText(data.otp))
-                                    .build()
-                            else
-                                null
-
-                            parsed.fields.forEach { field ->
-                                if (password != null && field.type == FieldType.PASSWORD) {
-                                    setField(field.autofillId, password)
-                                } else if (otp != null && field.type == FieldType.OTP) {
-                                    setField(field.autofillId, otp)
-                                } else if (username != null && (field.type == FieldType.USERNAME || field.type == FieldType.EMAIL)) {
-                                    setField(field.autofillId, username)
-                                } else {
-                                    println("unknown type: " + field.type)
+                            ).apply {
+                                setId("${data.label} (${data.username})")
+                                map.forEach {
+                                    setValue(
+                                        it.key, it.value
+                                    )
                                 }
-                            }
+                            }.build()
+                        }
+                    )
+                }
 
-                        }.build()
-
-                        else -> @Suppress("DEPRECATION") Dataset.Builder(
-                            RemoteViewsHelper.viewsWithUser(
-                                activity.applicationContext.packageName,
-                                data.label,
-                                data.username
-                            )
-                        ).apply {
-                            setId("${data.label} (${data.username})")
-                            parsed.fields.forEach { field ->
-                                if (data.password != null && field.type == FieldType.PASSWORD) {
-                                    setValue(
-                                        field.autofillId,
-                                        AutofillValue.forText(data.password)
-                                    )
-                                } else if (data.otp != null && field.type == FieldType.OTP) {
-                                    setValue(
-                                        field.autofillId,
-                                        AutofillValue.forText(data.otp)
-                                    )
-                                } else if (data.username != null && (field.type == FieldType.USERNAME || field.type == FieldType.EMAIL)) {
-                                    setValue(
-                                        field.autofillId,
-                                        AutofillValue.forText(data.username)
-                                    )
-                                } else {
-                                    println("unknown type: " + field.type)
-                                }
-                            }
-                        }.build()
-                    }
-                )
 
             }
         }.build()
