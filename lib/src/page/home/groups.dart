@@ -249,22 +249,28 @@ class _GroupsItemState extends State<_GroupsItem>
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
         ),
-        subtitle: Column(
-          children: [
-            Text(
-              kdbxGroup.notes.get() ?? "",
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (kdbxGroup.times.creationTime.get() != null)
+        subtitle: Padding(
+          padding: const EdgeInsets.only(left: 6),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                kdbxGroup.notes.get() ?? "",
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
               Align(
                 alignment: Alignment.centerRight,
                 child: Text(
-                  kdbxGroup.times.creationTime.get()!.toLocal().formatDate,
+                  (kdbxGroup.times.creationTime.get() ??
+                          DateTime.fromMillisecondsSinceEpoch(0))
+                      .toLocal()
+                      .formatDate,
                   overflow: TextOverflow.ellipsis,
                 ),
               )
-          ],
+            ],
+          ),
         ),
         onTap: () {
           context.router.platformNavigate(

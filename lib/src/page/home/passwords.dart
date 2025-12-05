@@ -514,6 +514,14 @@ class _PasswordItemState extends State<_PasswordItem>
   }
 
   @override
+  void didUpdateWidget(covariant _PasswordItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.kdbxEntry.uuid != oldWidget.kdbxEntry.uuid) {
+      didNavigationHistory();
+    }
+  }
+
+  @override
   void dispose() {
     NativeInstancePlatform.instance.removeListener(this);
     super.dispose();
@@ -637,7 +645,7 @@ class _PasswordItemState extends State<_PasswordItem>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 12),
+              padding: const EdgeInsets.only(left: 6),
               child: Text(
                 kdbxEntry.getNonNullString(KdbxKeyCommon.URL),
                 style: Theme.of(context).textTheme.bodySmall,

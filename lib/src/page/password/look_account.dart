@@ -704,7 +704,8 @@ class _LookPasswordListTileState extends State<_LookPasswordListTile>
           widget.password.isEmpty,
           Text(
             showPassword ? widget.password : "*" * widget.password.length,
-            style: Theme.of(context).textTheme.titleSmall,
+            style:
+                Theme.of(context).textTheme.titleSmall?.copyWith(height: 1), // 固定 height 防止切换显示高度变化抖动
           ),
         ),
       ),

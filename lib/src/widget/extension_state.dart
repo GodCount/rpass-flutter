@@ -18,6 +18,8 @@ import '../util/file.dart';
 import '../util/route.dart';
 import 'chip_list.dart';
 import 'common.dart';
+import 'extension_state.dart';
+import 'kdbx_history_list.dart';
 
 export "context_menu.dart";
 
@@ -288,69 +290,8 @@ extension StatefulBottomSheet on State {
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        final t = I18n.of(context)!;
-
-        final history = kdbxEntry.history.reversed.toList();
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Align(
-              alignment: Alignment.center,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 12, bottom: 6),
-                child: Text(
-                  t.timeline,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-            ),
-            history.isNotEmpty
-                ? Expanded(
-                    child: TimeLineListWidget(
-                        itemCount: history.length,
-                        itemBuilder: (context, index) {
-                          final entry = history[index];
-                          return Card(
-                            elevation: 4.0,
-                            margin: const EdgeInsets.only(left: 12, right: 12),
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(6.0),
-                              ),
-                            ),
-                            child: InkWell(
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(6.0),
-                              ),
-                              onTap: () {
-                                context.router.popAndPush(LookAccountRoute(
-                                  kdbxEntry: entry,
-                                  uuid: entry.uuid,
-                                  readOnly: true,
-                                ));
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: Text(
-                                  entry.times.lastModificationTime
-                                      .get()!
-                                      .toLocal()
-                                      .formatDate,
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
-                  )
-                : Expanded(
-                    child: Center(
-                      child: Opacity(
-                        opacity: .5,
-                        child: Text(t.not_history_record),
-                      ),
-                    ),
-                  )
-          ],
+        return KdbxHistoryList(
+          kdbxEntry: kdbxEntry,
         );
       },
     );
