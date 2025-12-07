@@ -98,17 +98,15 @@ class BiometricState extends State<Biometric> {
 
   Future<BiometricStorageFile> _getStorageFile(
     BuildContext context,
-    BiometricStorageKey key, {
-    // 只有第一次初始化时才有效
-    StorageFileInitOptions? options,
-  }) async {
+    BiometricStorageKey key,
+  ) async {
     _assertBiometric();
 
     if (_storageMap.containsKey(key.name)) return _storageMap[key.name]!;
 
     _storageMap[key.name] = await _biometric.getStorage(
       key.name,
-      options: options,
+      options: StorageFileInitOptions(androidUseStrongBox: false),
       promptInfo: _getPromptInfo(context),
     );
 
