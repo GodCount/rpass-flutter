@@ -20,6 +20,7 @@ import 'chip_list.dart';
 import 'common.dart';
 import 'extension_state.dart';
 import 'kdbx_history_list.dart';
+import 'kdbx_icon.dart';
 
 export "context_menu.dart";
 

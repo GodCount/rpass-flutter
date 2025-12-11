@@ -35,6 +35,7 @@ export 'setting/import_account.dart' show ImportAccountRoute;
 export 'setting/change_locale.dart' show ChangeLocaleRoute;
 export 'setting/more_security.dart' show MoreSecurityRoute;
 export 'setting/sync_account.dart' show SyncAccountRoute;
+export 'setting/other_settings.dart' show OtherSettingsRoute;
 
 
 export 'remotes_fs/auth_remote_fs.dart' show AuthRemoteFsRoute, AuthRemoteRouteType;

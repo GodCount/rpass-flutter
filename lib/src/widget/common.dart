@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 
 import '../context/kdbx.dart';
 import '../i18n.dart';
-import '../kdbx/icons.dart';
 import '../kdbx/kdbx.dart';
 import '../page/route.dart';
 import '../util/common.dart';
 import 'extension_state.dart';
+import 'kdbx_icon.dart';
 
 mixin HintEmptyTextUtil<T extends StatefulWidget> on State<T> {
   Widget hintEmptyText(bool isEmpty, Widget widget) {
@@ -20,36 +20,6 @@ mixin HintEmptyTextUtil<T extends StatefulWidget> on State<T> {
             ),
           )
         : widget;
-  }
-}
-
-class KdbxIconWidgetData {
-  KdbxIconWidgetData({required this.icon, this.customIcon});
-
-  final KdbxIcon icon;
-  final KdbxCustomIcon? customIcon;
-}
-
-class KdbxIconWidget extends StatelessWidget {
-  const KdbxIconWidget({super.key, required this.kdbxIcon, this.size = 32});
-
-  final KdbxIconWidgetData kdbxIcon;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    if (kdbxIcon.customIcon != null) {
-      return Image.memory(
-        kdbxIcon.customIcon!.data,
-        width: size,
-        height: size,
-      );
-    } else {
-      return Icon(
-        KdbxIcon2Material.to(kdbxIcon.icon),
-        size: size,
-      );
-    }
   }
 }
 
@@ -591,6 +561,7 @@ class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
                 kdbxIcon: KdbxIconWidgetData(
                   icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
                   customIcon: kdbxEntry.customIcon,
+                  domain: kdbxEntry.getActualString(KdbxKeyCommon.URL),
                 ),
                 size: 24,
               ),

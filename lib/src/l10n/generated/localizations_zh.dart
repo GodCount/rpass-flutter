@@ -608,4 +608,19 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get auto_fill_match_app => '自动填充应用';
+
+  @override
+  String get start_focus_sreach => '启动时聚焦到搜索框上';
+
+  @override
+  String get show_favicon => '显示网站图标';
+
+  @override
+  String get show_favicon_sub => '开启后,将尝试从指定的来源服务中请求网站图标并替换显示,自定义图标不会被替换.';
+
+  @override
+  String get all => '全部';
+
+  @override
+  String get direct_download => '直接下载';
 }

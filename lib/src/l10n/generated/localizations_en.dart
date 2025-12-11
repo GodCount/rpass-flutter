@@ -624,4 +624,20 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get auto_fill_match_app => 'Auto-fill Application';
+
+  @override
+  String get start_focus_sreach => 'Focus on the search box on startup';
+
+  @override
+  String get show_favicon => 'Display the favicon';
+
+  @override
+  String get show_favicon_sub =>
+      'When enabled, it will attempt to request the website icon from the specified source service and replace it with the new icon; custom icons will not be replaced.';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get direct_download => 'Direct Dwnload';
 }

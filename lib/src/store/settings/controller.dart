@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../widget/kdbx_icon.dart';
 import './service.dart';
 
 class SettingsController with ChangeNotifier {
@@ -15,6 +16,9 @@ class SettingsController with ChangeNotifier {
   Duration? _remoteSyncCycle;
   DateTime? _lastSyncTime;
   late bool _manualSelectFillItem;
+  late bool _startFocusSreach;
+  FavIconSource? _favIconSource;
+
 
   ThemeMode get themeMode => _themeMode;
   Locale? get locale => _locale;
@@ -26,6 +30,9 @@ class SettingsController with ChangeNotifier {
   Duration? get remoteSyncCycle => _remoteSyncCycle;
   DateTime? get lastSyncTime => _lastSyncTime;
   bool get manualSelectFillItem => _manualSelectFillItem;
+  bool get startFocusSreach => _startFocusSreach;
+  FavIconSource? get favIconSource => _favIconSource;
+
 
   Future<void> setThemeMode(ThemeMode? mode) async {
     if (mode == null) return;
@@ -74,7 +81,11 @@ class SettingsController with ChangeNotifier {
 
     _enableRecordKeyFilePath = enable;
 
-    notifyListeners();
+    if (!enable) {
+      setKeyFilePath(null);
+    } else {
+      notifyListeners();
+    }
 
     await _settingsService.setEnableRecordKeyFilePath(enable);
   }
@@ -129,6 +140,29 @@ class SettingsController with ChangeNotifier {
     await _settingsService.setManualSelectFillItem(enable);
   }
 
+
+  Future<void> setStartFocusSreach(bool enable) async {
+    if (enable == _startFocusSreach) return;
+
+    _startFocusSreach = enable;
+
+    notifyListeners();
+
+    await _settingsService.setStartFocusSreach(enable);
+  }
+
+
+  Future<void> setFavIconSource(FavIconSource? value) async {
+    if (value == _favIconSource) return;
+
+    _favIconSource = value;
+
+    notifyListeners();
+
+    await _settingsService.setFavIconSource(value);
+  }
+
+
   Future<void> init() async {
     _themeMode = await _settingsService.getThemeMode();
     _locale = await _settingsService.getLocale();
@@ -141,6 +175,8 @@ class SettingsController with ChangeNotifier {
     _remoteSyncCycle = await _settingsService.getRemoteSyncCycle();
     _lastSyncTime = await _settingsService.getLastSyncTime();
     _manualSelectFillItem = await _settingsService.getManualSelectFillItem();
+    _startFocusSreach = await _settingsService.getStartFocusSreach();
+    _favIconSource = await _settingsService.getFavIconSource();
 
     notifyListeners();
   }

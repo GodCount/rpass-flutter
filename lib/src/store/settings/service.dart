@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../widget/kdbx_icon.dart';
 import '../shared_preferences/index.dart';
 
 class SettingsService with SharedPreferencesService {
@@ -74,7 +75,9 @@ class SettingsService with SharedPreferencesService {
     final cycle = await getInt("remote_sync_cycle");
     // 默认值 1天
     // 小于0则表示每次启动
-    return cycle == null || cycle > 0 ? Duration(seconds: cycle ?? 86400) : null;
+    return cycle == null || cycle > 0
+        ? Duration(seconds: cycle ?? 86400)
+        : null;
   }
 
   Future<bool> setRemoteSyncCycle(Duration? cycle) {
@@ -98,6 +101,27 @@ class SettingsService with SharedPreferencesService {
 
   Future<bool> setManualSelectFillItem(bool enbale) {
     return setBool("manual_select_fill_item", enbale);
+  }
+
+  Future<bool> getStartFocusSreach() async {
+    return await getBool("start_focus_sreach") ?? false;
+  }
+
+  Future<bool> setStartFocusSreach(bool enbale) {
+    return setBool("start_focus_sreach", enbale);
+  }
+
+  Future<FavIconSource?> getFavIconSource() async {
+    final value = await getInt("favicon_source");
+    return value != null && value > 0 && value < FavIconSource.values.length
+        ? FavIconSource.values[value]
+        : null;
+  }
+
+  Future<bool> setFavIconSource(FavIconSource? value) {
+    if (value == null) return remove("favicon_source");
+
+    return setInt("favicon_source", FavIconSource.values.indexOf(value));
   }
 
   @override

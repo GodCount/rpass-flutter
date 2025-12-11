@@ -295,5 +295,10 @@
     "enable_auto_fill_service": "Enable Auto-fill Service",
     "manual_select_fill_item": "Manually Select Fill Item",
     "manual_select_fill_item_subtitle": "When the auto-matched fill dataset returns empty",
-    "auto_fill_match_app": "Auto-fill Application"
+    "auto_fill_match_app": "Auto-fill Application",
+    "start_focus_sreach": "Focus on the search box on startup",
+    "show_favicon": "Display the favicon",
+    "show_favicon_sub": "When enabled, it will attempt to request the website icon from the specified source service and replace it with the new icon; custom icons will not be replaced.",
+    "all": "All",
+    "direct_download": "Direct Dwnload"
 }

@@ -7,9 +7,11 @@ import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../native/channel.dart';
+import '../../store/index.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/common.dart';
+import '../../widget/kdbx_icon.dart';
 import '../password/edit_account.dart';
 import '../password/look_account.dart';
 import 'route_wrap.dart';
@@ -65,6 +67,7 @@ class PasswordsPage extends StatefulWidget {
 class _PasswordsPageState extends State<PasswordsPage>
     with AutomaticKeepAliveClientMixin {
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
 
   @override
   bool get wantKeepAlive => true;
@@ -93,11 +96,18 @@ class _PasswordsPageState extends State<PasswordsPage>
     _removeKdbxListener = () => kdbx.removeListener(_onKdbxSave);
 
     super.initState();
+
+    if (Store.instance.settings.startFocusSreach) {
+      Future.delayed(Duration(milliseconds: 300)).then((_) {
+        _searchFocusNode.requestFocus();
+      });
+    }
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     _removeKdbxListener?.call();
     _removeKdbxListener = null;
     _totalEntry.clear();
@@ -137,6 +147,7 @@ class _PasswordsPageState extends State<PasswordsPage>
         automaticallyImplyLeading: false,
         title: _AppBarTitleToSearch(
           controller: _searchController,
+          focusNode: _searchFocusNode,
           itemCount: kdbx.totalEntry.length,
           matchCount:
               _searchController.text.isNotEmpty ? _totalEntry.length : 0,
@@ -195,6 +206,7 @@ class _PasswordsPageState extends State<PasswordsPage>
           padding: const EdgeInsets.only(left: 12),
           child: TextField(
             controller: _searchController,
+            focusNode: _searchFocusNode,
             cursorHeight: 16,
             style: Theme.of(context).textTheme.bodyMedium,
             decoration: InputDecoration(
@@ -288,11 +300,13 @@ class _PasswordsPageState extends State<PasswordsPage>
 class _AppBarTitleToSearch extends StatefulWidget {
   const _AppBarTitleToSearch({
     required this.controller,
+    required this.focusNode,
     required this.itemCount,
     required this.matchCount,
   });
 
   final TextEditingController controller;
+  final FocusNode focusNode;
   final int itemCount;
   final int matchCount;
 
@@ -301,30 +315,22 @@ class _AppBarTitleToSearch extends StatefulWidget {
 }
 
 class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
-  final FocusNode _focusNode = FocusNode();
-
   bool _hasFocus = false;
 
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(() {
-      if (!_focusNode.hasFocus && _hasFocus) {
+    widget.focusNode.addListener(() {
+      if (!widget.focusNode.hasFocus && _hasFocus) {
         setState(() {
           _hasFocus = false;
         });
-      } else if (_focusNode.hasFocus) {
+      } else if (widget.focusNode.hasFocus) {
         setState(() {
           _hasFocus = true;
         });
       }
     });
-  }
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
   }
 
   @override
@@ -339,8 +345,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
       },
       child: TextField(
         controller: widget.controller,
-        focusNode: _focusNode,
-        autofocus: false,
+        focusNode: widget.focusNode,
         ignorePointers: !_hasFocus && widget.controller.text.isEmpty,
         style: Theme.of(context).textTheme.bodySmall,
         decoration: InputDecoration(
@@ -353,7 +358,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
             curve: Curves.easeInBack,
             onEnd: () {
               if (_hasFocus) {
-                _focusNode.requestFocus();
+                widget.focusNode.requestFocus();
               }
             },
             child: _hasFocus || widget.controller.text.isNotEmpty
@@ -375,7 +380,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
               if (widget.controller.text.isNotEmpty) {
                 widget.controller.clear();
               } else {
-                _focusNode.unfocus();
+                widget.focusNode.unfocus();
               }
             },
             icon: AnimatedIconSwitcher(
@@ -625,6 +630,7 @@ class _PasswordItemState extends State<_PasswordItem>
             kdbxIcon: KdbxIconWidgetData(
               icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
               customIcon: kdbxEntry.customIcon,
+              domain: kdbxEntry.getActualString(KdbxKeyCommon.URL),
             ),
             size: 24,
           ),

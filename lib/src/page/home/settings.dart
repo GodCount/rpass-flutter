@@ -50,6 +50,7 @@ final List<String> childRouteNames = [
   ImportAccountRoute.name,
   ExportAccountRoute.name,
   SyncAccountRoute.name,
+  OtherSettingsRoute.name,
 ];
 
 class SettingsPage extends StatefulWidget {
@@ -285,13 +286,6 @@ class _SettingsPageState extends State<SettingsPage>
               ),
             ),
             ListTile(
-              title: Text(t.sync_settings),
-              selected: childRouteName == SyncAccountRoute.name,
-              onTap: () {
-                context.router.platformNavigate(SyncAccountRoute());
-              },
-            ),
-            ListTile(
               title: Text(t.import),
               selected: childRouteName == ImportAccountRoute.name,
               onTap: () {
@@ -299,11 +293,19 @@ class _SettingsPageState extends State<SettingsPage>
               },
             ),
             ListTile(
-              shape: shape,
               title: Text(t.export),
               selected: childRouteName == ExportAccountRoute.name,
               onTap: () {
                 context.router.platformNavigate(ExportAccountRoute());
+              },
+            ),
+            ListTile(
+              shape: shape,
+              title: Text(t.sync_settings),
+              selected: childRouteName == SyncAccountRoute.name,
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () {
+                context.router.platformNavigate(SyncAccountRoute());
               },
             ),
           ]),
@@ -314,20 +316,20 @@ class _SettingsPageState extends State<SettingsPage>
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(right: 6),
-                    child: Icon(Icons.touch_app),
+                    child: Icon(Icons.more_outlined),
                   ),
-                  Text(t.info, style: Theme.of(context).textTheme.bodyLarge),
+                  Text(t.other, style: Theme.of(context).textTheme.bodyLarge),
                 ],
               ),
             ),
             ListTile(
-              shape: shape,
               title: Text(t.about),
               onTap: () {
                 showAboutDialog(
                   context: context,
                   applicationName: RpassInfo.appName,
-                  applicationVersion: "${RpassInfo.version}+${RpassInfo.buildNumber}",
+                  applicationVersion:
+                      "${RpassInfo.version}+${RpassInfo.buildNumber}",
                   applicationIcon: const Image(
                     image: AssetImage('assets/icons/logo.png'),
                     width: 72,
@@ -361,6 +363,15 @@ class _SettingsPageState extends State<SettingsPage>
                     )
                   ],
                 );
+              },
+            ),
+            ListTile(
+              shape: shape,
+              title: Text(t.more_settings),
+              selected: childRouteName == OtherSettingsRoute.name,
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () {
+                context.router.platformNavigate(OtherSettingsRoute());
               },
             ),
           ]),

@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../native/channel.dart';
 import '../../util/route.dart';
+import '../../widget/kdbx_icon.dart';
 import '../route.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
@@ -211,6 +212,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                       kdbxIcon: KdbxIconWidgetData(
                         icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
                         customIcon: kdbxEntry.customIcon,
+                        domain: kdbxEntry.getActualString(KdbxKeyCommon.URL),
                       ),
                       size: 24,
                     ),

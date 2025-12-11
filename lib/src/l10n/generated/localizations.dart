@@ -1249,6 +1249,36 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'自动填充应用'**
   String get auto_fill_match_app;
+
+  /// No description provided for @start_focus_sreach.
+  ///
+  /// In zh, this message translates to:
+  /// **'启动时聚焦到搜索框上'**
+  String get start_focus_sreach;
+
+  /// No description provided for @show_favicon.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示网站图标'**
+  String get show_favicon;
+
+  /// No description provided for @show_favicon_sub.
+  ///
+  /// In zh, this message translates to:
+  /// **'开启后,将尝试从指定的来源服务中请求网站图标并替换显示,自定义图标不会被替换.'**
+  String get show_favicon_sub;
+
+  /// No description provided for @all.
+  ///
+  /// In zh, this message translates to:
+  /// **'全部'**
+  String get all;
+
+  /// No description provided for @direct_download.
+  ///
+  /// In zh, this message translates to:
+  /// **'直接下载'**
+  String get direct_download;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

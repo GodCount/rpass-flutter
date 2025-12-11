@@ -8,7 +8,7 @@ import '../../kdbx/kdbx.dart';
 import '../../native/channel.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
-import '../../widget/common.dart';
+import '../../widget/kdbx_icon.dart';
 import '../../widget/extension_state.dart';
 import '../route.dart';
 
@@ -449,6 +449,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
           kdbxIcon: KdbxIconWidgetData(
             icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
             customIcon: kdbxEntry.customIcon,
+            domain: kdbxEntry.getActualString(KdbxKeyCommon.URL),
           ),
         ),
         trailing:

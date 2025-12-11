@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 import 'package:rich_text_controller/rich_text_controller.dart';
 
 import '../../util/route.dart';
+import '../../widget/kdbx_icon.dart';
 import '../route.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
@@ -133,6 +134,7 @@ class _EditAccountPageState extends State<EditAccountPage>
   }
 
   void _entryFieldSaved(EntryFieldSaved field) {
+    debugPrint("_entryFieldSaved===>  ${field.key} == ${field.runtimeType}");
     if (field is EntryBinaryFieldSaved) {
       final binarys = field.value;
       final oldBinaryKeys = _kdbxEntry.binaryEntries.map((item) => item.key);

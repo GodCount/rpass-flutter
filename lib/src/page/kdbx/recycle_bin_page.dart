@@ -7,7 +7,7 @@ import '../../util/route.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
-import '../../widget/common.dart';
+import '../../widget/kdbx_icon.dart';
 import '../../widget/extension_state.dart';
 import '../password/look_account.dart';
 

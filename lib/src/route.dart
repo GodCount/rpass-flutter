@@ -154,6 +154,10 @@ RootStackRouter _createMobileAutoRoute() {
         path: "/select_auto_fill_app",
         page: SelectAutoFillAppRoute.page,
       ),
+      AutoRoute(
+        path: "/other_settings",
+        page: OtherSettingsRoute.page,
+      ),
     ],
   );
 }
@@ -255,6 +259,10 @@ RootStackRouter _createDesktopAutoRoute() {
               AutoRoute(
                 path: "sync_account",
                 page: SyncAccountRoute.page,
+              ),
+              AutoRoute(
+                path: "other_settings",
+                page: OtherSettingsRoute.page,
               ),
             ],
           ),
