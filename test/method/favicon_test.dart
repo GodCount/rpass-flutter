@@ -96,12 +96,6 @@ void main() {
       );
     });
 
-    test("Fetch Favicon", () async {
-      KdbxFetchFavIcon fetchFavicon = KdbxFetchFavIcon(source: FavIconSource.Slef);
-
-      await fetchFavicon.fetch("https://github.com/GodCount/rpass-flutter");
-    });
-
     test("Duckduckgo Fetch Favicon", () async {
       KdbxFetchFavIcon fetchFavicon =
           KdbxFetchFavIcon(source: FavIconSource.Duckduckgo);

@@ -1,11 +1,7 @@
-import 'dart:io';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../../i18n.dart';
-import '../../native/channel.dart';
-import '../../native/platform/android.dart';
 import '../../store/index.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
@@ -45,17 +41,6 @@ class OtherSettingsPage extends StatefulWidget {
 
 class _OtherSettingsPageState extends State<OtherSettingsPage>
     with SecondLevelPageAutoBack<OtherSettingsPage> {
-  AutofillServiceStatus _autofillServiceStatus =
-      AutofillServiceStatus.unsupported;
-
-  @override
-  void initState() {
-    super.initState();
-    NativeInstancePlatform.instance.autofillService
-        .status()
-        .then((value) => setState(() => _autofillServiceStatus = value));
-  }
-
   void _setFavIconSource() {
     final t = I18n.of(context)!;
 
@@ -69,7 +54,7 @@ class _OtherSettingsPageState extends State<OtherSettingsPage>
       };
     }
 
-    showBottomSheetList(title: t.lock, children: [
+    showBottomSheetList(title: t.show_favicon, children: [
       ListTile(
         title: Text(t.none),
         trailing: favIconSource == null ? const Icon(Icons.check) : null,
