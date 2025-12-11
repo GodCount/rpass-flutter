@@ -78,12 +78,17 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
     }
   }
 
-  Future<void> _setInitKdbx((Kdbx, String?) result) async {
+  Future<void> _setInitKdbx(
+    (Kdbx, String?) result, [
+    bool initPresetGroup = false,
+  ]) async {
     final store = Store.instance;
 
     final kdbx = result.$1;
     kdbx.filepath = store.localInfo.localKdbxFile.path;
-    _addPresetGroup(kdbx);
+    if (initPresetGroup) {
+      _addPresetGroup(kdbx);
+    }
 
     await kdbxSave(kdbx);
 
@@ -113,7 +118,7 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
         name: RpassInfo.defaultKdbxName,
       );
 
-      await _setInitKdbx((kdbx, keyFile?.$1));
+      await _setInitKdbx((kdbx, keyFile?.$1), true);
     }
   }
 
