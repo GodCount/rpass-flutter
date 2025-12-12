@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../widget/kdbx_icon.dart';
+import '../../util/fetch_favicon.dart';
 import './service.dart';
 
 class SettingsController with ChangeNotifier {

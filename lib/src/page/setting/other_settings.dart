@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 import '../../i18n.dart';
 import '../../store/index.dart';
+import '../../util/fetch_favicon.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
-import '../../widget/kdbx_icon.dart';
 
 class _OtherSettingsArgs extends PageRouteArgs {
   _OtherSettingsArgs({super.key});
@@ -61,17 +61,18 @@ class _OtherSettingsPageState extends State<OtherSettingsPage>
         onTap: autoSavePop(null),
       ),
       ListTile(
-        title: Text(t.all),
-        trailing:
-            favIconSource == FavIconSource.All ? const Icon(Icons.check) : null,
-        onTap: autoSavePop(FavIconSource.All),
-      ),
-      ListTile(
         title: Text(t.direct_download),
         trailing: favIconSource == FavIconSource.Slef
             ? const Icon(Icons.check)
             : null,
         onTap: autoSavePop(FavIconSource.Slef),
+      ),
+      ListTile(
+        title: const Text("Cravatar"),
+        trailing: favIconSource == FavIconSource.Cravatar
+            ? const Icon(Icons.check)
+            : null,
+        onTap: autoSavePop(FavIconSource.Cravatar),
       ),
       ListTile(
         title: const Text("Duckduckgo"),

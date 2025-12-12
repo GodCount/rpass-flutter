@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../widget/kdbx_icon.dart';
+import '../../util/fetch_favicon.dart';
 import '../shared_preferences/index.dart';
 
 class SettingsService with SharedPreferencesService {

@@ -289,4 +289,12 @@ extension CommonString on String {
   bool isRepeatChar() {
     return Set.from(split("")).length != length;
   }
+
+  String simpleToDomain() {
+    if (startsWith(RegExp(r"https?://"))) {
+      return split("/")[2].trim();
+    } else {
+      return split("/")[0].trim();
+    }
+  }
 }

@@ -6,6 +6,7 @@ import 'package:enigo_flutter/enigo_flutter.dart';
 
 import '../native/channel.dart';
 import '../native/platform/android.dart';
+import '../util/common.dart';
 import 'kdbx.dart';
 
 final _logger = Logger("kdbx:auto_fill");
@@ -105,16 +106,8 @@ Future<void> autoFillSequence(KdbxEntry kdbxEntry, [KdbxKey? kdbxKey]) async {
 }
 
 extension _MatchWebDomain on String {
-  String toUrlDomain() {
-    if (startsWith(RegExp(r"https?://"))) {
-      return split("/")[2].trim();
-    } else {
-      return split("/")[0].trim();
-    }
-  }
-
   bool matchWebDomain(String url) {
-    final domain = url.toUrlDomain();
+    final domain = url.simpleToDomain();
     return contains(domain) || startsWith(domain) || endsWith(domain);
   }
 }
