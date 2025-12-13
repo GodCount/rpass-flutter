@@ -640,4 +640,10 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get direct_download => 'Direct Dwnload';
+
+  @override
+  String get select_source_refresh => 'Select the Source refresh icon';
+
+  @override
+  String get clear_favicon_cache => 'Clear Favicon Cache';
 }

@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 
 import '../../i18n.dart';
 import '../../store/index.dart';
+import '../../util/cache_network_image.dart';
 import '../../util/fetch_favicon.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
+import '../../widget/kdbx_icon.dart';
 
 class _OtherSettingsArgs extends PageRouteArgs {
   _OtherSettingsArgs({super.key});
@@ -41,14 +43,47 @@ class OtherSettingsPage extends StatefulWidget {
 
 class _OtherSettingsPageState extends State<OtherSettingsPage>
     with SecondLevelPageAutoBack<OtherSettingsPage> {
-  void _setFavIconSource() {
+  bool _existsCache = false;
+
+  @override
+  void initState() {
+    super.initState();
+    KdbxIconWidget.cacheManager.size().then((value) {
+      if (value > 0) {
+        setState(() {
+          _existsCache = true;
+        });
+      }
+    });
+  }
+
+  void _clearCahce() async {
+    try {
+      final t = I18n.of(context)!;
+
+      if (await showConfirmDialog(
+        title: t.warn,
+        message: t.clear_favicon_cache,
+      )) {
+        await KdbxIconWidget.cacheManager.clear();
+        MemoryImageCacheManager.instance.clear();
+        setState(() {
+          _existsCache = false;
+        });
+      }
+    } catch (e) {
+      showError(e);
+    }
+  }
+
+  void _setFaviconSource() {
     final t = I18n.of(context)!;
 
-    final favIconSource = Store.instance.settings.favIconSource;
+    final faviconSource = Store.instance.settings.faviconSource;
 
-    GestureTapCallback? autoSavePop(FavIconSource? value) {
+    GestureTapCallback? autoSavePop(FaviconSource? value) {
       return () {
-        Store.instance.settings.setFavIconSource(value);
+        Store.instance.settings.setFaviconSource(value);
         context.router.pop();
         setState(() {});
       };
@@ -57,36 +92,36 @@ class _OtherSettingsPageState extends State<OtherSettingsPage>
     showBottomSheetList(title: t.show_favicon, children: [
       ListTile(
         title: Text(t.none),
-        trailing: favIconSource == null ? const Icon(Icons.check) : null,
+        trailing: faviconSource == null ? const Icon(Icons.check) : null,
         onTap: autoSavePop(null),
       ),
       ListTile(
         title: Text(t.direct_download),
-        trailing: favIconSource == FavIconSource.Slef
+        trailing: faviconSource == FaviconSource.Slef
             ? const Icon(Icons.check)
             : null,
-        onTap: autoSavePop(FavIconSource.Slef),
+        onTap: autoSavePop(FaviconSource.Slef),
       ),
       ListTile(
         title: const Text("Cravatar"),
-        trailing: favIconSource == FavIconSource.Cravatar
+        trailing: faviconSource == FaviconSource.Cravatar
             ? const Icon(Icons.check)
             : null,
-        onTap: autoSavePop(FavIconSource.Cravatar),
+        onTap: autoSavePop(FaviconSource.Cravatar),
       ),
       ListTile(
         title: const Text("Duckduckgo"),
-        trailing: favIconSource == FavIconSource.Duckduckgo
+        trailing: faviconSource == FaviconSource.Duckduckgo
             ? const Icon(Icons.check)
             : null,
-        onTap: autoSavePop(FavIconSource.Duckduckgo),
+        onTap: autoSavePop(FaviconSource.Duckduckgo),
       ),
       ListTile(
         title: const Text("Google"),
-        trailing: favIconSource == FavIconSource.Google
+        trailing: faviconSource == FaviconSource.Google
             ? const Icon(Icons.check)
             : null,
-        onTap: autoSavePop(FavIconSource.Google),
+        onTap: autoSavePop(FaviconSource.Google),
       ),
     ]);
   }
@@ -118,10 +153,15 @@ class _OtherSettingsPageState extends State<OtherSettingsPage>
           ListTile(
             title: Text(t.show_favicon),
             subtitle: Text(t.show_favicon_sub),
-            trailing: store.settings.favIconSource != null
+            trailing: store.settings.faviconSource != null
                 ? const Icon(Icons.check)
                 : null,
-            onTap: _setFavIconSource,
+            onTap: _setFaviconSource,
+          ),
+          ListTile(
+            title: Text(t.clear_favicon_cache),
+            enabled: _existsCache,
+            onTap: _clearCahce,
           ),
         ],
       ),

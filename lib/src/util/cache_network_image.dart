@@ -17,6 +17,7 @@ abstract class BaseCacheManager<T> {
   Future<T?> read(String key);
   Future<void> write(String key, T? value);
   Future<void> clear();
+  Future<int> size();
 }
 
 class FetchNetworkImage {
@@ -55,9 +56,47 @@ class FetchNetworkImage {
     );
 
     if (bytes.lengthInBytes == 0) {
-      throw Exception('NetworkImage is an empty file: $resolved');
+      throw Exception('FetchNetworkImage is an empty file: $resolved');
     }
     return bytes;
+  }
+}
+
+class MemoryImageCacheManager {
+  MemoryImageCacheManager._();
+
+  static MemoryImageCacheManager get instance =>
+      MemoryImageCacheManager._initInstances();
+  static MemoryImageCacheManager? _instance;
+
+  static MemoryImageCacheManager _initInstances() {
+    _instance ??= MemoryImageCacheManager._();
+    return _instance!;
+  }
+
+  final _cacheKeys = <WeakReference<CacheNetworkImage>>{};
+
+  void add(CacheNetworkImage value) {
+    _cacheKeys.add(WeakReference(value));
+  }
+
+  void evict(String url) {
+    for (final key in _cacheKeys) {
+      if (key.target != null && key.target!.url == url) {
+        PaintingBinding.instance.imageCache.evict(key.target!);
+        _cacheKeys.remove(key);
+        break;
+      }
+    }
+  }
+
+  void clear() {
+    for (final key in _cacheKeys) {
+      if (key.target != null) {
+        PaintingBinding.instance.imageCache.evict(key.target!);
+      }
+    }
+    _cacheKeys.clear();
   }
 }
 
@@ -96,6 +135,8 @@ class CacheNetworkImage extends ImageProvider<CacheNetworkImage> {
     final StreamController<ImageChunkEvent> chunkEvents =
         StreamController<ImageChunkEvent>();
 
+    MemoryImageCacheManager.instance.add(key);
+
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, chunkEvents, decode: decode),
       chunkEvents: chunkEvents.stream,
@@ -128,18 +169,18 @@ class CacheNetworkImage extends ImageProvider<CacheNetworkImage> {
       }
 
       bytes ??= await _fetchNetworkImage.fetch(
-          key.url,
-          onBytesReceived: (cumulative, total) {
-            chunkEvents.add(
-              ImageChunkEvent(
-                cumulativeBytesLoaded: cumulative,
-                expectedTotalBytes: total,
-              ),
-            );
-          },
-        );
+        key.url,
+        onBytesReceived: (cumulative, total) {
+          chunkEvents.add(
+            ImageChunkEvent(
+              cumulativeBytesLoaded: cumulative,
+              expectedTotalBytes: total,
+            ),
+          );
+        },
+      );
 
-      Future<ui.Codec> warpDcode(ui.ImmutableBuffer buffer) async {
+      Future<ui.Codec> warpDecode(ui.ImmutableBuffer buffer) async {
         try {
           final result = await decode(buffer);
           if (cacheManager != null) {
@@ -164,7 +205,7 @@ class CacheNetworkImage extends ImageProvider<CacheNetworkImage> {
         }
       }
 
-      return warpDcode(await ui.ImmutableBuffer.fromUint8List(bytes));
+      return warpDecode(await ui.ImmutableBuffer.fromUint8List(bytes));
     } catch (e) {
       // Depending on where the exception was thrown, the image cache may not
       // have had a chance to track the key in the cache at all.
@@ -185,11 +226,12 @@ class CacheNetworkImage extends ImageProvider<CacheNetworkImage> {
     }
     return other is CacheNetworkImage &&
         other.url == url &&
-        other.scale == scale;
+        other.scale == scale &&
+        other._fetchNetworkImage == _fetchNetworkImage;
   }
 
   @override
-  int get hashCode => Object.hash(url, scale);
+  int get hashCode => Object.hash(url, scale, _fetchNetworkImage.hashCode);
 
   @override
   String toString() =>

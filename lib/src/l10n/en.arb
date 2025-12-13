@@ -300,5 +300,7 @@
     "show_favicon": "Display the favicon",
     "show_favicon_sub": "When enabled, it will attempt to request the website icon from the specified source service and replace it with the new icon; custom icons will not be replaced.",
     "all": "All",
-    "direct_download": "Direct Dwnload"
+    "direct_download": "Direct Dwnload",
+    "select_source_refresh": "Select the Source refresh icon",
+    "clear_favicon_cache": "Clear Favicon Cache"
 }

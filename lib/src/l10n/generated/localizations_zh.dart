@@ -623,4 +623,10 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get direct_download => '直接下载';
+
+  @override
+  String get select_source_refresh => '选择来源刷新图标';
+
+  @override
+  String get clear_favicon_cache => '清除图标缓存';
 }

@@ -111,17 +111,17 @@ class SettingsService with SharedPreferencesService {
     return setBool("start_focus_sreach", enbale);
   }
 
-  Future<FavIconSource?> getFavIconSource() async {
+  Future<FaviconSource?> getFaviconSource() async {
     final value = await getInt("favicon_source");
-    return value != null && value > 0 && value < FavIconSource.values.length
-        ? FavIconSource.values[value]
+    return value != null && value > 0 && value < FaviconSource.values.length
+        ? FaviconSource.values[value]
         : null;
   }
 
-  Future<bool> setFavIconSource(FavIconSource? value) {
+  Future<bool> setFaviconSource(FaviconSource? value) {
     if (value == null) return remove("favicon_source");
 
-    return setInt("favicon_source", FavIconSource.values.indexOf(value));
+    return setInt("favicon_source", FaviconSource.values.indexOf(value));
   }
 
   @override

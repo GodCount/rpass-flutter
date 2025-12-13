@@ -56,6 +56,8 @@ class _HomePageState extends State<HomePage>
     SettingsRoute(),
   ];
 
+  bool _enableRemoteSync = false;
+
   @override
   bool get wantKeepAlive => true;
 
@@ -70,7 +72,8 @@ class _HomePageState extends State<HomePage>
   }
 
   void _settingsListener() {
-    if (Store.instance.settings.enableRemoteSync) {
+    if (_enableRemoteSync != Store.instance.settings.enableRemoteSync &&
+        Store.instance.settings.enableRemoteSync) {
       final cycle = Store.instance.settings.remoteSyncCycle;
       final time = Store.instance.settings.lastSyncTime;
       if (cycle == null ||
@@ -79,6 +82,7 @@ class _HomePageState extends State<HomePage>
         Store.instance.syncKdbx.sync(context);
       }
     }
+    _enableRemoteSync = Store.instance.settings.enableRemoteSync;
   }
 
   @override

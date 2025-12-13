@@ -300,5 +300,7 @@
     "show_favicon": "显示网站图标",
     "show_favicon_sub": "开启后,将尝试从指定的来源服务中请求网站图标并替换显示,自定义图标不会被替换.",
     "all": "全部",
-    "direct_download": "直接下载"
+    "direct_download": "直接下载",
+    "select_source_refresh": "选择来源刷新图标",
+    "clear_favicon_cache": "清除图标缓存"
 }

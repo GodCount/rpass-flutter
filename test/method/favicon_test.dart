@@ -7,7 +7,7 @@ import 'package:rpass/src/util/fetch_favicon.dart';
 void main() {
   group("Favicon Cache Manager", () {
     final cacheDir = Directory("test/cache").absolute;
-    final cacheManager = FaviconCacheManager(cacheDir: cacheDir.path);
+    final cacheManager = FaviconCacheManager(cacheDir: cacheDir);
 
     final testData = Uint8List.fromList([1, 2, 3, 4, 5]);
 
@@ -36,40 +36,40 @@ void main() {
 
     test("Clear Cache", () async {
       await cacheManager.clear();
-      expect(await cacheDir.exists(), isFalse);
+      expect(await cacheDir.list().length, equals(0));
     });
   });
 
   group("Fetch Kdbx Favicon", () {
     test("Splice Url", () {
-      FavIconSourceApi fetchFavicon = SlefFavIconSourceApi("github.com");
+      FaviconSourceApi fetchFavicon = SlefFaviconSourceApi("github.com");
 
       expect(
-        fetchFavicon.getFavIconUrls(),
+        fetchFavicon.getFaviconUrls(),
         equals(["http://github.com/faviocn.ico"]),
       );
 
-      fetchFavicon = CravatarFavIconSourceApi("docs.flutter.dev");
+      fetchFavicon = CravatarFaviconSourceApi("docs.flutter.dev");
 
       expect(
-        fetchFavicon.getFavIconUrls(),
+        fetchFavicon.getFaviconUrls(),
         equals([
           "https://cn.cravatar.com/favicon/api/index.php?url=docs.flutter.dev",
           "https://cn.cravatar.com/favicon/api/index.php?url=flutter.dev"
         ]),
       );
 
-      fetchFavicon = DuckduckgoFavIconSourceApi("docs.flutter.dev");
+      fetchFavicon = DuckduckgoFaviconSourceApi("docs.flutter.dev");
 
       expect(
-        fetchFavicon.getFavIconUrls(),
+        fetchFavicon.getFaviconUrls(),
         equals(["https://icons.duckduckgo.com/ip3/flutter.dev.ico"]),
       );
 
-      fetchFavicon = GoogleFavIconSourceApi("docs.flutter.dev");
+      fetchFavicon = GoogleFaviconSourceApi("docs.flutter.dev");
 
       expect(
-        fetchFavicon.getFavIconUrls(),
+        fetchFavicon.getFaviconUrls(),
         equals([
           "https://www.google.com/s2/favicons?domain=docs.flutter.dev&sz=32",
           "https://www.google.com/s2/favicons?domain=flutter.dev&sz=32"
@@ -78,21 +78,19 @@ void main() {
     });
 
     test("Duckduckgo Fetch Favicon", () async {
-      FetchFavIcon fetchFavicon = FetchFavIcon(
-        source: FavIconSource.Duckduckgo,
-      );
+      FetchFavicon fetchFavicon = FetchFavicon(FaviconSource.Duckduckgo);
 
       await fetchFavicon.fetch("https://github.com/GodCount/rpass-flutter");
     });
 
     test("Google Fetch Favicon", () async {
-      FetchFavIcon fetchFavicon = FetchFavIcon(source: FavIconSource.Google);
+      FetchFavicon fetchFavicon = FetchFavicon(FaviconSource.Google);
 
       await fetchFavicon.fetch("https://github.com/GodCount/rpass-flutter");
     });
 
     test("Cravatar Fetch Favicon", () async {
-      FetchFavIcon fetchFavicon = FetchFavIcon(source: FavIconSource.Cravatar);
+      FetchFavicon fetchFavicon = FetchFavicon(FaviconSource.Cravatar);
 
       await fetchFavicon.fetch("https://github.com/GodCount/rpass-flutter");
 

@@ -17,7 +17,7 @@ class SettingsController with ChangeNotifier {
   DateTime? _lastSyncTime;
   late bool _manualSelectFillItem;
   late bool _startFocusSreach;
-  FavIconSource? _favIconSource;
+  FaviconSource? _faviconSource;
 
 
   ThemeMode get themeMode => _themeMode;
@@ -31,7 +31,7 @@ class SettingsController with ChangeNotifier {
   DateTime? get lastSyncTime => _lastSyncTime;
   bool get manualSelectFillItem => _manualSelectFillItem;
   bool get startFocusSreach => _startFocusSreach;
-  FavIconSource? get favIconSource => _favIconSource;
+  FaviconSource? get faviconSource => _faviconSource;
 
 
   Future<void> setThemeMode(ThemeMode? mode) async {
@@ -152,14 +152,14 @@ class SettingsController with ChangeNotifier {
   }
 
 
-  Future<void> setFavIconSource(FavIconSource? value) async {
-    if (value == _favIconSource) return;
+  Future<void> setFaviconSource(FaviconSource? value) async {
+    if (value == _faviconSource) return;
 
-    _favIconSource = value;
+    _faviconSource = value;
 
     notifyListeners();
 
-    await _settingsService.setFavIconSource(value);
+    await _settingsService.setFaviconSource(value);
   }
 
 
@@ -176,7 +176,7 @@ class SettingsController with ChangeNotifier {
     _lastSyncTime = await _settingsService.getLastSyncTime();
     _manualSelectFillItem = await _settingsService.getManualSelectFillItem();
     _startFocusSreach = await _settingsService.getStartFocusSreach();
-    _favIconSource = await _settingsService.getFavIconSource();
+    _faviconSource = await _settingsService.getFaviconSource();
 
     notifyListeners();
   }

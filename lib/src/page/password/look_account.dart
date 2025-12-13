@@ -9,6 +9,9 @@ import 'package:rich_text_controller/rich_text_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../native/channel.dart';
+import '../../store/index.dart';
+import '../../util/cache_network_image.dart';
+import '../../util/fetch_favicon.dart';
 import '../../util/route.dart';
 import '../../widget/kdbx_icon.dart';
 import '../route.dart';
@@ -104,10 +107,29 @@ class _LookAccountPageState extends State<LookAccountPage>
         HintEmptyTextUtil,
         SecondLevelPageAutoBack<LookAccountPage>,
         NativeChannelListener {
+  late KdbxIconWidgetData _kdbxIcon;
+
   @override
   void initState() {
     NativeInstancePlatform.instance.addListener(this);
+
+    _kdbxIcon = KdbxIconWidgetData(
+      icon: widget.kdbxEntry.icon.get() ?? KdbxIcon.Key,
+      customIcon: widget.kdbxEntry.customIcon,
+      domain: widget.kdbxEntry.getActualString(KdbxKeyCommon.URL),
+    );
+
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant LookAccountPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _kdbxIcon = KdbxIconWidgetData(
+      icon: widget.kdbxEntry.icon.get() ?? KdbxIcon.Key,
+      customIcon: widget.kdbxEntry.customIcon,
+      domain: widget.kdbxEntry.getActualString(KdbxKeyCommon.URL),
+    );
   }
 
   @override
@@ -115,11 +137,46 @@ class _LookAccountPageState extends State<LookAccountPage>
     setState(() {});
   }
 
-  _launchUrl(String url) {
+  void _launchUrl(String url) {
     launchUrl(
       Uri.parse(url.startsWith(RegExp(r"^https*://")) ? url : "http://$url"),
       mode: LaunchMode.externalApplication,
     );
+  }
+
+  void _forceRefreshFavicon() {
+    final t = I18n.of(context)!;
+
+    GestureTapCallback? onCallback(FaviconSource value) {
+      return () async {
+        context.router.pop();
+        if (_kdbxIcon.domain != null) {
+          _kdbxIcon = _kdbxIcon.copyWith(source: value);
+          await KdbxIconWidget.cacheManager.write(_kdbxIcon.domain!, null);
+          MemoryImageCacheManager.instance.evict(_kdbxIcon.domain!);
+          setState(() {});
+        }
+      };
+    }
+
+    showBottomSheetList(title: t.select_source_refresh, children: [
+      ListTile(
+        title: Text(t.direct_download),
+        onTap: onCallback(FaviconSource.Slef),
+      ),
+      ListTile(
+        title: const Text("Cravatar"),
+        onTap: onCallback(FaviconSource.Cravatar),
+      ),
+      ListTile(
+        title: const Text("Duckduckgo"),
+        onTap: onCallback(FaviconSource.Duckduckgo),
+      ),
+      ListTile(
+        title: const Text("Google"),
+        onTap: onCallback(FaviconSource.Google),
+      ),
+    ]);
   }
 
   @override
@@ -148,6 +205,8 @@ class _LookAccountPageState extends State<LookAccountPage>
     final password = kdbxEntry.getNonNullString(KdbxKeyCommon.PASSWORD);
     final email = kdbxEntry.getNonNullString(KdbxKeyCommon.EMAIL);
     final notes = kdbxEntry.getNonNullString(KdbxKeyCommon.NOTES);
+
+    final faviconSource = Store.instance.settings.faviconSource;
 
     return Scaffold(
       appBar: AppBar(
@@ -208,13 +267,20 @@ class _LookAccountPageState extends State<LookAccountPage>
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(right: 6),
-                    child: KdbxIconWidget(
-                      kdbxIcon: KdbxIconWidgetData(
-                        icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
-                        customIcon: kdbxEntry.customIcon,
-                        domain: kdbxEntry.getActualString(KdbxKeyCommon.URL),
+                    child: GestureDetector(
+                      onLongPress:
+                          faviconSource != null && _kdbxIcon.domain != null
+                              ? _forceRefreshFavicon
+                              : null,
+                      child: KdbxIconWidget(
+                        kdbxIcon: _kdbxIcon,
+                        size: 24,
+                        errorCallback: _kdbxIcon.source != null
+                            ? (error) {
+                                showToast("Load Image $error");
+                              }
+                            : null,
                       ),
-                      size: 24,
                     ),
                   ),
                   Expanded(
@@ -706,8 +772,10 @@ class _LookPasswordListTileState extends State<_LookPasswordListTile>
           widget.password.isEmpty,
           Text(
             showPassword ? widget.password : "*" * widget.password.length,
-            style:
-                Theme.of(context).textTheme.titleSmall?.copyWith(height: 1), // 固定 height 防止切换显示高度变化抖动
+            style: Theme.of(context)
+                .textTheme
+                .titleSmall
+                ?.copyWith(height: 1), // 固定 height 防止切换显示高度变化抖动
           ),
         ),
       ),

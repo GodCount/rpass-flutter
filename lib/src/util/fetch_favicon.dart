@@ -7,19 +7,19 @@ import 'package:path_provider/path_provider.dart';
 import '../util/cache_network_image.dart';
 import '../util/common.dart';
 
-enum FavIconSource {
+enum FaviconSource {
   Slef,
   Google,
   Duckduckgo,
   Cravatar,
 }
 
-abstract class FavIconSourceApi {
-  FavIconSourceApi(this.domain);
+abstract class FaviconSourceApi {
+  FaviconSourceApi(this.domain);
 
   final String domain;
 
-  List<String> getFavIconUrls();
+  List<String> getFaviconUrls();
 
   ///
   /// 如果站点返回默认图片,但状态码又是200就需要通过这个来判断
@@ -34,11 +34,11 @@ abstract class FavIconSourceApi {
   }
 }
 
-class SlefFavIconSourceApi extends FavIconSourceApi {
-  SlefFavIconSourceApi(super.domain);
+class SlefFaviconSourceApi extends FaviconSourceApi {
+  SlefFaviconSourceApi(super.domain);
 
   @override
-  List<String> getFavIconUrls() {
+  List<String> getFaviconUrls() {
     return ["http://$domain/faviocn.ico"];
   }
 
@@ -48,11 +48,11 @@ class SlefFavIconSourceApi extends FavIconSourceApi {
   }
 }
 
-class GoogleFavIconSourceApi extends FavIconSourceApi {
-  GoogleFavIconSourceApi(super.domain);
+class GoogleFaviconSourceApi extends FaviconSourceApi {
+  GoogleFaviconSourceApi(super.domain);
 
   @override
-  List<String> getFavIconUrls() {
+  List<String> getFaviconUrls() {
     return [
       "https://www.google.com/s2/favicons?domain=$domain&sz=32",
       if (_getSecondDomain() != domain)
@@ -66,11 +66,11 @@ class GoogleFavIconSourceApi extends FavIconSourceApi {
   }
 }
 
-class DuckduckgoFavIconSourceApi extends FavIconSourceApi {
-  DuckduckgoFavIconSourceApi(super.domain);
+class DuckduckgoFaviconSourceApi extends FaviconSourceApi {
+  DuckduckgoFaviconSourceApi(super.domain);
 
   @override
-  List<String> getFavIconUrls() {
+  List<String> getFaviconUrls() {
     return [
       "https://icons.duckduckgo.com/ip3/${_getSecondDomain()}.ico",
     ];
@@ -82,11 +82,11 @@ class DuckduckgoFavIconSourceApi extends FavIconSourceApi {
   }
 }
 
-class CravatarFavIconSourceApi extends FavIconSourceApi {
-  CravatarFavIconSourceApi(super.domain);
+class CravatarFaviconSourceApi extends FaviconSourceApi {
+  CravatarFaviconSourceApi(super.domain);
 
   @override
-  List<String> getFavIconUrls() {
+  List<String> getFaviconUrls() {
     return [
       "https://cn.cravatar.com/favicon/api/index.php?url=$domain",
       if (_getSecondDomain() != domain)
@@ -100,23 +100,21 @@ class CravatarFavIconSourceApi extends FavIconSourceApi {
   }
 }
 
-class FetchFavIcon extends FetchNetworkImage {
-  FetchFavIcon({
-    this.source = FavIconSource.Duckduckgo,
-  });
+class FetchFavicon extends FetchNetworkImage {
+  FetchFavicon([this._source = FaviconSource.Duckduckgo]);
 
-  FavIconSource source;
+  final FaviconSource _source;
 
-  FavIconSourceApi _getFaviconSource(String url) {
-    switch (source) {
-      case FavIconSource.Slef:
-        return SlefFavIconSourceApi(url.simpleToDomain());
-      case FavIconSource.Cravatar:
-        return CravatarFavIconSourceApi(url.simpleToDomain());
-      case FavIconSource.Duckduckgo:
-        return DuckduckgoFavIconSourceApi(url.simpleToDomain());
-      case FavIconSource.Google:
-        return GoogleFavIconSourceApi(url.simpleToDomain());
+  FaviconSourceApi _getFaviconSource(String url) {
+    switch (_source) {
+      case FaviconSource.Slef:
+        return SlefFaviconSourceApi(url.simpleToDomain());
+      case FaviconSource.Cravatar:
+        return CravatarFaviconSourceApi(url.simpleToDomain());
+      case FaviconSource.Duckduckgo:
+        return DuckduckgoFaviconSourceApi(url.simpleToDomain());
+      case FaviconSource.Google:
+        return GoogleFaviconSourceApi(url.simpleToDomain());
     }
   }
 
@@ -129,7 +127,7 @@ class FetchFavIcon extends FetchNetworkImage {
 
     final source = _getFaviconSource(url);
 
-    for (final item in source.getFavIconUrls()) {
+    for (final item in source.getFaviconUrls()) {
       try {
         final data = await super.fetch(
           item,
@@ -145,20 +143,38 @@ class FetchFavIcon extends FetchNetworkImage {
     }
     throw lastError;
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is FetchFavicon &&
+        other._source == _source ;
+  }
+
+  @override
+  int get hashCode => Object.hash(_source, null);
 }
 
 class FaviconCacheManager extends BaseCacheManager<Uint8List> {
   FaviconCacheManager({
     this.label = "favicon",
-    @visibleForTesting String? cacheDir,
+    @visibleForTesting Directory? cacheDir,
   }) : _cacheDir = cacheDir;
 
   final String label;
 
-  String? _cacheDir;
+  Directory? _cacheDir;
 
-  Future<String> _getCacheDir() async {
-    if (_cacheDir != null) return _cacheDir!;
+  Future<Directory> _getCacheDir() async {
+    if (_cacheDir != null) {
+      if (!(await _cacheDir!.exists())) {
+        await _cacheDir!.create(recursive: true);
+      }
+
+      return _cacheDir!;
+    }
 
     Directory dir = switch (Platform.operatingSystem) {
       "android" => (await getExternalStorageDirectory()) ??
@@ -166,30 +182,25 @@ class FaviconCacheManager extends BaseCacheManager<Uint8List> {
       _ => await getApplicationSupportDirectory(),
     };
 
-    dir = Directory(path.join(dir.path, "cache", label));
+    _cacheDir = Directory(path.join(dir.path, "cache", label));
 
-    if (!(await dir.exists())) {
-      await dir.create(recursive: true);
+    if (!(await _cacheDir!.exists())) {
+      await _cacheDir!.create(recursive: true);
     }
-
-    _cacheDir = dir.path;
 
     return _cacheDir!;
   }
 
-  String _transformKey(String key) {
-    // TODO! 使用 Base36-Lower 编码他, 后续需要解码会来用的
-    return key.simpleToDomain().toLowerCase();
-  }
-
   Future<File> _file(String key) async {
-    return File(path.join(await _getCacheDir(), _transformKey(key)));
+    return File(path.join((await _getCacheDir()).path, md5(key)));
   }
 
   @override
   Future<void> clear() async {
     final dir = await _getCacheDir();
-    await Directory(dir).delete(recursive: true);
+    await for (final file in dir.list()) {
+      await file.delete(recursive: true);
+    }
   }
 
   @override
@@ -212,5 +223,11 @@ class FaviconCacheManager extends BaseCacheManager<Uint8List> {
     } else if (value != null) {
       await file.writeAsBytes(value);
     }
+  }
+
+  @override
+  Future<int> size() async {
+    final dir = await _getCacheDir();
+    return await dir.list().length;
   }
 }

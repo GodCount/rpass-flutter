@@ -1279,6 +1279,18 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'直接下载'**
   String get direct_download;
+
+  /// No description provided for @select_source_refresh.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择来源刷新图标'**
+  String get select_source_refresh;
+
+  /// No description provided for @clear_favicon_cache.
+  ///
+  /// In zh, this message translates to:
+  /// **'清除图标缓存'**
+  String get clear_favicon_cache;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {
