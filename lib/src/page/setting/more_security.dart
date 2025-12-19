@@ -71,22 +71,28 @@ class _MoreSecurityPageState extends State<MoreSecurityPage>
     showBottomSheetList(title: t.lock, children: [
       ListTile(
         title: Text(t.never),
-        enabled: settings.lockDelay != null,
+        trailing: settings.lockDelay == null ? const Icon(Icons.check) : null,
         onTap: autoSavePop(null),
       ),
       ListTile(
         title: Text(t.seconds(30)),
-        enabled: settings.lockDelay != const Duration(seconds: 30),
+        trailing: settings.lockDelay == const Duration(seconds: 30)
+            ? const Icon(Icons.check)
+            : null,
         onTap: autoSavePop(const Duration(seconds: 30)),
       ),
       ListTile(
         title: Text(t.minutes(3)),
-        enabled: settings.lockDelay != const Duration(minutes: 3),
+        trailing: settings.lockDelay == const Duration(minutes: 3)
+            ? const Icon(Icons.check)
+            : null,
         onTap: autoSavePop(const Duration(minutes: 3)),
       ),
       ListTile(
         title: Text(t.minutes(5)),
-        enabled: settings.lockDelay != const Duration(minutes: 5),
+        trailing: settings.lockDelay == const Duration(minutes: 5)
+            ? const Icon(Icons.check)
+            : null,
         onTap: autoSavePop(const Duration(minutes: 5)),
       )
     ]);

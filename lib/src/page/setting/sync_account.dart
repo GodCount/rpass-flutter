@@ -60,22 +60,29 @@ class _SyncAccountPageState extends State<SyncAccountPage>
     showBottomSheetList(title: t.sync_cycle, children: [
       ListTile(
         title: Text(t.each_startup),
-        enabled: settings.remoteSyncCycle != null,
+        trailing:
+            settings.remoteSyncCycle == null ? const Icon(Icons.check) : null,
         onTap: autoSavePop(null),
       ),
       ListTile(
         title: Text(t.days(1)),
-        enabled: settings.remoteSyncCycle != const Duration(days: 1),
+        trailing: settings.remoteSyncCycle == const Duration(days: 1)
+            ? const Icon(Icons.check)
+            : null,
         onTap: autoSavePop(const Duration(days: 1)),
       ),
       ListTile(
         title: Text(t.days(7)),
-        enabled: settings.remoteSyncCycle != const Duration(days: 7),
+        trailing: settings.remoteSyncCycle == const Duration(days: 7)
+            ? const Icon(Icons.check)
+            : null,
         onTap: autoSavePop(const Duration(days: 7)),
       ),
       ListTile(
         title: Text(t.days(30)),
-        enabled: settings.remoteSyncCycle != const Duration(days: 30),
+        trailing: settings.remoteSyncCycle == const Duration(days: 30)
+            ? const Icon(Icons.check)
+            : null,
         onTap: autoSavePop(const Duration(days: 30)),
       ),
     ]);

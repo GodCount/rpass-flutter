@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -295,6 +296,47 @@ extension CommonString on String {
       return split("/")[2].trim();
     } else {
       return split("/")[0].trim();
+    }
+  }
+}
+
+class TaskInfo {
+  TaskInfo(this.duration, this.task);
+
+  final Function task;
+  Duration duration;
+}
+
+class SimpleSerialTimerTask {
+  SimpleSerialTimerTask(this.task1, this.task2)
+      : assert(task1 != null || task2 != null, "There is at least one task");
+
+  final TaskInfo? task1;
+  final TaskInfo? task2;
+
+  Timer? _timer;
+
+  void _start(TaskInfo task) {
+    _timer = Timer(task.duration, () {
+      if (task2 != null && task != task2) {
+        _start(task2!);
+      } else {
+        _timer = null;
+      }
+      task.task.call();
+    });
+  }
+
+  void start() {
+    assert(_timer == null, "Repeat start task");
+    TaskInfo task = task1 ?? task2!;
+    _start(task);
+  }
+
+  void cancel() {
+    if (_timer != null) {
+      _timer!.cancel();
+      _timer = null;
     }
   }
 }

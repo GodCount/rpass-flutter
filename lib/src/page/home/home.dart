@@ -257,35 +257,31 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
 
 // 后台触发锁定
 mixin BackgroundLock on State<HomePage> {
-  Timer? _timer;
-  bool _verificationStart = false;
+  late SimpleSerialTimerTask _serialTimerTask;
 
   late final _observer = CallbackBindingObserver(
-      didChangeAppLifecycleState: _didChangeAppLifecycleState);
+    didChangeAppLifecycleState: _didChangeAppLifecycleState,
+  );
 
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(_observer);
     super.initState();
-  }
-
-  void _startTimer() {
-    final settings = Store.instance.settings;
-    if (settings.lockDelay != null && !_verificationStart) {
-      _cancelTimer();
-      _timer = Timer(settings.lockDelay!, () async {
-        _verificationStart = true;
+    bool verificationStart = false;
+    _serialTimerTask = SimpleSerialTimerTask(
+      TaskInfo(Duration.zero, () async {
+        debugPrint("enter verificatino $verificationStart");
+        if (verificationStart) return;
+        verificationStart = true;
         await context.router.push(VerifyOwnerRoute());
-        _verificationStart = false;
-      });
-    }
-  }
-
-  void _cancelTimer() {
-    if (_timer != null) {
-      _timer!.cancel();
-      _timer = null;
-    }
+        verificationStart = false;
+      }),
+      TaskInfo(Duration.zero, () {
+        debugPrint("close kdbx, locked");
+        KdbxProvider.setKdbx(context, null);
+        context.router.replaceAll([LoadKdbxRoute()]);
+      }),
+    );
   }
 
   void _didChangeAppLifecycleState(AppLifecycleState state) {
@@ -296,10 +292,16 @@ mixin BackgroundLock on State<HomePage> {
           break;
         }
       case AppLifecycleState.hidden:
-        _startTimer();
+        if (Store.instance.settings.lockDelay != null) {
+          _serialTimerTask.task1!.duration = Store.instance.settings.lockDelay!;
+          _serialTimerTask.task2!.duration = Store.instance.settings.lockDelay!;
+          debugPrint("start timer lock");
+          _serialTimerTask.start();
+        }
         break;
       case AppLifecycleState.resumed:
-        _cancelTimer();
+        debugPrint("cacnel timer lock");
+        _serialTimerTask.cancel();
         break;
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
@@ -309,7 +311,7 @@ mixin BackgroundLock on State<HomePage> {
 
   @override
   void dispose() {
-    _cancelTimer();
+    _serialTimerTask.cancel();
     WidgetsBinding.instance.removeObserver(_observer);
     super.dispose();
   }
