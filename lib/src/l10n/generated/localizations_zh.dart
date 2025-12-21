@@ -629,4 +629,7 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get clear_favicon_cache => '清除图标缓存';
+
+  @override
+  String get menu => '菜单';
 }

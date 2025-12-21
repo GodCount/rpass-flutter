@@ -646,4 +646,7 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get clear_favicon_cache => 'Clear Favicon Cache';
+
+  @override
+  String get menu => 'Menu';
 }

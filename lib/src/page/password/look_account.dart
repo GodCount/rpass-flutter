@@ -179,6 +179,53 @@ class _LookAccountPageState extends State<LookAccountPage>
     ]);
   }
 
+  void _showMenu() {
+    final t = I18n.of(context)!;
+
+    GestureTapCallback? onAutoPop(GestureTapCallback func) {
+      return () async {
+        context.router.pop();
+        func.call();
+      };
+    }
+
+    showBottomSheetList(title: t.menu, children: [
+      ListTile(
+        enabled: !widget.readOnly,
+        title: Text(t.history_record),
+        leading: const Icon(Icons.history),
+        onTap: onAutoPop(() => showEntryHistoryList(widget.kdbxEntry)),
+      ),
+      ListTile(
+        title: Text(t.clone),
+        leading: const Icon(Icons.copy),
+        onTap: onAutoPop(() async {
+          final kdbx = KdbxProvider.of(context)!;
+
+          final clone = widget.kdbxEntry.clone(kdbx.virtualGroup);
+
+          final result = await context.router.push(EditAccountRoute(
+            initKdbxGroup: widget.kdbxEntry.parent,
+            kdbxEntry: clone,
+            uuid: clone.uuid,
+          ));
+          if (result is bool && result) {
+            context.router.replace(LookAccountRoute(
+              kdbxEntry: clone,
+              uuid: clone.uuid,
+            ));
+          }
+        }),
+      ),
+      ListTile(
+        enabled: !widget.readOnly && !widget.kdbxEntry.isInRecycleBin(),
+        title: Text(t.delete),
+        leading: const Icon(Icons.delete),
+        onTap: onAutoPop(_deleteAccount),
+      ),
+    ]);
+  }
+
   @override
   void dispose() {
     NativeInstancePlatform.instance.removeListener(this);
@@ -214,16 +261,7 @@ class _LookAccountPageState extends State<LookAccountPage>
         leading: autoBack(),
         title: Text(t.lookup),
         actions: [
-          IconButton(
-            onPressed: !readOnly && !kdbxEntry.isInRecycleBin()
-                ? _deleteAccount
-                : null,
-            icon: const Icon(Icons.delete),
-          ),
-          IconButton(
-            onPressed: !readOnly ? () => showEntryHistoryList(kdbxEntry) : null,
-            icon: const Icon(Icons.history_rounded),
-          ),
+          IconButton(onPressed: _showMenu, icon: const Icon(Icons.menu)),
         ],
       ),
       body: ListView(
@@ -267,12 +305,14 @@ class _LookAccountPageState extends State<LookAccountPage>
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(right: 6),
-                    child: GestureDetector(
-                      onLongPress:
-                          faviconSource != null && _kdbxIcon.domain != null
-                              ? _forceRefreshFavicon
-                              : null,
-                      child: KdbxIconWidget(
+                    child: IconButton(
+                      onPressed: () {},
+                      onLongPress: faviconSource != null &&
+                              _kdbxIcon.domain != null &&
+                              _kdbxIcon.domain!.isNotEmpty
+                          ? _forceRefreshFavicon
+                          : null,
+                      icon: KdbxIconWidget(
                         kdbxIcon: _kdbxIcon,
                         size: 24,
                         errorCallback: _kdbxIcon.source != null

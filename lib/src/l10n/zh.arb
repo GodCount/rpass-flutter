@@ -302,5 +302,6 @@
     "all": "全部",
     "direct_download": "直接下载",
     "select_source_refresh": "选择来源刷新图标",
-    "clear_favicon_cache": "清除图标缓存"
+    "clear_favicon_cache": "清除图标缓存",
+    "menu": "菜单"
 }

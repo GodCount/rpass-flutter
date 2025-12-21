@@ -210,7 +210,7 @@ extension KdbxGroupExt on KdbxBase {
 mixin KdbxVirtualObject on KdbxBase {
   KdbxGroup? _kdbxVirtualGroup;
 
-  KdbxGroup? get virtualGroup => _kdbxVirtualGroup;
+  KdbxGroup get virtualGroup => _getVirtualGroup();
 
   KdbxGroup _getVirtualGroup() {
     if (_kdbxVirtualGroup != null) return _kdbxVirtualGroup!;
@@ -218,12 +218,12 @@ mixin KdbxVirtualObject on KdbxBase {
       ctx: kdbxFile.ctx,
       parent: null,
       name: "Virtual-Group",
-    );
+    )..file = kdbxFile;
     return _kdbxVirtualGroup!;
   }
 
   KdbxEntry createVirtualEntry() {
-    return createEntry(_getVirtualGroup());
+    return createEntry(virtualGroup);
   }
 }
 

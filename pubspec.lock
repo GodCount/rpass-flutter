@@ -493,7 +493,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "23cbb8d4c2c399252d4449a1393f2ad554c4db68"
+      resolved-ref: "16e82c2a6428174046320f949b8c2bcae8500882"
       url: "https://github.com/rongyu-zhen/kdbx.dart.git"
     source: git
     version: "2.4.1"

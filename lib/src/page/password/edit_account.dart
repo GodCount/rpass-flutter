@@ -28,21 +28,25 @@ class _EditAccountArgs extends PageRouteArgs {
   _EditAccountArgs({
     super.key,
     this.kdbxEntry,
+    this.initKdbxGroup,
   });
 
   final KdbxEntry? kdbxEntry;
+  final KdbxGroup? initKdbxGroup;
 }
 
 class EditAccountRoute extends PageRouteInfo<_EditAccountArgs> {
   EditAccountRoute({
     Key? key,
     KdbxEntry? kdbxEntry,
+    KdbxGroup? initKdbxGroup,
     KdbxUuid? uuid,
   }) : super(
           name,
           args: _EditAccountArgs(
             key: key,
             kdbxEntry: kdbxEntry,
+            initKdbxGroup: initKdbxGroup,
           ),
           rawPathParams: {
             "uuid": uuid?.deBase64Uuid,
@@ -68,6 +72,7 @@ class EditAccountRoute extends PageRouteInfo<_EditAccountArgs> {
       return EditAccountPage(
         key: args.key,
         kdbxEntry: args.kdbxEntry,
+        initKdbxGroup: args.initKdbxGroup,
       );
     },
   );
@@ -77,9 +82,11 @@ class EditAccountPage extends StatefulWidget {
   const EditAccountPage({
     super.key,
     this.kdbxEntry,
+    this.initKdbxGroup,
   });
 
   final KdbxEntry? kdbxEntry;
+  final KdbxGroup? initKdbxGroup;
 
   @override
   State<EditAccountPage> createState() => _EditAccountPageState();
@@ -247,7 +254,7 @@ class _EditAccountPageState extends State<EditAccountPage>
         child: KdbxEntryGroup(
           initialValue: _kdbxEntry.parent != kdbx.virtualGroup
               ? _kdbxEntry.parent
-              : kdbx.kdbxFile.body.rootGroup,
+              : widget.initKdbxGroup ?? kdbx.kdbxFile.body.rootGroup,
           onSaved: _kdbxEntryGroupSave,
         ),
       ),

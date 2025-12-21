@@ -1291,6 +1291,12 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'清除图标缓存'**
   String get clear_favicon_cache;
+
+  /// No description provided for @menu.
+  ///
+  /// In zh, this message translates to:
+  /// **'菜单'**
+  String get menu;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {
