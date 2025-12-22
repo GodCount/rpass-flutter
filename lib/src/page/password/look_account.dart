@@ -243,7 +243,9 @@ class _LookAccountPageState extends State<LookAccountPage>
 
     const shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(6.0), bottomRight: Radius.circular(6.0)),
+        bottomLeft: Radius.circular(12.0),
+        bottomRight: Radius.circular(12.0),
+      ),
     );
 
     final title = kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE);
@@ -732,7 +734,7 @@ class _LookAccountPageState extends State<LookAccountPage>
     return Card(
       margin: const EdgeInsets.all(6),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(6.0)),
+        borderRadius: BorderRadius.all(Radius.circular(12.0)),
       ),
       child: Column(
         children: children,

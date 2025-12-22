@@ -435,9 +435,9 @@ class _OpenContainerPasswordItem extends StatelessWidget {
                 kdbxEntry: kdbxEntry,
               );
       },
-      closedElevation: 2,
+      closedElevation: 4,
       closedShape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        borderRadius: BorderRadius.all(Radius.circular(12.0)),
       ),
       closedBuilder: (BuildContext context, VoidCallback openContainer) {
         return _PasswordItem(

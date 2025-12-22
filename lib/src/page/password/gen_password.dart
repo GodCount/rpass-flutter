@@ -123,7 +123,9 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
 
     const shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(6.0), bottomRight: Radius.circular(6.0)),
+        bottomLeft: Radius.circular(12.0),
+        bottomRight: Radius.circular(12.0),
+      ),
     );
 
     return Scaffold(
@@ -152,10 +154,8 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
             ),
             ListTile(
               shape: shape,
-              isThreeLine: true,
               title: Container(
                 alignment: Alignment.centerLeft,
-                constraints: const BoxConstraints(minWidth: 56),
                 child: MatchText(
                   text: password,
                   style: Theme.of(context)
@@ -187,14 +187,12 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
                   ],
                 ),
               ),
-              subtitle: const SizedBox(),
+              // subtitle: const SizedBox(),
               trailing: IconButton(
                 icon: const Icon(Icons.refresh),
                 onPressed: _updatePassword,
               ),
             ),
-          ]),
-          _cardColumn([
             ListTile(
               shape: shape,
               title: LinearProgressIndicator(
@@ -238,7 +236,6 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
               shape: shape,
               title: Slider(
                 value: _length,
-                divisions: 128,
                 min: 4,
                 max: 128,
                 onChanged: (value) {
@@ -329,6 +326,7 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
                     border: OutlineInputBorder(),
                   ),
                 ),
+                subtitle: SizedBox(height: 6,),
               )
             ],
           ),
@@ -358,7 +356,7 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
     return Card(
       margin: const EdgeInsets.all(6),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(6.0)),
+        borderRadius: BorderRadius.all(Radius.circular(12.0)),
       ),
       child: Column(
         children: children,

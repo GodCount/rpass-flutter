@@ -168,7 +168,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
     return Card(
       margin: const EdgeInsets.all(6),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(6.0)),
+        borderRadius: BorderRadius.all(Radius.circular(12.0)),
       ),
       child: Column(
         children: children,

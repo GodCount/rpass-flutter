@@ -13,9 +13,9 @@ ThemeData theme(Brightness brightness) {
     colorScheme: scheme,
     appBarTheme: AppBarTheme(
       centerTitle: true,
-      elevation: 4.0,
-      scrolledUnderElevation: 4.0,
+      scrolledUnderElevation: 2.0,
       backgroundColor: scheme.secondaryContainer,
+      shadowColor: scheme.shadow,
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: scheme.surfaceContainer,
@@ -28,5 +28,6 @@ ThemeData theme(Brightness brightness) {
     listTileTheme: ListTileThemeData(
       selectedTileColor: scheme.primaryContainer,
     ),
+    cardTheme: CardThemeData(elevation: 4.0),
   );
 }

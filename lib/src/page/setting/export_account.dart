@@ -134,8 +134,8 @@ class _ExportAccountPageState extends State<ExportAccountPage>
           ListTile(
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(6.0),
-                topRight: Radius.circular(6.0),
+                topLeft: Radius.circular(12.0),
+                topRight: Radius.circular(12.0),
               ),
             ),
             title: Text(t.export_n_file("KDBX")),
@@ -152,8 +152,8 @@ class _ExportAccountPageState extends State<ExportAccountPage>
           ListTile(
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(6.0),
-                bottomRight: Radius.circular(6.0),
+                bottomLeft: Radius.circular(12.0),
+                bottomRight: Radius.circular(12.0),
               ),
             ),
             title: Text(t.export_n_file("CSV (Firefox)")),
@@ -168,7 +168,7 @@ class _ExportAccountPageState extends State<ExportAccountPage>
     return Card(
       margin: const EdgeInsets.all(24),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(6.0)),
+        borderRadius: BorderRadius.all(Radius.circular(12.0)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
