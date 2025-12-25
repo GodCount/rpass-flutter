@@ -52,6 +52,7 @@ class _HomePageState extends State<HomePage>
   final List<PageRouteInfo> _routes = [
     PasswordsRoute(),
     GroupsRoute(),
+    DetectionRoute(),
     SettingsRoute(),
   ];
 
@@ -130,6 +131,10 @@ class _MobileHomePage extends StatelessWidget {
           NavigationDestination(
             icon: const Icon(Icons.groups_2_rounded),
             label: t.group,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.find_in_page_rounded),
+            label: t.detection,
           ),
           NavigationDestination(
             icon: const Icon(Icons.settings),
@@ -235,6 +240,10 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
               NavigationRailDestination(
                 icon: const Icon(Icons.groups_2_rounded),
                 label: Text(t.group),
+              ),
+              NavigationRailDestination(
+                icon: const Icon(Icons.find_in_page_rounded),
+                label: Text(t.detection),
               ),
               NavigationRailDestination(
                 icon: const Icon(Icons.settings),

@@ -303,5 +303,6 @@
     "direct_download": "Direct Dwnload",
     "select_source_refresh": "Select the Source refresh icon",
     "clear_favicon_cache": "Clear Favicon Cache",
-    "menu": "Menu"
+    "menu": "Menu",
+    "detection": "Detection"
 }

@@ -649,4 +649,7 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get menu => 'Menu';
+
+  @override
+  String get detection => 'Detection';
 }

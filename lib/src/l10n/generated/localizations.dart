@@ -1297,6 +1297,12 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'菜单'**
   String get menu;
+
+  /// No description provided for @detection.
+  ///
+  /// In zh, this message translates to:
+  /// **'检测'**
+  String get detection;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

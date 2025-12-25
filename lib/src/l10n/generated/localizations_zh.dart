@@ -632,4 +632,7 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get menu => '菜单';
+
+  @override
+  String get detection => '检测';
 }

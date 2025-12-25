@@ -10,6 +10,7 @@ export 'home/home.dart' show HomeRoute;
 export 'home/passwords.dart' show PasswordsRoute;
 export 'home/groups.dart' show GroupsRoute;
 export 'home/settings.dart' show SettingsRoute;
+export 'home/detection.dart' show DetectionRoute;
 
 
 export 'kdbx/select_icon_page.dart' show SelectIconRoute;

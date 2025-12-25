@@ -65,6 +65,10 @@ RootStackRouter _createMobileAutoRoute() {
             page: GroupsRoute.page,
           ),
           AutoRoute(
+            path: "detection",
+            page: DetectionRoute.page,
+          ),
+          AutoRoute(
             path: "settings",
             page: SettingsRoute.page,
           ),
@@ -217,6 +221,20 @@ RootStackRouter _createDesktopAutoRoute() {
               AutoRoute(
                 path: "manage_group_entry/:uuid",
                 page: ManageGroupEntryRoute.page,
+              ),
+            ],
+          ),
+          AutoRoute(
+            path: "detection",
+            page: DetectionRoute.page,
+            children: [
+              NamedRouteDef(
+                name: "EmptyPageRoute",
+                initial: true,
+                path: "empty",
+                builder: (_, __) {
+                  return const EmptyPage();
+                },
               ),
             ],
           ),

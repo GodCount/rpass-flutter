@@ -90,8 +90,36 @@ String timeBasedUuid() {
 
 int randomInt(int min, int max) => min + math.Random().nextInt(max - min);
 
-int passwordEntropy(int length, int charSetLength) =>
-    (length * (math.log(charSetLength) / math.log(2))).round();
+int passwordEntropy(int length, int charSetLength) {
+  if (charSetLength < 1) return 0;
+  return (length * (math.log(charSetLength) / math.log(2))).round();
+}
+
+int passCharSetLength(String str) {
+  int length = 0;
+  if (RegExp(r"[0-9]").hasMatch(str)) {
+    length += 10;
+    str = str.replaceAll(RegExp(r"[0-9]"), "");
+  }
+  if (RegExp(r"[a-z]").hasMatch(str)) {
+    length += 26;
+    str = str.replaceAll(RegExp(r"[a-z]"), "");
+  }
+  if (RegExp(r"[A-Z]").hasMatch(str)) {
+    length += 26;
+    str = str.replaceAll(RegExp(r"[A-Z]"), "");
+  }
+
+  if (RegExp(symbols.split("").map((it) => RegExp.escape(it)).join("|"))
+      .hasMatch(str)) {
+    length += symbols.length;
+    str = str.replaceAll(
+        RegExp(symbols.split("").map((it) => RegExp.escape(it)).join("|")), "");
+  }
+
+  length += str.length;
+  return length;
+}
 
 /// (Random Password, Password Entropy)
 (String, int) randomPassword({

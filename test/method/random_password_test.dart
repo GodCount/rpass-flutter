@@ -83,6 +83,21 @@ void main() {
       );
     });
 
+    test("pass CharSet Length", () {
+      (String, int) result = randomPassword(length: 10);
+      expect(
+        passwordEntropy(result.$1.length, passCharSetLength(result.$1)) ==
+            result.$2,
+        isTrue,
+      );
+      result = randomPassword(length: 10, customText: "µ∫√ç¬˚∆πø");
+      expect(
+        passwordEntropy(result.$1.length, passCharSetLength(result.$1)) <=
+            result.$2,
+        isTrue,
+      );
+    });
+
     test("throw Exception", () {
       expect(
         () => randomPassword(

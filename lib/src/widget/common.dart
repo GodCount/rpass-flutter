@@ -688,3 +688,42 @@ class _AnimatedIconSwitcherState extends State<AnimatedIconSwitcher> {
     super.didUpdateWidget(oldWidget);
   }
 }
+
+class GestureTapScale extends StatefulWidget {
+  const GestureTapScale({
+    super.key,
+    this.scale = 0.95,
+    this.duration = const Duration(milliseconds: 120),
+    this.onTap,
+    required this.child,
+  });
+
+  final double scale;
+  final Duration duration;
+  final VoidCallback? onTap;
+  final Widget child;
+
+  @override
+  State<GestureTapScale> createState() => _GestureTapScaleState();
+}
+
+class _GestureTapScaleState extends State<GestureTapScale> {
+  bool _isDown = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isDown = true),
+      onTapUp: (_) {
+        setState(() => _isDown = false);
+        widget.onTap?.call();
+      },
+      onTapCancel: () => setState(() => _isDown = false),
+      child: AnimatedScale(
+        duration: widget.duration,
+        scale: _isDown ? widget.scale : 1.0,
+        child: widget.child,
+      ),
+    );
+  }
+}
