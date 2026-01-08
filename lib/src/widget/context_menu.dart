@@ -60,6 +60,8 @@ class RevertContextMenuItem extends MyContextMenuItem {
   final bool selected;
 }
 
+typedef BuildMenuItemValue<T> = T Function(KdbxKey key);
+
 mixin class _KdbxKeyContextMenuItem {
   static String _kdbxKey2I18n(BuildContext context, String key) {
     final t = I18n.of(context)!;
@@ -80,22 +82,66 @@ mixin class _KdbxKeyContextMenuItem {
         return t.description;
       case KdbxKeySpecial.KEY_AUTO_TYPE:
         return t.fill_sequence;
+      case KdbxKeyURLS.KEY_URL1:
+        return t.domain_num(1);
+      case KdbxKeyURLS.KEY_URL2:
+        return t.domain_num(2);
+      case KdbxKeyURLS.KEY_URL3:
+        return t.domain_num(3);
+      case KdbxKeyURLS.KEY_URL4:
+        return t.domain_num(4);
+      case KdbxKeyURLS.KEY_URL5:
+        return t.domain_num(5);
       default:
         return key;
     }
   }
 
-  static List<(KdbxKey, String)> _getKdbxKeyI18n(
+  static List<MenuItem<T>> _buildKdbxKeyMenuItem<T>(
     BuildContext context,
     KdbxEntry kdbxEntry,
+    BuildMenuItemValue<T> buildValue,
   ) {
+    final urls = [KdbxKeyCommon.URL, ...kdbxEntry.moreUrlsKeys];
     return [
-      ...KdbxKeyCommon.all
-          .map((item) => (item, _kdbxKey2I18n(context, item.key))),
-      ...kdbxEntry.customEntries.map((item) => (
-            item.key,
-            _kdbxKey2I18n(context, item.key.key),
-          ))
+      ...KdbxKeyCommon.excludeURL.map(
+        (item) => MenuItem(
+          label: _kdbxKey2I18n(context, item.key),
+          enabled: kdbxEntry.getNonNullString(item).isNotEmpty,
+          value: buildValue(item),
+        ),
+      ),
+      urls.length > 1
+          ? MenuItem.submenu(
+              label: I18n.of(context)!.domain,
+              items: [KdbxKeyCommon.URL, ...kdbxEntry.moreUrlsKeys]
+                  .map(
+                    (item) => MenuItem(
+                      label: _kdbxKey2I18n(context, item.key),
+                      enabled: kdbxEntry.getNonNullString(item).isNotEmpty,
+                      value: buildValue(item),
+                    ),
+                  )
+                  .toList(),
+            )
+          : MenuItem(
+              label: _kdbxKey2I18n(context, KdbxKeyCommon.KEY_URL),
+              enabled: kdbxEntry.getNonNullString(KdbxKeyCommon.URL).isNotEmpty,
+              value: buildValue(KdbxKeyCommon.URL),
+            ),
+      MenuItem.submenu(
+        label: I18n.of(context)!.custom_field,
+        enabled: kdbxEntry.customEntries.isNotEmpty,
+        items: kdbxEntry.customEntries
+            .map(
+              (item) => MenuItem(
+                label: _kdbxKey2I18n(context, item.key.key),
+                enabled: kdbxEntry.getNonNullString(item.key).isNotEmpty,
+                value: buildValue(item.key),
+              ),
+            )
+            .toList(),
+      ),
     ];
   }
 }
@@ -109,13 +155,11 @@ class CopyContextMenuItem extends MyContextMenuItem {
     BuildContext context,
     KdbxEntry kdbxEntry,
   ) {
-    return _KdbxKeyContextMenuItem._getKdbxKeyI18n(context, kdbxEntry)
-        .map((item) => MenuItem(
-              label: item.$2,
-              enabled: (kdbxEntry.getActualString(item.$1) ?? '').isNotEmpty,
-              value: CopyContextMenuItem(item.$1),
-            ))
-        .toList();
+    return _KdbxKeyContextMenuItem._buildKdbxKeyMenuItem(
+      context,
+      kdbxEntry,
+      (key) => CopyContextMenuItem(key),
+    );
   }
 }
 
@@ -128,13 +172,11 @@ class AutoFillContextMenuItem extends MyContextMenuItem {
     BuildContext context,
     KdbxEntry kdbxEntry,
   ) {
-    return _KdbxKeyContextMenuItem._getKdbxKeyI18n(context, kdbxEntry)
-        .map((item) => MenuItem(
-              label: item.$2,
-              enabled: (kdbxEntry.getActualString(item.$1) ?? '').isNotEmpty,
-              value: AutoFillContextMenuItem(item.$1),
-            ))
-        .toList();
+    return _KdbxKeyContextMenuItem._buildKdbxKeyMenuItem(
+      context,
+      kdbxEntry,
+      (key) => AutoFillContextMenuItem(key),
+    );
   }
 }
 

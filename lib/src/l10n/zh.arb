@@ -303,5 +303,20 @@
     "direct_download": "直接下载",
     "select_source_refresh": "选择来源刷新图标",
     "clear_favicon_cache": "清除图标缓存",
-    "menu": "菜单"
+    "menu": "菜单",
+    "project_info": "项目信息",
+    "account_info": "账号信息",
+    "auto_fill_info": "自动填充信息",
+    "additional_info": "附加信息",
+    "add_domain": "添加域名",
+    "domain_num": "域名 {num}",
+    "@domain_num": {
+        "description": "数",
+        "placeholders": {
+            "num": {
+                "type": "int"
+            }
+        }
+    },
+    "edit_group": "编辑分组"
 }

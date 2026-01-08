@@ -138,12 +138,12 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
     );
 
     List<String> customFields = [];
+    List<KdbxKey> moreUrlsFields = [];
 
     if (widget.kdbxEntry != null) {
-      customFields = widget.kdbxEntry!.stringEntries
-          .where((item) => !defaultKdbxKeys.contains(item.key))
-          .map((item) => item.key.key)
-          .toList();
+      customFields =
+          widget.kdbxEntry!.customEntries.map((item) => item.key.key).toList();
+      moreUrlsFields = widget.kdbxEntry!.moreUrlsKeys;
     }
 
     return Scaffold(
@@ -170,7 +170,7 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
                   title: Text(t.default_field),
                   subtitle: ChipList(
                     onChipTap: (item) => _insertTextAtCursor(item.value),
-                    items: KdbxKeyCommon.all
+                    items: [...KdbxKeyCommon.excludeURL, KdbxKeyCommon.URL, ...moreUrlsFields]
                         .map((item) => ChipListItem(
                               label: "{${item.key}}",
                               value: "{${item.key}}",

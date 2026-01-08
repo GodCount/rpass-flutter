@@ -303,5 +303,20 @@
     "direct_download": "Direct Dwnload",
     "select_source_refresh": "Select the Source refresh icon",
     "clear_favicon_cache": "Clear Favicon Cache",
-    "menu": "Menu"
+    "menu": "Menu",
+    "project_info": "Project Information",
+    "account_info": "Account Information",
+    "auto_fill_info": "Auto-fill Information",
+    "additional_info": "Additional Information",
+    "add_domain": "Add Domain",
+    "domain_num": "Domain {num}",
+    "@domain_num": {
+        "description": "num",
+        "placeholders": {
+            "num": {
+                "type": "int"
+            }
+        }
+    },
+    "edit_group": "Edit Group"
 }

@@ -226,15 +226,7 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
           Expanded(child: Text(t.select_group)),
           IconButton(
             onPressed: () async {
-              await setKdbxGroup(
-                KdbxGroupData(
-                  name: '',
-                  notes: '',
-                  kdbxIcon: KdbxIconWidgetData(
-                    icon: KdbxIcon.Folder,
-                  ),
-                ),
-              );
+              await addKdbxGroup();
               setState(() {});
             },
             icon: const Icon(Icons.add),
@@ -255,10 +247,13 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
           children: [kdbx.kdbxFile.body.rootGroup, ...kdbx.rootGroups]
               .map(
                 (item) => ListTile(
-                  title: Padding(
-                    padding: const EdgeInsets.only(left: 24.0),
-                    child: Text(getKdbxObjectTitle(item)),
+                  leading: KdbxIconWidget(
+                    kdbxIcon: KdbxIconWidgetData(
+                      icon: item.icon.get() ?? KdbxIcon.Folder,
+                      customIcon: item.customIcon,
+                    ),
                   ),
+                  title: Text(getKdbxObjectTitle(item)),
                   trailing:
                       item == widget.value ? const Icon(Icons.done) : null,
                   onTap: () {
@@ -275,170 +270,6 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
             widget.onResult(null);
           },
           child: Text(t.cancel),
-        ),
-      ],
-    );
-  }
-}
-
-class SetKdbxGroupDialog extends StatefulWidget {
-  const SetKdbxGroupDialog({
-    super.key,
-    required this.kdbxGroupData,
-    required this.onResult,
-  });
-
-  final KdbxGroupData kdbxGroupData;
-  final FormFieldSetter<KdbxGroupData> onResult;
-
-  static Future<Object?> openDialog(
-    BuildContext context,
-    KdbxGroupData kdbxGroupData,
-  ) {
-    return showDialog(
-      context: context,
-      builder: (context) {
-        return SetKdbxGroupDialog(
-          kdbxGroupData: kdbxGroupData,
-          onResult: (value) {
-            context.router.pop(value);
-          },
-        );
-      },
-    );
-  }
-
-  @override
-  State<SetKdbxGroupDialog> createState() => SetKdbxGroupDialogState();
-}
-
-class SetKdbxGroupDialogState extends State<SetKdbxGroupDialog> {
-  late final KdbxGroupData _kdbxGroupData = widget.kdbxGroupData.clone();
-
-  bool _isDirty() {
-    return _kdbxGroupData.kdbxIcon.icon != widget.kdbxGroupData.kdbxIcon.icon ||
-        _kdbxGroupData.kdbxIcon.customIcon?.uuid !=
-            widget.kdbxGroupData.kdbxIcon.customIcon?.uuid ||
-        _kdbxGroupData.name != widget.kdbxGroupData.name ||
-        _kdbxGroupData.notes != widget.kdbxGroupData.notes ||
-        _kdbxGroupData.enableDisplay != widget.kdbxGroupData.enableDisplay ||
-        _kdbxGroupData.enableSearching != widget.kdbxGroupData.enableSearching;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final t = I18n.of(context)!;
-
-    return AlertDialog(
-      title: Text(_kdbxGroupData.kdbxGroup != null ? t.modify : t.create),
-      content: SizedBox(
-        // 移动端不需要限制宽度
-        width: isDesktop ? 375 : null,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              autofocus: true,
-              initialValue: _kdbxGroupData.name,
-              textInputAction: TextInputAction.done,
-              onChanged: (value) {
-                _kdbxGroupData.name = value;
-                setState(() {});
-              },
-              decoration: InputDecoration(
-                label: Text(t.title),
-                border: const OutlineInputBorder(),
-                prefixIcon: IconButton(
-                  onPressed: () async {
-                    final reslut = await context.router.push(SelectIconRoute());
-                    if (reslut != null && reslut is KdbxIconWidgetData) {
-                      _kdbxGroupData.kdbxIcon = reslut;
-                      setState(() {});
-                    }
-                  },
-                  icon: KdbxIconWidget(
-                    kdbxIcon: _kdbxGroupData.kdbxIcon,
-                    size: 24,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: () async {
-                final text = await context.router.push(EditNotesRoute(
-                  text: _kdbxGroupData.notes,
-                ));
-
-                if (text != null && text is String) {
-                  _kdbxGroupData.notes = text;
-                  setState(() {});
-                }
-              },
-              child: InputDecorator(
-                isEmpty: _kdbxGroupData.notes.isEmpty,
-                decoration: InputDecoration(
-                  labelText: t.description,
-                  border: const OutlineInputBorder(),
-                ),
-                child: _kdbxGroupData.notes.isNotEmpty
-                    ? Text(
-                        _kdbxGroupData.notes,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      )
-                    : null,
-              ),
-            ),
-            ListTile(
-              trailing: Checkbox(
-                tristate: true,
-                value: _kdbxGroupData.enableDisplay,
-                onChanged: (value) {
-                  _kdbxGroupData.enableDisplay = value;
-                  setState(() {});
-                },
-              ),
-              title: Text(t.display),
-              subtitle: Text(switch (_kdbxGroupData.enableDisplay) {
-                true => t.enable_display_true_subtitle,
-                false => t.enable_display_false_subtitle,
-                null => t.enable_display_null_subtitle
-              }),
-            ),
-            ListTile(
-              trailing: Checkbox(
-                tristate: true,
-                value: _kdbxGroupData.enableSearching,
-                onChanged: (value) {
-                  _kdbxGroupData.enableSearching = value;
-                  setState(() {});
-                },
-              ),
-              title: Text(t.search),
-              subtitle: Text(switch (_kdbxGroupData.enableSearching) {
-                true => t.enable_searching_true_subtitle,
-                false => t.enable_searching_false_subtitle,
-                null => t.enable_searching_null_subtitle
-              }),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            widget.onResult(null);
-          },
-          child: Text(t.cancel),
-        ),
-        TextButton(
-          onPressed: _isDirty()
-              ? () {
-                  widget.onResult(_kdbxGroupData);
-                }
-              : null,
-          child: Text(t.confirm),
         ),
       ],
     );

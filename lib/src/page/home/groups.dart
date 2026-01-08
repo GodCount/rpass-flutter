@@ -87,6 +87,15 @@ class _GroupsPageState extends State<GroupsPage>
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(t.group),
+        actionsPadding: const EdgeInsets.only(right: 6),
+        actions: isDesktop
+            ? [
+                IconButton(
+                  onPressed: () => context.router.push(EditGroupPageRoute()),
+                  icon: const Icon(Icons.add),
+                ),
+              ]
+            : null,
       ),
       body: ListView.builder(
         itemBuilder: (context, i) {
@@ -94,23 +103,17 @@ class _GroupsPageState extends State<GroupsPage>
         },
         itemCount: groups.length,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => setKdbxGroup(
-          KdbxGroupData(
-            name: '',
-            notes: '',
-            kdbxIcon: KdbxIconWidgetData(
-              icon: KdbxIcon.Folder,
-            ),
-          ),
-        ),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(56 / 2),
-          ),
-        ),
-        child: const Icon(Icons.group_add_rounded),
-      ),
+      floatingActionButton: isMobile
+          ? FloatingActionButton(
+              onPressed: () => context.router.push(EditGroupPageRoute()),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(56 / 2),
+                ),
+              ),
+              child: const Icon(Icons.group_add_rounded),
+            )
+          : null,
     );
   }
 }
@@ -133,7 +136,8 @@ class _GroupsItemState extends State<_GroupsItem>
 
   @override
   void didNavigationHistory() {
-    if (context.topRoute.name == ManageGroupEntryRoute.name) {
+    if (context.topRoute.name == ManageGroupEntryRoute.name ||
+        context.topRoute.name == EditGroupPageRoute.name) {
       final selected = context.topRoute.inheritedPathParams.optString("uuid") ==
           widget.kdbxGroup.uuid.deBase64Uuid;
 
@@ -183,19 +187,10 @@ class _GroupsItemState extends State<_GroupsItem>
             );
             break;
           case ModifyContextMenuItem():
-            setKdbxGroup(
-              KdbxGroupData(
-                name: kdbxGroup.name.get() ?? '',
-                notes: kdbxGroup.notes.get() ?? '',
-                enableSearching: kdbxGroup.enableSearching.get(),
-                enableDisplay: kdbxGroup.enableDisplay.get(),
-                kdbxIcon: KdbxIconWidgetData(
-                  icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
-                  customIcon: kdbxGroup.customIcon,
-                ),
-                kdbxGroup: kdbxGroup,
-              ),
-            );
+            context.router.platformNavigate(EditGroupPageRoute(
+              kdbxGroup: kdbxGroup,
+              uuid: kdbxGroup.uuid,
+            ));
             break;
           case DeleteContextMenuItem():
             _kdbxGroupDelete(kdbxGroup);
@@ -290,19 +285,10 @@ class _GroupsItemState extends State<_GroupsItem>
                       ),
                     );
                   },
-                  onModifyTap: () => setKdbxGroup(
-                    KdbxGroupData(
-                      name: kdbxGroup.name.get() ?? '',
-                      notes: kdbxGroup.notes.get() ?? '',
-                      enableSearching: kdbxGroup.enableSearching.get(),
-                      enableDisplay: kdbxGroup.enableDisplay.get(),
-                      kdbxIcon: KdbxIconWidgetData(
-                        icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
-                        customIcon: kdbxGroup.customIcon,
-                      ),
-                      kdbxGroup: kdbxGroup,
-                    ),
-                  ),
+                  onModifyTap: () => context.router.platformNavigate(EditGroupPageRoute(
+                    kdbxGroup: kdbxGroup,
+                    uuid: kdbxGroup.uuid,
+                  )),
                   onDeleteTap: kdbxGroup.parent != null
                       ? () => _kdbxGroupDelete(kdbxGroup)
                       : null,

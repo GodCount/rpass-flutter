@@ -19,6 +19,7 @@ class KdbxIconWidgetData {
 
   final KdbxIcon icon;
   final KdbxCustomIcon? customIcon;
+  // TODO! url 现在是支持复数个了 KdbxKeyURLS favicon 需要兼容
   final String? domain;
   final FaviconSource? source;
 
@@ -38,8 +39,12 @@ class KdbxIconWidgetData {
 }
 
 class KdbxIconWidget extends StatelessWidget {
-  const KdbxIconWidget(
-      {super.key, required this.kdbxIcon, this.size = 32, this.errorCallback});
+  const KdbxIconWidget({
+    super.key,
+    required this.kdbxIcon,
+    this.size = 32,
+    this.errorCallback,
+  });
 
   static final FaviconCacheManager cacheManager = FaviconCacheManager();
 

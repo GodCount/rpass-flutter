@@ -135,6 +135,12 @@ class KbdxSearchHandler {
     "password": "Password",
     "otp": "OTPAuth",
     "OTPAuth": "OTPAuth",
+    "url1": "URL1",
+    "url2": "URL2",
+    "url3": "URL3",
+    "url4": "URL4",
+    "url5": "URL5",
+
     // 特殊字段
     "tag": "Tags",
     "g": "Group",
@@ -148,7 +154,7 @@ class KbdxSearchHandler {
 
   bool _allContains(KdbxEntry kdbxEntry, String value) {
     var weight = 0;
-    for (var key in KdbxKeyCommon.all) {
+    for (var key in [...KdbxKeyCommon.all, ...KdbxKeyURLS.all]) {
       weight +=
           kdbxEntry.getNonNullString(key).toLowerCase().contains(value) ? 1 : 0;
     }

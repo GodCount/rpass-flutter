@@ -1297,6 +1297,48 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'菜单'**
   String get menu;
+
+  /// No description provided for @project_info.
+  ///
+  /// In zh, this message translates to:
+  /// **'项目信息'**
+  String get project_info;
+
+  /// No description provided for @account_info.
+  ///
+  /// In zh, this message translates to:
+  /// **'账号信息'**
+  String get account_info;
+
+  /// No description provided for @auto_fill_info.
+  ///
+  /// In zh, this message translates to:
+  /// **'自动填充信息'**
+  String get auto_fill_info;
+
+  /// No description provided for @additional_info.
+  ///
+  /// In zh, this message translates to:
+  /// **'附加信息'**
+  String get additional_info;
+
+  /// No description provided for @add_domain.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加域名'**
+  String get add_domain;
+
+  /// 数
+  ///
+  /// In zh, this message translates to:
+  /// **'域名 {num}'**
+  String domain_num(int num);
+
+  /// No description provided for @edit_group.
+  ///
+  /// In zh, this message translates to:
+  /// **'编辑分组'**
+  String get edit_group;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

@@ -99,6 +99,10 @@ RootStackRouter _createMobileAutoRoute() {
         page: ManageGroupEntryRoute.page,
       ),
       AutoRoute(
+        path: "/edit_group/:uuid",
+        page: EditGroupPageRoute.page,
+      ),
+      AutoRoute(
         path: "/edit_account/:uuid",
         page: EditAccountRoute.page,
       ),
@@ -217,6 +221,10 @@ RootStackRouter _createDesktopAutoRoute() {
               AutoRoute(
                 path: "manage_group_entry/:uuid",
                 page: ManageGroupEntryRoute.page,
+              ),
+              AutoRoute(
+                path: "edit_group/:uuid",
+                page: EditGroupPageRoute.page,
               ),
             ],
           ),

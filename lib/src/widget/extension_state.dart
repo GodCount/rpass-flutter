@@ -9,9 +9,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 
 import '../context/biometric.dart';
-import '../context/kdbx.dart';
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
+import '../page/kdbx/edit_group_page.dart';
 import '../page/route.dart';
 import '../util/common.dart';
 import '../util/file.dart';
@@ -133,7 +133,7 @@ extension StatefulDialog on State {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('title(t) url'),
+                      const Text('title(t) url[1-5]'),
                       const SizedBox(height: 6),
                       const Text('user(u) email(e)'),
                       const SizedBox(height: 6),
@@ -417,34 +417,26 @@ extension StatefulKdbx on State {
     }
   }
 
-  Future<bool> _kdbxGroupSave(KdbxGroupData data) async {
-    final kdbx = KdbxProvider.of(context)!;
-
-    final kdbxGroup = data.kdbxGroup ?? kdbx.createGroup(data.name);
-
-    kdbxGroup.name.set(data.name);
-
-    kdbxGroup.notes.set(data.notes);
-
-    kdbxGroup.enableDisplay.set(data.enableDisplay);
-
-    kdbxGroup.enableSearching.set(data.enableSearching);
-
-    if (data.kdbxIcon.customIcon != null) {
-      kdbxGroup.customIcon = data.kdbxIcon.customIcon;
-    } else if (data.kdbxIcon.icon != kdbxGroup.icon.get()) {
-      kdbxGroup.icon.set(data.kdbxIcon.icon);
+  Future<void> addKdbxGroup() async {
+    if (isDesktop) {
+      await showDialog(
+        context: context,
+        builder: (context) {
+          return Dialog(
+            insetPadding: const EdgeInsets.symmetric(
+              horizontal: 24,
+              vertical: 32,
+            ),
+            clipBehavior: Clip.antiAlias,
+            shape: Theme.of(context).dialogTheme.shape,
+            constraints: BoxConstraints(maxWidth: 375, maxHeight: 600),
+            child: EditGroupPagePage(),
+          );
+        },
+      );
+    } else {
+      await context.router.push(EditGroupPageRoute());
     }
-
-    return await kdbxSave(kdbx);
-  }
-
-  Future<bool> setKdbxGroup(KdbxGroupData data) async {
-    final result = await SetKdbxGroupDialog.openDialog(context, data);
-    if (result is KdbxGroupData) {
-      return _kdbxGroupSave(result);
-    }
-    return false;
   }
 
   Future<void> autoFill(KdbxEntry kdbxEntry, [KdbxKey? key]) async {

@@ -28,6 +28,6 @@ ThemeData theme(Brightness brightness) {
     listTileTheme: ListTileThemeData(
       selectedTileColor: scheme.primaryContainer,
     ),
-    cardTheme: CardThemeData(elevation: 4.0),
+    cardTheme: CardThemeData(elevation: 2.0),
   );
 }

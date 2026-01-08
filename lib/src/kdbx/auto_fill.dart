@@ -108,7 +108,7 @@ Future<void> autoFillSequence(KdbxEntry kdbxEntry, [KdbxKey? kdbxKey]) async {
 extension _MatchWebDomain on String {
   bool matchWebDomain(String url) {
     final domain = url.simpleToDomain();
-    return contains(domain) || startsWith(domain) || endsWith(domain);
+    return contains(domain) || domain.contains(this);
   }
 }
 
@@ -124,17 +124,10 @@ Future<List<AutofillDataset>> androidAutofillSearch(
     final packageName =
         it.getActualString(KdbxKeySpecial.AUTO_FILL_PACKAGE_NAME);
 
-    final url = it.getActualString(KdbxKeyCommon.URL);
-
-    if (packageName != null && metadata.packageNames.contains(packageName)) {
-      return url != null && url.isNotEmpty
-          ? metadata.webDomains.any((it) => it.domain.matchWebDomain(url))
-          : true;
-    }
-
-    return url != null && url.isNotEmpty
-        ? metadata.webDomains.any((it) => it.domain.matchWebDomain(url))
-        : false;
+    // 任意一个 url 匹配成功, 或者包名对应上
+    return it.getUrls().any((url) =>
+            metadata.webDomains.any((it) => it.domain.matchWebDomain(url))) ||
+        (packageName != null && metadata.packageNames.contains(packageName));
   });
 
   return result.map((it) => it.toAutofillDataset(metadata.fieldTypes)).toList();

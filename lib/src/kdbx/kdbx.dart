@@ -93,10 +93,45 @@ class KdbxKeyCommon {
     OTP,
     NOTES
   ];
+
+  static List<KdbxKey> excludeURL = [
+    TITLE,
+    USER_NAME,
+    EMAIL,
+    PASSWORD,
+    OTP,
+    NOTES
+  ];
+}
+
+class KdbxKeyURLS {
+  static const KEY_URL1 = 'URL1';
+  static KdbxKey URL1 = KdbxKey(KEY_URL1);
+
+  static const KEY_URL2 = 'URL2';
+  static KdbxKey URL2 = KdbxKey(KEY_URL2);
+
+  static const KEY_URL3 = 'URL3';
+  static KdbxKey URL3 = KdbxKey(KEY_URL3);
+
+  static const KEY_URL4 = 'URL4';
+  static KdbxKey URL4 = KdbxKey(KEY_URL4);
+
+  static const KEY_URL5 = 'URL5';
+  static KdbxKey URL5 = KdbxKey(KEY_URL5);
+
+  static List<KdbxKey> all = [
+    URL1,
+    URL2,
+    URL3,
+    URL4,
+    URL5,
+  ];
 }
 
 final defaultKdbxKeys = [
   ...KdbxKeyCommon.all,
+  ...KdbxKeyURLS.all,
   ...KdbxKeySpecial.all,
 ];
 
@@ -121,9 +156,14 @@ class FieldStatistic {
   final Set<String> customFields;
   final Set<String> customIcons;
 
-  Set<String>? getStatistic(KdbxKey kdbxKey) {
+  Set<String> getStatistic(KdbxKey kdbxKey) {
     switch (kdbxKey.key) {
       case KdbxKeyCommon.KEY_URL:
+      case KdbxKeyURLS.KEY_URL1:
+      case KdbxKeyURLS.KEY_URL2:
+      case KdbxKeyURLS.KEY_URL3:
+      case KdbxKeyURLS.KEY_URL4:
+      case KdbxKeyURLS.KEY_URL5:
         return urls;
       case KdbxKeyCommon.KEY_USER_NAME:
         return userNames;
@@ -136,7 +176,7 @@ class FieldStatistic {
       case "CustomIcons":
         return customIcons;
     }
-    return null;
+    return {};
   }
 }
 
@@ -334,9 +374,16 @@ mixin KdbxEntryFieldStatistic on KdbxBase {
 
       _fieldStatistic!.tags.addAll(entry.tagList);
 
-      _fieldStatistic!.customFields.addAll(entry.stringEntries
-          .where((kdbxKey) => !KdbxKeyCommon.all.contains(kdbxKey.key))
-          .map((kdbxKey) => kdbxKey.key.key));
+      for (final item in entry.stringEntries) {
+        if (entry.isCustomKey(item.key)) {
+          _fieldStatistic!.customFields.add(item.key.key);
+        } else if (KdbxKeyURLS.all.contains(item.key)) {
+          final url = entry.getActualString(item.key);
+          if (url != null && url.isNotEmpty) {
+            _fieldStatistic!.urls.add(url);
+          }
+        }
+      }
     }
 
     totalEntry.forEach(setFieldStatistic);
@@ -594,6 +641,11 @@ extension KdbxEntryCommon on KdbxEntry {
   Iterable<MapEntry<KdbxKey, StringValue?>> get customEntries =>
       stringEntries.where((item) => isCustomKey(item.key));
 
+  List<KdbxKey> get moreUrlsKeys {
+    final keys = stringEntries.map((item) => item.key);
+    return KdbxKeyURLS.all.where((item) => keys.contains(item)).toList();
+  }
+
   bool isDefaultKey(KdbxKey key) => defaultKdbxKeys.contains(key);
 
   bool isCustomKey(KdbxKey key) => !isDefaultKey(key);
@@ -610,6 +662,14 @@ extension KdbxEntryCommon on KdbxEntry {
 
   String? getActualString(KdbxKey key) {
     return key == KdbxKeyCommon.OTP ? getOTPCode() : getString(key)?.getText();
+  }
+
+  List<String> getUrls() {
+    return [KdbxKeyCommon.URL, ...KdbxKeyURLS.all]
+        .map((item) => getActualString(item))
+        .where((item) => item != null && item.isNotEmpty)
+        .cast<String>()
+        .toList();
   }
 
   String? getOTPCode() {

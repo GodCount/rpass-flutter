@@ -16,7 +16,7 @@ export 'kdbx/select_icon_page.dart' show SelectIconRoute;
 export 'kdbx/recycle_bin_page.dart' show RecycleBinRoute;
 export 'kdbx/kdbx_setting_page.dart' show KdbxSettingRoute;
 export 'kdbx/manage_group_entry.dart' show ManageGroupEntryRoute;
-
+export 'kdbx/edit_group_page.dart' show EditGroupPageRoute;
 
 export 'password/edit_account.dart' show EditAccountRoute;
 export 'password/gen_password.dart' show GenPasswordRoute;

@@ -632,4 +632,27 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get menu => '菜单';
+
+  @override
+  String get project_info => '项目信息';
+
+  @override
+  String get account_info => '账号信息';
+
+  @override
+  String get auto_fill_info => '自动填充信息';
+
+  @override
+  String get additional_info => '附加信息';
+
+  @override
+  String get add_domain => '添加域名';
+
+  @override
+  String domain_num(int num) {
+    return '域名 $num';
+  }
+
+  @override
+  String get edit_group => '编辑分组';
 }

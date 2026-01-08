@@ -257,6 +257,8 @@ class _LookAccountPageState extends State<LookAccountPage>
 
     final faviconSource = Store.instance.settings.faviconSource;
 
+    final moreUrlsKeys = kdbxEntry.moreUrlsKeys;
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: automaticallyImplyLeading,
@@ -340,6 +342,66 @@ class _LookAccountPageState extends State<LookAccountPage>
                 ],
               ),
             ),
+            ListTile(
+              title: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: Text(t.account),
+              ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(left: 12),
+                child: hintEmptyText(
+                  username.isEmpty,
+                  Text(
+                    username,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+              ),
+              onLongPress:
+                  username.isNotEmpty ? () => writeClipboard(username) : null,
+            ),
+            ListTile(
+              title: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: Text(t.email),
+              ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(left: 12),
+                child: hintEmptyText(
+                  email.isEmpty,
+                  Text(
+                    email,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+              ),
+              onLongPress:
+                  email.isNotEmpty ? () => writeClipboard(email) : null,
+            ),
+            _LookPasswordListTile(
+              shape: shape,
+              password: password,
+              onLongPress: () => writeClipboard(password),
+            ),
+          ]),
+          _cardColumn([
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(right: 6),
+                    child: Icon(
+                      Icons.ads_click,
+                    ),
+                  ),
+                  Text(
+                    t.auto_fill,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ],
+              ),
+            ),
             if (isDesktop)
               ListTile(
                 title: Padding(
@@ -401,6 +463,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                 ),
               ),
             ListTile(
+              shape: moreUrlsKeys.isEmpty ? shape : null,
               title: Padding(
                 padding: const EdgeInsets.only(left: 6),
                 child: Text(t.domain),
@@ -419,53 +482,56 @@ class _LookAccountPageState extends State<LookAccountPage>
                 onPressed: url.isNotEmpty ? () => _launchUrl(url) : null,
                 icon: const Icon(Icons.open_in_new),
               ),
-              onLongPress: url.isNotEmpty
-                  ? () => writeClipboard(
+              onLongPress: url.isNotEmpty ? () => writeClipboard(url) : null,
+            ),
+            ...moreUrlsKeys.asMap().entries.map(
+              (item) {
+                final url = kdbxEntry.getNonNullString(item.value);
+                String text = item.value.key;
+
+                switch (item.value.key) {
+                  case KdbxKeyURLS.KEY_URL1:
+                    text = t.domain_num(1);
+                    break;
+                  case KdbxKeyURLS.KEY_URL2:
+                    text = t.domain_num(2);
+                    break;
+                  case KdbxKeyURLS.KEY_URL3:
+                    text = t.domain_num(3);
+                    break;
+                  case KdbxKeyURLS.KEY_URL4:
+                    text = t.domain_num(4);
+                    break;
+                  case KdbxKeyURLS.KEY_URL5:
+                    text = t.domain_num(5);
+                    break;
+                }
+
+                return ListTile(
+                  shape: item.value == moreUrlsKeys.last ? shape : null,
+                  title: Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: Text(text),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: hintEmptyText(
+                      url.isEmpty,
+                      Text(
                         url,
-                      )
-                  : null,
-            ),
-            ListTile(
-              title: Padding(
-                padding: const EdgeInsets.only(left: 6),
-                child: Text(t.account),
-              ),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(left: 12),
-                child: hintEmptyText(
-                  username.isEmpty,
-                  Text(
-                    username,
-                    style: Theme.of(context).textTheme.titleSmall,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              onLongPress:
-                  username.isNotEmpty ? () => writeClipboard(username) : null,
-            ),
-            ListTile(
-              title: Padding(
-                padding: const EdgeInsets.only(left: 6),
-                child: Text(t.email),
-              ),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(left: 12),
-                child: hintEmptyText(
-                  email.isEmpty,
-                  Text(
-                    email,
-                    style: Theme.of(context).textTheme.titleSmall,
+                  trailing: IconButton(
+                    onPressed: url.isNotEmpty ? () => _launchUrl(url) : null,
+                    icon: const Icon(Icons.open_in_new),
                   ),
-                ),
-              ),
-              onLongPress:
-                  email.isNotEmpty ? () => writeClipboard(email) : null,
-            ),
-            _LookPasswordListTile(
-              shape: shape,
-              password: password,
-              onLongPress: () => writeClipboard(password),
-            ),
+                  onLongPress:
+                      url.isNotEmpty ? () => writeClipboard(url) : null,
+                );
+              },
+            )
           ]),
           _otp(shape),
           if (customFields.isNotEmpty)
@@ -519,7 +585,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                   const Padding(
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(
-                      Icons.description_outlined,
+                      Icons.description_rounded,
                     ),
                   ),
                   Text(

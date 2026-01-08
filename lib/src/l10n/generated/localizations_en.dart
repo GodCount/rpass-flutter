@@ -649,4 +649,27 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get menu => 'Menu';
+
+  @override
+  String get project_info => 'Project Information';
+
+  @override
+  String get account_info => 'Account Information';
+
+  @override
+  String get auto_fill_info => 'Auto-fill Information';
+
+  @override
+  String get additional_info => 'Additional Information';
+
+  @override
+  String get add_domain => 'Add Domain';
+
+  @override
+  String domain_num(int num) {
+    return 'Domain $num';
+  }
+
+  @override
+  String get edit_group => 'Edit Group';
 }
