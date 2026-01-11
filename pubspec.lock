@@ -69,10 +69,10 @@ packages:
     dependency: "direct main"
     description:
       name: auto_route
-      sha256: c820e918863a03544aac68eaf61e17c8a6126b663d7cad24a8fd3657a1e6be61
+      sha256: "6d3ccc11b520b6eff0ab5a2c3d1c43c46d1486249cc746c4bb14486d876e8b43"
       url: "https://pub.dev"
     source: hosted
-    version: "10.1.2"
+    version: "10.3.0"
   base32:
     dependency: transitive
     description:
@@ -85,7 +85,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: keevault-2025-b
+      ref: "29860ebed7d23ec2fd09749728ef12b285420758"
       resolved-ref: "29860ebed7d23ec2fd09749728ef12b285420758"
       url: "https://github.com/kee-org/biometric_storage"
     source: git
@@ -435,8 +435,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
-      resolved-ref: bda7c13410fe78fafb9ee628df9395e32d4c6ea1
+      ref: "0b0fb6d5f516903f81435db128b5894504a5308d"
+      resolved-ref: "0b0fb6d5f516903f81435db128b5894504a5308d"
       url: "https://github.com/rongyu-zhen/installed_apps.git"
     source: git
     version: "1.6.0"
@@ -492,7 +492,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
+      ref: "16e82c2a6428174046320f949b8c2bcae8500882"
       resolved-ref: "16e82c2a6428174046320f949b8c2bcae8500882"
       url: "https://github.com/rongyu-zhen/kdbx.dart.git"
     source: git
@@ -1058,7 +1058,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: main
+      ref: a3c04a4960b9161c1fbf6c470d14d711fc5bcd5c
       resolved-ref: a3c04a4960b9161c1fbf6c470d14d711fc5bcd5c
       url: "https://github.com/rongyu-zhen/webdav_client.git"
     source: git

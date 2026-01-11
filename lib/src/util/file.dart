@@ -10,9 +10,6 @@ export 'package:file_picker/file_picker.dart' show FileType;
 
 class CancelException implements Exception {}
 
-/// TODO! 桌面端，能重复触发（mac 无影响）
-/// 选择文件，应该只能弹出一次，
-
 class SimpleFile {
   static Future<Directory> applicationDocumentsDirectory =
       getApplicationDocumentsDirectory();
@@ -32,6 +29,7 @@ class SimpleFile {
       allowedExtensions: [path.extension(filename).replaceAll(".", "")],
       bytes: !_ignoreBytes ? data : null,
       fileName: filename,
+      lockParentWindow: true,
     );
 
     if (filepath == null) {
@@ -56,6 +54,7 @@ class SimpleFile {
       type: allowedExtensions != null ? FileType.custom : type,
       initialDirectory: (await applicationDocumentsDirectory).path,
       allowedExtensions: allowedExtensions,
+      lockParentWindow: true,
     );
     if (result == null || result.xFiles.isEmpty) {
       throw CancelException();
@@ -85,6 +84,7 @@ class SimpleFile {
       type: allowedExtensions != null ? FileType.custom : type,
       initialDirectory: (await applicationDocumentsDirectory).path,
       allowedExtensions: allowedExtensions,
+      lockParentWindow: true
     );
     if (result == null || result.xFiles.isEmpty) {
       throw CancelException();

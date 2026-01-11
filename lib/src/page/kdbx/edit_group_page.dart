@@ -121,7 +121,7 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
       }
 
       if (await kdbxSave(KdbxProvider.of(context)!)) {
-        context.router.pop(true);
+        context.router.pop(kdbxGroup.uuid);
       }
     }
   }

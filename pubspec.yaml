@@ -57,20 +57,20 @@ dependencies:
   biometric_storage:
     git:
       url: https://github.com/kee-org/biometric_storage
-      ref: keevault-2025-b
+      ref: 29860ebed7d23ec2fd09749728ef12b285420758
   kdbx:
     git:
       url: https://github.com/rongyu-zhen/kdbx.dart.git
-      ref: master
+      ref: 16e82c2a6428174046320f949b8c2bcae8500882
   path: ^1.9.1
   flutter_slidable: ^4.0.3
   logging: ^1.3.0
   logging_appenders: ^1.4.0+1
-  auto_route: ^10.1.2
+  auto_route: ^10.3.0
   webdav_client:
     git:
       url: https://github.com/rongyu-zhen/webdav_client.git
-      ref: main
+      ref: a3c04a4960b9161c1fbf6c470d14d711fc5bcd5c
   dio: ^5.9.0
   flutter_context_menu: ^0.3.0
   rich_text_controller: ^3.0.1
@@ -81,7 +81,7 @@ dependencies:
   installed_apps:
     git:
       url: https://github.com/rongyu-zhen/installed_apps.git
-      ref: master
+      ref: 0b0fb6d5f516903f81435db128b5894504a5308d
 
 dev_dependencies:
   flutter_test:

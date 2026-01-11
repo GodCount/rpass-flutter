@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
+import 'package:installed_apps/installed_apps.dart';
 import 'package:logging/logging.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -107,18 +108,21 @@ class _LookAccountPageState extends State<LookAccountPage>
         HintEmptyTextUtil,
         SecondLevelPageAutoBack<LookAccountPage>,
         NativeChannelListener {
-  late KdbxIconWidgetData _kdbxIcon;
+  late KdbxIconWidgetData _kdbxIcon = KdbxIconWidgetData(
+    icon: widget.kdbxEntry.icon.get() ?? KdbxIcon.Key,
+    customIcon: widget.kdbxEntry.customIcon,
+    domain: widget.kdbxEntry.getActualString(KdbxKeyCommon.URL),
+  );
+
+  late String? packageName =
+      widget.kdbxEntry.getActualString(KdbxKeySpecial.AUTO_FILL_PACKAGE_NAME);
+
+  Future<AppInfo?>? _appInfoFuture;
 
   @override
   void initState() {
     NativeInstancePlatform.instance.addListener(this);
-
-    _kdbxIcon = KdbxIconWidgetData(
-      icon: widget.kdbxEntry.icon.get() ?? KdbxIcon.Key,
-      customIcon: widget.kdbxEntry.customIcon,
-      domain: widget.kdbxEntry.getActualString(KdbxKeyCommon.URL),
-    );
-
+    _getAppInfo();
     super.initState();
   }
 
@@ -130,6 +134,20 @@ class _LookAccountPageState extends State<LookAccountPage>
       customIcon: widget.kdbxEntry.customIcon,
       domain: widget.kdbxEntry.getActualString(KdbxKeyCommon.URL),
     );
+
+    final newPackageName =
+        widget.kdbxEntry.getActualString(KdbxKeySpecial.AUTO_FILL_PACKAGE_NAME);
+
+    if (packageName != newPackageName) {
+      packageName = newPackageName;
+      _getAppInfo();
+    }
+  }
+
+  void _getAppInfo() {
+    if (isMobile && packageName != null && packageName!.isNotEmpty) {
+      _appInfoFuture = InstalledAppsInstance.instance.getAppInfo(packageName!);
+    }
   }
 
   @override
@@ -461,6 +479,48 @@ class _LookAccountPageState extends State<LookAccountPage>
                       : null,
                   icon: const Icon(Icons.ads_click),
                 ),
+              ),
+            if (isMobile && packageName != null && packageName!.isNotEmpty)
+              FutureBuilder(
+                future: _appInfoFuture,
+                builder: (context, snapshot) {
+                  return ListTile(
+                    title: Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: Text(t.auto_fill_match_app),
+                    ),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(left: 12),
+                      child: hintEmptyText(
+                        !snapshot.hasData,
+                        Text(
+                          snapshot.data?.name ?? "",
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                      ),
+                    ),
+                    trailing: IconButton(
+                      onPressed: snapshot.hasData
+                          ? () => InstalledAppsInstance.instance
+                              .startApp(snapshot.data!.packageName)
+                          : null,
+                      icon: snapshot.hasData
+                          ? ImageFileString(
+                              snapshot.data!.icon,
+                              width: 18,
+                              height: 18,
+                              error: const Icon(
+                                Icons.android_outlined,
+                                size: 18,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.android_outlined,
+                              size: 18,
+                            ),
+                    ),
+                  );
+                },
               ),
             ListTile(
               shape: moreUrlsKeys.isEmpty ? shape : null,

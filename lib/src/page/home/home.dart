@@ -284,27 +284,39 @@ mixin BackgroundLock on State<HomePage> {
   }
 
   void _didChangeAppLifecycleState(AppLifecycleState state) {
+    int status = -1;
+
+    if (Platform.isMacOS || Platform.isWindows) {}
+
     switch (state) {
       case AppLifecycleState.inactive:
-        // 只有桌面端才回调 （inactive == bulr）?
-        if (!Platform.isMacOS || !Platform.isWindows) {
-          break;
+        if (Platform.isMacOS || Platform.isWindows) {
+          status = 1;
         }
-      case AppLifecycleState.hidden:
-        if (Store.instance.settings.lockDelay != null) {
-          _serialTimerTask.task1!.duration = Store.instance.settings.lockDelay!;
-          _serialTimerTask.task2!.duration = Store.instance.settings.lockDelay!;
-          debugPrint("start timer lock");
-          _serialTimerTask.start();
+        break;
+      case AppLifecycleState.paused:
+        if (Platform.isAndroid || Platform.isIOS) {
+          status = 1;
         }
         break;
       case AppLifecycleState.resumed:
-        debugPrint("cacnel timer lock");
-        _serialTimerTask.cancel();
+        status = 0;
         break;
-      case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
       case AppLifecycleState.detached:
         break;
+    }
+
+    if (status == 1) {
+      if (Store.instance.settings.lockDelay != null) {
+        _serialTimerTask.task1!.duration = Store.instance.settings.lockDelay!;
+        _serialTimerTask.task2!.duration = Store.instance.settings.lockDelay!;
+        debugPrint("start timer lock");
+        _serialTimerTask.start();
+      }
+    } else if (status == 0) {
+      debugPrint("cacnel timer lock");
+      _serialTimerTask.cancel();
     }
   }
 

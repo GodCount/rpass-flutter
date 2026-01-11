@@ -417,9 +417,9 @@ extension StatefulKdbx on State {
     }
   }
 
-  Future<void> addKdbxGroup() async {
+  Future<Object?> addKdbxGroup() async {
     if (isDesktop) {
-      await showDialog(
+      return await showDialog(
         context: context,
         builder: (context) {
           return Dialog(
@@ -435,7 +435,7 @@ extension StatefulKdbx on State {
         },
       );
     } else {
-      await context.router.push(EditGroupPageRoute());
+      return await context.router.push(EditGroupPageRoute());
     }
   }
 

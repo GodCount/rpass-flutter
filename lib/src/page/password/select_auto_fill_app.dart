@@ -1,10 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:installed_apps/index.dart';
+import 'package:installed_apps/installed_apps.dart';
 
 import '../../rpass.dart';
 import '../../util/route.dart';
 import '../../i18n.dart';
+import '../../widget/common.dart';
 
 class _SelectAutoFillAppArgs extends PageRouteArgs {
   _SelectAutoFillAppArgs({
@@ -213,7 +214,13 @@ class _SelectAutoFillAppPageState extends State<SelectAutoFillAppPage> {
                   child: SizedBox(
                     width: 32,
                     height: 32,
-                    child: Image.memory(item.icon),
+                    child: ImageFileString(
+                      item.icon,
+                      error: const Icon(
+                        Icons.android_outlined,
+                        size: 18,
+                      ),
+                    ),
                   ),
                 ),
                 title: Text(item.name),

@@ -1,11 +1,11 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../context/kdbx.dart';
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
-import '../page/route.dart';
-import '../util/common.dart';
 import 'extension_state.dart';
 import 'kdbx_icon.dart';
 
@@ -226,7 +226,10 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
           Expanded(child: Text(t.select_group)),
           IconButton(
             onPressed: () async {
-              await addKdbxGroup();
+              final uuid = await addKdbxGroup();
+              if (uuid != null && uuid is KdbxUuid) {
+                return widget.onResult(kdbx.findGroupByUuid(uuid));
+              }
               setState(() {});
             },
             icon: const Icon(Icons.add),
@@ -517,5 +520,46 @@ class _AnimatedIconSwitcherState extends State<AnimatedIconSwitcher> {
   void didUpdateWidget(covariant AnimatedIconSwitcher oldWidget) {
     prveKey = oldWidget.key;
     super.didUpdateWidget(oldWidget);
+  }
+}
+
+class ImageFileString extends StatefulWidget {
+  const ImageFileString(
+    this.file, {
+    super.key,
+    this.width,
+    this.height,
+    this.error,
+  });
+
+  final String file;
+  final double? width;
+  final double? height;
+
+  final Widget? error;
+
+  @override
+  State<ImageFileString> createState() => ImageFileStringState();
+}
+
+class ImageFileStringState extends State<ImageFileString> {
+  late File file = File(widget.file);
+
+  @override
+  void didUpdateWidget(covariant ImageFileString oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.file != oldWidget.file) {
+      file = File(widget.file);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.file(
+      file,
+      width: widget.width,
+      height: widget.height,
+      errorBuilder: widget.error != null ? (_, __, ___) => widget.error! : null,
+    );
   }
 }

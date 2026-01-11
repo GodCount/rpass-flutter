@@ -1,6 +1,5 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:installed_apps/app_info.dart';
 import 'package:installed_apps/installed_apps.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
 
@@ -8,6 +7,7 @@ import '../kdbx/kdbx.dart';
 import '../page/route.dart';
 import '../util/common.dart';
 import 'chip_list.dart';
+import 'common.dart';
 import 'extension_state.dart';
 import 'kdbx_icon.dart';
 import 'shake_widget.dart';
@@ -356,55 +356,87 @@ class EntryAutoTypeFormField extends StatelessWidget {
   }
 }
 
-class EntryAutoFillAppFormField extends FormField<String> {
-  EntryAutoFillAppFormField({
+class EntryAutoFillAppFormField extends StatefulWidget {
+  const EntryAutoFillAppFormField({
     super.key,
-    String? label,
-    super.initialValue,
-    super.onSaved,
-  }) : super(builder: (field) {
-          return FutureBuilder<AppInfo?>(
-            future: field.value == null
-                ? Future.error("Empty")
-                : InstalledAppsInstance.instance.getAppInfo(field.value!),
-            builder: (context, snapshot) {
-              return GestureDetector(
-                onTap: () async {
-                  final packageName =
-                      await field.context.router.push(SelectAutoFillAppRoute());
-                  if (field.value == packageName ||
-                      field.value == null && packageName == "none") {
-                    return;
-                  }
-                  if (packageName != null && packageName is String) {
-                    field.didChange(packageName == "none" ? null : packageName);
-                  }
-                },
-                child: InputDecorator(
-                  isEmpty: field.value == null || field.value!.isEmpty,
-                  decoration: InputDecoration(
-                    labelText: label,
-                    border: const OutlineInputBorder(),
-                    prefixIcon: IconButton(
-                      onPressed: null,
-                      icon: snapshot.hasData
-                          ? Image.memory(
-                              snapshot.data!.icon,
-                              width: 18,
-                              height: 18,
-                            )
-                          : const Icon(
+    this.label,
+    this.initialValue,
+    this.onSaved,
+  });
+
+  final String? label;
+  final String? initialValue;
+  final FormFieldSetter<String>? onSaved;
+
+  @override
+  State<EntryAutoFillAppFormField> createState() =>
+      _EntryAutoFillAppFormFieldState();
+}
+
+class _EntryAutoFillAppFormFieldState extends State<EntryAutoFillAppFormField> {
+  late Future<AppInfo?> _future = _getAppInfo();
+
+  Future<AppInfo?> _getAppInfo() async {
+    return widget.initialValue != null
+        ? InstalledAppsInstance.instance.getAppInfo(widget.initialValue!)
+        : null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FormField<String>(
+      initialValue: widget.initialValue,
+      onSaved: widget.onSaved,
+      builder: (field) {
+        return FutureBuilder<AppInfo?>(
+          future: _future,
+          builder: (context, snapshot) {
+            return GestureDetector(
+              onTap: () async {
+                final packageName =
+                    await field.context.router.push(SelectAutoFillAppRoute());
+                if (field.value == packageName ||
+                    field.value == null && packageName == "none") {
+                  return;
+                }
+                if (packageName != null && packageName is String) {
+                  _future =
+                      InstalledAppsInstance.instance.getAppInfo(packageName);
+
+                  field.didChange(packageName == "none" ? null : packageName);
+                }
+              },
+              child: InputDecorator(
+                isEmpty: field.value == null || field.value!.isEmpty,
+                decoration: InputDecoration(
+                  labelText: widget.label,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: IconButton(
+                    onPressed: null,
+                    icon: snapshot.hasData
+                        ? ImageFileString(
+                            snapshot.data!.icon,
+                            width: 18,
+                            height: 18,
+                            error: const Icon(
                               Icons.android_outlined,
                               size: 18,
                             ),
-                    ),
+                          )
+                        : const Icon(
+                            Icons.android_outlined,
+                            size: 18,
+                          ),
                   ),
-                  child: snapshot.hasData || field.value != null
-                      ? Text(snapshot.data?.name ?? field.value ?? "")
-                      : null,
                 ),
-              );
-            },
-          );
-        });
+                child: snapshot.hasData || field.value != null
+                    ? Text(snapshot.data?.name ?? field.value ?? "")
+                    : null,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 }
