@@ -454,7 +454,11 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
         ),
         trailing:
             _selecteds.contains(kdbxEntry) ? const Icon(Icons.done) : null,
-        title: Text(getKdbxObjectTitle(kdbxEntry)),
+        title: Text(
+          getKdbxObjectTitle(kdbxEntry),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
     );
   }

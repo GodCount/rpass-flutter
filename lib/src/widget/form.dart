@@ -10,7 +10,6 @@ import 'chip_list.dart';
 import 'common.dart';
 import 'extension_state.dart';
 import 'kdbx_icon.dart';
-import 'shake_widget.dart';
 
 class EntryTitleFormField extends StatefulWidget {
   const EntryTitleFormField({
@@ -123,19 +122,16 @@ class _EntryTextFormFieldState extends State<EntryTextFormField> {
 
   @override
   Widget build(BuildContext context) {
-    return ShakeFormField<String>(
+    return TextFormField(
       validator: widget.validator,
-      builder: (context, validator) {
-        return TextFormField(
-          validator: validator,
-          controller: _controller,
-          onSaved: widget.onSaved,
-          contextMenuBuilder: widget.contextMenuBuilder,
-          decoration: InputDecoration(
-            labelText: widget.label,
-            border: const OutlineInputBorder(),
-            suffixIcon: (widget.trailingIcon != null &&
-                    widget.onTrailingTap != null)
+      controller: _controller,
+      onSaved: widget.onSaved,
+      contextMenuBuilder: widget.contextMenuBuilder,
+      decoration: InputDecoration(
+        labelText: widget.label,
+        border: const OutlineInputBorder(),
+        suffixIcon:
+            (widget.trailingIcon != null && widget.onTrailingTap != null)
                 ? Padding(
                     padding: const EdgeInsets.all(4.0),
                     child: IconButton(
@@ -147,9 +143,7 @@ class _EntryTextFormFieldState extends State<EntryTextFormField> {
                     ),
                   )
                 : null,
-          ),
-        );
-      },
+      ),
     );
   }
 }
@@ -438,5 +432,80 @@ class _EntryAutoFillAppFormFieldState extends State<EntryAutoFillAppFormField> {
         );
       },
     );
+  }
+}
+
+class DropdownMenuFormField2 extends FormField<String> {
+  DropdownMenuFormField2({
+    super.key,
+    double? width,
+    double? menuHeight,
+    String? label,
+    super.initialValue,
+    EdgeInsets? expandedInsets,
+    required List<String> items,
+    super.onSaved,
+    super.autovalidateMode = AutovalidateMode.disabled,
+    super.validator,
+    bool enableFilter = false,
+    bool? requestFocusOnTap,
+  }) : super(builder: (FormFieldState<String> field) {
+          final state = field as _DropdownMenuFormField2State;
+
+          return DropdownMenu(
+            width: width,
+            menuHeight: menuHeight,
+            label: label != null ? Text(label) : null,
+            errorText: state.errorText,
+            enableFilter: enableFilter,
+            controller: state.controller,
+            initialSelection: initialValue,
+            expandedInsets: expandedInsets,
+            requestFocusOnTap: requestFocusOnTap,
+            dropdownMenuEntries: items
+                .map((value) => DropdownMenuEntry(
+                      value: value,
+                      label: value,
+                      labelWidget: Text(
+                        value,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ))
+                .toList(),
+          );
+        });
+
+  @override
+  FormFieldState<String> createState() => _DropdownMenuFormField2State();
+}
+
+class _DropdownMenuFormField2State extends FormFieldState<String> {
+  late TextEditingController controller =
+      TextEditingController(text: widget.initialValue);
+
+  @override
+  void initState() {
+    controller.addListener(_handleControllerChanged);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.removeListener(_handleControllerChanged);
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  void reset() {
+    controller.text = widget.initialValue ?? "";
+    super.reset();
+  }
+
+  void _handleControllerChanged() {
+    if (controller.text != value) {
+      didChange(controller.text);
+    }
   }
 }

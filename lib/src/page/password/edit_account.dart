@@ -588,8 +588,6 @@ class EntryExpiresFieldSaved extends EntryFieldSaved<(bool, DateTime)> {
 typedef OnEntryFidleDeleted = void Function(KdbxKey key);
 typedef OnEntryFieldSaved = void Function(EntryFieldSaved field);
 
-
-
 class KdbxEntryGroup extends FormField<KdbxGroup> {
   KdbxEntryGroup({super.key, super.initialValue, super.onSaved})
       : super(
@@ -873,29 +871,18 @@ class _EntryFieldState extends State<EntryField> {
           validator: _entryFieldValidator(),
           builder: (context, validator) {
             return LayoutBuilder(builder: (context, constraints) {
-              return DropdownMenuFormField(
+              return DropdownMenuFormField2(
                 width: constraints.biggest.width,
-                initialSelection:
+                initialValue:
                     widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
-                dropdownMenuEntries: kdbx.fieldStatistic
-                    .getStatistic(widget.kdbxKey)
-                    .map((value) => DropdownMenuEntry(
-                          value: value,
-                          label: value,
-                          labelWidget: Text(
-                            value,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ))
-                    .toList(),
-                label: Text(_kdbKey2I18n()),
+                items:
+                    kdbx.fieldStatistic.getStatistic(widget.kdbxKey).toList(),
+                label: _kdbKey2I18n(),
                 onSaved: _kdbxTextFieldSaved,
                 expandedInsets: const EdgeInsets.all(0),
                 validator: validator,
                 menuHeight: 150,
                 enableFilter: true,
-                enableSearch: true,
                 requestFocusOnTap: true,
               );
             });
