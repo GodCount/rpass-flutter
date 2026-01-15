@@ -1,0 +1,9 @@
+{
+    "clangd.fallbackFlags": [
+        "-I${workspaceFolder}/example/windows",
+        "-I${workspaceFolder}/example/windows/flutter/ephemeral",
+        "-I${workspaceFolder}/example/windows/flutter/ephemeral/cpp_client_wrapper/include"
+    ],
+    "cmake.ignoreCMakeListsMissing": true,
+    "clangd.path": "clangd"
+}
