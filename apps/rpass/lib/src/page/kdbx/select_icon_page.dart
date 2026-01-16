@@ -10,7 +10,6 @@ import '../../util/route.dart';
 import '../../widget/extension_state.dart';
 import '../../widget/kdbx_icon.dart';
 
-
 final _logger = Logger("page:select_icon_page");
 
 class _SelectIconArgs extends PageRouteArgs {
@@ -18,12 +17,7 @@ class _SelectIconArgs extends PageRouteArgs {
 }
 
 class SelectIconRoute extends PageRouteInfo<_SelectIconArgs> {
-  SelectIconRoute({
-    Key? key,
-  }) : super(
-          name,
-          args: _SelectIconArgs(key: key),
-        );
+  SelectIconRoute({Key? key}) : super(name, args: _SelectIconArgs(key: key));
 
   static const name = "SelectIconRoute";
 
@@ -59,49 +53,35 @@ class _SelectIconPageState extends State<SelectIconPage> {
     final kdbx = KdbxProvider.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(t.select_icon),
-      ),
+      appBar: AppBar(title: Text(t.select_icon)),
       body: GridView.count(
         crossAxisCount: width ~/ 64,
         children: [
           ...kdbx.customIcons.map((item) {
-            final kdbxIcon =
-                KdbxIconWidgetData(icon: KdbxIcon.Key, customIcon: item);
+            final kdbxIcon = KdbxIconWidgetData(
+              icon: KdbxIcon.Key,
+              customIcon: item,
+            );
             return InkWell(
               onTap: () => _onIconTap(kdbxIcon),
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: KdbxIconWidget(
-                  kdbxIcon: kdbxIcon,
-                  size: 32,
-                ),
+                child: KdbxIconWidget(kdbxIcon: kdbxIcon, size: 32),
               ),
             );
           }),
-          const SizedBox(
-            width: 64,
-            height: 64,
-          ),
-          ...KdbxIcon.values.map(
-            (item) {
-              final kdbxIcon = KdbxIconWidgetData(icon: item);
-              return InkWell(
-                onTap: () => _onIconTap(kdbxIcon),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: KdbxIconWidget(
-                    kdbxIcon: kdbxIcon,
-                    size: 32,
-                  ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(
-            width: 64,
-            height: 64,
-          ),
+          const SizedBox(width: 64, height: 64),
+          ...KdbxIcon.values.map((item) {
+            final kdbxIcon = KdbxIconWidgetData(icon: item);
+            return InkWell(
+              onTap: () => _onIconTap(kdbxIcon),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: KdbxIconWidget(kdbxIcon: kdbxIcon, size: 32),
+              ),
+            );
+          }),
+          const SizedBox(width: 64, height: 64),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -109,10 +89,15 @@ class _SelectIconPageState extends State<SelectIconPage> {
         onPressed: () async {
           try {
             final (_, bytes) = await SimpleFile.openFile(type: FileType.image);
-            _onIconTap(KdbxIconWidgetData(
-              icon: KdbxIcon.Key,
-              customIcon: KdbxCustomIcon(uuid: KdbxUuid.random(), data: bytes),
-            ));
+            _onIconTap(
+              KdbxIconWidgetData(
+                icon: KdbxIcon.Key,
+                customIcon: KdbxCustomIcon(
+                  uuid: KdbxUuid.random(),
+                  data: bytes,
+                ),
+              ),
+            );
           } catch (e) {
             if (e is! CancelException) {
               _logger.warning("read image file fail!", e);
@@ -121,9 +106,7 @@ class _SelectIconPageState extends State<SelectIconPage> {
           }
         },
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(56 / 2),
-          ),
+          borderRadius: BorderRadius.all(Radius.circular(56 / 2)),
         ),
         child: const Icon(Icons.add),
       ),

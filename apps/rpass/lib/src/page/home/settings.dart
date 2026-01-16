@@ -23,21 +23,14 @@ class _SettingsArgs extends PageRouteArgs {
 }
 
 class SettingsRoute extends PageRouteInfo<_SettingsArgs> {
-  SettingsRoute({
-    Key? key,
-  }) : super(
-          name,
-          args: _SettingsArgs(key: key),
-        );
+  SettingsRoute({Key? key}) : super(name, args: _SettingsArgs(key: key));
 
   static const name = "SettingsRoute";
 
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_SettingsArgs>(
-        orElse: () => _SettingsArgs(),
-      );
+      final args = data.argsAs<_SettingsArgs>(orElse: () => _SettingsArgs());
       return SettingsPage(key: args.key);
     },
   );
@@ -101,10 +94,7 @@ class _SettingsPageState extends State<SettingsPage>
     final biometric = Biometric.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text(t.setting),
-      ),
+      appBar: AppBar(automaticallyImplyLeading: false, title: Text(t.setting)),
       body: ListView(
         padding: const EdgeInsets.all(6),
         children: [
@@ -194,15 +184,18 @@ class _SettingsPageState extends State<SettingsPage>
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.translate),
                   ),
-                  Text(t.language,
-                      style: Theme.of(context).textTheme.bodyLarge),
+                  Text(
+                    t.language,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
                 ],
               ),
             ),
             ListTile(
               shape: shape,
               title: Text(
-                  store.settings.locale != null ? t.locale_name : t.system),
+                store.settings.locale != null ? t.locale_name : t.system,
+              ),
               trailing: const Icon(Icons.chevron_right_rounded),
               selected: childRouteName == ChangeLocaleRoute.name,
               onTap: () {
@@ -219,8 +212,10 @@ class _SettingsPageState extends State<SettingsPage>
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.security),
                   ),
-                  Text(t.security,
-                      style: Theme.of(context).textTheme.bodyLarge),
+                  Text(
+                    t.security,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
                 ],
               ),
             ),
@@ -348,21 +343,25 @@ class _SettingsPageState extends State<SettingsPage>
                         children: [
                           TextButton(
                             onPressed: () async => await launchUrl(
-                                Uri.parse(
-                                    "https://github.com/GodCount/rpass-flutter"),
-                                mode: LaunchMode.externalApplication),
+                              Uri.parse(
+                                "https://github.com/GodCount/rpass-flutter",
+                              ),
+                              mode: LaunchMode.externalApplication,
+                            ),
                             child: Text(t.source_code_location("Github")),
                           ),
                           TextButton(
                             onPressed: () async => await launchUrl(
-                                Uri.parse(
-                                    "https://gitee.com/do_yzr/rpass-flutter"),
-                                mode: LaunchMode.externalApplication),
+                              Uri.parse(
+                                "https://gitee.com/do_yzr/rpass-flutter",
+                              ),
+                              mode: LaunchMode.externalApplication,
+                            ),
                             child: Text(t.source_code_location("Gitee")),
                           ),
                         ],
                       ),
-                    )
+                    ),
                   ],
                 );
               },
@@ -388,9 +387,7 @@ class _SettingsPageState extends State<SettingsPage>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(12.0)),
       ),
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 }

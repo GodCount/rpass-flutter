@@ -13,29 +13,18 @@ import '../../widget/kdbx_icon.dart';
 final _logger = Logger("page:edit_group_page");
 
 class _EditGroupPageArgs extends PageRouteArgs {
-  _EditGroupPageArgs({
-    super.key,
-    this.kdbxGroup,
-  });
+  _EditGroupPageArgs({super.key, this.kdbxGroup});
 
   final KdbxGroup? kdbxGroup;
 }
 
 class EditGroupPageRoute extends PageRouteInfo<_EditGroupPageArgs> {
-  EditGroupPageRoute({
-    Key? key,
-    KdbxGroup? kdbxGroup,
-    KdbxUuid? uuid,
-  }) : super(
-          name,
-          args: _EditGroupPageArgs(
-            key: key,
-            kdbxGroup: kdbxGroup,
-          ),
-          rawPathParams: {
-            "uuid": uuid?.deBase64Uuid,
-          },
-        );
+  EditGroupPageRoute({Key? key, KdbxGroup? kdbxGroup, KdbxUuid? uuid})
+    : super(
+        name,
+        args: _EditGroupPageArgs(key: key, kdbxGroup: kdbxGroup),
+        rawPathParams: {"uuid": uuid?.deBase64Uuid},
+      );
 
   static const name = "EditGroupPageRoute";
 
@@ -48,15 +37,10 @@ class EditGroupPageRoute extends PageRouteInfo<_EditGroupPageArgs> {
           final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
           final kdbxGroup = uuid != null ? kdbx.findGroupByUuid(uuid) : null;
 
-          return _EditGroupPageArgs(
-            kdbxGroup: kdbxGroup,
-          );
+          return _EditGroupPageArgs(kdbxGroup: kdbxGroup);
         },
       );
-      return EditGroupPagePage(
-        key: args.key,
-        kdbxGroup: args.kdbxGroup,
-      );
+      return EditGroupPagePage(key: args.key, kdbxGroup: args.kdbxGroup);
     },
   );
 }
@@ -94,9 +78,7 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
         : KdbxGroupData(
             name: '',
             notes: '',
-            kdbxIcon: KdbxIconWidgetData(
-              icon: KdbxIcon.Folder,
-            ),
+            kdbxIcon: KdbxIconWidgetData(icon: KdbxIcon.Folder),
           );
   }
 
@@ -162,15 +144,15 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
               // 项目信息
               _cardColumn([
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   child: Row(
                     children: [
                       const Padding(
                         padding: EdgeInsets.only(right: 6),
-                        child: Icon(
-                          Icons.assessment_rounded,
-                        ),
+                        child: Icon(Icons.assessment_rounded),
                       ),
                       Text(
                         t.project_info,
@@ -187,11 +169,8 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
                     kdbxIcon: _kdbxGroupData.kdbxIcon,
                     onSaved: (data) {
                       _kdbxGroupData.name = data!.$1;
-                      _kdbxGroupData.kdbxIcon =
-                          _kdbxGroupData.kdbxIcon.copyWith(
-                        icon: data.$2,
-                        customIcon: data.$3,
-                      );
+                      _kdbxGroupData.kdbxIcon = _kdbxGroupData.kdbxIcon
+                          .copyWith(icon: data.$2, customIcon: data.$3);
                     },
                   ),
                 ),
@@ -211,7 +190,7 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
                       DropdownMenuItem(
                         value: false,
                         child: Text(t.enable_display_false_subtitle),
-                      )
+                      ),
                     ],
                     decoration: InputDecoration(
                       labelText: t.display,
@@ -239,7 +218,7 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
                       DropdownMenuItem(
                         value: false,
                         child: Text(t.enable_searching_false_subtitle),
-                      )
+                      ),
                     ],
                     decoration: InputDecoration(
                       labelText: t.search,
@@ -255,15 +234,15 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
               // 附加信息
               _cardColumn([
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   child: Row(
                     children: [
                       const Padding(
                         padding: EdgeInsets.only(right: 6),
-                        child: Icon(
-                          Icons.add_box_rounded,
-                        ),
+                        child: Icon(Icons.add_box_rounded),
                       ),
                       Text(
                         t.additional_info,
@@ -298,9 +277,7 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
               heroTag: const ValueKey("edit_group_float"),
               onPressed: _kdbxGroupSave,
               shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(56 / 2),
-                ),
+                borderRadius: BorderRadius.all(Radius.circular(56 / 2)),
               ),
               child: const Icon(Icons.save),
             )
@@ -317,10 +294,7 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
       child: ClipRRect(
         child: Padding(
           padding: const EdgeInsets.only(top: 6, bottom: 12),
-          child: Column(
-            spacing: 12,
-            children: children,
-          ),
+          child: Column(spacing: 12, children: children),
         ),
       ),
     );

@@ -10,12 +10,7 @@ import '../util/common.dart';
 import 'extension_state.dart';
 
 class MyMotion extends StatefulWidget {
-  const MyMotion({
-    super.key,
-    this.onOpen,
-    this.onClose,
-    required this.child,
-  });
+  const MyMotion({super.key, this.onOpen, this.onClose, required this.child});
 
   final VoidCallback? onOpen;
   final VoidCallback? onClose;
@@ -138,7 +133,7 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
                     child: Text(t.not_history_record),
                   ),
                 ),
-              )
+              ),
       ],
     );
   }
@@ -161,11 +156,13 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
             style: Theme.of(context).textTheme.bodySmall,
           ),
           onTap: () {
-            context.router.popAndPush(LookAccountRoute(
-              kdbxEntry: entry,
-              uuid: entry.uuid,
-              readOnly: true,
-            ));
+            context.router.popAndPush(
+              LookAccountRoute(
+                kdbxEntry: entry,
+                uuid: entry.uuid,
+                readOnly: true,
+              ),
+            );
           },
         );
 
@@ -190,9 +187,7 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
                       foregroundColor: Theme.of(context).colorScheme.error,
                       onPressed: (context) => _remove(entry),
                     ),
-                    const SizedBox(
-                      width: 16,
-                    )
+                    const SizedBox(width: 16),
                   ],
                 ),
                 child: child,

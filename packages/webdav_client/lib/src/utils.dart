@@ -49,17 +49,18 @@ DateTime? str2LocalTime(String? str) {
   }
 
   return DateTime.parse(
-          '${list[3]}-$month-${list[1].padLeft(2, '0')}T${list[4]}Z')
-      .toLocal();
+    '${list[3]}-$month-${list[1].padLeft(2, '0')}T${list[4]}Z',
+  ).toLocal();
 }
 
 // create response error
 DioException newResponseError(Response resp) {
   return DioException(
-      requestOptions: resp.requestOptions,
-      response: resp,
-      type: DioExceptionType.badResponse,
-      error: resp.statusMessage);
+    requestOptions: resp.requestOptions,
+    response: resp,
+    type: DioExceptionType.badResponse,
+    error: resp.statusMessage,
+  );
 }
 
 // create xml error
@@ -79,8 +80,9 @@ String computeNonce() {
 }
 
 String trim(String str, [String? chars]) {
-  RegExp pattern =
-      (chars != null) ? RegExp('^[$chars]+|[$chars]+\$') : RegExp(r'^\s+|\s+$');
+  RegExp pattern = (chars != null)
+      ? RegExp('^[$chars]+|[$chars]+\$')
+      : RegExp(r'^\s+|\s+$');
   return str.replaceAll(pattern, '');
 }
 

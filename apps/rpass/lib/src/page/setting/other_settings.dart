@@ -14,12 +14,8 @@ class _OtherSettingsArgs extends PageRouteArgs {
 }
 
 class OtherSettingsRoute extends PageRouteInfo<_OtherSettingsArgs> {
-  OtherSettingsRoute({
-    Key? key,
-  }) : super(
-          name,
-          args: _OtherSettingsArgs(key: key),
-        );
+  OtherSettingsRoute({Key? key})
+    : super(name, args: _OtherSettingsArgs(key: key));
 
   static const name = "OtherSettingsRoute";
 
@@ -89,41 +85,44 @@ class _OtherSettingsPageState extends State<OtherSettingsPage>
       };
     }
 
-    showBottomSheetList(title: t.show_favicon, children: [
-      ListTile(
-        title: Text(t.none),
-        trailing: faviconSource == null ? const Icon(Icons.check) : null,
-        onTap: autoSavePop(null),
-      ),
-      ListTile(
-        title: Text(t.direct_download),
-        trailing: faviconSource == FaviconSource.Slef
-            ? const Icon(Icons.check)
-            : null,
-        onTap: autoSavePop(FaviconSource.Slef),
-      ),
-      ListTile(
-        title: const Text("Cravatar"),
-        trailing: faviconSource == FaviconSource.Cravatar
-            ? const Icon(Icons.check)
-            : null,
-        onTap: autoSavePop(FaviconSource.Cravatar),
-      ),
-      ListTile(
-        title: const Text("Duckduckgo"),
-        trailing: faviconSource == FaviconSource.Duckduckgo
-            ? const Icon(Icons.check)
-            : null,
-        onTap: autoSavePop(FaviconSource.Duckduckgo),
-      ),
-      ListTile(
-        title: const Text("Google"),
-        trailing: faviconSource == FaviconSource.Google
-            ? const Icon(Icons.check)
-            : null,
-        onTap: autoSavePop(FaviconSource.Google),
-      ),
-    ]);
+    showBottomSheetList(
+      title: t.show_favicon,
+      children: [
+        ListTile(
+          title: Text(t.none),
+          trailing: faviconSource == null ? const Icon(Icons.check) : null,
+          onTap: autoSavePop(null),
+        ),
+        ListTile(
+          title: Text(t.direct_download),
+          trailing: faviconSource == FaviconSource.Slef
+              ? const Icon(Icons.check)
+              : null,
+          onTap: autoSavePop(FaviconSource.Slef),
+        ),
+        ListTile(
+          title: const Text("Cravatar"),
+          trailing: faviconSource == FaviconSource.Cravatar
+              ? const Icon(Icons.check)
+              : null,
+          onTap: autoSavePop(FaviconSource.Cravatar),
+        ),
+        ListTile(
+          title: const Text("Duckduckgo"),
+          trailing: faviconSource == FaviconSource.Duckduckgo
+              ? const Icon(Icons.check)
+              : null,
+          onTap: autoSavePop(FaviconSource.Duckduckgo),
+        ),
+        ListTile(
+          title: const Text("Google"),
+          trailing: faviconSource == FaviconSource.Google
+              ? const Icon(Icons.check)
+              : null,
+          onTap: autoSavePop(FaviconSource.Google),
+        ),
+      ],
+    );
   }
 
   @override
@@ -145,8 +144,9 @@ class _OtherSettingsPageState extends State<OtherSettingsPage>
                 ? const Icon(Icons.check)
                 : null,
             onTap: () {
-              store.settings
-                  .setStartFocusSreach(!store.settings.startFocusSreach);
+              store.settings.setStartFocusSreach(
+                !store.settings.startFocusSreach,
+              );
               setState(() {});
             },
           ),

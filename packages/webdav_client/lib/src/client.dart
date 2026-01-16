@@ -64,9 +64,13 @@ class Client {
 
   /// Read all files in a folder
   Future<List<File>> readDir(String path, [CancelToken? cancelToken]) async {
-    var resp = await this
-        .c
-        .wdPropfind(this, path, true, fileXmlStr, cancelToken: cancelToken);
+    var resp = await this.c.wdPropfind(
+      this,
+      path,
+      true,
+      fileXmlStr,
+      cancelToken: cancelToken,
+    );
 
     String str = resp.data;
     return WebdavXml.toFiles(uriPath, str);
@@ -74,9 +78,13 @@ class Client {
 
   /// Read a single files properties
   Future<File> readProps(String path, [CancelToken? cancelToken]) async {
-    var resp = await this
-        .c
-        .wdPropfind(this, path, true, fileXmlStr, cancelToken: cancelToken);
+    var resp = await this.c.wdPropfind(
+      this,
+      path,
+      true,
+      fileXmlStr,
+      cancelToken: cancelToken,
+    );
 
     String str = resp.data;
     return WebdavXml.toFiles(uriPath, str, skipSelf: false).first;
@@ -135,16 +143,24 @@ class Client {
 
   /// Rename a folder or file
   /// If you rename the folder, some webdav services require a '/' at the end of the path.
-  Future<void> rename(String oldPath, String newPath, bool overwrite,
-      [CancelToken? cancelToken]) {
+  Future<void> rename(
+    String oldPath,
+    String newPath,
+    bool overwrite, [
+    CancelToken? cancelToken,
+  ]) {
     return this.c.wdCopyMove(this, oldPath, newPath, false, overwrite);
   }
 
   /// Copy a file / folder from A to B
   /// If copied the folder (A > B), it will copy all the contents of folder A to folder B.
   /// Some webdav services have been tested and found to delete the original contents of the B folder!!!
-  Future<void> copy(String oldPath, String newPath, bool overwrite,
-      [CancelToken? cancelToken]) {
+  Future<void> copy(
+    String oldPath,
+    String newPath,
+    bool overwrite, [
+    CancelToken? cancelToken,
+  ]) {
     return this.c.wdCopyMove(this, oldPath, newPath, true, overwrite);
   }
 
@@ -156,11 +172,11 @@ class Client {
     CancelToken? cancelToken,
   }) {
     return this.c.wdReadWithBytes(
-          this,
-          path,
-          onProgress: onProgress,
-          cancelToken: cancelToken,
-        );
+      this,
+      path,
+      onProgress: onProgress,
+      cancelToken: cancelToken,
+    );
   }
 
   /// Read the bytes of a file with stream and write to a local file
@@ -171,12 +187,12 @@ class Client {
     CancelToken? cancelToken,
   }) async {
     await this.c.wdReadWithStream(
-          this,
-          path,
-          savePath,
-          onProgress: onProgress,
-          cancelToken: cancelToken,
-        );
+      this,
+      path,
+      savePath,
+      onProgress: onProgress,
+      cancelToken: cancelToken,
+    );
   }
 
   /// Write the bytes to remote path
@@ -187,12 +203,12 @@ class Client {
     CancelToken? cancelToken,
   }) {
     return this.c.wdWriteWithBytes(
-          this,
-          path,
-          data,
-          onProgress: onProgress,
-          cancelToken: cancelToken,
-        );
+      this,
+      path,
+      data,
+      onProgress: onProgress,
+      cancelToken: cancelToken,
+    );
   }
 
   /// Read local file stream and write to remote file
@@ -204,13 +220,13 @@ class Client {
   }) async {
     var file = io.File(localFilePath);
     return this.c.wdWriteWithStream(
-          this,
-          path,
-          file.openRead(),
-          file.lengthSync(),
-          onProgress: onProgress,
-          cancelToken: cancelToken,
-        );
+      this,
+      path,
+      file.openRead(),
+      file.lengthSync(),
+      onProgress: onProgress,
+      cancelToken: cancelToken,
+    );
   }
 }
 

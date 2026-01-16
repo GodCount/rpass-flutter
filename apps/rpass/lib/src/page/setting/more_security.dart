@@ -15,12 +15,8 @@ class _MoreSecurityArgs extends PageRouteArgs {
 }
 
 class MoreSecurityRoute extends PageRouteInfo<_MoreSecurityArgs> {
-  MoreSecurityRoute({
-    Key? key,
-  }) : super(
-          name,
-          args: _MoreSecurityArgs(key: key),
-        );
+  MoreSecurityRoute({Key? key})
+    : super(name, args: _MoreSecurityArgs(key: key));
 
   static const name = "MoreSecurityRoute";
 
@@ -50,9 +46,9 @@ class _MoreSecurityPageState extends State<MoreSecurityPage>
   @override
   void initState() {
     super.initState();
-    NativeInstancePlatform.instance.autofillService
-        .status()
-        .then((value) => setState(() => _autofillServiceStatus = value));
+    NativeInstancePlatform.instance.autofillService.status().then(
+      (value) => setState(() => _autofillServiceStatus = value),
+    );
   }
 
   void _setLockDelay() {
@@ -68,34 +64,37 @@ class _MoreSecurityPageState extends State<MoreSecurityPage>
       };
     }
 
-    showBottomSheetList(title: t.lock, children: [
-      ListTile(
-        title: Text(t.never),
-        trailing: settings.lockDelay == null ? const Icon(Icons.check) : null,
-        onTap: autoSavePop(null),
-      ),
-      ListTile(
-        title: Text(t.seconds(30)),
-        trailing: settings.lockDelay == const Duration(seconds: 30)
-            ? const Icon(Icons.check)
-            : null,
-        onTap: autoSavePop(const Duration(seconds: 30)),
-      ),
-      ListTile(
-        title: Text(t.minutes(3)),
-        trailing: settings.lockDelay == const Duration(minutes: 3)
-            ? const Icon(Icons.check)
-            : null,
-        onTap: autoSavePop(const Duration(minutes: 3)),
-      ),
-      ListTile(
-        title: Text(t.minutes(5)),
-        trailing: settings.lockDelay == const Duration(minutes: 5)
-            ? const Icon(Icons.check)
-            : null,
-        onTap: autoSavePop(const Duration(minutes: 5)),
-      )
-    ]);
+    showBottomSheetList(
+      title: t.lock,
+      children: [
+        ListTile(
+          title: Text(t.never),
+          trailing: settings.lockDelay == null ? const Icon(Icons.check) : null,
+          onTap: autoSavePop(null),
+        ),
+        ListTile(
+          title: Text(t.seconds(30)),
+          trailing: settings.lockDelay == const Duration(seconds: 30)
+              ? const Icon(Icons.check)
+              : null,
+          onTap: autoSavePop(const Duration(seconds: 30)),
+        ),
+        ListTile(
+          title: Text(t.minutes(3)),
+          trailing: settings.lockDelay == const Duration(minutes: 3)
+              ? const Icon(Icons.check)
+              : null,
+          onTap: autoSavePop(const Duration(minutes: 3)),
+        ),
+        ListTile(
+          title: Text(t.minutes(5)),
+          trailing: settings.lockDelay == const Duration(minutes: 5)
+              ? const Icon(Icons.check)
+              : null,
+          onTap: autoSavePop(const Duration(minutes: 5)),
+        ),
+      ],
+    );
   }
 
   @override
@@ -120,12 +119,11 @@ class _MoreSecurityPageState extends State<MoreSecurityPage>
               lockDelay == null
                   ? t.never
                   : lockDelay.inSeconds < 60
-                      ? t.seconds(lockDelay.inSeconds)
-                      : t.minutes(lockDelay.inMinutes),
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(color: Theme.of(context).colorScheme.primary),
+                  ? t.seconds(lockDelay.inSeconds)
+                  : t.minutes(lockDelay.inMinutes),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
           ),
           ListTile(
@@ -151,7 +149,8 @@ class _MoreSecurityPageState extends State<MoreSecurityPage>
                   _autofillServiceStatus = AutofillServiceStatus.disabled;
                 } else {
                   final result = await NativeInstancePlatform
-                      .instance.autofillService
+                      .instance
+                      .autofillService
                       .enabled();
                   _autofillServiceStatus = result
                       ? AutofillServiceStatus.enabled
@@ -178,7 +177,7 @@ class _MoreSecurityPageState extends State<MoreSecurityPage>
                   ? const Icon(Icons.check)
                   : null,
             ),
-          ]
+          ],
         ],
       ),
     );

@@ -59,10 +59,7 @@ class _EntryTitleFormFieldState extends State<EntryTitleFormField> {
               });
             }
           },
-          icon: KdbxIconWidget(
-            kdbxIcon: _kdbxIcon,
-            size: 18,
-          ),
+          icon: KdbxIconWidget(kdbxIcon: _kdbxIcon, size: 18),
         ),
       ),
     );
@@ -132,17 +129,17 @@ class _EntryTextFormFieldState extends State<EntryTextFormField> {
         border: const OutlineInputBorder(),
         suffixIcon:
             (widget.trailingIcon != null && widget.onTrailingTap != null)
-                ? Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: IconButton(
-                      onPressed: () async {
-                        _controller.text =
-                            await widget.onTrailingTap!() ?? _controller.text;
-                      },
-                      icon: widget.trailingIcon!,
-                    ),
-                  )
-                : null,
+            ? Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: IconButton(
+                  onPressed: () async {
+                    _controller.text =
+                        await widget.onTrailingTap!() ?? _controller.text;
+                  },
+                  icon: widget.trailingIcon!,
+                ),
+              )
+            : null,
       ),
     );
   }
@@ -154,34 +151,36 @@ class EntryNotesFormField extends FormField<String> {
     String? label,
     super.initialValue,
     super.onSaved,
-  }) : super(builder: (field) {
-          return GestureDetector(
-            onTap: () async {
-              final text = await field.context.router.push(EditNotesRoute(
-                text: field.value ?? "",
-              ));
+  }) : super(
+         builder: (field) {
+           return GestureDetector(
+             onTap: () async {
+               final text = await field.context.router.push(
+                 EditNotesRoute(text: field.value ?? ""),
+               );
 
-              if (text != null && text is String) {
-                field.didChange(text);
-              }
-            },
-            child: InputDecorator(
-              isEmpty: field.value == null || field.value!.isEmpty,
-              decoration: InputDecoration(
-                labelText: label,
-                border: const OutlineInputBorder(),
-              ),
-              child: field.value != null && field.value!.isNotEmpty
-                  ? Text(field.value!, maxLines: 3)
-                  : null,
-            ),
-          );
-        });
+               if (text != null && text is String) {
+                 field.didChange(text);
+               }
+             },
+             child: InputDecorator(
+               isEmpty: field.value == null || field.value!.isEmpty,
+               decoration: InputDecoration(
+                 labelText: label,
+                 border: const OutlineInputBorder(),
+               ),
+               child: field.value != null && field.value!.isNotEmpty
+                   ? Text(field.value!, maxLines: 3)
+                   : null,
+             ),
+           );
+         },
+       );
 }
 
 typedef OnChipTap<T> = bool Function(ChipListItem<T> item);
-typedef OnAddChipTap<T> = Future<ChipListItem<T>?> Function(
-    List<ChipListItem<T>> list);
+typedef OnAddChipTap<T> =
+    Future<ChipListItem<T>?> Function(List<ChipListItem<T>> list);
 
 class ChipListFormField<T> extends FormField<List<ChipListItem<T>>> {
   ChipListFormField({
@@ -194,47 +193,47 @@ class ChipListFormField<T> extends FormField<List<ChipListItem<T>>> {
     super.onSaved,
     super.autovalidateMode = AutovalidateMode.disabled,
   }) : super(
-          initialValue: initialValue,
-          builder: (field) {
-            void onChangedHandler(List<ChipListItem<T>> value) {
-              field.didChange(value);
-              onChanged?.call(value);
-            }
+         initialValue: initialValue,
+         builder: (field) {
+           void onChangedHandler(List<ChipListItem<T>> value) {
+             field.didChange(value);
+             onChanged?.call(value);
+           }
 
-            return InputDecorator(
-              decoration: InputDecoration(
-                labelText: label,
-                border: const OutlineInputBorder(),
-              ),
-              child: ChipList<T>(
-                maxHeight: 150,
-                items: field.value!,
-                onChipTap: onChipTap != null
-                    ? (item) {
-                        if (onChipTap(item)) {
-                          onChangedHandler(field.value!);
-                        }
-                      }
-                    : null,
-                onDeleted: (item) {
-                  final list = field.value!;
-                  list.remove(item);
-                  onChangedHandler(list);
-                },
-                onAddChipTap: onAddChipTap != null
-                    ? () async {
-                        final item = await onAddChipTap(field.value!);
-                        if (item != null) {
-                          final list = field.value!;
-                          list.add(item);
-                          onChangedHandler(list);
-                        }
-                      }
-                    : null,
-              ),
-            );
-          },
-        );
+           return InputDecorator(
+             decoration: InputDecoration(
+               labelText: label,
+               border: const OutlineInputBorder(),
+             ),
+             child: ChipList<T>(
+               maxHeight: 150,
+               items: field.value!,
+               onChipTap: onChipTap != null
+                   ? (item) {
+                       if (onChipTap(item)) {
+                         onChangedHandler(field.value!);
+                       }
+                     }
+                   : null,
+               onDeleted: (item) {
+                 final list = field.value!;
+                 list.remove(item);
+                 onChangedHandler(list);
+               },
+               onAddChipTap: onAddChipTap != null
+                   ? () async {
+                       final item = await onAddChipTap(field.value!);
+                       if (item != null) {
+                         final list = field.value!;
+                         list.add(item);
+                         onChangedHandler(list);
+                       }
+                     }
+                   : null,
+             ),
+           );
+         },
+       );
 }
 
 class EntryExpiresFormField extends FormField<(bool, DateTime)> {
@@ -243,42 +242,44 @@ class EntryExpiresFormField extends FormField<(bool, DateTime)> {
     String? label,
     super.initialValue,
     super.onSaved,
-  }) : super(builder: (field) {
-          return GestureDetector(
-            onTap: () async {
-              final result = await field.showDateTimePicker(
-                field.context,
-                minimumDate: DateTime(2024, 7, 1, 18, 11, 58),
-                maximumDate: DateTime(4001, 7, 1, 18, 11, 58),
-                initialDateTime: field.value?.$2,
-              );
-              if (result != null) {
-                field.didChange((field.value?.$1 ?? false, result));
-              }
-            },
-            child: InputDecorator(
-              isEmpty: false,
-              decoration: InputDecoration(
-                labelText: label,
-                border: const OutlineInputBorder(),
-                suffixIcon: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Checkbox(
-                    value: field.value?.$1 ?? false,
-                    onChanged: (value) {
-                      if (field.value != null) {
-                        field.didChange((value ?? false, field.value!.$2));
-                      }
-                    },
-                  ),
-                ),
-              ),
-              child: field.value != null
-                  ? Text(field.value!.$2.toLocal().formatDate)
-                  : null,
-            ),
-          );
-        });
+  }) : super(
+         builder: (field) {
+           return GestureDetector(
+             onTap: () async {
+               final result = await field.showDateTimePicker(
+                 field.context,
+                 minimumDate: DateTime(2024, 7, 1, 18, 11, 58),
+                 maximumDate: DateTime(4001, 7, 1, 18, 11, 58),
+                 initialDateTime: field.value?.$2,
+               );
+               if (result != null) {
+                 field.didChange((field.value?.$1 ?? false, result));
+               }
+             },
+             child: InputDecorator(
+               isEmpty: false,
+               decoration: InputDecoration(
+                 labelText: label,
+                 border: const OutlineInputBorder(),
+                 suffixIcon: Padding(
+                   padding: const EdgeInsets.all(8.0),
+                   child: Checkbox(
+                     value: field.value?.$1 ?? false,
+                     onChanged: (value) {
+                       if (field.value != null) {
+                         field.didChange((value ?? false, field.value!.$2));
+                       }
+                     },
+                   ),
+                 ),
+               ),
+               child: field.value != null
+                   ? Text(field.value!.$2.toLocal().formatDate)
+                   : null,
+             ),
+           );
+         },
+       );
 }
 
 class EntryAutoTypeFormField extends StatelessWidget {
@@ -303,27 +304,24 @@ class EntryAutoTypeFormField extends StatelessWidget {
         MatchTargetItem.pattern(
           AutoTypeRichPattern.BUTTON,
           allowInlineMatching: true,
-          style: Theme.of(context)
-              .textTheme
-              .bodyLarge!
-              .copyWith(color: Colors.blueAccent),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge!.copyWith(color: Colors.blueAccent),
         ),
         MatchTargetItem.pattern(
           AutoTypeRichPattern.KDBX_KEY,
           allowInlineMatching: true,
-          style: Theme.of(context)
-              .textTheme
-              .bodyLarge!
-              .copyWith(color: Colors.green),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge!.copyWith(color: Colors.green),
         ),
         MatchTargetItem.pattern(
           AutoTypeRichPattern.SHORTCUT_KEY,
           allowInlineMatching: true,
-          style: Theme.of(context)
-              .textTheme
-              .bodyLarge!
-              .copyWith(color: Colors.orangeAccent),
-        )
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge!.copyWith(color: Colors.orangeAccent),
+        ),
       ],
       child: (controller) {
         return TextFormField(
@@ -335,10 +333,9 @@ class EntryAutoTypeFormField extends StatelessWidget {
             border: const OutlineInputBorder(),
           ),
           onTap: () async {
-            final text = await context.router.push(EditAutoTypeRoute(
-              text: controller.text,
-              kdbxEntry: kdbxEntry,
-            ));
+            final text = await context.router.push(
+              EditAutoTypeRoute(text: controller.text, kdbxEntry: kdbxEntry),
+            );
 
             if (text != null && text is String) {
               controller.text = text;
@@ -387,15 +384,17 @@ class _EntryAutoFillAppFormFieldState extends State<EntryAutoFillAppFormField> {
           builder: (context, snapshot) {
             return GestureDetector(
               onTap: () async {
-                final packageName =
-                    await field.context.router.push(SelectAutoFillAppRoute());
+                final packageName = await field.context.router.push(
+                  SelectAutoFillAppRoute(),
+                );
                 if (field.value == packageName ||
                     field.value == null && packageName == "none") {
                   return;
                 }
                 if (packageName != null && packageName is String) {
-                  _future =
-                      InstalledAppsInstance.instance.getAppInfo(packageName);
+                  _future = InstalledAppsInstance.instance.getAppInfo(
+                    packageName,
+                  );
 
                   field.didChange(packageName == "none" ? null : packageName);
                 }
@@ -412,15 +411,9 @@ class _EntryAutoFillAppFormFieldState extends State<EntryAutoFillAppFormField> {
                             snapshot.data!.icon,
                             width: 18,
                             height: 18,
-                            error: const Icon(
-                              Icons.android_outlined,
-                              size: 18,
-                            ),
+                            error: const Icon(Icons.android_outlined, size: 18),
                           )
-                        : const Icon(
-                            Icons.android_outlined,
-                            size: 18,
-                          ),
+                        : const Icon(Icons.android_outlined, size: 18),
                   ),
                 ),
                 child: snapshot.hasData || field.value != null
@@ -449,40 +442,45 @@ class DropdownMenuFormField2 extends FormField<String> {
     super.validator,
     bool enableFilter = false,
     bool? requestFocusOnTap,
-  }) : super(builder: (FormFieldState<String> field) {
-          final state = field as _DropdownMenuFormField2State;
+  }) : super(
+         builder: (FormFieldState<String> field) {
+           final state = field as _DropdownMenuFormField2State;
 
-          return DropdownMenu(
-            width: width,
-            menuHeight: menuHeight,
-            label: label != null ? Text(label) : null,
-            errorText: state.errorText,
-            enableFilter: enableFilter,
-            controller: state.controller,
-            initialSelection: initialValue,
-            expandedInsets: expandedInsets,
-            requestFocusOnTap: requestFocusOnTap,
-            dropdownMenuEntries: items
-                .map((value) => DropdownMenuEntry(
-                      value: value,
-                      label: value,
-                      labelWidget: Text(
-                        value,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ))
-                .toList(),
-          );
-        });
+           return DropdownMenu(
+             width: width,
+             menuHeight: menuHeight,
+             label: label != null ? Text(label) : null,
+             errorText: state.errorText,
+             enableFilter: enableFilter,
+             controller: state.controller,
+             initialSelection: initialValue,
+             expandedInsets: expandedInsets,
+             requestFocusOnTap: requestFocusOnTap,
+             dropdownMenuEntries: items
+                 .map(
+                   (value) => DropdownMenuEntry(
+                     value: value,
+                     label: value,
+                     labelWidget: Text(
+                       value,
+                       maxLines: 2,
+                       overflow: TextOverflow.ellipsis,
+                     ),
+                   ),
+                 )
+                 .toList(),
+           );
+         },
+       );
 
   @override
   FormFieldState<String> createState() => _DropdownMenuFormField2State();
 }
 
 class _DropdownMenuFormField2State extends FormFieldState<String> {
-  late TextEditingController controller =
-      TextEditingController(text: widget.initialValue);
+  late TextEditingController controller = TextEditingController(
+    text: widget.initialValue,
+  );
 
   @override
   void initState() {

@@ -8,24 +8,16 @@ import '../../util/common.dart';
 import '../../widget/extension_state.dart';
 
 class _GenPasswordArgs extends PageRouteArgs {
-  _GenPasswordArgs({
-    super.key,
-    this.popPassword = false,
-  });
+  _GenPasswordArgs({super.key, this.popPassword = false});
   final bool popPassword;
 }
 
 class GenPasswordRoute extends PageRouteInfo<_GenPasswordArgs> {
-  GenPasswordRoute({
-    Key? key,
-    bool popPassword = false,
-  }) : super(
-          name,
-          args: _GenPasswordArgs(
-            key: key,
-            popPassword: popPassword,
-          ),
-        );
+  GenPasswordRoute({Key? key, bool popPassword = false})
+    : super(
+        name,
+        args: _GenPasswordArgs(key: key, popPassword: popPassword),
+      );
 
   static const name = "GenPasswordRoute";
 
@@ -35,19 +27,13 @@ class GenPasswordRoute extends PageRouteInfo<_GenPasswordArgs> {
       final args = data.argsAs<_GenPasswordArgs>(
         orElse: () => _GenPasswordArgs(),
       );
-      return GenPasswordPage(
-        key: args.key,
-        popPassword: args.popPassword,
-      );
+      return GenPasswordPage(key: args.key, popPassword: args.popPassword);
     },
   );
 }
 
 class GenPasswordPage extends StatefulWidget {
-  const GenPasswordPage({
-    super.key,
-    this.popPassword = false,
-  });
+  const GenPasswordPage({super.key, this.popPassword = false});
 
   final bool popPassword;
 
@@ -158,10 +144,9 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
                 alignment: Alignment.centerLeft,
                 child: MatchText(
                   text: password,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyLarge!
-                      .copyWith(color: Colors.red),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge!.copyWith(color: Colors.red),
                   matchs: [
                     MatchHighlightItem(
                       regExp: RegExp(r"[a-zA-Z]+"),
@@ -169,21 +154,19 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
                     ),
                     MatchHighlightItem(
                       regExp: RegExp(r"\d+"),
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyLarge!
-                          .copyWith(color: Colors.blue),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyLarge!.copyWith(color: Colors.blue),
                     ),
                     if (_customText.isNotEmpty)
                       MatchHighlightItem(
                         regExp: RegExp(
                           "[${Set.from(_customText.split("")).join()}]+",
                         ),
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge!
-                            .copyWith(color: Colors.green),
-                      )
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodyLarge!.copyWith(color: Colors.green),
+                      ),
                   ],
                 ),
               ),
@@ -201,11 +184,9 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
                 color: entropy < 32
                     ? Colors.red
                     : entropy < 56
-                        ? Colors.amber
-                        : Colors.green,
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(4),
-                ),
+                    ? Colors.amber
+                    : Colors.green,
+                borderRadius: const BorderRadius.all(Radius.circular(4)),
               ),
               trailing: SizedBox(
                 width: 64,
@@ -248,89 +229,85 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
               trailing: Text("${_length.toInt()}"),
             ),
           ]),
-          _cardColumn(
-            [
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(right: 6),
-                      child: Icon(Icons.onetwothree),
-                    ),
-                    Text(
-                      t.include_cahr,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                  ],
-                ),
-              ),
-              ListTile(
-                title: Text("${t.letter} (abc)"),
-                trailing: _enableLetterLow ? const Icon(Icons.check) : null,
-                onTap: () {
-                  _cahnged(enableLetterLow: !_enableLetterLow);
-                },
-              ),
-              ListTile(
-                title: Text("${t.letter} (ABC)"),
-                trailing: _enableLetterUp ? const Icon(Icons.check) : null,
-                onTap: () {
-                  _cahnged(enableLetterUp: !_enableLetterUp);
-                },
-              ),
-              ListTile(
-                title: Text("${t.number} (01)"),
-                trailing: _enableNumber ? const Icon(Icons.check) : null,
-                onTap: () {
-                  _cahnged(enableNumber: !_enableNumber);
-                },
-              ),
-              ListTile(
-                title: Text("${t.special_char} (!@)"),
-                trailing: _enableSymbol ? const Icon(Icons.check) : null,
-                onTap: () {
-                  _cahnged(enableSymbol: !_enableSymbol);
-                },
-              ),
-              ListTile(
-                title: Text(t.custom),
-                trailing: _enableCustom ? const Icon(Icons.check) : null,
-                onTap: () {
-                  _cahnged(enableCustom: !_enableCustom);
-                },
-              ),
-              ListTile(
-                shape: shape,
-                title: TextField(
-                  onEditingComplete: () {
-                    if (_customText.isEmpty &&
-                        !_enableNumber &&
-                        !_enableSymbol &&
-                        !_enableLetterLow &&
-                        !_enableLetterUp) {
-                      _cahnged(
-                        enableNumber: true,
-                        enableSymbol: true,
-                        enableLetterLow: true,
-                        enableLetterUp: true,
-                        enableCustom: false,
-                      );
-                    } else {
-                      _updatePassword();
-                    }
-                  },
-                  onChanged: (value) => _customText = value,
-                  enabled: _enableCustom,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+          _cardColumn([
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(right: 6),
+                    child: Icon(Icons.onetwothree),
                   ),
-                ),
-                subtitle: SizedBox(height: 6,),
-              )
-            ],
-          ),
-          const SizedBox(height: 56)
+                  Text(
+                    t.include_cahr,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              title: Text("${t.letter} (abc)"),
+              trailing: _enableLetterLow ? const Icon(Icons.check) : null,
+              onTap: () {
+                _cahnged(enableLetterLow: !_enableLetterLow);
+              },
+            ),
+            ListTile(
+              title: Text("${t.letter} (ABC)"),
+              trailing: _enableLetterUp ? const Icon(Icons.check) : null,
+              onTap: () {
+                _cahnged(enableLetterUp: !_enableLetterUp);
+              },
+            ),
+            ListTile(
+              title: Text("${t.number} (01)"),
+              trailing: _enableNumber ? const Icon(Icons.check) : null,
+              onTap: () {
+                _cahnged(enableNumber: !_enableNumber);
+              },
+            ),
+            ListTile(
+              title: Text("${t.special_char} (!@)"),
+              trailing: _enableSymbol ? const Icon(Icons.check) : null,
+              onTap: () {
+                _cahnged(enableSymbol: !_enableSymbol);
+              },
+            ),
+            ListTile(
+              title: Text(t.custom),
+              trailing: _enableCustom ? const Icon(Icons.check) : null,
+              onTap: () {
+                _cahnged(enableCustom: !_enableCustom);
+              },
+            ),
+            ListTile(
+              shape: shape,
+              title: TextField(
+                onEditingComplete: () {
+                  if (_customText.isEmpty &&
+                      !_enableNumber &&
+                      !_enableSymbol &&
+                      !_enableLetterLow &&
+                      !_enableLetterUp) {
+                    _cahnged(
+                      enableNumber: true,
+                      enableSymbol: true,
+                      enableLetterLow: true,
+                      enableLetterUp: true,
+                      enableCustom: false,
+                    );
+                  } else {
+                    _updatePassword();
+                  }
+                },
+                onChanged: (value) => _customText = value,
+                enabled: _enableCustom,
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+              ),
+              subtitle: SizedBox(height: 6),
+            ),
+          ]),
+          const SizedBox(height: 56),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -343,9 +320,7 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
           }
         },
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(56 / 2),
-          ),
+          borderRadius: BorderRadius.all(Radius.circular(56 / 2)),
         ),
         child: Icon(widget.popPassword ? Icons.done : Icons.copy),
       ),
@@ -358,9 +333,7 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(12.0)),
       ),
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 }

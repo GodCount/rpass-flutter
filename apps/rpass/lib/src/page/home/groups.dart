@@ -17,21 +17,14 @@ class _GroupsArgs extends PageRouteArgs {
 }
 
 class GroupsRoute extends PageRouteInfo<_GroupsArgs> {
-  GroupsRoute({
-    Key? key,
-  }) : super(
-          name,
-          args: _GroupsArgs(key: key),
-        );
+  GroupsRoute({Key? key}) : super(name, args: _GroupsArgs(key: key));
 
   static const name = "GroupsRoute";
 
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_GroupsArgs>(
-        orElse: () => _GroupsArgs(),
-      );
+      final args = data.argsAs<_GroupsArgs>(orElse: () => _GroupsArgs());
       return GroupsPage(key: args.key);
     },
   );
@@ -107,9 +100,7 @@ class _GroupsPageState extends State<GroupsPage>
           ? FloatingActionButton(
               onPressed: () => context.router.push(EditGroupPageRoute()),
               shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(56 / 2),
-                ),
+                borderRadius: BorderRadius.all(Radius.circular(56 / 2)),
               ),
               child: const Icon(Icons.group_add_rounded),
             )
@@ -119,9 +110,7 @@ class _GroupsPageState extends State<GroupsPage>
 }
 
 class _GroupsItem extends StatefulWidget {
-  const _GroupsItem({
-    required this.kdbxGroup,
-  });
+  const _GroupsItem({required this.kdbxGroup});
 
   final KdbxGroup kdbxGroup;
 
@@ -138,7 +127,8 @@ class _GroupsItemState extends State<_GroupsItem>
   void didNavigationHistory() {
     if (context.topRoute.name == ManageGroupEntryRoute.name ||
         context.topRoute.name == EditGroupPageRoute.name) {
-      final selected = context.topRoute.inheritedPathParams.optString("uuid") ==
+      final selected =
+          context.topRoute.inheritedPathParams.optString("uuid") ==
           widget.kdbxGroup.uuid.deBase64Uuid;
 
       if (selected != _selected) {
@@ -156,10 +146,7 @@ class _GroupsItemState extends State<_GroupsItem>
   void _kdbxGroupDelete(KdbxGroup kdbxGroup) async {
     final t = I18n.of(context)!;
 
-    if (await showConfirmDialog(
-      title: t.delete,
-      message: t.is_move_recycle,
-    )) {
+    if (await showConfirmDialog(title: t.delete, message: t.is_move_recycle)) {
       final kdbx = KdbxProvider.of(context)!;
       kdbx.deleteGroup(kdbxGroup);
       await kdbxSave(kdbx);
@@ -181,16 +168,13 @@ class _GroupsItemState extends State<_GroupsItem>
         switch (type) {
           case SearchContextMenuItem():
             context.router.navigate(
-              PasswordsRoute(
-                search: 'g:"${kdbxGroup.name.get() ?? ''}"',
-              ),
+              PasswordsRoute(search: 'g:"${kdbxGroup.name.get() ?? ''}"'),
             );
             break;
           case ModifyContextMenuItem():
-            context.router.platformNavigate(EditGroupPageRoute(
-              kdbxGroup: kdbxGroup,
-              uuid: kdbxGroup.uuid,
-            ));
+            context.router.platformNavigate(
+              EditGroupPageRoute(kdbxGroup: kdbxGroup, uuid: kdbxGroup.uuid),
+            );
             break;
           case DeleteContextMenuItem():
             _kdbxGroupDelete(kdbxGroup);
@@ -263,36 +247,33 @@ class _GroupsItemState extends State<_GroupsItem>
                       .formatDate,
                   overflow: TextOverflow.ellipsis,
                 ),
-              )
+              ),
             ],
           ),
         ),
         onTap: () {
           context.router.platformNavigate(
-            ManageGroupEntryRoute(
-              kdbxGroup: kdbxGroup,
-              uuid: kdbxGroup.uuid,
-            ),
+            ManageGroupEntryRoute(kdbxGroup: kdbxGroup, uuid: kdbxGroup.uuid),
           );
         },
         onLongPress: isMobile
             ? () => showKdbxGroupAction(
-                  kdbxGroup.name.get() ?? '',
-                  onSearchTap: () {
-                    context.router.navigate(
-                      PasswordsRoute(
-                        search: 'g:"${kdbxGroup.name.get() ?? ''}"',
-                      ),
-                    );
-                  },
-                  onModifyTap: () => context.router.platformNavigate(EditGroupPageRoute(
+                kdbxGroup.name.get() ?? '',
+                onSearchTap: () {
+                  context.router.navigate(
+                    PasswordsRoute(search: 'g:"${kdbxGroup.name.get() ?? ''}"'),
+                  );
+                },
+                onModifyTap: () => context.router.platformNavigate(
+                  EditGroupPageRoute(
                     kdbxGroup: kdbxGroup,
                     uuid: kdbxGroup.uuid,
-                  )),
-                  onDeleteTap: kdbxGroup.parent != null
-                      ? () => _kdbxGroupDelete(kdbxGroup)
-                      : null,
-                )
+                  ),
+                ),
+                onDeleteTap: kdbxGroup.parent != null
+                    ? () => _kdbxGroupDelete(kdbxGroup)
+                    : null,
+              )
             : null,
       ),
     );

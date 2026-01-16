@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:installed_apps/app_info.dart';
 import 'package:installed_apps/installed_apps.dart';
@@ -43,7 +45,7 @@ class AppListScreen extends StatelessWidget {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: Colors.transparent,
-          child: Image.memory(app.icon!),
+          child: Image.file(File(app.icon)),
         ),
         title: Text(app.name),
         subtitle: Text(app.getVersionInfo()),

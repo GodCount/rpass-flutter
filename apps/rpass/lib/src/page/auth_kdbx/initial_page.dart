@@ -20,21 +20,14 @@ class _InitialArgs extends PageRouteArgs {
 }
 
 class InitialRoute extends PageRouteInfo<_InitialArgs> {
-  InitialRoute({
-    Key? key,
-  }) : super(
-          name,
-          args: _InitialArgs(key: key),
-        );
+  InitialRoute({Key? key}) : super(name, args: _InitialArgs(key: key));
 
   static const name = "InitialRoute";
 
   static final PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<_InitialArgs>(
-        orElse: () => _InitialArgs(),
-      );
+      final args = data.argsAs<_InitialArgs>(orElse: () => _InitialArgs());
       return InitialPage(key: args.key);
     },
   );
@@ -109,8 +102,10 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
         throw Exception("Lack of key file.");
       }
 
-      final credentials =
-          Kdbx.createCredentials(isPassword ? passowrd : null, keyFile?.$2);
+      final credentials = Kdbx.createCredentials(
+        isPassword ? passowrd : null,
+        keyFile?.$2,
+      );
 
       final kdbx = Kdbx.create(
         credentials: credentials,
@@ -132,10 +127,9 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
       throw Exception("Invalid file extension");
     }
 
-    final result = await context.router.push(LoadExternalKdbxRoute(
-      kdbxFile: file.$2,
-      kdbxFilePath: file.$1,
-    ));
+    final result = await context.router.push(
+      LoadExternalKdbxRoute(kdbxFile: file.$2, kdbxFilePath: file.$1),
+    );
 
     if (result != null && result is (Kdbx, String?)) {
       await _setInitKdbx(result);
@@ -145,16 +139,18 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
   @override
   Future<void> importKdbxByWebDav() async {
     // 登录 webdav
-    final result = await context.router.push(AuthRemoteFsRoute(
-      config: WebdavConfig(),
-      type: AuthRemoteRouteType.import,
-    ));
+    final result = await context.router.push(
+      AuthRemoteFsRoute(
+        config: WebdavConfig(),
+        type: AuthRemoteRouteType.import,
+      ),
+    );
 
     if (result != null && result is WebdavClient) {
       // 导入 kdbx 文件
-      final result2 = await context.router.push(ImportRemoteKdbxRoute(
-        client: result,
-      ));
+      final result2 = await context.router.push(
+        ImportRemoteKdbxRoute(client: result),
+      );
 
       if (result2 != null && result2 is (Kdbx, String?)) {
         await _setInitKdbx(result2);

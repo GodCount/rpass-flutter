@@ -8,28 +8,17 @@ import '../../util/route.dart';
 import '../../widget/chip_list.dart';
 
 class _EditAutoTypeArgs extends PageRouteArgs {
-  _EditAutoTypeArgs({
-    super.key,
-    required this.text,
-    this.kdbxEntry,
-  });
+  _EditAutoTypeArgs({super.key, required this.text, this.kdbxEntry});
   final String text;
   final KdbxEntry? kdbxEntry;
 }
 
 class EditAutoTypeRoute extends PageRouteInfo<_EditAutoTypeArgs> {
-  EditAutoTypeRoute({
-    Key? key,
-    required String text,
-    KdbxEntry? kdbxEntry,
-  }) : super(
-          name,
-          args: _EditAutoTypeArgs(
-            key: key,
-            text: text,
-            kdbxEntry: kdbxEntry,
-          ),
-        );
+  EditAutoTypeRoute({Key? key, required String text, KdbxEntry? kdbxEntry})
+    : super(
+        name,
+        args: _EditAutoTypeArgs(key: key, text: text, kdbxEntry: kdbxEntry),
+      );
 
   static const name = "EditAutoTypeRoute";
 
@@ -37,9 +26,7 @@ class EditAutoTypeRoute extends PageRouteInfo<_EditAutoTypeArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<_EditAutoTypeArgs>(
-        orElse: () => _EditAutoTypeArgs(
-          text: "",
-        ),
+        orElse: () => _EditAutoTypeArgs(text: ""),
       );
       return EditAutoTypePage(
         key: args.key,
@@ -51,11 +38,7 @@ class EditAutoTypeRoute extends PageRouteInfo<_EditAutoTypeArgs> {
 }
 
 class EditAutoTypePage extends StatefulWidget {
-  const EditAutoTypePage({
-    super.key,
-    required this.text,
-    this.kdbxEntry,
-  });
+  const EditAutoTypePage({super.key, required this.text, this.kdbxEntry});
 
   final String text;
   final KdbxEntry? kdbxEntry;
@@ -78,8 +61,9 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
   void _insertTextAtCursor(String textToInsert) {
     final selection = _controller!.selection;
 
-    final start =
-        selection.start == -1 ? _controller!.text.length : selection.start;
+    final start = selection.start == -1
+        ? _controller!.text.length
+        : selection.start;
 
     final end = selection.end == -1 ? start : selection.end;
 
@@ -113,27 +97,24 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
         MatchTargetItem.pattern(
           AutoTypeRichPattern.BUTTON,
           allowInlineMatching: true,
-          style: Theme.of(context)
-              .textTheme
-              .bodyLarge!
-              .copyWith(color: Colors.blueAccent),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge!.copyWith(color: Colors.blueAccent),
         ),
         MatchTargetItem.pattern(
           AutoTypeRichPattern.KDBX_KEY,
           allowInlineMatching: true,
-          style: Theme.of(context)
-              .textTheme
-              .bodyLarge!
-              .copyWith(color: Colors.green),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge!.copyWith(color: Colors.green),
         ),
         MatchTargetItem.pattern(
           AutoTypeRichPattern.SHORTCUT_KEY,
           allowInlineMatching: true,
-          style: Theme.of(context)
-              .textTheme
-              .bodyLarge!
-              .copyWith(color: Colors.orangeAccent),
-        )
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge!.copyWith(color: Colors.orangeAccent),
+        ),
       ],
     );
 
@@ -141,15 +122,14 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
     List<KdbxKey> moreUrlsFields = [];
 
     if (widget.kdbxEntry != null) {
-      customFields =
-          widget.kdbxEntry!.customEntries.map((item) => item.key.key).toList();
+      customFields = widget.kdbxEntry!.customEntries
+          .map((item) => item.key.key)
+          .toList();
       moreUrlsFields = widget.kdbxEntry!.moreUrlsKeys;
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(t.edit_auto_fill_sequence),
-      ),
+      appBar: AppBar(title: Text(t.edit_auto_fill_sequence)),
       body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -158,9 +138,7 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
             child: TextFormField(
               controller: _controller,
               focusNode: _focusNode,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(border: OutlineInputBorder()),
             ),
           ),
           Expanded(
@@ -170,12 +148,19 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
                   title: Text(t.default_field),
                   subtitle: ChipList(
                     onChipTap: (item) => _insertTextAtCursor(item.value),
-                    items: [...KdbxKeyCommon.excludeURL, KdbxKeyCommon.URL, ...moreUrlsFields]
-                        .map((item) => ChipListItem(
-                              label: "{${item.key}}",
-                              value: "{${item.key}}",
-                            ))
-                        .toList(),
+                    items:
+                        [
+                              ...KdbxKeyCommon.excludeURL,
+                              KdbxKeyCommon.URL,
+                              ...moreUrlsFields,
+                            ]
+                            .map(
+                              (item) => ChipListItem(
+                                label: "{${item.key}}",
+                                value: "{${item.key}}",
+                              ),
+                            )
+                            .toList(),
                   ),
                 ),
                 if (customFields.isNotEmpty)
@@ -184,10 +169,12 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
                     subtitle: ChipList(
                       onChipTap: (item) => _insertTextAtCursor(item.value),
                       items: customFields
-                          .map((item) => ChipListItem(
-                                label: "{S:$item}",
-                                value: "{S:$item}",
-                              ))
+                          .map(
+                            (item) => ChipListItem(
+                              label: "{S:$item}",
+                              value: "{S:$item}",
+                            ),
+                          )
                           .toList(),
                     ),
                   ),
@@ -196,16 +183,13 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
                   subtitle: ChipList(
                     onChipTap: (item) => _insertTextAtCursor(item.value),
                     items: AutoTypeKeys.BUTTON
-                        .map((item) => ChipListItem(
-                              label: item,
-                              value: item,
-                            ))
+                        .map((item) => ChipListItem(label: item, value: item))
                         .toList(),
                   ),
-                )
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -218,9 +202,7 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
           }
         },
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(56 / 2),
-          ),
+          borderRadius: BorderRadius.all(Radius.circular(56 / 2)),
         ),
         child: const Icon(Icons.done),
       ),

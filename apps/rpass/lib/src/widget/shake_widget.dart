@@ -3,7 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 abstract class AnimationControllerState<T extends StatefulWidget>
-    extends State<T> with SingleTickerProviderStateMixin {
+    extends State<T>
+    with SingleTickerProviderStateMixin {
   Duration? _duration;
 
   late final AnimationController animationController;
@@ -11,7 +12,9 @@ abstract class AnimationControllerState<T extends StatefulWidget>
   @override
   void initState() {
     animationController = AnimationController(
-        vsync: this, duration: _duration ?? const Duration(milliseconds: 400));
+      vsync: this,
+      duration: _duration ?? const Duration(milliseconds: 400),
+    );
     super.initState();
   }
 
@@ -69,8 +72,9 @@ class ShakeWidgetState extends AnimationControllerState<ShakeWidget> {
       animation: animationController,
       child: widget.child,
       builder: (context, child) {
-        final sineValue =
-            sin(widget.count * 2 * pi * animationController.value);
+        final sineValue = sin(
+          widget.count * 2 * pi * animationController.value,
+        );
         return Transform.translate(
           offset: Offset(sineValue * widget.offset, 0),
           child: child,
@@ -80,10 +84,8 @@ class ShakeWidgetState extends AnimationControllerState<ShakeWidget> {
   }
 }
 
-typedef ShakeFormFieldBuilder<T> = Widget Function(
-  BuildContext context,
-  FormFieldValidator<T>? validator,
-);
+typedef ShakeFormFieldBuilder<T> =
+    Widget Function(BuildContext context, FormFieldValidator<T>? validator);
 
 class ShakeFormField<T> extends StatefulWidget {
   const ShakeFormField({

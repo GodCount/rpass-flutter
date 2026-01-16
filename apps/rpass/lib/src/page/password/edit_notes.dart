@@ -16,28 +16,17 @@ class EditNotesArgs {
 }
 
 class _EditNotesArgs extends PageRouteArgs {
-  _EditNotesArgs({
-    super.key,
-    required this.text,
-    this.readOnly = false,
-  });
+  _EditNotesArgs({super.key, required this.text, this.readOnly = false});
   final String text;
   final bool readOnly;
 }
 
 class EditNotesRoute extends PageRouteInfo<_EditNotesArgs> {
-  EditNotesRoute({
-    Key? key,
-    required String text,
-    bool readOnly = false,
-  }) : super(
-          name,
-          args: _EditNotesArgs(
-            key: key,
-            text: text,
-            readOnly: readOnly,
-          ),
-        );
+  EditNotesRoute({Key? key, required String text, bool readOnly = false})
+    : super(
+        name,
+        args: _EditNotesArgs(key: key, text: text, readOnly: readOnly),
+      );
 
   static const name = "EditNotesRoute";
 
@@ -45,10 +34,7 @@ class EditNotesRoute extends PageRouteInfo<_EditNotesArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<_EditNotesArgs>(
-        orElse: () => _EditNotesArgs(
-          text: "",
-          readOnly: true,
-        ),
+        orElse: () => _EditNotesArgs(text: "", readOnly: true),
       );
       return EditNotesPage(
         key: args.key,
@@ -60,11 +46,7 @@ class EditNotesRoute extends PageRouteInfo<_EditNotesArgs> {
 }
 
 class EditNotesPage extends StatefulWidget {
-  const EditNotesPage({
-    super.key,
-    required this.text,
-    this.readOnly = false,
-  });
+  const EditNotesPage({super.key, required this.text, this.readOnly = false});
 
   final String text;
   final bool readOnly;
@@ -94,9 +76,7 @@ class _EditNotesPageState extends State<EditNotesPage> {
           keyboardType: TextInputType.multiline,
           initialValue: widget.text,
           readOnly: widget.readOnly,
-          decoration: const InputDecoration(
-            border: InputBorder.none,
-          ),
+          decoration: const InputDecoration(border: InputBorder.none),
           onChanged: (value) {
             if (_text == null) {
               setState(() {
@@ -115,9 +95,7 @@ class _EditNotesPageState extends State<EditNotesPage> {
                 context.router.pop(_text);
               },
               shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(56 / 2),
-                ),
+                borderRadius: BorderRadius.all(Radius.circular(56 / 2)),
               ),
               child: const Icon(Icons.done),
             )

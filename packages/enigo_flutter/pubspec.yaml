@@ -2,10 +2,10 @@ name: enigo_flutter
 description: "A binding rust enigo flutter plugin."
 version: 0.0.1
 homepage: https://github.com/GodCount/enigo_flutter
+resolution: workspace
 
 environment:
-  sdk: ^3.0.0
-  flutter: ">=3.3.0"
+  sdk: ">=3.10.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -18,7 +18,7 @@ dev_dependencies:
   ffigen: ^11.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^6.0.0
   integration_test:
     sdk: flutter
 

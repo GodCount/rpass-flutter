@@ -46,7 +46,7 @@ class WebdavConfig extends RemoteClientConfig {
         description: "Auth Type",
         value: type.name,
         optionList: AuthType.values.map((item) => item.name).toList(),
-      )
+      ),
     };
   }
 
@@ -171,10 +171,7 @@ class WebdavClient extends RemoteClient<WebdavConfig> {
     CancelSignal? cancelSignal,
   ]) async {
     return _transformFile(
-      await _client.readProps(
-        path,
-        _transformCancel(cancelSignal),
-      ),
+      await _client.readProps(path, _transformCancel(cancelSignal)),
     );
   }
 
@@ -183,9 +180,10 @@ class WebdavClient extends RemoteClient<WebdavConfig> {
     String path, [
     CancelSignal? cancelSignal,
   ]) async {
-    return (await _client.readDir(path, _transformCancel(cancelSignal)))
-        .map(_transformFile)
-        .toList();
+    return (await _client.readDir(
+      path,
+      _transformCancel(cancelSignal),
+    )).map(_transformFile).toList();
   }
 
   @override

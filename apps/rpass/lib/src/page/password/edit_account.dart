@@ -24,11 +24,7 @@ import '../../widget/shake_widget.dart';
 final _logger = Logger("page:edit_account");
 
 class _EditAccountArgs extends PageRouteArgs {
-  _EditAccountArgs({
-    super.key,
-    this.kdbxEntry,
-    this.initKdbxGroup,
-  });
+  _EditAccountArgs({super.key, this.kdbxEntry, this.initKdbxGroup});
 
   final KdbxEntry? kdbxEntry;
   final KdbxGroup? initKdbxGroup;
@@ -41,16 +37,14 @@ class EditAccountRoute extends PageRouteInfo<_EditAccountArgs> {
     KdbxGroup? initKdbxGroup,
     KdbxUuid? uuid,
   }) : super(
-          name,
-          args: _EditAccountArgs(
-            key: key,
-            kdbxEntry: kdbxEntry,
-            initKdbxGroup: initKdbxGroup,
-          ),
-          rawPathParams: {
-            "uuid": uuid?.deBase64Uuid,
-          },
-        );
+         name,
+         args: _EditAccountArgs(
+           key: key,
+           kdbxEntry: kdbxEntry,
+           initKdbxGroup: initKdbxGroup,
+         ),
+         rawPathParams: {"uuid": uuid?.deBase64Uuid},
+       );
 
   static const name = "EditAccountRoute";
 
@@ -63,9 +57,7 @@ class EditAccountRoute extends PageRouteInfo<_EditAccountArgs> {
           final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
           final kdbxEntry = uuid != null ? kdbx.findEntryByUuid(uuid) : null;
 
-          return _EditAccountArgs(
-            kdbxEntry: kdbxEntry,
-          );
+          return _EditAccountArgs(kdbxEntry: kdbxEntry);
         },
       );
       return EditAccountPage(
@@ -78,11 +70,7 @@ class EditAccountRoute extends PageRouteInfo<_EditAccountArgs> {
 }
 
 class EditAccountPage extends StatefulWidget {
-  const EditAccountPage({
-    super.key,
-    this.kdbxEntry,
-    this.initKdbxGroup,
-  });
+  const EditAccountPage({super.key, this.kdbxEntry, this.initKdbxGroup});
 
   final KdbxEntry? kdbxEntry;
   final KdbxGroup? initKdbxGroup;
@@ -97,8 +85,9 @@ class _EditAccountPageState extends State<EditAccountPage>
 
   late KdbxEntry _kdbxEntry = widget.kdbxEntry ?? _createKdbxEntry();
 
-  late Set<KdbxKey> _entryFields =
-      _kdbxEntry.customEntries.map((item) => item.key).toSet();
+  late Set<KdbxKey> _entryFields = _kdbxEntry.customEntries
+      .map((item) => item.key)
+      .toSet();
 
   late Set<KdbxKey> _urlsFields = _kdbxEntry.moreUrlsKeys.toSet();
 
@@ -120,13 +109,10 @@ class _EditAccountPageState extends State<EditAccountPage>
   }
 
   KdbxEntry _createKdbxEntry() {
-    return KdbxProvider.of(context)!.createVirtualEntry()
-      ..setString(
-        KdbxKeyCommon.PASSWORD,
-        PlainValue(
-          randomPassword(length: 10).$1,
-        ),
-      );
+    return KdbxProvider.of(context)!.createVirtualEntry()..setString(
+      KdbxKeyCommon.PASSWORD,
+      PlainValue(randomPassword(length: 10).$1),
+    );
   }
 
   void _kdbxEntrySave() async {
@@ -281,9 +267,7 @@ class _EditAccountPageState extends State<EditAccountPage>
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(right: 6),
-                    child: Icon(
-                      Icons.assessment_rounded,
-                    ),
+                    child: Icon(Icons.assessment_rounded),
                   ),
                   Text(
                     t.project_info,
@@ -312,9 +296,7 @@ class _EditAccountPageState extends State<EditAccountPage>
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(right: 6),
-                    child: Icon(
-                      Icons.account_box_rounded,
-                    ),
+                    child: Icon(Icons.account_box_rounded),
                   ),
                   Text(
                     t.account_info,
@@ -352,9 +334,7 @@ class _EditAccountPageState extends State<EditAccountPage>
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(right: 6),
-                    child: Icon(
-                      Icons.ads_click,
-                    ),
+                    child: Icon(Icons.ads_click),
                   ),
                   Text(
                     t.auto_fill_info,
@@ -403,9 +383,7 @@ class _EditAccountPageState extends State<EditAccountPage>
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(right: 6),
-                    child: Icon(
-                      Icons.description_rounded,
-                    ),
+                    child: Icon(Icons.description_rounded),
                   ),
                   Text(
                     t.custom_field,
@@ -433,9 +411,7 @@ class _EditAccountPageState extends State<EditAccountPage>
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(right: 6),
-                    child: Icon(
-                      Icons.add_box_rounded,
-                    ),
+                    child: Icon(Icons.add_box_rounded),
                   ),
                   Text(
                     t.additional_info,
@@ -465,7 +441,7 @@ class _EditAccountPageState extends State<EditAccountPage>
               onSaved: _entryFieldSaved,
             ),
           ]),
-          const SizedBox(height: 42)
+          const SizedBox(height: 42),
         ],
       ),
     );
@@ -492,9 +468,7 @@ class _EditAccountPageState extends State<EditAccountPage>
               heroTag: const ValueKey("edit_account_float"),
               onPressed: _kdbxEntrySave,
               shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(56 / 2),
-                ),
+                borderRadius: BorderRadius.all(Radius.circular(56 / 2)),
               ),
               child: const Icon(Icons.save),
             )
@@ -511,10 +485,7 @@ class _EditAccountPageState extends State<EditAccountPage>
       child: ClipRRect(
         child: Padding(
           padding: const EdgeInsets.only(top: 6, bottom: 12),
-          child: Column(
-            spacing: 12,
-            children: children,
-          ),
+          child: Column(spacing: 12, children: children),
         ),
       ),
     );
@@ -530,7 +501,7 @@ class _EditAccountPageState extends State<EditAccountPage>
           onPressed: onPressed,
           label: Text(label),
           icon: const Icon(Icons.add),
-        )
+        ),
       ],
     );
   }
@@ -590,33 +561,32 @@ typedef OnEntryFieldSaved = void Function(EntryFieldSaved field);
 
 class KdbxEntryGroup extends FormField<KdbxGroup> {
   KdbxEntryGroup({super.key, super.initialValue, super.onSaved})
-      : super(
-          builder: (field) {
-            return Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16),
-              child: GestureDetector(
-                onTap: () async {
-                  final result =
-                      await field.showGroupSelectorDialog(field.value);
+    : super(
+        builder: (field) {
+          return Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16),
+            child: GestureDetector(
+              onTap: () async {
+                final result = await field.showGroupSelectorDialog(field.value);
 
-                  if (result != null) {
-                    field.didChange(result);
-                  }
-                },
-                child: InputDecorator(
-                  isEmpty: field.value == null,
-                  decoration: InputDecoration(
-                    labelText: I18n.of(field.context)!.group,
-                    border: const OutlineInputBorder(),
-                  ),
-                  child: field.value != null
-                      ? Text(field.value!.name.get() ?? '')
-                      : null,
+                if (result != null) {
+                  field.didChange(result);
+                }
+              },
+              child: InputDecorator(
+                isEmpty: field.value == null,
+                decoration: InputDecoration(
+                  labelText: I18n.of(field.context)!.group,
+                  border: const OutlineInputBorder(),
                 ),
+                child: field.value != null
+                    ? Text(field.value!.name.get() ?? '')
+                    : null,
               ),
-            );
-          },
-        );
+            ),
+          );
+        },
+      );
 }
 
 class EntryField extends StatefulWidget {
@@ -648,7 +618,7 @@ class _EntryFieldState extends State<EntryField> {
     final kdbx = KdbxProvider.of(context)!;
     final limitItmes = {
       ...defaultKdbxKeys,
-      ...widget.kdbxEntry.stringEntries.map((item) => item.key)
+      ...widget.kdbxEntry.stringEntries.map((item) => item.key),
     }.map((item) => item.key).toList();
 
     limitItmes.remove(widget.kdbxKey.key);
@@ -706,9 +676,7 @@ class _EntryFieldState extends State<EntryField> {
                     foregroundColor: Theme.of(context).colorScheme.error,
                     onPressed: (context) => widget.onDeleted!(widget.kdbxKey),
                   ),
-                const SizedBox(
-                  width: 16,
-                )
+                const SizedBox(width: 16),
               ],
             ),
             child: child,
@@ -768,19 +736,22 @@ class _EntryFieldState extends State<EntryField> {
       case KdbxKeyURLS.KEY_URL3:
       case KdbxKeyURLS.KEY_URL4:
       case KdbxKeyURLS.KEY_URL5:
-        return (value) => value != null &&
+        return (value) =>
+            value != null &&
                 value.isNotEmpty &&
                 !CommonRegExp.domain.hasMatch(value)
             ? t.format_error(CommonRegExp.domain.pattern)
             : null;
       case KdbxKeyCommon.KEY_EMAIL:
-        return (value) => value != null &&
+        return (value) =>
+            value != null &&
                 value.isNotEmpty &&
                 !CommonRegExp.email.hasMatch(value)
             ? t.format_error(CommonRegExp.email.pattern)
             : null;
       case KdbxKeyCommon.KEY_OTP:
-        return (value) => value != null &&
+        return (value) =>
+            value != null &&
                 value.isNotEmpty &&
                 !CommonRegExp.oneTimePassword.hasMatch(value)
             ? t.format_error(CommonRegExp.oneTimePassword.pattern)
@@ -791,18 +762,21 @@ class _EntryFieldState extends State<EntryField> {
   }
 
   void _kdbxTextFieldSaved(String? value) {
-    widget.onSaved(EntryTextFieldSaved(
-      key: widget.kdbxKey,
-      renameKdbxKey: _renameKdbxKey,
-      value: value != null && value.isNotEmpty ? PlainValue(value) : null,
-    ));
+    widget.onSaved(
+      EntryTextFieldSaved(
+        key: widget.kdbxKey,
+        renameKdbxKey: _renameKdbxKey,
+        value: value != null && value.isNotEmpty ? PlainValue(value) : null,
+      ),
+    );
   }
 
   KdbxKey _uniqueBinaryName(String filepath) {
     final fileName = path.basename(filepath);
     final lastIndex = fileName.lastIndexOf('.');
-    final baseName =
-        lastIndex > -1 ? fileName.substring(0, lastIndex) : fileName;
+    final baseName = lastIndex > -1
+        ? fileName.substring(0, lastIndex)
+        : fileName;
     final ext = lastIndex > -1 ? fileName.substring(lastIndex + 1) : 'ext';
     for (var i = 0; i < 1000; i++) {
       final k = i == 0 ? KdbxKey(fileName) : KdbxKey('$baseName$i.$ext');
@@ -856,12 +830,14 @@ class _EntryFieldState extends State<EntryField> {
             customIcon: widget.kdbxEntry.customIcon,
           ),
           onSaved: (data) {
-            widget.onSaved(EntryTitleFieldSaved(
-              key: widget.kdbxKey,
-              value: PlainValue(data!.$1),
-              icon: data.$2,
-              customIcon: data.$3,
-            ));
+            widget.onSaved(
+              EntryTitleFieldSaved(
+                key: widget.kdbxKey,
+                value: PlainValue(data!.$1),
+                icon: data.$2,
+                customIcon: data.$3,
+              ),
+            );
           },
         );
       case KdbxKeyCommon.KEY_URL:
@@ -870,22 +846,26 @@ class _EntryFieldState extends State<EntryField> {
         return ShakeFormField<String>(
           validator: _entryFieldValidator(),
           builder: (context, validator) {
-            return LayoutBuilder(builder: (context, constraints) {
-              return DropdownMenuFormField2(
-                width: constraints.biggest.width,
-                initialValue:
-                    widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
-                items:
-                    kdbx.fieldStatistic.getStatistic(widget.kdbxKey).toList(),
-                label: _kdbKey2I18n(),
-                onSaved: _kdbxTextFieldSaved,
-                expandedInsets: const EdgeInsets.all(0),
-                validator: validator,
-                menuHeight: 150,
-                enableFilter: true,
-                requestFocusOnTap: true,
-              );
-            });
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                return DropdownMenuFormField2(
+                  width: constraints.biggest.width,
+                  initialValue: widget.kdbxEntry
+                      .getString(widget.kdbxKey)
+                      ?.getText(),
+                  items: kdbx.fieldStatistic
+                      .getStatistic(widget.kdbxKey)
+                      .toList(),
+                  label: _kdbKey2I18n(),
+                  onSaved: _kdbxTextFieldSaved,
+                  expandedInsets: const EdgeInsets.all(0),
+                  validator: validator,
+                  menuHeight: 150,
+                  enableFilter: true,
+                  requestFocusOnTap: true,
+                );
+              },
+            );
           },
         );
       case KdbxKeyCommon.KEY_PASSWORD:
@@ -908,8 +888,9 @@ class _EntryFieldState extends State<EntryField> {
         return EntryTextFormField(
           initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
           label: _kdbKey2I18n(),
-          trailingIcon:
-              _displayScanner ? const Icon(Icons.qr_code_scanner) : null,
+          trailingIcon: _displayScanner
+              ? const Icon(Icons.qr_code_scanner)
+              : null,
           onTrailingTap: _displayScanner
               ? () async {
                   final optUrl = await context.router.push(
@@ -935,10 +916,9 @@ class _EntryFieldState extends State<EntryField> {
           label: _kdbKey2I18n(),
           kdbxEntry: widget.kdbxEntry,
           onSaved: (value) {
-            widget.onSaved(EntryAutoTypeFieldSaved(
-              key: widget.kdbxKey,
-              value: value!,
-            ));
+            widget.onSaved(
+              EntryAutoTypeFieldSaved(key: widget.kdbxKey, value: value!),
+            );
           },
         );
       case KdbxKeySpecial.KEY_AUTO_FILL_PACKAGE_NAME:
@@ -946,10 +926,9 @@ class _EntryFieldState extends State<EntryField> {
           label: _kdbKey2I18n(),
           initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
           onSaved: (value) {
-            widget.onSaved(EntryAutoFillAppFieldSaved(
-              key: widget.kdbxKey,
-              value: value,
-            ));
+            widget.onSaved(
+              EntryAutoFillAppFieldSaved(key: widget.kdbxKey, value: value),
+            );
           },
         );
       case KdbxKeySpecial.KEY_TAGS:
@@ -958,12 +937,14 @@ class _EntryFieldState extends State<EntryField> {
           label: _kdbKey2I18n(),
           initialValue: kdbx.fieldStatistic
               .getStatistic(widget.kdbxKey)
-              .map((item) => ChipListItem(
-                    value: item,
-                    label: item,
-                    select: tags.contains(item),
-                    deletable: false,
-                  ))
+              .map(
+                (item) => ChipListItem(
+                  value: item,
+                  label: item,
+                  select: tags.contains(item),
+                  deletable: false,
+                ),
+              )
               .toList(),
           onChipTap: (item) {
             item.select = !item.select;
@@ -971,24 +952,28 @@ class _EntryFieldState extends State<EntryField> {
           },
           onAddChipTap: _addTag,
           onSaved: (list) {
-            widget.onSaved(EntryTagsFieldSaved(
-              key: widget.kdbxKey,
-              value: list!
-                  .where((item) => item.select)
-                  .map((item) => item.value)
-                  .toList(),
-            ));
+            widget.onSaved(
+              EntryTagsFieldSaved(
+                key: widget.kdbxKey,
+                value: list!
+                    .where((item) => item.select)
+                    .map((item) => item.value)
+                    .toList(),
+              ),
+            );
           },
         );
       case KdbxKeySpecial.KEY_ATTACH:
         return ChipListFormField(
           label: _kdbKey2I18n(),
           initialValue: widget.kdbxEntry.binaryEntries
-              .map((item) => ChipListItem(
-                    value: item,
-                    label: item.key.key,
-                    deletable: !item.value.isProtected,
-                  ))
+              .map(
+                (item) => ChipListItem(
+                  value: item,
+                  label: item.key.key,
+                  deletable: !item.value.isProtected,
+                ),
+              )
               .toList(),
           onChanged: (list) {
             _binaryKeys = list.map((item) => item.value.key).toList();
@@ -1002,11 +987,7 @@ class _EntryFieldState extends State<EntryField> {
               final (filepath, bytes) = await SimpleFile.openFile();
               final map = MapEntry(
                 _uniqueBinaryName(filepath),
-                KdbxBinary(
-                  isInline: false,
-                  isProtected: false,
-                  value: bytes,
-                ),
+                KdbxBinary(isInline: false, isProtected: false, value: bytes),
               );
               return ChipListItem(value: map, label: map.key.key);
             } catch (e) {
@@ -1018,10 +999,12 @@ class _EntryFieldState extends State<EntryField> {
             return null;
           },
           onSaved: (list) {
-            widget.onSaved(EntryBinaryFieldSaved(
-              key: widget.kdbxKey,
-              value: list!.map((item) => item.value).toList(),
-            ));
+            widget.onSaved(
+              EntryBinaryFieldSaved(
+                key: widget.kdbxKey,
+                value: list!.map((item) => item.value).toList(),
+              ),
+            );
           },
         );
       case KdbxKeySpecial.KEY_EXPIRES:
@@ -1033,10 +1016,9 @@ class _EntryFieldState extends State<EntryField> {
                 DateTime(4001, 7, 1, 18, 11, 58),
           ),
           onSaved: (value) {
-            widget.onSaved(EntryExpiresFieldSaved(
-              key: widget.kdbxKey,
-              value: value!,
-            ));
+            widget.onSaved(
+              EntryExpiresFieldSaved(key: widget.kdbxKey, value: value!),
+            );
           },
         );
       case KdbxKeyURLS.KEY_URL1:
@@ -1048,8 +1030,9 @@ class _EntryFieldState extends State<EntryField> {
           validator: _entryFieldValidator(),
           builder: (context, validator) {
             return EntryTextFormField(
-              initialValue:
-                  widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
+              initialValue: widget.kdbxEntry
+                  .getString(widget.kdbxKey)
+                  ?.getText(),
               label: _kdbKey2I18n(),
               validator: validator,
               onSaved: _kdbxTextFieldSaved,
@@ -1077,19 +1060,14 @@ class _EntryFieldState extends State<EntryField> {
       label: t.new_label,
       limitItems: [
         ...kdbx.fieldStatistic.getStatistic(KdbxKeySpecial.TAGS),
-        ...list.map((item) => item.value)
+        ...list.map((item) => item.value),
       ],
     );
 
     if (result != null && result is String) {
-      return ChipListItem(
-        value: result,
-        label: result,
-        select: true,
-      );
+      return ChipListItem(value: result, label: result, select: true);
     }
 
     return null;
   }
 }
-

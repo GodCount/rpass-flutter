@@ -6,11 +6,7 @@ import '../channel.dart';
 
 final _logger = Logger("native:android");
 
-enum AutofillServiceStatus {
-  unsupported,
-  disabled,
-  enabled,
-}
+enum AutofillServiceStatus { unsupported, disabled, enabled }
 
 class AutofillField {
   static const PASSWORD = "password";
@@ -32,8 +28,10 @@ class AutofillMetadata {
             .map((dynamic e) => e as String)
             .toSet(),
         webDomains: (json['webDomains'] as Iterable)
-            .map((dynamic e) =>
-                AutofillWebDomain.fromJson(e as Map<dynamic, dynamic>))
+            .map(
+              (dynamic e) =>
+                  AutofillWebDomain.fromJson(e as Map<dynamic, dynamic>),
+            )
             .toSet(),
         fieldTypes: (json['fieldTypes'] as Iterable)
             .map((dynamic e) => e as String)
@@ -48,10 +46,10 @@ class AutofillMetadata {
   String toString() => toJson().toString();
 
   Map<String, Object> toJson() => {
-        'packageNames': packageNames,
-        'webDomains': webDomains.map((e) => e.toJson()),
-        'fieldTypes': fieldTypes,
-      };
+    'packageNames': packageNames,
+    'webDomains': webDomains.map((e) => e.toJson()),
+    'fieldTypes': fieldTypes,
+  };
 }
 
 class AutofillWebDomain {
@@ -69,34 +67,26 @@ class AutofillWebDomain {
   @override
   String toString() => toJson().toString();
 
-  Map<String, Object?> toJson() => {
-        'scheme': scheme,
-        'domain': domain,
-      };
+  Map<String, Object?> toJson() => {'scheme': scheme, 'domain': domain};
 }
 
 class AutofillDataset {
-  AutofillDataset({
-    this.label,
-    this.username,
-    this.password,
-    this.otp,
-  });
+  AutofillDataset({this.label, this.username, this.password, this.otp});
 
   final String? label;
   final String? username;
   final String? password;
   final String? otp;
 
-    @override
+  @override
   String toString() => toJson().toString();
 
   Map<String, Object?> toJson() => {
-        'label': label,
-        'username': username,
-        'password': password,
-        'otp': otp,
-      };
+    'label': label,
+    'username': username,
+    'password': password,
+    'otp': otp,
+  };
 }
 
 class AutofillService {
@@ -132,14 +122,15 @@ class _AndroidAutofillService extends AutofillService {
     return result == null
         ? AutofillServiceStatus.unsupported
         : result
-            ? AutofillServiceStatus.enabled
-            : AutofillServiceStatus.disabled;
+        ? AutofillServiceStatus.enabled
+        : AutofillServiceStatus.disabled;
   }
 
   @override
   Future<bool> enabled() async {
-    return await channel
-            .invokeMethod<bool>("request_enabled_autofill_service") ??
+    return await channel.invokeMethod<bool>(
+          "request_enabled_autofill_service",
+        ) ??
         false;
   }
 
@@ -150,8 +141,9 @@ class _AndroidAutofillService extends AutofillService {
 
   @override
   Future<AutofillMetadata?> metadata() async {
-    final result = await channel
-        .invokeMapMethod<dynamic, dynamic>("get_autofill_metadata");
+    final result = await channel.invokeMapMethod<dynamic, dynamic>(
+      "get_autofill_metadata",
+    );
     return result != null ? AutofillMetadata.fromJson(result) : null;
   }
 
@@ -171,8 +163,9 @@ class AndroidNativeInstancePlatform extends NativeInstancePlatform {
 
   final MethodChannel _channel = const MethodChannel('native_channel_rpass');
 
-  late final _AndroidAutofillService _autofillService =
-      _AndroidAutofillService(_channel);
+  late final _AndroidAutofillService _autofillService = _AndroidAutofillService(
+    _channel,
+  );
 
   @override
   AutofillService get autofillService => _autofillService;

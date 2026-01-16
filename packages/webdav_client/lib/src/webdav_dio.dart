@@ -23,11 +23,7 @@ class WdDio with DioMixin implements Dio {
   // debug
   final bool debug;
 
-  WdDio({
-    BaseOptions? options,
-    this.interceptorList,
-    this.debug = false,
-  }) {
+  WdDio({BaseOptions? options, this.interceptorList, this.debug = false}) {
     this.options = options ?? BaseOptions();
     // 禁止重定向
     this.options.followRedirects = false;
@@ -101,9 +97,10 @@ class WdDio with DioMixin implements Dio {
         // Digest
         if (lowerW3AHeader?.contains('digest') == true) {
           self.auth = DigestAuth(
-              user: self.auth.user,
-              pwd: self.auth.pwd,
-              dParts: DigestParts(w3AHeader));
+            user: self.auth.user,
+            pwd: self.auth.pwd,
+            dParts: DigestParts(w3AHeader),
+          );
         }
         // Basic
         else if (lowerW3AHeader?.contains('basic') == true) {
@@ -118,9 +115,10 @@ class WdDio with DioMixin implements Dio {
       else if (self.auth.type == AuthType.DigestAuth &&
           lowerW3AHeader?.contains('stale=true') == true) {
         self.auth = DigestAuth(
-            user: self.auth.user,
-            pwd: self.auth.pwd,
-            dParts: DigestParts(w3AHeader));
+          user: self.auth.user,
+          pwd: self.auth.pwd,
+          dParts: DigestParts(w3AHeader),
+        );
       } else {
         throw newResponseError(resp);
       }
@@ -161,11 +159,18 @@ class WdDio with DioMixin implements Dio {
   }
 
   // OPTIONS
-  Future<Response> wdOptions(Client self, String path,
-      {CancelToken? cancelToken}) {
-    return this.req(self, 'OPTIONS', path,
-        optionsHandler: (options) => options.headers?['depth'] = '0',
-        cancelToken: cancelToken);
+  Future<Response> wdOptions(
+    Client self,
+    String path, {
+    CancelToken? cancelToken,
+  }) {
+    return this.req(
+      self,
+      'OPTIONS',
+      path,
+      optionsHandler: (options) => options.headers?['depth'] = '0',
+      cancelToken: cancelToken,
+    );
   }
 
   // // quota
@@ -180,16 +185,26 @@ class WdDio with DioMixin implements Dio {
 
   // PROPFIND
   Future<Response> wdPropfind(
-      Client self, String path, bool depth, String dataStr,
-      {CancelToken? cancelToken}) async {
-    var resp = await this.req(self, 'PROPFIND', path, data: dataStr,
-        optionsHandler: (options) {
-      options.headers?['depth'] = depth ? '1' : '0';
-      options.headers?['content-type'] = 'application/xml;charset=UTF-8';
-      options.headers?['accept'] = 'application/xml,text/xml';
-      options.headers?['accept-charset'] = 'utf-8';
-      options.headers?['accept-encoding'] = '';
-    }, cancelToken: cancelToken);
+    Client self,
+    String path,
+    bool depth,
+    String dataStr, {
+    CancelToken? cancelToken,
+  }) async {
+    var resp = await this.req(
+      self,
+      'PROPFIND',
+      path,
+      data: dataStr,
+      optionsHandler: (options) {
+        options.headers?['depth'] = depth ? '1' : '0';
+        options.headers?['content-type'] = 'application/xml;charset=UTF-8';
+        options.headers?['accept'] = 'application/xml,text/xml';
+        options.headers?['accept-charset'] = 'utf-8';
+        options.headers?['accept-encoding'] = '';
+      },
+      cancelToken: cancelToken,
+    );
 
     if (resp.statusCode != 207) {
       throw newResponseError(resp);
@@ -199,26 +214,45 @@ class WdDio with DioMixin implements Dio {
   }
 
   /// MKCOL
-  Future<Response> wdMkcol(Client self, String path,
-      {CancelToken? cancelToken}) {
+  Future<Response> wdMkcol(
+    Client self,
+    String path, {
+    CancelToken? cancelToken,
+  }) {
     return this.req(self, 'MKCOL', path, cancelToken: cancelToken);
   }
 
   /// DELETE
-  Future<Response> wdDelete(Client self, String path,
-      {CancelToken? cancelToken}) {
+  Future<Response> wdDelete(
+    Client self,
+    String path, {
+    CancelToken? cancelToken,
+  }) {
     return this.req(self, 'DELETE', path, cancelToken: cancelToken);
   }
 
   /// COPY OR MOVE
   Future<void> wdCopyMove(
-      Client self, String oldPath, String newPath, bool isCopy, bool overwrite,
-      {CancelToken? cancelToken}) async {
+    Client self,
+    String oldPath,
+    String newPath,
+    bool isCopy,
+    bool overwrite, {
+    CancelToken? cancelToken,
+  }) async {
     var method = isCopy == true ? 'COPY' : 'MOVE';
-    var resp = await this.req(self, method, oldPath, optionsHandler: (options) {
-      options.headers?['destination'] = Uri.encodeFull(join(self.uri, newPath));
-      options.headers?['overwrite'] = overwrite == true ? 'T' : 'F';
-    }, cancelToken: cancelToken);
+    var resp = await this.req(
+      self,
+      method,
+      oldPath,
+      optionsHandler: (options) {
+        options.headers?['destination'] = Uri.encodeFull(
+          join(self.uri, newPath),
+        );
+        options.headers?['overwrite'] = overwrite == true ? 'T' : 'F';
+      },
+      cancelToken: cancelToken,
+    );
 
     var status = resp.statusCode;
     // TODO 207
@@ -226,16 +260,25 @@ class WdDio with DioMixin implements Dio {
       return;
     } else if (status == 409) {
       await this._createParent(self, newPath, cancelToken: cancelToken);
-      return this.wdCopyMove(self, oldPath, newPath, isCopy, overwrite,
-          cancelToken: cancelToken);
+      return this.wdCopyMove(
+        self,
+        oldPath,
+        newPath,
+        isCopy,
+        overwrite,
+        cancelToken: cancelToken,
+      );
     } else {
       throw newResponseError(resp);
     }
   }
 
   /// create parent folder
-  Future<void>? _createParent(Client self, String path,
-      {CancelToken? cancelToken}) {
+  Future<void>? _createParent(
+    Client self,
+    String path, {
+    CancelToken? cancelToken,
+  }) {
     var parentPath = path.substring(0, path.lastIndexOf('/') + 1);
 
     if (parentPath == '' || parentPath == '/') {
@@ -276,8 +319,7 @@ class WdDio with DioMixin implements Dio {
                 options.responseType = ResponseType.bytes,
             onReceiveProgress: onProgress,
             cancelToken: cancelToken,
-          ))
-              .data;
+          )).data;
         }
       }
       throw newResponseError(resp);
@@ -354,8 +396,9 @@ class WdDio with DioMixin implements Dio {
     if (compressed) {
       total = -1;
     } else {
-      total =
-          int.parse(resp.headers.value(Headers.contentLengthHeader) ?? '-1');
+      total = int.parse(
+        resp.headers.value(Headers.contentLengthHeader) ?? '-1',
+      );
     }
 
     late StreamSubscription subscription;
@@ -374,26 +417,28 @@ class WdDio with DioMixin implements Dio {
       (data) {
         subscription.pause();
         // Write file asynchronously
-        asyncWrite = raf.writeFrom(data).then((_raf) {
-          // Notify progress
-          received += data.length;
+        asyncWrite = raf
+            .writeFrom(data)
+            .then((_raf) {
+              // Notify progress
+              received += data.length;
 
-          onProgress?.call(received, total);
+              onProgress?.call(received, total);
 
-          raf = _raf;
-          if (cancelToken == null || !cancelToken.isCancelled) {
-            subscription.resume();
-          }
-        }).catchError((err) async {
-          try {
-            await subscription.cancel();
-          } finally {
-            completer.completeError(DioException(
-              requestOptions: resp.requestOptions,
-              error: err,
-            ));
-          }
-        });
+              raf = _raf;
+              if (cancelToken == null || !cancelToken.isCancelled) {
+                subscription.resume();
+              }
+            })
+            .catchError((err) async {
+              try {
+                await subscription.cancel();
+              } finally {
+                completer.completeError(
+                  DioException(requestOptions: resp.requestOptions, error: err),
+                );
+              }
+            });
       },
       onDone: () async {
         try {
@@ -402,20 +447,18 @@ class WdDio with DioMixin implements Dio {
           await raf.close();
           completer.complete(resp);
         } catch (err) {
-          completer.completeError(DioException(
-            requestOptions: resp.requestOptions,
-            error: err,
-          ));
+          completer.completeError(
+            DioException(requestOptions: resp.requestOptions, error: err),
+          );
         }
       },
       onError: (e) async {
         try {
           await _closeAndDelete();
         } finally {
-          completer.completeError(DioException(
-            requestOptions: resp.requestOptions,
-            error: e,
-          ));
+          completer.completeError(
+            DioException(requestOptions: resp.requestOptions, error: e),
+          );
         }
       },
       cancelOnError: true,
@@ -428,12 +471,13 @@ class WdDio with DioMixin implements Dio {
     });
 
     if (resp.requestOptions.receiveTimeout != null &&
-        resp.requestOptions.receiveTimeout!
-                .compareTo(Duration(milliseconds: 0)) >
+        resp.requestOptions.receiveTimeout!.compareTo(
+              Duration(milliseconds: 0),
+            ) >
             0) {
-      future = future
-          .timeout(resp.requestOptions.receiveTimeout!)
-          .catchError((Object err) async {
+      future = future.timeout(resp.requestOptions.receiveTimeout!).catchError((
+        Object err,
+      ) async {
         await subscription.cancel();
         await _closeAndDelete();
         if (err is TimeoutException) {

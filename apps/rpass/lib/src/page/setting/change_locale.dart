@@ -11,12 +11,8 @@ class _ChangeLocaleArgs extends PageRouteArgs {
 }
 
 class ChangeLocaleRoute extends PageRouteInfo<_ChangeLocaleArgs> {
-  ChangeLocaleRoute({
-    Key? key,
-  }) : super(
-          name,
-          args: _ChangeLocaleArgs(key: key),
-        );
+  ChangeLocaleRoute({Key? key})
+    : super(name, args: _ChangeLocaleArgs(key: key));
 
   static const name = "ChangeLocaleRoute";
 
@@ -45,8 +41,9 @@ class _ChangeLocalePageState extends State<ChangeLocalePage>
   @override
   void initState() {
     for (var locale in I18n.supportedLocales) {
-      _locales[locale.toString()] =
-          I18n.lookupLocalizations(locale).locale_name;
+      _locales[locale.toString()] = I18n.lookupLocalizations(
+        locale,
+      ).locale_name;
     }
     super.initState();
   }

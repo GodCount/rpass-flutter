@@ -16,12 +16,7 @@ class _RecycleBinArgs extends PageRouteArgs {
 }
 
 class RecycleBinRoute extends PageRouteInfo<_RecycleBinArgs> {
-  RecycleBinRoute({
-    Key? key,
-  }) : super(
-          name,
-          args: _RecycleBinArgs(key: key),
-        );
+  RecycleBinRoute({Key? key}) : super(name, args: _RecycleBinArgs(key: key));
 
   static const name = "RecycleBinRoute";
 
@@ -103,12 +98,10 @@ class _RecycleBinPageState extends State<RecycleBinPage>
           textColor: Theme.of(context).colorScheme.error,
           leading: const Icon(Icons.delete_forever),
           title: Text(t.completely_delete),
-          onTap: () => _deleteWarnDialog(
-            () {
-              _deletePermanentlys([kdbxObject]);
-              context.router.pop();
-            },
-          ),
+          onTap: () => _deleteWarnDialog(() {
+            _deletePermanentlys([kdbxObject]);
+            context.router.pop();
+          }),
         ),
       ],
     );
@@ -203,7 +196,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
                   onPressed: () =>
                       _deleteWarnDialog(() => _deletePermanentlys(_selecteds)),
                   icon: const Icon(Icons.delete_forever),
-                )
+                ),
               ]
             : null,
       ),
@@ -248,9 +241,9 @@ class _RecycleBinPageState extends State<RecycleBinPage>
             _restoreObjects(selected ? _selecteds : [kdbxObject]);
             break;
           case DeleteContextMenuItem(selected: final selected):
-            _deleteWarnDialog(() => _deletePermanentlys(
-                  selected ? _selecteds : [kdbxObject],
-                ));
+            _deleteWarnDialog(
+              () => _deletePermanentlys(selected ? _selecteds : [kdbxObject]),
+            );
             break;
           default:
             break;
@@ -309,8 +302,9 @@ class _RecycleBinPageState extends State<RecycleBinPage>
             icon: kdbxObject is KdbxEntry ? KdbxIcon.Key : KdbxIcon.Folder,
           ),
         ),
-        trailing:
-            _selecteds.contains(kdbxObject) ? const Icon(Icons.done) : null,
+        trailing: _selecteds.contains(kdbxObject)
+            ? const Icon(Icons.done)
+            : null,
         title: Text(getKdbxObjectTitle(kdbxObject)),
       ),
     );

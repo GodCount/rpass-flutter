@@ -19,13 +19,14 @@ class AppInfo {
 
   factory AppInfo.create(dynamic data) {
     return AppInfo(
-        name: data["name"],
-        icon: data["icon"],
-        packageName: data["packageName"],
-        versionName: data["versionName"] ?? "1.0.0",
-        versionCode: data["versionCode"] ?? 1,
-        installedTimestamp: data["installedTimestamp"] ?? 0,
-        isSystem: data["isSystem"] ?? false);
+      name: data["name"],
+      icon: data["icon"],
+      packageName: data["packageName"],
+      versionName: data["versionName"] ?? "1.0.0",
+      versionCode: data["versionCode"] ?? 1,
+      installedTimestamp: data["installedTimestamp"] ?? 0,
+      isSystem: data["isSystem"] ?? false,
+    );
   }
 
   String getVersionInfo() {
@@ -46,10 +47,12 @@ class AppInfo {
   static List<AppInfo> parseList(dynamic apps) {
     if (apps == null || apps is! List || apps.isEmpty) return [];
     final List<AppInfo> appInfoList = apps
-        .where((element) =>
-            element is Map &&
-            element.containsKey("name") &&
-            element.containsKey("packageName"))
+        .where(
+          (element) =>
+              element is Map &&
+              element.containsKey("name") &&
+              element.containsKey("packageName"),
+        )
         .map((app) => AppInfo.create(app))
         .toList();
     appInfoList.sort((a, b) => a.name.compareTo(b.name));

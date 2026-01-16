@@ -27,25 +27,19 @@ class ShakeTestPageState extends State<ShakeTestPage> {
                 validator: (value) =>
                     value?.isEmpty ?? false ? "no empty" : null,
                 builder: (context, validator) {
-                  return TextFormField(
-                    validator: validator,
-                  );
+                  return TextFormField(validator: validator);
                 },
               ),
               ShakeFormField<String>(
                 validator: (value) =>
                     value?.isNotEmpty ?? false ? "empty" : null,
                 builder: (context, validator) {
-                  return TextFormField(
-                    validator: validator,
-                  );
+                  return TextFormField(validator: validator);
                 },
               ),
               ShakeFormField<String>(
                 builder: (context, validator) {
-                  return TextFormField(
-                    validator: validator,
-                  );
+                  return TextFormField(validator: validator);
                 },
               ),
               const SizedBox(height: 12),
@@ -54,7 +48,7 @@ class ShakeTestPageState extends State<ShakeTestPage> {
                   _formKey.currentState!.validate();
                 },
                 child: const Text("验证"),
-              )
+              ),
             ],
           ),
         ),

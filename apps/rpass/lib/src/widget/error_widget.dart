@@ -11,10 +11,7 @@ void customErrorWidget() {
 }
 
 class ReleaseModeErrorWidget extends StatelessWidget {
-  const ReleaseModeErrorWidget({
-    super.key,
-    required this.details,
-  });
+  const ReleaseModeErrorWidget({super.key, required this.details});
 
   final FlutterErrorDetails details;
 

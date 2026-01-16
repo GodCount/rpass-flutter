@@ -8,21 +8,12 @@ import '../../i18n.dart';
 import '../../widget/common.dart';
 
 class _SelectAutoFillAppArgs extends PageRouteArgs {
-  _SelectAutoFillAppArgs({
-    super.key,
-  });
+  _SelectAutoFillAppArgs({super.key});
 }
 
 class SelectAutoFillAppRoute extends PageRouteInfo<_SelectAutoFillAppArgs> {
-  SelectAutoFillAppRoute({
-    Key? key,
-    String? packageName,
-  }) : super(
-          name,
-          args: _SelectAutoFillAppArgs(
-            key: key,
-          ),
-        );
+  SelectAutoFillAppRoute({Key? key, String? packageName})
+    : super(name, args: _SelectAutoFillAppArgs(key: key));
 
   static const name = "SelectAutoFillAppRoute";
 
@@ -32,17 +23,13 @@ class SelectAutoFillAppRoute extends PageRouteInfo<_SelectAutoFillAppArgs> {
       final args = data.argsAs<_SelectAutoFillAppArgs>(
         orElse: () => _SelectAutoFillAppArgs(),
       );
-      return SelectAutoFillAppPage(
-        key: args.key,
-      );
+      return SelectAutoFillAppPage(key: args.key);
     },
   );
 }
 
 class SelectAutoFillAppPage extends StatefulWidget {
-  const SelectAutoFillAppPage({
-    super.key,
-  });
+  const SelectAutoFillAppPage({super.key});
 
   @override
   State<SelectAutoFillAppPage> createState() => _SelectAutoFillAppPageState();
@@ -58,40 +45,37 @@ class _SelectAutoFillAppPageState extends State<SelectAutoFillAppPage> {
   void initState() {
     super.initState();
     String lastText = "";
-    _searchController.addListener(
-      () {
-        if (lastText != _searchController.text) {
-          lastText = _searchController.text;
-          setState(() {
-            _future = _sreach();
-          });
-        }
-      },
-    );
+    _searchController.addListener(() {
+      if (lastText != _searchController.text) {
+        lastText = _searchController.text;
+        setState(() {
+          _future = _sreach();
+        });
+      }
+    });
 
     setState(() {
       _future = _sreach();
     });
   }
 
-  Future<List<AppInfo>> _sreach({
-    bool force = false,
-    bool? system,
-  }) async {
+  Future<List<AppInfo>> _sreach({bool force = false, bool? system}) async {
     _system = system ?? _system;
 
     final text = _searchController.text.toLowerCase();
 
-    final result = (await InstalledAppsInstance.instance
-            .getInstalledApps(force))
-        .where((it) {
-      if (it.packageName == RpassInfo.packageName) return false;
+    final result =
+        (await InstalledAppsInstance.instance.getInstalledApps(force)).where(
+          (it) {
+            if (it.packageName == RpassInfo.packageName) return false;
 
-      if (!_system && it.isSystem) return false;
+            if (!_system && it.isSystem) return false;
 
-      return text.isNotEmpty ? it.name.toLowerCase().contains(text) : true;
-    }).toList()
-      ..sort((a, b) => b.installedTimestamp - a.installedTimestamp);
+            return text.isNotEmpty
+                ? it.name.toLowerCase().contains(text)
+                : true;
+          },
+        ).toList()..sort((a, b) => b.installedTimestamp - a.installedTimestamp);
 
     return result;
   }
@@ -129,10 +113,7 @@ class _SelectAutoFillAppPageState extends State<SelectAutoFillAppPage> {
                         onPressed: () {
                           _searchController.text = "";
                         },
-                        icon: const Icon(
-                          Icons.close,
-                          size: 16,
-                        ),
+                        icon: const Icon(Icons.close, size: 16),
                       )
                     : null,
               ),
@@ -163,10 +144,7 @@ class _SelectAutoFillAppPageState extends State<SelectAutoFillAppPage> {
             },
             itemBuilder: (BuildContext context) {
               return [
-                PopupMenuItem(
-                  value: "refresh",
-                  child: Text(t.refresh),
-                ),
+                PopupMenuItem(value: "refresh", child: Text(t.refresh)),
                 PopupMenuItem(
                   value: "system",
                   child: Text(
@@ -175,7 +153,7 @@ class _SelectAutoFillAppPageState extends State<SelectAutoFillAppPage> {
                 ),
               ];
             },
-          )
+          ),
         ],
       ),
       body: FutureBuilder(
@@ -216,10 +194,7 @@ class _SelectAutoFillAppPageState extends State<SelectAutoFillAppPage> {
                     height: 32,
                     child: ImageFileString(
                       item.icon,
-                      error: const Icon(
-                        Icons.android_outlined,
-                        size: 18,
-                      ),
+                      error: const Icon(Icons.android_outlined, size: 18),
                     ),
                   ),
                 ),

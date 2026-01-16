@@ -37,12 +37,8 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 
   /// Initialize flutter_rust_bridge in mock mode.
   /// No libraries for FFI are loaded.
-  static void initMock({
-    required RustLibApi api,
-  }) {
-    instance.initMockImpl(
-      api: api,
-    );
+  static void initMock({required RustLibApi api}) {
+    instance.initMockImpl(api: api);
   }
 
   /// Dispose flutter_rust_bridge
@@ -76,10 +72,10 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
-    stem: 'enigo_flutter',
-    ioDirectory: 'rust/target/release/',
-    webPrefix: 'pkg/',
-  );
+        stem: 'enigo_flutter',
+        ioDirectory: 'rust/target/release/',
+        webPrefix: 'pkg/',
+      );
 }
 
 abstract class RustLibApi extends BaseApi {
@@ -105,46 +101,54 @@ abstract class RustLibApi extends BaseApi {
 
   String crateApiEnigoButtonToString({required Button that});
 
-  void crateApiEnigoEnigoButton(
-      {required Enigo that,
-      required Button button,
-      required Direction direction});
+  void crateApiEnigoEnigoButton({
+    required Enigo that,
+    required Button button,
+    required Direction direction,
+  });
 
   bool crateApiEnigoEnigoHasPermission({required bool openPrompt});
 
-  void crateApiEnigoEnigoKey(
-      {required Enigo that,
-      required PhysicalKeyboardKey key,
-      required Direction direction});
+  void crateApiEnigoEnigoKey({
+    required Enigo that,
+    required PhysicalKeyboardKey key,
+    required Direction direction,
+  });
 
   (int, int) crateApiEnigoEnigoLocation({required Enigo that});
 
   (int, int) crateApiEnigoEnigoMainDisplay({required Enigo that});
 
-  void crateApiEnigoEnigoMoveMouse(
-      {required Enigo that,
-      required int x,
-      required int y,
-      required Coordinate coordinate});
+  void crateApiEnigoEnigoMoveMouse({
+    required Enigo that,
+    required int x,
+    required int y,
+    required Coordinate coordinate,
+  });
 
   Enigo crateApiEnigoEnigoNew({required Settings settings});
 
   Enigo crateApiEnigoEnigoPreset();
 
-  void crateApiEnigoEnigoRaw(
-      {required Enigo that,
-      required int keycode,
-      required Direction direction});
+  void crateApiEnigoEnigoRaw({
+    required Enigo that,
+    required int keycode,
+    required Direction direction,
+  });
 
-  void crateApiEnigoEnigoScroll(
-      {required Enigo that, required int length, required Axis axis});
+  void crateApiEnigoEnigoScroll({
+    required Enigo that,
+    required int length,
+    required Axis axis,
+  });
 
   void crateApiEnigoEnigoText({required Enigo that, required String text});
 
   Future<void> crateApiEnigoInitApp();
 
-  PhysicalKeyboardKey crateApiEnigoTestKey2Key(
-      {required PhysicalKeyboardKey key});
+  PhysicalKeyboardKey crateApiEnigoTestKey2Key({
+    required PhysicalKeyboardKey key,
+  });
 
   RustArcIncrementStrongCountFnType get rust_arc_increment_strong_count_Enigo;
 
@@ -169,310 +173,316 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   Button crateApiEnigoButtonBack() {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 1)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData:
-            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
-        decodeErrorData: null,
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 1)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoButtonBackConstMeta,
+        argValues: [],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoButtonBackConstMeta,
-      argValues: [],
-      apiImpl: this,
-    ));
+    );
   }
 
-  TaskConstMeta get kCrateApiEnigoButtonBackConstMeta => const TaskConstMeta(
-        debugName: "Button_back",
-        argNames: [],
-      );
+  TaskConstMeta get kCrateApiEnigoButtonBackConstMeta =>
+      const TaskConstMeta(debugName: "Button_back", argNames: []);
 
   @override
   Button crateApiEnigoButtonForward() {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData:
-            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
-        decodeErrorData: null,
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoButtonForwardConstMeta,
+        argValues: [],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoButtonForwardConstMeta,
-      argValues: [],
-      apiImpl: this,
-    ));
+    );
   }
 
-  TaskConstMeta get kCrateApiEnigoButtonForwardConstMeta => const TaskConstMeta(
-        debugName: "Button_forward",
-        argNames: [],
-      );
+  TaskConstMeta get kCrateApiEnigoButtonForwardConstMeta =>
+      const TaskConstMeta(debugName: "Button_forward", argNames: []);
 
   @override
   Button crateApiEnigoButtonLeft() {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData:
-            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
-        decodeErrorData: null,
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoButtonLeftConstMeta,
+        argValues: [],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoButtonLeftConstMeta,
-      argValues: [],
-      apiImpl: this,
-    ));
+    );
   }
 
-  TaskConstMeta get kCrateApiEnigoButtonLeftConstMeta => const TaskConstMeta(
-        debugName: "Button_left",
-        argNames: [],
-      );
+  TaskConstMeta get kCrateApiEnigoButtonLeftConstMeta =>
+      const TaskConstMeta(debugName: "Button_left", argNames: []);
 
   @override
   Button crateApiEnigoButtonMiddle() {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 4)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData:
-            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
-        decodeErrorData: null,
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 4)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoButtonMiddleConstMeta,
+        argValues: [],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoButtonMiddleConstMeta,
-      argValues: [],
-      apiImpl: this,
-    ));
+    );
   }
 
-  TaskConstMeta get kCrateApiEnigoButtonMiddleConstMeta => const TaskConstMeta(
-        debugName: "Button_middle",
-        argNames: [],
-      );
+  TaskConstMeta get kCrateApiEnigoButtonMiddleConstMeta =>
+      const TaskConstMeta(debugName: "Button_middle", argNames: []);
 
   @override
   Button crateApiEnigoButtonNew({required String value}) {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_String(value, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 5)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData:
-            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
-        decodeErrorData: null,
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(value, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 5)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoButtonNewConstMeta,
+        argValues: [value],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoButtonNewConstMeta,
-      argValues: [value],
-      apiImpl: this,
-    ));
+    );
   }
 
-  TaskConstMeta get kCrateApiEnigoButtonNewConstMeta => const TaskConstMeta(
-        debugName: "Button_new",
-        argNames: ["value"],
-      );
+  TaskConstMeta get kCrateApiEnigoButtonNewConstMeta =>
+      const TaskConstMeta(debugName: "Button_new", argNames: ["value"]);
 
   @override
   Button crateApiEnigoButtonRight() {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 6)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData:
-            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
-        decodeErrorData: null,
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 6)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoButtonRightConstMeta,
+        argValues: [],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoButtonRightConstMeta,
-      argValues: [],
-      apiImpl: this,
-    ));
+    );
   }
 
-  TaskConstMeta get kCrateApiEnigoButtonRightConstMeta => const TaskConstMeta(
-        debugName: "Button_right",
-        argNames: [],
-      );
+  TaskConstMeta get kCrateApiEnigoButtonRightConstMeta =>
+      const TaskConstMeta(debugName: "Button_right", argNames: []);
 
   @override
   Button crateApiEnigoButtonScrollDown() {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 7)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData:
-            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
-        decodeErrorData: null,
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 7)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoButtonScrollDownConstMeta,
+        argValues: [],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoButtonScrollDownConstMeta,
-      argValues: [],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiEnigoButtonScrollDownConstMeta =>
-      const TaskConstMeta(
-        debugName: "Button_scroll_down",
-        argNames: [],
-      );
+      const TaskConstMeta(debugName: "Button_scroll_down", argNames: []);
 
   @override
   Button crateApiEnigoButtonScrollLeft() {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 8)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData:
-            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
-        decodeErrorData: null,
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 8)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoButtonScrollLeftConstMeta,
+        argValues: [],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoButtonScrollLeftConstMeta,
-      argValues: [],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiEnigoButtonScrollLeftConstMeta =>
-      const TaskConstMeta(
-        debugName: "Button_scroll_left",
-        argNames: [],
-      );
+      const TaskConstMeta(debugName: "Button_scroll_left", argNames: []);
 
   @override
   Button crateApiEnigoButtonScrollRight() {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData:
-            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
-        decodeErrorData: null,
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoButtonScrollRightConstMeta,
+        argValues: [],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoButtonScrollRightConstMeta,
-      argValues: [],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiEnigoButtonScrollRightConstMeta =>
-      const TaskConstMeta(
-        debugName: "Button_scroll_right",
-        argNames: [],
-      );
+      const TaskConstMeta(debugName: "Button_scroll_right", argNames: []);
 
   @override
   Button crateApiEnigoButtonScrollUp() {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 10)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData:
-            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
-        decodeErrorData: null,
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 10)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoButtonScrollUpConstMeta,
+        argValues: [],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoButtonScrollUpConstMeta,
-      argValues: [],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiEnigoButtonScrollUpConstMeta =>
-      const TaskConstMeta(
-        debugName: "Button_scroll_up",
-        argNames: [],
-      );
+      const TaskConstMeta(debugName: "Button_scroll_up", argNames: []);
 
   @override
   String crateApiEnigoButtonToString({required Button that}) {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-            that, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 11)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_String,
-        decodeErrorData: null,
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
+            that,
+            serializer,
+          );
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 11)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoButtonToStringConstMeta,
+        argValues: [that],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoButtonToStringConstMeta,
-      argValues: [that],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiEnigoButtonToStringConstMeta =>
-      const TaskConstMeta(
-        debugName: "Button_to_string",
-        argNames: ["that"],
-      );
+      const TaskConstMeta(debugName: "Button_to_string", argNames: ["that"]);
 
   @override
-  void crateApiEnigoEnigoButton(
-      {required Enigo that,
-      required Button button,
-      required Direction direction}) {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-            that, serializer);
-        sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-            button, serializer);
-        sse_encode_direction(direction, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 12)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_unit,
-        decodeErrorData: null,
+  void crateApiEnigoEnigoButton({
+    required Enigo that,
+    required Button button,
+    required Direction direction,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+            that,
+            serializer,
+          );
+          sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
+            button,
+            serializer,
+          );
+          sse_encode_direction(direction, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 12)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoEnigoButtonConstMeta,
+        argValues: [that, button, direction],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoEnigoButtonConstMeta,
-      argValues: [that, button, direction],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiEnigoEnigoButtonConstMeta => const TaskConstMeta(
-        debugName: "Enigo_button",
-        argNames: ["that", "button", "direction"],
-      );
+    debugName: "Enigo_button",
+    argNames: ["that", "button", "direction"],
+  );
 
   @override
   bool crateApiEnigoEnigoHasPermission({required bool openPrompt}) {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_bool(openPrompt, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 13)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_bool,
-        decodeErrorData: null,
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_bool(openPrompt, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 13)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_bool,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoEnigoHasPermissionConstMeta,
+        argValues: [openPrompt],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoEnigoHasPermissionConstMeta,
-      argValues: [openPrompt],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiEnigoEnigoHasPermissionConstMeta =>
@@ -482,108 +492,123 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  void crateApiEnigoEnigoKey(
-      {required Enigo that,
-      required PhysicalKeyboardKey key,
-      required Direction direction}) {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-            that, serializer);
-        sse_encode_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKey(
-            key, serializer);
-        sse_encode_direction(direction, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 14)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_unit,
-        decodeErrorData: null,
+  void crateApiEnigoEnigoKey({
+    required Enigo that,
+    required PhysicalKeyboardKey key,
+    required Direction direction,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+            that,
+            serializer,
+          );
+          sse_encode_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKey(
+            key,
+            serializer,
+          );
+          sse_encode_direction(direction, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 14)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoEnigoKeyConstMeta,
+        argValues: [that, key, direction],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoEnigoKeyConstMeta,
-      argValues: [that, key, direction],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiEnigoEnigoKeyConstMeta => const TaskConstMeta(
-        debugName: "Enigo_key",
-        argNames: ["that", "key", "direction"],
-      );
+    debugName: "Enigo_key",
+    argNames: ["that", "key", "direction"],
+  );
 
   @override
   (int, int) crateApiEnigoEnigoLocation({required Enigo that}) {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-            that, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 15)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_record_i_32_i_32,
-        decodeErrorData: null,
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+            that,
+            serializer,
+          );
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 15)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_record_i_32_i_32,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoEnigoLocationConstMeta,
+        argValues: [that],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoEnigoLocationConstMeta,
-      argValues: [that],
-      apiImpl: this,
-    ));
+    );
   }
 
-  TaskConstMeta get kCrateApiEnigoEnigoLocationConstMeta => const TaskConstMeta(
-        debugName: "Enigo_location",
-        argNames: ["that"],
-      );
+  TaskConstMeta get kCrateApiEnigoEnigoLocationConstMeta =>
+      const TaskConstMeta(debugName: "Enigo_location", argNames: ["that"]);
 
   @override
   (int, int) crateApiEnigoEnigoMainDisplay({required Enigo that}) {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-            that, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 16)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_record_i_32_i_32,
-        decodeErrorData: null,
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+            that,
+            serializer,
+          );
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 16)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_record_i_32_i_32,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoEnigoMainDisplayConstMeta,
+        argValues: [that],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoEnigoMainDisplayConstMeta,
-      argValues: [that],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiEnigoEnigoMainDisplayConstMeta =>
-      const TaskConstMeta(
-        debugName: "Enigo_main_display",
-        argNames: ["that"],
-      );
+      const TaskConstMeta(debugName: "Enigo_main_display", argNames: ["that"]);
 
   @override
-  void crateApiEnigoEnigoMoveMouse(
-      {required Enigo that,
-      required int x,
-      required int y,
-      required Coordinate coordinate}) {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-            that, serializer);
-        sse_encode_i_32(x, serializer);
-        sse_encode_i_32(y, serializer);
-        sse_encode_coordinate(coordinate, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 17)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_unit,
-        decodeErrorData: null,
+  void crateApiEnigoEnigoMoveMouse({
+    required Enigo that,
+    required int x,
+    required int y,
+    required Coordinate coordinate,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+            that,
+            serializer,
+          );
+          sse_encode_i_32(x, serializer);
+          sse_encode_i_32(y, serializer);
+          sse_encode_coordinate(coordinate, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 17)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoEnigoMoveMouseConstMeta,
+        argValues: [that, x, y, coordinate],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoEnigoMoveMouseConstMeta,
-      argValues: [that, x, y, coordinate],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiEnigoEnigoMoveMouseConstMeta =>
@@ -594,256 +619,288 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   Enigo crateApiEnigoEnigoNew({required Settings settings}) {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_box_autoadd_settings(settings, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 18)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData:
-            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo,
-        decodeErrorData: null,
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_settings(settings, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 18)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoEnigoNewConstMeta,
+        argValues: [settings],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoEnigoNewConstMeta,
-      argValues: [settings],
-      apiImpl: this,
-    ));
+    );
   }
 
-  TaskConstMeta get kCrateApiEnigoEnigoNewConstMeta => const TaskConstMeta(
-        debugName: "Enigo_new",
-        argNames: ["settings"],
-      );
+  TaskConstMeta get kCrateApiEnigoEnigoNewConstMeta =>
+      const TaskConstMeta(debugName: "Enigo_new", argNames: ["settings"]);
 
   @override
   Enigo crateApiEnigoEnigoPreset() {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 19)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData:
-            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo,
-        decodeErrorData: null,
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 19)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoEnigoPresetConstMeta,
+        argValues: [],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoEnigoPresetConstMeta,
-      argValues: [],
-      apiImpl: this,
-    ));
+    );
   }
 
-  TaskConstMeta get kCrateApiEnigoEnigoPresetConstMeta => const TaskConstMeta(
-        debugName: "Enigo_preset",
-        argNames: [],
-      );
+  TaskConstMeta get kCrateApiEnigoEnigoPresetConstMeta =>
+      const TaskConstMeta(debugName: "Enigo_preset", argNames: []);
 
   @override
-  void crateApiEnigoEnigoRaw(
-      {required Enigo that,
-      required int keycode,
-      required Direction direction}) {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-            that, serializer);
-        sse_encode_u_16(keycode, serializer);
-        sse_encode_direction(direction, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 20)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_unit,
-        decodeErrorData: null,
+  void crateApiEnigoEnigoRaw({
+    required Enigo that,
+    required int keycode,
+    required Direction direction,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+            that,
+            serializer,
+          );
+          sse_encode_u_16(keycode, serializer);
+          sse_encode_direction(direction, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 20)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoEnigoRawConstMeta,
+        argValues: [that, keycode, direction],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoEnigoRawConstMeta,
-      argValues: [that, keycode, direction],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiEnigoEnigoRawConstMeta => const TaskConstMeta(
-        debugName: "Enigo_raw",
-        argNames: ["that", "keycode", "direction"],
-      );
+    debugName: "Enigo_raw",
+    argNames: ["that", "keycode", "direction"],
+  );
 
   @override
-  void crateApiEnigoEnigoScroll(
-      {required Enigo that, required int length, required Axis axis}) {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-            that, serializer);
-        sse_encode_i_32(length, serializer);
-        sse_encode_axis(axis, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 21)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_unit,
-        decodeErrorData: null,
+  void crateApiEnigoEnigoScroll({
+    required Enigo that,
+    required int length,
+    required Axis axis,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+            that,
+            serializer,
+          );
+          sse_encode_i_32(length, serializer);
+          sse_encode_axis(axis, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 21)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoEnigoScrollConstMeta,
+        argValues: [that, length, axis],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoEnigoScrollConstMeta,
-      argValues: [that, length, axis],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiEnigoEnigoScrollConstMeta => const TaskConstMeta(
-        debugName: "Enigo_scroll",
-        argNames: ["that", "length", "axis"],
-      );
+    debugName: "Enigo_scroll",
+    argNames: ["that", "length", "axis"],
+  );
 
   @override
   void crateApiEnigoEnigoText({required Enigo that, required String text}) {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-            that, serializer);
-        sse_encode_String(text, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 22)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_unit,
-        decodeErrorData: null,
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+            that,
+            serializer,
+          );
+          sse_encode_String(text, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 22)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoEnigoTextConstMeta,
+        argValues: [that, text],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoEnigoTextConstMeta,
-      argValues: [that, text],
-      apiImpl: this,
-    ));
+    );
   }
 
-  TaskConstMeta get kCrateApiEnigoEnigoTextConstMeta => const TaskConstMeta(
-        debugName: "Enigo_text",
-        argNames: ["that", "text"],
-      );
+  TaskConstMeta get kCrateApiEnigoEnigoTextConstMeta =>
+      const TaskConstMeta(debugName: "Enigo_text", argNames: ["that", "text"]);
 
   @override
   Future<void> crateApiEnigoInitApp() {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 23, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_unit,
-        decodeErrorData: null,
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 23,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoInitAppConstMeta,
+        argValues: [],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoInitAppConstMeta,
-      argValues: [],
-      apiImpl: this,
-    ));
+    );
   }
 
-  TaskConstMeta get kCrateApiEnigoInitAppConstMeta => const TaskConstMeta(
-        debugName: "init_app",
-        argNames: [],
-      );
+  TaskConstMeta get kCrateApiEnigoInitAppConstMeta =>
+      const TaskConstMeta(debugName: "init_app", argNames: []);
 
   @override
-  PhysicalKeyboardKey crateApiEnigoTestKey2Key(
-      {required PhysicalKeyboardKey key}) {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKey(
-            key, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 24)!;
-      },
-      codec: SseCodec(
-        decodeSuccessData:
-            sse_decode_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKey,
-        decodeErrorData: null,
+  PhysicalKeyboardKey crateApiEnigoTestKey2Key({
+    required PhysicalKeyboardKey key,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKey(
+            key,
+            serializer,
+          );
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 24)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKey,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEnigoTestKey2KeyConstMeta,
+        argValues: [key],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiEnigoTestKey2KeyConstMeta,
-      argValues: [key],
-      apiImpl: this,
-    ));
+    );
   }
 
-  TaskConstMeta get kCrateApiEnigoTestKey2KeyConstMeta => const TaskConstMeta(
-        debugName: "test_key2key",
-        argNames: ["key"],
-      );
-
-  RustArcIncrementStrongCountFnType get rust_arc_increment_strong_count_Enigo =>
-      wire.rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo;
-
-  RustArcDecrementStrongCountFnType get rust_arc_decrement_strong_count_Enigo =>
-      wire.rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo;
+  TaskConstMeta get kCrateApiEnigoTestKey2KeyConstMeta =>
+      const TaskConstMeta(debugName: "test_key2key", argNames: ["key"]);
 
   RustArcIncrementStrongCountFnType
-      get rust_arc_increment_strong_count_Button => wire
-          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button;
+  get rust_arc_increment_strong_count_Enigo => wire
+      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo;
 
   RustArcDecrementStrongCountFnType
-      get rust_arc_decrement_strong_count_Button => wire
-          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button;
+  get rust_arc_decrement_strong_count_Enigo => wire
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo;
+
+  RustArcIncrementStrongCountFnType
+  get rust_arc_increment_strong_count_Button => wire
+      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button;
+
+  RustArcDecrementStrongCountFnType
+  get rust_arc_decrement_strong_count_Button => wire
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button;
 
   @protected
   Enigo
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-          dynamic raw) {
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return EnigoImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   Button
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-          dynamic raw) {
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return ButtonImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   Enigo
-      dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-          dynamic raw) {
+  dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return EnigoImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   Button
-      dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-          dynamic raw) {
+  dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return ButtonImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   Enigo
-      dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-          dynamic raw) {
+  dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return EnigoImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   PhysicalKeyboardKey
-      dco_decode_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKey(
-          dynamic raw) {
+  dco_decode_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKey(
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     throw UnimplementedError(
-        'Not implemented in this codec, please use the other one');
+      'Not implemented in this codec, please use the other one',
+    );
   }
 
   @protected
   Enigo
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-          dynamic raw) {
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return EnigoImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   Button
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-          dynamic raw) {
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return ButtonImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
@@ -939,10 +996,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     if (arr.length != 2) {
       throw Exception('Expected 2 elements, got ${arr.length}');
     }
-    return (
-      dco_decode_i_32(arr[0]),
-      dco_decode_i_32(arr[1]),
-    );
+    return (dco_decode_i_32(arr[0]), dco_decode_i_32(arr[1]));
   }
 
   @protected
@@ -996,53 +1050,69 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   Enigo
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-          SseDeserializer deserializer) {
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return EnigoImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
   Button
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-          SseDeserializer deserializer) {
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return ButtonImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
   Enigo
-      sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-          SseDeserializer deserializer) {
+  sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return EnigoImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
   Button
-      sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-          SseDeserializer deserializer) {
+  sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return ButtonImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
   Enigo
-      sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-          SseDeserializer deserializer) {
+  sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return EnigoImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
   PhysicalKeyboardKey
-      sse_decode_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKey(
-          SseDeserializer deserializer) {
+  sse_decode_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKey(
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var inner = sse_decode_u_32(deserializer);
     return PhysicalKeyboardKey(inner);
@@ -1050,20 +1120,26 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   Enigo
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-          SseDeserializer deserializer) {
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return EnigoImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
   Button
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-          SseDeserializer deserializer) {
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return ButtonImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
@@ -1189,19 +1265,21 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_releaseKeysWhenDropped = sse_decode_bool(deserializer);
     var var_openPromptToGetPermissions = sse_decode_bool(deserializer);
     var var_independentOfKeyboardState = sse_decode_bool(deserializer);
-    var var_windowsSubjectToMouseSpeedAndAccelerationLevel =
-        sse_decode_bool(deserializer);
+    var var_windowsSubjectToMouseSpeedAndAccelerationLevel = sse_decode_bool(
+      deserializer,
+    );
     return Settings(
-        linuxDelay: var_linuxDelay,
-        x11Display: var_x11Display,
-        waylandDisplay: var_waylandDisplay,
-        windowsDwExtraInfo: var_windowsDwExtraInfo,
-        eventSourceUserData: var_eventSourceUserData,
-        releaseKeysWhenDropped: var_releaseKeysWhenDropped,
-        openPromptToGetPermissions: var_openPromptToGetPermissions,
-        independentOfKeyboardState: var_independentOfKeyboardState,
-        windowsSubjectToMouseSpeedAndAccelerationLevel:
-            var_windowsSubjectToMouseSpeedAndAccelerationLevel);
+      linuxDelay: var_linuxDelay,
+      x11Display: var_x11Display,
+      waylandDisplay: var_waylandDisplay,
+      windowsDwExtraInfo: var_windowsDwExtraInfo,
+      eventSourceUserData: var_eventSourceUserData,
+      releaseKeysWhenDropped: var_releaseKeysWhenDropped,
+      openPromptToGetPermissions: var_openPromptToGetPermissions,
+      independentOfKeyboardState: var_independentOfKeyboardState,
+      windowsSubjectToMouseSpeedAndAccelerationLevel:
+          var_windowsSubjectToMouseSpeedAndAccelerationLevel,
+    );
   }
 
   @protected
@@ -1235,73 +1313,103 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-          Enigo self, SseSerializer serializer) {
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+    Enigo self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-        (self as EnigoImpl).frbInternalSseEncode(move: true), serializer);
+      (self as EnigoImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
   }
 
   @protected
   void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-          Button self, SseSerializer serializer) {
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
+    Button self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-        (self as ButtonImpl).frbInternalSseEncode(move: true), serializer);
+      (self as ButtonImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
   }
 
   @protected
   void
-      sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-          Enigo self, SseSerializer serializer) {
+  sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+    Enigo self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-        (self as EnigoImpl).frbInternalSseEncode(move: false), serializer);
+      (self as EnigoImpl).frbInternalSseEncode(move: false),
+      serializer,
+    );
   }
 
   @protected
   void
-      sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-          Button self, SseSerializer serializer) {
+  sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
+    Button self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-        (self as ButtonImpl).frbInternalSseEncode(move: false), serializer);
+      (self as ButtonImpl).frbInternalSseEncode(move: false),
+      serializer,
+    );
   }
 
   @protected
   void
-      sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-          Enigo self, SseSerializer serializer) {
+  sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+    Enigo self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-        (self as EnigoImpl).frbInternalSseEncode(move: false), serializer);
+      (self as EnigoImpl).frbInternalSseEncode(move: false),
+      serializer,
+    );
   }
 
   @protected
   void
-      sse_encode_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKey(
-          PhysicalKeyboardKey self, SseSerializer serializer) {
+  sse_encode_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKey(
+    PhysicalKeyboardKey self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_u_32(self.usbHidUsage, serializer);
   }
 
   @protected
   void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
-          Enigo self, SseSerializer serializer) {
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
+    Enigo self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-        (self as EnigoImpl).frbInternalSseEncode(move: null), serializer);
+      (self as EnigoImpl).frbInternalSseEncode(move: null),
+      serializer,
+    );
   }
 
   @protected
   void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-          Button self, SseSerializer serializer) {
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
+    Button self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-        (self as ButtonImpl).frbInternalSseEncode(move: null), serializer);
+      (self as ButtonImpl).frbInternalSseEncode(move: null),
+      serializer,
+    );
   }
 
   @protected
@@ -1324,14 +1432,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void sse_encode_box_autoadd_i_64(
-      PlatformInt64 self, SseSerializer serializer) {
+    PlatformInt64 self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_64(self, serializer);
   }
 
   @protected
   void sse_encode_box_autoadd_settings(
-      Settings self, SseSerializer serializer) {
+    Settings self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_settings(self, serializer);
   }
@@ -1368,7 +1480,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void sse_encode_list_prim_u_8_strict(
-      Uint8List self, SseSerializer serializer) {
+    Uint8List self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putUint8List(self);
@@ -1386,7 +1500,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void sse_encode_opt_box_autoadd_i_64(
-      PlatformInt64? self, SseSerializer serializer) {
+    PlatformInt64? self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     sse_encode_bool(self != null, serializer);
@@ -1397,7 +1513,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void sse_encode_opt_box_autoadd_usize(
-      BigInt? self, SseSerializer serializer) {
+    BigInt? self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     sse_encode_bool(self != null, serializer);
@@ -1425,7 +1543,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_bool(self.openPromptToGetPermissions, serializer);
     sse_encode_bool(self.independentOfKeyboardState, serializer);
     sse_encode_bool(
-        self.windowsSubjectToMouseSpeedAndAccelerationLevel, serializer);
+      self.windowsSubjectToMouseSpeedAndAccelerationLevel,
+      serializer,
+    );
   }
 
   @protected
@@ -1462,11 +1582,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 class ButtonImpl extends RustOpaque implements Button {
   // Not to be used by end users
   ButtonImpl.frbInternalDcoDecode(List<dynamic> wire)
-      : super.frbInternalDcoDecode(wire, _kStaticData);
+    : super.frbInternalDcoDecode(wire, _kStaticData);
 
   // Not to be used by end users
   ButtonImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
-      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+    : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
 
   static final _kStaticData = RustArcStaticData(
     rustArcIncrementStrongCount:
@@ -1477,20 +1597,19 @@ class ButtonImpl extends RustOpaque implements Button {
         RustLib.instance.api.rust_arc_decrement_strong_count_ButtonPtr,
   );
 
-  String toString() => RustLib.instance.api.crateApiEnigoButtonToString(
-        that: this,
-      );
+  String toString() =>
+      RustLib.instance.api.crateApiEnigoButtonToString(that: this);
 }
 
 @sealed
 class EnigoImpl extends RustOpaque implements Enigo {
   // Not to be used by end users
   EnigoImpl.frbInternalDcoDecode(List<dynamic> wire)
-      : super.frbInternalDcoDecode(wire, _kStaticData);
+    : super.frbInternalDcoDecode(wire, _kStaticData);
 
   // Not to be used by end users
   EnigoImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
-      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+    : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
 
   static final _kStaticData = RustArcStaticData(
     rustArcIncrementStrongCount:
@@ -1503,29 +1622,41 @@ class EnigoImpl extends RustOpaque implements Enigo {
 
   void button({required Button button, required Direction direction}) =>
       RustLib.instance.api.crateApiEnigoEnigoButton(
-          that: this, button: button, direction: direction);
+        that: this,
+        button: button,
+        direction: direction,
+      );
 
   void key({required PhysicalKeyboardKey key, required Direction direction}) =>
-      RustLib.instance.api
-          .crateApiEnigoEnigoKey(that: this, key: key, direction: direction);
-
-  (int, int) location() => RustLib.instance.api.crateApiEnigoEnigoLocation(
+      RustLib.instance.api.crateApiEnigoEnigoKey(
         that: this,
+        key: key,
+        direction: direction,
       );
+
+  (int, int) location() =>
+      RustLib.instance.api.crateApiEnigoEnigoLocation(that: this);
 
   (int, int) mainDisplay() =>
-      RustLib.instance.api.crateApiEnigoEnigoMainDisplay(
-        that: this,
-      );
+      RustLib.instance.api.crateApiEnigoEnigoMainDisplay(that: this);
 
-  void moveMouse(
-          {required int x, required int y, required Coordinate coordinate}) =>
-      RustLib.instance.api.crateApiEnigoEnigoMoveMouse(
-          that: this, x: x, y: y, coordinate: coordinate);
+  void moveMouse({
+    required int x,
+    required int y,
+    required Coordinate coordinate,
+  }) => RustLib.instance.api.crateApiEnigoEnigoMoveMouse(
+    that: this,
+    x: x,
+    y: y,
+    coordinate: coordinate,
+  );
 
   void raw({required int keycode, required Direction direction}) =>
       RustLib.instance.api.crateApiEnigoEnigoRaw(
-          that: this, keycode: keycode, direction: direction);
+        that: this,
+        keycode: keycode,
+        direction: direction,
+      );
 
   void scroll({required int length, required Axis axis}) => RustLib.instance.api
       .crateApiEnigoEnigoScroll(that: this, length: length, axis: axis);

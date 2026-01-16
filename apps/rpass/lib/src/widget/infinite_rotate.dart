@@ -34,10 +34,7 @@ class _InfiniteRotateWidgetState extends State<InfiniteRotateWidget>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
+    _controller = AnimationController(duration: widget.duration, vsync: this);
     if (widget.enabled) {
       _controller.repeat();
     }
@@ -51,9 +48,6 @@ class _InfiniteRotateWidgetState extends State<InfiniteRotateWidget>
 
   @override
   Widget build(BuildContext context) {
-    return RotationTransition(
-      turns: _controller,
-      child: widget.child,
-    );
+    return RotationTransition(turns: _controller, child: widget.child);
   }
 }

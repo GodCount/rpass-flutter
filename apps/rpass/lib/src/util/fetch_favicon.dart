@@ -7,12 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import '../util/cache_network_image.dart';
 import '../util/common.dart';
 
-enum FaviconSource {
-  Slef,
-  Google,
-  Duckduckgo,
-  Cravatar,
-}
+enum FaviconSource { Slef, Google, Duckduckgo, Cravatar }
 
 abstract class FaviconSourceApi {
   FaviconSourceApi(this.domain);
@@ -56,7 +51,7 @@ class GoogleFaviconSourceApi extends FaviconSourceApi {
     return [
       "https://www.google.com/s2/favicons?domain=$domain&sz=32",
       if (_getSecondDomain() != domain)
-        "https://www.google.com/s2/favicons?domain=${_getSecondDomain()}&sz=32"
+        "https://www.google.com/s2/favicons?domain=${_getSecondDomain()}&sz=32",
     ];
   }
 
@@ -71,9 +66,7 @@ class DuckduckgoFaviconSourceApi extends FaviconSourceApi {
 
   @override
   List<String> getFaviconUrls() {
-    return [
-      "https://icons.duckduckgo.com/ip3/${_getSecondDomain()}.ico",
-    ];
+    return ["https://icons.duckduckgo.com/ip3/${_getSecondDomain()}.ico"];
   }
 
   @override
@@ -90,7 +83,7 @@ class CravatarFaviconSourceApi extends FaviconSourceApi {
     return [
       "https://cn.cravatar.com/favicon/api/index.php?url=$domain",
       if (_getSecondDomain() != domain)
-        "https://cn.cravatar.com/favicon/api/index.php?url=${_getSecondDomain()}"
+        "https://cn.cravatar.com/favicon/api/index.php?url=${_getSecondDomain()}",
     ];
   }
 
@@ -129,10 +122,7 @@ class FetchFavicon extends FetchNetworkImage {
 
     for (final item in source.getFaviconUrls()) {
       try {
-        final data = await super.fetch(
-          item,
-          onBytesReceived: onBytesReceived,
-        );
+        final data = await super.fetch(item, onBytesReceived: onBytesReceived);
 
         if (source.isDefault(data)) throw Exception("is default favicon");
         return data;
@@ -149,8 +139,7 @@ class FetchFavicon extends FetchNetworkImage {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is FetchFavicon &&
-        other._source == _source ;
+    return other is FetchFavicon && other._source == _source;
   }
 
   @override
@@ -177,8 +166,9 @@ class FaviconCacheManager extends BaseCacheManager<Uint8List> {
     }
 
     Directory dir = switch (Platform.operatingSystem) {
-      "android" => (await getExternalStorageDirectory()) ??
-          (await getApplicationSupportDirectory()),
+      "android" =>
+        (await getExternalStorageDirectory()) ??
+            (await getApplicationSupportDirectory()),
       _ => await getApplicationSupportDirectory(),
     };
 

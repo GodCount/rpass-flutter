@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MatchHighlightItem {
-  const MatchHighlightItem({
-    required this.regExp,
-    required this.style,
-  });
+  const MatchHighlightItem({required this.regExp, required this.style});
 
   final RegExp regExp;
   final TextStyle style;
@@ -32,10 +29,7 @@ class MatchText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RichText(
-      text: TextSpan(
-        style: style,
-        children: _matchText(),
-      ),
+      text: TextSpan(style: style, children: _matchText()),
     );
   }
 

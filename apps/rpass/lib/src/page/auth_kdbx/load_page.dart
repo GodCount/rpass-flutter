@@ -19,12 +19,7 @@ class _LoadKdbxArgs extends PageRouteArgs {
 }
 
 class LoadKdbxRoute extends PageRouteInfo<_LoadKdbxArgs> {
-  LoadKdbxRoute({
-    Key? key,
-  }) : super(
-          name,
-          args: _LoadKdbxArgs(key: key),
-        );
+  LoadKdbxRoute({Key? key}) : super(name, args: _LoadKdbxArgs(key: key));
 
   static const name = "LoadKdbxRoute";
 
@@ -70,8 +65,10 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
         throw Exception("Lack of key file.");
       }
 
-      final credentials =
-          Kdbx.createCredentials(isPassword ? passowrd : null, keyFile?.$2);
+      final credentials = Kdbx.createCredentials(
+        isPassword ? passowrd : null,
+        keyFile?.$2,
+      );
 
       kdbxFile = kdbxFile ?? await store.localInfo.localKdbxFile.readAsBytes();
 
@@ -94,8 +91,8 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
   }
 
   Future<bool> _isAutoFill(Kdbx kdbx) async {
-    final metadata =
-        await NativeInstancePlatform.instance.autofillService.metadata();
+    final metadata = await NativeInstancePlatform.instance.autofillService
+        .metadata();
 
     if (metadata == null) return false;
 
@@ -108,7 +105,9 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
       if (dataset != null) result.add(dataset);
     }
 
-    await NativeInstancePlatform.instance.autofillService.responseDataset(result);
+    await NativeInstancePlatform.instance.autofillService.responseDataset(
+      result,
+    );
 
     return true;
   }

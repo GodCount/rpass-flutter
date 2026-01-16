@@ -27,14 +27,12 @@ sealed class MyContextMenuItem {
   static List<MenuItem<MyContextMenuItem>> buildSubmenuAutoFill(
     BuildContext context,
     KdbxEntry kdbxEntry,
-  ) =>
-      AutoFillContextMenuItem.buildSubmenuItem(context, kdbxEntry);
+  ) => AutoFillContextMenuItem.buildSubmenuItem(context, kdbxEntry);
 
   static List<MenuItem<MyContextMenuItem>> buildSubmenuCopy(
     BuildContext context,
     KdbxEntry kdbxEntry,
-  ) =>
-      CopyContextMenuItem.buildSubmenuItem(context, kdbxEntry);
+  ) => CopyContextMenuItem.buildSubmenuItem(context, kdbxEntry);
 }
 
 class EditContextMenuItem extends MyContextMenuItem {}

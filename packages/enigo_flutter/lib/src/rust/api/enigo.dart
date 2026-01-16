@@ -24,8 +24,11 @@ abstract class Enigo implements RustOpaqueInterface {
 
   (int, int) mainDisplay();
 
-  void moveMouse(
-      {required int x, required int y, required Coordinate coordinate});
+  void moveMouse({
+    required int x,
+    required int y,
+    required Coordinate coordinate,
+  });
 
   factory Enigo({required Settings settings}) =>
       RustLib.instance.api.crateApiEnigoEnigoNew(settings: settings);
@@ -71,24 +74,11 @@ abstract class Button implements RustOpaqueInterface {
   String toString();
 }
 
-enum Axis {
-  horizontal,
-  vertical,
-  ;
-}
+enum Axis { horizontal, vertical }
 
-enum Coordinate {
-  abs,
-  rel,
-  ;
-}
+enum Coordinate { abs, rel }
 
-enum Direction {
-  press,
-  release,
-  click,
-  ;
-}
+enum Direction { press, release, click }
 
 class Settings {
   final int linuxDelay;

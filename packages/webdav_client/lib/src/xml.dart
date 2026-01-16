@@ -28,11 +28,7 @@ class WebdavXml {
   static List<XmlElement> findElements(XmlElement element, String tag) =>
       element.findElements(tag, namespace: '*').toList();
 
-  static List<File> toFiles(
-    String uriPath,
-    String xmlStr, {
-    skipSelf = true,
-  }) {
+  static List<File> toFiles(String uriPath, String xmlStr, {skipSelf = true}) {
     var files = <File>[];
     var xmlDocument = XmlDocument.parse(xmlStr);
     List<XmlElement> list = findAllElements(xmlDocument, 'response');
@@ -40,8 +36,9 @@ class WebdavXml {
     list.forEach((element) {
       // name
       final hrefElements = findElements(element, 'href');
-      String href =
-          hrefElements.isNotEmpty ? hrefElements.single.innerText : '';
+      String href = hrefElements.isNotEmpty
+          ? hrefElements.single.innerText
+          : '';
 
       // propstats
       var props = findElements(element, 'propstat');
@@ -54,8 +51,10 @@ class WebdavXml {
             final resourceTypeElements = findElements(prop, 'resourcetype');
             // isDir
             bool isDir = resourceTypeElements.isNotEmpty
-                ? findElements(resourceTypeElements.single, 'collection')
-                    .isNotEmpty
+                ? findElements(
+                    resourceTypeElements.single,
+                    'collection',
+                  ).isNotEmpty
                 : false;
 
             // skip self
@@ -84,8 +83,9 @@ class WebdavXml {
 
             // eTag
             final eTagElements = findElements(prop, 'getetag');
-            String eTag =
-                eTagElements.isNotEmpty ? eTagElements.single.innerText : '';
+            String eTag = eTagElements.isNotEmpty
+                ? eTagElements.single.innerText
+                : '';
 
             // create time
             final cTimeElements = findElements(prop, 'creationdate');
@@ -104,16 +104,18 @@ class WebdavXml {
 
             var filePath = str.replaceFirst(uriPath, "");
 
-            files.add(File(
-              path: filePath,
-              isDir: isDir,
-              name: name,
-              mimeType: mimeType,
-              size: size,
-              eTag: eTag,
-              cTime: cTime,
-              mTime: mTime,
-            ));
+            files.add(
+              File(
+                path: filePath,
+                isDir: isDir,
+                name: name,
+                mimeType: mimeType,
+                size: size,
+                eTag: eTag,
+                cTime: cTime,
+                mTime: mTime,
+              ),
+            );
             break;
           }
         }

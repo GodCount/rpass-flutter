@@ -16,12 +16,8 @@ class _ImportAccountArgs extends PageRouteArgs {
 }
 
 class ImportAccountRoute extends PageRouteInfo<_ImportAccountArgs> {
-  ImportAccountRoute({
-    Key? key,
-  }) : super(
-          name,
-          args: _ImportAccountArgs(key: key),
-        );
+  ImportAccountRoute({Key? key})
+    : super(name, args: _ImportAccountArgs(key: key));
 
   static const name = "ImportAccountRoute";
 
@@ -51,10 +47,7 @@ class _ImportAccountPageState extends State<ImportAccountPage>
     try {
       final kdbx = KdbxProvider.of(context)!;
       final result = await SimpleFile.openText(allowedExtensions: ["csv"]);
-      final list = adapter.import(csvToJson(
-        result,
-        shouldParseNumbers: false,
-      ));
+      final list = adapter.import(csvToJson(result, shouldParseNumbers: false));
       kdbx.import(list);
       if (await kdbxSave(kdbx)) {
         showToast("${t.import_done} ${list.length}");
@@ -109,10 +102,7 @@ class _ImportAccountPageState extends State<ImportAccountPage>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(12.0)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: children,
-      ),
+      child: Column(mainAxisSize: MainAxisSize.min, children: children),
     );
   }
 }

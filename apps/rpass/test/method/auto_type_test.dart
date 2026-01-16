@@ -55,26 +55,40 @@ void main() {
         equals(PhysicalKeyboardKey.backspace),
       );
 
-      expect(PhysicalKeyboardKey.findKeyByCode(97 + 458659),
-          equals(PhysicalKeyboardKey.keyA));
+      expect(
+        PhysicalKeyboardKey.findKeyByCode(97 + 458659),
+        equals(PhysicalKeyboardKey.keyA),
+      );
 
-      expect(ShortcutSequenceItem.parse("^a").key,
-          equals(PhysicalKeyboardKey.keyA));
+      expect(
+        ShortcutSequenceItem.parse("^a").key,
+        equals(PhysicalKeyboardKey.keyA),
+      );
 
-      expect(ShortcutSequenceItem.parse("^z").key,
-          equals(PhysicalKeyboardKey.keyZ));
+      expect(
+        ShortcutSequenceItem.parse("^z").key,
+        equals(PhysicalKeyboardKey.keyZ),
+      );
 
-      expect(ShortcutSequenceItem.parse("^1").key,
-          equals(PhysicalKeyboardKey.digit1));
+      expect(
+        ShortcutSequenceItem.parse("^1").key,
+        equals(PhysicalKeyboardKey.digit1),
+      );
 
-      expect(ShortcutSequenceItem.parse("^9").key,
-          equals(PhysicalKeyboardKey.digit9));
+      expect(
+        ShortcutSequenceItem.parse("^9").key,
+        equals(PhysicalKeyboardKey.digit9),
+      );
 
-      expect(ShortcutSequenceItem.parse("^0").key,
-          equals(PhysicalKeyboardKey.digit0));
+      expect(
+        ShortcutSequenceItem.parse("^0").key,
+        equals(PhysicalKeyboardKey.digit0),
+      );
 
-      expect(ShortcutSequenceItem.parse("^a").modifiers,
-          equals([PhysicalKeyboardKey.controlLeft]));
+      expect(
+        ShortcutSequenceItem.parse("^a").modifiers,
+        equals([PhysicalKeyboardKey.controlLeft]),
+      );
 
       expect(
         ShortcutSequenceItem.parse("%^+a").modifiers,
@@ -90,7 +104,9 @@ void main() {
       expect(KdbxSequenceItem("S:Custom").key, equals("Custom"));
 
       expect(
-          KdbxSequenceItem("S:Custom:S:Custom").key, equals("Custom:S:Custom"));
+        KdbxSequenceItem("S:Custom:S:Custom").key,
+        equals("Custom:S:Custom"),
+      );
     });
 
     test("Sequence Parse", () {

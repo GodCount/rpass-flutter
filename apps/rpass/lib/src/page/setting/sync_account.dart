@@ -15,12 +15,7 @@ class _SyncAccountArgs extends PageRouteArgs {
 }
 
 class SyncAccountRoute extends PageRouteInfo<_SyncAccountArgs> {
-  SyncAccountRoute({
-    Key? key,
-  }) : super(
-          name,
-          args: _SyncAccountArgs(key: key),
-        );
+  SyncAccountRoute({Key? key}) : super(name, args: _SyncAccountArgs(key: key));
 
   static const name = "SyncAccountRoute";
 
@@ -57,35 +52,39 @@ class _SyncAccountPageState extends State<SyncAccountPage>
       };
     }
 
-    showBottomSheetList(title: t.sync_cycle, children: [
-      ListTile(
-        title: Text(t.each_startup),
-        trailing:
-            settings.remoteSyncCycle == null ? const Icon(Icons.check) : null,
-        onTap: autoSavePop(null),
-      ),
-      ListTile(
-        title: Text(t.days(1)),
-        trailing: settings.remoteSyncCycle == const Duration(days: 1)
-            ? const Icon(Icons.check)
-            : null,
-        onTap: autoSavePop(const Duration(days: 1)),
-      ),
-      ListTile(
-        title: Text(t.days(7)),
-        trailing: settings.remoteSyncCycle == const Duration(days: 7)
-            ? const Icon(Icons.check)
-            : null,
-        onTap: autoSavePop(const Duration(days: 7)),
-      ),
-      ListTile(
-        title: Text(t.days(30)),
-        trailing: settings.remoteSyncCycle == const Duration(days: 30)
-            ? const Icon(Icons.check)
-            : null,
-        onTap: autoSavePop(const Duration(days: 30)),
-      ),
-    ]);
+    showBottomSheetList(
+      title: t.sync_cycle,
+      children: [
+        ListTile(
+          title: Text(t.each_startup),
+          trailing: settings.remoteSyncCycle == null
+              ? const Icon(Icons.check)
+              : null,
+          onTap: autoSavePop(null),
+        ),
+        ListTile(
+          title: Text(t.days(1)),
+          trailing: settings.remoteSyncCycle == const Duration(days: 1)
+              ? const Icon(Icons.check)
+              : null,
+          onTap: autoSavePop(const Duration(days: 1)),
+        ),
+        ListTile(
+          title: Text(t.days(7)),
+          trailing: settings.remoteSyncCycle == const Duration(days: 7)
+              ? const Icon(Icons.check)
+              : null,
+          onTap: autoSavePop(const Duration(days: 7)),
+        ),
+        ListTile(
+          title: Text(t.days(30)),
+          trailing: settings.remoteSyncCycle == const Duration(days: 30)
+              ? const Icon(Icons.check)
+              : null,
+          onTap: autoSavePop(const Duration(days: 30)),
+        ),
+      ],
+    );
   }
 
   @override
@@ -129,18 +128,19 @@ class _SyncAccountPageState extends State<SyncAccountPage>
                       ? t.each_startup
                       : t.days(remoteSyncCycle.inDays),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: store.settings.enableRemoteSync
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withValues(alpha: 0.6)),
+                    color: store.settings.enableRemoteSync
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.6),
+                  ),
                 ),
               ),
               ListTile(
                 title: const Text("WebDAV"),
                 subtitle: Text(t.sync_note_subtitle),
-                enabled: !store.syncKdbx.isSyncing &&
+                enabled:
+                    !store.syncKdbx.isSyncing &&
                     store.settings.enableRemoteSync,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 onTap: () async {
@@ -157,12 +157,14 @@ class _SyncAccountPageState extends State<SyncAccountPage>
                 trailing: InfiniteRotateWidget(
                   enabled: store.syncKdbx.isSyncing,
                   child: IconButton(
-                    onPressed: !store.syncKdbx.isSyncing &&
+                    onPressed:
+                        !store.syncKdbx.isSyncing &&
                             store.settings.enableRemoteSync &&
                             store.syncKdbx.config != null
                         ? () => store.syncKdbx.sync(context)
                         : null,
-                    onLongPress: !store.syncKdbx.isSyncing &&
+                    onLongPress:
+                        !store.syncKdbx.isSyncing &&
                             store.settings.enableRemoteSync &&
                             store.syncKdbx.config != null
                         ? () => store.syncKdbx.sync(context, forceMerge: true)
@@ -181,9 +183,7 @@ class _SyncAccountPageState extends State<SyncAccountPage>
                 ),
               if (store.syncKdbx.lastMergeContext != null)
                 Theme(
-                  data: ThemeData(
-                    dividerColor: Colors.transparent,
-                  ),
+                  data: ThemeData(dividerColor: Colors.transparent),
                   child: ExpansionTile(
                     title: Text(t.sync_merge_log),
                     children: _buildMergeTile(store.syncKdbx.lastMergeContext!),

@@ -115,8 +115,9 @@ class InputDialogState extends State<InputDialog> {
 
     Widget? limitIcon;
 
-    final leadingIcon =
-        widget.leadingBuilder != null ? widget.leadingBuilder!(this) : null;
+    final leadingIcon = widget.leadingBuilder != null
+        ? widget.leadingBuilder!(this)
+        : null;
 
     if (isLimitContent) {
       limitIcon = Icon(
@@ -143,7 +144,7 @@ class InputDialogState extends State<InputDialog> {
             dropdownMenuEntries: widget.promptItmes!
                 .map((value) => DropdownMenuEntry(value: value, label: value))
                 .toList(),
-          )
+          ),
         ],
       );
     } else {
@@ -184,11 +185,7 @@ class InputDialogState extends State<InputDialog> {
 }
 
 class GroupSelectorDialog extends StatefulWidget {
-  const GroupSelectorDialog({
-    super.key,
-    this.value,
-    required this.onResult,
-  });
+  const GroupSelectorDialog({super.key, this.value, required this.onResult});
 
   final KdbxGroup? value;
   final FormFieldSetter<KdbxGroup> onResult;
@@ -233,7 +230,7 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
               setState(() {});
             },
             icon: const Icon(Icons.add),
-          )
+          ),
         ],
       ),
       contentPadding: EdgeInsets.only(
@@ -257,8 +254,9 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
                     ),
                   ),
                   title: Text(getKdbxObjectTitle(item)),
-                  trailing:
-                      item == widget.value ? const Icon(Icons.done) : null,
+                  trailing: item == widget.value
+                      ? const Icon(Icons.done)
+                      : null,
                   onTap: () {
                     widget.onResult(item == widget.value ? null : item);
                   },
@@ -342,10 +340,9 @@ class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
     _totalEntry.clear();
     final kdbx = KdbxProvider.of(context)!;
 
-    _totalEntry.addAll(_kbdxSearchHandler.search(
-      _searchController.text,
-      kdbx.totalEntry,
-    ));
+    _totalEntry.addAll(
+      _kbdxSearchHandler.search(_searchController.text, kdbx.totalEntry),
+    );
     setState(() {});
   }
 
@@ -371,7 +368,7 @@ class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
                 icon: const Icon(Icons.help_outline_rounded),
               ),
             ),
-          )
+          ),
         ],
       ),
       contentPadding: EdgeInsets.only(
@@ -400,10 +397,9 @@ class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
                 size: 24,
               ),
               titleTextStyle: kdbxEntry.isExpiry()
-                  ? Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(color: Theme.of(context).colorScheme.error)
+                  ? Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.error,
+                    )
                   : Theme.of(context).textTheme.titleMedium,
               title: Text(
                 kdbxEntry.isExpiry()
@@ -477,10 +473,7 @@ class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
         style: Theme.of(context).textTheme.titleSmall,
         text: "$subLabel ",
         children: [
-          TextSpan(
-            style: Theme.of(context).textTheme.bodySmall,
-            text: text,
-          )
+          TextSpan(style: Theme.of(context).textTheme.bodySmall, text: text),
         ],
       ),
     );
@@ -488,10 +481,7 @@ class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
 }
 
 class AnimatedIconSwitcher extends StatefulWidget {
-  const AnimatedIconSwitcher({
-    super.key,
-    required this.icon,
-  });
+  const AnimatedIconSwitcher({super.key, required this.icon});
 
   final Widget icon;
 

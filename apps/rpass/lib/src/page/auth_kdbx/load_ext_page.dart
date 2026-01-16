@@ -8,11 +8,7 @@ import '../../util/route.dart';
 import 'authorized_page.dart';
 
 class _LoadExternalKdbxArgs extends PageRouteArgs {
-  _LoadExternalKdbxArgs({
-    super.key,
-    required this.kdbxFile,
-    this.kdbxFilePath,
-  });
+  _LoadExternalKdbxArgs({super.key, required this.kdbxFile, this.kdbxFilePath});
 
   final Uint8List kdbxFile;
   final String? kdbxFilePath;
@@ -24,13 +20,13 @@ class LoadExternalKdbxRoute extends PageRouteInfo<_LoadExternalKdbxArgs> {
     required Uint8List kdbxFile,
     String? kdbxFilePath,
   }) : super(
-          name,
-          args: _LoadExternalKdbxArgs(
-            key: key,
-            kdbxFile: kdbxFile,
-            kdbxFilePath: kdbxFilePath,
-          ),
-        );
+         name,
+         args: _LoadExternalKdbxArgs(
+           key: key,
+           kdbxFile: kdbxFile,
+           kdbxFilePath: kdbxFilePath,
+         ),
+       );
 
   static const name = "LoadExternalKdbxRoute";
 
@@ -38,19 +34,13 @@ class LoadExternalKdbxRoute extends PageRouteInfo<_LoadExternalKdbxArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<_LoadExternalKdbxArgs>();
-      return LoadExternalKdbxPage(
-        key: args.key,
-        kdbxFile: args.kdbxFile,
-      );
+      return LoadExternalKdbxPage(key: args.key, kdbxFile: args.kdbxFile);
     },
   );
 }
 
 class LoadExternalKdbxPage extends AuthorizedPage {
-  const LoadExternalKdbxPage({
-    super.key,
-    required this.kdbxFile,
-  });
+  const LoadExternalKdbxPage({super.key, required this.kdbxFile});
 
   final Uint8List kdbxFile;
 

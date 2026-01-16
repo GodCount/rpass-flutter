@@ -36,31 +36,31 @@ void main() {
 
     test("not include cahr", () {
       expect(
-        randomPassword(length: 20, enableLetterLowercase: false)
-            .$1
-            .split("")
-            .any((char) => letters.contains(char)),
+        randomPassword(
+          length: 20,
+          enableLetterLowercase: false,
+        ).$1.split("").any((char) => letters.contains(char)),
         isFalse,
       );
       expect(
-        randomPassword(length: 20, enableLetterUppercase: false)
-            .$1
-            .split("")
-            .any((char) => letters.toUpperCase().contains(char)),
+        randomPassword(
+          length: 20,
+          enableLetterUppercase: false,
+        ).$1.split("").any((char) => letters.toUpperCase().contains(char)),
         isFalse,
       );
       expect(
-        randomPassword(length: 20, enableNumber: false)
-            .$1
-            .split("")
-            .any((char) => numbers.contains(char)),
+        randomPassword(
+          length: 20,
+          enableNumber: false,
+        ).$1.split("").any((char) => numbers.contains(char)),
         isFalse,
       );
       expect(
-        randomPassword(length: 20, enableSymbol: false)
-            .$1
-            .split("")
-            .any((char) => symbols.contains(char)),
+        randomPassword(
+          length: 20,
+          enableSymbol: false,
+        ).$1.split("").any((char) => symbols.contains(char)),
         isFalse,
       );
     });

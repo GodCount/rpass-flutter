@@ -55,20 +55,14 @@ abstract interface class RemoteFileSystem {
     CancelSignal? cancelSignal,
   });
 
-  Future<RemoteFile> readFileInfo(
-    String path, [
-    CancelSignal? cancelSignal,
-  ]);
+  Future<RemoteFile> readFileInfo(String path, [CancelSignal? cancelSignal]);
   Future<Uint8List> readFile({
     required String path,
     OnProgress? onProgress,
     CancelSignal? cancelSignal,
   });
 
-  Future<List<RemoteFile>> readdir(
-    String path, [
-    CancelSignal? cancelSignal,
-  ]);
+  Future<List<RemoteFile>> readdir(String path, [CancelSignal? cancelSignal]);
 
   Future<RemoteFile> mkdir({
     required String path,
@@ -76,10 +70,7 @@ abstract interface class RemoteFileSystem {
     CancelSignal? cancelSignal,
   });
 
-  Future<void> delete(
-    String path, [
-    CancelSignal? cancelSignal,
-  ]);
+  Future<void> delete(String path, [CancelSignal? cancelSignal]);
 }
 
 class RemoteFile {
@@ -91,15 +82,17 @@ class RemoteFile {
     DateTime? cTime,
     DateTime? mTime,
     String? name,
-  })  : _client = client,
-        _path = path,
-        _name = name ?? (path.endsWith("/")
-                ? path.substring(0, path.length - 1).split("/").last
-                : path.split("/").last),
-        _dir = dir,
-        _size = size,
-        _cTime = cTime,
-        _mTime = mTime;
+  }) : _client = client,
+       _path = path,
+       _name =
+           name ??
+           (path.endsWith("/")
+               ? path.substring(0, path.length - 1).split("/").last
+               : path.split("/").last),
+       _dir = dir,
+       _size = size,
+       _cTime = cTime,
+       _mTime = mTime;
 
   final RemoteClient _client;
 
@@ -126,16 +119,15 @@ class RemoteFile {
     _name = file.name;
   }
 
-  Future<void> write(
-    Uint8List data, [
-    CancelSignal? cancelSignal,
-  ]) async {
+  Future<void> write(Uint8List data, [CancelSignal? cancelSignal]) async {
     assert(!dir, "this is dir");
-    _updateInfo(await _client.writeFile(
-      path: path,
-      data: data,
-      cancelSignal: cancelSignal,
-    ));
+    _updateInfo(
+      await _client.writeFile(
+        path: path,
+        data: data,
+        cancelSignal: cancelSignal,
+      ),
+    );
   }
 
   Future<void> move({
@@ -143,12 +135,14 @@ class RemoteFile {
     bool overwrite = false,
     CancelSignal? cancelSignal,
   }) async {
-    _updateInfo(await _client.move(
-      oldPath: path,
-      newPath: newPath,
-      overwrite: overwrite,
-      cancelSignal: cancelSignal,
-    ));
+    _updateInfo(
+      await _client.move(
+        oldPath: path,
+        newPath: newPath,
+        overwrite: overwrite,
+        cancelSignal: cancelSignal,
+      ),
+    );
   }
 
   Future<RemoteFile> copy({
@@ -175,16 +169,12 @@ class RemoteFile {
     );
   }
 
-  Future<List<RemoteFile>> readdir([
-    CancelSignal? cancelSignal,
-  ]) {
+  Future<List<RemoteFile>> readdir([CancelSignal? cancelSignal]) {
     assert(dir, "this not dir");
     return _client.readdir(path, cancelSignal);
   }
 
-  Future<void> delete([
-    CancelSignal? cancelSignal,
-  ]) {
+  Future<void> delete([CancelSignal? cancelSignal]) {
     return _client.delete(path, cancelSignal);
   }
 

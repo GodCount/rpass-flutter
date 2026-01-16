@@ -16,6 +16,5 @@ class I18n {
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       MyLocalizations.localizationsDelegates;
 
-  static const List<Locale> supportedLocales =
-      MyLocalizations.supportedLocales;
+  static const List<Locale> supportedLocales = MyLocalizations.supportedLocales;
 }

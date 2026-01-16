@@ -84,28 +84,31 @@ class InputParse {
       final quoteMatch = quotePattern.firstMatch(part);
 
       if (spaceMatch == null) {
-        result.add(ParseObject(
-          field: field,
-          value: quoteMatch?.namedGroup("value") ?? part,
-        ));
+        result.add(
+          ParseObject(
+            field: field,
+            value: quoteMatch?.namedGroup("value") ?? part,
+          ),
+        );
         break;
       }
 
       if (quoteMatch == null || spaceMatch.start < quoteMatch.start) {
         if (spaceMatch.start > 0) {
-          result.add(ParseObject(
-            field: field,
-            value: part.substring(0, spaceMatch.start),
-          ));
+          result.add(
+            ParseObject(
+              field: field,
+              value: part.substring(0, spaceMatch.start),
+            ),
+          );
         }
         i += spaceMatch.end;
         continue;
       }
 
-      result.add(ParseObject(
-        field: field,
-        value: quoteMatch.namedGroup("value") ?? "",
-      ));
+      result.add(
+        ParseObject(field: field, value: quoteMatch.namedGroup("value") ?? ""),
+      );
       i += quoteMatch.end;
     }
 
@@ -114,9 +117,7 @@ class InputParse {
 }
 
 class KbdxSearchHandler {
-  KbdxSearchHandler({
-    this.useKdbxEntryConfig = false,
-  });
+  KbdxSearchHandler({this.useKdbxEntryConfig = false});
 
   /// 对指定字段进行匹配
   /// 字段映射表, 可以缩写映射到完整字段
@@ -155,8 +156,9 @@ class KbdxSearchHandler {
   bool _allContains(KdbxEntry kdbxEntry, String value) {
     var weight = 0;
     for (var key in [...KdbxKeyCommon.all, ...KdbxKeyURLS.all]) {
-      weight +=
-          kdbxEntry.getNonNullString(key).toLowerCase().contains(value) ? 1 : 0;
+      weight += kdbxEntry.getNonNullString(key).toLowerCase().contains(value)
+          ? 1
+          : 0;
     }
     weight += kdbxEntry.tagList.contains(value) ? 1 : 0;
     return weight > 0;
@@ -222,10 +224,11 @@ class KbdxSearchHandler {
       result = sourceList.where((item) => item.enableDisplay());
     }
 
-    return result.toList()
-      ..sort((a, b) => b.times.lastModificationTime
-          .get()!
-          .compareTo(a.times.lastModificationTime.get()!));
+    return result.toList()..sort(
+      (a, b) => b.times.lastModificationTime.get()!.compareTo(
+        a.times.lastModificationTime.get()!,
+      ),
+    );
   }
 }
 

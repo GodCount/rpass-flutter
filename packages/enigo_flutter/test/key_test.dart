@@ -11,529 +11,529 @@ import 'package:flutter_test/flutter_test.dart';
 /// 从 physical_key_data 提取的不支持键值
 ///
 const macosUnpportKeys = [
-// Hyper
+  // Hyper
   16,
-// Super
+  // Super
   17,
-// FnLock
+  // FnLock
   19,
-// Suspend
+  // Suspend
   20,
-// Resume
+  // Resume
   21,
-// Turbo
+  // Turbo
   22,
-// PrivacyScreenToggle
+  // PrivacyScreenToggle
   23,
-// MicrophoneMuteToggle
+  // MicrophoneMuteToggle
   24,
-// Sleep
+  // Sleep
   65666,
-// WakeUp
+  // WakeUp
   65667,
-// DisplayToggleIntExt
+  // DisplayToggleIntExt
   65717,
-// GameButton1
+  // GameButton1
   392961,
-// GameButton2
+  // GameButton2
   392962,
-// GameButton3
+  // GameButton3
   392963,
-// GameButton4
+  // GameButton4
   392964,
-// GameButton5
+  // GameButton5
   392965,
-// GameButton6
+  // GameButton6
   392966,
-// GameButton7
+  // GameButton7
   392967,
-// GameButton8
+  // GameButton8
   392968,
-// GameButton9
+  // GameButton9
   392969,
-// GameButton10
+  // GameButton10
   392970,
-// GameButton11
+  // GameButton11
   392971,
-// GameButton12
+  // GameButton12
   392972,
-// GameButton13
+  // GameButton13
   392973,
-// GameButton14
+  // GameButton14
   392974,
-// GameButton15
+  // GameButton15
   392975,
-// GameButton16
+  // GameButton16
   392976,
-// GameButtonA
+  // GameButtonA
   392977,
-// GameButtonB
+  // GameButtonB
   392978,
-// GameButtonC
+  // GameButtonC
   392979,
-// GameButtonLeft1
+  // GameButtonLeft1
   392980,
-// GameButtonLeft2
+  // GameButtonLeft2
   392981,
-// GameButtonMode
+  // GameButtonMode
   392982,
-// GameButtonRight1
+  // GameButtonRight1
   392983,
-// GameButtonRight2
+  // GameButtonRight2
   392984,
-// GameButtonSelect
+  // GameButtonSelect
   392985,
-// GameButtonStart
+  // GameButtonStart
   392986,
-// GameButtonThumbLeft
+  // GameButtonThumbLeft
   392987,
-// GameButtonThumbRight
+  // GameButtonThumbRight
   392988,
-// GameButtonX
+  // GameButtonX
   392989,
-// GameButtonY
+  // GameButtonY
   392990,
-// GameButtonZ
+  // GameButtonZ
   392991,
-// UsbReserved
+  // UsbReserved
   458752,
-// UsbErrorRollOver
+  // UsbErrorRollOver
   458753,
-// UsbPostFail
+  // UsbPostFail
   458754,
-// UsbErrorUndefined
+  // UsbErrorUndefined
   458755,
-// PrintScreen
+  // PrintScreen
   458822,
-// ScrollLock
+  // ScrollLock
   458823,
-// Pause
+  // Pause
   458824,
-// Power
+  // Power
   458854,
-// F21
+  // F21
   458864,
-// F22
+  // F22
   458865,
-// F23
+  // F23
   458866,
-// F24
+  // F24
   458867,
-// Open
+  // Open
   458868,
-// Help
+  // Help
   458869,
-// Select
+  // Select
   458871,
-// Again
+  // Again
   458873,
-// Undo
+  // Undo
   458874,
-// Cut
+  // Cut
   458875,
-// Copy
+  // Copy
   458876,
-// Paste
+  // Paste
   458877,
-// Find
+  // Find
   458878,
-// KanaMode
+  // KanaMode
   458888,
-// Convert
+  // Convert
   458890,
-// NonConvert
+  // NonConvert
   458891,
-// Lang3
+  // Lang3
   458898,
-// Lang4
+  // Lang4
   458899,
-// Lang5
+  // Lang5
   458900,
-// Abort
+  // Abort
   458907,
-// Props
+  // Props
   458915,
-// NumpadParenLeft
+  // NumpadParenLeft
   458934,
-// NumpadParenRight
+  // NumpadParenRight
   458935,
-// NumpadBackspace
+  // NumpadBackspace
   458939,
-// NumpadMemoryStore
+  // NumpadMemoryStore
   458960,
-// NumpadMemoryRecall
+  // NumpadMemoryRecall
   458961,
-// NumpadMemoryClear
+  // NumpadMemoryClear
   458962,
-// NumpadMemoryAdd
+  // NumpadMemoryAdd
   458963,
-// NumpadMemorySubtract
+  // NumpadMemorySubtract
   458964,
-// NumpadSignChange
+  // NumpadSignChange
   458967,
-// NumpadClear
+  // NumpadClear
   458968,
-// NumpadClearEntry
+  // NumpadClearEntry
   458969,
-// Info
+  // Info
   786528,
-// ClosedCaptionToggle
+  // ClosedCaptionToggle
   786529,
-// BrightnessUp
+  // BrightnessUp
   786543,
-// BrightnessDown
+  // BrightnessDown
   786544,
-// BrightnessToggle
+  // BrightnessToggle
   786546,
-// BrightnessMinimum
+  // BrightnessMinimum
   786547,
-// BrightnessMaximum
+  // BrightnessMaximum
   786548,
-// BrightnessAuto
+  // BrightnessAuto
   786549,
-// KbdIllumUp
+  // KbdIllumUp
   786553,
-// KbdIllumDown
+  // KbdIllumDown
   786554,
-// MediaLast
+  // MediaLast
   786563,
-// LaunchPhone
+  // LaunchPhone
   786572,
-// ProgramGuide
+  // ProgramGuide
   786573,
-// Exit
+  // Exit
   786580,
-// ChannelUp
+  // ChannelUp
   786588,
-// ChannelDown
+  // ChannelDown
   786589,
-// MediaPlay
+  // MediaPlay
   786608,
-// MediaPause
+  // MediaPause
   786609,
-// MediaRecord
+  // MediaRecord
   786610,
-// MediaFastForward
+  // MediaFastForward
   786611,
-// MediaRewind
+  // MediaRewind
   786612,
-// MediaTrackNext
+  // MediaTrackNext
   786613,
-// MediaTrackPrevious
+  // MediaTrackPrevious
   786614,
-// MediaStop
+  // MediaStop
   786615,
-// Eject
+  // Eject
   786616,
-// MediaPlayPause
+  // MediaPlayPause
   786637,
-// SpeechInputToggle
+  // SpeechInputToggle
   786639,
-// BassBoost
+  // BassBoost
   786661,
-// MediaSelect
+  // MediaSelect
   786819,
-// LaunchWordProcessor
+  // LaunchWordProcessor
   786820,
-// LaunchSpreadsheet
+  // LaunchSpreadsheet
   786822,
-// LaunchMail
+  // LaunchMail
   786826,
-// LaunchContacts
+  // LaunchContacts
   786829,
-// LaunchCalendar
+  // LaunchCalendar
   786830,
-// LaunchApp2
+  // LaunchApp2
   786834,
-// LaunchApp1
+  // LaunchApp1
   786836,
-// LaunchInternetBrowser
+  // LaunchInternetBrowser
   786838,
-// LogOff
+  // LogOff
   786844,
-// LockScreen
+  // LockScreen
   786846,
-// LaunchControlPanel
+  // LaunchControlPanel
   786847,
-// SelectTask
+  // SelectTask
   786850,
-// LaunchDocuments
+  // LaunchDocuments
   786855,
-// SpellCheck
+  // SpellCheck
   786859,
-// LaunchKeyboardLayout
+  // LaunchKeyboardLayout
   786862,
-// LaunchScreenSaver
+  // LaunchScreenSaver
   786865,
-// LaunchAudioBrowser
+  // LaunchAudioBrowser
   786871,
-// LaunchAssistant
+  // LaunchAssistant
   786891,
-// New
+  // New
   786945,
-// Close
+  // Close
   786947,
-// Save
+  // Save
   786951,
-// Print
+  // Print
   786952,
-// BrowserSearch
+  // BrowserSearch
   786977,
-// BrowserHome
+  // BrowserHome
   786979,
-// BrowserBack
+  // BrowserBack
   786980,
-// BrowserForward
+  // BrowserForward
   786981,
-// BrowserStop
+  // BrowserStop
   786982,
-// BrowserRefresh
+  // BrowserRefresh
   786983,
-// BrowserFavorites
+  // BrowserFavorites
   786986,
-// ZoomIn
+  // ZoomIn
   786989,
-// ZoomOut
+  // ZoomOut
   786990,
-// ZoomToggle
+  // ZoomToggle
   786994,
-// Redo
+  // Redo
   787065,
-// MailReply
+  // MailReply
   787081,
-// MailForward
+  // MailForward
   787083,
-// MailSend
+  // MailSend
   787084,
-// KeyboardLayoutSelect
+  // KeyboardLayoutSelect
   787101,
-// ShowAllWindows
+  // ShowAllWindows
   787103,
 ];
 const windowsUnpportKeys = [
-// Hyper
+  // Hyper
   16,
-// Super
+  // Super
   17,
-// Fn
+  // Fn
   18,
-// FnLock
+  // FnLock
   19,
-// Suspend
+  // Suspend
   20,
-// Resume
+  // Resume
   21,
-// Turbo
+  // Turbo
   22,
-// PrivacyScreenToggle
+  // PrivacyScreenToggle
   23,
-// MicrophoneMuteToggle
+  // MicrophoneMuteToggle
   24,
-// DisplayToggleIntExt
+  // DisplayToggleIntExt
   65717,
-// GameButton1
+  // GameButton1
   392961,
-// GameButton2
+  // GameButton2
   392962,
-// GameButton3
+  // GameButton3
   392963,
-// GameButton4
+  // GameButton4
   392964,
-// GameButton5
+  // GameButton5
   392965,
-// GameButton6
+  // GameButton6
   392966,
-// GameButton7
+  // GameButton7
   392967,
-// GameButton8
+  // GameButton8
   392968,
-// GameButton9
+  // GameButton9
   392969,
-// GameButton10
+  // GameButton10
   392970,
-// GameButton11
+  // GameButton11
   392971,
-// GameButton12
+  // GameButton12
   392972,
-// GameButton13
+  // GameButton13
   392973,
-// GameButton14
+  // GameButton14
   392974,
-// GameButton15
+  // GameButton15
   392975,
-// GameButton16
+  // GameButton16
   392976,
-// GameButtonA
+  // GameButtonA
   392977,
-// GameButtonB
+  // GameButtonB
   392978,
-// GameButtonC
+  // GameButtonC
   392979,
-// GameButtonLeft1
+  // GameButtonLeft1
   392980,
-// GameButtonLeft2
+  // GameButtonLeft2
   392981,
-// GameButtonMode
+  // GameButtonMode
   392982,
-// GameButtonRight1
+  // GameButtonRight1
   392983,
-// GameButtonRight2
+  // GameButtonRight2
   392984,
-// GameButtonSelect
+  // GameButtonSelect
   392985,
-// GameButtonStart
+  // GameButtonStart
   392986,
-// GameButtonThumbLeft
+  // GameButtonThumbLeft
   392987,
-// GameButtonThumbRight
+  // GameButtonThumbRight
   392988,
-// GameButtonX
+  // GameButtonX
   392989,
-// GameButtonY
+  // GameButtonY
   392990,
-// GameButtonZ
+  // GameButtonZ
   392991,
-// UsbReserved
+  // UsbReserved
   458752,
-// UsbErrorUndefined
+  // UsbErrorUndefined
   458755,
-// Open
+  // Open
   458868,
-// Select
+  // Select
   458871,
-// Again
+  // Again
   458873,
-// Find
+  // Find
   458878,
-// Lang5
+  // Lang5
   458900,
-// Abort
+  // Abort
   458907,
-// Props
+  // Props
   458915,
-// NumpadParenLeft
+  // NumpadParenLeft
   458934,
-// NumpadParenRight
+  // NumpadParenRight
   458935,
-// NumpadBackspace
+  // NumpadBackspace
   458939,
-// NumpadMemoryStore
+  // NumpadMemoryStore
   458960,
-// NumpadMemoryRecall
+  // NumpadMemoryRecall
   458961,
-// NumpadMemoryClear
+  // NumpadMemoryClear
   458962,
-// NumpadMemoryAdd
+  // NumpadMemoryAdd
   458963,
-// NumpadMemorySubtract
+  // NumpadMemorySubtract
   458964,
-// NumpadSignChange
+  // NumpadSignChange
   458967,
-// NumpadClear
+  // NumpadClear
   458968,
-// NumpadClearEntry
+  // NumpadClearEntry
   458969,
-// Info
+  // Info
   786528,
-// ClosedCaptionToggle
+  // ClosedCaptionToggle
   786529,
-// BrightnessUp
+  // BrightnessUp
   786543,
-// BrightnessDown
+  // BrightnessDown
   786544,
-// BrightnessToggle
+  // BrightnessToggle
   786546,
-// BrightnessMinimum
+  // BrightnessMinimum
   786547,
-// BrightnessMaximum
+  // BrightnessMaximum
   786548,
-// BrightnessAuto
+  // BrightnessAuto
   786549,
-// KbdIllumUp
+  // KbdIllumUp
   786553,
-// KbdIllumDown
+  // KbdIllumDown
   786554,
-// MediaLast
+  // MediaLast
   786563,
-// LaunchPhone
+  // LaunchPhone
   786572,
-// ProgramGuide
+  // ProgramGuide
   786573,
-// Exit
+  // Exit
   786580,
-// ChannelUp
+  // ChannelUp
   786588,
-// ChannelDown
+  // ChannelDown
   786589,
-// MediaPlay
+  // MediaPlay
   786608,
-// MediaPause
+  // MediaPause
   786609,
-// MediaRecord
+  // MediaRecord
   786610,
-// MediaFastForward
+  // MediaFastForward
   786611,
-// MediaRewind
+  // MediaRewind
   786612,
-// SpeechInputToggle
+  // SpeechInputToggle
   786639,
-// BassBoost
+  // BassBoost
   786661,
-// LaunchWordProcessor
+  // LaunchWordProcessor
   786820,
-// LaunchSpreadsheet
+  // LaunchSpreadsheet
   786822,
-// LaunchContacts
+  // LaunchContacts
   786829,
-// LaunchCalendar
+  // LaunchCalendar
   786830,
-// LaunchInternetBrowser
+  // LaunchInternetBrowser
   786838,
-// LogOff
+  // LogOff
   786844,
-// LockScreen
+  // LockScreen
   786846,
-// LaunchControlPanel
+  // LaunchControlPanel
   786847,
-// SelectTask
+  // SelectTask
   786850,
-// LaunchDocuments
+  // LaunchDocuments
   786855,
-// SpellCheck
+  // SpellCheck
   786859,
-// LaunchKeyboardLayout
+  // LaunchKeyboardLayout
   786862,
-// LaunchScreenSaver
+  // LaunchScreenSaver
   786865,
-// LaunchAudioBrowser
+  // LaunchAudioBrowser
   786871,
-// LaunchAssistant
+  // LaunchAssistant
   786891,
-// New
+  // New
   786945,
-// Close
+  // Close
   786947,
-// Save
+  // Save
   786951,
-// Print
+  // Print
   786952,
-// ZoomIn
+  // ZoomIn
   786989,
-// ZoomOut
+  // ZoomOut
   786990,
-// ZoomToggle
+  // ZoomToggle
   786994,
-// Redo
+  // Redo
   787065,
-// MailReply
+  // MailReply
   787081,
-// MailForward
+  // MailForward
   787083,
-// MailSend
+  // MailSend
   787084,
-// KeyboardLayoutSelect
+  // KeyboardLayoutSelect
   787101,
-// ShowAllWindows
+  // ShowAllWindows
   787103,
 ];
 
@@ -543,7 +543,11 @@ Future<void> main() async {
   setUpAll(
     () async => await RustLib.init(
       externalLibrary: ExternalLibrary.open(
-        'rust/target/debug/libenigo_flutter.${Platform.isWindows ? "dll" : Platform.isMacOS ? "dylib" : "so"}',
+        'rust/target/debug/libenigo_flutter.${Platform.isWindows
+            ? "dll"
+            : Platform.isMacOS
+            ? "dylib"
+            : "so"}',
       ),
     ),
   );

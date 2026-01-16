@@ -47,8 +47,9 @@ Future<void> autoFillSequence(KdbxEntry kdbxEntry, [KdbxKey? kdbxKey]) async {
           // 填充单个字段
           items = [KdbxSequenceItem(kdbxKey.key)];
         } else {
-          items = AutoTypeSequenceParse.parse(kdbxEntry.getAutoTypeSequence())
-              .items;
+          items = AutoTypeSequenceParse.parse(
+            kdbxEntry.getAutoTypeSequence(),
+          ).items;
         }
 
         debugPrint("[start auto fill]");
@@ -121,12 +122,15 @@ Future<List<AutofillDataset>> androidAutofillSearch(
   List<KdbxEntry> kdbxEntrys,
 ) async {
   final result = kdbxEntrys.where((it) {
-    final packageName =
-        it.getActualString(KdbxKeySpecial.AUTO_FILL_PACKAGE_NAME);
+    final packageName = it.getActualString(
+      KdbxKeySpecial.AUTO_FILL_PACKAGE_NAME,
+    );
 
     // 任意一个 url 匹配成功, 或者包名对应上
-    return it.getUrls().any((url) =>
-            metadata.webDomains.any((it) => it.domain.matchWebDomain(url))) ||
+    return it.getUrls().any(
+          (url) =>
+              metadata.webDomains.any((it) => it.domain.matchWebDomain(url)),
+        ) ||
         (packageName != null && metadata.packageNames.contains(packageName));
   });
 

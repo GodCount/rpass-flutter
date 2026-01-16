@@ -16,12 +16,7 @@ import '../../widget/extension_state.dart';
 
 final _logger = Logger("page:auth");
 
-enum AuthorizedType {
-  initial,
-  load,
-  modify_password,
-  verify_owner,
-}
+enum AuthorizedType { initial, load, modify_password, verify_owner }
 
 abstract class AuthorizedPage extends StatefulWidget {
   const AuthorizedPage({super.key});
@@ -71,7 +66,8 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
   }
 
   void _initKeyFile() async {
-    keyFilecontroller.enableGenKeyFile = authType == AuthorizedType.initial ||
+    keyFilecontroller.enableGenKeyFile =
+        authType == AuthorizedType.initial ||
         authType == AuthorizedType.modify_password;
 
     if (readHistoryKeyFile) {
@@ -261,12 +257,13 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
                                 textInputAction: TextInputAction.next,
                                 onEditingComplete:
                                     authType == AuthorizedType.verify_owner ||
-                                            authType == AuthorizedType.load
-                                        ? _confirm
-                                        : null,
+                                        authType == AuthorizedType.load
+                                    ? _confirm
+                                    : null,
                                 decoration: InputDecoration(
-                                  labelText:
-                                      isPassword ? t.password : t.none_password,
+                                  labelText: isPassword
+                                      ? t.password
+                                      : t.none_password,
                                   border: const OutlineInputBorder(),
                                   prefixIcon: Checkbox(
                                     value: isPassword,
@@ -392,9 +389,8 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
 }
 
 class KeyFileController with ChangeNotifier {
-  KeyFileController({
-    bool? enableGenKeyFile,
-  }) : _enableGenKeyFile = enableGenKeyFile ?? false;
+  KeyFileController({bool? enableGenKeyFile})
+    : _enableGenKeyFile = enableGenKeyFile ?? false;
 
   bool _enableGenKeyFile;
 
@@ -441,11 +437,7 @@ class KeyFileController with ChangeNotifier {
 }
 
 class KeyFileFormField extends StatefulWidget {
-  const KeyFileFormField({
-    super.key,
-    required this.controller,
-    this.validator,
-  });
+  const KeyFileFormField({super.key, required this.controller, this.validator});
 
   final KeyFileController controller;
   final FormFieldValidator<(String, Uint8List)>? validator;

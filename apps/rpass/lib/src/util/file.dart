@@ -84,7 +84,7 @@ class SimpleFile {
       type: allowedExtensions != null ? FileType.custom : type,
       initialDirectory: (await applicationDocumentsDirectory).path,
       allowedExtensions: allowedExtensions,
-      lockParentWindow: true
+      lockParentWindow: true,
     );
     if (result == null || result.xFiles.isEmpty) {
       throw CancelException();

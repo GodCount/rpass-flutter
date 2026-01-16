@@ -62,7 +62,7 @@ class KdbxKeySpecial {
     AUTO_FILL_PACKAGE_NAME,
     TAGS,
     ATTACH,
-    EXPIRES
+    EXPIRES,
   ];
 }
 
@@ -91,7 +91,7 @@ class KdbxKeyCommon {
     EMAIL,
     PASSWORD,
     OTP,
-    NOTES
+    NOTES,
   ];
 
   static List<KdbxKey> excludeURL = [
@@ -100,7 +100,7 @@ class KdbxKeyCommon {
     EMAIL,
     PASSWORD,
     OTP,
-    NOTES
+    NOTES,
   ];
 }
 
@@ -120,13 +120,7 @@ class KdbxKeyURLS {
   static const KEY_URL5 = 'URL5';
   static KdbxKey URL5 = KdbxKey(KEY_URL5);
 
-  static List<KdbxKey> all = [
-    URL1,
-    URL2,
-    URL3,
-    URL4,
-    URL5,
-  ];
+  static List<KdbxKey> all = [URL1, URL2, URL3, URL4, URL5];
 }
 
 final defaultKdbxKeys = [
@@ -143,12 +137,12 @@ class FieldStatistic {
     Set<String>? tags,
     Set<String>? customFields,
     Set<String>? customIcons,
-  })  : urls = urls ?? {},
-        userNames = userNames ?? {},
-        emails = emails ?? {},
-        tags = tags ?? {},
-        customFields = customFields ?? {},
-        customIcons = customIcons ?? {};
+  }) : urls = urls ?? {},
+       userNames = userNames ?? {},
+       emails = emails ?? {},
+       tags = tags ?? {},
+       customFields = customFields ?? {},
+       customIcons = customIcons ?? {};
   final Set<String> urls;
   final Set<String> userNames;
   final Set<String> emails;
@@ -238,9 +232,9 @@ extension KdbxGroupExt on KdbxBase {
 
   KdbxGroup? findGroupByUuid(KdbxUuid uuid) {
     try {
-      return kdbxFile.body.rootGroup
-          .getAllGroups()
-          .firstWhere((group) => group.uuid == uuid);
+      return kdbxFile.body.rootGroup.getAllGroups().firstWhere(
+        (group) => group.uuid == uuid,
+      );
     } catch (e) {
       return null;
     }
@@ -270,9 +264,9 @@ mixin KdbxVirtualObject on KdbxBase {
 extension KdbxEntryExt on KdbxBase {
   // 除垃圾桶的全部 KdbxEntry
   List<KdbxEntry> get totalEntry => [
-        ...kdbxFile.body.rootGroup.entries,
-        ...rootGroups.expand((group) => group.getAllEntries())
-      ];
+    ...kdbxFile.body.rootGroup.entries,
+    ...rootGroups.expand((group) => group.getAllEntries()),
+  ];
 
   KdbxEntry createEntry(KdbxGroup parent) {
     final entry = KdbxEntry.create(kdbxFile, parent);
@@ -298,9 +292,9 @@ extension KdbxEntryExt on KdbxBase {
 
 extension KdbxRecycleBinExt on KdbxBase {
   List<KdbxObject> get recycleBinObjects => [
-        ...kdbxFile.getRecycleBinOrCreate().groups,
-        ...kdbxFile.getRecycleBinOrCreate().entries,
-      ];
+    ...kdbxFile.getRecycleBinOrCreate().groups,
+    ...kdbxFile.getRecycleBinOrCreate().entries,
+  ];
 
   void deletePermanently(KdbxObject object) {
     kdbxFile.deletePermanently(object);
@@ -356,9 +350,9 @@ mixin KdbxEntryFieldStatistic on KdbxBase {
 
     _fieldStatistic = FieldStatistic();
 
-    _fieldStatistic!.customIcons.addAll(customIcons.map(
-      (item) => item.uuid.uuid,
-    ));
+    _fieldStatistic!.customIcons.addAll(
+      customIcons.map((item) => item.uuid.uuid),
+    );
 
     void setFieldStatistic(KdbxEntry entry) {
       final url = entry.getString(KdbxKeyCommon.URL)?.getText();
@@ -389,9 +383,9 @@ mixin KdbxEntryFieldStatistic on KdbxBase {
     totalEntry.forEach(setFieldStatistic);
 
     kdbxFile.dirtyObjectsChanged.listen((event) {
-      _fieldStatistic!.customIcons.addAll(customIcons.map(
-        (item) => item.uuid.uuid,
-      ));
+      _fieldStatistic!.customIcons.addAll(
+        customIcons.map((item) => item.uuid.uuid),
+      );
       for (var item in event) {
         if (item is KdbxEntry) {
           setFieldStatistic(item);
@@ -433,14 +427,15 @@ extension KdbxExternalImport on KdbxBase {
 extension KdbxSync on KdbxBase {
   KdbxEntry? get syncAccountEntry =>
       customData[KdbxCustomDataKey.SYNC_ACCPUNT_UUID] != null
-          ? findEntryByUuid(
-              KdbxUuid(customData[KdbxCustomDataKey.SYNC_ACCPUNT_UUID]!),
-            )
-          : null;
+      ? findEntryByUuid(
+          KdbxUuid(customData[KdbxCustomDataKey.SYNC_ACCPUNT_UUID]!),
+        )
+      : null;
 
   set syncAccountEntry(KdbxEntry? entry) {
-    customData[KdbxCustomDataKey.SYNC_ACCPUNT_UUID] =
-        entry != null ? entry.uuid.uuid : KdbxUuid.NIL.uuid;
+    customData[KdbxCustomDataKey.SYNC_ACCPUNT_UUID] = entry != null
+        ? entry.uuid.uuid
+        : KdbxUuid.NIL.uuid;
   }
 }
 
@@ -483,9 +478,11 @@ extension KdbxEntryAndroidAutoFill on KdbxEntry {
     return AutofillDataset(
       label: title != null && title.isNotEmpty ? title : user,
       password: fieldTypes.contains(AutofillField.PASSWORD) ? password : null,
-      username: fieldTypes.contains(AutofillField.EMAIL) &&
+      username:
+          fieldTypes.contains(AutofillField.EMAIL) &&
               email != null &&
-              email.isNotEmpty // 存在邮箱,优先返回邮箱
+              email
+                  .isNotEmpty // 存在邮箱,优先返回邮箱
           ? email
           : user ?? email,
       otp: fieldTypes.contains(AutofillField.OTP) ? otp : null,
@@ -541,10 +538,7 @@ class Kdbx extends KdbxBase
   }) async {
     return Kdbx(
       filepath: filepath,
-      kdbxFile: await KdbxFormat().read(
-        data,
-        credentials,
-      ),
+      kdbxFile: await KdbxFormat().read(data, credentials),
     );
   }
 
@@ -555,10 +549,7 @@ class Kdbx extends KdbxBase
   }) async {
     return Kdbx(
       filepath: filepath,
-      kdbxFile: await KdbxFormat().read(
-        data,
-        Credentials.fromHash(token),
-      ),
+      kdbxFile: await KdbxFormat().read(data, Credentials.fromHash(token)),
     );
   }
 
@@ -580,7 +571,8 @@ class Kdbx extends KdbxBase
     final isUpdateMasterKey = remoteKdbx.kdbxFile.body.meta.masterKeyChanged
         .isAfter(kdbxFile.body.meta.masterKeyChanged);
 
-    final masterKeyChanged = isUpdateMasterKey ||
+    final masterKeyChanged =
+        isUpdateMasterKey ||
         remoteKdbx.kdbxFile.body.meta.masterKeyChanged.get() !=
             kdbxFile.body.meta.masterKeyChanged.get();
 
@@ -629,9 +621,9 @@ extension KdbxEntryTagExt on KdbxEntry {
   }
 
   Map<KdbxKey, String> toPlainMapEntry() {
-    return Map.fromEntries(KdbxKeyCommon.all.map(
-      (item) => MapEntry(item, getNonNullString(item)),
-    ));
+    return Map.fromEntries(
+      KdbxKeyCommon.all.map((item) => MapEntry(item, getNonNullString(item))),
+    );
   }
 }
 
@@ -757,7 +749,6 @@ extension KdbxUuidCommon on KdbxUuid {
 }
 
 extension KdbxUuidString on String {
-  KdbxUuid get kdbxUuid => KdbxUuid.fromBytes(
-        Uint8List.fromList(Uuid.parse(this)),
-      );
+  KdbxUuid get kdbxUuid =>
+      KdbxUuid.fromBytes(Uint8List.fromList(Uuid.parse(this)));
 }

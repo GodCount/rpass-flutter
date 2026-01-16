@@ -14,20 +14,17 @@ mixin class SharedPreferencesService {
   Future<int?> getInt(String key) async => (await _prefs).getInt(key);
 
   @protected
-  Future<double?> getDouble(String key) async =>
-      (await _prefs).getDouble(key);
+  Future<double?> getDouble(String key) async => (await _prefs).getDouble(key);
 
   @protected
-  Future<String?> getString(String key) async =>
-      (await _prefs).getString(key);
+  Future<String?> getString(String key) async => (await _prefs).getString(key);
 
   @protected
   Future<List<String>?> getStringList(String key) async =>
       (await _prefs).getStringList(key);
 
   @protected
-  Future<bool> containsKey(String key) async =>
-      (await _prefs).containsKey(key);
+  Future<bool> containsKey(String key) async => (await _prefs).containsKey(key);
 
   @protected
   Future<bool> setBool(String key, bool value) async =>

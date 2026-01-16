@@ -2,11 +2,7 @@ import 'dart:convert';
 import 'utils.dart';
 
 /// Auth type
-enum AuthType {
-  NoAuth,
-  BasicAuth,
-  DigestAuth,
-}
+enum AuthType { NoAuth, BasicAuth, DigestAuth }
 
 /// Auth -----------------------------------
 class Auth {
@@ -16,11 +12,9 @@ class Auth {
   /// password
   final String pwd;
 
-  const Auth({
-    required String user,
-    required String pwd,
-  })  : this.user = user,
-        this.pwd = pwd;
+  const Auth({required String user, required String pwd})
+    : this.user = user,
+      this.pwd = pwd;
 
   /// Get auth type
   AuthType get type => AuthType.NoAuth;
@@ -31,13 +25,8 @@ class Auth {
 
 /// BasicAuth ------------------------------------
 class BasicAuth extends Auth {
-  const BasicAuth({
-    required String user,
-    required String pwd,
-  }) : super(
-          user: user,
-          pwd: pwd,
-        );
+  const BasicAuth({required String user, required String pwd})
+    : super(user: user, pwd: pwd);
 
   @override
   AuthType get type => AuthType.BasicAuth;
@@ -53,14 +42,8 @@ class BasicAuth extends Auth {
 class DigestAuth extends Auth {
   DigestParts dParts;
 
-  DigestAuth({
-    required String user,
-    required String pwd,
-    required this.dParts,
-  }) : super(
-          user: user,
-          pwd: pwd,
-        );
+  DigestAuth({required String user, required String pwd, required this.dParts})
+    : super(user: user, pwd: pwd);
 
   String? get nonce => this.dParts.parts['nonce'];
 
@@ -127,7 +110,8 @@ class DigestAuth extends Auth {
       return md5Hash('${this.dParts.method}:${this.dParts.uri}');
     } else if (qop == 'auth-int' && this.entityBody?.isEmpty == false) {
       return md5Hash(
-          '${this.dParts.method}:${this.dParts.uri}:${md5Hash(this.entityBody!)}');
+        '${this.dParts.method}:${this.dParts.uri}:${md5Hash(this.entityBody!)}',
+      );
     }
 
     return '';
@@ -135,7 +119,11 @@ class DigestAuth extends Auth {
 
   //
   String _computeResponse(
-      String ha1, String ha2, int nonceCount, String cnonce) {
+    String ha1,
+    String ha2,
+    int nonceCount,
+    String cnonce,
+  ) {
     String? qop = this.qop;
 
     if (qop?.isEmpty != false) {

@@ -43,42 +43,41 @@ class _ChipListState<T> extends State<ChipList<T>> {
   @override
   Widget build(BuildContext context) {
     final children = widget.items
-        .map((item) => ElevatedButton.icon(
-              iconAlignment: IconAlignment.end,
-              style: TextButton.styleFrom(
-                padding: (item.deletable && widget.onDeleted != null)
-                    ? const EdgeInsets.only(
-                        top: 4,
-                        right: 0,
-                        bottom: 4,
-                        left: 24,
-                      )
-                    : null,
-                side: item.select
-                    ? BorderSide(color: Theme.of(context).primaryColor)
-                    : null,
-                elevation: widget.onChipTap == null ? 0 : null,
-                overlayColor:
-                    widget.onChipTap == null ? Colors.transparent : null,
-                enabledMouseCursor:
-                    widget.onChipTap == null ? SystemMouseCursors.basic : null,
-              ),
-              onPressed: () {
-                widget.onChipTap?.call(item);
-              },
-              label: Text(item.label),
-              icon: (item.deletable && widget.onDeleted != null)
-                  ? SizedBox(
-                      height: 32,
-                      width: 32,
-                      child: IconButton(
-                        iconSize: 16,
-                        onPressed: () => widget.onDeleted!(item),
-                        icon: const Icon(Icons.delete),
-                      ),
-                    )
+        .map(
+          (item) => ElevatedButton.icon(
+            iconAlignment: IconAlignment.end,
+            style: TextButton.styleFrom(
+              padding: (item.deletable && widget.onDeleted != null)
+                  ? const EdgeInsets.only(top: 4, right: 0, bottom: 4, left: 24)
                   : null,
-            ))
+              side: item.select
+                  ? BorderSide(color: Theme.of(context).primaryColor)
+                  : null,
+              elevation: widget.onChipTap == null ? 0 : null,
+              overlayColor: widget.onChipTap == null
+                  ? Colors.transparent
+                  : null,
+              enabledMouseCursor: widget.onChipTap == null
+                  ? SystemMouseCursors.basic
+                  : null,
+            ),
+            onPressed: () {
+              widget.onChipTap?.call(item);
+            },
+            label: Text(item.label),
+            icon: (item.deletable && widget.onDeleted != null)
+                ? SizedBox(
+                    height: 32,
+                    width: 32,
+                    child: IconButton(
+                      iconSize: 16,
+                      onPressed: () => widget.onDeleted!(item),
+                      icon: const Icon(Icons.delete),
+                    ),
+                  )
+                : null,
+          ),
+        )
         .toList();
 
     if (widget.onAddChipTap != null) {
@@ -94,11 +93,7 @@ class _ChipListState<T> extends State<ChipList<T>> {
       constraints: BoxConstraints(maxHeight: widget.maxHeight),
       child: SingleChildScrollView(
         padding: const EdgeInsets.only(top: 8, bottom: 8),
-        child: Wrap(
-          spacing: 6,
-          runSpacing: 6,
-          children: children,
-        ),
+        child: Wrap(spacing: 6, runSpacing: 6, children: children),
       ),
     );
   }

@@ -28,11 +28,14 @@ final _logger = Logger("widget:extension_state");
 
 extension StatefulClipboard on State {
   void writeClipboard(String text) {
-    Clipboard.setData(ClipboardData(text: text)).then((value) {
-      showToast(I18n.of(context)!.copy_done);
-    }, onError: (e) {
-      showError(e);
-    });
+    Clipboard.setData(ClipboardData(text: text)).then(
+      (value) {
+        showToast(I18n.of(context)!.copy_done);
+      },
+      onError: (e) {
+        showError(e);
+      },
+    );
   }
 }
 
@@ -42,15 +45,16 @@ extension StatefulDialog on State {
       context: context,
       builder: (context) {
         return AlertDialog(
-          content:
-              SelectableText(I18n.of(context)!.throw_message(error.toString())),
+          content: SelectableText(
+            I18n.of(context)!.throw_message(error.toString()),
+          ),
           actions: [
             TextButton(
               onPressed: () {
                 context.router.pop();
               },
               child: Text(I18n.of(context)!.confirm),
-            )
+            ),
           ],
         );
       },
@@ -61,10 +65,9 @@ extension StatefulDialog on State {
     if (Platform.isAndroid || Platform.isIOS) {
       await Fluttertoast.showToast(msg: msg);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(msg),
-        duration: const Duration(seconds: 2),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), duration: const Duration(seconds: 2)),
+      );
     }
   }
 
@@ -181,10 +184,7 @@ extension StatefulDialog on State {
 }
 
 extension StatefulBottomSheet on State {
-  void showBottomSheetList({
-    String? title,
-    required List<ListTile> children,
-  }) {
+  void showBottomSheetList({String? title, required List<ListTile> children}) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -195,8 +195,10 @@ extension StatefulBottomSheet on State {
               Align(
                 alignment: Alignment.center,
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 24,
+                  ),
                   child: Text(
                     title,
                     style: Theme.of(context).textTheme.titleLarge,
@@ -214,28 +216,31 @@ extension StatefulBottomSheet on State {
   }
 
   void showBinaryAction(ChipListItem<MapEntry<KdbxKey, KdbxBinary>> binary) {
-    showBottomSheetList(title: binary.label, children: [
-      ListTile(
-        leading: const Icon(Icons.save),
-        title: Text(I18n.of(context)!.save),
-        onTap: () async {
-          try {
-            final result = await SimpleFile.saveFile(
-              data: binary.value.value.value,
-              filename: binary.label,
-            );
-            showToast(result);
-          } catch (e) {
-            if (e is! CancelException) {
-              _logger.warning("save as attachment fail!", e);
-              showError(e);
+    showBottomSheetList(
+      title: binary.label,
+      children: [
+        ListTile(
+          leading: const Icon(Icons.save),
+          title: Text(I18n.of(context)!.save),
+          onTap: () async {
+            try {
+              final result = await SimpleFile.saveFile(
+                data: binary.value.value.value,
+                filename: binary.label,
+              );
+              showToast(result);
+            } catch (e) {
+              if (e is! CancelException) {
+                _logger.warning("save as attachment fail!", e);
+                showError(e);
+              }
+            } finally {
+              context.router.pop();
             }
-          } finally {
-            context.router.pop();
-          }
-        },
-      )
-    ]);
+          },
+        ),
+      ],
+    );
   }
 
   void showKdbxGroupAction(
@@ -291,9 +296,7 @@ extension StatefulBottomSheet on State {
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        return KdbxHistoryList(
-          kdbxEntry: kdbxEntry,
-        );
+        return KdbxHistoryList(kdbxEntry: kdbxEntry);
       },
     );
   }
@@ -331,9 +334,7 @@ extension StatefulBottomSheet on State {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const SizedBox(
-                    width: 40,
-                  ),
+                  const SizedBox(width: 40),
                   Text(
                     t.expires_time,
                     style: Theme.of(context).textTheme.titleLarge,
@@ -358,7 +359,7 @@ extension StatefulBottomSheet on State {
                   dateTime = value;
                 },
               ),
-            )
+            ),
           ],
         );
       },
@@ -401,8 +402,8 @@ extension StatefulKdbx on State {
     return kdbxObject is KdbxEntry
         ? kdbxObject.label ?? ''
         : kdbxObject is KdbxGroup
-            ? kdbxObject.name.get() ?? ''
-            : '';
+        ? kdbxObject.name.get() ?? ''
+        : '';
   }
 
   Future<bool> kdbxSave(Kdbx kdbx) async {
@@ -454,8 +455,8 @@ class CallbackBindingObserver extends WidgetsBindingObserver {
   CallbackBindingObserver({
     VoidCallback? didChangeMetrics,
     OnDidChangeAppLifecycleState? didChangeAppLifecycleState,
-  })  : _didChangeMetrics = didChangeMetrics,
-        _didChangeAppLifecycleState = didChangeAppLifecycleState;
+  }) : _didChangeMetrics = didChangeMetrics,
+       _didChangeAppLifecycleState = didChangeAppLifecycleState;
 
   final VoidCallback? _didChangeMetrics;
 
@@ -555,13 +556,14 @@ mixin SecondLevelRouteUtil<T extends StatefulWidget> on State<T>
     SrceenResize.instance.addObserver(this);
     final navigationHistory = context.router.navigationHistory;
     navigationHistory.addListener(_navigationHistory);
-    _removeNavHistoryListener =
-        () => navigationHistory.removeListener(_navigationHistory);
+    _removeNavHistoryListener = () =>
+        navigationHistory.removeListener(_navigationHistory);
   }
 
   void _navigationHistory() {
     if (context.router.currentPath.startsWith("/home")) {
-      final isEmptyRouter = context.router.currentSegments.length <= 2 ||
+      final isEmptyRouter =
+          context.router.currentSegments.length <= 2 ||
           context.router.currentSegments.last.name == "EmptyPageRoute";
 
       if (this.isEmptyRouter != isEmptyRouter) {
@@ -598,8 +600,8 @@ mixin NavigationHistoryObserver<T extends StatefulWidget> on State<T> {
   void initState() {
     final navigationHistory = context.router.navigationHistory;
     navigationHistory.addListener(didNavigationHistory);
-    _removeNavHistoryListener =
-        () => navigationHistory.removeListener(didNavigationHistory);
+    _removeNavHistoryListener = () =>
+        navigationHistory.removeListener(didNavigationHistory);
     super.initState();
   }
 
@@ -651,9 +653,11 @@ mixin SecondLevelPageAutoBack<T extends StatefulWidget> on State<T>
     if (!isDesktop) return null;
 
     return SrceenResize.instance.isSingleScreen
-        ? BackButton(onPressed: () {
-            context.router.pop();
-          })
+        ? BackButton(
+            onPressed: () {
+              context.router.pop();
+            },
+          )
         : null;
   }
 }
@@ -666,8 +670,9 @@ extension PlatformStackRouter on StackRouter {
       if (parent != null &&
           parent is TabsRouter &&
           parent.stack[parent.activeIndex].routeKey != router.key) {
-        final i =
-            parent.stack.indexWhere((item) => item.routeKey == router.key);
+        final i = parent.stack.indexWhere(
+          (item) => item.routeKey == router.key,
+        );
         if (i != -1) {
           parent.setActiveIndex(i);
         }
@@ -682,13 +687,10 @@ extension PlatformStackRouter on StackRouter {
     if (isDesktop) {
       final router = findStackScope(route);
       _updateTabs(router);
-      await router.replaceAll(
-        [
-          const NamedRoute("EmptyPageRoute"),
-          route,
-        ],
-        onFailure: onFailure,
-      );
+      await router.replaceAll([
+        const NamedRoute("EmptyPageRoute"),
+        route,
+      ], onFailure: onFailure);
     } else {
       await push(route, onFailure: onFailure);
     }
@@ -706,9 +708,9 @@ extension OperateConfirmVerifyOwner on State {
         return false;
       }
     } else {
-      final result = await context.pushRoute(VerifyOwnerRoute(
-        operateConfirm: true,
-      ));
+      final result = await context.pushRoute(
+        VerifyOwnerRoute(operateConfirm: true),
+      );
       return result != null && result is bool && result;
     }
   }

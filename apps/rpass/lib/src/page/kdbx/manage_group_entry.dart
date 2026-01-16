@@ -13,10 +13,7 @@ import '../../widget/extension_state.dart';
 import '../route.dart';
 
 class _ManageGroupEntryArgs extends PageRouteArgs {
-  _ManageGroupEntryArgs({
-    super.key,
-    required this.kdbxGroup,
-  });
+  _ManageGroupEntryArgs({super.key, required this.kdbxGroup});
 
   final KdbxGroup kdbxGroup;
 }
@@ -27,15 +24,10 @@ class ManageGroupEntryRoute extends PageRouteInfo<_ManageGroupEntryArgs> {
     required KdbxGroup kdbxGroup,
     KdbxUuid? uuid,
   }) : super(
-          name,
-          args: _ManageGroupEntryArgs(
-            key: key,
-            kdbxGroup: kdbxGroup,
-          ),
-          rawPathParams: {
-            "uuid": uuid?.deBase64Uuid,
-          },
-        );
+         name,
+         args: _ManageGroupEntryArgs(key: key, kdbxGroup: kdbxGroup),
+         rawPathParams: {"uuid": uuid?.deBase64Uuid},
+       );
 
   static const name = "ManageGroupEntryRoute";
 
@@ -51,15 +43,10 @@ class ManageGroupEntryRoute extends PageRouteInfo<_ManageGroupEntryArgs> {
           if (kdbxGroup == null) {
             throw Exception("kdbxGroup is null, Not found by uuid: $uuid");
           }
-          return _ManageGroupEntryArgs(
-            kdbxGroup: kdbxGroup,
-          );
+          return _ManageGroupEntryArgs(kdbxGroup: kdbxGroup);
         },
       );
-      return ManageGroupEntryPage(
-        key: args.key,
-        kdbxGroup: args.kdbxGroup,
-      );
+      return ManageGroupEntryPage(key: args.key, kdbxGroup: args.kdbxGroup);
     },
   );
 }
@@ -137,10 +124,12 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
 
   void _search() {
     _totalEntry.clear();
-    _totalEntry.addAll(_kbdxSearchHandler.search(
-      _searchController.text,
-      widget.kdbxGroup.entries,
-    ));
+    _totalEntry.addAll(
+      _kbdxSearchHandler.search(
+        _searchController.text,
+        widget.kdbxGroup.entries,
+      ),
+    );
     _selecteds.removeWhere(((item) => !_totalEntry.contains(item)));
     setState(() {});
   }
@@ -156,10 +145,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
 
   void _delete(List<KdbxEntry> kdbxEntrys) async {
     final t = I18n.of(context)!;
-    if (await showConfirmDialog(
-      title: t.delete,
-      message: t.is_move_recycle,
-    )) {
+    if (await showConfirmDialog(title: t.delete, message: t.is_move_recycle)) {
       final kdbx = KdbxProvider.of(context)!;
       for (var item in kdbxEntrys) {
         kdbx.deleteEntry(item);
@@ -194,10 +180,9 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
           enabled: kdbxEntry != null,
           onTap: () {
             context.router.pop();
-            context.router.platformNavigate(LookAccountRoute(
-              kdbxEntry: kdbxEntry!,
-              uuid: kdbxEntry.uuid,
-            ));
+            context.router.platformNavigate(
+              LookAccountRoute(kdbxEntry: kdbxEntry!, uuid: kdbxEntry.uuid),
+            );
           },
         ),
         ListTile(
@@ -264,10 +249,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
                   iconSize: 16,
                   padding: const EdgeInsets.all(4),
                   onPressed: showSearchHelpDialog,
-                  icon: const Icon(
-                    Icons.help_outline_rounded,
-                    size: 16,
-                  ),
+                  icon: const Icon(Icons.help_outline_rounded, size: 16),
                 ),
               ),
               prefixIconConstraints: const BoxConstraints(
@@ -285,10 +267,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
                         onPressed: () {
                           _searchController.text = "";
                         },
-                        icon: const Icon(
-                          Icons.close,
-                          size: 16,
-                        ),
+                        icon: const Icon(Icons.close, size: 16),
                       )
                     : null,
               ),
@@ -339,16 +318,14 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
         }
         switch (type) {
           case ViewContextMenuItem():
-            context.router.platformNavigate(LookAccountRoute(
-              kdbxEntry: kdbxEntry,
-              uuid: kdbxEntry.uuid,
-            ));
+            context.router.platformNavigate(
+              LookAccountRoute(kdbxEntry: kdbxEntry, uuid: kdbxEntry.uuid),
+            );
             break;
           case EditContextMenuItem():
-            context.router.platformNavigate(EditAccountRoute(
-              kdbxEntry: kdbxEntry,
-              uuid: kdbxEntry.uuid,
-            ));
+            context.router.platformNavigate(
+              EditAccountRoute(kdbxEntry: kdbxEntry, uuid: kdbxEntry.uuid),
+            );
             break;
           case CopyContextMenuItem(kdbxKey: final kdbxKey):
             writeClipboard(
@@ -443,8 +420,9 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
       child: ListTile(
         selected: _showMenu == kdbxEntry,
         onTap: () => _onItemTap(kdbxEntry),
-        onLongPress:
-            isMobile ? () => _showSelectorEntryAction(kdbxEntry) : null,
+        onLongPress: isMobile
+            ? () => _showSelectorEntryAction(kdbxEntry)
+            : null,
         leading: KdbxIconWidget(
           kdbxIcon: KdbxIconWidgetData(
             icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
@@ -452,8 +430,9 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
             domain: kdbxEntry.getActualString(KdbxKeyCommon.URL),
           ),
         ),
-        trailing:
-            _selecteds.contains(kdbxEntry) ? const Icon(Icons.done) : null,
+        trailing: _selecteds.contains(kdbxEntry)
+            ? const Icon(Icons.done)
+            : null,
         title: Text(
           getKdbxObjectTitle(kdbxEntry),
           maxLines: 1,

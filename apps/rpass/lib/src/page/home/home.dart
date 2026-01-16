@@ -20,12 +20,7 @@ class _HomeArgs extends PageRouteArgs {
 }
 
 class HomeRoute extends PageRouteInfo<_HomeArgs> {
-  HomeRoute({
-    Key? key,
-  }) : super(
-          name,
-          args: _HomeArgs(key: key),
-        );
+  HomeRoute({Key? key}) : super(name, args: _HomeArgs(key: key));
 
   static const name = "HomeRoute";
 
@@ -134,7 +129,7 @@ class _MobileHomePage extends StatelessWidget {
           NavigationDestination(
             icon: const Icon(Icons.settings),
             label: t.setting,
-          )
+          ),
         ],
       ),
     );
@@ -177,8 +172,9 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
             extended: isIdeaSrceen,
             selectedIndex: tabsRouter.activeIndex,
             onDestinationSelected: tabsRouter.setActiveIndex,
-            backgroundColor:
-                Theme.of(context).colorScheme.surfaceContainerHighest,
+            backgroundColor: Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest,
             // leading: Padding(
             //   padding: const EdgeInsets.only(top: 8),
             //   child: Text(
@@ -203,19 +199,23 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
                           ? InfiniteRotateWidget(
                               enabled: store.syncKdbx.isSyncing,
                               child: IconButton(
-                                disabledColor:
-                                    Theme.of(context).iconTheme.color,
-                                color: !store.syncKdbx.isSyncing &&
+                                disabledColor: Theme.of(
+                                  context,
+                                ).iconTheme.color,
+                                color:
+                                    !store.syncKdbx.isSyncing &&
                                         store.syncKdbx.lastError != null
                                     ? Theme.of(context).colorScheme.error
                                     : null,
-                                onPressed: !store.syncKdbx.isSyncing &&
+                                onPressed:
+                                    !store.syncKdbx.isSyncing &&
                                         store.syncKdbx.lastError != null
                                     ? () {
                                         showError(store.syncKdbx.lastError);
                                       }
                                     : null,
-                                icon: !store.syncKdbx.isSyncing &&
+                                icon:
+                                    !store.syncKdbx.isSyncing &&
                                         store.syncKdbx.lastError != null
                                     ? const Icon(Icons.sync_problem)
                                     : const Icon(Icons.sync),
@@ -239,7 +239,7 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
               NavigationRailDestination(
                 icon: const Icon(Icons.settings),
                 label: Text(t.setting),
-              )
+              ),
             ],
           ),
           Expanded(
@@ -247,7 +247,7 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               child: widget.child,
             ),
-          )
+          ),
         ],
       ),
     );

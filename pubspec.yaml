@@ -1,0 +1,16 @@
+name: rpass_workspace
+publish_to: "none"
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+
+workspace:
+  - apps/rpass
+  - packages/enigo_flutter
+  - packages/installed_apps
+  - packages/webdav_client
+
+
+dev_dependencies:
+  melos: ^7.3.0
+  flutter_lints: ^6.0.0

@@ -8,9 +8,8 @@ import 'package:logging/logging.dart';
 
 final _logger = Logger("util:cache_network_image");
 
-typedef _SimpleDecoderCallback = Future<ui.Codec> Function(
-  ui.ImmutableBuffer buffer,
-);
+typedef _SimpleDecoderCallback =
+    Future<ui.Codec> Function(ui.ImmutableBuffer buffer);
 
 abstract class BaseCacheManager<T> {
   Future<bool> exist(String key);
@@ -165,7 +164,8 @@ class CacheNetworkImage extends ImageProvider<CacheNetworkImage> {
         }
       } catch (e) {
         _logger.warning(
-            "cache manager (${cacheManager.runtimeType}) read fail $e");
+          "cache manager (${cacheManager.runtimeType}) read fail $e",
+        );
       }
 
       bytes ??= await _fetchNetworkImage.fetch(
@@ -188,7 +188,8 @@ class CacheNetworkImage extends ImageProvider<CacheNetworkImage> {
               await cacheManager!.write(key.url, bytes);
             } catch (e) {
               _logger.warning(
-                  "cache manager (${cacheManager.runtimeType}) write fail $e");
+                "cache manager (${cacheManager.runtimeType}) write fail $e",
+              );
             }
           }
           return result;
@@ -198,7 +199,8 @@ class CacheNetworkImage extends ImageProvider<CacheNetworkImage> {
               await cacheManager!.write(key.url, null);
             } catch (e) {
               _logger.warning(
-                  "cache manager (${cacheManager.runtimeType}) write fail $e");
+                "cache manager (${cacheManager.runtimeType}) write fail $e",
+              );
             }
           }
           rethrow;

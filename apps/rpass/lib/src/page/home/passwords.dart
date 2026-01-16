@@ -23,19 +23,12 @@ class _PasswordsArgs extends PageRouteArgs {
 }
 
 class PasswordsRoute extends PageRouteInfo<_PasswordsArgs> {
-  PasswordsRoute({
-    Key? key,
-    String? search,
-  }) : super(
-          name,
-          args: _PasswordsArgs(
-            key: key,
-            search: search,
-          ),
-          rawQueryParams: {
-            "search": search,
-          },
-        );
+  PasswordsRoute({Key? key, String? search})
+    : super(
+        name,
+        args: _PasswordsArgs(key: key, search: search),
+        rawQueryParams: {"search": search},
+      );
 
   static const name = "PasswordsRoute";
 
@@ -43,14 +36,10 @@ class PasswordsRoute extends PageRouteInfo<_PasswordsArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<_PasswordsArgs>(
-        orElse: () => _PasswordsArgs(
-          search: data.queryParams.optString("search"),
-        ),
+        orElse: () =>
+            _PasswordsArgs(search: data.queryParams.optString("search")),
       );
-      return PasswordsPage(
-        key: args.key,
-        search: args.search,
-      );
+      return PasswordsPage(key: args.key, search: args.search);
     },
   );
 }
@@ -72,8 +61,9 @@ class _PasswordsPageState extends State<PasswordsPage>
   @override
   bool get wantKeepAlive => true;
 
-  final KbdxSearchHandler _kbdxSearchHandler =
-      KbdxSearchHandler(useKdbxEntryConfig: true);
+  final KbdxSearchHandler _kbdxSearchHandler = KbdxSearchHandler(
+    useKdbxEntryConfig: true,
+  );
   final List<KdbxEntry> _totalEntry = [];
 
   VoidCallback? _removeKdbxListener;
@@ -124,10 +114,9 @@ class _PasswordsPageState extends State<PasswordsPage>
     _totalEntry.clear();
     final kdbx = KdbxProvider.of(context)!;
 
-    _totalEntry.addAll(_kbdxSearchHandler.search(
-      _searchController.text,
-      kdbx.totalEntry,
-    ));
+    _totalEntry.addAll(
+      _kbdxSearchHandler.search(_searchController.text, kdbx.totalEntry),
+    );
     setState(() {});
   }
 
@@ -149,8 +138,9 @@ class _PasswordsPageState extends State<PasswordsPage>
           controller: _searchController,
           focusNode: _searchFocusNode,
           itemCount: kdbx.totalEntry.length,
-          matchCount:
-              _searchController.text.isNotEmpty ? _totalEntry.length : 0,
+          matchCount: _searchController.text.isNotEmpty
+              ? _totalEntry.length
+              : 0,
         ),
       ),
       body: ListView.separated(
@@ -158,9 +148,7 @@ class _PasswordsPageState extends State<PasswordsPage>
         padding: const EdgeInsets.all(12),
         itemCount: _totalEntry.length,
         separatorBuilder: (context, index) {
-          return const SizedBox(
-            height: 12,
-          );
+          return const SizedBox(height: 12);
         },
         itemBuilder: (context, index) {
           return _OpenContainerPasswordItem(kdbxEntry: _totalEntry[index]);
@@ -177,18 +165,13 @@ class _PasswordsPageState extends State<PasswordsPage>
         },
         closedElevation: 6.0,
         closedShape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(56 / 2),
-          ),
+          borderRadius: BorderRadius.all(Radius.circular(56 / 2)),
         ),
         closedBuilder: (BuildContext context, VoidCallback openContainer) {
           return SizedBox(
             width: 56,
             height: 56,
-            child: InkWell(
-              onTap: openContainer,
-              child: const Icon(Icons.add),
-            ),
+            child: InkWell(onTap: openContainer, child: const Icon(Icons.add)),
           );
         },
       ),
@@ -223,10 +206,7 @@ class _PasswordsPageState extends State<PasswordsPage>
                   iconSize: 16,
                   padding: const EdgeInsets.all(4),
                   onPressed: showSearchHelpDialog,
-                  icon: const Icon(
-                    Icons.help_outline_rounded,
-                    size: 16,
-                  ),
+                  icon: const Icon(Icons.help_outline_rounded, size: 16),
                 ),
               ),
               prefixIconConstraints: const BoxConstraints(
@@ -244,10 +224,7 @@ class _PasswordsPageState extends State<PasswordsPage>
                         onPressed: () {
                           _searchController.text = "";
                         },
-                        icon: const Icon(
-                          Icons.close,
-                          size: 16,
-                        ),
+                        icon: const Icon(Icons.close, size: 16),
                       )
                     : null,
               ),
@@ -275,9 +252,7 @@ class _PasswordsPageState extends State<PasswordsPage>
         padding: const EdgeInsets.all(12),
         itemCount: _totalEntry.length,
         separatorBuilder: (context, index) {
-          return const SizedBox(
-            height: 12,
-          );
+          return const SizedBox(height: 12);
         },
         itemBuilder: (context, index) {
           return _PasswordItem(
@@ -350,8 +325,9 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
         style: Theme.of(context).textTheme.bodySmall,
         decoration: InputDecoration(
           border: InputBorder.none,
-          labelStyle:
-              !_hasFocus ? Theme.of(context).textTheme.titleLarge : null,
+          labelStyle: !_hasFocus
+              ? Theme.of(context).textTheme.titleLarge
+              : null,
           label: AnimatedAlign(
             alignment: _hasFocus ? Alignment.centerLeft : Alignment.center,
             duration: const Duration(milliseconds: 300),
@@ -385,19 +361,10 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
             },
             icon: AnimatedIconSwitcher(
               icon: !_hasFocus && widget.controller.text.isEmpty
-                  ? const Icon(
-                      Icons.search_rounded,
-                      key: ValueKey(1),
-                    )
+                  ? const Icon(Icons.search_rounded, key: ValueKey(1))
                   : widget.controller.text.isNotEmpty
-                      ? const Icon(
-                          Icons.close,
-                          key: ValueKey(2),
-                        )
-                      : const Icon(
-                          Icons.arrow_downward_rounded,
-                          key: ValueKey(3),
-                        ),
+                  ? const Icon(Icons.close, key: ValueKey(2))
+                  : const Icon(Icons.arrow_downward_rounded, key: ValueKey(3)),
             ),
           ),
         ),
@@ -407,9 +374,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
 }
 
 class _OpenContainerPasswordItem extends StatelessWidget {
-  const _OpenContainerPasswordItem({
-    required this.kdbxEntry,
-  });
+  const _OpenContainerPasswordItem({required this.kdbxEntry});
 
   final KdbxEntry kdbxEntry;
 
@@ -428,12 +393,8 @@ class _OpenContainerPasswordItem extends StatelessWidget {
       middleColor: mainColor,
       openBuilder: (BuildContext context, VoidCallback _) {
         return isLogPress
-            ? EditAccountPage(
-                kdbxEntry: kdbxEntry,
-              )
-            : LookAccountPage(
-                kdbxEntry: kdbxEntry,
-              );
+            ? EditAccountPage(kdbxEntry: kdbxEntry)
+            : LookAccountPage(kdbxEntry: kdbxEntry);
       },
       closedElevation: 4,
       closedShape: const RoundedRectangleBorder(
@@ -457,11 +418,7 @@ class _OpenContainerPasswordItem extends StatelessWidget {
 }
 
 class _PasswordItem extends StatefulWidget {
-  const _PasswordItem({
-    required this.kdbxEntry,
-    this.onTap,
-    this.onLongPress,
-  });
+  const _PasswordItem({required this.kdbxEntry, this.onTap, this.onLongPress});
 
   final KdbxEntry kdbxEntry;
   final GestureTapCallback? onTap;
@@ -491,7 +448,8 @@ class _PasswordItemState extends State<_PasswordItem>
   void didNavigationHistory() {
     if (context.topRoute.name == LookAccountRoute.name ||
         context.topRoute.name == EditAccountRoute.name) {
-      final selected = context.topRoute.inheritedPathParams.optString("uuid") ==
+      final selected =
+          context.topRoute.inheritedPathParams.optString("uuid") ==
           widget.kdbxEntry.uuid.deBase64Uuid;
 
       if (selected != _selected) {
@@ -508,10 +466,7 @@ class _PasswordItemState extends State<_PasswordItem>
 
   void _deletePassword() async {
     final t = I18n.of(context)!;
-    if (await showConfirmDialog(
-      title: t.delete,
-      message: t.is_move_recycle,
-    )) {
+    if (await showConfirmDialog(title: t.delete, message: t.is_move_recycle)) {
       final kdbx = KdbxProvider.of(context)!;
       kdbx.deleteEntry(widget.kdbxEntry);
       await kdbxSave(kdbx);
@@ -549,10 +504,7 @@ class _PasswordItemState extends State<_PasswordItem>
         switch (type) {
           case EditContextMenuItem():
             context.router.platformNavigate(
-              EditAccountRoute(
-                kdbxEntry: kdbxEntry,
-                uuid: kdbxEntry.uuid,
-              ),
+              EditAccountRoute(kdbxEntry: kdbxEntry, uuid: kdbxEntry.uuid),
             );
             break;
           case CopyContextMenuItem(kdbxKey: final kdbxKey):
@@ -640,10 +592,9 @@ class _PasswordItemState extends State<_PasswordItem>
               ? "${kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE)} (${t.expires})"
               : kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE),
           style: kdbxEntry.isExpiry()
-              ? Theme.of(context)
-                  .textTheme
-                  .titleLarge
-                  ?.copyWith(color: Theme.of(context).colorScheme.error)
+              ? Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                )
               : Theme.of(context).textTheme.titleLarge,
           overflow: TextOverflow.ellipsis,
         ),
@@ -665,10 +616,7 @@ class _PasswordItemState extends State<_PasswordItem>
               t.email_ab,
               kdbxEntry.getNonNullString(KdbxKeyCommon.EMAIL),
             ),
-            _subtitleText(
-              t.label_ab,
-              kdbxEntry.tagList.join(", "),
-            ),
+            _subtitleText(t.label_ab, kdbxEntry.tagList.join(", ")),
             Align(
               alignment: Alignment.centerRight,
               child: Text(
@@ -691,10 +639,7 @@ class _PasswordItemState extends State<_PasswordItem>
         style: Theme.of(context).textTheme.titleMedium,
         text: "$subLabel ",
         children: [
-          TextSpan(
-            style: Theme.of(context).textTheme.bodyMedium,
-            text: text,
-          )
+          TextSpan(style: Theme.of(context).textTheme.bodyMedium, text: text),
         ],
       ),
     );

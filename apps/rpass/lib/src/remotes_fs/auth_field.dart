@@ -21,11 +21,7 @@ class TextAuthField extends AuthField<String> {
 
   @override
   TextAuthField clone() {
-    return TextAuthField(
-      key: key,
-      description: description,
-      value: value,
-    );
+    return TextAuthField(key: key, description: description, value: value);
   }
 }
 
@@ -38,11 +34,7 @@ class BoolAuthField extends AuthField<bool> {
 
   @override
   BoolAuthField clone() {
-    return BoolAuthField(
-      key: key,
-      description: description,
-      value: value,
-    );
+    return BoolAuthField(key: key, description: description, value: value);
   }
 }
 
@@ -79,11 +71,7 @@ class PasswordAuthField extends AuthField<String> {
 
   @override
   PasswordAuthField clone() {
-    return PasswordAuthField(
-      key: key,
-      description: description,
-      value: value,
-    );
+    return PasswordAuthField(key: key, description: description, value: value);
   }
 }
 

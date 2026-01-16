@@ -11,12 +11,8 @@ class _QrCodeScannerArgs extends PageRouteArgs {
 }
 
 class QrCodeScannerRoute extends PageRouteInfo<_QrCodeScannerArgs> {
-  QrCodeScannerRoute({
-    Key? key,
-  }) : super(
-          name,
-          args: _QrCodeScannerArgs(key: key),
-        );
+  QrCodeScannerRoute({Key? key})
+    : super(name, args: _QrCodeScannerArgs(key: key));
 
   static const name = "QrCodeScannerRoute";
 

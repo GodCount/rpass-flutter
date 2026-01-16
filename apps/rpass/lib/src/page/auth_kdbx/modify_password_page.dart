@@ -17,12 +17,8 @@ class _ModifyPasswordArgs extends PageRouteArgs {
 }
 
 class ModifyPasswordRoute extends PageRouteInfo<_ModifyPasswordArgs> {
-  ModifyPasswordRoute({
-    Key? key,
-  }) : super(
-          name,
-          args: _ModifyPasswordArgs(key: key),
-        );
+  ModifyPasswordRoute({Key? key})
+    : super(name, args: _ModifyPasswordArgs(key: key));
 
   static const name = "ModifyPasswordRoute";
 
@@ -67,15 +63,14 @@ class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
       final biometric = Biometric.of(context);
 
       final oldCredentials = kdbx.credentials;
-      final credentials =
-          Kdbx.createCredentials(isPassword ? passowrd : null, keyFile?.$2);
+      final credentials = Kdbx.createCredentials(
+        isPassword ? passowrd : null,
+        keyFile?.$2,
+      );
 
       if (biometric.enable) {
         try {
-          await biometric.updateCredentials(
-            context,
-            credentials.getHash(),
-          );
+          await biometric.updateCredentials(context, credentials.getHash());
           _logger.finest("update credentials to biometric done!");
         } catch (error, stackTrace) {
           if (error is AuthException &&
@@ -101,17 +96,10 @@ class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
       } catch (error, stackTrace) {
         kdbx.modifyCredentials(oldCredentials);
         if (biometric.enable) {
-          await biometric.updateCredentials(
-            context,
-            oldCredentials.getHash(),
-          );
+          await biometric.updateCredentials(context, oldCredentials.getHash());
         }
 
-        _logger.severe(
-          "update credentials fail!",
-          error,
-          stackTrace,
-        );
+        _logger.severe("update credentials fail!", error, stackTrace);
         rethrow;
       }
 

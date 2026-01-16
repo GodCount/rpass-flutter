@@ -7,18 +7,12 @@ import '../../util/route.dart';
 import '../../widget/extension_state.dart';
 import '../../kdbx/kdbx.dart';
 
-
 class _KdbxSettingArgs extends PageRouteArgs {
   _KdbxSettingArgs({super.key});
 }
 
 class KdbxSettingRoute extends PageRouteInfo<_KdbxSettingArgs> {
-  KdbxSettingRoute({
-    Key? key,
-  }) : super(
-          name,
-          args: _KdbxSettingArgs(key: key),
-        );
+  KdbxSettingRoute({Key? key}) : super(name, args: _KdbxSettingArgs(key: key));
 
   static const name = "KdbxSettingRoute";
 
@@ -97,8 +91,10 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                     padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.history_rounded),
                   ),
-                  Text(t.history_record,
-                      style: Theme.of(context).textTheme.bodyLarge),
+                  Text(
+                    t.history_record,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
                 ],
               ),
             ),
@@ -120,7 +116,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                       },
                     ),
                   ),
-                  Text(_historyMaxItems.toString())
+                  Text(_historyMaxItems.toString()),
                 ],
               ),
             ),
@@ -142,7 +138,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                       },
                     ),
                   ),
-                  Text("$_historyMaxSize MB")
+                  Text("$_historyMaxSize MB"),
                 ],
               ),
             ),
@@ -154,9 +150,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
               heroTag: const ValueKey("kdbx_setting_float"),
               onPressed: _save,
               shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(56 / 2),
-                ),
+                borderRadius: BorderRadius.all(Radius.circular(56 / 2)),
               ),
               child: const Icon(Icons.save),
             )
@@ -170,9 +164,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(12.0)),
       ),
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 }

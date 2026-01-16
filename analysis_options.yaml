@@ -1,0 +1,11 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    constant_identifier_names: ignore
+    non_constant_identifier_names: ignore
+    use_build_context_synchronously: ignore
+
+linter:
+  rules:
+    prefer_relative_imports: true

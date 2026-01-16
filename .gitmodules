@@ -1,0 +1,3 @@
+[submodule "packages/kdbx.dart"]
+	path = packages/kdbx.dart
+	url = https://github.com/rongyu-zhen/kdbx.dart

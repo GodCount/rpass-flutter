@@ -11,10 +11,7 @@ import '../../util/route.dart';
 import '../../widget/common.dart';
 import '../../widget/extension_state.dart';
 
-enum AuthRemoteRouteType {
-  sync,
-  import,
-}
+enum AuthRemoteRouteType { sync, import }
 
 class _AuthRemoteFsArgs extends PageRouteArgs {
   _AuthRemoteFsArgs({
@@ -33,16 +30,10 @@ class AuthRemoteFsRoute extends PageRouteInfo<_AuthRemoteFsArgs> {
     AuthRemoteRouteType type = AuthRemoteRouteType.sync,
     required RemoteClientConfig config,
   }) : super(
-          name,
-          args: _AuthRemoteFsArgs(
-            key: key,
-            type: type,
-            config: config,
-          ),
-          rawPathParams: {
-            "type": type,
-          },
-        );
+         name,
+         args: _AuthRemoteFsArgs(key: key, type: type, config: config),
+         rawPathParams: {"type": type},
+       );
 
   static const name = "AuthRemoteFsRoute";
 
@@ -207,9 +198,7 @@ class _AuthRemoteFsState extends State<AuthRemoteFsPage> {
       } else if (item.value is TextAuthField) {
         return _textField(item.value as TextAuthField);
       }
-      throw UnsupportedError(
-        "type ${item.value.runtimeType} is unknown!",
-      );
+      throw UnsupportedError("type ${item.value.runtimeType} is unknown!");
     }).toList();
 
     return Scaffold(
@@ -265,8 +254,9 @@ class _AuthRemoteFsState extends State<AuthRemoteFsPage> {
                           width: 180,
                           padding: const EdgeInsets.only(top: 8),
                           child: ElevatedButton(
-                            onPressed:
-                                !_loading ? () => context.router.pop() : null,
+                            onPressed: !_loading
+                                ? () => context.router.pop()
+                                : null,
                             child: Text(t.back),
                           ),
                         ),
@@ -300,10 +290,7 @@ class _AuthRemoteFsState extends State<AuthRemoteFsPage> {
       builder: (widget) {
         return ListTile(
           title: Text(field.description),
-          trailing: Checkbox(
-            value: widget.value,
-            onChanged: widget.didChange,
-          ),
+          trailing: Checkbox(value: widget.value, onChanged: widget.didChange),
         );
       },
     );
@@ -368,12 +355,7 @@ class _AuthRemoteFsState extends State<AuthRemoteFsPage> {
           expandedInsets: const EdgeInsets.all(0),
           label: Text(field.description),
           dropdownMenuEntries: field.optionList
-              .map(
-                (item) => DropdownMenuEntry(
-                  label: item,
-                  value: item,
-                ),
-              )
+              .map((item) => DropdownMenuEntry(label: item, value: item))
               .toList(),
         );
       },
@@ -382,10 +364,7 @@ class _AuthRemoteFsState extends State<AuthRemoteFsPage> {
 }
 
 class _NumericalRangeFormatter extends TextInputFormatter {
-  _NumericalRangeFormatter({
-    this.min,
-    this.max,
-  });
+  _NumericalRangeFormatter({this.min, this.max});
 
   final int? min;
   final int? max;

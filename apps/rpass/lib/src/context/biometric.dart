@@ -92,7 +92,8 @@ class BiometricState extends State<Biometric> {
   void _assertBiometric() {
     if (!isSupport) {
       throw Exception(
-          "unsupprt biometric authenticate response is $_authenticateResponse");
+        "unsupprt biometric authenticate response is $_authenticateResponse",
+      );
     }
   }
 
@@ -128,9 +129,10 @@ class BiometricState extends State<Biometric> {
       throw Exception("not enabled biometric");
     }
 
-    final credentials =
-        await (await _getStorageFile(context, BiometricStorageKey.credentials))
-            .read(promptInfo: _getPromptInfo(context));
+    final credentials = await (await _getStorageFile(
+      context,
+      BiometricStorageKey.credentials,
+    )).read(promptInfo: _getPromptInfo(context));
     if (credentials == null || credentials.isEmpty) {
       Store.instance.settings.seEnableBiometric(false);
       throw Exception("no record token from biometric");
@@ -143,10 +145,10 @@ class BiometricState extends State<Biometric> {
     _assertBiometric();
 
     // 通过写入触发生物识别以验证权限
-    await (await _getStorageFile(context, BiometricStorageKey.owner)).write(
-      "owner",
-      promptInfo: _getPromptInfo(context),
-    );
+    await (await _getStorageFile(
+      context,
+      BiometricStorageKey.owner,
+    )).write("owner", promptInfo: _getPromptInfo(context));
   }
 
   Future<void> updateCredentials(
@@ -156,14 +158,15 @@ class BiometricState extends State<Biometric> {
     _assertBiometric();
 
     if (credentials == null) {
-      await (await _getStorageFile(context, BiometricStorageKey.credentials))
-          .delete(promptInfo: _getPromptInfo(context));
+      await (await _getStorageFile(
+        context,
+        BiometricStorageKey.credentials,
+      )).delete(promptInfo: _getPromptInfo(context));
     } else {
       await (await _getStorageFile(
         context,
         BiometricStorageKey.credentials,
-      ))
-          .write(_encode(credentials), promptInfo: _getPromptInfo(context));
+      )).write(_encode(credentials), promptInfo: _getPromptInfo(context));
     }
   }
 

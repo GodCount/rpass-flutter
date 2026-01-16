@@ -37,11 +37,11 @@ void main() async {
     await Store.instance.loadStore();
   } catch (e, s) {
     _logger.severe("init fail!", e, s);
-    return runApp(ErrorWidget.builder(FlutterErrorDetails(
-      library: "Rpass framework",
-      exception: e,
-      stack: s,
-    )));
+    return runApp(
+      ErrorWidget.builder(
+        FlutterErrorDetails(library: "Rpass framework", exception: e, stack: s),
+      ),
+    );
   }
   runApp(const RpassApp());
 }
@@ -58,10 +58,9 @@ class InitAppFail extends StatelessWidget {
         body: Center(
           child: Text(
             "Init app fail! \n $error",
-            style: Theme.of(context)
-                .textTheme
-                .labelLarge
-                ?.merge(const TextStyle(fontSize: 32)),
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.merge(const TextStyle(fontSize: 32)),
           ),
         ),
       ),

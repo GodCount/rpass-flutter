@@ -25,9 +25,7 @@ class _WidgetTestApp extends StatelessWidget {
           return MaterialPageRoute(
             builder: (context) {
               return Scaffold(
-                appBar: AppBar(
-                  title: Text(settings.name!.substring(1)),
-                ),
+                appBar: AppBar(title: Text(settings.name!.substring(1))),
                 body: routes[settings.name]!(context),
               );
             },
@@ -48,21 +46,19 @@ class _HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("小部件测试"),
-      ),
+      appBar: AppBar(title: const Text("小部件测试")),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: routes
-              .map((item) => TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pushNamed(item);
-                    },
-                    child: Text(
-                      item.substring(1),
-                    ),
-                  ))
+              .map(
+                (item) => TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(item);
+                  },
+                  child: Text(item.substring(1)),
+                ),
+              )
               .toList(),
         ),
       ),

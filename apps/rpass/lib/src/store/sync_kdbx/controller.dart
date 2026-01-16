@@ -45,10 +45,7 @@ class SyncKdbxController with ChangeNotifier {
     return sync(context);
   }
 
-  Future<void> sync(
-    BuildContext context, {
-    bool forceMerge = false,
-  }) async {
+  Future<void> sync(BuildContext context, {bool forceMerge = false}) async {
     try {
       _lastError = null;
       _lastMergeContext = null;
@@ -105,9 +102,9 @@ class SyncKdbxController with ChangeNotifier {
         );
       } catch (e) {
         _logger.warning("local credentials Unable open remote kdbx.", e);
-        final result = await context.router.push(LoadExternalKdbxRoute(
-          kdbxFile: remoteData,
-        ));
+        final result = await context.router.push(
+          LoadExternalKdbxRoute(kdbxFile: remoteData),
+        );
 
         if (result != null && result is (Kdbx, String?)) {
           remoteKdbx = result.$1;

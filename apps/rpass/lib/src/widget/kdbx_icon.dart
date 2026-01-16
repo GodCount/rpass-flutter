@@ -55,19 +55,12 @@ class KdbxIconWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (kdbxIcon.customIcon != null) {
-      return Image.memory(
-        kdbxIcon.customIcon!.data,
-        width: size,
-        height: size,
-      );
+      return Image.memory(kdbxIcon.customIcon!.data, width: size, height: size);
     }
 
     final faviconSource = Store.instance.settings.faviconSource;
 
-    final icon = Icon(
-      KdbxIcon2Material.to(kdbxIcon.icon),
-      size: size,
-    );
+    final icon = Icon(KdbxIcon2Material.to(kdbxIcon.icon), size: size);
 
     if (kdbxIcon.domain == null ||
         kdbxIcon.domain!.isEmpty ||
@@ -93,7 +86,8 @@ class KdbxIconWidget extends StatelessWidget {
           transitionBuilder: (child, animation) {
             return FadeTransition(opacity: animation, child: child);
           },
-          child: child is Semantics &&
+          child:
+              child is Semantics &&
                   child.child is RawImage &&
                   (child.child! as RawImage).image != null
               ? child

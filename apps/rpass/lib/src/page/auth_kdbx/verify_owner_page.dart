@@ -8,10 +8,7 @@ import '../../util/route.dart';
 import 'authorized_page.dart';
 
 class _VerifyOwnerArgs extends PageRouteArgs {
-  _VerifyOwnerArgs({
-    super.key,
-    this.operateConfirm = false,
-  });
+  _VerifyOwnerArgs({super.key, this.operateConfirm = false});
 
   // 操作确认 当设置为 true 时不做 PopScope 拦截
   // 验证用户 并返回结果 bool
@@ -19,16 +16,11 @@ class _VerifyOwnerArgs extends PageRouteArgs {
 }
 
 class VerifyOwnerRoute extends PageRouteInfo<_VerifyOwnerArgs> {
-  VerifyOwnerRoute({
-    Key? key,
-    bool operateConfirm = false,
-  }) : super(
-          name,
-          args: _VerifyOwnerArgs(
-            key: key,
-            operateConfirm: operateConfirm,
-          ),
-        );
+  VerifyOwnerRoute({Key? key, bool operateConfirm = false})
+    : super(
+        name,
+        args: _VerifyOwnerArgs(key: key, operateConfirm: operateConfirm),
+      );
 
   static const name = "VerifyOwnerRoute";
 
@@ -47,10 +39,7 @@ class VerifyOwnerRoute extends PageRouteInfo<_VerifyOwnerArgs> {
 }
 
 class VerifyOwnerPage extends AuthorizedPage {
-  const VerifyOwnerPage({
-    super.key,
-    this.operateConfirm = false,
-  });
+  const VerifyOwnerPage({super.key, this.operateConfirm = false});
 
   final bool operateConfirm;
 
@@ -82,8 +71,10 @@ class _VerifyOwnerPageState extends AuthorizedPageState<VerifyOwnerPage> {
 
       final kdbx = KdbxProvider.of(context)!;
 
-      final credentials =
-          Kdbx.createCredentials(isPassword ? passowrd : null, keyFile?.$2);
+      final credentials = Kdbx.createCredentials(
+        isPassword ? passowrd : null,
+        keyFile?.$2,
+      );
 
       if (credentials.toBase64() != kdbx.credentials.toBase64()) {
         throw Exception("password verify error");
@@ -103,9 +94,6 @@ class _VerifyOwnerPageState extends AuthorizedPageState<VerifyOwnerPage> {
   Widget build(BuildContext context) {
     return _operateConfirm
         ? super.build(context)
-        : PopScope(
-            canPop: false,
-            child: super.build(context),
-          );
+        : PopScope(canPop: false, child: super.build(context));
   }
 }

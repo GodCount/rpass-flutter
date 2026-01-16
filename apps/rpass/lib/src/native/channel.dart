@@ -17,8 +17,8 @@ class NativeInstancePlatform {
     NativeInstancePlatform._instance ??= Platform.isMacOS || Platform.isWindows
         ? DesktopNativeInstancePlatform()
         : Platform.isAndroid
-            ? AndroidNativeInstancePlatform()
-            : NativeInstancePlatform();
+        ? AndroidNativeInstancePlatform()
+        : NativeInstancePlatform();
   }
 
   final ObserverList<NativeChannelListener> _listeners =

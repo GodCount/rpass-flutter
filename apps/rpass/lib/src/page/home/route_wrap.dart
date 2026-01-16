@@ -101,10 +101,7 @@ class EmptyPage extends StatelessWidget {
     final t = I18n.of(context)!;
 
     return Center(
-      child: Text(
-        t.empty,
-        style: Theme.of(context).textTheme.bodyLarge,
-      ),
+      child: Text(t.empty, style: Theme.of(context).textTheme.bodyLarge),
     );
   }
 }

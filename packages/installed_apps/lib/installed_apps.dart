@@ -14,17 +14,19 @@ class _AndroidInstalledAppsInstance extends InstalledAppsInstance {
   /// Returns a list of [AppInfo] objects representing the installed apps.
   @override
   Future<List<AppInfo>> getInstalledApps([bool force = false]) async {
-    return AppInfo.parseList(await _channel.invokeMethod("getInstalledApps", {
-      "force": force,
-    }));
+    return AppInfo.parseList(
+      await _channel.invokeMethod("getInstalledApps", {"force": force}),
+    );
   }
 
   @override
   Future<AppInfo?> getAppInfo(String packageName, {bool force = false}) async {
-    return AppInfo.create(await _channel.invokeMethod("getAppInfo", {
-      "packageName": packageName,
-      "force": force,
-    }));
+    return AppInfo.create(
+      await _channel.invokeMethod("getAppInfo", {
+        "packageName": packageName,
+        "force": force,
+      }),
+    );
   }
 
   @override

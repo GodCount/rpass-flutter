@@ -60,18 +60,25 @@ void main() {
   group('write', () {
     // It is best not to open debug mode, otherwise the byte data is too large and the output results in IDE cards, 😄
     test('write data to server', () async {
-      await client.write('/new folder/新建文本文档.txt', Uint8List.fromList([0]),
-          onProgress: (c, t) {
-        print(c / t);
-      });
+      await client.write(
+        '/new folder/新建文本文档.txt',
+        Uint8List.fromList([0]),
+        onProgress: (c, t) {
+          print(c / t);
+        },
+      );
     }, timeout: Timeout.none);
 
     test('write a file to server', () async {
       CancelToken c = CancelToken();
-      await client.writeFromFile('./README.md', '/新建文件夹/README.md',
-          onProgress: (c, t) {
-        print(c / t);
-      }, cancelToken: c);
+      await client.writeFromFile(
+        './README.md',
+        '/新建文件夹/README.md',
+        onProgress: (c, t) {
+          print(c / t);
+        },
+        cancelToken: c,
+      );
     }, timeout: Timeout.none);
   });
 
@@ -99,16 +106,22 @@ void main() {
 
   group('read', () {
     test('read remote file', () async {
-      await client.read('/new folder/README.md', onProgress: (c, t) {
-        print(c / t);
-      });
+      await client.read(
+        '/new folder/README.md',
+        onProgress: (c, t) {
+          print(c / t);
+        },
+      );
     }, timeout: Timeout.none);
 
     test('read remote file 2 local file', () async {
-      await client.read2File('/new folder/README.md', './test/README.md',
-          onProgress: (c, t) {
-        print(c / t);
-      });
+      await client.read2File(
+        '/new folder/README.md',
+        './test/README.md',
+        onProgress: (c, t) {
+          print(c / t);
+        },
+      );
     }, timeout: Timeout.none);
   });
 

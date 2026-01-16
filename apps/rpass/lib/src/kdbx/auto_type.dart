@@ -63,7 +63,8 @@ class AutoTypeKeys {
 }
 
 class AutoTypeRichPattern {
-  static const BUTTON = r"({("
+  static const BUTTON =
+      r"({("
       r"TAB|ENTER|UP|DOWN|LEFT|RIGHT|INSERT|INS|DELETE|DEL|"
       r"HOME|END|PGUP|PGDN|SPACE|BACKSPACE|BS|BKSP|BREAK|CAPSLOCK|"
       r"ESC|WIN|LWIN|RWIN|APPS|HELP|NUMLOCK|PRTSC|SCROLLLOCK|(F(1[0-6]|[1-9]))|"
@@ -108,64 +109,64 @@ class TextSequenceItem {
 
 class ButtonSequenceItem extends TextSequenceItem {
   ButtonSequenceItem(super.value)
-      : button = switch (value) {
-          "TAB" => PhysicalKeyboardKey.tab,
-          "ENTER" || "~" => PhysicalKeyboardKey.enter,
-          "UP" => PhysicalKeyboardKey.arrowUp,
-          "DOWN" => PhysicalKeyboardKey.arrowDown,
-          "LEFT" => PhysicalKeyboardKey.arrowLeft,
-          "RIGHT" => PhysicalKeyboardKey.arrowRight,
-          "INSERT" || "INS" => PhysicalKeyboardKey.insert,
-          "DELETE" || "DEL" => PhysicalKeyboardKey.delete,
-          "HOME" => PhysicalKeyboardKey.home,
-          "END" => PhysicalKeyboardKey.end,
-          "PGUP" => PhysicalKeyboardKey.pageUp,
-          "PGDN" => PhysicalKeyboardKey.pageDown,
-          "SPACE" => PhysicalKeyboardKey.space,
-          "BACKSPACE" || "BS" || "BKSP" => PhysicalKeyboardKey.backspace,
-          "BREAK" => PhysicalKeyboardKey.pause,
-          "CAPSLOCK" => PhysicalKeyboardKey.capsLock,
-          "ESC" => PhysicalKeyboardKey.escape,
-          "WIN" || "LWIN" => PhysicalKeyboardKey.metaLeft,
-          "RWIN" => PhysicalKeyboardKey.metaRight,
-          "HELP" => PhysicalKeyboardKey.help,
-          "NUMLOCK" => PhysicalKeyboardKey.numLock,
-          "PRTSC" => PhysicalKeyboardKey.printScreen,
-          "SCROLLLOCK" => PhysicalKeyboardKey.scrollLock,
-          "F1" => PhysicalKeyboardKey.f1,
-          "F2" => PhysicalKeyboardKey.f2,
-          "F3" => PhysicalKeyboardKey.f3,
-          "F4" => PhysicalKeyboardKey.f4,
-          "F5" => PhysicalKeyboardKey.f5,
-          "F6" => PhysicalKeyboardKey.f6,
-          "F7" => PhysicalKeyboardKey.f7,
-          "F8" => PhysicalKeyboardKey.f8,
-          "F9" => PhysicalKeyboardKey.f9,
-          "F10" => PhysicalKeyboardKey.f10,
-          "F11" => PhysicalKeyboardKey.f11,
-          "F12" => PhysicalKeyboardKey.f12,
-          "F13" => PhysicalKeyboardKey.f13,
-          "F14" => PhysicalKeyboardKey.f14,
-          "F15" => PhysicalKeyboardKey.f15,
-          "F16" => PhysicalKeyboardKey.f16,
-          "ADD" => PhysicalKeyboardKey.numpadAdd,
-          "SUBTRACT" => PhysicalKeyboardKey.numpadSubtract,
-          "MULTIPLY" => PhysicalKeyboardKey.numpadMultiply,
-          "DIVIDE" => PhysicalKeyboardKey.numpadDivide,
-          "NUMPAD0" => PhysicalKeyboardKey.numpad0,
-          "NUMPAD1" => PhysicalKeyboardKey.numpad1,
-          "NUMPAD2" => PhysicalKeyboardKey.numpad2,
-          "NUMPAD3" => PhysicalKeyboardKey.numpad3,
-          "NUMPAD4" => PhysicalKeyboardKey.numpad4,
-          "NUMPAD5" => PhysicalKeyboardKey.numpad5,
-          "NUMPAD6" => PhysicalKeyboardKey.numpad6,
-          "NUMPAD7" => PhysicalKeyboardKey.numpad7,
-          "NUMPAD8" => PhysicalKeyboardKey.numpad8,
-          "NUMPAD9" => PhysicalKeyboardKey.numpad9,
-          // 不清楚对应的键
-          "APPS" => null,
-          _ => null,
-        };
+    : button = switch (value) {
+        "TAB" => PhysicalKeyboardKey.tab,
+        "ENTER" || "~" => PhysicalKeyboardKey.enter,
+        "UP" => PhysicalKeyboardKey.arrowUp,
+        "DOWN" => PhysicalKeyboardKey.arrowDown,
+        "LEFT" => PhysicalKeyboardKey.arrowLeft,
+        "RIGHT" => PhysicalKeyboardKey.arrowRight,
+        "INSERT" || "INS" => PhysicalKeyboardKey.insert,
+        "DELETE" || "DEL" => PhysicalKeyboardKey.delete,
+        "HOME" => PhysicalKeyboardKey.home,
+        "END" => PhysicalKeyboardKey.end,
+        "PGUP" => PhysicalKeyboardKey.pageUp,
+        "PGDN" => PhysicalKeyboardKey.pageDown,
+        "SPACE" => PhysicalKeyboardKey.space,
+        "BACKSPACE" || "BS" || "BKSP" => PhysicalKeyboardKey.backspace,
+        "BREAK" => PhysicalKeyboardKey.pause,
+        "CAPSLOCK" => PhysicalKeyboardKey.capsLock,
+        "ESC" => PhysicalKeyboardKey.escape,
+        "WIN" || "LWIN" => PhysicalKeyboardKey.metaLeft,
+        "RWIN" => PhysicalKeyboardKey.metaRight,
+        "HELP" => PhysicalKeyboardKey.help,
+        "NUMLOCK" => PhysicalKeyboardKey.numLock,
+        "PRTSC" => PhysicalKeyboardKey.printScreen,
+        "SCROLLLOCK" => PhysicalKeyboardKey.scrollLock,
+        "F1" => PhysicalKeyboardKey.f1,
+        "F2" => PhysicalKeyboardKey.f2,
+        "F3" => PhysicalKeyboardKey.f3,
+        "F4" => PhysicalKeyboardKey.f4,
+        "F5" => PhysicalKeyboardKey.f5,
+        "F6" => PhysicalKeyboardKey.f6,
+        "F7" => PhysicalKeyboardKey.f7,
+        "F8" => PhysicalKeyboardKey.f8,
+        "F9" => PhysicalKeyboardKey.f9,
+        "F10" => PhysicalKeyboardKey.f10,
+        "F11" => PhysicalKeyboardKey.f11,
+        "F12" => PhysicalKeyboardKey.f12,
+        "F13" => PhysicalKeyboardKey.f13,
+        "F14" => PhysicalKeyboardKey.f14,
+        "F15" => PhysicalKeyboardKey.f15,
+        "F16" => PhysicalKeyboardKey.f16,
+        "ADD" => PhysicalKeyboardKey.numpadAdd,
+        "SUBTRACT" => PhysicalKeyboardKey.numpadSubtract,
+        "MULTIPLY" => PhysicalKeyboardKey.numpadMultiply,
+        "DIVIDE" => PhysicalKeyboardKey.numpadDivide,
+        "NUMPAD0" => PhysicalKeyboardKey.numpad0,
+        "NUMPAD1" => PhysicalKeyboardKey.numpad1,
+        "NUMPAD2" => PhysicalKeyboardKey.numpad2,
+        "NUMPAD3" => PhysicalKeyboardKey.numpad3,
+        "NUMPAD4" => PhysicalKeyboardKey.numpad4,
+        "NUMPAD5" => PhysicalKeyboardKey.numpad5,
+        "NUMPAD6" => PhysicalKeyboardKey.numpad6,
+        "NUMPAD7" => PhysicalKeyboardKey.numpad7,
+        "NUMPAD8" => PhysicalKeyboardKey.numpad8,
+        "NUMPAD9" => PhysicalKeyboardKey.numpad9,
+        // 不清楚对应的键
+        "APPS" => null,
+        _ => null,
+      };
 
   factory ButtonSequenceItem.parse(String value) {
     return ButtonSequenceItem(
@@ -217,12 +218,14 @@ class ShortcutSequenceItem extends TextSequenceItem {
   factory ShortcutSequenceItem.parse(String value) {
     final values = value
         .split("")
-        .map((item) => switch (item) {
-              "^" => PhysicalKeyboardKey.controlLeft,
-              "+" => PhysicalKeyboardKey.shiftLeft,
-              "%" => PhysicalKeyboardKey.altLeft,
-              _ => _findKeyByCode(item)
-            })
+        .map(
+          (item) => switch (item) {
+            "^" => PhysicalKeyboardKey.controlLeft,
+            "+" => PhysicalKeyboardKey.shiftLeft,
+            "%" => PhysicalKeyboardKey.altLeft,
+            _ => _findKeyByCode(item),
+          },
+        )
         .whereType<PhysicalKeyboardKey>()
         .toSet()
         .toList();

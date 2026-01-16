@@ -7,7 +7,7 @@ void main() {
 
 class MetricsBindingObserver extends WidgetsBindingObserver {
   MetricsBindingObserver({required VoidCallback didChangeMetrics})
-      : _didChangeMetrics = didChangeMetrics;
+    : _didChangeMetrics = didChangeMetrics;
 
   final VoidCallback _didChangeMetrics;
 
@@ -21,8 +21,9 @@ mixin SrceenSizeObserver<T extends StatefulWidget> on State<T> {
   final double ideaSrceenWidth = 814;
   final double singleSrceenWidth = 564;
 
-  late final _srceenObserver =
-      MetricsBindingObserver(didChangeMetrics: _didChangeMetrics);
+  late final _srceenObserver = MetricsBindingObserver(
+    didChangeMetrics: _didChangeMetrics,
+  );
 
   late Size srceenSize;
   bool isIdeaSrceen = false;
@@ -201,8 +202,9 @@ class HomePageState extends State<HomePage> with SrceenSizeObserver<HomePage> {
       builder: (context, child, _) {
         final tabsRouter = AutoTabsRouter.of(context);
 
-        final isEmptyRouter =
-            !context.router.navigationHistory.isPathActive("/user_info/");
+        final isEmptyRouter = !context.router.navigationHistory.isPathActive(
+          "/user_info/",
+        );
 
         return Scaffold(
           body: !isSingleScreen
@@ -214,8 +216,9 @@ class HomePageState extends State<HomePage> with SrceenSizeObserver<HomePage> {
                       extended: isIdeaSrceen,
                       selectedIndex: tabsRouter.activeIndex,
                       onDestinationSelected: tabsRouter.setActiveIndex,
-                      backgroundColor:
-                          Theme.of(context).colorScheme.surfaceContainer,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainer,
                       destinations: const [
                         NavigationRailDestination(
                           icon: Icon(Icons.account_box_outlined),
@@ -228,12 +231,10 @@ class HomePageState extends State<HomePage> with SrceenSizeObserver<HomePage> {
                         NavigationRailDestination(
                           icon: Icon(Icons.settings),
                           label: Text("设置"),
-                        )
+                        ),
                       ],
                     ),
-                    Expanded(
-                      child: child,
-                    )
+                    Expanded(child: child),
                   ],
                 )
               : child,
@@ -283,8 +284,9 @@ class UserListPageState extends State<UserListPage>
   }
 
   void _navigationHistory() {
-    final isEmptyRouter =
-        !context.router.navigationHistory.isPathActive("/user_info/");
+    final isEmptyRouter = !context.router.navigationHistory.isPathActive(
+      "/user_info/",
+    );
 
     if (this.isEmptyRouter != isEmptyRouter) {
       this.isEmptyRouter = isEmptyRouter;
@@ -357,12 +359,7 @@ class UserListPageState extends State<UserListPage>
           title: Text("User::${widget.userGroupName}::$i"),
           onTap: () {
             autoRouter.replace(
-              NamedRoute(
-                "UserInfoPageRoute",
-                params: {
-                  "name": i.toString(),
-                },
-              ),
+              NamedRoute("UserInfoPageRoute", params: {"name": i.toString()}),
             );
           },
         );
@@ -381,9 +378,7 @@ class UserInfoPage extends StatelessWidget {
     return Scaffold(
       body: Container(
         color: Colors.teal,
-        child: Center(
-          child: Text('UserInfoPage::$name'),
-        ),
+        child: Center(child: Text('UserInfoPage::$name')),
       ),
     );
   }
@@ -407,9 +402,7 @@ class EmptyPageState extends State<EmptyPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Center(
-        child: Text("${srceenSize.width}x${srceenSize.height}"),
-      ),
+      body: Center(child: Text("${srceenSize.width}x${srceenSize.height}")),
     );
   }
 }

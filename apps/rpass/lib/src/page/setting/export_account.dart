@@ -19,12 +19,8 @@ class _ExportAccountArgs extends PageRouteArgs {
 }
 
 class ExportAccountRoute extends PageRouteInfo<_ExportAccountArgs> {
-  ExportAccountRoute({
-    Key? key,
-  }) : super(
-          name,
-          args: _ExportAccountArgs(key: key),
-        );
+  ExportAccountRoute({Key? key})
+    : super(name, args: _ExportAccountArgs(key: key));
 
   static const name = "ExportAccountRoute";
 
@@ -102,9 +98,11 @@ class _ExportAccountPageState extends State<ExportAccountPage>
 
       final kdbx = KdbxProvider.of(context)!;
       try {
-        final result = jsonToCsv(adapter.export(
-          kdbx.totalEntry.map((item) => item.toPlainMapEntry()).toList(),
-        ));
+        final result = jsonToCsv(
+          adapter.export(
+            kdbx.totalEntry.map((item) => item.toPlainMapEntry()).toList(),
+          ),
+        );
         final filepath = await SimpleFile.saveText(
           data: result,
           filename: "${RpassInfo.appName}_${adapter.name}.csv",
@@ -141,10 +139,7 @@ class _ExportAccountPageState extends State<ExportAccountPage>
             title: Text(t.export_n_file("KDBX")),
             onTap: _exportKdbxFile,
           ),
-          ListTile(
-            title: Text(t.export_n_file("XML")),
-            onTap: _exportKdbxXml,
-          ),
+          ListTile(title: Text(t.export_n_file("XML")), onTap: _exportKdbxXml),
           ListTile(
             title: Text(t.export_n_file("CSV (Chrome)")),
             onTap: () => _otherExportAlert(ChromeCsvAdapter()),
@@ -170,10 +165,7 @@ class _ExportAccountPageState extends State<ExportAccountPage>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(12.0)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: children,
-      ),
+      child: Column(mainAxisSize: MainAxisSize.min, children: children),
     );
   }
 }

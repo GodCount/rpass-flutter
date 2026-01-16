@@ -3,10 +3,7 @@ import 'package:rpass/src/kdbx/common.dart';
 
 void main() {
   group("解析搜索输入", () {
-    final mapFieldTable = {
-      "t": "Title",
-      "title": "Title",
-    };
+    final mapFieldTable = {"t": "Title", "title": "Title"};
 
     test("没有字段的搜索", () {
       String input = "这是个关键字 这还是个关键字";

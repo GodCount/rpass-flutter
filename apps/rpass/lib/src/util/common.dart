@@ -20,7 +20,8 @@ final IV iv = IV.fromUtf8("9" * 16);
 
 const letters = r"qwertyuiopasdfghjklzxcvbnm";
 const numbers = r"0123456789";
-const symbols = r"!@#$%^&*_-=+'(),./\:;<>?[]`{}|~"
+const symbols =
+    r"!@#$%^&*_-=+'(),./\:;<>?[]`{}|~"
     r'"';
 
 const storageUnitSuffixes = [
@@ -76,8 +77,9 @@ Iterable<String> aesEncryptList(String key, Iterable<String> list) {
 )
 Iterable<String> aesDenryptList(String key, Iterable<String> list) {
   final encrypter = Encrypter(AES(Key.fromUtf8(key), mode: AESMode.cbc));
-  return list
-      .map((item) => encrypter.decrypt(Encrypted.fromBase64(item), iv: iv));
+  return list.map(
+    (item) => encrypter.decrypt(Encrypted.fromBase64(item), iv: iv),
+  );
 }
 
 @Deprecated(
@@ -154,10 +156,7 @@ int passwordEntropy(int length, int charSetLength) =>
   }
   values.sort((a, b) => math.Random().nextInt(2));
 
-  return (
-    values.join(""),
-    passwordEntropy(values.length, chars.length),
-  );
+  return (values.join(""), passwordEntropy(values.length, chars.length));
 }
 
 List<Map<String, dynamic>> csvToJson(
@@ -309,7 +308,7 @@ class TaskInfo {
 
 class SimpleSerialTimerTask {
   SimpleSerialTimerTask(this.task1, this.task2)
-      : assert(task1 != null || task2 != null, "There is at least one task");
+    : assert(task1 != null || task2 != null, "There is at least one task");
 
   final TaskInfo? task1;
   final TaskInfo? task2;

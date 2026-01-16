@@ -55,7 +55,7 @@ void main() {
         fetchFavicon.getFaviconUrls(),
         equals([
           "https://cn.cravatar.com/favicon/api/index.php?url=docs.flutter.dev",
-          "https://cn.cravatar.com/favicon/api/index.php?url=flutter.dev"
+          "https://cn.cravatar.com/favicon/api/index.php?url=flutter.dev",
         ]),
       );
 
@@ -72,7 +72,7 @@ void main() {
         fetchFavicon.getFaviconUrls(),
         equals([
           "https://www.google.com/s2/favicons?domain=docs.flutter.dev&sz=32",
-          "https://www.google.com/s2/favicons?domain=flutter.dev&sz=32"
+          "https://www.google.com/s2/favicons?domain=flutter.dev&sz=32",
         ]),
       );
     });
