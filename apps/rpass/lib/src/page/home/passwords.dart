@@ -2,11 +2,11 @@ import 'package:animations/animations.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
+import 'package:prev_focus_window/prev_focus_window.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
-import '../../native/channel.dart';
 import '../../store/index.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
@@ -429,18 +429,18 @@ class _PasswordItem extends StatefulWidget {
 }
 
 class _PasswordItemState extends State<_PasswordItem>
-    with NavigationHistoryObserver<_PasswordItem>, NativeChannelListener {
+    with NavigationHistoryObserver<_PasswordItem>, PrevFocusWindowListener {
   bool _selected = false;
   bool _showMenu = false;
 
   @override
   void initState() {
-    NativeInstancePlatform.instance.addListener(this);
+    PrevFocusWindow.instance.addListener(this);
     super.initState();
   }
 
   @override
-  void onTargetAppChange(String? name) {
+  void onWindowChange(String? name) {
     setState(() {});
   }
 
@@ -483,7 +483,7 @@ class _PasswordItemState extends State<_PasswordItem>
 
   @override
   void dispose() {
-    NativeInstancePlatform.instance.removeListener(this);
+    PrevFocusWindow.instance.removeListener(this);
     super.dispose();
   }
 
@@ -540,15 +540,15 @@ class _PasswordItemState extends State<_PasswordItem>
             ),
             const MenuDivider(),
             MenuItem(
-              enabled: NativeInstancePlatform.instance.isTargetAppExist,
+              enabled: PrevFocusWindow.instance.isTargetWindowExist,
               label:
-                  "${t.auto_fill}${NativeInstancePlatform.instance.isTargetAppExist ? " (${NativeInstancePlatform.instance.targetAppName})" : ""}",
+                  "${t.auto_fill}${PrevFocusWindow.instance.isTargetWindowExist ? " (${PrevFocusWindow.instance.targetWindowName})" : ""}",
               icon: Icons.ads_click,
               value: MyContextMenuItem.autoFill(),
             ),
             MenuItem.submenu(
               label: t.auto_fill_specified_field,
-              enabled: NativeInstancePlatform.instance.isTargetAppExist,
+              enabled: PrevFocusWindow.instance.isTargetWindowExist,
               items: MyContextMenuItem.buildSubmenuAutoFill(context, kdbxEntry),
             ),
             MenuItem(

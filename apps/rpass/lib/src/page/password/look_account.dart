@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:installed_apps/installed_apps.dart';
 import 'package:logging/logging.dart';
+import 'package:prev_focus_window/prev_focus_window.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../native/channel.dart';
 import '../../store/index.dart';
 import '../../util/cache_network_image.dart';
 import '../../util/fetch_favicon.dart';
@@ -96,7 +96,7 @@ class _LookAccountPageState extends State<LookAccountPage>
     with
         HintEmptyTextUtil,
         SecondLevelPageAutoBack<LookAccountPage>,
-        NativeChannelListener {
+        PrevFocusWindowListener {
   late KdbxIconWidgetData _kdbxIcon = KdbxIconWidgetData(
     icon: widget.kdbxEntry.icon.get() ?? KdbxIcon.Key,
     customIcon: widget.kdbxEntry.customIcon,
@@ -111,7 +111,7 @@ class _LookAccountPageState extends State<LookAccountPage>
 
   @override
   void initState() {
-    NativeInstancePlatform.instance.addListener(this);
+    PrevFocusWindow.instance.addListener(this);
     _getAppInfo();
     super.initState();
   }
@@ -142,7 +142,7 @@ class _LookAccountPageState extends State<LookAccountPage>
   }
 
   @override
-  void onTargetAppChange(String? name) {
+  void onWindowChange(String? name) {
     setState(() {});
   }
 
@@ -244,7 +244,7 @@ class _LookAccountPageState extends State<LookAccountPage>
 
   @override
   void dispose() {
-    NativeInstancePlatform.instance.removeListener(this);
+    PrevFocusWindow.instance.removeListener(this);
     super.dispose();
   }
 
@@ -419,7 +419,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                 title: Padding(
                   padding: const EdgeInsets.only(left: 6),
                   child: Text(
-                    "${t.auto_fill}${NativeInstancePlatform.instance.isTargetAppExist ? " (${NativeInstancePlatform.instance.targetAppName})" : ""}",
+                    "${t.auto_fill}${PrevFocusWindow.instance.isTargetWindowExist ? " (${PrevFocusWindow.instance.targetWindowName})" : ""}",
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -465,7 +465,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                   ),
                 ),
                 trailing: IconButton(
-                  onPressed: NativeInstancePlatform.instance.isTargetAppExist
+                  onPressed: PrevFocusWindow.instance.isTargetWindowExist
                       ? () => autoFill(kdbxEntry)
                       : null,
                   icon: const Icon(Icons.ads_click),

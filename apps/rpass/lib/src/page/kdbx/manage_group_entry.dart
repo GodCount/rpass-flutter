@@ -1,11 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
+import 'package:prev_focus_window/prev_focus_window.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
-import '../../native/channel.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/kdbx_icon.dart';
@@ -61,7 +61,7 @@ class ManageGroupEntryPage extends StatefulWidget {
 }
 
 class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
-    with SecondLevelPageAutoBack<ManageGroupEntryPage>, NativeChannelListener {
+    with SecondLevelPageAutoBack<ManageGroupEntryPage>, PrevFocusWindowListener {
   final TextEditingController _searchController = TextEditingController();
 
   final KbdxSearchHandler _kbdxSearchHandler = KbdxSearchHandler();
@@ -88,14 +88,14 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
 
     _searchController.addListener(_search);
 
-    NativeInstancePlatform.instance.addListener(this);
+    PrevFocusWindow.instance.addListener(this);
 
     _search();
     super.initState();
   }
 
   @override
-  void onTargetAppChange(String? name) {
+  void onWindowChange(String? name) {
     setState(() {});
   }
 
@@ -118,7 +118,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
     _selecteds.clear();
     _removeKdbxListener?.call();
     _removeKdbxListener = null;
-    NativeInstancePlatform.instance.addListener(this);
+    PrevFocusWindow.instance.addListener(this);
     super.dispose();
   }
 
@@ -368,15 +368,15 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
             ),
             const MenuDivider(),
             MenuItem(
-              enabled: NativeInstancePlatform.instance.isTargetAppExist,
+              enabled: PrevFocusWindow.instance.isTargetWindowExist,
               label:
-                  "${t.auto_fill}${NativeInstancePlatform.instance.isTargetAppExist ? " (${NativeInstancePlatform.instance.targetAppName})" : ""}",
+                  "${t.auto_fill}${PrevFocusWindow.instance.isTargetWindowExist ? " (${PrevFocusWindow.instance.targetWindowName})" : ""}",
               icon: Icons.ads_click,
               value: MyContextMenuItem.autoFill(),
             ),
             MenuItem.submenu(
               label: t.auto_fill_specified_field,
-              enabled: NativeInstancePlatform.instance.isTargetAppExist,
+              enabled: PrevFocusWindow.instance.isTargetWindowExist,
               items: MyContextMenuItem.buildSubmenuAutoFill(context, kdbxEntry),
             ),
             MenuItem(

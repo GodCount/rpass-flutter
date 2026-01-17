@@ -35,6 +35,9 @@ class PrevFocusWindow extends PlatformInterface {
   String? _targetWindowName;
   String? get targetWindowName => _targetWindowName;
 
+  bool get isTargetWindowExist =>
+      _targetWindowName != null && _targetWindowName!.isNotEmpty;
+
   Future<void> _methodCallHandler(MethodCall call) async {
     debugPrint("prev_focus_window_channel: ${call.method}, ${call.arguments}");
 

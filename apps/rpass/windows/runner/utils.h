@@ -22,6 +22,5 @@ int Scale(int source, double scale_factor);
 
 double ScaleFactor(int x, int y);
 
-std::string getWindowTitle(const HWND hwnd);
 
 #endif  // RUNNER_UTILS_H_

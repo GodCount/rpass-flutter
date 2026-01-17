@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:enigo_flutter/enigo_flutter.dart';
+import 'package:prev_focus_window/prev_focus_window.dart';
 
-import '../native/channel.dart';
 import '../native/platform/android.dart';
 import '../util/common.dart';
 import 'kdbx.dart';
@@ -31,7 +31,7 @@ class NoPermission implements Exception {
 Future<void> autoFillSequence(KdbxEntry kdbxEntry, [KdbxKey? kdbxKey]) async {
   if (!Platform.isMacOS && !Platform.isWindows) return;
 
-  if (NativeInstancePlatform.instance.targetAppName != null) {
+  if (PrevFocusWindow.instance.targetWindowName != null) {
     // 在运行中不要重复触发
     if (_runing) {
       debugPrint("[auto fill runing]");
@@ -40,7 +40,7 @@ Future<void> autoFillSequence(KdbxEntry kdbxEntry, [KdbxKey? kdbxKey]) async {
     _runing = true;
 
     try {
-      if (await NativeInstancePlatform.instance.activatePrevWindow()) {
+      if (await PrevFocusWindow.instance.activatePrevWindow()) {
         final List<TextSequenceItem> items;
 
         if (kdbxKey != null) {

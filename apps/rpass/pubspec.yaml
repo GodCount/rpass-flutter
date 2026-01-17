@@ -52,6 +52,8 @@ dependencies:
     path: ../../packages/enigo_flutter
   installed_apps:
     path: ../../packages/installed_apps
+  prev_focus_window:
+    path: ../../packages/prev_focus_window
 
 dev_dependencies:
   flutter_test:

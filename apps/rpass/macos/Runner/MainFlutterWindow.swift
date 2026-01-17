@@ -1,78 +1,6 @@
 import Cocoa
 import FlutterMacOS
 
-extension NSRunningApplication {
-    var isCurrentApplication: Bool {
-        return self.processIdentifier == ProcessInfo.processInfo.processIdentifier
-    }
-}
-
-class RpassFultterPlugin: NSObject, FlutterPlugin {
-    static func register(with registrar: FlutterPluginRegistrar) {
-        let channel = FlutterMethodChannel(
-            name: "native_channel_rpass", binaryMessenger: registrar.messenger)
-        let instance = RpassFultterPlugin(registrar, channel)
-        registrar.addMethodCallDelegate(instance, channel: channel)
-    }
-
-    private var registrar: FlutterPluginRegistrar!
-    private var channel: FlutterMethodChannel!
-    private var prevActivedApplication: NSRunningApplication? = nil
-
-    public init(_ registrar: FlutterPluginRegistrar, _ channel: FlutterMethodChannel) {
-        super.init()
-        self.registrar = registrar
-        self.channel = channel
-
-        NSWorkspace.shared.notificationCenter.addObserver(
-            self,
-            selector: #selector(applicationDidActivate(notification:)),
-            name: NSWorkspace.didActivateApplicationNotification,
-            object: nil
-        )
-    }
-
-    deinit {
-        NSWorkspace.shared.notificationCenter.removeObserver(self)
-    }
-
-    @objc func applicationDidActivate(notification: Notification) {
-        if let userInfo = notification.userInfo,
-            let application = userInfo[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
-        {
-            if !application.isCurrentApplication {
-                self.prevActivedApplication = application
-                let args = [
-                    "name": application.localizedName
-                ]
-                self.channel.invokeMethod("prev_actived_application", arguments: args)
-            }
-        } else {
-            self.prevActivedApplication = nil
-            self.channel.invokeMethod("prev_actived_application", arguments: ["name": nil])
-        }
-    }
-
-    public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let methodName: String = call.method
-        // let args: [String: Any] = call.arguments as? [String: Any] ?? [:]
-        switch methodName {
-        case "activate_prev_application":
-            if let application = self.prevActivedApplication {
-                if !application.isTerminated {
-                    return result(application.activate(options: .activateAllWindows))
-                }
-            }
-            self.prevActivedApplication = nil
-            result(false)
-            break
-        default:
-            result(FlutterMethodNotImplemented)
-        }
-    }
-
-}
-
 class MainFlutterWindow: NSWindow {
     override func awakeFromNib() {
         let flutterViewController = FlutterViewController()
@@ -80,8 +8,6 @@ class MainFlutterWindow: NSWindow {
         self.contentViewController = flutterViewController
         self.setFrame(windowFrame, display: true)
 
-        // register self method handler
-        RpassFultterPlugin.register(with: flutterViewController.registrar(forPlugin: "RpassPlugin"))
         RegisterGeneratedPlugins(registry: flutterViewController)
 
         super.awakeFromNib()

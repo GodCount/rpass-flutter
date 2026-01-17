@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  prev_focus_window
   url_launcher_windows
 )
 

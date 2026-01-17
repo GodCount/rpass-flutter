@@ -8,23 +8,35 @@
 
 namespace prev_focus_window {
 
-class PrevFocusWindowPlugin : public flutter::Plugin {
- public:
-  static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);
 
-  PrevFocusWindowPlugin();
 
-  virtual ~PrevFocusWindowPlugin();
 
-  // Disallow copy and assign.
-  PrevFocusWindowPlugin(const PrevFocusWindowPlugin&) = delete;
-  PrevFocusWindowPlugin& operator=(const PrevFocusWindowPlugin&) = delete;
+	class PrevFocusWindowPlugin : public flutter::Plugin {
+	public:
+		static void RegisterWithRegistrar(flutter::PluginRegistrarWindows* registrar);
+		static void CALLBACK HandleWinEventProc(HWINEVENTHOOK hWinEventHook, DWORD event, HWND hwnd,
+			LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime);
 
-  // Called when a method is called on this plugin's channel from Dart.
-  void HandleMethodCall(
-      const flutter::MethodCall<flutter::EncodableValue> &method_call,
-      std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
-};
+		PrevFocusWindowPlugin();
+
+		virtual ~PrevFocusWindowPlugin();
+
+	private:
+
+		// Called for top-level WindowProc delegation.
+		std::optional<LRESULT> PrevFocusWindowPlugin::HandleWindowProc(HWND hWnd,
+			UINT message,
+			WPARAM wParam,
+			LPARAM lParam);
+
+		// Called when a method is called on this plugin's channel from Dart.
+		void PrevFocusWindowPlugin::HandleMethodCall(
+			const flutter::MethodCall<flutter::EncodableValue>& method_call,
+			std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+
+	};
+
+
 
 }  // namespace prev_focus_window
 
