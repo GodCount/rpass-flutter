@@ -35,19 +35,19 @@ class Client {
 
   /// Set the public request headers
   void setHeaders(Map<String, dynamic> headers) =>
-      this.c.options.headers = headers;
+      c.options.headers = headers;
 
   /// Set the connection server timeout time in milliseconds.
   void setConnectTimeout(int timeout) =>
-      this.c.options.connectTimeout = Duration(milliseconds: timeout);
+      c.options.connectTimeout = Duration(milliseconds: timeout);
 
   /// Set send data timeout time in milliseconds.
   void setSendTimeout(int timeout) =>
-      this.c.options.sendTimeout = Duration(milliseconds: timeout);
+      c.options.sendTimeout = Duration(milliseconds: timeout);
 
   /// Set transfer data time in milliseconds.
   void setReceiveTimeout(int timeout) =>
-      this.c.options.receiveTimeout = Duration(milliseconds: timeout);
+      c.options.receiveTimeout = Duration(milliseconds: timeout);
 
   /// Test whether the service can connect
   Future<void> ping([CancelToken? cancelToken]) async {
@@ -64,7 +64,7 @@ class Client {
 
   /// Read all files in a folder
   Future<List<File>> readDir(String path, [CancelToken? cancelToken]) async {
-    var resp = await this.c.wdPropfind(
+    var resp = await c.wdPropfind(
       this,
       path,
       true,
@@ -78,7 +78,7 @@ class Client {
 
   /// Read a single files properties
   Future<File> readProps(String path, [CancelToken? cancelToken]) async {
-    var resp = await this.c.wdPropfind(
+    var resp = await c.wdPropfind(
       this,
       path,
       true,
@@ -92,7 +92,7 @@ class Client {
 
   /// Create a folder
   Future<void> mkdir(String path, [CancelToken? cancelToken]) async {
-    var resp = await this.c.wdMkcol(this, path, cancelToken: cancelToken);
+    var resp = await c.wdMkcol(this, path, cancelToken: cancelToken);
     var status = resp.statusCode;
     if (status != 201 && status != 405) {
       throw newResponseError(resp);
@@ -101,7 +101,7 @@ class Client {
 
   /// Recursively create folders
   Future<void> mkdirAll(String path, [CancelToken? cancelToken]) async {
-    var resp = await this.c.wdMkcol(this, path, cancelToken: cancelToken);
+    var resp = await c.wdMkcol(this, path, cancelToken: cancelToken);
     var status = resp.statusCode;
     if (status == 201 || status == 405) {
       return;
@@ -112,8 +112,8 @@ class Client {
         if (e == '') {
           continue;
         }
-        sub += e + '/';
-        resp = await this.c.wdMkcol(this, sub, cancelToken: cancelToken);
+        sub += '$e/';
+        resp = await c.wdMkcol(this, sub, cancelToken: cancelToken);
         status = resp.statusCode;
         if (status != 201 && status != 405) {
           throw newResponseError(resp);
@@ -132,7 +132,7 @@ class Client {
 
   /// Remove files
   Future<void> removeAll(String path, [CancelToken? cancelToken]) async {
-    var resp = await this.c.wdDelete(this, path, cancelToken: cancelToken);
+    var resp = await c.wdDelete(this, path, cancelToken: cancelToken);
     if (resp.statusCode == 200 ||
         resp.statusCode == 204 ||
         resp.statusCode == 404) {
@@ -149,7 +149,7 @@ class Client {
     bool overwrite, [
     CancelToken? cancelToken,
   ]) {
-    return this.c.wdCopyMove(this, oldPath, newPath, false, overwrite);
+    return c.wdCopyMove(this, oldPath, newPath, false, overwrite);
   }
 
   /// Copy a file / folder from A to B
@@ -161,7 +161,7 @@ class Client {
     bool overwrite, [
     CancelToken? cancelToken,
   ]) {
-    return this.c.wdCopyMove(this, oldPath, newPath, true, overwrite);
+    return c.wdCopyMove(this, oldPath, newPath, true, overwrite);
   }
 
   /// Read the bytes of a file
@@ -171,7 +171,7 @@ class Client {
     void Function(int count, int total)? onProgress,
     CancelToken? cancelToken,
   }) {
-    return this.c.wdReadWithBytes(
+    return c.wdReadWithBytes(
       this,
       path,
       onProgress: onProgress,
@@ -186,7 +186,7 @@ class Client {
     void Function(int count, int total)? onProgress,
     CancelToken? cancelToken,
   }) async {
-    await this.c.wdReadWithStream(
+    await c.wdReadWithStream(
       this,
       path,
       savePath,
@@ -202,7 +202,7 @@ class Client {
     void Function(int count, int total)? onProgress,
     CancelToken? cancelToken,
   }) {
-    return this.c.wdWriteWithBytes(
+    return c.wdWriteWithBytes(
       this,
       path,
       data,
@@ -219,7 +219,7 @@ class Client {
     CancelToken? cancelToken,
   }) async {
     var file = io.File(localFilePath);
-    return this.c.wdWriteWithStream(
+    return c.wdWriteWithStream(
       this,
       path,
       file.openRead(),

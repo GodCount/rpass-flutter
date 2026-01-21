@@ -14,8 +14,8 @@ abstract class _HashBase {
   final bool _bigEndianWords;
   int _lengthInBytes = 0;
   List<int> _pendingData;
-  List<int> _currentChunk;
-  List<int> _h;
+  final List<int> _currentChunk;
+  final List<int> _h;
   bool _digestCalled = false;
 
   _HashBase(this._chunkSizeInWords, int digestSizeInWords, this._bigEndianWords)
@@ -24,11 +24,9 @@ abstract class _HashBase {
       _h = List.filled(digestSizeInWords, 0);
 
   // Update the hasher with more data.
-  add(List<int> data) {
+  void add(List<int> data) {
     if (_digestCalled) {
-      throw new StateError(
-        'Hash update method called after digest was retrieved',
-      );
+      throw StateError('Hash update method called after digest was retrieved');
     }
     _lengthInBytes += data.length;
     _pendingData.addAll(data);
@@ -43,7 +41,7 @@ abstract class _HashBase {
     _digestCalled = true;
     _finalizeData();
     _iterate();
-    assert(_pendingData.length == 0);
+    assert(_pendingData.isEmpty);
     return _resultAsBytes();
   }
 
@@ -53,14 +51,14 @@ abstract class _HashBase {
   }
 
   // Create a fresh instance of this Hash.
-  newInstance();
+  _HashBase newInstance();
 
   // One round of the hash computation.
-  _updateHash(List<int> m);
+  void _updateHash(List<int> m);
 
   // Helper methods.
-  _add32(x, y) => (x + y) & _MASK_32;
-  _roundUp(val, n) => (val + n - 1) & -n;
+  dynamic _add32(int x, int y) => (x + y) & _MASK_32;
+  dynamic _roundUp(int val, int n) => (val + n - 1) & -n;
 
   // Rotate left limiting to unsigned 32-bit values.
   int _rotl32(int val, int shift) {
@@ -79,7 +77,7 @@ abstract class _HashBase {
   }
 
   // Converts a list of bytes to a chunk of 32-bit words.
-  _bytesToChunk(List<int> data, int dataIndex) {
+  void _bytesToChunk(List<int> data, int dataIndex) {
     assert((data.length - dataIndex) >= (_chunkSizeInWords * _BYTES_PER_WORD));
 
     for (var wordIndex = 0; wordIndex < _chunkSizeInWords; wordIndex++) {
@@ -98,7 +96,7 @@ abstract class _HashBase {
 
   // Convert a 32-bit word to four bytes.
   List<int> _wordToBytes(int word) {
-    List<int> bytes = new List.filled(_BYTES_PER_WORD, 0);
+    List<int> bytes = List.filled(_BYTES_PER_WORD, 0);
     bytes[0] = (word >> (_bigEndianWords ? 24 : 0)) & _MASK_8;
     bytes[1] = (word >> (_bigEndianWords ? 16 : 8)) & _MASK_8;
     bytes[2] = (word >> (_bigEndianWords ? 8 : 16)) & _MASK_8;
@@ -108,7 +106,7 @@ abstract class _HashBase {
 
   // Iterate through data updating the hash computation for each
   // chunk.
-  _iterate() {
+  void _iterate() {
     var len = _pendingData.length;
     var chunkSizeInBytes = _chunkSizeInWords * _BYTES_PER_WORD;
     if (len >= chunkSizeInBytes) {
@@ -123,7 +121,7 @@ abstract class _HashBase {
 
   // Finalize the data. Add a 1 bit to the end of the message. Expand with
   // 0 bits and add the length of the message.
-  _finalizeData() {
+  void _finalizeData() {
     _pendingData.add(0x80);
     var contentsLength = _lengthInBytes + 9;
     var chunkSizeInBytes = _chunkSizeInWords * _BYTES_PER_WORD;
@@ -154,11 +152,12 @@ class MD5 extends _HashBase {
   }
 
   // Returns a new instance of this Hash.
+  @override
   MD5 newInstance() {
-    return new MD5();
+    return MD5();
   }
 
-  static const _k = const [
+  static const _k = [
     0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a, //
     0xa8304613, 0xfd469501, 0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be, //
     0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821, 0xf61e2562, 0xc040b340, //
@@ -172,7 +171,7 @@ class MD5 extends _HashBase {
     0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391,
   ];
 
-  static const _r = const [
+  static const _r = [
     7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, //
     20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 4, 11, 16, 23, 4, 11, //
     16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 6, 10, 15, 21, 6, 10, 15, 21, 6, //
@@ -181,6 +180,7 @@ class MD5 extends _HashBase {
 
   // Compute one iteration of the MD5 algorithm with a chunk of
   // 16 32-bit pieces.
+  @override
   void _updateHash(List<int> m) {
     assert(m.length == 16);
 
@@ -189,8 +189,8 @@ class MD5 extends _HashBase {
     var c = _h[2];
     var d = _h[3];
 
-    var t0;
-    var t1;
+    int t0;
+    int t1;
 
     for (var i = 0; i < 64; i++) {
       if (i < 16) {

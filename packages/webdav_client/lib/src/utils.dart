@@ -22,9 +22,9 @@ const months = {
 
 // md5
 String md5Hash(String data) {
-  MD5 hasher = new MD5()..add(Utf8Encoder().convert(data));
+  MD5 hasher = MD5()..add(Utf8Encoder().convert(data));
   var bytes = hasher.close();
-  var result = new StringBuffer();
+  var result = StringBuffer();
   for (var part in bytes) {
     result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
   }
@@ -87,19 +87,19 @@ String trim(String str, [String? chars]) {
 }
 
 String ltrim(String str, [String? chars]) {
-  var pattern = chars != null ? new RegExp('^[$chars]+') : new RegExp(r'^\s+');
+  var pattern = chars != null ? RegExp('^[$chars]+') : RegExp(r'^\s+');
   return str.replaceAll(pattern, '');
 }
 
 String rtrim(String str, [String? chars]) {
-  var pattern = chars != null ? new RegExp('[$chars]+\$') : new RegExp(r'\s+$');
+  var pattern = chars != null ? RegExp('[$chars]+\$') : RegExp(r'\s+$');
   return str.replaceAll(pattern, '');
 }
 
 // 使用 '/' 连接path
 String join(String path0, String path1) {
   if (path1.isEmpty) return path0;
-  return rtrim(path0, '/') + '/' + ltrim(path1, '/');
+  return '${rtrim(path0, '/')}/${ltrim(path1, '/')}';
 }
 
 // 获取文件名

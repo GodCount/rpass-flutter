@@ -1,4 +1,4 @@
-library webdav_client;
+library;
 
 export 'src/auth.dart';
 export 'src/client.dart';

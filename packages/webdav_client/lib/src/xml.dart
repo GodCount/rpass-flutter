@@ -33,7 +33,7 @@ class WebdavXml {
     var xmlDocument = XmlDocument.parse(xmlStr);
     List<XmlElement> list = findAllElements(xmlDocument, 'response');
     // response
-    list.forEach((element) {
+    for (var element in list) {
       // name
       final hrefElements = findElements(element, 'href');
       String href = hrefElements.isNotEmpty
@@ -120,7 +120,7 @@ class WebdavXml {
           }
         }
       }
-    });
+    }
     return files;
   }
 }

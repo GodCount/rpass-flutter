@@ -7,9 +7,9 @@ import 'package:webdav_client/webdav_client.dart' as webdav;
 
 void main() {
   var client = webdav.newClient(
-    'https://something',
-    user: 'user',
-    password: 'pwd',
+    'https://dav.jianguoyun.com/dav/test/',
+    user: 'do_yzr@163.com',
+    password: 'ak4sw6bysemugw5s',
     debug: true,
   );
 
@@ -41,19 +41,19 @@ void main() {
   group('readDir', () {
     test('read root path', () async {
       var list = await client.readDir('/');
-      list.forEach((f) {
+      for (var f in list) {
         print('${f.name} ${f.path}');
-      });
+      }
     });
 
     test('read sub path', () async {
       // need change real folder name
       var list = await client.readDir('/new folder');
-      list.forEach((f) {
+      for (var f in list) {
         print(f.path);
         print(f.name);
         print(f.mTime.toString());
-      });
+      }
     });
   });
 
