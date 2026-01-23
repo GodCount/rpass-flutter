@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:window_manager/window_manager.dart';
 
 import './store/index.dart';
 import 'context/biometric.dart';
@@ -40,8 +41,30 @@ class UnfocusNavigatorRoute extends NavigatorObserver {
 
 final RootStackRouter router = createAutoRoute();
 
-class RpassApp extends StatelessWidget {
+class RpassApp extends StatefulWidget {
   const RpassApp({super.key});
+
+  @override
+  State<RpassApp> createState() => _RpassApp();
+}
+
+class _RpassApp extends State<RpassApp> with WindowListener {
+  @override
+  void initState() {
+    super.initState();
+    windowManager.addListener(this);
+  }
+
+  @override
+  void onWindowClose() {
+    windowManager.hide();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    windowManager.removeListener(this);
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:enigo_flutter/enigo_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'src/context/biometric.dart';
 import 'src/log.dart';
@@ -18,6 +19,19 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Log.setupLogging(true);
+
+  if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+    await windowManager.ensureInitialized();
+    await windowManager.setPreventClose(true);
+
+    windowManager.waitUntilReadyToShow(
+      WindowOptions(size: Size(900, 640), minimumSize: Size(413, 640)),
+      () async {
+        await windowManager.show();
+        await windowManager.focus();
+      },
+    );
+  }
 
   // TODO！桌面端未进行测试
   if (Platform.isAndroid || Platform.isIOS) {
@@ -35,6 +49,7 @@ void main() async {
   try {
     await RpassInfo.init();
     await Store.instance.loadStore();
+    await windowManager.setTitle(RpassInfo.appName);
   } catch (e, s) {
     _logger.severe("init fail!", e, s);
     return runApp(

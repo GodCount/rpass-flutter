@@ -3,6 +3,7 @@ description: "A new Flutter project."
 publish_to: "none"
 version: 2.1.4+201400
 resolution: workspace
+homepage: https://github.com/GodCount/rpass-flutter.git
 
 environment:
   sdk: ">=3.10.0 <4.0.0"
@@ -54,6 +55,7 @@ dependencies:
     path: ../../packages/installed_apps
   prev_focus_window:
     path: ../../packages/prev_focus_window
+  window_manager: ^0.5.1
 
 dev_dependencies:
   flutter_test:
