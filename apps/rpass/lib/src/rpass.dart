@@ -1,7 +1,7 @@
 import 'package:package_info_plus/package_info_plus.dart';
 
 class RpassInfo {
-  static late PackageInfo? _packageInfo;
+  static PackageInfo? _packageInfo;
 
   static Future<void> init() async {
     _packageInfo = await PackageInfo.fromPlatform();

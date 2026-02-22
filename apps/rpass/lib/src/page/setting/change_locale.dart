@@ -40,12 +40,16 @@ class _ChangeLocalePageState extends State<ChangeLocalePage>
 
   @override
   void initState() {
-    for (var locale in I18n.supportedLocales) {
-      _locales[locale.toString()] = I18n.lookupLocalizations(
-        locale,
-      ).locale_name;
-    }
     super.initState();
+    _initLocals();
+  }
+
+  void _initLocals() async {
+    for (var locale in I18n.supportedLocales) {
+      _locales[locale.toString()] = (await I18n.delegate.load(
+        locale,
+      )).locale_name;
+    }
   }
 
   @override

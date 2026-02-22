@@ -6,17 +6,20 @@ import 'package:logging/logging.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'src/context/biometric.dart';
+import 'src/i18n.dart';
 import 'src/log.dart';
 import 'src/native/channel.dart';
 import 'src/rpass.dart';
 import 'src/app.dart';
 import 'src/store/index.dart';
+import 'src/tray.dart';
 import 'src/widget/error_widget.dart';
 
 final _logger = Logger("main");
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  customErrorWidget();
 
   await Log.setupLogging(true);
 
@@ -44,12 +47,18 @@ void main() async {
     await RustLib.init();
   }
 
-  customErrorWidget();
-
   try {
     await RpassInfo.init();
     await Store.instance.loadStore();
-    await windowManager.setTitle(RpassInfo.appName);
+
+    I18n.setGlobalMyLocale(
+      await I18n.delegate.load(Store.instance.settings.locale ?? Locale("zh")),
+    );
+
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      await systemTray.ensureInitialized();
+      await windowManager.setTitle(RpassInfo.appName);
+    }
   } catch (e, s) {
     _logger.severe("init fail!", e, s);
     return runApp(
@@ -58,6 +67,7 @@ void main() async {
       ),
     );
   }
+
   runApp(const RpassApp());
 }
 
