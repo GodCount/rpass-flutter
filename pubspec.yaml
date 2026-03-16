@@ -9,6 +9,7 @@ workspace:
   - apps/rpass
   - packages/enigo_flutter
   - packages/installed_apps
+  - packages/lan_fill_server
   - packages/prev_focus_window
   - packages/webdav_client
 
