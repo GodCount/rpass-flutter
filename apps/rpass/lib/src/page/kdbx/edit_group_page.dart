@@ -33,7 +33,7 @@ class EditGroupPageRoute extends PageRouteInfo<_EditGroupPageArgs> {
     builder: (context, data) {
       final args = data.argsAs<_EditGroupPageArgs>(
         orElse: () {
-          final kdbx = KdbxProvider.of(context)!;
+          final kdbx = KdbxProvider.of(context).kdbx!;
           final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
           final kdbxGroup = uuid != null ? kdbx.findGroupByUuid(uuid) : null;
 
@@ -86,7 +86,7 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
     if (_from.currentState!.validate()) {
       _from.currentState!.save();
 
-      final kdbx = KdbxProvider.of(context)!;
+      final kdbx = KdbxProvider.of(context).kdbx!;
 
       final kdbxGroup =
           _kdbxGroupData.kdbxGroup ?? kdbx.createGroup(_kdbxGroupData.name);
@@ -102,7 +102,7 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
         kdbxGroup.icon.set(_kdbxGroupData.kdbxIcon.icon);
       }
 
-      if (await kdbxSave(KdbxProvider.of(context)!)) {
+      if (await kdbxSave(KdbxProvider.of(context).kdbx!)) {
         context.router.pop(kdbxGroup.uuid);
       }
     }

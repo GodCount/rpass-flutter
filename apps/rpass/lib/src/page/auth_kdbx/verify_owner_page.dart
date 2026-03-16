@@ -69,7 +69,7 @@ class _VerifyOwnerPageState extends AuthorizedPageState<VerifyOwnerPage> {
         throw Exception("Lack of key file.");
       }
 
-      final kdbx = KdbxProvider.of(context)!;
+      final kdbx = KdbxProvider.of(context).kdbx!;
 
       final credentials = Kdbx.createCredentials(
         isPassword ? passowrd : null,

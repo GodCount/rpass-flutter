@@ -45,7 +45,7 @@ class _ImportAccountPageState extends State<ImportAccountPage>
     final t = I18n.of(context)!;
 
     try {
-      final kdbx = KdbxProvider.of(context)!;
+      final kdbx = KdbxProvider.of(context).kdbx!;
       final result = await SimpleFile.openText(allowedExtensions: ["csv"]);
       final list = adapter.import(csvToJson(result, shouldParseNumbers: false));
       kdbx.import(list);

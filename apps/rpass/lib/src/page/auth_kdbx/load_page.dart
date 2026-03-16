@@ -82,7 +82,7 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
         await store.settings.setKeyFilePath(keyFile?.$1);
       }
 
-      KdbxProvider.setKdbx(context, kdbx);
+      KdbxProvider.of(context).setKdbx(kdbx);
 
       if (!(await _isAutoFill(kdbx))) {
         context.router.replace(HomeRoute());
@@ -129,7 +129,7 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
       filepath: store.localInfo.localKdbxFile.path,
     );
 
-    KdbxProvider.setKdbx(context, kdbx);
+    KdbxProvider.of(context).setKdbx(kdbx);
 
     if (!(await _isAutoFill(kdbx))) {
       context.router.replace(HomeRoute());

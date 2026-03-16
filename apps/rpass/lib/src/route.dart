@@ -20,7 +20,7 @@ final skipAuthGuard = [
 class AuthGuard extends AutoRouteGuard {
   @override
   void onNavigation(NavigationResolver resolver, StackRouter router) {
-    final kdbx = KdbxProvider.of(resolver.context);
+    final kdbx = KdbxProvider.of(resolver.context).kdbx;
     if (kdbx == null && !skipAuthGuard.contains(resolver.routeName)) {
       resolver.redirectUntil(
         Store.instance.localInfo.localKdbxFileExists
@@ -164,6 +164,10 @@ RootStackRouter _createDesktopAutoRoute() {
               AutoRoute(path: "kdbx_setting", page: KdbxSettingRoute.page),
               AutoRoute(path: "sync_account", page: SyncAccountRoute.page),
               AutoRoute(path: "other_settings", page: OtherSettingsRoute.page),
+              AutoRoute(
+                path: "shortcuts_settings",
+                page: ShortcutsSettingsRoute.page,
+              ),
             ],
           ),
         ],

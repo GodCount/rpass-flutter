@@ -87,6 +87,13 @@ class _OtherSettingsPageState extends State<OtherSettingsPage>
 
     showBottomSheetList(
       title: t.show_favicon,
+      actions: [
+        IconButton(
+          tooltip: t.clear_favicon_cache,
+          onPressed: _existsCache ? _clearCahce : null,
+          icon: const Icon(Icons.delete),
+        ),
+      ],
       children: [
         ListTile(
           title: Text(t.none),
@@ -157,11 +164,6 @@ class _OtherSettingsPageState extends State<OtherSettingsPage>
                 ? const Icon(Icons.check)
                 : null,
             onTap: _setFaviconSource,
-          ),
-          ListTile(
-            title: Text(t.clear_favicon_cache),
-            enabled: _existsCache,
-            onTap: _clearCahce,
           ),
         ],
       ),

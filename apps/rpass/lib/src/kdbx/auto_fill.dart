@@ -29,7 +29,7 @@ class NoPermission implements Exception {
 ///
 ///
 Future<void> autoFillSequence(KdbxEntry kdbxEntry, [KdbxKey? kdbxKey]) async {
-  if (!Platform.isMacOS && !Platform.isWindows) return;
+  if (!kIsDesktop) return;
 
   if (PrevFocusWindow.instance.targetWindowName != null) {
     // 在运行中不要重复触发

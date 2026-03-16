@@ -88,7 +88,7 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
       await store.settings.setKeyFilePath(result.$2);
     }
 
-    KdbxProvider.setKdbx(context, kdbx);
+    KdbxProvider.of(context).setKdbx(kdbx);
     context.router.replace(HomeRoute());
   }
 

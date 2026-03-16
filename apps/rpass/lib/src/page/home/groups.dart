@@ -50,7 +50,7 @@ class _GroupsPageState extends State<GroupsPage>
 
   @override
   void initState() {
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
     kdbx.addListener(_update);
     _removeKdbxListener = () => kdbx.removeListener(_update);
     super.initState();
@@ -72,7 +72,7 @@ class _GroupsPageState extends State<GroupsPage>
   Widget _buildMobile() {
     final t = I18n.of(context)!;
 
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
 
     final groups = [kdbx.kdbxFile.body.rootGroup, ...kdbx.rootGroups];
 
@@ -147,7 +147,7 @@ class _GroupsItemState extends State<_GroupsItem>
     final t = I18n.of(context)!;
 
     if (await showConfirmDialog(title: t.delete, message: t.is_move_recycle)) {
-      final kdbx = KdbxProvider.of(context)!;
+      final kdbx = KdbxProvider.of(context).kdbx!;
       kdbx.deleteGroup(kdbxGroup);
       await kdbxSave(kdbx);
     }

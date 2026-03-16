@@ -53,7 +53,7 @@ class EditAccountRoute extends PageRouteInfo<_EditAccountArgs> {
     builder: (context, data) {
       final args = data.argsAs<_EditAccountArgs>(
         orElse: () {
-          final kdbx = KdbxProvider.of(context)!;
+          final kdbx = KdbxProvider.of(context).kdbx!;
           final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
           final kdbxEntry = uuid != null ? kdbx.findEntryByUuid(uuid) : null;
 
@@ -109,7 +109,7 @@ class _EditAccountPageState extends State<EditAccountPage>
   }
 
   KdbxEntry _createKdbxEntry() {
-    return KdbxProvider.of(context)!.createVirtualEntry()..setString(
+    return KdbxProvider.of(context).kdbx!.createVirtualEntry()..setString(
       KdbxKeyCommon.PASSWORD,
       PlainValue(randomPassword(length: 10).$1),
     );
@@ -120,7 +120,7 @@ class _EditAccountPageState extends State<EditAccountPage>
       _from.currentState!.save();
       _kdbxDeleteSaved();
 
-      if (await kdbxSave(KdbxProvider.of(context)!)) {
+      if (await kdbxSave(KdbxProvider.of(context).kdbx!)) {
         context.router.pop(true);
       }
     }
@@ -133,7 +133,7 @@ class _EditAccountPageState extends State<EditAccountPage>
   }
 
   void _kdbxEntryGroupSaved(KdbxGroup? group) {
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
     if (group != null && _kdbxEntry.parent != group) {
       kdbx.kdbxFile.move(_kdbxEntry, group);
     }
@@ -226,7 +226,7 @@ class _EditAccountPageState extends State<EditAccountPage>
 
   void _addEntryField() async {
     final t = I18n.of(context)!;
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
 
     final limitItmes = [
       ...defaultKdbxKeys,
@@ -253,7 +253,7 @@ class _EditAccountPageState extends State<EditAccountPage>
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
 
     final child = SingleChildScrollView(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
@@ -610,12 +610,11 @@ class EntryField extends StatefulWidget {
 class _EntryFieldState extends State<EntryField> {
   KdbxKey? _renameKdbxKey;
 
-  final bool _displayScanner = Platform.isAndroid || Platform.isIOS;
   List<KdbxKey> _binaryKeys = [];
 
   void _onRenameKdbxKey() async {
     final t = I18n.of(context)!;
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
     final limitItmes = {
       ...defaultKdbxKeys,
       ...widget.kdbxEntry.stringEntries.map((item) => item.key),
@@ -684,47 +683,6 @@ class _EntryFieldState extends State<EntryField> {
         : child;
   }
 
-  String _kdbKey2I18n() {
-    final t = I18n.of(context)!;
-    switch (widget.kdbxKey.key) {
-      case KdbxKeyCommon.KEY_TITLE:
-        return t.title;
-      case KdbxKeyCommon.KEY_URL:
-        return t.domain;
-      case KdbxKeyURLS.KEY_URL1:
-        return t.domain_num(1);
-      case KdbxKeyURLS.KEY_URL2:
-        return t.domain_num(2);
-      case KdbxKeyURLS.KEY_URL3:
-        return t.domain_num(3);
-      case KdbxKeyURLS.KEY_URL4:
-        return t.domain_num(4);
-      case KdbxKeyURLS.KEY_URL5:
-        return t.domain_num(5);
-      case KdbxKeyCommon.KEY_USER_NAME:
-        return t.account;
-      case KdbxKeyCommon.KEY_EMAIL:
-        return t.email;
-      case KdbxKeyCommon.KEY_PASSWORD:
-        return t.password;
-      case KdbxKeyCommon.KEY_OTP:
-        return t.otp;
-      case KdbxKeyCommon.KEY_NOTES:
-        return t.description;
-      case KdbxKeySpecial.KEY_AUTO_TYPE:
-        return t.fill_sequence;
-      case KdbxKeySpecial.KEY_AUTO_FILL_PACKAGE_NAME:
-        return t.auto_fill_match_app;
-      case KdbxKeySpecial.KEY_TAGS:
-        return t.label;
-      case KdbxKeySpecial.KEY_ATTACH:
-        return t.attachment;
-      case KdbxKeySpecial.KEY_EXPIRES:
-        return t.expires_time;
-      default:
-        return _renameKdbxKey?.key ?? widget.kdbxKey.key;
-    }
-  }
 
   FormFieldValidator<String?>? _entryFieldValidator() {
     final t = I18n.of(context)!;
@@ -819,12 +777,12 @@ class _EntryFieldState extends State<EntryField> {
   }
 
   Widget _buildFormFieldFactory() {
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
     switch (widget.kdbxKey.key) {
       case KdbxKeyCommon.KEY_TITLE:
         return EntryTitleFormField(
           initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
-          label: _kdbKey2I18n(),
+          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
           kdbxIcon: KdbxIconWidgetData(
             icon: widget.kdbxEntry.icon.get() ?? KdbxIcon.Key,
             customIcon: widget.kdbxEntry.customIcon,
@@ -856,7 +814,7 @@ class _EntryFieldState extends State<EntryField> {
                   items: kdbx.fieldStatistic
                       .getStatistic(widget.kdbxKey)
                       .toList(),
-                  label: _kdbKey2I18n(),
+                  label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
                   onSaved: _kdbxTextFieldSaved,
                   expandedInsets: const EdgeInsets.all(0),
                   validator: validator,
@@ -871,7 +829,7 @@ class _EntryFieldState extends State<EntryField> {
       case KdbxKeyCommon.KEY_PASSWORD:
         return EntryTextFormField(
           initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
-          label: _kdbKey2I18n(),
+          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
           trailingIcon: const Icon(Icons.create),
           onTrailingTap: () async {
             final password = await context.router.push(
@@ -887,11 +845,9 @@ class _EntryFieldState extends State<EntryField> {
       case KdbxKeyCommon.KEY_OTP:
         return EntryTextFormField(
           initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
-          label: _kdbKey2I18n(),
-          trailingIcon: _displayScanner
-              ? const Icon(Icons.qr_code_scanner)
-              : null,
-          onTrailingTap: _displayScanner
+          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
+          trailingIcon: isMobile ? const Icon(Icons.qr_code_scanner) : null,
+          onTrailingTap: isMobile
               ? () async {
                   final optUrl = await context.router.push(
                     QrCodeScannerRoute(),
@@ -908,12 +864,12 @@ class _EntryFieldState extends State<EntryField> {
       case KdbxKeyCommon.KEY_NOTES:
         return EntryNotesFormField(
           initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
-          label: _kdbKey2I18n(),
+          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
           onSaved: _kdbxTextFieldSaved,
         );
       case KdbxKeySpecial.KEY_AUTO_TYPE:
         return EntryAutoTypeFormField(
-          label: _kdbKey2I18n(),
+          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
           kdbxEntry: widget.kdbxEntry,
           onSaved: (value) {
             widget.onSaved(
@@ -923,7 +879,7 @@ class _EntryFieldState extends State<EntryField> {
         );
       case KdbxKeySpecial.KEY_AUTO_FILL_PACKAGE_NAME:
         return EntryAutoFillAppFormField(
-          label: _kdbKey2I18n(),
+          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
           initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
           onSaved: (value) {
             widget.onSaved(
@@ -934,7 +890,7 @@ class _EntryFieldState extends State<EntryField> {
       case KdbxKeySpecial.KEY_TAGS:
         final tags = widget.kdbxEntry.tagList;
         return ChipListFormField(
-          label: _kdbKey2I18n(),
+          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
           initialValue: kdbx.fieldStatistic
               .getStatistic(widget.kdbxKey)
               .map(
@@ -965,7 +921,7 @@ class _EntryFieldState extends State<EntryField> {
         );
       case KdbxKeySpecial.KEY_ATTACH:
         return ChipListFormField(
-          label: _kdbKey2I18n(),
+          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
           initialValue: widget.kdbxEntry.binaryEntries
               .map(
                 (item) => ChipListItem(
@@ -1009,7 +965,7 @@ class _EntryFieldState extends State<EntryField> {
         );
       case KdbxKeySpecial.KEY_EXPIRES:
         return EntryExpiresFormField(
-          label: _kdbKey2I18n(),
+          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
           initialValue: (
             widget.kdbxEntry.times.expires.get() ?? false,
             widget.kdbxEntry.times.expiryTime.get()?.toLocal() ??
@@ -1033,7 +989,7 @@ class _EntryFieldState extends State<EntryField> {
               initialValue: widget.kdbxEntry
                   .getString(widget.kdbxKey)
                   ?.getText(),
-              label: _kdbKey2I18n(),
+              label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
               validator: validator,
               onSaved: _kdbxTextFieldSaved,
               contextMenuBuilder: _contextMenuBuilder,
@@ -1043,7 +999,7 @@ class _EntryFieldState extends State<EntryField> {
       default:
         return EntryTextFormField(
           initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
-          label: _kdbKey2I18n(),
+          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
           onSaved: _kdbxTextFieldSaved,
           contextMenuBuilder: _contextMenuBuilder,
         );
@@ -1052,7 +1008,7 @@ class _EntryFieldState extends State<EntryField> {
 
   Future<ChipListItem<String>?> _addTag(List<ChipListItem<String>> list) async {
     final t = I18n.of(context)!;
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
 
     final result = await InputDialog.openDialog(
       context,

@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:hotkey_manager/hotkey_manager.dart';
 
 import '../../util/fetch_favicon.dart';
 import '../shared_preferences/index.dart';
+import 'shortcuts.dart';
 
 class SettingsService with SharedPreferencesService {
   Future<ThemeMode> getThemeMode() async {
@@ -122,6 +126,42 @@ class SettingsService with SharedPreferencesService {
     if (value == null) return remove("favicon_source");
 
     return setInt("favicon_source", FaviconSource.values.indexOf(value));
+  }
+
+  Future<Iterable<HotKey>?> getShrtcutsHotKeys() async {
+    final jsonStr = await getString("shrtcuts_hot_keys");
+
+    if (jsonStr == null) return null;
+
+    final List<dynamic> data = jsonDecode(jsonStr);
+    return data.map((item) => HotKey.fromJson(item));
+  }
+
+  Future<bool> setShrtcutsHotKeys(Iterable<HotKey>? hotKeys) async {
+    return hotKeys != null
+        ? setString(
+            "shrtcuts_hot_keys",
+            jsonEncode(hotKeys.map((item) => item.toJson()).toList()),
+          )
+        : remove("shrtcuts_hot_keys");
+  }
+
+  Future<ShortcutsOpenAppAlignment> getShortcutsOpenAppAlignment() async {
+    final value = await getInt("shortcuts_open_app_alignment");
+    return value != null &&
+            value > 0 &&
+            value < ShortcutsOpenAppAlignment.values.length
+        ? ShortcutsOpenAppAlignment.values[value]
+        : ShortcutsOpenAppAlignment.mouseScreenCenter;
+  }
+
+  Future<bool> setShortcutsOpenAppAlignment(ShortcutsOpenAppAlignment? value) {
+    if (value == null) return remove("shortcuts_open_app_alignment");
+
+    return setInt(
+      "shortcuts_open_app_alignment",
+      ShortcutsOpenAppAlignment.values.indexOf(value),
+    );
   }
 
   @override

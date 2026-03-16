@@ -672,4 +672,46 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get edit_group => 'Edit Group';
+
+  @override
+  String get shortcuts => '快捷键';
+
+  @override
+  String get open => '打开';
+
+  @override
+  String get quit => '退出';
+
+  @override
+  String get reset => '重置';
+
+  @override
+  String get shortcut_open_subtitle => '显示或隐藏窗口';
+
+  @override
+  String get shortcut_lock_subtitle => '锁定并回到验证界面';
+
+  @override
+  String get shortcut_autofill_subtitle =>
+      '触发密码页选中项的自动填充.\n注意自动填充是通过模拟键盘输入的会和快捷键冲突,按下后需要快速释放.';
+
+  @override
+  String shortcut_autofill_field(String field) {
+    return '填充$field';
+  }
+
+  @override
+  String get window_position => '窗口位置';
+
+  @override
+  String get mouse_position => '鼠标位置';
+
+  @override
+  String get mouse_center => '相对鼠标中心';
+
+  @override
+  String get mouse_screen_center => '鼠标光标显示器中心';
+
+  @override
+  String get prev_position => '上次的位置';
 }

@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../util/fetch_favicon.dart';
 import './service.dart';
+import 'shortcuts.dart';
 
 class SettingsController with ChangeNotifier {
   final SettingsService _settingsService = SettingsService();
+
+  late final ShortcutsStore shortcutsStore;
 
   late ThemeMode _themeMode;
   Locale? _locale;
@@ -159,6 +162,11 @@ class SettingsController with ChangeNotifier {
   }
 
   Future<void> init() async {
+    shortcutsStore = ShortcutsStore(
+      settingsService: _settingsService,
+      notifyListeners: notifyListeners,
+    );
+
     _themeMode = await _settingsService.getThemeMode();
     _locale = await _settingsService.getLocale();
     _enableBiometric = await _settingsService.getEnableBiometric();
@@ -172,6 +180,8 @@ class SettingsController with ChangeNotifier {
     _manualSelectFillItem = await _settingsService.getManualSelectFillItem();
     _startFocusSreach = await _settingsService.getStartFocusSreach();
     _faviconSource = await _settingsService.getFaviconSource();
+
+    await shortcutsStore.init();
 
     notifyListeners();
   }

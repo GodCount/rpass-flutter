@@ -59,7 +59,7 @@ class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
       }
 
       final store = Store.instance;
-      final kdbx = KdbxProvider.of(context)!;
+      final kdbx = KdbxProvider.of(context).kdbx!;
       final biometric = Biometric.of(context);
 
       final oldCredentials = kdbx.credentials;

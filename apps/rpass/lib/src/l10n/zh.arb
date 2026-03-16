@@ -318,5 +318,26 @@
             }
         }
     },
-    "edit_group": "编辑分组"
+    "edit_group": "编辑分组",
+    "shortcuts": "快捷键",
+    "open": "打开",
+    "quit": "退出",
+    "reset": "重置",
+    "shortcut_open_subtitle": "显示或隐藏窗口",
+    "shortcut_lock_subtitle": "锁定并回到验证界面",
+    "shortcut_autofill_subtitle": "触发密码页选中项的自动填充.\n注意自动填充是通过模拟键盘输入的会和快捷键冲突,按下后需要快速释放.",
+    "shortcut_autofill_field": "填充{field}",
+    "@shortcut_autofill_field": {
+        "description": "字段",
+        "placeholders": {
+            "field": {
+                "type": "String"
+            }
+        }
+    },
+    "window_position": "窗口位置",
+    "mouse_position": "鼠标位置",
+    "mouse_center": "相对鼠标中心",
+    "mouse_screen_center": "鼠标光标显示器中心",
+    "prev_position": "上次的位置"
 }

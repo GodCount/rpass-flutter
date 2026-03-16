@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -6,17 +5,21 @@ import 'dart:math' as math;
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:csv/csv.dart';
 import 'package:csv/csv_settings_autodetection.dart';
-import 'package:encrypt/encrypt.dart';
+import 'package:flutter/foundation.dart'
+    show ObserverList, ValueChanged, protected;
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
+// UI 布局使用, 后续可能会去掉; 而是通过屏幕大小决定
 final bool isMobile = Platform.isAndroid || Platform.isIOS;
 final bool isDesktop = !isMobile;
 
-const uuid = Uuid();
+// 功能层面判断
+final bool kIsMobile = Platform.isAndroid || Platform.isIOS;
+final bool kIsDesktop =
+    Platform.isWindows || Platform.isMacOS || Platform.isLinux;
 
-@Deprecated("old data encrypt")
-final IV iv = IV.fromUtf8("9" * 16);
+const uuid = Uuid();
 
 const letters = r"qwertyuiopasdfghjklzxcvbnm";
 const numbers = r"0123456789";
@@ -38,56 +41,6 @@ const storageUnitSuffixes = [
 
 String md5(String data) {
   return crypto.md5.convert(utf8.encode(data)).toString();
-}
-
-@Deprecated(
-  "old data encrypt"
-  "move kdbx",
-)
-String aesEncrypt(String key, String data) {
-  final encrypter = Encrypter(AES(Key.fromUtf8(key), mode: AESMode.cbc));
-
-  final encrypted = encrypter.encrypt(data, iv: iv);
-
-  return encrypted.base64;
-}
-
-@Deprecated(
-  "old data encrypt"
-  "move kdbx",
-)
-String aesDenrypt(String key, String data) {
-  final encrypter = Encrypter(AES(Key.fromUtf8(key), mode: AESMode.cbc));
-
-  return encrypter.decrypt(Encrypted.fromBase64(data), iv: iv);
-}
-
-@Deprecated(
-  "old data encrypt"
-  "move kdbx",
-)
-Iterable<String> aesEncryptList(String key, Iterable<String> list) {
-  final encrypter = Encrypter(AES(Key.fromUtf8(key), mode: AESMode.cbc));
-  return list.map((item) => encrypter.encrypt(item, iv: iv).base64);
-}
-
-@Deprecated(
-  "old data encrypt"
-  "move kdbx",
-)
-Iterable<String> aesDenryptList(String key, Iterable<String> list) {
-  final encrypter = Encrypter(AES(Key.fromUtf8(key), mode: AESMode.cbc));
-  return list.map(
-    (item) => encrypter.decrypt(Encrypted.fromBase64(item), iv: iv),
-  );
-}
-
-@Deprecated(
-  "old data encrypt"
-  "move kdbx",
-)
-String timeBasedUuid() {
-  return uuid.v1();
 }
 
 int randomInt(int min, int max) => min + math.Random().nextInt(max - min);
@@ -299,43 +252,29 @@ extension CommonString on String {
   }
 }
 
-class TaskInfo {
-  TaskInfo(this.duration, this.task);
+mixin SimpleObserverListener<T> {
+  final ObserverList<T> _listeners = ObserverList<T>();
 
-  final Function task;
-  Duration duration;
-}
+  List<T> get listeners => List.unmodifiable(_listeners);
 
-class SimpleSerialTimerTask {
-  SimpleSerialTimerTask(this.task1, this.task2)
-    : assert(task1 != null || task2 != null, "There is at least one task");
+  bool get hasListeners => _listeners.isNotEmpty;
 
-  final TaskInfo? task1;
-  final TaskInfo? task2;
-
-  Timer? _timer;
-
-  void _start(TaskInfo task) {
-    _timer = Timer(task.duration, () {
-      if (task2 != null && task != task2) {
-        _start(task2!);
-      } else {
-        _timer = null;
-      }
-      task.task.call();
-    });
-  }
-
-  void start() {
-    assert(_timer == null, "Repeat start task");
-    TaskInfo task = task1 ?? task2!;
-    _start(task);
-  }
-
-  void cancel() {
-    if (_timer != null) {
-      _timer!.cancel();
-      _timer = null;
+  @protected
+  void emit(ValueChanged<T> handle) {
+    for (final item in listeners) {
+      handle(item);
     }
+  }
+
+  void addListener(T listener) {
+    _listeners.add(listener);
+  }
+
+  void removeListener(T listener) {
+    _listeners.remove(listener);
+  }
+
+  void removeAllListener() {
+    _listeners.clear();
   }
 }

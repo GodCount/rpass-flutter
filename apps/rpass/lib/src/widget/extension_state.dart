@@ -62,7 +62,7 @@ extension StatefulDialog on State {
   }
 
   Future<void> showToast(String msg) async {
-    if (Platform.isAndroid || Platform.isIOS) {
+    if (kIsMobile) {
       await Fluttertoast.showToast(msg: msg);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -184,30 +184,27 @@ extension StatefulDialog on State {
 }
 
 extension StatefulBottomSheet on State {
-  void showBottomSheetList({String? title, required List<ListTile> children}) {
+  void showBottomSheetList({
+    String? title,
+    List<Widget>? actions,
+    required List<Widget> children,
+  }) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
         return ListView(
           shrinkWrap: true,
           children: [
-            if (title != null)
-              Align(
-                alignment: Alignment.center,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 24,
-                  ),
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleLarge,
-                    maxLines: 1,
-                    softWrap: true,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
+            AppBar(
+              backgroundColor: Colors.transparent,
+              primary: true,
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              title: title != null ? Text(title) : null,
+              titleTextStyle: Theme.of(context).textTheme.titleLarge,
+              actionsPadding: const EdgeInsets.only(right: 16),
+              actions: actions,
+            ),
             ...children,
           ],
         );

@@ -54,7 +54,9 @@ class PasswordsPage extends StatefulWidget {
 }
 
 class _PasswordsPageState extends State<PasswordsPage>
-    with AutomaticKeepAliveClientMixin {
+    with
+        AutomaticKeepAliveClientMixin,
+        NavigationHistoryObserver<PasswordsPage> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
 
@@ -78,7 +80,7 @@ class _PasswordsPageState extends State<PasswordsPage>
 
   @override
   void initState() {
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
     _searchController.addListener(_searchAccounts);
     _searchAccounts();
 
@@ -95,6 +97,18 @@ class _PasswordsPageState extends State<PasswordsPage>
   }
 
   @override
+  void didNavigationHistory() {
+    if (context.topRoute.name == LookAccountRoute.name ||
+        context.topRoute.name == EditAccountRoute.name) {
+      final kdbxProvider = KdbxProvider.of(context);
+      final uuid = context.topRoute.inheritedPathParams.optString("uuid");
+      kdbxProvider.setSelectedKdbxEntry(
+        uuid != null ? kdbxProvider.kdbx!.findEntryByUuid(uuid.kdbxUuid) : null,
+      );
+    }
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     _searchFocusNode.dispose();
@@ -105,14 +119,14 @@ class _PasswordsPageState extends State<PasswordsPage>
   }
 
   void _onKdbxSave() {
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
     _kbdxSearchHandler.setFieldOther(kdbx.fieldStatistic.customFields);
     _searchAccounts();
   }
 
   void _searchAccounts() {
     _totalEntry.clear();
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
 
     _totalEntry.addAll(
       _kbdxSearchHandler.search(_searchController.text, kdbx.totalEntry),
@@ -127,7 +141,7 @@ class _PasswordsPageState extends State<PasswordsPage>
   }
 
   Widget _buildMobile() {
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
 
     final mainColor = Theme.of(context).colorScheme.primaryContainer;
 
@@ -429,8 +443,7 @@ class _PasswordItem extends StatefulWidget {
 }
 
 class _PasswordItemState extends State<_PasswordItem>
-    with NavigationHistoryObserver<_PasswordItem>, PrevFocusWindowListener {
-  bool _selected = false;
+    with PrevFocusWindowListener {
   bool _showMenu = false;
 
   @override
@@ -444,40 +457,12 @@ class _PasswordItemState extends State<_PasswordItem>
     setState(() {});
   }
 
-  @override
-  void didNavigationHistory() {
-    if (context.topRoute.name == LookAccountRoute.name ||
-        context.topRoute.name == EditAccountRoute.name) {
-      final selected =
-          context.topRoute.inheritedPathParams.optString("uuid") ==
-          widget.kdbxEntry.uuid.deBase64Uuid;
-
-      if (selected != _selected) {
-        setState(() {
-          _selected = selected;
-        });
-      }
-    } else if (_selected) {
-      setState(() {
-        _selected = false;
-      });
-    }
-  }
-
   void _deletePassword() async {
     final t = I18n.of(context)!;
     if (await showConfirmDialog(title: t.delete, message: t.is_move_recycle)) {
-      final kdbx = KdbxProvider.of(context)!;
+      final kdbx = KdbxProvider.of(context).kdbx!;
       kdbx.deleteEntry(widget.kdbxEntry);
       await kdbxSave(kdbx);
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant _PasswordItem oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.kdbxEntry.uuid != oldWidget.kdbxEntry.uuid) {
-      didNavigationHistory();
     }
   }
 
@@ -492,6 +477,11 @@ class _PasswordItemState extends State<_PasswordItem>
     final t = I18n.of(context)!;
 
     final kdbxEntry = widget.kdbxEntry;
+
+    final selected =
+        KdbxProvider.of(context).selectedKdbxEntry?.uuid ==
+        widget.kdbxEntry.uuid;
+
     return CustomContextMenuRegion<MyContextMenuItem>(
       enabled: isDesktop,
       onItemSelected: (type) {
@@ -535,7 +525,7 @@ class _PasswordItemState extends State<_PasswordItem>
               label: t.edit_account,
               icon: Icons.edit,
               enabled:
-                  context.topRoute.name != EditAccountRoute.name || !_selected,
+                  context.topRoute.name != EditAccountRoute.name || !selected,
               value: MyContextMenuItem.edit(),
             ),
             const MenuDivider(),
@@ -575,7 +565,7 @@ class _PasswordItemState extends State<_PasswordItem>
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
         ),
-        selected: _selected || _showMenu,
+        selected: selected || _showMenu,
         leading: Padding(
           padding: const EdgeInsets.only(top: 6),
           child: KdbxIconWidget(

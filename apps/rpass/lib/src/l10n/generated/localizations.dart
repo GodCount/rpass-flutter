@@ -1339,6 +1339,84 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'编辑分组'**
   String get edit_group;
+
+  /// No description provided for @shortcuts.
+  ///
+  /// In zh, this message translates to:
+  /// **'快捷键'**
+  String get shortcuts;
+
+  /// No description provided for @open.
+  ///
+  /// In zh, this message translates to:
+  /// **'打开'**
+  String get open;
+
+  /// No description provided for @quit.
+  ///
+  /// In zh, this message translates to:
+  /// **'退出'**
+  String get quit;
+
+  /// No description provided for @reset.
+  ///
+  /// In zh, this message translates to:
+  /// **'重置'**
+  String get reset;
+
+  /// No description provided for @shortcut_open_subtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示或隐藏窗口'**
+  String get shortcut_open_subtitle;
+
+  /// No description provided for @shortcut_lock_subtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'锁定并回到验证界面'**
+  String get shortcut_lock_subtitle;
+
+  /// No description provided for @shortcut_autofill_subtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'触发密码页选中项的自动填充.\n注意自动填充是通过模拟键盘输入的会和快捷键冲突,按下后需要快速释放.'**
+  String get shortcut_autofill_subtitle;
+
+  /// 字段
+  ///
+  /// In zh, this message translates to:
+  /// **'填充{field}'**
+  String shortcut_autofill_field(String field);
+
+  /// No description provided for @window_position.
+  ///
+  /// In zh, this message translates to:
+  /// **'窗口位置'**
+  String get window_position;
+
+  /// No description provided for @mouse_position.
+  ///
+  /// In zh, this message translates to:
+  /// **'鼠标位置'**
+  String get mouse_position;
+
+  /// No description provided for @mouse_center.
+  ///
+  /// In zh, this message translates to:
+  /// **'相对鼠标中心'**
+  String get mouse_center;
+
+  /// No description provided for @mouse_screen_center.
+  ///
+  /// In zh, this message translates to:
+  /// **'鼠标光标显示器中心'**
+  String get mouse_screen_center;
+
+  /// No description provided for @prev_position.
+  ///
+  /// In zh, this message translates to:
+  /// **'上次的位置'**
+  String get prev_position;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

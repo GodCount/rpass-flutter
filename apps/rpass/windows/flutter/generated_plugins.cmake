@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  hotkey_manager_windows
   prev_focus_window
   screen_retriever_windows
   tray_manager

@@ -79,7 +79,7 @@ class _AuthRemoteFsState extends State<AuthRemoteFsPage> {
   void initState() {
     _formData = _config.toAuthFields();
 
-    final kdbx = KdbxProvider.of(context);
+    final kdbx = KdbxProvider.of(context).kdbx;
 
     if (widget.type == AuthRemoteRouteType.sync && kdbx != null) {
       _syncAccountEntry = kdbx.syncAccountEntry;
@@ -89,7 +89,12 @@ class _AuthRemoteFsState extends State<AuthRemoteFsPage> {
         _formData = _config.toAuthFields();
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) async {
-          if (await showConfirmDialog(title: "选择账号", message: "从数据库中选择账号")) {
+          final t = I18n.of(context)!;
+
+          if (await showConfirmDialog(
+            title: t.select_account,
+            message: t.selected_sync_account_subtitle,
+          )) {
             _syncAccountEntry = await KdbxEntrySelectorDialog.openDialog(
               context,
               value: _syncAccountEntry,
@@ -110,7 +115,7 @@ class _AuthRemoteFsState extends State<AuthRemoteFsPage> {
   }
 
   Future<void> _saveLoginInfo(RemoteClientConfig config) async {
-    final kdbx = KdbxProvider.of(context);
+    final kdbx = KdbxProvider.of(context).kdbx;
     if (kdbx == null) return;
 
     if (_syncAccountEntry == null) {

@@ -44,6 +44,7 @@ final List<String> childRouteNames = [
   ExportAccountRoute.name,
   SyncAccountRoute.name,
   OtherSettingsRoute.name,
+  ShortcutsSettingsRoute.name,
 ];
 
 class SettingsPage extends StatefulWidget {
@@ -227,7 +228,7 @@ class _SettingsPageState extends State<SettingsPage>
                     : null,
                 onTap: () async {
                   try {
-                    final kdbx = KdbxProvider.of(context)!;
+                    final kdbx = KdbxProvider.of(context).kdbx!;
 
                     final enableBiometric = !store.settings.enableBiometric;
                     await biometric.updateCredentials(
@@ -306,6 +307,7 @@ class _SettingsPageState extends State<SettingsPage>
               },
             ),
           ]),
+
           _cardColumn([
             Padding(
               padding: const EdgeInsets.all(12),
@@ -366,6 +368,15 @@ class _SettingsPageState extends State<SettingsPage>
                 );
               },
             ),
+            if (kIsDesktop)
+              ListTile(
+                title: Text(t.shortcuts),
+                selected: childRouteName == ShortcutsSettingsRoute.name,
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  context.router.platformNavigate(ShortcutsSettingsRoute());
+                },
+              ),
             ListTile(
               shape: shape,
               title: Text(t.more_settings),

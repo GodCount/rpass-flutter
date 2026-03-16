@@ -70,7 +70,7 @@ class _ExportAccountPageState extends State<ExportAccountPage>
     )) {
       if (!(await operateConfirm())) return;
 
-      final kdbx = KdbxProvider.of(context)!;
+      final kdbx = KdbxProvider.of(context).kdbx!;
       try {
         final filepath = await SimpleFile.saveText(
           data:
@@ -96,7 +96,7 @@ class _ExportAccountPageState extends State<ExportAccountPage>
     )) {
       if (!(await operateConfirm())) return;
 
-      final kdbx = KdbxProvider.of(context)!;
+      final kdbx = KdbxProvider.of(context).kdbx!;
       try {
         final result = jsonToCsv(
           adapter.export(

@@ -57,7 +57,7 @@ class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
     builder: (context, data) {
       final args = data.argsAs<_LookAccountArgs>(
         orElse: () {
-          final kdbx = KdbxProvider.of(context)!;
+          final kdbx = KdbxProvider.of(context).kdbx!;
           final readOnly = data.queryParams.getBool("readOnly", false);
           final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
           final kdbxEntry = uuid != null ? kdbx.findEntryByUuid(uuid) : null;
@@ -136,7 +136,7 @@ class _LookAccountPageState extends State<LookAccountPage>
   }
 
   void _getAppInfo() {
-    if (isMobile && packageName != null && packageName!.isNotEmpty) {
+    if (kIsMobile && packageName != null && packageName!.isNotEmpty) {
       _appInfoFuture = InstalledAppsInstance.instance.getAppInfo(packageName!);
     }
   }
@@ -214,7 +214,7 @@ class _LookAccountPageState extends State<LookAccountPage>
           title: Text(t.clone),
           leading: const Icon(Icons.copy),
           onTap: onAutoPop(() async {
-            final kdbx = KdbxProvider.of(context)!;
+            final kdbx = KdbxProvider.of(context).kdbx!;
 
             final clone = widget.kdbxEntry.clone(kdbx.virtualGroup);
 
@@ -471,7 +471,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                   icon: const Icon(Icons.ads_click),
                 ),
               ),
-            if (isMobile && packageName != null && packageName!.isNotEmpty)
+            if (kIsMobile && packageName != null && packageName!.isNotEmpty)
               FutureBuilder(
                 future: _appInfoFuture,
                 builder: (context, snapshot) {
@@ -780,7 +780,7 @@ class _LookAccountPageState extends State<LookAccountPage>
               heroTag: const ValueKey("look_account_float"),
               onPressed: () async {
                 if (kdbxEntry.isInRecycleBin()) {
-                  final kdbx = KdbxProvider.of(context)!;
+                  final kdbx = KdbxProvider.of(context).kdbx!;
                   kdbx.restoreObject(kdbxEntry);
                   if (await kdbxSave(kdbx)) {
                     context.router.pop();
@@ -811,7 +811,7 @@ class _LookAccountPageState extends State<LookAccountPage>
   void _deleteAccount() async {
     final t = I18n.of(context)!;
     if (await showConfirmDialog(title: t.delete, message: t.is_move_recycle)) {
-      final kdbx = KdbxProvider.of(context)!;
+      final kdbx = KdbxProvider.of(context).kdbx!;
       kdbx.deleteEntry(widget.kdbxEntry);
       if (await kdbxSave(kdbx)) {
         context.router.pop();

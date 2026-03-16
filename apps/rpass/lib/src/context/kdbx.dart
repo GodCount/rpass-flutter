@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../kdbx/kdbx.dart';
+import '../util/common.dart';
 
 class KdbxProvider extends StatefulWidget {
   const KdbxProvider({super.key, required this.child});
@@ -30,23 +31,45 @@ class KdbxProvider extends StatefulWidget {
     return kdbxProvider!;
   }
 
-  static void setKdbx(BuildContext context, Kdbx? kdbx) {
-    _ofState(context).setKdbx(kdbx);
-  }
-
-  static Kdbx? of(BuildContext context) {
-    return _ofState(context).kdbx;
+  static KdbxProviderState of(BuildContext context) {
+    return _ofState(context);
   }
 
   @override
   State<KdbxProvider> createState() => KdbxProviderState();
 }
 
-class KdbxProviderState extends State<KdbxProvider> {
+mixin KdbxProviderListener {
+  void onKdbxChanged(Kdbx? kdbx) {}
+
+  void onSelectedKdbxEntryChanged(KdbxEntry? kdbxEntry) {}
+}
+
+class KdbxProviderState extends State<KdbxProvider>
+    with SimpleObserverListener<KdbxProviderListener> {
   Kdbx? kdbx;
+  KdbxEntry? selectedKdbxEntry;
 
   void setKdbx(Kdbx? kdbx) {
     this.kdbx = kdbx;
+    selectedKdbxEntry = null;
+    emit((listener) {
+      listener.onKdbxChanged(kdbx);
+      listener.onSelectedKdbxEntryChanged(null);
+    });
+  }
+
+  void setSelectedKdbxEntry(KdbxEntry? kdbxEntry) {
+    if (kdbxEntry == selectedKdbxEntry) return;
+
+    selectedKdbxEntry = kdbxEntry;
+    emit((listener) => listener.onSelectedKdbxEntryChanged(kdbxEntry));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    removeAllListener();
   }
 
   @override

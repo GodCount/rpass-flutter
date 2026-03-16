@@ -44,7 +44,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
   @override
   void initState() {
     Future.delayed(Duration.zero, () {
-      final kdbx = KdbxProvider.of(context)!;
+      final kdbx = KdbxProvider.of(context).kdbx!;
       _historyMaxItems = kdbx.historyMaxItems;
       _historyMaxSize = _b2mb(kdbx.historyMaxSize).toInt();
       setState(() {});
@@ -61,7 +61,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
   }
 
   void _save() async {
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
     kdbx.historyMaxItems = _historyMaxItems;
     kdbx.historyMaxSize = _mb2b(_historyMaxSize).toInt();
     if (await kdbxSave(kdbx)) {

@@ -53,7 +53,7 @@ class SyncKdbxController with ChangeNotifier {
       _isSyncing = true;
       notifyListeners();
 
-      final kdbx = KdbxProvider.of(context)!;
+      final kdbx = KdbxProvider.of(context).kdbx!;
 
       await init(kdbx);
 

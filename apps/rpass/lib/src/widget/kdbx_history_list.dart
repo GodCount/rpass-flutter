@@ -91,7 +91,7 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
     //   confirm: t.delete,
     // )) {
     //   if (widget.kdbxEntry.history.remove(entry)) {
-    //     kdbxSave(KdbxProvider.of(context)!);
+    //     kdbxSave(KdbxProvider.of(context).kdbx!);
     //     setState(() {});
     //   }
     // }

@@ -6,13 +6,13 @@ import 'package:logging/logging.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'src/context/biometric.dart';
-import 'src/i18n.dart';
 import 'src/log.dart';
 import 'src/native/channel.dart';
 import 'src/rpass.dart';
 import 'src/app.dart';
 import 'src/store/index.dart';
 import 'src/tray.dart';
+import 'src/util/common.dart';
 import 'src/widget/error_widget.dart';
 
 final _logger = Logger("main");
@@ -23,7 +23,7 @@ void main() async {
 
   await Log.setupLogging(true);
 
-  if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+  if (kIsDesktop) {
     await windowManager.ensureInitialized();
     await windowManager.setPreventClose(true);
 
@@ -37,7 +37,7 @@ void main() async {
   }
 
   // TODO！桌面端未进行测试
-  if (Platform.isAndroid || Platform.isIOS) {
+  if (kIsMobile) {
     await BiometricState.initCanAuthenticate();
   }
 
@@ -51,14 +51,11 @@ void main() async {
     await RpassInfo.init();
     await Store.instance.loadStore();
 
-    I18n.setGlobalMyLocale(
-      await I18n.delegate.load(Store.instance.settings.locale ?? Locale("zh")),
-    );
-
-    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+    if (kIsDesktop) {
       await systemTray.ensureInitialized();
       await windowManager.setTitle(RpassInfo.appName);
     }
+
   } catch (e, s) {
     _logger.severe("init fail!", e, s);
     return runApp(

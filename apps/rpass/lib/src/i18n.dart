@@ -17,14 +17,4 @@ class I18n {
       MyLocalizations.localizationsDelegates;
 
   static const List<Locale> supportedLocales = MyLocalizations.supportedLocales;
-
-  static MyLocalizations? _t;
-
-  static MyLocalizations? get t => _t;
-
-  static void setGlobalMyLocale(MyLocalizations locale) {
-    _t = locale;
-  }
-
-
 }

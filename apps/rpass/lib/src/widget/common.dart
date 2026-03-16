@@ -215,7 +215,7 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
 
     return AlertDialog(
       title: Row(
@@ -338,7 +338,7 @@ class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
 
   void _searchAccounts() {
     _totalEntry.clear();
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
 
     _totalEntry.addAll(
       _kbdxSearchHandler.search(_searchController.text, kdbx.totalEntry),

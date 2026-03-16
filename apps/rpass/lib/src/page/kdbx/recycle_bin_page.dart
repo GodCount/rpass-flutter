@@ -47,7 +47,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
   KdbxObject? _showMenu;
 
   void _save() async {
-    await kdbxSave(KdbxProvider.of(context)!);
+    await kdbxSave(KdbxProvider.of(context).kdbx!);
   }
 
   void _deleteWarnDialog(VoidCallback confirmCallback) async {
@@ -109,7 +109,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
 
   void _restoreObjects(List<KdbxObject> values) {
     if (values.isEmpty) return;
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
     for (var item in values) {
       kdbx.restoreObject(item);
     }
@@ -118,7 +118,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
 
   void _deletePermanentlys(List<KdbxObject> values) {
     if (values.isEmpty) return;
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
     for (var item in values) {
       kdbx.deletePermanently(item);
     }
@@ -141,7 +141,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
 
   @override
   void initState() {
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
     kdbx.addListener(_update);
     _removeKdbxListener = () => kdbx.removeListener(_update);
     super.initState();
@@ -149,7 +149,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
 
   void _update() {
     setState(() {
-      final kdbx = KdbxProvider.of(context)!;
+      final kdbx = KdbxProvider.of(context).kdbx!;
       final allObjects = kdbx.recycleBinObjects;
       _selecteds.removeWhere(((item) => !allObjects.contains(item)));
     });
@@ -167,7 +167,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
 
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
 
     return Scaffold(
       appBar: AppBar(

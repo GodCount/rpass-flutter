@@ -61,39 +61,6 @@ class RevertContextMenuItem extends MyContextMenuItem {
 typedef BuildMenuItemValue<T> = T Function(KdbxKey key);
 
 mixin class _KdbxKeyContextMenuItem {
-  static String _kdbxKey2I18n(BuildContext context, String key) {
-    final t = I18n.of(context)!;
-    switch (key) {
-      case KdbxKeyCommon.KEY_TITLE:
-        return t.title;
-      case KdbxKeyCommon.KEY_URL:
-        return t.domain;
-      case KdbxKeyCommon.KEY_USER_NAME:
-        return t.account;
-      case KdbxKeyCommon.KEY_EMAIL:
-        return t.email;
-      case KdbxKeyCommon.KEY_PASSWORD:
-        return t.password;
-      case KdbxKeyCommon.KEY_OTP:
-        return t.otp;
-      case KdbxKeyCommon.KEY_NOTES:
-        return t.description;
-      case KdbxKeySpecial.KEY_AUTO_TYPE:
-        return t.fill_sequence;
-      case KdbxKeyURLS.KEY_URL1:
-        return t.domain_num(1);
-      case KdbxKeyURLS.KEY_URL2:
-        return t.domain_num(2);
-      case KdbxKeyURLS.KEY_URL3:
-        return t.domain_num(3);
-      case KdbxKeyURLS.KEY_URL4:
-        return t.domain_num(4);
-      case KdbxKeyURLS.KEY_URL5:
-        return t.domain_num(5);
-      default:
-        return key;
-    }
-  }
 
   static List<MenuItem<T>> _buildKdbxKeyMenuItem<T>(
     BuildContext context,
@@ -104,7 +71,7 @@ mixin class _KdbxKeyContextMenuItem {
     return [
       ...KdbxKeyCommon.excludeURL.map(
         (item) => MenuItem(
-          label: _kdbxKey2I18n(context, item.key),
+          label: item.key.fromKdbxKeyToI18n(context),
           enabled: kdbxEntry.getNonNullString(item).isNotEmpty,
           value: buildValue(item),
         ),
@@ -115,7 +82,7 @@ mixin class _KdbxKeyContextMenuItem {
               items: [KdbxKeyCommon.URL, ...kdbxEntry.moreUrlsKeys]
                   .map(
                     (item) => MenuItem(
-                      label: _kdbxKey2I18n(context, item.key),
+                      label: item.key.fromKdbxKeyToI18n(context),
                       enabled: kdbxEntry.getNonNullString(item).isNotEmpty,
                       value: buildValue(item),
                     ),
@@ -123,7 +90,7 @@ mixin class _KdbxKeyContextMenuItem {
                   .toList(),
             )
           : MenuItem(
-              label: _kdbxKey2I18n(context, KdbxKeyCommon.KEY_URL),
+              label: KdbxKeyCommon.KEY_URL.fromKdbxKeyToI18n(context),
               enabled: kdbxEntry.getNonNullString(KdbxKeyCommon.URL).isNotEmpty,
               value: buildValue(KdbxKeyCommon.URL),
             ),
@@ -133,7 +100,7 @@ mixin class _KdbxKeyContextMenuItem {
         items: kdbxEntry.customEntries
             .map(
               (item) => MenuItem(
-                label: _kdbxKey2I18n(context, item.key.key),
+                label: item.key.key.fromKdbxKeyToI18n(context),
                 enabled: kdbxEntry.getNonNullString(item.key).isNotEmpty,
                 value: buildValue(item.key),
               ),

@@ -50,7 +50,7 @@ class _SelectIconPageState extends State<SelectIconPage> {
 
     final mediaQuery = MediaQuery.of(context);
     final width = mediaQuery.size.width;
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
 
     return Scaffold(
       appBar: AppBar(title: Text(t.select_icon)),

@@ -36,7 +36,7 @@ class ManageGroupEntryRoute extends PageRouteInfo<_ManageGroupEntryArgs> {
     builder: (context, data) {
       final args = data.argsAs<_ManageGroupEntryArgs>(
         orElse: () {
-          final kdbx = KdbxProvider.of(context)!;
+          final kdbx = KdbxProvider.of(context).kdbx!;
           final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
           final kdbxGroup = uuid != null ? kdbx.findGroupByUuid(uuid) : null;
 
@@ -79,7 +79,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
 
   @override
   void initState() {
-    final kdbx = KdbxProvider.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
 
     _kbdxSearchHandler.setFieldOther(kdbx.fieldStatistic.customFields);
 
@@ -146,7 +146,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
   void _delete(List<KdbxEntry> kdbxEntrys) async {
     final t = I18n.of(context)!;
     if (await showConfirmDialog(title: t.delete, message: t.is_move_recycle)) {
-      final kdbx = KdbxProvider.of(context)!;
+      final kdbx = KdbxProvider.of(context).kdbx!;
       for (var item in kdbxEntrys) {
         kdbx.deleteEntry(item);
       }
@@ -159,7 +159,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
   void _move(List<KdbxEntry> kdbxEntrys) async {
     final group = await showGroupSelectorDialog(widget.kdbxGroup);
     if (group != null) {
-      final kdbx = KdbxProvider.of(context)!;
+      final kdbx = KdbxProvider.of(context).kdbx!;
       for (var item in kdbxEntrys) {
         kdbx.kdbxFile.move(item, group);
       }

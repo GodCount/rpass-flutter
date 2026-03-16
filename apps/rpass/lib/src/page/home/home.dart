@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -41,7 +39,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage>
-    with AutomaticKeepAliveClientMixin, BackgroundLock {
+    with AutomaticKeepAliveClientMixin {
   final GlobalKey _globalKey = GlobalKey();
 
   final List<PageRouteInfo> _routes = [
@@ -60,7 +58,7 @@ class _HomePageState extends State<HomePage>
     super.initState();
     Store.instance.settings.addListener(_settingsListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Store.instance.syncKdbx.init(KdbxProvider.of(context)!);
+      Store.instance.syncKdbx.init(KdbxProvider.of(context).kdbx!);
       _settingsListener();
     });
   }
@@ -251,79 +249,5 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
         ],
       ),
     );
-  }
-}
-
-// 后台触发锁定
-mixin BackgroundLock on State<HomePage> {
-  late SimpleSerialTimerTask _serialTimerTask;
-
-  late final _observer = CallbackBindingObserver(
-    didChangeAppLifecycleState: _didChangeAppLifecycleState,
-  );
-
-  @override
-  void initState() {
-    WidgetsBinding.instance.addObserver(_observer);
-    super.initState();
-    bool verificationStart = false;
-    _serialTimerTask = SimpleSerialTimerTask(
-      TaskInfo(Duration.zero, () async {
-        debugPrint("enter verificatino $verificationStart");
-        if (verificationStart) return;
-        verificationStart = true;
-        await context.router.push(VerifyOwnerRoute());
-        verificationStart = false;
-      }),
-      TaskInfo(Duration.zero, () {
-        debugPrint("close kdbx, locked");
-        KdbxProvider.setKdbx(context, null);
-        context.router.replaceAll([LoadKdbxRoute()]);
-      }),
-    );
-  }
-
-  void _didChangeAppLifecycleState(AppLifecycleState state) {
-    int status = -1;
-
-    if (Platform.isMacOS || Platform.isWindows) {}
-
-    switch (state) {
-      case AppLifecycleState.inactive:
-        if (Platform.isMacOS || Platform.isWindows) {
-          status = 1;
-        }
-        break;
-      case AppLifecycleState.paused:
-        if (Platform.isAndroid || Platform.isIOS) {
-          status = 1;
-        }
-        break;
-      case AppLifecycleState.resumed:
-        status = 0;
-        break;
-      case AppLifecycleState.hidden:
-      case AppLifecycleState.detached:
-        break;
-    }
-
-    if (status == 1) {
-      if (Store.instance.settings.lockDelay != null) {
-        _serialTimerTask.task1!.duration = Store.instance.settings.lockDelay!;
-        _serialTimerTask.task2!.duration = Store.instance.settings.lockDelay!;
-        debugPrint("start timer lock");
-        _serialTimerTask.start();
-      }
-    } else if (status == 0) {
-      debugPrint("cacnel timer lock");
-      _serialTimerTask.cancel();
-    }
-  }
-
-  @override
-  void dispose() {
-    _serialTimerTask.cancel();
-    WidgetsBinding.instance.removeObserver(_observer);
-    super.dispose();
   }
 }

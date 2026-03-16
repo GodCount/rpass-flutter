@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
+import 'common.dart';
+
 export 'package:file_picker/file_picker.dart' show FileType;
 
 class CancelException implements Exception {}
@@ -14,8 +16,7 @@ class SimpleFile {
   static Future<Directory> applicationDocumentsDirectory =
       getApplicationDocumentsDirectory();
 
-  static final bool _ignoreBytes =
-      Platform.isWindows || Platform.isMacOS || Platform.isLinux;
+  static final bool _ignoreBytes = kIsDesktop;
 
   static Future<String> saveFile({
     required Uint8List data,

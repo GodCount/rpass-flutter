@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:kdbx/kdbx.dart' hide KdbxException, KdbxKeyCommon;
 import 'package:uuid/uuid.dart';
 
+import '../i18n.dart';
 import '../native/platform/android.dart';
 import '../rpass.dart';
 import '../util/one_time_password.dart';
@@ -751,4 +752,46 @@ extension KdbxUuidCommon on KdbxUuid {
 extension KdbxUuidString on String {
   KdbxUuid get kdbxUuid =>
       KdbxUuid.fromBytes(Uint8List.fromList(Uuid.parse(this)));
+
+  String fromKdbxKeyToI18n(BuildContext context) {
+    final t = I18n.of(context)!;
+    switch (this) {
+      case KdbxKeyCommon.KEY_TITLE:
+        return t.title;
+      case KdbxKeyCommon.KEY_URL:
+        return t.domain;
+      case KdbxKeyURLS.KEY_URL1:
+        return t.domain_num(1);
+      case KdbxKeyURLS.KEY_URL2:
+        return t.domain_num(2);
+      case KdbxKeyURLS.KEY_URL3:
+        return t.domain_num(3);
+      case KdbxKeyURLS.KEY_URL4:
+        return t.domain_num(4);
+      case KdbxKeyURLS.KEY_URL5:
+        return t.domain_num(5);
+      case KdbxKeyCommon.KEY_USER_NAME:
+        return t.account;
+      case KdbxKeyCommon.KEY_EMAIL:
+        return t.email;
+      case KdbxKeyCommon.KEY_PASSWORD:
+        return t.password;
+      case KdbxKeyCommon.KEY_OTP:
+        return t.otp;
+      case KdbxKeyCommon.KEY_NOTES:
+        return t.description;
+      case KdbxKeySpecial.KEY_AUTO_TYPE:
+        return t.fill_sequence;
+      case KdbxKeySpecial.KEY_AUTO_FILL_PACKAGE_NAME:
+        return t.auto_fill_match_app;
+      case KdbxKeySpecial.KEY_TAGS:
+        return t.label;
+      case KdbxKeySpecial.KEY_ATTACH:
+        return t.attachment;
+      case KdbxKeySpecial.KEY_EXPIRES:
+        return t.expires_time;
+      default:
+        return this;
+    }
+  }
 }
