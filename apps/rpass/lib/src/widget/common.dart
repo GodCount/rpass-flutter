@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:pretty_qr_code/pretty_qr_code.dart';
 
 import '../context/kdbx.dart';
 import '../i18n.dart';
@@ -549,7 +551,74 @@ class ImageFileStringState extends State<ImageFileString> {
       file,
       width: widget.width,
       height: widget.height,
-      errorBuilder: widget.error != null ? (_, __, ___) => widget.error! : null,
+      errorBuilder: widget.error != null ? (_, _, _) => widget.error! : null,
+    );
+  }
+}
+
+class QrCodeDialog extends StatefulWidget {
+  const QrCodeDialog({
+    super.key,
+    required this.getQrData,
+    required this.refreshDuration,
+  });
+
+  final ValueGetter<Future<String>> getQrData;
+  final Duration refreshDuration;
+
+  static Future<void> openDialog(
+    BuildContext context, {
+    required ValueGetter<Future<String>> getQrData,
+    required Duration refreshDuration,
+  }) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return QrCodeDialog(
+          getQrData: getQrData,
+          refreshDuration: refreshDuration,
+        );
+      },
+    );
+  }
+
+  @override
+  State<QrCodeDialog> createState() => _QrCodeDialogState();
+}
+
+class _QrCodeDialogState extends State<QrCodeDialog> {
+  String? _qrCode;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+
+    refresh();
+    _timer = Timer.periodic(widget.refreshDuration, refresh);
+  }
+
+  void refresh([Timer? timer]) async {
+    _qrCode = await widget.getQrData();
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _timer?.cancel();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = I18n.of(context)!;
+
+    return AlertDialog(
+      title: Text("data"),
+      content: _qrCode != null
+          ? PrettyQrView.data(data: _qrCode!)
+          : Text("data"),
     );
   }
 }

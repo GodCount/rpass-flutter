@@ -5,19 +5,10 @@ import 'package:lan_fill_server/src/model/device_info.dto.dart';
 
 class TIM extends InteractiveManipulation {
   @override
-  Future<bool> validateFingerprint(
-    String fingerprint,
-    String? deviceName,
-  ) async {
-    print("${deviceName} ==> ${fingerprint}");
-    return false;
-  }
-  
-  @override
   void onCilentClose() {
     // TODO: implement onCilentClose
   }
-  
+
   @override
   void onServerClose() {
     // TODO: implement onServerClose
@@ -28,9 +19,17 @@ class TIM extends InteractiveManipulation {
     // TODO: implement remoteAutofill
     throw UnimplementedError();
   }
+
+  @override
+  Future<bool> validateFingerprint(
+    String fingerprint,
+    String devicePlatform,
+    String? deviceName,
+  ) {
+    // TODO: implement validateFingerprint
+    throw UnimplementedError();
+  }
 }
-
-
 
 Future<void> main() async {
   final server = LanFillServer(

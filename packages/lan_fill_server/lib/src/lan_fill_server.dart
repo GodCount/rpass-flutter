@@ -282,6 +282,7 @@ class LanFillServer {
     final deviceName = req.headers[HeadersConstant.deviceName]?.first;
     final deviceFingerprint =
         req.headers[HeadersConstant.deviceFingerprint]?.first;
+    final devicePlatform = req.headers[HeadersConstant.devicePlatform]?.first;
 
     if (deviceFingerprint == null) {
       return Response.unauthorized();
@@ -289,6 +290,7 @@ class LanFillServer {
 
     if (!(await interactiveManipulation.validateFingerprint(
       deviceFingerprint,
+      devicePlatform ?? "unknown",
       deviceName,
     ))) {
       return Response.forbidden();

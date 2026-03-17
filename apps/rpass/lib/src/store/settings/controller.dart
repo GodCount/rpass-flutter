@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lan_fill_server/lan_fill_server.dart';
 
 import '../../util/fetch_favicon.dart';
 import './service.dart';
@@ -21,6 +22,8 @@ class SettingsController with ChangeNotifier {
   late bool _manualSelectFillItem;
   late bool _startFocusSreach;
   FaviconSource? _faviconSource;
+  late StoredSecurityContext _securityContext;
+  late List<String> _trustFingerprints;
 
   ThemeMode get themeMode => _themeMode;
   Locale? get locale => _locale;
@@ -34,6 +37,8 @@ class SettingsController with ChangeNotifier {
   bool get manualSelectFillItem => _manualSelectFillItem;
   bool get startFocusSreach => _startFocusSreach;
   FaviconSource? get faviconSource => _faviconSource;
+  StoredSecurityContext get securityContext => _securityContext;
+  List<String> get trustFingerprints => _trustFingerprints;
 
   Future<void> setThemeMode(ThemeMode? mode) async {
     if (mode == null) return;
@@ -161,6 +166,24 @@ class SettingsController with ChangeNotifier {
     await _settingsService.setFaviconSource(value);
   }
 
+  Future<void> setStoredSecurityContext(StoredSecurityContext? value) async {
+    if (value == _securityContext) return;
+
+    _securityContext = value ?? generateSecurityContext();
+
+    notifyListeners();
+
+    await _settingsService.setStoredSecurityContext(_securityContext);
+  }
+
+  Future<void> setTrustFingerprints(List<String> value) async {
+    _trustFingerprints = value;
+
+    notifyListeners();
+
+    await _settingsService.setTrustFingerprints(value);
+  }
+
   Future<void> init() async {
     shortcutsStore = ShortcutsStore(
       settingsService: _settingsService,
@@ -180,6 +203,8 @@ class SettingsController with ChangeNotifier {
     _manualSelectFillItem = await _settingsService.getManualSelectFillItem();
     _startFocusSreach = await _settingsService.getStartFocusSreach();
     _faviconSource = await _settingsService.getFaviconSource();
+    _securityContext = await _settingsService.getStoredSecurityContext();
+    _trustFingerprints = await _settingsService.getTrustFingerprints();
 
     await shortcutsStore.init();
 

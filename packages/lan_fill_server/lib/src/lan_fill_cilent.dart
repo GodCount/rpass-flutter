@@ -159,6 +159,7 @@ class LanFillCilent {
       /// 用户交互,验证陌生设备
       if (!(await interactiveManipulation.validateFingerprint(
         deviceFingerprint ?? certificateHash,
+        _serverPlatform,
         deviceName,
       ))) {
         return;

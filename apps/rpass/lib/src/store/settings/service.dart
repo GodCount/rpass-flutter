@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
+import 'package:lan_fill_server/lan_fill_server.dart';
 
 import '../../util/fetch_favicon.dart';
 import '../shared_preferences/index.dart';
@@ -162,6 +163,42 @@ class SettingsService with SharedPreferencesService {
       "shortcuts_open_app_alignment",
       ShortcutsOpenAppAlignment.values.indexOf(value),
     );
+  }
+
+  Future<StoredSecurityContext> getStoredSecurityContext() async {
+    final jsonStr = await getString("stored_security_context");
+
+    StoredSecurityContext? context;
+
+    if (jsonStr != null) {
+      try {
+        context = StoredSecurityContext.formJson(jsonDecode(jsonStr));
+      } catch (e) {
+        debugPrint("$e");
+      }
+    }
+
+    if (context == null) {
+      context = generateSecurityContext();
+      setStoredSecurityContext(context);
+    }
+    return context;
+  }
+
+  Future<bool> setStoredSecurityContext(StoredSecurityContext? context) {
+    return context != null
+        ? setString("stored_security_context", jsonEncode(context.toJson()))
+        : remove("stored_security_context");
+  }
+
+  Future<List<String>> getTrustFingerprints() async {
+    return await getStringList("trust_fingerprints") ?? [];
+  }
+
+  Future<bool> setTrustFingerprints(List<String>? list) async {
+    return list != null
+        ? setStringList("trust_fingerprints", list)
+        : remove("trust_fingerprints");
   }
 
   @override

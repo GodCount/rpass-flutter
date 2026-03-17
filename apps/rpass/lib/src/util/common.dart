@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -277,4 +278,48 @@ mixin SimpleObserverListener<T> {
   void removeAllListener() {
     _listeners.clear();
   }
+}
+
+class SimpleAsyncQueue {
+  final _queue = <Future<void> Function()>[];
+  bool _isProcessing = false;
+
+  Future<T> add<T>(Future<T> Function() task) {
+    final completer = Completer<T>();
+
+    Future<void> wrappedTask() async {
+      try {
+        final result = await task();
+        completer.complete(result);
+      } catch (e, stackTrace) {
+        completer.completeError(e, stackTrace);
+      }
+    }
+
+    _queue.add(wrappedTask);
+    _processQueue();
+
+    return completer.future;
+  }
+
+  void _processQueue() async {
+    if (_isProcessing || _queue.isEmpty) return;
+
+    _isProcessing = true;
+
+    while (_queue.isNotEmpty) {
+      final task = _queue.removeAt(0);
+      await task(); // 等待当前任务完成
+    }
+
+    _isProcessing = false;
+  }
+
+  void clear() {
+    _queue.clear();
+  }
+
+  int get length => _queue.length;
+
+  bool get isProcessing => _isProcessing;
 }
