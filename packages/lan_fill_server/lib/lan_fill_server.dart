@@ -4,7 +4,9 @@
 library;
 
 
+export 'src/interactive_manipulation.dart';
 export 'src/util/security_helper.dart';
+export 'src/model/model.dart';
 
 
 export 'src/lan_fill_server.dart';

@@ -7,9 +7,11 @@ import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 
 import 'interactive_manipulation.dart';
+import 'model/autofill.dto.dart';
 import 'model/device_info.dto.dart';
 import 'model/register.dto.dart';
 import 'util/address.dart';
+import 'util/common.dart';
 import 'util/constant.dart';
 import 'util/encrypt_utils.dart';
 import 'util/security_helper.dart';
@@ -41,10 +43,12 @@ class LanFillCilent {
   Dio? _dio;
 
   bool _connecting = false;
-
   bool get connecting => _dio != null && _connecting;
 
   Timer? _heartbeatTimer;
+
+  String _serverPlatform = "unknown";
+  String get serverPlatform => _serverPlatform;
 
   Dio _getDio() {
     assert(_dio != null, "You need to run registration before doing this");
@@ -66,29 +70,28 @@ class LanFillCilent {
     final address = await matchSameDomainAddress(registerDto.addres);
     final key = utf8.encode(registerDto.code);
 
+    final baseOptions = BaseOptions(
+      sendTimeout: const Duration(seconds: 1),
+      contentType: "application/octet-stream",
+      responseType: ResponseType.bytes,
+      headers: {
+        HttpHeaders.userAgentHeader:
+            "Rpass/${option.deviceInfo.appVersion} LanFillCilent/1.0.0",
+        HeadersConstant.deviceName: option.deviceInfo.deviceName,
+        HeadersConstant.deviceFingerprint: option.deviceInfo.fingerprint,
+        HeadersConstant.devicePlatform: Platform.operatingSystem,
+      },
+      validateStatus: (status) => status != null,
+    );
+
     /// 创建一个普通客户端
     /// 从服务器请求加密证书
-    final dio =
-        Dio(
-            BaseOptions(
-              sendTimeout: const Duration(seconds: 1),
-              contentType: "application/octet-stream",
-              responseType: ResponseType.bytes,
-              headers: {
-                HttpHeaders.userAgentHeader:
-                    "Rpass/${option.deviceInfo.appVersion} LanFillCilent/1.0.0",
-                HeadersConstant.deviceName: option.deviceInfo.deviceName,
-                HeadersConstant.deviceFingerprint:
-                    option.deviceInfo.fingerprint,
-              },
-              validateStatus: (status) => status != null,
-            ),
-          )
-          ..httpClientAdapter = IOHttpClientAdapter(
-            createHttpClient: () => HttpClient()
-              ..badCertificateCallback =
-                  (X509Certificate certificate, String host, int port) => true,
-          );
+    final dio = Dio(baseOptions)
+      ..httpClientAdapter = IOHttpClientAdapter(
+        createHttpClient: () => HttpClient()
+          ..badCertificateCallback =
+              (X509Certificate certificate, String host, int port) => true,
+      );
 
     ///
     /// 判断哪些ip地址能和服务器通讯
@@ -146,6 +149,9 @@ class LanFillCilent {
         HeadersConstant.deviceFingerprint,
       );
 
+      _serverPlatform =
+          res.headers.value(HeadersConstant.devicePlatform) ?? _serverPlatform;
+
       final certificateHash = calculateHashOfCertificate(
         decryptData["certificate"],
       );
@@ -168,17 +174,11 @@ class LanFillCilent {
       ///
       /// 创建安全客户端
       _dio = Dio(
-        BaseOptions(
+        baseOptions.copyWith(
           baseUrl: "https://$ip:${registerDto.port}",
           sendTimeout: const Duration(seconds: 3),
           contentType: "application/json",
           responseType: ResponseType.json,
-          headers: {
-            HttpHeaders.userAgentHeader:
-                "Rpass/${option.deviceInfo.appVersion} LanFillCilent/1.0.0",
-            HeadersConstant.deviceName: option.deviceInfo.deviceName,
-            HeadersConstant.deviceFingerprint: option.deviceInfo.fingerprint,
-          },
         ),
       );
 
@@ -218,5 +218,17 @@ class LanFillCilent {
 
     _heartbeatTimer = Timer(option.heartbeatDuration, heartbeat);
     return _connecting;
+  }
+
+  Future<void> autofill(AutofillDto dto) async {
+    final dio = _getDio();
+
+    if (!isDesktopPlatform(_serverPlatform)) {
+      throw Exception(
+        "server platform $_serverPlatform, not supported autofill",
+      );
+    }
+
+    final res = await dio.post("/api/autofill", data: dto.toJson());
   }
 }

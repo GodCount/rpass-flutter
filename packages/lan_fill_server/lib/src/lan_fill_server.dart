@@ -6,18 +6,20 @@ import 'package:relic/relic.dart';
 
 import 'package:otp/otp.dart';
 import 'interactive_manipulation.dart';
+import 'model/autofill.dto.dart';
 import 'model/device_info.dto.dart';
 import 'model/register.dto.dart';
 import 'util/address.dart';
+import 'util/common.dart';
 import 'util/constant.dart';
 import 'util/encrypt_utils.dart';
 import 'util/security_helper.dart';
 
-class MyIOAdapter extends IOAdapter {
-  MyIOAdapter(super.server);
+class _MyIOAdapter extends IOAdapter {
+  _MyIOAdapter(super.server);
 
-  static Future<MyIOAdapter> bind(SecurityContext context) async {
-    return MyIOAdapter(
+  static Future<_MyIOAdapter> bind(SecurityContext context) async {
+    return _MyIOAdapter(
       await HttpServer.bindSecure(
         InternetAddress.anyIPv4,
         0,
@@ -189,7 +191,7 @@ class LanFillServer {
       );
     }
 
-    _server = await _app.run(() => MyIOAdapter.bind(_securityContext));
+    _server = await _app.run(() => _MyIOAdapter.bind(_securityContext));
 
     _idleCloseServer.start();
 
@@ -220,6 +222,7 @@ class LanFillServer {
       _validateCertificate(option.securityContext.certificateHash),
     );
     app.get("/api/heartbeat", _apiHeartbeat);
+    app.post('/api/autofill', _apiAutofill);
     return app;
   }
 
@@ -237,6 +240,10 @@ class LanFillServer {
               ];
               headers[HeadersConstant.deviceFingerprint] = [
                 deviceInfo.fingerprint,
+              ];
+
+              headers[HeadersConstant.devicePlatform] = [
+                Platform.operatingSystem,
               ];
             }),
           );
@@ -309,5 +316,22 @@ class LanFillServer {
 
   Future<Response> _apiHeartbeat(final Request req) async {
     return Response.ok();
+  }
+
+  Future<Response> _apiAutofill(final Request req) async {
+    if (!isDesktopPlatform(Platform.operatingSystem)) {
+      return Response.notImplemented();
+    }
+
+    final data = AutofillDto.formJson(jsonDecode(await req.readAsString()));
+
+    if (data.fields.isEmpty) return Response.noContent();
+
+    try {
+      await interactiveManipulation.remoteAutofill(data);
+      return Response.ok();
+    } catch (e) {
+      return Response.internalServerError(body: Body.fromString(e.toString()));
+    }
   }
 }

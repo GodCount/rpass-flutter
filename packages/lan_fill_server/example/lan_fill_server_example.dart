@@ -1,7 +1,7 @@
 import 'package:lan_fill_server/lan_fill_server.dart';
 import 'package:lan_fill_server/src/interactive_manipulation.dart';
+import 'package:lan_fill_server/src/model/autofill.dto.dart';
 import 'package:lan_fill_server/src/model/device_info.dto.dart';
-import 'package:lan_fill_server/src/util/security_helper.dart';
 
 class TIM extends InteractiveManipulation {
   @override
@@ -21,6 +21,12 @@ class TIM extends InteractiveManipulation {
   @override
   void onServerClose() {
     // TODO: implement onServerClose
+  }
+
+  @override
+  Future<void> remoteAutofill(AutofillDto dto) {
+    // TODO: implement remoteAutofill
+    throw UnimplementedError();
   }
 }
 
