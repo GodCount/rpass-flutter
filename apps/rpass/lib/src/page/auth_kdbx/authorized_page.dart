@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 import '../../context/biometric.dart';
+import '../../context/lan_fill_server.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../store/index.dart';
@@ -197,6 +198,7 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
     final biometric = Biometric.of(context);
+    final lanFill = LanFillInherited.of(context);
 
     final String subtitle;
     switch (authType) {
@@ -217,11 +219,26 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
       body: Center(
         child: Card(
           margin: const EdgeInsets.all(24),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
+          child: Container(
+            padding: const EdgeInsets.all(24).copyWith(top: 6),
+            constraints: const BoxConstraints(maxWidth: 312),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (lanFill != null &&
+                    (authType == AuthorizedType.initial ||
+                        authType == AuthorizedType.load))
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                      onPressed: lanFill.openQrCodeDialog,
+                      icon: Icon(
+                        lanFill.serverClosed
+                            ? Icons.connect_without_contact_rounded
+                            : Icons.cast_connected,
+                      ),
+                    ),
+                  ),
                 Text(
                   t.app_name,
                   style: Theme.of(context).textTheme.headlineSmall,

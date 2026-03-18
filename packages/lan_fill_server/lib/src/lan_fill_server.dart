@@ -90,6 +90,13 @@ class EncryptCertificateTotp {
   Uint8List codeBytes() {
     return utf8.encode(codeString());
   }
+
+  Duration nextInterval() {
+    return Duration(
+      seconds:
+          interval.inSeconds - (DateTime.now().second % interval.inSeconds),
+    );
+  }
 }
 
 class _IdleCloseServerMiddleware {
@@ -179,6 +186,8 @@ class LanFillServer {
         duration: option.idleCloseTimeout,
         onIdleCallback: close,
       );
+
+  bool get isClosed => _server == null;
 
   Future<RegisterDto> start() async {
     if (_server != null) {

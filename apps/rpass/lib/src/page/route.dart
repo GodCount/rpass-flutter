@@ -35,3 +35,5 @@ export 'setting/shortcuts_settings.dart' show ShortcutsSettingsRoute;
 export 'remotes_fs/auth_remote_fs.dart'
     show AuthRemoteFsRoute, AuthRemoteRouteType;
 export 'remotes_fs/import_remote_kdbx.dart' show ImportRemoteKdbxRoute;
+
+export './root_page.dart' show RootRpassAppRoute;

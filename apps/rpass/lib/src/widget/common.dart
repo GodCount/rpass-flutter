@@ -557,28 +557,19 @@ class ImageFileStringState extends State<ImageFileString> {
 }
 
 class QrCodeDialog extends StatefulWidget {
-  const QrCodeDialog({
-    super.key,
-    required this.getQrData,
-    required this.refreshDuration,
-  });
+  const QrCodeDialog({super.key, required this.getQrData});
 
-  final ValueGetter<Future<String>> getQrData;
-  final Duration refreshDuration;
+  final ValueGetter<Future<(String, Duration)>> getQrData;
 
   static Future<void> openDialog(
     BuildContext context, {
-    required ValueGetter<Future<String>> getQrData,
-    required Duration refreshDuration,
+    required ValueGetter<Future<(String, Duration)>> getQrData,
   }) {
     return showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return QrCodeDialog(
-          getQrData: getQrData,
-          refreshDuration: refreshDuration,
-        );
+        return QrCodeDialog(getQrData: getQrData);
       },
     );
   }
@@ -596,12 +587,14 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
     super.initState();
 
     refresh();
-    _timer = Timer.periodic(widget.refreshDuration, refresh);
   }
 
-  void refresh([Timer? timer]) async {
-    _qrCode = await widget.getQrData();
-    setState(() {});
+  void refresh() async {
+    final (data, next) = await widget.getQrData();
+    _timer = Timer(next, refresh);
+    setState(() {
+      _qrCode = data;
+    });
   }
 
   @override
