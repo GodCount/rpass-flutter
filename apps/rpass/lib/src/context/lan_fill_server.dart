@@ -79,6 +79,7 @@ class _LanFillServerState extends State<LanFillServerProvider>
 
       QrCodeDialog.openDialog(
         context,
+        title: "局域网填充",
         getQrData: () async {
           try {
             dto ??= await _server!.start();

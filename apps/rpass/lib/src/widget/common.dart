@@ -557,19 +557,21 @@ class ImageFileStringState extends State<ImageFileString> {
 }
 
 class QrCodeDialog extends StatefulWidget {
-  const QrCodeDialog({super.key, required this.getQrData});
+  const QrCodeDialog({super.key, required this.getQrData, this.title});
 
   final ValueGetter<Future<(String, Duration)>> getQrData;
+
+  final String? title;
 
   static Future<void> openDialog(
     BuildContext context, {
     required ValueGetter<Future<(String, Duration)>> getQrData,
+    String? title,
   }) {
     return showDialog(
       context: context,
-      barrierDismissible: false,
       builder: (context) {
-        return QrCodeDialog(getQrData: getQrData);
+        return QrCodeDialog(getQrData: getQrData, title: title);
       },
     );
   }
@@ -586,15 +588,18 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
   void initState() {
     super.initState();
 
-    refresh();
+    _refresh();
   }
 
-  void refresh() async {
+  void _refresh() async {
     final (data, next) = await widget.getQrData();
-    _timer = Timer(next, refresh);
-    setState(() {
-      _qrCode = data;
-    });
+
+    _qrCode = data;
+
+    _timer?.cancel();
+    _timer = Timer(next, _refresh);
+
+    setState(() {});
   }
 
   @override
@@ -608,10 +613,17 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
     final t = I18n.of(context)!;
 
     return AlertDialog(
-      title: Text("data"),
+      title: widget.title != null ? Center(child: Text(widget.title!)) : null,
       content: _qrCode != null
-          ? PrettyQrView.data(data: _qrCode!)
-          : Text("data"),
+          ? PrettyQrView.data(
+              data: _qrCode!,
+              decoration: const PrettyQrDecoration(
+                image: PrettyQrDecorationImage(
+                  image: AssetImage("assets/icons/logo.png"),
+                ),
+              ),
+            )
+          : null,
     );
   }
 }

@@ -30,10 +30,10 @@ class StoredSecurityContext {
 
   Map<String, String> toJson() {
     return {
-      privateKey: privateKey,
-      publicKey: publicKey,
-      certificate: certificate,
-      certificateHash: certificateHash,
+      "privateKey": privateKey,
+      "publicKey": publicKey,
+      "certificate": certificate,
+      "certificateHash": certificateHash,
     };
   }
 }

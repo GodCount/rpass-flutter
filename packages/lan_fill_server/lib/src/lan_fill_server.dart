@@ -60,7 +60,7 @@ class LanFillServerOption {
 
 class EncryptCertificateTotp {
   EncryptCertificateTotp({
-    this.codeLength = 16,
+    this.codeLength = 10,
     this.interval = const Duration(seconds: 60),
   });
 
@@ -93,8 +93,7 @@ class EncryptCertificateTotp {
 
   Duration nextInterval() {
     return Duration(
-      seconds:
-          interval.inSeconds - (DateTime.now().second % interval.inSeconds),
+      seconds: OTP.remainingSeconds(interval: interval.inSeconds),
     );
   }
 }
@@ -170,6 +169,7 @@ class LanFillServer {
   final InteractiveManipulation interactiveManipulation;
 
   late final EncryptCertificateTotp certificateTotp = EncryptCertificateTotp(
+    // AES-256 requires a 32-byte key
     codeLength: 32,
     interval: option.secretKeyInterval,
   );
