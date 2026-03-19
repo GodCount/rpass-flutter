@@ -29,6 +29,11 @@ class TIM extends InteractiveManipulation {
     // TODO: implement validateFingerprint
     throw UnimplementedError();
   }
+
+  @override
+  void onServerCilentFirstHeartbeat(String devicePlatform, String? deviceName) {
+    // TODO: implement onServerCilentFirstHeartbeat
+  }
 }
 
 Future<void> main() async {

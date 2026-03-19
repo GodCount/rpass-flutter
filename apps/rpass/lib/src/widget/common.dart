@@ -610,15 +610,16 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final t = I18n.of(context)!;
-
     return AlertDialog(
       title: widget.title != null ? Center(child: Text(widget.title!)) : null,
       content: _qrCode != null
           ? PrettyQrView.data(
+              // fix: set decoration after will not redrawn
+              key: ValueKey(_qrCode!),
               data: _qrCode!,
               decoration: const PrettyQrDecoration(
                 image: PrettyQrDecorationImage(
+                  padding: EdgeInsets.all(30),
                   image: AssetImage("assets/icons/logo.png"),
                 ),
               ),

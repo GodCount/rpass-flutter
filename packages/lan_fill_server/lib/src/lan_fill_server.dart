@@ -162,6 +162,8 @@ class _IdleCloseServerMiddleware {
   }
 }
 
+final firstQueryParam = QueryParam<bool>("first", bool.parse);
+
 class LanFillServer {
   LanFillServer(this.interactiveManipulation, this.option);
 
@@ -326,6 +328,20 @@ class LanFillServer {
   }
 
   Future<Response> _apiHeartbeat(final Request req) async {
+    final first = req.queryParameters.tryGet(firstQueryParam);
+
+    if (first == true) {
+      final deviceName = req.headers[HeadersConstant.deviceName]?.first;
+      final devicePlatform =
+          req.headers[HeadersConstant.devicePlatform]?.first ?? "unknown";
+
+      unawaited(() async {
+        interactiveManipulation.onServerCilentFirstHeartbeat(
+          devicePlatform,
+          deviceName,
+        );
+      }());
+    }
     return Response.ok();
   }
 

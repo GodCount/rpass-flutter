@@ -77,7 +77,7 @@ class _LanFillServerState extends State<LanFillServerProvider>
       );
       RegisterDto? dto = await _server!.start();
 
-      QrCodeDialog.openDialog(
+      await QrCodeDialog.openDialog(
         context,
         title: "局域网填充",
         getQrData: () async {
@@ -92,8 +92,8 @@ class _LanFillServerState extends State<LanFillServerProvider>
           }
         },
       );
-    } catch (e) {
-      showError(e);
+    } catch (e, s) {
+      showError("$e\n$s");
     }
   }
 
@@ -116,12 +116,11 @@ class _LanFillServerState extends State<LanFillServerProvider>
       );
 
       await _cilent!.register(data);
-    } catch (e) {
-      showError(e);
+    } catch (e, s) {
+      showError("$e\n$s");
     }
   }
 
-  @protected
   @override
   Future<bool> validateFingerprint(
     String fingerprint,
@@ -162,20 +161,25 @@ class _LanFillServerState extends State<LanFillServerProvider>
     });
   }
 
-  @protected
   @override
   Future<void> remoteAutofill(AutofillDto dto) {
     // TODO: implement remoteAutofill
     throw UnimplementedError();
   }
 
-  @protected
+  @override
+  void onServerCilentFirstHeartbeat(String devicePlatform, String? deviceName) {
+    // TODO! pop QrCodeDialog.openDialog 弹窗
+    // ? 直接pop 可能有风险, 例如打开QrCodeDialog 进入 _BackgroundLock
+    // 这时回调到这里直接pop 会把VerifyOwnerRoute 关掉 ?
+
+  }
+
   @override
   void onCilentClose() {
     _validateFingerprintQueue.clear();
   }
 
-  @protected
   @override
   void onServerClose() {
     _validateFingerprintQueue.clear();

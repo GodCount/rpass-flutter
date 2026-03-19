@@ -9,6 +9,8 @@ abstract mixin class InteractiveManipulation {
 
   Future<void> remoteAutofill(AutofillDto dto);
 
+  void onServerCilentFirstHeartbeat(String devicePlatform, String? deviceName);
+
   void onCilentClose();
 
   void onServerClose();

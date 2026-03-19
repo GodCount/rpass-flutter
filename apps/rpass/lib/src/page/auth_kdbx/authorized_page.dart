@@ -11,6 +11,7 @@ import '../../context/lan_fill_server.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../store/index.dart';
+import '../../util/common.dart';
 import '../../util/file.dart';
 import '../../widget/shake_widget.dart';
 import '../../widget/extension_state.dart';
@@ -220,12 +221,13 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
         child: Card(
           margin: const EdgeInsets.all(24),
           child: Container(
-            padding: const EdgeInsets.all(24).copyWith(top: 6),
+            padding: const EdgeInsets.all(24).copyWith(top: 6, right: 6),
             constraints: const BoxConstraints(maxWidth: 312),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (lanFill != null &&
+                if (kIsDesktop &&
+                    lanFill != null &&
                     (authType == AuthorizedType.initial ||
                         authType == AuthorizedType.load))
                   Align(
@@ -248,7 +250,7 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
                   child: Text(subtitle, textAlign: TextAlign.center),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 24),
+                  padding: const EdgeInsets.only(top: 24, right: 18),
                   child: Form(
                     key: form,
                     child: Column(

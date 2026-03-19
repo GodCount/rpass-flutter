@@ -180,6 +180,10 @@ class LanFillCilent {
           sendTimeout: const Duration(seconds: 3),
           contentType: "application/json",
           responseType: ResponseType.json,
+          headers: {
+            ...baseOptions.headers,
+            Headers.contentTypeHeader: "application/json",
+          },
         ),
       );
 
@@ -191,7 +195,7 @@ class LanFillCilent {
               },
       );
 
-      if (!(await heartbeat())) {
+      if (!(await _heartbeat(true))) {
         throw Exception("Heartbeat request response fail");
       }
 
@@ -203,11 +207,14 @@ class LanFillCilent {
     );
   }
 
-  Future<bool> heartbeat() async {
+  Future<bool> _heartbeat([bool? first]) async {
     _heartbeatTimer?.cancel();
     final dio = _getDio();
     try {
-      final res = await dio.get("/api/heartbeat");
+      final res = await dio.get(
+        "/api/heartbeat",
+        queryParameters: {"first": (first ?? false).toString()},
+      );
       _connecting = res.statusCode == HttpStatus.ok;
     } catch (e) {
       _connecting = false;
@@ -217,7 +224,7 @@ class LanFillCilent {
       return false;
     }
 
-    _heartbeatTimer = Timer(option.heartbeatDuration, heartbeat);
+    _heartbeatTimer = Timer(option.heartbeatDuration, _heartbeat);
     return _connecting;
   }
 

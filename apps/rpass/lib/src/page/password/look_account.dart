@@ -10,6 +10,7 @@ import 'package:prev_focus_window/prev_focus_window.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../context/lan_fill_server.dart';
 import '../../store/index.dart';
 import '../../util/cache_network_image.dart';
 import '../../util/fetch_favicon.dart';
@@ -193,6 +194,7 @@ class _LookAccountPageState extends State<LookAccountPage>
 
   void _showMenu() {
     final t = I18n.of(context)!;
+    final lanFill = LanFillInherited.of(context);
 
     GestureTapCallback? onAutoPop(GestureTapCallback func) {
       return () async {
@@ -204,6 +206,18 @@ class _LookAccountPageState extends State<LookAccountPage>
     showBottomSheetList(
       title: t.menu,
       children: [
+        if (kIsMobile && lanFill != null)
+          ListTile(
+            enabled: !widget.readOnly,
+            title: Text("局域网填充"),
+            leading: Icon(
+              lanFill.serverClosed
+                  ? Icons.connect_without_contact_rounded
+                  : Icons.cast_connected,
+            ),
+            onTap: onAutoPop(lanFill.openQrCodeScanner),
+          ),
+
         ListTile(
           enabled: !widget.readOnly,
           title: Text(t.history_record),
