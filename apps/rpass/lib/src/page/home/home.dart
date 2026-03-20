@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 import '../../context/kdbx.dart';
+import '../../context/lan_fill_server.dart';
 import '../route.dart';
 import '../../i18n.dart';
 import '../../store/index.dart';
@@ -161,6 +162,8 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
 
     final store = Store.instance;
 
+    final lanFill = LanFillInherited.of(context);
+
     return Scaffold(
       body: Row(
         children: [
@@ -173,6 +176,7 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
             backgroundColor: Theme.of(
               context,
             ).colorScheme.surfaceContainerHighest,
+            trailingAtBottom: true,
             // leading: Padding(
             //   padding: const EdgeInsets.only(top: 8),
             //   child: Text(
@@ -180,12 +184,20 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
             //     style: Theme.of(context).textTheme.titleLarge,
             //   ),
             // ),
-            trailing: Expanded(
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: ListenableBuilder(
+            trailing: Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Column(
+                children: [
+                  if (kIsDesktop && lanFill != null)
+                    IconButton(
+                      onPressed: lanFill.openQrCodeDialog,
+                      icon: Icon(
+                        lanFill.serverClosed
+                            ? Icons.cast_connected
+                            : Icons.connect_without_contact_rounded,
+                      ),
+                    ),
+                  ListenableBuilder(
                     listenable: Listenable.merge([
                       store.syncKdbx,
                       store.settings,
@@ -222,7 +234,7 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
                           : const SizedBox();
                     },
                   ),
-                ),
+                ],
               ),
             ),
             destinations: [

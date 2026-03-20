@@ -557,21 +557,32 @@ class ImageFileStringState extends State<ImageFileString> {
 }
 
 class QrCodeDialog extends StatefulWidget {
-  const QrCodeDialog({super.key, required this.getQrData, this.title});
+  const QrCodeDialog({
+    super.key,
+    this.title,
+    required this.getQrData,
+    this.onClose,
+  });
 
   final ValueGetter<Future<(String, Duration)>> getQrData;
+  final VoidCallback? onClose;
 
   final String? title;
 
   static Future<void> openDialog(
     BuildContext context, {
     required ValueGetter<Future<(String, Duration)>> getQrData,
+    VoidCallback? onClose,
     String? title,
   }) {
     return showDialog(
       context: context,
       builder: (context) {
-        return QrCodeDialog(getQrData: getQrData, title: title);
+        return QrCodeDialog(
+          getQrData: getQrData,
+          title: title,
+          onClose: onClose,
+        );
       },
     );
   }
@@ -610,8 +621,11 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final t = I18n.of(context)!;
+
     return AlertDialog(
       title: widget.title != null ? Center(child: Text(widget.title!)) : null,
+      actionsAlignment: .center,
       content: _qrCode != null
           ? PrettyQrView.data(
               // fix: set decoration after will not redrawn
@@ -624,6 +638,18 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
                 ),
               ),
             )
+          : null,
+      actions: widget.onClose != null
+          ? [
+              TextButton(
+                onPressed: () {
+                  _timer?.cancel();
+                  context.router.pop();
+                  widget.onClose?.call();
+                },
+                child: Text(t.close),
+              ),
+            ]
           : null,
     );
   }

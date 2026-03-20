@@ -697,4 +697,22 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get prev_position => '上次的位置';
+
+  @override
+  String get lan_fill => '局域网填充';
+
+  @override
+  String get unknown_device => '未知设备';
+
+  @override
+  String get trust => '信任';
+
+  @override
+  String get device => '设备';
+
+  @override
+  String get platform => '平台';
+
+  @override
+  String get close => '关闭';
 }

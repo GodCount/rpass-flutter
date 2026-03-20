@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:installed_apps/installed_apps.dart';
+import 'package:lan_fill_server/lan_fill_server.dart';
 import 'package:logging/logging.dart';
 import 'package:prev_focus_window/prev_focus_window.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
@@ -209,13 +210,24 @@ class _LookAccountPageState extends State<LookAccountPage>
         if (kIsMobile && lanFill != null)
           ListTile(
             enabled: !widget.readOnly,
-            title: Text("局域网填充"),
+            title: Text(t.lan_fill),
             leading: Icon(
-              lanFill.serverClosed
+              lanFill.cilentConnecting
                   ? Icons.connect_without_contact_rounded
                   : Icons.cast_connected,
             ),
-            onTap: onAutoPop(lanFill.openQrCodeScanner),
+            onTap: onAutoPop(() {
+              lanFill.requestRemoteAutofill(
+                AutofillDto(
+                  fields: {
+                    KdbxKeyCommon.KEY_USER_NAME: widget.kdbxEntry
+                        .getActualString(KdbxKeyCommon.USER_NAME),
+                    KdbxKeyCommon.KEY_PASSWORD: widget.kdbxEntry
+                        .getActualString(KdbxKeyCommon.PASSWORD),
+                  },
+                ),
+              );
+            }),
           ),
 
         ListTile(
@@ -254,6 +266,56 @@ class _LookAccountPageState extends State<LookAccountPage>
         ),
       ],
     );
+  }
+
+  VoidCallback? createOnTileClick(KdbxKey key) {
+    return kIsMobile &&
+            widget.kdbxEntry.getActualString(key)?.isNotEmpty == true
+        ? () {
+            final t = I18n.of(context)!;
+
+            final lanFill = LanFillInherited.of(context);
+
+            GestureTapCallback? onAutoPop(GestureTapCallback func) {
+              return () async {
+                context.router.pop();
+                func.call();
+              };
+            }
+
+            showBottomSheetList(
+              title: key.key.fromKdbxKeyToI18n(context),
+              children: [
+                ListTile(
+                  title: Text(t.copy),
+                  leading: const Icon(Icons.copy),
+                  onTap: onAutoPop(() {
+                    writeClipboard(widget.kdbxEntry.getActualString(key) ?? "");
+                  }),
+                ),
+                ListTile(
+                  enabled: lanFill != null,
+                  title: Text(t.lan_fill),
+                  leading: Icon(
+                    lanFill?.cilentConnecting == true
+                        ? Icons.connect_without_contact_rounded
+                        : Icons.cast_connected,
+                  ),
+                  onTap: onAutoPop(() {
+                    lanFill!.requestRemoteAutofill(
+                      AutofillDto(
+                        key: key.key,
+                        fields: {
+                          key.key: widget.kdbxEntry.getActualString(key),
+                        },
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            );
+          }
+        : null;
   }
 
   @override
@@ -386,6 +448,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                   Text(username, style: Theme.of(context).textTheme.titleSmall),
                 ),
               ),
+              onTap: createOnTileClick(KdbxKeyCommon.USER_NAME),
               onLongPress: username.isNotEmpty
                   ? () => writeClipboard(username)
                   : null,
@@ -402,6 +465,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                   Text(email, style: Theme.of(context).textTheme.titleSmall),
                 ),
               ),
+              onTap: createOnTileClick(KdbxKeyCommon.EMAIL),
               onLongPress: email.isNotEmpty
                   ? () => writeClipboard(email)
                   : null,
@@ -409,6 +473,7 @@ class _LookAccountPageState extends State<LookAccountPage>
             _LookPasswordListTile(
               shape: shape,
               password: password,
+              onTap: createOnTileClick(KdbxKeyCommon.PASSWORD),
               onLongPress: () => writeClipboard(password),
             ),
           ]),
@@ -542,6 +607,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                 onPressed: url.isNotEmpty ? () => _launchUrl(url) : null,
                 icon: const Icon(Icons.open_in_new),
               ),
+              onTap: createOnTileClick(KdbxKeyCommon.URL),
               onLongPress: url.isNotEmpty ? () => writeClipboard(url) : null,
             ),
             ...moreUrlsKeys.asMap().entries.map((item) {
@@ -583,6 +649,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                   onPressed: url.isNotEmpty ? () => _launchUrl(url) : null,
                   icon: const Icon(Icons.open_in_new),
                 ),
+                onTap: createOnTileClick(item.value),
                 onLongPress: url.isNotEmpty ? () => writeClipboard(url) : null,
               );
             }),
@@ -622,6 +689,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                       ),
                     ),
                   ),
+                  onTap: createOnTileClick(item.key),
                   onLongPress: kdbxEntry.getNonNullString(item.key).isNotEmpty
                       ? () =>
                             writeClipboard(kdbxEntry.getNonNullString(item.key))
@@ -866,6 +934,7 @@ class _LookAccountPageState extends State<LookAccountPage>
               oneTimePassword: widget.kdbxEntry.getNonNullString(
                 KdbxKeyCommon.OTP,
               ),
+              onTap: createOnTileClick(KdbxKeyCommon.OTP),
             ),
           ])
         : const SizedBox.shrink();
@@ -884,11 +953,13 @@ class _LookAccountPageState extends State<LookAccountPage>
 class _LookPasswordListTile extends StatefulWidget {
   const _LookPasswordListTile({
     required this.password,
+    this.onTap,
     this.onLongPress,
     this.shape,
   });
 
   final String password;
+  final GestureTapCallback? onTap;
   final GestureTapCallback? onLongPress;
   final ShapeBorder? shape;
 
@@ -934,16 +1005,22 @@ class _LookPasswordListTileState extends State<_LookPasswordListTile>
               ),
             )
           : null,
+      onTap: widget.onTap,
       onLongPress: widget.password.isNotEmpty ? widget.onLongPress : null,
     );
   }
 }
 
 class _LookOtPasswordListTile extends StatefulWidget {
-  const _LookOtPasswordListTile({required this.oneTimePassword, this.shape});
+  const _LookOtPasswordListTile({
+    required this.oneTimePassword,
+    this.shape,
+    this.onTap,
+  });
 
   final String oneTimePassword;
   final ShapeBorder? shape;
+  final GestureTapCallback? onTap;
 
   @override
   State<_LookOtPasswordListTile> createState() =>
@@ -995,6 +1072,7 @@ class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile> {
               },
             )
           : null,
+      onTap: widget.onTap,
       onLongPress: () {
         writeClipboard("${_authOneTimePassword!.code()}");
       },

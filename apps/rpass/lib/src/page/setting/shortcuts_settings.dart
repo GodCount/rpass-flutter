@@ -296,7 +296,7 @@ class _ModifyHotKeyDialogState extends State<ModifyHotKeyDialog> {
       canPop: false,
       child: AlertDialog(
         title: Text(widget.identifier),
-        constraints: BoxConstraints(maxWidth: 312, maxHeight: 240),
+        constraints: BoxConstraints(maxHeight: 240),
         content: Center(
           child: HotKeyRecorder(
             initalHotKey: hotKey,

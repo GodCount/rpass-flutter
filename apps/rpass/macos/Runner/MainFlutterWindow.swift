@@ -10,6 +10,9 @@ class MainFlutterWindow: NSWindow {
 
     RegisterGeneratedPlugins(registry: flutterViewController)
 
+    NSApplication.shared.setActivationPolicy(.accessory)
+    self.level = .floating
+
     super.awakeFromNib()
   }
 }

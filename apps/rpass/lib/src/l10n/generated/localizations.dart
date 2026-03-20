@@ -1417,6 +1417,42 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'上次的位置'**
   String get prev_position;
+
+  /// No description provided for @lan_fill.
+  ///
+  /// In zh, this message translates to:
+  /// **'局域网填充'**
+  String get lan_fill;
+
+  /// No description provided for @unknown_device.
+  ///
+  /// In zh, this message translates to:
+  /// **'未知设备'**
+  String get unknown_device;
+
+  /// No description provided for @trust.
+  ///
+  /// In zh, this message translates to:
+  /// **'信任'**
+  String get trust;
+
+  /// No description provided for @device.
+  ///
+  /// In zh, this message translates to:
+  /// **'设备'**
+  String get device;
+
+  /// No description provided for @platform.
+  ///
+  /// In zh, this message translates to:
+  /// **'平台'**
+  String get platform;
+
+  /// No description provided for @close.
+  ///
+  /// In zh, this message translates to:
+  /// **'关闭'**
+  String get close;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

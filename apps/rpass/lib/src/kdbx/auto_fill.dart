@@ -22,11 +22,18 @@ class NoPermission implements Exception {
   }
 }
 
+typedef GetValueByKey = String? Function(String key);
+
 ///
 /// 桌面端 以模拟键盘输入的方式自动填充信息
 ///
 ///
-Future<void> autoFillSequence(KdbxEntry kdbxEntry, [KdbxKey? kdbxKey]) async {
+Future<void> autoFillSequence(
+  String sequence, {
+  required GetValueByKey getValue,
+  // 存在则只填充这个字段
+  String? key,
+}) async {
   if (!kIsDesktop) return;
 
   if (PrevFocusWindow.instance.targetWindowName != null) {
@@ -41,13 +48,11 @@ Future<void> autoFillSequence(KdbxEntry kdbxEntry, [KdbxKey? kdbxKey]) async {
       if (await PrevFocusWindow.instance.activatePrevWindow()) {
         final List<TextSequenceItem> items;
 
-        if (kdbxKey != null) {
+        if (key != null) {
           // 填充单个字段
-          items = [KdbxSequenceItem(kdbxKey.key)];
+          items = [KdbxSequenceItem(key)];
         } else {
-          items = AutoTypeSequenceParse.parse(
-            kdbxEntry.getAutoTypeSequence(),
-          ).items;
+          items = AutoTypeSequenceParse.parse(sequence).items;
         }
 
         debugPrint("[start auto fill]");
@@ -79,7 +84,7 @@ Future<void> autoFillSequence(KdbxEntry kdbxEntry, [KdbxKey? kdbxKey]) async {
               enigo.key(key: key, direction: Direction.release);
             }
           } else if (item is KdbxSequenceItem) {
-            final text = kdbxEntry.getActualString(KdbxKey(item.key));
+            final text = getValue(item.key);
 
             if (text != null && text.isNotEmpty) {
               debugPrint("[KdbxSequenceItem] ${item.key}");

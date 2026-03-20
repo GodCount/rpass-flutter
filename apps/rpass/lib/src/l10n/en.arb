@@ -319,25 +319,31 @@
         }
     },
     "edit_group": "Edit Group",
-    "shortcuts": "快捷键",
-    "open": "打开",
-    "quit": "退出",
-    "reset": "重置",
-    "shortcut_open_subtitle": "显示或隐藏窗口",
-    "shortcut_lock_subtitle": "锁定并回到验证界面",
-    "shortcut_autofill_subtitle": "触发密码页选中项的自动填充.\n注意自动填充是通过模拟键盘输入的会和快捷键冲突,按下后需要快速释放.",
-    "shortcut_autofill_field": "填充{field}",
+    "shortcuts": "Shortcuts",
+    "open": "Open",
+    "quit": "Quit",
+    "reset": "Reset",
+    "shortcut_open_subtitle": "Show or hide window",
+    "shortcut_lock_subtitle": "Lock and return to verification interface",
+    "shortcut_autofill_subtitle": "Trigger auto-fill for selected item on password page.\nNote: Auto-fill is simulated by keyboard input and conflicts with shortcuts, press and release quickly.",
+    "shortcut_autofill_field": "Fill {field}",
     "@shortcut_autofill_field": {
-        "description": "字段",
+        "description": "Field",
         "placeholders": {
             "field": {
                 "type": "String"
             }
         }
     },
-    "window_position": "窗口位置",
-    "mouse_position": "鼠标位置",
-    "mouse_center": "相对鼠标中心",
-    "mouse_screen_center": "鼠标光标显示器中心",
-    "prev_position": "上次的位置"
+    "window_position": "Window Position",
+    "mouse_position": "Mouse Position",
+    "mouse_center": "Relative to Mouse Center",
+    "mouse_screen_center": "Mouse Cursor Screen Center",
+    "prev_position": "Previous Position",
+    "lan_fill": "LAN Fill",
+    "unknown_device": "Unknown Device",
+    "trust": "Trust",
+    "device": "Device",
+    "platform": "Platform",
+    "close": "Close"
 }

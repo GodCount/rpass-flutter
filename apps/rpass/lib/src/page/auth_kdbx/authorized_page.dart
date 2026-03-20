@@ -236,8 +236,8 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
                       onPressed: lanFill.openQrCodeDialog,
                       icon: Icon(
                         lanFill.serverClosed
-                            ? Icons.connect_without_contact_rounded
-                            : Icons.cast_connected,
+                            ? Icons.cast_connected
+                            : Icons.connect_without_contact_rounded,
                       ),
                     ),
                   ),

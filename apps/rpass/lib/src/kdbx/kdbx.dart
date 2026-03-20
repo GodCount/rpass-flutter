@@ -734,7 +734,11 @@ extension KdbxEntryAutoType on KdbxEntry {
   }
 
   Future<void> autoFill([KdbxKey? key]) {
-    return autoFillSequence(this, key);
+    return autoFillSequence(
+      getAutoTypeSequence(),
+      key: key?.key,
+      getValue: (key) => getActualString(KdbxKey(key)),
+    );
   }
 }
 

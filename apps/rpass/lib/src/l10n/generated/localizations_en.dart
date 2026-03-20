@@ -674,44 +674,63 @@ class MyLocalizationsEn extends MyLocalizations {
   String get edit_group => 'Edit Group';
 
   @override
-  String get shortcuts => '快捷键';
+  String get shortcuts => 'Shortcuts';
 
   @override
-  String get open => '打开';
+  String get open => 'Open';
 
   @override
-  String get quit => '退出';
+  String get quit => 'Quit';
 
   @override
-  String get reset => '重置';
+  String get reset => 'Reset';
 
   @override
-  String get shortcut_open_subtitle => '显示或隐藏窗口';
+  String get shortcut_open_subtitle => 'Show or hide window';
 
   @override
-  String get shortcut_lock_subtitle => '锁定并回到验证界面';
+  String get shortcut_lock_subtitle =>
+      'Lock and return to verification interface';
 
   @override
   String get shortcut_autofill_subtitle =>
-      '触发密码页选中项的自动填充.\n注意自动填充是通过模拟键盘输入的会和快捷键冲突,按下后需要快速释放.';
+      'Trigger auto-fill for selected item on password page.\nNote: Auto-fill is simulated by keyboard input and conflicts with shortcuts, press and release quickly.';
 
   @override
   String shortcut_autofill_field(String field) {
-    return '填充$field';
+    return 'Fill $field';
   }
 
   @override
-  String get window_position => '窗口位置';
+  String get window_position => 'Window Position';
 
   @override
-  String get mouse_position => '鼠标位置';
+  String get mouse_position => 'Mouse Position';
 
   @override
-  String get mouse_center => '相对鼠标中心';
+  String get mouse_center => 'Relative to Mouse Center';
 
   @override
-  String get mouse_screen_center => '鼠标光标显示器中心';
+  String get mouse_screen_center => 'Mouse Cursor Screen Center';
 
   @override
-  String get prev_position => '上次的位置';
+  String get prev_position => 'Previous Position';
+
+  @override
+  String get lan_fill => 'LAN Fill';
+
+  @override
+  String get unknown_device => 'Unknown Device';
+
+  @override
+  String get trust => 'Trust';
+
+  @override
+  String get device => 'Device';
+
+  @override
+  String get platform => 'Platform';
+
+  @override
+  String get close => 'Close';
 }

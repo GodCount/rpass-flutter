@@ -339,5 +339,11 @@
     "mouse_position": "鼠标位置",
     "mouse_center": "相对鼠标中心",
     "mouse_screen_center": "鼠标光标显示器中心",
-    "prev_position": "上次的位置"
+    "prev_position": "上次的位置",
+    "lan_fill": "局域网填充",
+    "unknown_device": "未知设备",
+    "trust": "信任",
+    "device": "设备",
+    "platform": "平台",
+    "close": "关闭"
 }

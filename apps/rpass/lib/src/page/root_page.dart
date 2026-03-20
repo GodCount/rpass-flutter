@@ -216,6 +216,11 @@ class _RootRpassAppState extends State<RootRpassApp>
     windowManager.hide();
   }
 
+  @override
+  void onWindowBlur() {
+    windowManager.hide();
+  }
+
   void onLocaleChange() {
     updateTrayMenu();
   }
