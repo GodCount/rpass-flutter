@@ -195,6 +195,21 @@ class LanFillCilent {
               },
       );
 
+      _dio!.interceptors.add(
+        InterceptorsWrapper(
+          onError: (error, handler) {
+            // 请求错误下,不是这两种类型的,则代表连接断开了
+            _connecting =
+                !(error.type != .badResponse && error.type != .cancel);
+            handler.next(error);
+          },
+          onResponse: (response, handler) {
+            _connecting = true;
+            handler.next(response);
+          },
+        ),
+      );
+
       if (!(await _heartbeat(true))) {
         throw Exception("Heartbeat request response fail");
       }
@@ -211,11 +226,15 @@ class LanFillCilent {
     _heartbeatTimer?.cancel();
     final dio = _getDio();
     try {
-      final res = await dio.get(
+      await dio.get(
         "/api/heartbeat",
         queryParameters: {"first": (first ?? false).toString()},
+        options: Options(
+          sendTimeout: const Duration(milliseconds: 300),
+          receiveTimeout: const Duration(milliseconds: 300),
+        ),
       );
-      _connecting = res.statusCode == HttpStatus.ok;
+      _connecting = true;
     } catch (e) {
       _connecting = false;
     }
@@ -226,6 +245,10 @@ class LanFillCilent {
 
     _heartbeatTimer = Timer(option.heartbeatDuration, _heartbeat);
     return _connecting;
+  }
+
+  Future<bool> heartbeat() {
+    return _heartbeat();
   }
 
   Future<void> autofill(AutofillDto dto) async {

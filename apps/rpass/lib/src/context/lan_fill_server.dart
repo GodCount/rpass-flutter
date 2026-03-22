@@ -136,9 +136,10 @@ class _LanFillServerState extends State<LanFillServerProvider>
 
   Future<void> requestRemoteAutofill(AutofillDto dto) async {
     try {
-      if (_cilent?.connecting != true) {
+      if ((await _cilent?.heartbeat()) != true) {
         await openQrCodeScanner();
       }
+
       if (_cilent?.connecting != true) return;
 
       await _cilent!.autofill(dto);
