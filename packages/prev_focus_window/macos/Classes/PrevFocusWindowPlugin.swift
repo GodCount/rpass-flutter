@@ -58,7 +58,9 @@ public class PrevFocusWindowPlugin: NSObject, FlutterPlugin {
         switch methodName {
         case "activate_prev_window":
             if let application = self.prevActivedApplication {
-                if !application.isTerminated {
+                if application.isActive {
+                    return result(true)
+                } else if !application.isTerminated {
                     return result(application.activate(options: .activateAllWindows))
                 }
             }
