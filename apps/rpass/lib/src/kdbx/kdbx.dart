@@ -517,10 +517,9 @@ class Kdbx extends KdbxBase
   }
 
   static Credentials createCredentials(String? password, Uint8List? keyFile) {
-    assert(
-      !(password == null && keyFile == null),
-      "Must include a password / key file.",
-    );
+    if (password == null && keyFile == null) {
+      throw Exception("Must include a password / key file.");
+    }
 
     return Credentials.composite(
       password != null ? ProtectedValue.fromString(password) : null,

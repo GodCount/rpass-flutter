@@ -120,7 +120,7 @@ class RemoteFile {
   }
 
   Future<void> write(Uint8List data, [CancelSignal? cancelSignal]) async {
-    assert(!dir, "this is dir");
+    if (dir) throw Exception("this is dir");
     _updateInfo(
       await _client.writeFile(
         path: path,
@@ -170,7 +170,7 @@ class RemoteFile {
   }
 
   Future<List<RemoteFile>> readdir([CancelSignal? cancelSignal]) {
-    assert(dir, "this not dir");
+    if (!dir) throw Exception("this not dir");
     return _client.readdir(path, cancelSignal);
   }
 

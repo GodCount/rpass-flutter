@@ -129,12 +129,11 @@ class ShortcutsStore with SimpleObserverListener<ShortcutsHotHandler> {
       return _notifyListeners();
     }
 
-    assert(
-      hotKeys.values.every(
-        (item) => item.identifier == hotKey.identifier || !item.eq(hotKey),
-      ),
-      "shortcut key conflict.",
-    );
+    if (!hotKeys.values.every(
+      (item) => item.identifier == hotKey.identifier || !item.eq(hotKey),
+    )) {
+      throw Exception("shortcut key conflict.");
+    }
 
     if (hotKeys[hotKey.identifier] == null) {
       hotKeys[hotKey.identifier] = hotKey;

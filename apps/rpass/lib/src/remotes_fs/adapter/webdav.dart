@@ -120,7 +120,7 @@ class WebdavClient extends RemoteClient<WebdavConfig> {
   }
 
   RemoteFile _transformFile(File file) {
-    assert(file.path != null, "path is null");
+    if (file.path == null) throw Exception("path is null");
     return RemoteFile(
       client: this,
       path: file.path!,

@@ -51,7 +51,9 @@ class LanFillCilent {
   String get serverPlatform => _serverPlatform;
 
   Dio _getDio() {
-    assert(_dio != null, "You need to run registration before doing this");
+    if (_dio == null) {
+      throw Exception("You need to run registration before doing this");
+    }
     return _dio!;
   }
 
