@@ -64,24 +64,23 @@ class _RootRpassAppState extends State<RootRpassApp>
     windowManager.addListener(this);
     trayManager.addListener(this);
     KdbxProvider.of(context).addListener(this);
+    Store.instance.settings.addListener(_settingsListener);
     Store.instance.settings.shortcutsStore.addListener(_hotKeyHandler);
 
+    _updateTrayMenu();
+  }
+
+  void _updateTrayMenu() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      updateTrayMenu();
+      systemTray.updateTrayMenu(I18n.of(context)!);
     });
   }
 
-  @override
-  void didUpdateWidget(covariant RootRpassApp oldWidget) {
-    super.didUpdateWidget(oldWidget);
+  void _settingsListener() {
     if (_locale != Store.instance.settings.locale) {
       _locale = Store.instance.settings.locale;
-      onLocaleChange();
+      _updateTrayMenu();
     }
-  }
-
-  void updateTrayMenu() {
-    systemTray.updateTrayMenu(I18n.of(context)!);
   }
 
   void _hotKeyHandler(HotKey hotKey, ShortcutsTrigger trigger) async {
@@ -217,12 +216,14 @@ class _RootRpassAppState extends State<RootRpassApp>
   }
 
   @override
-  void onWindowBlur() {
-    windowManager.hide();
+  void onWindowFocus() {
+    windowManager.setOpacity(1);
   }
 
-  void onLocaleChange() {
-    updateTrayMenu();
+  @override
+  void onWindowBlur() {
+    // windowManager.hide();
+    windowManager.setOpacity(.5);
   }
 
   @override
@@ -231,6 +232,7 @@ class _RootRpassAppState extends State<RootRpassApp>
     windowManager.removeListener(this);
     trayManager.removeListener(this);
     KdbxProvider.of(context).removeListener(this);
+    Store.instance.settings.removeListener(_settingsListener);
     Store.instance.settings.shortcutsStore.removeListener(_hotKeyHandler);
   }
 

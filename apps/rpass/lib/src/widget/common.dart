@@ -631,6 +631,7 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
               // fix: set decoration after will not redrawn
               key: ValueKey(_qrCode!),
               data: _qrCode!,
+              errorCorrectLevel: QrErrorCorrectLevel.M,
               decoration: const PrettyQrDecoration(
                 image: PrettyQrDecorationImage(
                   padding: EdgeInsets.all(30),
