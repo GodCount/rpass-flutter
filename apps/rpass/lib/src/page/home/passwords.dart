@@ -98,13 +98,17 @@ class _PasswordsPageState extends State<PasswordsPage>
 
   @override
   void didNavigationHistory() {
+    final kdbxProvider = KdbxProvider.of(context);
     if (context.topRoute.name == LookAccountRoute.name ||
         context.topRoute.name == EditAccountRoute.name) {
-      final kdbxProvider = KdbxProvider.of(context);
       final uuid = context.topRoute.inheritedPathParams.optString("uuid");
       kdbxProvider.setSelectedKdbxEntry(
         uuid != null ? kdbxProvider.kdbx!.findEntryByUuid(uuid.kdbxUuid) : null,
       );
+    } else if (kIsMobile) {
+      kdbxProvider.setSelectedKdbxEntry(null);
+    } else if (context.router.isPathActive("/passwords/empty")) {
+      kdbxProvider.setSelectedKdbxEntry(null);
     }
   }
 
