@@ -16,6 +16,15 @@ class SettingsService with SharedPreferencesService {
 
   Future<bool> setThemeMode(ThemeMode mode) => setInt("theme_mode", mode.index);
 
+  Future<Color> getThemeSeedColor() async {
+    final color = (await getString("theme_seed_color")) ?? "FF659BFF";
+    return Color(int.parse(color, radix: 16));
+  }
+
+  Future<bool> setThemeSeedColor(Color color) {
+    return setString("theme_seed_color", color.toARGB32().toRadixString(16));
+  }
+
   Future<Locale?> getLocale() async {
     final lang = await getString("locale");
     if (lang != null) {

@@ -31,6 +31,7 @@ export 'setting/more_security.dart' show MoreSecurityRoute;
 export 'setting/sync_account.dart' show SyncAccountRoute;
 export 'setting/other_settings.dart' show OtherSettingsRoute;
 export 'setting/shortcuts_settings.dart' show ShortcutsSettingsRoute;
+export 'setting/change_theme.dart' show ChangeThemeRoute;
 
 export 'remotes_fs/auth_remote_fs.dart'
     show AuthRemoteFsRoute, AuthRemoteRouteType;

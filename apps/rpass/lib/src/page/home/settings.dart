@@ -37,6 +37,7 @@ class SettingsRoute extends PageRouteInfo<_SettingsArgs> {
 }
 
 final List<String> childRouteNames = [
+  ChangeThemeRoute.name,
   RecycleBinRoute.name,
   ChangeLocaleRoute.name,
   MoreSecurityRoute.name,
@@ -113,31 +114,19 @@ class _SettingsPageState extends State<SettingsPage>
               ),
             ),
             ListTile(
-              title: Text(t.system),
-              trailing: store.settings.themeMode == ThemeMode.system
-                  ? const Icon(Icons.check)
-                  : null,
-              onTap: () {
-                store.settings.setThemeMode(ThemeMode.system);
-              },
-            ),
-            ListTile(
-              title: Text(t.light),
-              trailing: store.settings.themeMode == ThemeMode.light
-                  ? const Icon(Icons.check)
-                  : null,
-              onTap: () {
-                store.settings.setThemeMode(ThemeMode.light);
-              },
-            ),
-            ListTile(
               shape: shape,
-              title: Text(t.dark),
-              trailing: store.settings.themeMode == ThemeMode.dark
-                  ? const Icon(Icons.check)
-                  : null,
+              title: Text(switch (store.settings.themeMode) {
+                ThemeMode.system => t.system,
+                ThemeMode.light => t.light,
+                ThemeMode.dark => t.dark,
+              }),
+              trailing: Icon(
+                Icons.color_lens_rounded,
+                color: store.settings.themeSeedColor,
+              ),
+              selected: childRouteName == ChangeThemeRoute.name,
               onTap: () {
-                store.settings.setThemeMode(ThemeMode.dark);
+                context.router.platformNavigate(ChangeThemeRoute());
               },
             ),
           ]),

@@ -81,6 +81,7 @@ RootStackRouter _createMobileAutoRoute() {
           AutoRoute(path: "edit_auto_type", page: EditAutoTypeRoute.page),
           AutoRoute(path: "gen_password", page: GenPasswordRoute.page),
           AutoRoute(path: "scanner_code", page: QrCodeScannerRoute.page),
+          AutoRoute(path: "change_theme", page: ChangeThemeRoute.page),
           AutoRoute(path: "change_locale", page: ChangeLocaleRoute.page),
           AutoRoute(path: "export_account", page: ExportAccountRoute.page),
           AutoRoute(path: "import_account", page: ImportAccountRoute.page),
@@ -176,6 +177,7 @@ RootStackRouter _createDesktopAutoRoute() {
                     },
                   ),
                   AutoRoute(path: "recycle_bin", page: RecycleBinRoute.page),
+                  AutoRoute(path: "change_theme", page: ChangeThemeRoute.page),
                   AutoRoute(
                     path: "change_locale",
                     page: ChangeLocaleRoute.page,

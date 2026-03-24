@@ -11,6 +11,8 @@ class SettingsController with ChangeNotifier {
   late final ShortcutsStore shortcutsStore;
 
   late ThemeMode _themeMode;
+  late Color _themeSeedColor;
+
   Locale? _locale;
   late bool _enableBiometric;
   Duration? _lockDelay;
@@ -26,6 +28,8 @@ class SettingsController with ChangeNotifier {
   late List<String> _trustFingerprints;
 
   ThemeMode get themeMode => _themeMode;
+  Color get themeSeedColor => _themeSeedColor;
+
   Locale? get locale => _locale;
   bool get enableBiometric => _enableBiometric;
   Duration? get lockDelay => _lockDelay;
@@ -50,6 +54,16 @@ class SettingsController with ChangeNotifier {
     notifyListeners();
 
     await _settingsService.setThemeMode(mode);
+  }
+
+  Future<void> setThemeSeedColor(Color color) async {
+    if (color == _themeSeedColor) return;
+
+    _themeSeedColor = color;
+
+    notifyListeners();
+
+    await _settingsService.setThemeSeedColor(color);
   }
 
   Future<void> setLocale(Locale? locale) async {
@@ -191,6 +205,8 @@ class SettingsController with ChangeNotifier {
     );
 
     _themeMode = await _settingsService.getThemeMode();
+    _themeSeedColor = await _settingsService.getThemeSeedColor();
+
     _locale = await _settingsService.getLocale();
     _enableBiometric = await _settingsService.getEnableBiometric();
     _lockDelay = await _settingsService.getLockDelay();

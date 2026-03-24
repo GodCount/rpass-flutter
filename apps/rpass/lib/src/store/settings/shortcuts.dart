@@ -70,7 +70,7 @@ class ShortcutsStore with SimpleObserverListener<ShortcutsHotHandler> {
       "open": HotKey(
         identifier: "open",
         modifiers: [HotKeyModifier.alt, HotKeyModifier.shift],
-        key: LogicalKeyboardKey.keyP,
+        key: LogicalKeyboardKey.keyA,
       ),
       "lock": HotKey(
         identifier: "lock",

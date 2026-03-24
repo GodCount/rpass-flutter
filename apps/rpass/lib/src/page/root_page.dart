@@ -215,16 +215,16 @@ class _RootRpassAppState extends State<RootRpassApp>
     windowManager.hide();
   }
 
-  @override
-  void onWindowFocus() {
-    windowManager.setOpacity(1);
-  }
+  // @override
+  // void onWindowFocus() {
+  //   windowManager.setOpacity(1);
+  // }
 
-  @override
-  void onWindowBlur() {
-    // windowManager.hide();
-    windowManager.setOpacity(.5);
-  }
+  // @override
+  // void onWindowBlur() {
+  //   // windowManager.hide();
+  //   windowManager.setOpacity(.5);
+  // }
 
   @override
   void dispose() {

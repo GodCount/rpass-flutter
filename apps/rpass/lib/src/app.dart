@@ -53,8 +53,8 @@ class RpassApp extends StatelessWidget {
           builder: (context, child) {
             return MaterialApp.router(
               restorationScopeId: 'app',
-              theme: theme(Brightness.light),
-              darkTheme: theme(Brightness.dark),
+              theme: theme(Brightness.light, store.settings.themeSeedColor),
+              darkTheme: theme(Brightness.dark, store.settings.themeSeedColor),
               themeMode: store.settings.themeMode,
               locale: store.settings.locale,
               localizationsDelegates: I18n.localizationsDelegates,
