@@ -1,7 +1,7 @@
 name: rpass
 description: "A new Flutter project."
 publish_to: "none"
-version: 2.1.4+201400
+version: 3.0.0+300000
 resolution: workspace
 homepage: https://github.com/GodCount/rpass-flutter.git
 

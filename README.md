@@ -12,6 +12,12 @@
 | :---: | :---: | :-----: | :-: | :-----: |
 |  ⏳   |  ✅   |   ✅    | ⏳  |   ✅    |
 
+
+## 功能支持
+
+>[更新日志](./CHANGELOG.md)
+
+
 ## 安装
 
 从[发布版本](https://github.com/GodCount/rpass-flutter/releases/latest)页面获取最新的版本。
