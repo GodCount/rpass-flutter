@@ -269,8 +269,7 @@ class _LookAccountPageState extends State<LookAccountPage>
   }
 
   VoidCallback? createOnTileClick(KdbxKey key) {
-    return kIsMobile &&
-            widget.kdbxEntry.getActualString(key)?.isNotEmpty == true
+    return widget.kdbxEntry.getActualString(key)?.isNotEmpty == true
         ? () {
             final t = I18n.of(context)!;
 
@@ -293,25 +292,35 @@ class _LookAccountPageState extends State<LookAccountPage>
                     writeClipboard(widget.kdbxEntry.getActualString(key) ?? "");
                   }),
                 ),
-                ListTile(
-                  enabled: lanFill != null,
-                  title: Text(t.lan_fill),
-                  leading: Icon(
-                    lanFill?.cilentConnecting == true
-                        ? Icons.connect_without_contact_rounded
-                        : Icons.cast_connected,
+                if (kIsMobile)
+                  ListTile(
+                    enabled: lanFill != null,
+                    title: Text(t.lan_fill),
+                    leading: Icon(
+                      lanFill?.cilentConnecting == true
+                          ? Icons.connect_without_contact_rounded
+                          : Icons.cast_connected,
+                    ),
+                    onTap: onAutoPop(() {
+                      lanFill!.requestRemoteAutofill(
+                        AutofillDto(
+                          key: key.key,
+                          fields: {
+                            key.key: widget.kdbxEntry.getActualString(key),
+                          },
+                        ),
+                      );
+                    }),
                   ),
-                  onTap: onAutoPop(() {
-                    lanFill!.requestRemoteAutofill(
-                      AutofillDto(
-                        key: key.key,
-                        fields: {
-                          key.key: widget.kdbxEntry.getActualString(key),
-                        },
-                      ),
-                    );
-                  }),
-                ),
+                if (kIsDesktop)
+                  ListTile(
+                    enabled: PrevFocusWindow.instance.isTargetWindowExist,
+                    title: Text(t.auto_fill),
+                    leading: Icon(Icons.ads_click),
+                    onTap: onAutoPop(() {
+                      autoFill(widget.kdbxEntry, key);
+                    }),
+                  ),
               ],
             );
           }
