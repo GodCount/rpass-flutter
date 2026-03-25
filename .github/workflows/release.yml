@@ -7,7 +7,7 @@ on:
       - "v*"
 
 env:
-  FLUTTER_VERSION: "3.35.5"
+  FLUTTER_VERSION: "3.38.7"
 
 jobs:
   build_android:
@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Extract tag name
         run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
@@ -30,12 +32,12 @@ jobs:
       - name: Decode key.properties file
         env:
           ENCODED_STRING: ${{ secrets.ANDROID_KEY_PROPERTIES }}
-        run: echo $ENCODED_STRING | base64 -di > android/key.properties
+        run: echo $ENCODED_STRING | base64 -di > apps/rpass/android/key.properties
 
       - name: Decode android-keystore.jks file
         env:
           ENCODED_STRING: ${{ secrets.ANDROID_KEY_STORE }}
-        run: mkdir secrets && echo $ENCODED_STRING | base64 -di > android/android-keystore.jks
+        run: mkdir secrets && echo $ENCODED_STRING | base64 -di > apps/rpass/android/android-keystore.jks
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -48,15 +50,21 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
-      - name: Dependencies
-        run: flutter pub get
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - uses: bluefireteam/melos-action@v3
 
       - name: Build Android
-        run: flutter build apk --release --split-per-abi --target-platform android-arm,android-arm64,android-x64
+        run: |
+          cd apps/rpass
+          flutter build apk --release --split-per-abi --target-platform android-arm,android-arm64,android-x64
 
       - name: Move and Rename Apk
         run: |
-          base_path=build/app/outputs/flutter-apk/
+          base_path=apps/rpass/build/app/outputs/flutter-apk/
           apk_name="Rpass-${{ env.tag }}"
           mkdir -p build/dist/android
           cp $base_path/app-arm64-v8a-release.apk build/dist/android/$apk_name-arm64-v8a.apk
@@ -70,13 +78,15 @@ jobs:
           path: build/dist/android/*
 
   build_macos:
-    name: "Release for Macos"
+    name: "Release for MacOS"
     runs-on: macos-latest
     permissions: write-all
 
     steps:
-      - name: Clone repository
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Extract tag name
         run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
@@ -89,38 +99,49 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
-      - name: Dependencies
-        run: flutter pub get
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - uses: bluefireteam/melos-action@v3
 
       - name: Build MacOS
-        run: flutter build macos --release
+        run: |
+          cd apps/rpass
+          flutter build macos --release
 
       - name: Create DMG
         run: |
           mkdir -p build/dist/macos
-          cp -a build/macos/Build/Products/Release/Rpass.app build/dist/macos
+          cp -a apps/rpass/build/macos/Build/Products/Release/Rpass.app build/dist/macos
           ln -s /Applications build/dist/macos/Applications
           hdiutil create -format UDZO -srcfolder build/dist/macos -volname Rpass Rpass-${{ env.tag }}.dmg
 
-      - name: Upload MacOS
+      - name: Upload Android
         uses: actions/upload-artifact@v4
         with:
           name: macos_outputs
           path: Rpass-*.dmg
 
-  build-windows:
+  build_windows:
     name: "Release for windows"
     runs-on: "windows-latest"
     permissions: write-all
 
     steps:
-      - name: Clone repository
+      - name: Checkout repository
         uses: actions/checkout@v4
-      - run: |
+        with:
+          submodules: recursive
+
+      - name: Extract tag name
+        run: |
           $tag = "${{ github.ref }}".Replace('refs/tags/', '')
           echo "tag=$(echo $tag)" >> $env:GITHUB_ENV
 
-      - run: echo "Rpass_windows_${env:tag}.zip build progress"
+      - name: Echo build progress
+        run: echo "Rpass_windows_${env:tag}.zip build progress"
 
       - name: Enable Git longpaths
         run: git config --system core.longpaths true
@@ -130,11 +151,23 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
-      - run: flutter pub get
-      - run: flutter build windows
-      - run: Compress-Archive build/windows/x64/runner/Release/* Rpass_windows_${env:tag}.zip
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
 
-      - name: Upload windows outputs
+      - uses: bluefireteam/melos-action@v3
+
+      - name: Build windows
+        run: |
+          cd apps/rpass
+          flutter build windows
+
+      - name: Create Zip
+        run: |
+          Compress-Archive apps/rpass/build/windows/x64/runner/Release/* Rpass_windows_${env:tag}.zip
+
+      - name: Upload Android
         uses: actions/upload-artifact@v4
         with:
           name: windows_outputs
@@ -145,11 +178,12 @@ jobs:
     needs:
       - build_android
       - build_macos
-      - build-windows
+      - build_windows
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Extract tag name
         run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
         shell: bash
@@ -190,57 +224,3 @@ jobs:
           fail_on_unmatched_files: true
           body: ${{ steps.get_release_notes.outputs.release_notes }}
           token: ${{ secrets.GITHUB_TOKEN }}
-
-  # sync_gitee:
-  #     needs:
-  #         - build
-  #         - build_apk
-  #         - release
-  #     runs-on: ubuntu-20.04
-
-  #     steps:
-  #         - uses: actions/checkout@v4
-
-  #         - name: Get latest Notes
-  #           uses: yashanand1910/standard-release-notes@v1.5.0
-  #           id: get_release_notes
-  #           with:
-  #               version: ${{ needs.build.outputs.version }}
-
-  #         - name: Install Python
-  #           uses: actions/setup-python@v5
-  #           with:
-  #               python-version: "3.10"
-  #         - name: pip install requests
-  #           run: |
-  #               python -m pip install requests
-
-  #         - name: Download artifact
-  #           uses: actions/download-artifact@v4
-  #           with:
-  #               name: apks
-  #               path: dist/apks
-
-  #         - name: Sync Release Gitee
-  #           env:
-  #               ACCESS_TOKEN: ${{ secrets.GITEE_ACCESS_TOKEN }}
-  #               OWNER: do_yzr
-  #               REPO: Rpass-flutter
-  #               TAG_NAME: v${{ needs.build.outputs.version }}
-  #               NAME: ${{ needs.build.outputs.version }}
-  #               BODY: ${{ steps.get_release_notes.outputs.release_notes }}
-  #               PRERELEASE: 0
-  #               TARGET_COMMITISH: master
-  #               UPLOAD_DIR: ./dist/apks
-
-  #           run: >
-  #               python ./script/sync-gitee-release.py
-  #               $ACCESS_TOKEN
-  #               $OWNER
-  #               $REPO
-  #               $TAG_NAME
-  #               $NAME
-  #               "$BODY"
-  #               $PRERELEASE
-  #               $TARGET_COMMITISH
-  #               $UPLOAD_DIR
