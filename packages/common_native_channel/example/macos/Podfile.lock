@@ -1,0 +1,22 @@
+PODS:
+  - common_native_channel (0.0.1):
+    - FlutterMacOS
+  - FlutterMacOS (1.0.0)
+
+DEPENDENCIES:
+  - common_native_channel (from `Flutter/ephemeral/.symlinks/plugins/common_native_channel/macos`)
+  - FlutterMacOS (from `Flutter/ephemeral`)
+
+EXTERNAL SOURCES:
+  common_native_channel:
+    :path: Flutter/ephemeral/.symlinks/plugins/common_native_channel/macos
+  FlutterMacOS:
+    :path: Flutter/ephemeral
+
+SPEC CHECKSUMS:
+  common_native_channel: 7df2ad28406c638f820af8548a3dca86beda9067
+  FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
+
+PODFILE CHECKSUM: 54d867c82ac51cbd61b565781b9fada492027009
+
+COCOAPODS: 1.16.2

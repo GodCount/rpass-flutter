@@ -7,6 +7,7 @@ environment:
 
 workspace:
   - apps/rpass
+  - packages/common_native_channel
   - packages/enigo_flutter
   - packages/installed_apps
   - packages/lan_fill_server
