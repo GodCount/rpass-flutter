@@ -226,9 +226,8 @@ class LanFillCilent {
 
   Future<bool> _heartbeat([bool? first]) async {
     _heartbeatTimer?.cancel();
-    final dio = _getDio();
     try {
-      await dio.get(
+      await _getDio().get(
         "/api/heartbeat",
         queryParameters: {"first": (first ?? false).toString()},
         options: Options(
