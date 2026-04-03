@@ -611,6 +611,22 @@ class _EntryFieldState extends State<EntryField> {
 
   List<KdbxKey> _binaryKeys = [];
 
+  late final List<DropdownMenuEntry<String>> _dropdownMenuEntries =
+      KdbxProvider.of(context).kdbx!.fieldStatistic
+          .getStatistic(widget.kdbxKey)
+          .map(
+            (value) => DropdownMenuEntry(
+              value: value,
+              label: value,
+              labelWidget: Text(
+                value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          )
+          .toList();
+
   void _onRenameKdbxKey() async {
     final t = I18n.of(context)!;
     final kdbx = KdbxProvider.of(context).kdbx!;
@@ -681,7 +697,6 @@ class _EntryFieldState extends State<EntryField> {
           )
         : child;
   }
-
 
   FormFieldValidator<String?>? _entryFieldValidator() {
     final t = I18n.of(context)!;
@@ -810,9 +825,7 @@ class _EntryFieldState extends State<EntryField> {
                   initialValue: widget.kdbxEntry
                       .getString(widget.kdbxKey)
                       ?.getText(),
-                  items: kdbx.fieldStatistic
-                      .getStatistic(widget.kdbxKey)
-                      .toList(),
+                  dropdownMenuEntries: _dropdownMenuEntries,
                   label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
                   onSaved: _kdbxTextFieldSaved,
                   expandedInsets: const EdgeInsets.all(0),

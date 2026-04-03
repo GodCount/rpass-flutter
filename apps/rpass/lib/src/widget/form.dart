@@ -436,7 +436,7 @@ class DropdownMenuFormField2 extends FormField<String> {
     String? label,
     super.initialValue,
     EdgeInsets? expandedInsets,
-    required List<String> items,
+    required List<DropdownMenuEntry<String>> dropdownMenuEntries,
     super.onSaved,
     super.autovalidateMode = AutovalidateMode.disabled,
     super.validator,
@@ -456,19 +456,7 @@ class DropdownMenuFormField2 extends FormField<String> {
              initialSelection: initialValue,
              expandedInsets: expandedInsets,
              requestFocusOnTap: requestFocusOnTap,
-             dropdownMenuEntries: items
-                 .map(
-                   (value) => DropdownMenuEntry(
-                     value: value,
-                     label: value,
-                     labelWidget: Text(
-                       value,
-                       maxLines: 2,
-                       overflow: TextOverflow.ellipsis,
-                     ),
-                   ),
-                 )
-                 .toList(),
+             dropdownMenuEntries: dropdownMenuEntries,
            );
          },
        );
