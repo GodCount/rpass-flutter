@@ -17,7 +17,7 @@ namespace {
         if (required <= 0) return std::string();
 
         std::string out;
-        out.resize(required); // 包含 '\0'
+        out.resize(required);
         int written = WideCharToMultiByte(CP_UTF8, 0, str.c_str(), -1, &out[0], required, nullptr, nullptr);
         if (written <= 0) return std::string();
 
@@ -47,7 +47,6 @@ namespace {
         if (!IsWindowVisible(hwnd)) return false;
         if (!IsWindowEnabled(hwnd)) return false;
 
-        // 排除已知系统类（任务栏/托盘/桌面）
         wchar_t className[256] = { 0 };
         if (GetClassNameW(hwnd, className, static_cast<int>(_countof(className)))) {
             std::wstring cls(className);

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:common_native_channel/common_native_channel.dart';
-import 'package:common_native_channel/common_native_channel_platform.dart';
+import 'package:common_native_channel/src/common_native_channel_platform.dart';
 
 void main() {
   final CommonNativeChannelPlatform initialPlatform =
