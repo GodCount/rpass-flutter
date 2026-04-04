@@ -4,27 +4,32 @@
 #include <flutter/method_channel.h>
 #include <flutter/plugin_registrar_windows.h>
 
+#include "common_features_interface.h"
+
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace common_native_channel {
 
-class CommonNativeChannelPlugin : public flutter::Plugin {
- public:
-  static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);
+	class CommonNativeChannelPlugin : public flutter::Plugin {
+	public:
+		static void RegisterWithRegistrar(flutter::PluginRegistrarWindows* registrar);
 
-  CommonNativeChannelPlugin();
+		explicit CommonNativeChannelPlugin();
 
-  virtual ~CommonNativeChannelPlugin();
+		~CommonNativeChannelPlugin() override;
 
-  // Disallow copy and assign.
-  CommonNativeChannelPlugin(const CommonNativeChannelPlugin&) = delete;
-  CommonNativeChannelPlugin& operator=(const CommonNativeChannelPlugin&) = delete;
+		CommonNativeChannelPlugin(const CommonNativeChannelPlugin&) = delete;
+		CommonNativeChannelPlugin& operator=(const CommonNativeChannelPlugin&) = delete;
 
-  // Called when a method is called on this plugin's channel from Dart.
-  void HandleMethodCall(
-      const flutter::MethodCall<flutter::EncodableValue> &method_call,
-      std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
-};
+		void HandleMethodCall(
+			const flutter::MethodCall<flutter::EncodableValue>& method_call,
+			std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+
+	private:
+		std::vector<std::unique_ptr<CommonFeaturesInterface>> features_;
+	};
 
 }  // namespace common_native_channel
 

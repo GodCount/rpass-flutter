@@ -20,6 +20,9 @@ set(PLUGIN_NAME "common_native_channel_plugin")
 list(APPEND PLUGIN_SOURCES
   "common_native_channel_plugin.cpp"
   "common_native_channel_plugin.h"
+  "features/prev_focus_window.cpp"
+  "features/prev_focus_window.h"
+  "common_features_interface.h"
 )
 
 # Define the plugin library target. Its name must not be changed (see comment
