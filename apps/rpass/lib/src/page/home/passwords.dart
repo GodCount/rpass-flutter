@@ -1,8 +1,8 @@
 import 'package:animations/animations.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:common_native_channel/common_native_channel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
-import 'package:prev_focus_window/prev_focus_window.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
@@ -452,7 +452,7 @@ class _PasswordItemState extends State<_PasswordItem>
 
   @override
   void initState() {
-    PrevFocusWindow.instance.addListener(this);
+    prevFocusWindow.addListener(this);
     super.initState();
   }
 
@@ -472,7 +472,7 @@ class _PasswordItemState extends State<_PasswordItem>
 
   @override
   void dispose() {
-    PrevFocusWindow.instance.removeListener(this);
+    prevFocusWindow.removeListener(this);
     super.dispose();
   }
 
@@ -534,15 +534,15 @@ class _PasswordItemState extends State<_PasswordItem>
             ),
             const MenuDivider(),
             MenuItem(
-              enabled: PrevFocusWindow.instance.isTargetWindowExist,
+              enabled: prevFocusWindow.isTargetWindowExist,
               label:
-                  "${t.auto_fill}${PrevFocusWindow.instance.isTargetWindowExist ? " (${PrevFocusWindow.instance.targetWindowName})" : ""}",
+                  "${t.auto_fill}${prevFocusWindow.isTargetWindowExist ? " (${prevFocusWindow.targetWindowName})" : ""}",
               icon: Icons.ads_click,
               value: MyContextMenuItem.autoFill(),
             ),
             MenuItem.submenu(
               label: t.auto_fill_specified_field,
-              enabled: PrevFocusWindow.instance.isTargetWindowExist,
+              enabled: prevFocusWindow.isTargetWindowExist,
               items: MyContextMenuItem.buildSubmenuAutoFill(context, kdbxEntry),
             ),
             MenuItem(

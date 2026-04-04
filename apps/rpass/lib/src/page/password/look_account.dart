@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:common_native_channel/common_native_channel.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:installed_apps/installed_apps.dart';
 import 'package:lan_fill_server/lan_fill_server.dart';
 import 'package:logging/logging.dart';
-import 'package:prev_focus_window/prev_focus_window.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -113,7 +113,7 @@ class _LookAccountPageState extends State<LookAccountPage>
 
   @override
   void initState() {
-    PrevFocusWindow.instance.addListener(this);
+    prevFocusWindow.addListener(this);
     _getAppInfo();
     super.initState();
   }
@@ -314,7 +314,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                   ),
                 if (kIsDesktop)
                   ListTile(
-                    enabled: PrevFocusWindow.instance.isTargetWindowExist,
+                    enabled: prevFocusWindow.isTargetWindowExist,
                     title: Text(t.auto_fill),
                     leading: Icon(Icons.ads_click),
                     onTap: onAutoPop(() {
@@ -329,7 +329,7 @@ class _LookAccountPageState extends State<LookAccountPage>
 
   @override
   void dispose() {
-    PrevFocusWindow.instance.removeListener(this);
+    prevFocusWindow.removeListener(this);
     super.dispose();
   }
 
@@ -507,7 +507,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                 title: Padding(
                   padding: const EdgeInsets.only(left: 6),
                   child: Text(
-                    "${t.auto_fill}${PrevFocusWindow.instance.isTargetWindowExist ? " (${PrevFocusWindow.instance.targetWindowName})" : ""}",
+                    "${t.auto_fill}${prevFocusWindow.isTargetWindowExist ? " (${prevFocusWindow.targetWindowName})" : ""}",
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -553,7 +553,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                   ),
                 ),
                 trailing: IconButton(
-                  onPressed: PrevFocusWindow.instance.isTargetWindowExist
+                  onPressed: prevFocusWindow.isTargetWindowExist
                       ? () => autoFill(kdbxEntry)
                       : null,
                   icon: const Icon(Icons.ads_click),

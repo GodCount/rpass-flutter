@@ -74,8 +74,8 @@ dependencies:
     path: ../../packages/enigo_flutter
   installed_apps:
     path: ../../packages/installed_apps
-  prev_focus_window:
-    path: ../../packages/prev_focus_window
+  common_native_channel:
+    path: ../../packages/common_native_channel
 
   # 工具和实用功能
   fluttertoast: ^9.0.0

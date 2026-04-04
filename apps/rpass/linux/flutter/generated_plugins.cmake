@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   biometric_storage
+  common_native_channel
   hotkey_manager_linux
   screen_retriever_linux
   tray_manager

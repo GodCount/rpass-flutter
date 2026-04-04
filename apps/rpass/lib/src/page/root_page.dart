@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:common_native_channel/common_native_channel.dart';
 import 'package:enigo_flutter/enigo_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:logging/logging.dart';
-import 'package:prev_focus_window/prev_focus_window.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -93,7 +93,7 @@ class _RootRpassAppState extends State<RootRpassApp>
           if (await windowManager.isFocused()) {
             await windowManager.hide();
             // 返还焦点,忽略异常
-            unawaited(PrevFocusWindow.instance.activatePrevWindow());
+            unawaited(prevFocusWindow.activatePrevWindow());
           } else {
             final alignment = Store
                 .instance

@@ -1,7 +1,7 @@
+import 'package:common_native_channel/common_native_channel.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:enigo_flutter/enigo_flutter.dart';
-import 'package:prev_focus_window/prev_focus_window.dart';
 
 import '../native/platform/android.dart';
 import '../util/common.dart';
@@ -36,7 +36,7 @@ Future<void> autoFillSequence(
 }) async {
   if (!kIsDesktop) return;
 
-  if (PrevFocusWindow.instance.targetWindowName != null) {
+  if (prevFocusWindow.targetWindowName != null) {
     // 在运行中不要重复触发
     if (_runing) {
       debugPrint("[auto fill runing]");
@@ -45,7 +45,7 @@ Future<void> autoFillSequence(
     _runing = true;
 
     try {
-      if (await PrevFocusWindow.instance.activatePrevWindow()) {
+      if (await prevFocusWindow.activatePrevWindow()) {
         final List<TextSequenceItem> items;
 
         if (key != null) {

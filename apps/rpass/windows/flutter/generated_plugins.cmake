@@ -3,8 +3,8 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  common_native_channel
   hotkey_manager_windows
-  prev_focus_window
   screen_retriever_windows
   tray_manager
   url_launcher_windows
