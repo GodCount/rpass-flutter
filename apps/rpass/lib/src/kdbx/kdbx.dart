@@ -468,6 +468,22 @@ extension KdbxAndroidAutoFill on KdbxBase {
   }
 }
 
+extension _MatchSet on Set<String> {
+  bool hasMatch(RegExp reg) {
+    return any((item) => reg.hasMatch(item));
+  }
+}
+
+class AutoFillFieldMatch {
+  static final PASSWORD = RegExp("password|密码", caseSensitive: false);
+  static final USERNAME = RegExp(
+    "login|username|user|name|账号|用户",
+    caseSensitive: false,
+  );
+  static final EMAIL = RegExp("email|mail|邮箱", caseSensitive: false);
+  static final OTP = RegExp("otp", caseSensitive: false);
+}
+
 extension KdbxEntryAndroidAutoFill on KdbxEntry {
   AutofillDataset toAutofillDataset(Set<String> fieldTypes) {
     final title = getActualString(KdbxKeyCommon.TITLE);
@@ -478,15 +494,17 @@ extension KdbxEntryAndroidAutoFill on KdbxEntry {
 
     return AutofillDataset(
       label: title != null && title.isNotEmpty ? title : user,
-      password: fieldTypes.contains(AutofillField.PASSWORD) ? password : null,
+      password: fieldTypes.hasMatch(AutoFillFieldMatch.PASSWORD)
+          ? password
+          : null,
       username:
-          fieldTypes.contains(AutofillField.EMAIL) &&
+          fieldTypes.hasMatch(AutoFillFieldMatch.EMAIL) &&
               email != null &&
               email
                   .isNotEmpty // 存在邮箱,优先返回邮箱
           ? email
           : user ?? email,
-      otp: fieldTypes.contains(AutofillField.OTP) ? otp : null,
+      otp: fieldTypes.hasMatch(AutoFillFieldMatch.OTP) ? otp : null,
     );
   }
 }

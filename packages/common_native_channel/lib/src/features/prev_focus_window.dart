@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -55,6 +57,8 @@ class PrevFocusWindow extends CommonFeaturesInterface {
   }
 
   Future<bool> activatePrevWindow() async {
+    if (!Platform.isWindows && !Platform.isMacOS) return false;
+
     return await methodChannel.invokeMethod<bool>("activate_prev_window") ??
         false;
   }

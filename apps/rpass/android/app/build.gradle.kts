@@ -75,6 +75,10 @@ android {
     }
 }
 
+dependencies {
+    implementation("androidx.autofill:autofill:1.3.0")
+}
+
 flutter {
     source = "../.."
 }

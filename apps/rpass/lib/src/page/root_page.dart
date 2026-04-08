@@ -13,11 +13,14 @@ import '../context/kdbx.dart';
 import '../context/lan_fill_server.dart';
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
+import '../native/channel.dart';
+import '../native/platform/android.dart';
 import '../store/index.dart';
 import '../store/settings/shortcuts.dart';
 import '../tray.dart';
 import '../util/common.dart';
 import '../util/route.dart';
+import '../widget/common.dart';
 import 'auth_kdbx/load_page.dart';
 import 'auth_kdbx/verify_owner_page.dart';
 
@@ -54,7 +57,12 @@ class RootRpassApp extends StatefulWidget {
 }
 
 class _RootRpassAppState extends State<RootRpassApp>
-    with WindowListener, TrayListener, KdbxProviderListener, _BackgroundLock {
+    with
+        WindowListener,
+        TrayListener,
+        KdbxProviderListener,
+        _BackgroundLock,
+        NativeChannelListener {
   Locale? _locale;
 
   @override
@@ -67,6 +75,7 @@ class _RootRpassAppState extends State<RootRpassApp>
     KdbxProvider.of(context).addListener(this);
     Store.instance.settings.addListener(_settingsListener);
     Store.instance.settings.shortcutsStore.addListener(_hotKeyHandler);
+    NativeInstancePlatform.instance.addListener(this);
 
     _updateTrayMenu();
   }
@@ -218,16 +227,29 @@ class _RootRpassAppState extends State<RootRpassApp>
     windowManager.hide();
   }
 
-  // @override
-  // void onWindowFocus() {
-  //   windowManager.setOpacity(1);
-  // }
+  @override
+  void onRequestAutofill(AutofillMetadata metadata) async {
+    final kdbx = KdbxProvider.of(context).kdbx;
 
-  // @override
-  // void onWindowBlur() {
-  //   // windowManager.hide();
-  //   windowManager.setOpacity(.5);
-  // }
+    if (kdbx != null) {
+      List<AutofillDataset> result = await kdbx.autofillSearch(metadata);
+
+      if (result.isEmpty && Store.instance.settings.manualSelectFillItem) {
+        final kdbxEntry = await KdbxEntrySelectorDialog.openDialog(context);
+        final dataset = kdbxEntry?.toAutofillDataset(metadata.fieldTypes);
+
+        if (dataset != null) result.add(dataset);
+      }
+
+      await NativeInstancePlatform.instance.autofillService.responseDataset(
+        result,
+      );
+    } else {
+      await NativeInstancePlatform.instance.autofillService.responseDataset(
+        null,
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -237,6 +259,7 @@ class _RootRpassAppState extends State<RootRpassApp>
     KdbxProvider.of(context).removeListener(this);
     Store.instance.settings.removeListener(_settingsListener);
     Store.instance.settings.shortcutsStore.removeListener(_hotKeyHandler);
+    NativeInstancePlatform.instance.removeListener(this);
   }
 
   @override
@@ -287,6 +310,7 @@ mixin _BackgroundLock on State<RootRpassApp> {
   }
 
   void _onWindowEvent(String eventName) {
+    print("eventName $eventName");
     if (eventName == "minimize" || eventName == "hide") {
       _start();
     } else if (eventName == "focus") {

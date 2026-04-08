@@ -1,7 +1,27 @@
 import 'dart:io';
+
+import 'package:flutter/services.dart';
+
+import '../util/common.dart';
 import 'platform/android.dart';
 
-class NativeInstancePlatform {
+abstract class MethodChannelInterface {
+  MethodChannelInterface(this.channel, this.emit);
+
+  final MethodChannel channel;
+  final ValueChanged<ValueChanged<NativeChannelListener>> emit;
+
+  List<String> get methodCalls;
+
+  Future<dynamic> onMethodCallHandler(MethodCall call);
+}
+
+mixin NativeChannelListener {
+  void onRequestAutofill(AutofillMetadata metadata) {}
+}
+
+class NativeInstancePlatform
+    with SimpleObserverListener<NativeChannelListener> {
   static NativeInstancePlatform get instance => _instance!;
   static NativeInstancePlatform? _instance;
 

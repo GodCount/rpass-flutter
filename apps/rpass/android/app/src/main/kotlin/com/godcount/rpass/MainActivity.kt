@@ -1,6 +1,5 @@
 package com.godcount.rpass
 
-import android.os.Bundle
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 

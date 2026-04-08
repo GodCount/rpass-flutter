@@ -98,7 +98,7 @@ class AutofillService {
     return null;
   }
 
-  Future<bool> responseDataset(List<AutofillDataset> list) async {
+  Future<bool> responseDataset(List<AutofillDataset>? list) async {
     return false;
   }
 
@@ -111,10 +111,12 @@ class AutofillService {
   }
 }
 
-class _AndroidAutofillService extends AutofillService {
-  _AndroidAutofillService(this.channel);
+class _AndroidAutofillService extends MethodChannelInterface
+    implements AutofillService {
+  _AndroidAutofillService(super.channel, super.emit);
 
-  final MethodChannel channel;
+  @override
+  final List<String> methodCalls = ["request_autofill_metadata"];
 
   @override
   Future<AutofillServiceStatus> status() async {
@@ -148,11 +150,22 @@ class _AndroidAutofillService extends AutofillService {
   }
 
   @override
-  Future<bool> responseDataset(List<AutofillDataset> list) async {
-    return await channel.invokeMethod(
-      "response_autofill_dataset",
-      list.map((it) => it.toJson()).toList(),
-    );
+  Future<bool> responseDataset(List<AutofillDataset>? list) async {
+    return await channel.invokeMethod("response_autofill_dataset", {
+      "dataset": list?.map((it) => it.toJson()).toList(),
+    });
+  }
+
+  @override
+  Future<dynamic> onMethodCallHandler(MethodCall call) async {
+    if (call.method == "request_autofill_metadata") {
+      try {
+        final metadata = AutofillMetadata.fromJson(call.arguments["metadata"]);
+        emit((listener) => listener.onRequestAutofill(metadata));
+      } catch (e) {
+        _logger.warning("request autofill metadata $e");
+      }
+    }
   }
 }
 
@@ -165,12 +178,20 @@ class AndroidNativeInstancePlatform extends NativeInstancePlatform {
 
   late final _AndroidAutofillService _autofillService = _AndroidAutofillService(
     _channel,
+    emit,
   );
 
   @override
   AutofillService get autofillService => _autofillService;
 
+  late final List<MethodChannelInterface> _services = [_autofillService];
+
   Future<void> _methodCallHandler(MethodCall call) async {
-    debugPrint("native_channel: ${call.method}, ${call.arguments}");
+    debugPrint("_methodCallHandler ${call.method}");
+    for (final service in _services) {
+      if (service.methodCalls.contains(call.method)) {
+        return service.onMethodCallHandler(call);
+      }
+    }
   }
 }
