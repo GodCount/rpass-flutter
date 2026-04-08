@@ -715,4 +715,7 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get close => '关闭';
+
+  @override
+  String get seed_color => '种子色';
 }

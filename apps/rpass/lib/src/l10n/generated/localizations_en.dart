@@ -733,4 +733,7 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get close => 'Close';
+
+  @override
+  String get seed_color => 'Seed Color';
 }

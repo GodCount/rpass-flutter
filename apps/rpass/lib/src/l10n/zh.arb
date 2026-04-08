@@ -345,5 +345,6 @@
     "trust": "信任",
     "device": "设备",
     "platform": "平台",
-    "close": "关闭"
+    "close": "关闭",
+    "seed_color": "种子色"
 }

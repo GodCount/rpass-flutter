@@ -1453,6 +1453,12 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'关闭'**
   String get close;
+
+  /// No description provided for @seed_color.
+  ///
+  /// In zh, this message translates to:
+  /// **'种子色'**
+  String get seed_color;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

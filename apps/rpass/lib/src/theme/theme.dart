@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 const List<Color> availableColors = [
-  Color(0xFF659BFF),
+  Color(0xFF92AAE9),
   Colors.red,
   Colors.green,
   Colors.yellow,
@@ -27,6 +27,7 @@ ThemeData theme(Brightness brightness, [Color? seedColor]) {
   final scheme = ColorScheme.fromSeed(
     seedColor: seedColor ?? availableColors[0],
     brightness: brightness,
+    dynamicSchemeVariant: DynamicSchemeVariant.content,
   );
   return ThemeData(
     useMaterial3: true,
@@ -35,7 +36,7 @@ ThemeData theme(Brightness brightness, [Color? seedColor]) {
     appBarTheme: AppBarTheme(
       centerTitle: true,
       scrolledUnderElevation: 2.0,
-      backgroundColor: scheme.primaryContainer,
+      backgroundColor: scheme.secondaryContainer,
       shadowColor: scheme.shadow,
     ),
     navigationBarTheme: NavigationBarThemeData(
@@ -47,7 +48,8 @@ ThemeData theme(Brightness brightness, [Color? seedColor]) {
       ),
     ),
     listTileTheme: ListTileThemeData(
-      selectedTileColor: scheme.primaryContainer,
+      selectedColor: scheme.onSecondaryContainer,
+      selectedTileColor: scheme.secondaryContainer.withValues(alpha: 0.8),
     ),
     cardTheme: CardThemeData(elevation: 2.0),
   );

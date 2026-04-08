@@ -345,5 +345,6 @@
     "trust": "Trust",
     "device": "Device",
     "platform": "Platform",
-    "close": "Close"
+    "close": "Close",
+    "seed_color": "Seed Color"
 }

@@ -55,7 +55,7 @@ class _ChangeThemePageState extends State<ChangeThemePage>
       appBar: AppBar(
         automaticallyImplyLeading: automaticallyImplyLeading,
         leading: autoBack(),
-        title: Text(t.language_setting),
+        title: Text(t.theme),
       ),
       body: ListView(
         children: [
@@ -86,24 +86,51 @@ class _ChangeThemePageState extends State<ChangeThemePage>
               setThemeMode(ThemeMode.dark);
             },
           ),
-          Padding(
-            padding: const EdgeInsetsGeometry.all(12),
-            child: Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: availableColors.map(_buildColor).toList(),
+
+          ListTile(
+            title: Text(t.seed_color),
+            trailing: Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: Store.instance.settings.themeSeedColor,
+                borderRadius: BorderRadius.circular(24),
+              ),
             ),
+            onTap: _selectorSeedColor,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildColor(Color color) {
-    return GestureDetector(
-      onTap: () {
-        setThemeSeedColor(color);
+  void _selectorSeedColor() async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        final t = I18n.of(context)!;
+
+        return AlertDialog(
+          title: Text(t.seed_color),
+          content: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              for (final color in availableColors)
+                _buildColor(color, () {
+                  setThemeSeedColor(color);
+                  context.router.pop();
+                }),
+            ],
+          ),
+        );
       },
+    );
+  }
+
+  Widget _buildColor(Color color, GestureTapCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
       child: Container(
         width: 32,
         height: 32,
