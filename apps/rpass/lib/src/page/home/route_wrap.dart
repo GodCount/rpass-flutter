@@ -10,11 +10,11 @@ class RouteWrap extends StatefulWidget {
   const RouteWrap({
     super.key,
     required this.child,
-    this.empty = const EmptyPage(),
+    this.placeholder = const EmptyPage(),
   });
 
   final Widget child;
-  final Widget empty;
+  final Widget placeholder;
 
   @override
   State<RouteWrap> createState() => _RouteWrapState();
@@ -79,9 +79,11 @@ class _RouteWrapState extends State<RouteWrap>
                     vertical: 6,
                     horizontal: 3,
                   ),
-                  child: const ClipRRect(
+                  child: ClipRRect(
                     borderRadius: BorderRadius.all(Radius.circular(12)),
-                    child: AutoRouter(),
+                    child: AutoRouter(
+                      placeholder: (context) => widget.placeholder,
+                    ),
                   ),
                 ),
               ),

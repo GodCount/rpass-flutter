@@ -558,9 +558,7 @@ mixin SecondLevelRouteUtil<T extends StatefulWidget> on State<T>
 
   void _navigationHistory() {
     if (context.router.currentPath.startsWith("/home")) {
-      final isEmptyRouter =
-          context.router.currentSegments.length <= 2 ||
-          context.router.currentSegments.last.name == "EmptyPageRoute";
+      final isEmptyRouter = context.router.currentSegments.length == 2;
 
       if (this.isEmptyRouter != isEmptyRouter) {
         this.isEmptyRouter = isEmptyRouter;
@@ -614,7 +612,7 @@ mixin NavigationHistoryObserver<T extends StatefulWidget> on State<T> {
 mixin SecondLevelPageAutoBack<T extends StatefulWidget> on State<T>
     implements SrceenResizeObserver {
   bool get automaticallyImplyLeading =>
-      !isDesktop || context.router.pageCount > 2;
+      !isDesktop || context.router.pageCount > 1;
 
   @override
   void initState() {
@@ -683,10 +681,7 @@ extension PlatformStackRouter on StackRouter {
     if (isDesktop) {
       final router = findStackScope(route);
       _updateTabs(router);
-      await router.replaceAll([
-        const NamedRoute("EmptyPageRoute"),
-        route,
-      ], onFailure: onFailure);
+      await router.replaceAll([route], onFailure: onFailure);
     } else {
       await push(route, onFailure: onFailure);
     }

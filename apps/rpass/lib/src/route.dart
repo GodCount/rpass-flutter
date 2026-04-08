@@ -124,14 +124,6 @@ RootStackRouter _createDesktopAutoRoute() {
                 path: "passwords",
                 page: PasswordsRoute.page,
                 children: [
-                  NamedRouteDef(
-                    name: "EmptyPageRoute",
-                    initial: true,
-                    path: "empty",
-                    builder: (_, __) {
-                      return const EmptyPage();
-                    },
-                  ),
                   AutoRoute(
                     path: "edit_account/:uuid",
                     page: EditAccountRoute.page,
@@ -146,14 +138,6 @@ RootStackRouter _createDesktopAutoRoute() {
                 path: "groups",
                 page: GroupsRoute.page,
                 children: [
-                  NamedRouteDef(
-                    name: "EmptyPageRoute",
-                    initial: true,
-                    path: "empty",
-                    builder: (_, __) {
-                      return const EmptyPage();
-                    },
-                  ),
                   AutoRoute(
                     path: "manage_group_entry/:uuid",
                     page: ManageGroupEntryRoute.page,
@@ -168,14 +152,6 @@ RootStackRouter _createDesktopAutoRoute() {
                 path: "settings",
                 page: SettingsRoute.page,
                 children: [
-                  NamedRouteDef(
-                    name: "EmptyPageRoute",
-                    initial: true,
-                    path: "empty",
-                    builder: (_, __) {
-                      return const EmptyPage();
-                    },
-                  ),
                   AutoRoute(path: "recycle_bin", page: RecycleBinRoute.page),
                   AutoRoute(path: "change_theme", page: ChangeThemeRoute.page),
                   AutoRoute(
