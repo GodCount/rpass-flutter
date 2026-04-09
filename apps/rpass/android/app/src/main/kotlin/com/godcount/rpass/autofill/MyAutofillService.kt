@@ -12,6 +12,8 @@ import com.godcount.rpass.autofill.helpers.AutofillMetadata
 import com.godcount.rpass.autofill.helpers.ResponseHelper
 
 
+data class LastResponse(val metadata: AutofillMetadata, val dataset: List<AutofillDataset>)
+
 class MyAutofillService : AutofillService() {
 
 
@@ -19,6 +21,8 @@ class MyAutofillService : AutofillService() {
         var onAutofillRequest: ((metadata: AutofillMetadata) -> Unit)? = null
         var onAutofillResponse: ((activity: Activity, dataset: List<AutofillDataset>?) -> Unit)? =
             null
+
+        private var lastResponse: LastResponse? = null
     }
 
 
@@ -28,20 +32,25 @@ class MyAutofillService : AutofillService() {
 
         onAutofillResponse = null
 
-        val helperResponse = ResponseHelper.createAuthResponse(this, request)
+        val responseHelper = ResponseHelper.createResponse(this, request)
+        val metadata = responseHelper.parsed.toAutofillMetadata()
 
-        if (helperResponse == null) {
-            return callback.onSuccess(null)
-        }
+        println("metadata $metadata")
 
         fun setOnAutofillResponseByReply(finish: Boolean) {
+
             onAutofillResponse = ({ activity, dataset ->
                 onAutofillResponse = null
+                lastResponse = null
                 if (!dataset.isNullOrEmpty()) {
-                    val response = ResponseHelper.createDatasetResponse(this, request, dataset)
-                    val replyIntent =
-                        Intent().putExtra(EXTRA_AUTHENTICATION_RESULT, response!!.response)
 
+                    val response = responseHelper.buildDatasetResponse(dataset)
+
+                    if (response != null) {
+                        lastResponse = LastResponse(metadata, dataset)
+                    }
+
+                    val replyIntent = Intent().putExtra(EXTRA_AUTHENTICATION_RESULT, response)
                     activity.setResult(RESULT_OK, replyIntent)
 
                     if (finish) {
@@ -56,27 +65,34 @@ class MyAutofillService : AutofillService() {
 
 
         if (onAutofillRequest != null) {
-            onAutofillResponse = ({ activity, dataset ->
+            onAutofillResponse = ({ _, dataset ->
                 onAutofillResponse = null
+                lastResponse = null
+
                 if (dataset == null) {
                     setOnAutofillResponseByReply(false)
-                    callback.onSuccess(helperResponse.response)
+                    callback.onSuccess(responseHelper.buildAuthResponse(true))
                 } else if (dataset.isNotEmpty()) {
-                    callback.onSuccess(
-                        ResponseHelper.createDatasetResponse(
-                            this,
-                            request,
-                            dataset
-                        )?.response
-                    )
+                    val response = responseHelper.buildDatasetResponse(dataset)
+
+                    if (response != null) {
+                        lastResponse = LastResponse(metadata, dataset)
+                    }
+
+                    callback.onSuccess(response)
                 } else {
                     callback.onSuccess(null)
                 }
             })
-            onAutofillRequest!!(helperResponse.metadata)
+            onAutofillRequest!!(metadata)
+        } else if (lastResponse != null && lastResponse!!.metadata.equal(metadata)) {
+            callback.onSuccess(
+                responseHelper.buildDatasetResponse(lastResponse!!.dataset)
+            )
+            lastResponse = null
         } else {
             setOnAutofillResponseByReply(true)
-            callback.onSuccess(helperResponse.response)
+            callback.onSuccess(responseHelper.buildAuthResponse(false))
         }
 
     }

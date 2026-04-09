@@ -19,31 +19,20 @@ import android.view.inputmethod.InlineSuggestionsRequest
 import androidx.autofill.inline.v1.InlineSuggestionUi
 import com.godcount.rpass.MainActivity
 
-data class HelperResponse(val response: FillResponse, val metadata: AutofillMetadata)
 
 class ResponseHelper private constructor(
     private val context: Context,
     private val structure: AssistStructure,
-    private val dataset: List<AutofillDataset>?,
     private val inlineSuggestion: InlineSuggestionsRequest?
 ) {
     private var unlockLabel = "Rpass with Autofill"
 
-    private val parsed = ViewStructureParser(structure)
+    val parsed = ViewStructureParser(structure)
 
-
-    private fun build(): HelperResponse? {
+    fun buildDatasetResponse(dataset: List<AutofillDataset>?): FillResponse? {
         if (!parsed.canAutofill()) return null
 
-        if (dataset == null) return HelperResponse(buildAuthResponse(), parsed.toAutofillMetadata())
-
-        if (dataset.isEmpty()) return null
-
-        return HelperResponse(buildDatasetResponse(dataset), parsed.toAutofillMetadata())
-    }
-
-
-    private fun buildDatasetResponse(dataset: List<AutofillDataset>): FillResponse {
+        if (dataset.isNullOrEmpty()) return null
 
         fun createAttribution(msg: String): PendingIntent {
             val intent = Intent(context, MainActivity::class.java)
@@ -98,6 +87,7 @@ class ResponseHelper private constructor(
                                         )
                                     )
 
+
                                     if (inlineSuggestion != null) {
                                         setInlinePresentation(
                                             InlinePresentation(
@@ -150,18 +140,24 @@ class ResponseHelper private constructor(
         }.build()
     }
 
-    private fun buildAuthResponse(): FillResponse {
+    fun buildAuthResponse(flags: Boolean): FillResponse? {
+        if (!parsed.canAutofill()) return null
+
         val intent = Intent(context, MainActivity::class.java)
         intent.action = Intent.ACTION_RUN
 
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        if (flags) {
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                    Intent.FLAG_ACTIVITY_NEW_TASK
+        }
 
+        intent.putExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE, structure)
 
         intent.putExtra(
-            AutofillMetadata.EXTRA_NAME,
+            AutofillMetadata.EXTRA_AUTOFILL_METADATA,
             parsed.toAutofillMetadata().toJsonString()
         )
-        intent.putExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE, structure)
 
         val sender = PendingIntent.getActivity(
             context,
@@ -198,31 +194,28 @@ class ResponseHelper private constructor(
     }
 
     companion object {
-        fun createDatasetResponse(
+
+        fun createResponseByStructure(
             context: Context,
-            request: FillRequest,
-            dataset: List<AutofillDataset>
-        ): HelperResponse? {
-            return createResponse(context, request, dataset)
+            structure: AssistStructure,
+        ): ResponseHelper {
+            return ResponseHelper(
+                context,
+                structure,
+                null
+            )
         }
 
-
-        fun createAuthResponse(context: Context, request: FillRequest): HelperResponse? {
-            return createResponse(context, request, null)
-        }
-
-        private fun createResponse(
+        fun createResponse(
             context: Context,
             request: FillRequest,
-            dataset: List<AutofillDataset>?
-        ): HelperResponse? {
+        ): ResponseHelper {
             val structure = request.fillContexts.last().structure
             return ResponseHelper(
                 context,
                 structure,
-                dataset,
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) request.inlineSuggestionsRequest else null
-            ).build()
+            )
         }
 
     }

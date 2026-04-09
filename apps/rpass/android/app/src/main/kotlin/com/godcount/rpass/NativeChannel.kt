@@ -1,9 +1,13 @@
 package com.godcount.rpass
 
+import android.app.Activity
 import android.app.Activity.RESULT_OK
+import android.app.assist.AssistStructure
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
 import android.view.autofill.AutofillManager
+import android.view.autofill.AutofillManager.EXTRA_AUTHENTICATION_RESULT
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -15,6 +19,7 @@ import androidx.core.net.toUri
 import com.godcount.rpass.autofill.MyAutofillService
 import com.godcount.rpass.autofill.helpers.AutofillDataset
 import com.godcount.rpass.autofill.helpers.AutofillMetadata
+import com.godcount.rpass.autofill.helpers.ResponseHelper
 
 class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHandler,
     PluginRegistry.ActivityResultListener, PluginRegistry.NewIntentListener {
@@ -24,6 +29,7 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
             NativeChannel::class.java.hashCode() and 0xffff
     }
 
+    private var lastAutofillIntent: Intent? = null
     private var channel: MethodChannel? = null
     private var autofillManager: AutofillManager? = null
     private var activityBinding: ActivityPluginBinding? = null
@@ -65,16 +71,13 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
     override fun onDetachedFromActivity() {
         activityBinding?.removeActivityResultListener(this)
         activityBinding?.removeOnNewIntentListener(this)
+        lastAutofillIntent = null
         activityBinding = null
     }
 
     override fun onNewIntent(intent: Intent): Boolean {
-        if (intent.hasExtra(AutofillMetadata.EXTRA_NAME)) {
-            val metadata = getAutofillMetadata(intent)
-            if (metadata != null) {
-                this.requestAutofill(metadata)
-                return true
-            }
+        if (intent.hasExtra(AutofillMetadata.EXTRA_AUTOFILL_METADATA)) {
+            lastAutofillIntent = intent
         }
         return false
     }
@@ -114,39 +117,34 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
             }
 
             "get_autofill_metadata" -> {
-                result.success(activityBinding?.activity?.intent?.let {
-                    getAutofillMetadata(it)?.toMap()
-                })
+
+                val intent = lastAutofillIntent ?: activityBinding?.activity?.intent
+
+                if (intent != null) {
+                    val metadata = getAutofillMetadata(intent)
+                    return result.success(metadata?.toMap())
+                }
+                result.success(null)
             }
 
             "response_autofill_dataset" -> {
                 try {
-                    if (activityBinding != null && MyAutofillService.onAutofillResponse != null) {
-                        val dataset = call.argument<List<Map<String, String>>?>("dataset")
-                        if (dataset == null) {
-                            MyAutofillService.onAutofillResponse!!(
-                                activityBinding!!.activity,
-                                null
-                            )
-                        } else {
-                            dataset.takeIf { it.isNotEmpty() }
-                                ?.map { AutofillDataset.fromJson(it) }
-                                ?.filter { it.username != null || it.password != null || it.otp != null }
-                                ?.let {
-                                    MyAutofillService.onAutofillResponse!!(
-                                        activityBinding!!.activity,
-                                        it
-                                    )
-                                }
-                        }
+                    if (activityBinding == null) return result.success(false)
 
-                        result.success(true)
-                    } else {
-                        result.success(false)
-                    }
+                    val dataset = call.argument<List<Map<String, String>>?>("dataset")
+                        ?.takeIf { it.isNotEmpty() }
+                        ?.map { AutofillDataset.fromJson(it) }
+                        ?.filter { it.username != null || it.password != null || it.otp != null }
+
+                    result.success(responseAutofillDataset(activityBinding!!.activity, dataset))
 
                 } catch (e: Exception) {
                     result.error("unknown", e.message, e)
+                } finally {
+                    lastAutofillIntent = null
+                    if (activityBinding != null) {
+                        activityBinding!!.activity.intent = Intent()
+                    }
                 }
 
             }
@@ -155,9 +153,64 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
         }
     }
 
+
+    private fun responseAutofillDataset(
+        activity: Activity,
+        dataset: List<AutofillDataset>?
+    ): Boolean {
+        if (MyAutofillService.onAutofillResponse != null) {
+
+            MyAutofillService.onAutofillResponse!!(
+                activity,
+                dataset
+            )
+
+            return true
+        } else {
+
+            val intent = lastAutofillIntent ?: activityBinding?.activity?.intent
+
+            if (intent == null || intent.hasExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE)) {
+                return false
+            }
+
+            val structure = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra(
+                    AutofillManager.EXTRA_ASSIST_STRUCTURE,
+                    AssistStructure::class.java
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE)
+            }
+
+            if (structure == null) return false
+
+            val response = ResponseHelper.createResponseByStructure(
+                activity,
+                structure,
+            ).buildDatasetResponse(dataset)
+
+
+            val replyIntent =
+                Intent().putExtra(EXTRA_AUTHENTICATION_RESULT, response)
+
+            activity.setResult(RESULT_OK, replyIntent)
+
+            if (lastAutofillIntent == null) {
+                activity.finish()
+            } else {
+                activity.moveTaskToBack(false)
+                return true
+            }
+
+        }
+        return false
+    }
+
     private fun getAutofillMetadata(intent: Intent): AutofillMetadata? {
         return intent.getStringExtra(
-            AutofillMetadata.EXTRA_NAME
+            AutofillMetadata.EXTRA_AUTOFILL_METADATA
         )?.let(AutofillMetadata.Companion::fromJsonString)
     }
 

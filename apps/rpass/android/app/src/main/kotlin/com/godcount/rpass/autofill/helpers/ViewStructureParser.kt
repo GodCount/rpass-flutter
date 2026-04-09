@@ -97,15 +97,17 @@ class ViewStructureParser(private val structure: AssistStructure) {
         node: AssistStructure.ViewNode
     ): String {
 
+        if (!node.autofillHints.isNullOrEmpty()) {
+            val key = node.autofillHints!![0].lowercase(Locale.getDefault())
+            if (!fields.containsKey(key)) return key
+        }
+
+
         if (!node.hint.isNullOrEmpty()) {
             val key = node.hint!!.lowercase(Locale.getDefault())
             if (!fields.containsKey(key)) return key
         }
 
-        if (!node.autofillHints.isNullOrEmpty()) {
-            val key = node.autofillHints!![0].lowercase(Locale.getDefault())
-            if (!fields.containsKey(key)) return key
-        }
 
 
         return node.htmlInfo?.let {
@@ -157,9 +159,8 @@ data class AutofillMetadata(
     val fieldTypes: Set<String>,
 ) {
     companion object {
-        const val EXTRA_NAME = "AutofillMetadata"
+        const val EXTRA_AUTOFILL_METADATA = "com.godcount.rpass.AUTOFILL_METADATA"
         private const val FIELD_TYPES = "fieldTypes"
-
         private const val PACKAGE_NAMES = "packageNames"
         private const val WEB_DOMAINS = "webDomains"
 
@@ -177,6 +178,12 @@ data class AutofillMetadata(
                     }?.toSet() ?: HashSet()
                 )
             }
+    }
+
+    fun equal(data: AutofillMetadata): Boolean {
+        return packageNames.containsAll(data.packageNames) &&
+                webDomains.containsAll(data.webDomains) &&
+                fieldTypes.containsAll(data.fieldTypes)
     }
 
     fun toMap(): Map<Any, Any> = mapOf(

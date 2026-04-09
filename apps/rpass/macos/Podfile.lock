@@ -1,6 +1,8 @@
 PODS:
   - biometric_storage (0.0.1):
     - FlutterMacOS
+  - common_native_channel (0.0.1):
+    - FlutterMacOS
   - enigo_flutter (0.0.1):
     - FlutterMacOS
   - file_picker (0.0.1):
@@ -18,8 +20,6 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - prev_focus_window (0.0.1):
-    - FlutterMacOS
   - screen_retriever_macos (0.0.1):
     - FlutterMacOS
   - shared_preferences_foundation (0.0.1):
@@ -34,6 +34,7 @@ PODS:
 
 DEPENDENCIES:
   - biometric_storage (from `Flutter/ephemeral/.symlinks/plugins/biometric_storage/macos`)
+  - common_native_channel (from `Flutter/ephemeral/.symlinks/plugins/common_native_channel/macos`)
   - enigo_flutter (from `Flutter/ephemeral/.symlinks/plugins/enigo_flutter/macos`)
   - file_picker (from `Flutter/ephemeral/.symlinks/plugins/file_picker/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
@@ -41,7 +42,6 @@ DEPENDENCIES:
   - mobile_scanner (from `Flutter/ephemeral/.symlinks/plugins/mobile_scanner/darwin`)
   - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
-  - prev_focus_window (from `Flutter/ephemeral/.symlinks/plugins/prev_focus_window/macos`)
   - screen_retriever_macos (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos`)
   - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
   - tray_manager (from `Flutter/ephemeral/.symlinks/plugins/tray_manager/macos`)
@@ -55,6 +55,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   biometric_storage:
     :path: Flutter/ephemeral/.symlinks/plugins/biometric_storage/macos
+  common_native_channel:
+    :path: Flutter/ephemeral/.symlinks/plugins/common_native_channel/macos
   enigo_flutter:
     :path: Flutter/ephemeral/.symlinks/plugins/enigo_flutter/macos
   file_picker:
@@ -69,8 +71,6 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos
   path_provider_foundation:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
-  prev_focus_window:
-    :path: Flutter/ephemeral/.symlinks/plugins/prev_focus_window/macos
   screen_retriever_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos
   shared_preferences_foundation:
@@ -84,6 +84,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   biometric_storage: 9de0cb4e591e52329ca0da7df42e964db6c526cf
+  common_native_channel: 7df2ad28406c638f820af8548a3dca86beda9067
   enigo_flutter: bd48b6f0205d67230c22aead1ee71a5e01caed56
   file_picker: 7584aae6fa07a041af2b36a2655122d42f578c1a
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
@@ -92,7 +93,6 @@ SPEC CHECKSUMS:
   mobile_scanner: 9157936403f5a0644ca3779a38ff8404c5434a93
   package_info_plus: f0052d280d17aa382b932f399edf32507174e870
   path_provider_foundation: bb55f6dbba17d0dccd6737fe6f7f34fbd0376880
-  prev_focus_window: 402748479499b4d53316a1fc1bbe3c9b7bbc35ae
   screen_retriever_macos: 452e51764a9e1cdb74b3c541238795849f21557f
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   tray_manager: a104b5c81b578d83f3c3d0f40a997c8b10810166
