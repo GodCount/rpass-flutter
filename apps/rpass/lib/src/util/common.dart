@@ -8,6 +8,7 @@ import 'package:csv/csv.dart';
 import 'package:csv/csv_settings_autodetection.dart';
 import 'package:flutter/foundation.dart'
     show ObserverList, ValueChanged, protected;
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
@@ -322,4 +323,52 @@ class SimpleAsyncQueue {
   int get length => _queue.length;
 
   bool get isProcessing => _isProcessing;
+}
+
+///
+/// 用于在软件后台时防止定时器因为优化导致偏差较大
+///
+class SimpleTimestampTimer implements Timer {
+  SimpleTimestampTimer._(this.timer);
+
+  final Timer timer;
+
+  factory SimpleTimestampTimer(
+    Duration duration,
+    VoidCallback callback, {
+    Duration? interval,
+  }) {
+    assert(
+      interval == null || interval < duration,
+      "Interval should be shorter than duration",
+    );
+
+    interval =
+        interval ??
+        (duration.inSeconds < 1 ? duration : const Duration(seconds: 1));
+
+    final startTime = DateTime.now().millisecondsSinceEpoch;
+
+    return SimpleTimestampTimer._(
+      Timer.periodic(interval, (timer) {
+        final endTime = DateTime.now().millisecondsSinceEpoch - startTime;
+
+        if (endTime >= duration.inMilliseconds) {
+          timer.cancel();
+          callback.call();
+        }
+      }),
+    );
+  }
+
+  @override
+  void cancel() {
+    timer.cancel();
+  }
+
+  @override
+  bool get isActive => timer.isActive;
+
+  @override
+  int get tick => timer.tick;
 }

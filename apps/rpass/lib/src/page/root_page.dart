@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:common_native_channel/common_native_channel.dart';
@@ -283,8 +284,8 @@ class _CallbackWindowListener with WindowListener {
 mixin _BackgroundLock on State<RootRpassApp> {
   VoidCallback? _dispose;
 
-  Timer? _timerVerifyOwner;
-  Timer? _timerLockKdbx;
+  SimpleTimestampTimer? _timerVerifyOwner;
+  SimpleTimestampTimer? _timerLockKdbx;
 
   bool _isVerifyOwnerRoute = false;
 
@@ -309,8 +310,16 @@ mixin _BackgroundLock on State<RootRpassApp> {
     _cancel();
   }
 
-  void _onWindowEvent(String eventName) {
-    print("eventName $eventName");
+  void _onWindowEvent(String eventName) async {
+
+    if (Platform.isMacOS && eventName == "blur") {
+      // macos 下不存在 hide 事件, 只有 win 才有
+      // 修复 在mac下面执行 windowManager.hide() 后回调到这里拿到的 isVisible 可能不准确
+      // 判断可能 hide 操作是有延迟
+      await Future.delayed(const Duration(milliseconds: 60));
+      eventName = (!await windowManager.isVisible()) ? "hide" : "blur";
+    }
+
     if (eventName == "minimize" || eventName == "hide") {
       _start();
     } else if (eventName == "focus") {
@@ -327,7 +336,7 @@ mixin _BackgroundLock on State<RootRpassApp> {
     final lockDelay = Store.instance.settings.lockDelay;
     if (lockDelay == null) return;
 
-    _timerVerifyOwner = Timer(lockDelay, _runTimerVerifyOwner);
+    _timerVerifyOwner = SimpleTimestampTimer(lockDelay, _runTimerVerifyOwner);
   }
 
   void _runTimerVerifyOwner() async {
@@ -343,10 +352,11 @@ mixin _BackgroundLock on State<RootRpassApp> {
 
     final lockDelay = Store.instance.settings.lockDelay;
     if (lockDelay == null) return;
-    _timerLockKdbx = Timer(lockDelay, _runTimerLockKdbx);
+    _timerLockKdbx = SimpleTimestampTimer(lockDelay, _runTimerLockKdbx);
   }
 
   void _runTimerLockKdbx() {
+
     _timerLockKdbx?.cancel();
     _timerLockKdbx = null;
     _isVerifyOwnerRoute = false;
