@@ -84,17 +84,17 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
 
       KdbxProvider.of(context).setKdbx(kdbx);
 
-      if (!(await _isAutoFill(kdbx))) {
-        context.router.replace(HomeRoute());
-      }
+      await _responseAutoFill(kdbx);
+
+      context.router.replace(HomeRoute());
     }
   }
 
-  Future<bool> _isAutoFill(Kdbx kdbx) async {
+  Future<void> _responseAutoFill(Kdbx kdbx) async {
     final metadata = await NativeInstancePlatform.instance.autofillService
         .metadata();
 
-    if (metadata == null) return false;
+    if (metadata == null) return;
 
     List<AutofillDataset> result = await kdbx.autofillSearch(metadata);
 
@@ -109,7 +109,7 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
       result,
     );
 
-    return true;
+    return;
   }
 
   @override
@@ -131,9 +131,9 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
 
     KdbxProvider.of(context).setKdbx(kdbx);
 
-    if (!(await _isAutoFill(kdbx))) {
-      context.router.replace(HomeRoute());
-    }
+    await _responseAutoFill(kdbx);
+
+    context.router.replace(HomeRoute());
   }
 
   @override
