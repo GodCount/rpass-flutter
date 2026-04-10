@@ -11,7 +11,8 @@ class MainFlutterWindow: NSWindow {
     RegisterGeneratedPlugins(registry: flutterViewController)
 
     NSApplication.shared.setActivationPolicy(.accessory)
-    self.level = .floating
+
+    self.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
 
     super.awakeFromNib()
   }
