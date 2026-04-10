@@ -718,4 +718,7 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get seed_color => '种子色';
+
+  @override
+  String get lan_transfer => '局域网传输';
 }

@@ -1459,6 +1459,12 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'种子色'**
   String get seed_color;
+
+  /// No description provided for @lan_transfer.
+  ///
+  /// In zh, this message translates to:
+  /// **'局域网传输'**
+  String get lan_transfer;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

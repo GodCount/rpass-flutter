@@ -54,6 +54,11 @@ class LanFillCilent {
     if (_dio == null) {
       throw Exception("You need to run registration before doing this");
     }
+    if (!isDesktopPlatform(_serverPlatform)) {
+      throw Exception(
+        "server platform $_serverPlatform, not supported autofill",
+      );
+    }
     return _dio!;
   }
 
@@ -253,14 +258,21 @@ class LanFillCilent {
   }
 
   Future<void> autofill(AutofillDto dto) async {
+    await _getDio().post("/api/autofill", data: dto.toJson());
+  }
+
+  Future<void> uploadFile(String filename, Uint8List bytes) async {
     final dio = _getDio();
-
-    if (!isDesktopPlatform(_serverPlatform)) {
-      throw Exception(
-        "server platform $_serverPlatform, not supported autofill",
-      );
-    }
-
-    final res = await dio.post("/api/autofill", data: dto.toJson());
+    await dio.post(
+      "/api/upload_file",
+      data: bytes,
+      options: Options(
+        contentType: "application/octet-stream",
+        headers: {
+          Headers.contentTypeHeader: "application/octet-stream",
+          HeadersConstant.filename: filename,
+        },
+      ),
+    );
   }
 }

@@ -1,7 +1,6 @@
+import 'dart:typed_data';
+
 import 'package:lan_fill_server/lan_fill_server.dart';
-import 'package:lan_fill_server/src/interactive_manipulation.dart';
-import 'package:lan_fill_server/src/model/autofill.dto.dart';
-import 'package:lan_fill_server/src/model/device_info.dto.dart';
 
 class TIM extends InteractiveManipulation {
   @override
@@ -15,7 +14,7 @@ class TIM extends InteractiveManipulation {
   }
 
   @override
-  Future<void> remoteAutofill(AutofillDto dto) {
+  Future<void> onRemoteAutofill(AutofillDto dto) {
     // TODO: implement remoteAutofill
     throw UnimplementedError();
   }
@@ -34,6 +33,14 @@ class TIM extends InteractiveManipulation {
   void onServerCilentFirstHeartbeat(String devicePlatform, String? deviceName) {
     // TODO: implement onServerCilentFirstHeartbeat
   }
+
+  @override
+  Future<void> onSaveUploadFile(String filename, Uint8List bytes) {
+    // TODO: implement onSaveUploadFile
+    throw UnimplementedError();
+  }
+  
+
 }
 
 Future<void> main() async {

@@ -736,4 +736,7 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get seed_color => 'Seed Color';
+
+  @override
+  String get lan_transfer => 'LAN Transfer';
 }

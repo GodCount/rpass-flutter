@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:lan_fill_server/lan_fill_server.dart';
+import 'package:path/path.dart' as path;
 
 import '../i18n.dart';
 import '../kdbx/auto_fill.dart';
@@ -12,10 +14,12 @@ import '../page/route.dart';
 import '../rpass.dart';
 import '../store/index.dart';
 import '../util/common.dart';
+import '../util/file.dart';
 import '../widget/common.dart';
 import '../widget/extension_state.dart';
 
 typedef RequestRemoteAutofill = Future<void> Function(AutofillDto dto);
+typedef UpdateFile = Future<void> Function(String filename, Uint8List bytes);
 
 class LanFillInherited extends InheritedWidget {
   const LanFillInherited({
@@ -25,6 +29,8 @@ class LanFillInherited extends InheritedWidget {
     required this.openQrCodeDialog,
     required this.openQrCodeScanner,
     required this.requestRemoteAutofill,
+    required this.updateFile,
+
     required super.child,
   });
 
@@ -34,6 +40,7 @@ class LanFillInherited extends InheritedWidget {
   final ValueGetter<Future<void>> openQrCodeDialog;
   final ValueGetter<Future<void>> openQrCodeScanner;
   final RequestRemoteAutofill requestRemoteAutofill;
+  final UpdateFile updateFile;
 
   static LanFillInherited? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<LanFillInherited>();
@@ -61,7 +68,7 @@ class _LanFillServerState extends State<LanFillServerProvider>
   LanFillServer? _server;
 
   final SimpleAsyncQueue _validateFingerprintQueue = SimpleAsyncQueue();
-  final SimpleAsyncQueue _autoFillQueue = SimpleAsyncQueue();
+  final SimpleAsyncQueue _requestQueue = SimpleAsyncQueue();
 
   // 不信任的指纹
   // 每次弹出二维码窗口时重置
@@ -134,15 +141,29 @@ class _LanFillServerState extends State<LanFillServerProvider>
     }
   }
 
+  Future<bool> _ping() async {
+    if ((await _cilent?.heartbeat()) != true) {
+      await openQrCodeScanner();
+    }
+
+    return _cilent?.connecting ?? false;
+  }
+
   Future<void> requestRemoteAutofill(AutofillDto dto) async {
     try {
-      if ((await _cilent?.heartbeat()) != true) {
-        await openQrCodeScanner();
+      if (await _ping()) {
+        await _cilent!.autofill(dto);
       }
+    } catch (e, s) {
+      showError("$e\n$s");
+    }
+  }
 
-      if (_cilent?.connecting != true) return;
-
-      await _cilent!.autofill(dto);
+  Future<void> updateFile(String filename, Uint8List bytes) async {
+    try {
+      if (await _ping()) {
+        await _cilent!.uploadFile(filename, bytes);
+      }
     } catch (e, s) {
       showError("$e\n$s");
     }
@@ -191,14 +212,30 @@ class _LanFillServerState extends State<LanFillServerProvider>
   }
 
   @override
-  Future<void> remoteAutofill(AutofillDto dto) async {
-    await _autoFillQueue.add(() async {
+  Future<void> onRemoteAutofill(AutofillDto dto) async {
+    await _requestQueue.add(() async {
       await autoFillSequence(
         defaultAutoTypeSequence,
         key: dto.key,
         getValue: (key) => dto.fields[key],
       );
     });
+  }
+
+  @override
+  Future<void> onSaveUploadFile(String filename, Uint8List bytes) async {
+    try {
+      await _requestQueue.add(() async {
+        await SimpleFile.saveFile(
+          data: bytes,
+          filename: path.basename(filename),
+        );
+      });
+    } catch (e) {
+      if (e is! CancelException) {
+        showError(e);
+      }
+    }
   }
 
   @override
@@ -236,6 +273,7 @@ class _LanFillServerState extends State<LanFillServerProvider>
       openQrCodeDialog: openQrCodeDialog,
       openQrCodeScanner: openQrCodeScanner,
       requestRemoteAutofill: requestRemoteAutofill,
+      updateFile: updateFile,
       child: widget.child,
     );
   }

@@ -346,5 +346,6 @@
     "device": "Device",
     "platform": "Platform",
     "close": "Close",
-    "seed_color": "Seed Color"
+    "seed_color": "Seed Color",
+    "lan_transfer": "LAN Transfer"
 }

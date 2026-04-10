@@ -8,6 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 
 import '../context/biometric.dart';
+import '../context/lan_fill_server.dart';
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
 import '../page/kdbx/edit_group_page.dart';
@@ -212,12 +213,15 @@ extension StatefulBottomSheet on State {
   }
 
   void showBinaryAction(ChipListItem<MapEntry<KdbxKey, KdbxBinary>> binary) {
+    final t = I18n.of(context)!;
+    final lanFill = LanFillInherited.of(context);
+
     showBottomSheetList(
       title: binary.label,
       children: [
         ListTile(
           leading: const Icon(Icons.save),
-          title: Text(I18n.of(context)!.save),
+          title: Text(t.save),
           onTap: () async {
             try {
               final result = await SimpleFile.saveFile(
@@ -235,6 +239,20 @@ extension StatefulBottomSheet on State {
             }
           },
         ),
+        if (kIsMobile)
+          ListTile(
+            enabled: lanFill != null,
+            title: Text(t.lan_transfer),
+            leading: Icon(
+              lanFill?.cilentConnecting == true
+                  ? Icons.connect_without_contact_rounded
+                  : Icons.cast_connected,
+            ),
+            onTap: () {
+              context.router.pop();
+              lanFill?.updateFile(binary.label, binary.value.value.value);
+            },
+          ),
       ],
     );
   }

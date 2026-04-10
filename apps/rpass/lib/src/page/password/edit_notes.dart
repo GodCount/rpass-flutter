@@ -1,7 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:lan_fill_server/lan_fill_server.dart';
 
+import '../../context/lan_fill_server.dart';
 import '../../i18n.dart';
+import '../../util/common.dart';
 import '../../util/route.dart';
 
 @Deprecated(
@@ -58,6 +61,46 @@ class EditNotesPage extends StatefulWidget {
 class _EditNotesPageState extends State<EditNotesPage> {
   String? _text;
 
+  Widget _contextMenuBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    final lanFill = LanFillInherited.of(this.context);
+
+    if (kIsMobile && widget.readOnly && lanFill != null) {
+      final t = I18n.of(context)!;
+
+      final isCollapsed =
+          editableTextState.textEditingValue.selection.isCollapsed;
+
+      return AdaptiveTextSelectionToolbar.buttonItems(
+        buttonItems: [
+          if (!isCollapsed)
+            ContextMenuButtonItem(
+              label: t.lan_fill,
+              onPressed: () {
+                final text = editableTextState.textEditingValue.selection
+                    .textInside(editableTextState.textEditingValue.text);
+
+                lanFill.requestRemoteAutofill(
+                  AutofillDto(
+                    key: "notesSelection",
+                    fields: {"notesSelection": text},
+                  ),
+                );
+              },
+            ),
+          ...editableTextState.contextMenuButtonItems,
+        ],
+        anchors: editableTextState.contextMenuAnchors,
+      );
+    }
+
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
@@ -77,6 +120,7 @@ class _EditNotesPageState extends State<EditNotesPage> {
           initialValue: widget.text,
           readOnly: widget.readOnly,
           decoration: const InputDecoration(border: InputBorder.none),
+          contextMenuBuilder: _contextMenuBuilder,
           onChanged: (value) {
             if (_text == null) {
               setState(() {

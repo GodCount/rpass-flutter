@@ -234,6 +234,7 @@ class LanFillServer {
     );
     app.get("/api/heartbeat", _apiHeartbeat);
     app.post('/api/autofill', _apiAutofill);
+    app.post("/api/upload_file", _uploadFile);
     return app;
   }
 
@@ -355,10 +356,28 @@ class LanFillServer {
     if (data.fields.isEmpty) return Response.noContent();
 
     try {
-      await interactiveManipulation.remoteAutofill(data);
+      await interactiveManipulation.onRemoteAutofill(data);
       return Response.ok();
     } catch (e) {
       return Response.internalServerError(body: Body.fromString(e.toString()));
     }
+  }
+
+  Future<Response> _uploadFile(final Request req) async {
+    final filename = req.headers[HeadersConstant.filename]?.first ?? "unknown";
+
+    interactiveManipulation.onSaveUploadFile(filename, await req.readAsBytes());
+
+    return Response.ok();
+  }
+}
+
+extension _Request on Request {
+  Future<Uint8List> readAsBytes() async {
+    final builder = BytesBuilder();
+    await for (final chunk in read()) {
+      builder.add(chunk);
+    }
+    return builder.toBytes();
   }
 }

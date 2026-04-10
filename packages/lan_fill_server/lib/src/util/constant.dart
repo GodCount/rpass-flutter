@@ -4,4 +4,5 @@ sealed class HeadersConstant {
   static const aesIv = "r-aes-iv";
   static const deviceFingerprint = "r-device-fingerprint";
   static const devicePlatform = "r-device-platform";
+  static const filename = "r-file-name";
 }

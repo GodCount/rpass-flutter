@@ -346,5 +346,6 @@
     "device": "设备",
     "platform": "平台",
     "close": "关闭",
-    "seed_color": "种子色"
+    "seed_color": "种子色",
+    "lan_transfer": "局域网传输"
 }
