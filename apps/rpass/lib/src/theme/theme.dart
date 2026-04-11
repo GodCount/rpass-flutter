@@ -33,6 +33,7 @@ ThemeData theme(Brightness brightness, [Color? seedColor]) {
     useMaterial3: true,
     brightness: brightness,
     colorScheme: scheme,
+    splashFactory: NoSplash.splashFactory,
     appBarTheme: AppBarTheme(
       centerTitle: true,
       scrolledUnderElevation: 2.0,
