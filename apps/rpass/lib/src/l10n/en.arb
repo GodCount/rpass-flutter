@@ -347,5 +347,6 @@
     "platform": "Platform",
     "close": "Close",
     "seed_color": "Seed Color",
-    "lan_transfer": "LAN Transfer"
+    "lan_transfer": "LAN Transfer",
+    "no_math_manual_select": "No match, Try manual selection"
 }

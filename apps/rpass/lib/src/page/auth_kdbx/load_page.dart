@@ -96,13 +96,13 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
 
     if (metadata == null) return;
 
-    List<AutofillDataset> result = await kdbx.autofillSearch(metadata);
+    AutofillDataset result = await kdbx.autofillSearch(metadata);
 
-    if (result.isEmpty && Store.instance.settings.manualSelectFillItem) {
+    if (result.data.isEmpty && Store.instance.settings.manualSelectFillItem) {
       final kdbxEntry = await KdbxEntrySelectorDialog.openDialog(context);
       final dataset = kdbxEntry?.toAutofillDataset(metadata.fieldTypes);
 
-      if (dataset != null) result.add(dataset);
+      if (dataset != null) result.data.add(dataset);
     }
 
     await NativeInstancePlatform.instance.autofillService.responseDataset(

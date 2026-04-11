@@ -19,6 +19,7 @@ import androidx.core.net.toUri
 import com.godcount.rpass.autofill.MyAutofillService
 import com.godcount.rpass.autofill.helpers.AutofillDataset
 import com.godcount.rpass.autofill.helpers.AutofillMetadata
+import com.godcount.rpass.autofill.helpers.DatasetStatus
 import com.godcount.rpass.autofill.helpers.ResponseHelper
 
 class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHandler,
@@ -43,7 +44,7 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
             binding.applicationContext.getSystemService(AutofillManager::class.java)
 
         MyAutofillService.onAutofillRequest = {
-            requestAutofill(it)
+            requestAutofill(it, false)
         }
 
     }
@@ -77,6 +78,15 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
 
     override fun onNewIntent(intent: Intent): Boolean {
         if (intent.hasExtra(AutofillMetadata.EXTRA_AUTOFILL_METADATA)) {
+            if (intent.getStringExtra(AutofillDataset.EXTRA_AUTOFILL_DATASET_STATUS) == DatasetStatus.MANUAL.name) {
+                val metadata = this.getAutofillMetadata(intent)
+
+                if (metadata != null) {
+                    this.requestAutofill(metadata, true);
+                }
+
+                return true;
+            }
             lastAutofillIntent = intent
         }
         return false
@@ -131,10 +141,8 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
                 try {
                     if (activityBinding == null) return result.success(false)
 
-                    val dataset = call.argument<List<Map<String, String>>?>("dataset")
-                        ?.takeIf { it.isNotEmpty() }
-                        ?.map { AutofillDataset.fromJson(it) }
-                        ?.filter { it.username != null || it.password != null || it.otp != null }
+                    val dataset =
+                        AutofillDataset.fromJson(call.arguments<Map<String, Any?>>() ?: emptyMap())
 
                     result.success(responseAutofillDataset(activityBinding!!.activity, dataset))
 
@@ -156,7 +164,7 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
 
     private fun responseAutofillDataset(
         activity: Activity,
-        dataset: List<AutofillDataset>?
+        dataset: AutofillDataset
     ): Boolean {
         if (MyAutofillService.onAutofillResponse != null) {
 
@@ -170,7 +178,7 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
 
             val intent = lastAutofillIntent ?: activityBinding?.activity?.intent
 
-            if (intent == null || intent.hasExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE)) {
+            if (intent == null || !intent.hasExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE)) {
                 return false
             }
 
@@ -186,26 +194,16 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
 
             if (structure == null) return false
 
-            val response = ResponseHelper.createResponseByStructure(
-                activity,
-                structure,
-            ).buildDatasetResponse(dataset)
+            MyAutofillService.activitySetResult(
+                activity, ResponseHelper.createResponseByStructure(
+                    activity,
+                    structure,
+                ), dataset, lastAutofillIntent == null
+            )
 
-
-            val replyIntent =
-                Intent().putExtra(EXTRA_AUTHENTICATION_RESULT, response)
-
-            activity.setResult(RESULT_OK, replyIntent)
-
-            if (lastAutofillIntent == null) {
-                activity.finish()
-            } else {
-                activity.moveTaskToBack(false)
-                return true
-            }
+            return lastAutofillIntent != null
 
         }
-        return false
     }
 
     private fun getAutofillMetadata(intent: Intent): AutofillMetadata? {
@@ -214,11 +212,12 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
         )?.let(AutofillMetadata.Companion::fromJsonString)
     }
 
-    private fun requestAutofill(metadata: AutofillMetadata) {
+    private fun requestAutofill(metadata: AutofillMetadata, manualSelect: Boolean) {
         channel?.invokeMethod(
             "request_autofill_metadata",
             mapOf(
-                "metadata" to metadata.toMap()
+                "metadata" to metadata.toMap(),
+                "manualSelect" to manualSelect
             )
         )
     }

@@ -29,10 +29,14 @@ class ResponseHelper private constructor(
 
     val parsed = ViewStructureParser(structure)
 
-    fun buildDatasetResponse(dataset: List<AutofillDataset>?): FillResponse? {
-        if (!parsed.canAutofill()) return null
+    fun buildDatasetResponse(dataset: AutofillDataset): FillResponse? {
 
-        if (dataset.isNullOrEmpty()) return null
+        if (dataset.status != DatasetStatus.FILL) {
+            return buildAuthResponse(dataset.status,true, dataset.message);
+        }
+
+        if (dataset.data.isEmpty()) return null
+
 
         fun createAttribution(msg: String): PendingIntent {
             val intent = Intent(context, MainActivity::class.java)
@@ -46,23 +50,31 @@ class ResponseHelper private constructor(
         }
 
         return FillResponse.Builder().apply {
-            dataset.forEach { data ->
+            dataset.data.forEach { data ->
 
                 val map = HashMap<AutofillId, AutofillValue>()
 
+                val label = data[AutofillDataset.DATASET_FIELD_LABEL]
+                val username = data[AutofillDataset.DATASET_FIELD_USERNAME]
+
                 parsed.fields.forEach { field ->
-                    if (data.password != null && ViewStructureParser.ATTRIBUTES_PASSWORD_MATCHES.containsMatchIn(
+
+                    if (data[AutofillDataset.DATASET_FIELD_PASSWORD] != null && ViewStructureParser.ATTRIBUTES_PASSWORD_MATCHES.containsMatchIn(
                             field.key
                         )
                     ) {
-                        map[field.value] = AutofillValue.forText(data.password)
-                    } else if (data.otp != null && ViewStructureParser.ATTRIBUTES_OTP_MATCHES.containsMatchIn(
+                        map[field.value] =
+                            AutofillValue.forText(data[AutofillDataset.DATASET_FIELD_PASSWORD])
+                    } else if (data[AutofillDataset.DATASET_FIELD_OTP] != null && ViewStructureParser.ATTRIBUTES_OTP_MATCHES.containsMatchIn(
                             field.key
                         )
                     ) {
-                        map[field.value] = AutofillValue.forText(data.otp)
+                        map[field.value] =
+                            AutofillValue.forText(data[AutofillDataset.DATASET_FIELD_OTP])
+                    } else if (data[field.key] != null) {
+                        map[field.value] = AutofillValue.forText(data[field.key])
                     } else {
-                        map[field.value] = AutofillValue.forText(data.username)
+                        map[field.value] = AutofillValue.forText(username)
                     }
                 }
 
@@ -74,16 +86,16 @@ class ResponseHelper private constructor(
                                     setMenuPresentation(
                                         RemoteViewsHelper.viewsWithUser(
                                             context.packageName,
-                                            data.label,
-                                            data.username
+                                            label,
+                                            username
                                         )
                                     )
 
                                     setDialogPresentation(
                                         RemoteViewsHelper.viewsWithUser(
                                             context.packageName,
-                                            data.label,
-                                            data.username
+                                            label,
+                                            username
                                         )
                                     )
 
@@ -93,10 +105,10 @@ class ResponseHelper private constructor(
                                             InlinePresentation(
                                                 @SuppressLint("RestrictedApi")
                                                 InlineSuggestionUi.newContentBuilder(
-                                                    createAttribution(data.username ?: "Fill me")
+                                                    createAttribution(username ?: "Fill me")
                                                 )
                                                     .setTitle(
-                                                        data.label ?: data.username ?: "Fill me"
+                                                        label ?: username ?: "Fill me"
                                                     )
                                                     .build().slice,
                                                 inlineSuggestion.inlinePresentationSpecs[0],
@@ -121,8 +133,8 @@ class ResponseHelper private constructor(
                             else -> @Suppress("DEPRECATION") Dataset.Builder(
                                 RemoteViewsHelper.viewsWithUser(
                                     context.packageName,
-                                    data.label,
-                                    data.username
+                                    label,
+                                    username
                                 )
                             ).apply {
                                 map.forEach {
@@ -140,8 +152,9 @@ class ResponseHelper private constructor(
         }.build()
     }
 
-    fun buildAuthResponse(flags: Boolean): FillResponse? {
-        if (!parsed.canAutofill()) return null
+    fun buildAuthResponse(status: DatasetStatus, flags: Boolean, label: String?): FillResponse? {
+
+        val title = label ?: unlockLabel
 
         val intent = Intent(context, MainActivity::class.java)
         intent.action = Intent.ACTION_RUN
@@ -159,6 +172,8 @@ class ResponseHelper private constructor(
             parsed.toAutofillMetadata().toJsonString()
         )
 
+        intent.putExtra(AutofillDataset.EXTRA_AUTOFILL_DATASET_STATUS, status.name)
+
         val sender = PendingIntent.getActivity(
             context,
             0,
@@ -175,7 +190,7 @@ class ResponseHelper private constructor(
                     Presentations.Builder().setMenuPresentation(
                         RemoteViewsHelper.viewsWithAuth(
                             context.packageName,
-                            unlockLabel,
+                            title,
                             null
                         )
                     ).build()
@@ -185,7 +200,7 @@ class ResponseHelper private constructor(
                 setAuthentication(
                     parsed.fields.values.toTypedArray(),
                     sender,
-                    RemoteViewsHelper.viewsWithAuth(context.packageName, unlockLabel, null)
+                    RemoteViewsHelper.viewsWithAuth(context.packageName, title, null)
                 )
             }
 
@@ -223,28 +238,61 @@ class ResponseHelper private constructor(
 
 }
 
-
-data class AutofillDataset(
-    val label: String?,
-    val username: String?,
-    val password: String?,
-    val otp: String?
-) {
-
-    companion object {
-
-        fun fromJson(obj: Map<String, String>) =
-            AutofillDataset(
-                label = obj["label"],
-                username = obj["username"],
-                password = obj["password"],
-                otp = obj["otp"],
-            )
-    }
-
+enum class DatasetStatus {
+    AUTH, // 需要验证
+    MANUAL, // 需要手动选择
+    FILL // 直接填充
 }
 
+data class AutofillDataset(
+    val status: DatasetStatus,
+    val message: String?,
+    val data: List<HashMap<String, String>>
+) {
+    companion object {
+        const val EXTRA_AUTOFILL_DATASET_STATUS = "com.godcount.rpass.EXTRA_AUTOFILL_DATASET_STATUS"
 
+
+        const val DATASET_FIELD_LABEL = "label"
+        const val DATASET_FIELD_USERNAME = "username"
+        const val DATASET_FIELD_PASSWORD = "password"
+        const val DATASET_FIELD_OTP = "otp"
+
+
+        fun fromJson(map: Map<String, Any?>): AutofillDataset = AutofillDataset(
+            status = map.parseEnum("status"),
+            message = map["message"] as? String,
+            data = map.parseDatasetList("data")
+        )
+
+        private fun Map<String, Any?>.parseEnum(key: String): DatasetStatus {
+            return DatasetStatus.valueOf((this[key] as? String ?: "FILL").uppercase())
+        }
+
+        private fun Map<String, Any?>.parseDatasetList(key: String): List<HashMap<String, String>> {
+            val list = this[key] as? List<*> ?: return emptyList()
+
+            return list.mapNotNull { item ->
+                val map = item.toStringMap()
+                if (map != null && map.isNotEmpty()) map else null
+            }
+        }
+
+        private fun Any?.toStringMap(): HashMap<String, String>? {
+            val map = this as? Map<*, *> ?: return null
+
+            val result = HashMap<String, String>()
+            map.forEach { (k, v) ->
+                val key = k?.toString()?.takeIf { it.isNotBlank() } ?: return@forEach
+                val value = v?.toString()?.takeIf { it.isNotBlank() } ?: return@forEach
+                result[key] = value
+            }
+
+            return result.takeIf { it.isNotEmpty() }
+        }
+
+    }
+}
 
 
 

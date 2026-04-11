@@ -463,49 +463,44 @@ class SyncMergeContext {
 }
 
 extension KdbxAndroidAutoFill on KdbxBase {
-  Future<List<AutofillDataset>> autofillSearch(AutofillMetadata metadata) {
+  Future<AutofillDataset> autofillSearch(AutofillMetadata metadata) {
     return androidAutofillSearch(metadata, totalEntry);
   }
 }
 
-extension _MatchSet on Set<String> {
-  bool hasMatch(RegExp reg) {
-    return any((item) => reg.hasMatch(item));
-  }
-}
-
-class AutoFillFieldMatch {
-  static final PASSWORD = RegExp("password|密码", caseSensitive: false);
-  static final USERNAME = RegExp(
-    "login|username|user|name|账号|用户",
-    caseSensitive: false,
-  );
-  static final EMAIL = RegExp("email|mail|邮箱", caseSensitive: false);
-  static final OTP = RegExp("otp", caseSensitive: false);
-}
-
 extension KdbxEntryAndroidAutoFill on KdbxEntry {
-  AutofillDataset toAutofillDataset(Set<String> fieldTypes) {
+  Map<String, String?> toAutofillDataset(
+    Set<String> fieldTypes, [
+    Set<String>? keyFieldTypes,
+  ]) {
     final title = getActualString(KdbxKeyCommon.TITLE);
     final password = getActualString(KdbxKeyCommon.PASSWORD);
     final email = getActualString(KdbxKeyCommon.EMAIL);
     final user = getActualString(KdbxKeyCommon.USER_NAME);
     final otp = getActualString(KdbxKeyCommon.OTP);
 
-    return AutofillDataset(
-      label: title != null && title.isNotEmpty ? title : user,
-      password: fieldTypes.hasMatch(AutoFillFieldMatch.PASSWORD)
+    keyFieldTypes ??= AutofillDataset.getKeyFields(fieldTypes);
+
+    return {
+      AutofillDataset.DATASET_FIELD_LABEL: title != null && title.isNotEmpty
+          ? title
+          : user,
+      AutofillDataset.DATASET_FIELD_PASSWORD:
+          keyFieldTypes.contains(AutofillDataset.DATASET_FIELD_PASSWORD)
           ? password
           : null,
-      username:
-          fieldTypes.hasMatch(AutoFillFieldMatch.EMAIL) &&
+      AutofillDataset.DATASET_FIELD_USERNAME:
+          keyFieldTypes.contains(AutofillDataset.DATASET_FIELD_EMAIL) &&
               email != null &&
               email
                   .isNotEmpty // 存在邮箱,优先返回邮箱
           ? email
           : user ?? email,
-      otp: fieldTypes.hasMatch(AutoFillFieldMatch.OTP) ? otp : null,
-    );
+      AutofillDataset.DATASET_FIELD_OTP:
+          keyFieldTypes.contains(AutofillDataset.DATASET_FIELD_OTP)
+          ? otp
+          : null,
+    };
   }
 }
 

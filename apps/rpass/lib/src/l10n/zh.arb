@@ -347,5 +347,6 @@
     "platform": "平台",
     "close": "关闭",
     "seed_color": "种子色",
-    "lan_transfer": "局域网传输"
+    "lan_transfer": "局域网传输",
+    "no_math_manual_select": "没有匹配, 尝试手动选择"
 }

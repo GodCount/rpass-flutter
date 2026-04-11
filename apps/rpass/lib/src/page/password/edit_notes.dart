@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:lan_fill_server/lan_fill_server.dart';
@@ -6,17 +8,6 @@ import '../../context/lan_fill_server.dart';
 import '../../i18n.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
-
-@Deprecated(
-  '使用构造函数传参'
-  '弃用 Arguments 路由传参',
-)
-class EditNotesArgs {
-  EditNotesArgs({required this.text, this.readOnly = false});
-
-  final String text;
-  final bool readOnly;
-}
 
 class _EditNotesArgs extends PageRouteArgs {
   _EditNotesArgs({super.key, required this.text, this.readOnly = false});
@@ -81,6 +72,24 @@ class _EditNotesPageState extends State<EditNotesPage> {
               onPressed: () {
                 final text = editableTextState.textEditingValue.selection
                     .textInside(editableTextState.textEditingValue.text);
+
+                editableTextState.bringIntoView(
+                  editableTextState.textEditingValue.selection.extent,
+                );
+                editableTextState.hideToolbar(false);
+
+                if (Platform.isAndroid) {
+                  editableTextState.userUpdateTextEditingValue(
+                    TextEditingValue(
+                      text: editableTextState.textEditingValue.text,
+                      selection: TextSelection.collapsed(
+                        offset:
+                            editableTextState.textEditingValue.selection.end,
+                      ),
+                    ),
+                    SelectionChangedCause.toolbar,
+                  );
+                }
 
                 lanFill.requestRemoteAutofill(
                   AutofillDto(

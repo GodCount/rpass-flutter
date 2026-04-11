@@ -739,4 +739,7 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get lan_transfer => 'LAN Transfer';
+
+  @override
+  String get no_math_manual_select => 'No match, Try manual selection';
 }

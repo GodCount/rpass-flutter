@@ -70,22 +70,62 @@ class AutofillWebDomain {
   Map<String, Object?> toJson() => {'scheme': scheme, 'domain': domain};
 }
 
-class AutofillDataset {
-  AutofillDataset({this.label, this.username, this.password, this.otp});
+enum AutofillDatasetStatus {
+  AUTH, // 需要验证
+  MANUAL, // 需要手动选择
+  FILL, // 直接填充
+}
 
-  final String? label;
-  final String? username;
-  final String? password;
-  final String? otp;
+class _AutoFillFieldMatch {
+  static final PASSWORD = RegExp("password|密码", caseSensitive: false);
+  static final USERNAME = RegExp(
+    "login|username|user|name|账号|用户",
+    caseSensitive: false,
+  );
+  static final EMAIL = RegExp("email|mail|邮箱", caseSensitive: false);
+  static final OTP = RegExp("otp", caseSensitive: false);
+}
+
+extension _MatchSet on Set<String> {
+  bool hasMatch(RegExp reg) {
+    return any((item) => reg.hasMatch(item));
+  }
+}
+
+class AutofillDataset {
+  AutofillDataset({required this.status, this.message, required this.data});
+
+  static final DATASET_FIELD_LABEL = "label";
+  static final DATASET_FIELD_USERNAME = "username";
+  static final DATASET_FIELD_EMAIL = "email";
+
+  static final DATASET_FIELD_PASSWORD = "password";
+  static final DATASET_FIELD_OTP = "otp";
+
+  final AutofillDatasetStatus status;
+  final String? message;
+  final List<Map<String, String?>> data;
+
+  static Set<String> getKeyFields(Set<String> fields) {
+    return {
+      if (fields.hasMatch(_AutoFillFieldMatch.PASSWORD))
+        AutofillDataset.DATASET_FIELD_PASSWORD,
+      if (fields.hasMatch(_AutoFillFieldMatch.EMAIL))
+        AutofillDataset.DATASET_FIELD_EMAIL,
+      if (fields.hasMatch(_AutoFillFieldMatch.USERNAME))
+        AutofillDataset.DATASET_FIELD_USERNAME,
+      if (fields.hasMatch(_AutoFillFieldMatch.OTP))
+        AutofillDataset.DATASET_FIELD_OTP,
+    };
+  }
 
   @override
   String toString() => toJson().toString();
 
   Map<String, Object?> toJson() => {
-    'label': label,
-    'username': username,
-    'password': password,
-    'otp': otp,
+    'status': status.name,
+    'message': message,
+    'data': data,
   };
 }
 
@@ -98,7 +138,7 @@ class AutofillService {
     return null;
   }
 
-  Future<bool> responseDataset(List<AutofillDataset>? list) async {
+  Future<bool> responseDataset(AutofillDataset dataset) async {
     return false;
   }
 
@@ -150,10 +190,11 @@ class _AndroidAutofillService extends MethodChannelInterface
   }
 
   @override
-  Future<bool> responseDataset(List<AutofillDataset>? list) async {
-    return await channel.invokeMethod("response_autofill_dataset", {
-      "dataset": list?.map((it) => it.toJson()).toList(),
-    });
+  Future<bool> responseDataset(AutofillDataset dataset) async {
+    return await channel.invokeMethod(
+      "response_autofill_dataset",
+      dataset.toJson(),
+    );
   }
 
   @override
@@ -161,7 +202,10 @@ class _AndroidAutofillService extends MethodChannelInterface
     if (call.method == "request_autofill_metadata") {
       try {
         final metadata = AutofillMetadata.fromJson(call.arguments["metadata"]);
-        emit((listener) => listener.onRequestAutofill(metadata));
+        final manualSelect = call.arguments["manualSelect"] is bool
+            ? call.arguments["manualSelect"] as bool? ?? false
+            : false;
+        emit((listener) => listener.onRequestAutofill(metadata, manualSelect));
       } catch (e) {
         _logger.warning("request autofill metadata $e");
       }

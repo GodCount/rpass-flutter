@@ -120,7 +120,7 @@ extension _MatchWebDomain on String {
 /// 安卓端
 /// 返回自动填充数据集
 /// 给 AutofillService 服务
-Future<List<AutofillDataset>> androidAutofillSearch(
+Future<AutofillDataset> androidAutofillSearch(
   AutofillMetadata metadata,
   List<KdbxEntry> kdbxEntrys,
 ) async {
@@ -130,12 +130,19 @@ Future<List<AutofillDataset>> androidAutofillSearch(
     );
 
     // 任意一个 url 匹配成功, 或者包名对应上
-    return it.getUrls().any(
+    return (packageName != null &&
+            metadata.packageNames.contains(packageName)) ||
+        it.getUrls().any(
           (url) =>
               metadata.webDomains.any((it) => it.domain.matchWebDomain(url)),
-        ) ||
-        (packageName != null && metadata.packageNames.contains(packageName));
+        );
   });
 
-  return result.map((it) => it.toAutofillDataset(metadata.fieldTypes)).toList();
+  final keyFieldTypes = AutofillDataset.getKeyFields(metadata.fieldTypes);
+
+  final List<Map<String, String?>> dataset = result
+      .map((it) => it.toAutofillDataset(metadata.fieldTypes, keyFieldTypes))
+      .toList();
+
+  return AutofillDataset(status: .FILL, data: dataset);
 }

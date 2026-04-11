@@ -17,7 +17,7 @@ abstract class MethodChannelInterface {
 }
 
 mixin NativeChannelListener {
-  void onRequestAutofill(AutofillMetadata metadata) {}
+  void onRequestAutofill(AutofillMetadata metadata, bool manualSelect) {}
 }
 
 class NativeInstancePlatform

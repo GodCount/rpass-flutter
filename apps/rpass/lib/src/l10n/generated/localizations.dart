@@ -1465,6 +1465,12 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'局域网传输'**
   String get lan_transfer;
+
+  /// No description provided for @no_math_manual_select.
+  ///
+  /// In zh, this message translates to:
+  /// **'没有匹配, 尝试手动选择'**
+  String get no_math_manual_select;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

@@ -229,17 +229,25 @@ class _RootRpassAppState extends State<RootRpassApp>
   }
 
   @override
-  void onRequestAutofill(AutofillMetadata metadata) async {
+  void onRequestAutofill(AutofillMetadata metadata, bool manualSelect) async {
     final kdbx = KdbxProvider.of(context).kdbx;
 
     if (kdbx != null) {
-      List<AutofillDataset> result = await kdbx.autofillSearch(metadata);
+      AutofillDataset result = await kdbx.autofillSearch(metadata);
 
-      if (result.isEmpty && Store.instance.settings.manualSelectFillItem) {
-        final kdbxEntry = await KdbxEntrySelectorDialog.openDialog(context);
-        final dataset = kdbxEntry?.toAutofillDataset(metadata.fieldTypes);
+      if (result.data.isEmpty && Store.instance.settings.manualSelectFillItem) {
+        if (manualSelect) {
+          final kdbxEntry = await KdbxEntrySelectorDialog.openDialog(context);
+          final dataset = kdbxEntry?.toAutofillDataset(metadata.fieldTypes);
 
-        if (dataset != null) result.add(dataset);
+          if (dataset != null) result.data.add(dataset);
+        } else {
+          result = AutofillDataset(
+            status: .MANUAL,
+            message: I18n.of(context)!.no_math_manual_select,
+            data: [],
+          );
+        }
       }
 
       await NativeInstancePlatform.instance.autofillService.responseDataset(
@@ -247,7 +255,7 @@ class _RootRpassAppState extends State<RootRpassApp>
       );
     } else {
       await NativeInstancePlatform.instance.autofillService.responseDataset(
-        null,
+        AutofillDataset(status: .AUTH, data: []),
       );
     }
   }
@@ -311,7 +319,6 @@ mixin _BackgroundLock on State<RootRpassApp> {
   }
 
   void _onWindowEvent(String eventName) async {
-
     if (Platform.isMacOS && eventName == "blur") {
       // macos 下不存在 hide 事件, 只有 win 才有
       // 修复 在mac下面执行 windowManager.hide() 后回调到这里拿到的 isVisible 可能不准确
@@ -356,7 +363,6 @@ mixin _BackgroundLock on State<RootRpassApp> {
   }
 
   void _runTimerLockKdbx() {
-
     _timerLockKdbx?.cancel();
     _timerLockKdbx = null;
     _isVerifyOwnerRoute = false;

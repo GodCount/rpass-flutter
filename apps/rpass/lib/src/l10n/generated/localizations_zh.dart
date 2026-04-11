@@ -721,4 +721,7 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get lan_transfer => '局域网传输';
+
+  @override
+  String get no_math_manual_select => '没有匹配, 尝试手动选择';
 }
