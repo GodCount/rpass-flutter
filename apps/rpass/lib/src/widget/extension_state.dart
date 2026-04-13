@@ -4,7 +4,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 
 import '../context/biometric.dart';
@@ -62,13 +61,9 @@ extension StatefulDialog on State {
   }
 
   Future<void> showToast(String msg) async {
-    if (kIsMobile) {
-      await Fluttertoast.showToast(msg: msg);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), duration: const Duration(seconds: 2)),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), duration: const Duration(milliseconds: 1500)),
+    );
   }
 
   Future<bool> showConfirmDialog({
