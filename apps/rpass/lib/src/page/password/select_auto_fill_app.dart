@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:common_native_channel/common_native_channel.dart';
 import 'package:flutter/material.dart';
-import 'package:installed_apps/installed_apps.dart';
 
 import '../../rpass.dart';
 import '../../util/route.dart';
@@ -64,18 +64,13 @@ class _SelectAutoFillAppPageState extends State<SelectAutoFillAppPage> {
 
     final text = _searchController.text.toLowerCase();
 
-    final result =
-        (await InstalledAppsInstance.instance.getInstalledApps(force)).where(
-          (it) {
-            if (it.packageName == RpassInfo.packageName) return false;
+    final result = (await installedApps.getInstalledApps(force)).where((it) {
+      if (it.packageName == RpassInfo.packageName) return false;
 
-            if (!_system && it.isSystem) return false;
+      if (!_system && it.isSystem) return false;
 
-            return text.isNotEmpty
-                ? it.name.toLowerCase().contains(text)
-                : true;
-          },
-        ).toList()..sort((a, b) => b.installedTimestamp - a.installedTimestamp);
+      return text.isNotEmpty ? it.name.toLowerCase().contains(text) : true;
+    }).toList()..sort((a, b) => b.installedTimestamp - a.installedTimestamp);
 
     return result;
   }

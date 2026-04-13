@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'features/prev_focus_window.dart';
+import 'features/installed_apps.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,6 +12,7 @@ class MyApp extends StatelessWidget {
 
   static final Map<String, WidgetBuilder> routes = {
     "Prev Focus Window": (context) => const PrevFocusWindowPage(),
+    "Installed Apps": (context) => const InstalledAppsPage(),
   };
 
   @override

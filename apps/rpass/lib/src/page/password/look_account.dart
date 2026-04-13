@@ -5,7 +5,6 @@ import 'package:common_native_channel/common_native_channel.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
-import 'package:installed_apps/installed_apps.dart';
 import 'package:lan_fill_server/lan_fill_server.dart';
 import 'package:logging/logging.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
@@ -139,7 +138,7 @@ class _LookAccountPageState extends State<LookAccountPage>
 
   void _getAppInfo() {
     if (kIsMobile && packageName != null && packageName!.isNotEmpty) {
-      _appInfoFuture = InstalledAppsInstance.instance.getAppInfo(packageName!);
+      _appInfoFuture = installedApps.getAppInfo(packageName!);
     }
   }
 
@@ -580,7 +579,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                     ),
                     trailing: IconButton(
                       onPressed: snapshot.hasData
-                          ? () => InstalledAppsInstance.instance.startApp(
+                          ? () => installedApps.startApp(
                               snapshot.data!.packageName,
                             )
                           : null,

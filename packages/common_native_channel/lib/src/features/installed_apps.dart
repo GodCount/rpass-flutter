@@ -1,3 +1,52 @@
+import 'dart:io';
+
+import 'package:flutter/services.dart';
+
+import '../common_features_interface.dart';
+
+class InstalledApps extends CommonFeaturesInterface {
+  InstalledApps(super.methodChannel);
+
+  @override
+  final List<String> methodCalls = [];
+
+  @override
+  Future<dynamic> onMethodCallHandler(MethodCall call) async {}
+
+  Future<List<AppInfo>> getInstalledApps([bool force = false]) async {
+    if (!Platform.isAndroid) {
+      return throw UnsupportedError("${Platform.operatingSystem} Platform");
+    }
+
+    return AppInfo.parseList(
+      await methodChannel.invokeMethod("get_installed_apps", {"force": force}),
+    );
+  }
+
+  Future<AppInfo?> getAppInfo(String packageName, {bool force = false}) async {
+    if (!Platform.isAndroid) {
+      return throw UnsupportedError("${Platform.operatingSystem} Platform");
+    }
+    return AppInfo.create(
+      await methodChannel.invokeMethod("get_app_info", {
+        "packageName": packageName,
+        "force": force,
+      }),
+    );
+  }
+
+  Future<bool> startApp(String packageName) async {
+    if (!Platform.isAndroid) {
+      return throw UnsupportedError("${Platform.operatingSystem} Platform");
+    }
+
+    final result = await methodChannel.invokeMethod("start_app", {
+      "packageName": packageName,
+    });
+    return result != null && result is bool ? result : false;
+  }
+}
+
 class AppInfo {
   String name;
   String icon;

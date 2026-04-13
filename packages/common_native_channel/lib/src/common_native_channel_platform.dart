@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'common_features_interface.dart';
+import 'features/installed_apps.dart';
 import 'features/prev_focus_window.dart';
 
 class CommonNativeChannelPlatform extends PlatformInterface {
@@ -18,9 +19,10 @@ class CommonNativeChannelPlatform extends PlatformInterface {
   final methodChannel = const MethodChannel('common_native_channel');
 
   late final PrevFocusWindow prevFocusWindow = PrevFocusWindow(methodChannel);
+  late final InstalledApps installedApps = InstalledApps(methodChannel);
 
   @visibleForTesting
-  late final List<CommonFeaturesInterface> features = [prevFocusWindow];
+  late final List<CommonFeaturesInterface> features = [prevFocusWindow, installedApps];
 
   Future<dynamic> _methodCallHandler(MethodCall call) async {
     for (final feature in features) {

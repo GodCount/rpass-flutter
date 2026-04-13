@@ -72,8 +72,6 @@ dependencies:
   hotkey_manager: ^0.2.3
   enigo_flutter:
     path: ../../packages/enigo_flutter
-  installed_apps:
-    path: ../../packages/installed_apps
   common_native_channel:
     path: ../../packages/common_native_channel
 

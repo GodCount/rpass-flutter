@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:common_native_channel/common_native_channel.dart';
 import 'package:flutter/material.dart';
-import 'package:installed_apps/installed_apps.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
 
 import '../kdbx/kdbx.dart';
@@ -369,7 +369,7 @@ class _EntryAutoFillAppFormFieldState extends State<EntryAutoFillAppFormField> {
 
   Future<AppInfo?> _getAppInfo() async {
     return widget.initialValue != null
-        ? InstalledAppsInstance.instance.getAppInfo(widget.initialValue!)
+        ? installedApps.getAppInfo(widget.initialValue!)
         : null;
   }
 
@@ -392,7 +392,7 @@ class _EntryAutoFillAppFormFieldState extends State<EntryAutoFillAppFormField> {
                   return;
                 }
                 if (packageName != null && packageName is String) {
-                  _future = InstalledAppsInstance.instance.getAppInfo(
+                  _future = installedApps.getAppInfo(
                     packageName,
                   );
 
