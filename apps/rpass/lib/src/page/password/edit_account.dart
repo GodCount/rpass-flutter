@@ -169,10 +169,14 @@ class _EditAccountPageState extends State<EditAccountPage>
     } else if (field is EntryTagsFieldSaved) {
       _kdbxEntry.tagList = field.value;
     } else if (field is EntryTextFieldSaved) {
-      if (field.renameKdbxKey != null) {
-        _kdbxEntry.renameKey(field.key, field.renameKdbxKey!);
-      }
-      if (field.value != null) {
+      final oldValue = _kdbxEntry.getString(field.key)?.getText() ?? "";
+      final newValue = field.value?.getText() ?? "";
+
+      if (newValue != oldValue) {
+        if (field.renameKdbxKey != null) {
+          _kdbxEntry.renameKey(field.key, field.renameKdbxKey!);
+        }
+
         _kdbxEntry.setString(field.renameKdbxKey ?? field.key, field.value);
       }
     } else if (field is EntryTitleFieldSaved) {
@@ -738,7 +742,7 @@ class _EntryFieldState extends State<EntryField> {
       EntryTextFieldSaved(
         key: widget.kdbxKey,
         renameKdbxKey: _renameKdbxKey,
-        value: value != null && value.isNotEmpty ? PlainValue(value) : null,
+        value: value != null ? PlainValue(value) : null,
       ),
     );
   }
@@ -1011,7 +1015,9 @@ class _EntryFieldState extends State<EntryField> {
       default:
         return EntryTextFormField(
           initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
-          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
+          label: (_renameKdbxKey?.key ?? widget.kdbxKey.key).fromKdbxKeyToI18n(
+            context,
+          ),
           onSaved: _kdbxTextFieldSaved,
           contextMenuBuilder: _contextMenuBuilder,
         );

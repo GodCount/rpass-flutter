@@ -4,7 +4,6 @@ import 'package:auto_route/auto_route.dart';
 
 import 'page/route.dart';
 import 'context/kdbx.dart';
-import 'page/home/route_wrap.dart';
 import 'store/index.dart';
 import 'util/common.dart';
 
