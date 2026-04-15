@@ -53,6 +53,4 @@ $ cd apps/rpass
 $ flutter run -d macos / windows
 ```
 
-## 许可证
 
-[MIT](./LICENSE)
