@@ -22,6 +22,7 @@ import '../tray.dart';
 import '../util/common.dart';
 import '../util/route.dart';
 import '../widget/common.dart';
+import '../widget/extension_state.dart';
 import 'auth_kdbx/load_page.dart';
 import 'auth_kdbx/verify_owner_page.dart';
 
@@ -164,7 +165,7 @@ class _RootRpassAppState extends State<RootRpassApp>
         {
           if (kdbxProvider.selectedKdbxEntry != null) {
             await Future.delayed(const Duration(milliseconds: 500));
-            kdbxProvider.selectedKdbxEntry!.autoFill();
+            autoFill(kdbxProvider.selectedKdbxEntry!);
           }
         }
         break;
@@ -175,7 +176,7 @@ class _RootRpassAppState extends State<RootRpassApp>
 
             if (kdbxProvider.selectedKdbxEntry != null) {
               await Future.delayed(const Duration(milliseconds: 500));
-              kdbxProvider.selectedKdbxEntry!.autoFill(KdbxKey(key));
+              autoFill(kdbxProvider.selectedKdbxEntry!, KdbxKey(key));
             }
           }
         }

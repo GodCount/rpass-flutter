@@ -62,7 +62,10 @@ extension StatefulDialog on State {
 
   Future<void> showToast(String msg) async {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), duration: const Duration(milliseconds: 1500)),
+      SnackBar(
+        content: Text(msg),
+        duration: const Duration(milliseconds: 1500),
+      ),
     );
   }
 
