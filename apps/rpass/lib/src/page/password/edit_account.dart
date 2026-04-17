@@ -3,9 +3,12 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:lan_fill_server/lan_fill_server.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
+import '../../context/lan_fill_server.dart';
+import '../../util/one_time_password.dart';
 import '../../util/route.dart';
 import '../../widget/form.dart';
 import '../../widget/kdbx_icon.dart';
@@ -615,6 +618,9 @@ class _EntryFieldState extends State<EntryField> {
 
   List<KdbxKey> _binaryKeys = [];
 
+  String? _value;
+  AuthOneTimePassword? _otp;
+
   late final List<DropdownMenuEntry<String>> _dropdownMenuEntries =
       KdbxProvider.of(context).kdbx!.fieldStatistic
           .getStatistic(widget.kdbxKey)
@@ -630,6 +636,21 @@ class _EntryFieldState extends State<EntryField> {
             ),
           )
           .toList();
+
+  @override
+  void initState() {
+    _value = widget.kdbxEntry.getString(widget.kdbxKey)?.getText();
+    parseOtp(_value);
+    super.initState();
+  }
+
+  void parseOtp(String? value) {
+    if (widget.kdbxKey == KdbxKeyCommon.OTP) {
+      _otp = value != null && value.isNotEmpty
+          ? AuthOneTimePassword.tryParse(value)
+          : null;
+    }
+  }
 
   void _onRenameKdbxKey() async {
     final t = I18n.of(context)!;
@@ -662,6 +683,26 @@ class _EntryFieldState extends State<EntryField> {
     }
   }
 
+  void _onChanged(String? text) {
+    if (_value != text) {
+      _value = text;
+      parseOtp(_value);
+      setState(() {});
+    }
+  }
+
+  void onPressedLanFill() {
+    String? value = _otp != null ? _otp!.code().toString() : _value;
+
+    if (value != null && value.isNotEmpty) {
+      final lanFill = LanFillInherited.of(context)!;
+
+      lanFill.requestRemoteAutofill(
+        AutofillDto(key: "field", fields: {"field": value}),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final child = Padding(
@@ -669,13 +710,41 @@ class _EntryFieldState extends State<EntryField> {
       child: _buildFormFieldFactory(),
     );
 
+    if (!isMobile) return child;
+
+    final t = I18n.of(context)!;
+    final lanFill = LanFillInherited.of(context);
+
+    final isDefaultKey = KdbxKeyCommon.all.contains(widget.kdbxKey);
+    final isCustomKey = widget.kdbxEntry.isCustomKey(widget.kdbxKey);
     final isUrl = KdbxKeyURLS.all.contains(widget.kdbxKey);
 
-    return isMobile
-        ? Slidable(
-            groupTag: "0",
-            enabled: widget.kdbxEntry.isCustomKey(widget.kdbxKey) || isUrl,
-            endActionPane: ActionPane(
+    final enabled = isDefaultKey || isCustomKey || isUrl;
+
+    return Slidable(
+      groupTag: "0",
+      enabled: enabled,
+      startActionPane: enabled && lanFill != null
+          ? ActionPane(
+              motion: const ScrollMotion(),
+              children: [
+                const SizedBox(width: 16),
+                if (_otp != null) OtpDownCount(authOneTimePassword: _otp!),
+                SlidableAction(
+                  icon: lanFill.serverClosed
+                      ? Icons.cast_connected
+                      : Icons.connect_without_contact_rounded,
+                  label: t.lan_fill,
+                  borderRadius: BorderRadius.circular(99),
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Theme.of(context).colorScheme.secondary,
+                  onPressed: (context) => onPressedLanFill(),
+                ),
+              ],
+            )
+          : null,
+      endActionPane: isCustomKey || isUrl
+          ? ActionPane(
               motion: const ScrollMotion(),
               children: [
                 if (!isUrl)
@@ -696,10 +765,10 @@ class _EntryFieldState extends State<EntryField> {
                   ),
                 const SizedBox(width: 16),
               ],
-            ),
-            child: child,
-          )
-        : child;
+            )
+          : null,
+      child: child,
+    );
   }
 
   FormFieldValidator<String?>? _entryFieldValidator() {
@@ -796,10 +865,13 @@ class _EntryFieldState extends State<EntryField> {
 
   Widget _buildFormFieldFactory() {
     final kdbx = KdbxProvider.of(context).kdbx!;
+
+    final initialValue = widget.kdbxEntry.getString(widget.kdbxKey)?.getText();
+
     switch (widget.kdbxKey.key) {
       case KdbxKeyCommon.KEY_TITLE:
         return EntryTitleFormField(
-          initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
+          initialValue: initialValue,
           label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
           kdbxIcon: KdbxIconWidgetData(
             icon: widget.kdbxEntry.icon.get() ?? KdbxIcon.Key,
@@ -815,6 +887,7 @@ class _EntryFieldState extends State<EntryField> {
               ),
             );
           },
+          onChanged: _onChanged,
         );
       case KdbxKeyCommon.KEY_URL:
       case KdbxKeyCommon.KEY_USER_NAME:
@@ -826,12 +899,11 @@ class _EntryFieldState extends State<EntryField> {
               builder: (context, constraints) {
                 return DropdownMenuFormField2(
                   width: constraints.biggest.width,
-                  initialValue: widget.kdbxEntry
-                      .getString(widget.kdbxKey)
-                      ?.getText(),
+                  initialValue: initialValue,
                   dropdownMenuEntries: _dropdownMenuEntries,
                   label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
                   onSaved: _kdbxTextFieldSaved,
+                  onSelected: _onChanged,
                   expandedInsets: const EdgeInsets.all(0),
                   validator: validator,
                   menuHeight: 150,
@@ -844,7 +916,7 @@ class _EntryFieldState extends State<EntryField> {
         );
       case KdbxKeyCommon.KEY_PASSWORD:
         return EntryTextFormField(
-          initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
+          initialValue: initialValue,
           label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
           trailingIcon: const Icon(Icons.create),
           onTrailingTap: () async {
@@ -857,10 +929,11 @@ class _EntryFieldState extends State<EntryField> {
             return null;
           },
           onSaved: _kdbxTextFieldSaved,
+          onChanged: _onChanged,
         );
       case KdbxKeyCommon.KEY_OTP:
         return EntryTextFormField(
-          initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
+          initialValue: initialValue,
           label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
           trailingIcon: isMobile ? const Icon(Icons.qr_code_scanner) : null,
           onTrailingTap: isMobile
@@ -875,13 +948,15 @@ class _EntryFieldState extends State<EntryField> {
                 }
               : null,
           onSaved: _kdbxTextFieldSaved,
+          onChanged: _onChanged,
           validator: _entryFieldValidator(),
         );
       case KdbxKeyCommon.KEY_NOTES:
         return EntryNotesFormField(
-          initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
+          initialValue: initialValue,
           label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
           onSaved: _kdbxTextFieldSaved,
+          onChanged: _onChanged,
         );
       case KdbxKeySpecial.KEY_AUTO_TYPE:
         return EntryAutoTypeFormField(
@@ -896,7 +971,7 @@ class _EntryFieldState extends State<EntryField> {
       case KdbxKeySpecial.KEY_AUTO_FILL_PACKAGE_NAME:
         return EntryAutoFillAppFormField(
           label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
-          initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
+          initialValue: initialValue,
           onSaved: (value) {
             widget.onSaved(
               EntryAutoFillAppFieldSaved(key: widget.kdbxKey, value: value),
@@ -1002,23 +1077,23 @@ class _EntryFieldState extends State<EntryField> {
           validator: _entryFieldValidator(),
           builder: (context, validator) {
             return EntryTextFormField(
-              initialValue: widget.kdbxEntry
-                  .getString(widget.kdbxKey)
-                  ?.getText(),
+              initialValue: initialValue,
               label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
               validator: validator,
               onSaved: _kdbxTextFieldSaved,
+              onChanged: _onChanged,
               contextMenuBuilder: _contextMenuBuilder,
             );
           },
         );
       default:
         return EntryTextFormField(
-          initialValue: widget.kdbxEntry.getString(widget.kdbxKey)?.getText(),
+          initialValue: initialValue,
           label: (_renameKdbxKey?.key ?? widget.kdbxKey.key).fromKdbxKeyToI18n(
             context,
           ),
           onSaved: _kdbxTextFieldSaved,
+          onChanged: _onChanged,
           contextMenuBuilder: _contextMenuBuilder,
         );
     }

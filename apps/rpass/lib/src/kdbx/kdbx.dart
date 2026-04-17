@@ -678,14 +678,10 @@ extension KdbxEntryCommon on KdbxEntry {
   }
 
   String? getOTPCode() {
-    try {
-      final url = getString(KdbxKeyCommon.OTP)?.getText();
-      return url != null
-          ? AuthOneTimePassword.parse(url).code().toString()
-          : null;
-    } catch (e) {
-      return null;
-    }
+    final url = getString(KdbxKeyCommon.OTP)?.getText();
+    return url != null
+        ? AuthOneTimePassword.tryParse(url)?.code().toString()
+        : null;
   }
 
   String copyBasicString() {

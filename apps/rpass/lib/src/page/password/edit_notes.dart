@@ -58,7 +58,7 @@ class _EditNotesPageState extends State<EditNotesPage> {
   ) {
     final lanFill = LanFillInherited.of(this.context);
 
-    if (kIsMobile && widget.readOnly && lanFill != null) {
+    if (kIsMobile && lanFill != null) {
       final t = I18n.of(context)!;
 
       final isCollapsed =

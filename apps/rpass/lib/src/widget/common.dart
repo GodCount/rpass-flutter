@@ -8,6 +8,8 @@ import 'package:pretty_qr_code/pretty_qr_code.dart';
 import '../context/kdbx.dart';
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
+import '../util/common.dart';
+import '../util/one_time_password.dart';
 import 'extension_state.dart';
 import 'kdbx_icon.dart';
 
@@ -198,6 +200,8 @@ class GroupSelectorDialog extends StatefulWidget {
   }) {
     return showDialog(
       context: context,
+      // fix 在 GroupSelectorDialog 里触发导航 context.router.push 会把页面插入到弹窗下发的问题
+      useRootNavigator: kIsDesktop,
       builder: (context) {
         return GroupSelectorDialog(
           value: value,
@@ -652,6 +656,88 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
               ),
             ]
           : null,
+    );
+  }
+}
+
+typedef OnUpdateCallback = void Function();
+
+class OtpDownCount extends StatefulWidget {
+  const OtpDownCount({
+    super.key,
+    required this.authOneTimePassword,
+    this.onUpdate,
+  });
+
+  final AuthOneTimePassword authOneTimePassword;
+  final OnUpdateCallback? onUpdate;
+
+  @override
+  State<OtpDownCount> createState() => _OtpDownCountState();
+}
+
+class _OtpDownCountState extends State<OtpDownCount>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    _controller = AnimationController(
+      reverseDuration: const Duration(seconds: 1),
+      duration: Duration(seconds: widget.authOneTimePassword.period),
+      vsync: this,
+    )..repeat();
+
+    _animation = Tween(begin: 0.0, end: 1.0).animate(_controller);
+
+    _animation.addListener(() {
+      setState(() => {});
+    });
+
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _controller.reverse();
+      } else if (status == AnimationStatus.reverse && widget.onUpdate != null) {
+        Timer(const Duration(milliseconds: 100), widget.onUpdate!);
+      } else if (status == AnimationStatus.dismissed) {
+        _controller.forward(from: widget.authOneTimePassword.percent());
+      }
+    });
+
+    _controller.forward(from: widget.authOneTimePassword.percent());
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  String downcount() {
+    return (widget.authOneTimePassword.period -
+            (_animation.value * widget.authOneTimePassword.period))
+        .round()
+        .toString();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 24,
+      height: 24,
+      margin: const EdgeInsets.only(right: 8),
+      child: Stack(
+        alignment: AlignmentDirectional.center,
+        children: [
+          CircularProgressIndicator(
+            value: _animation.value,
+            backgroundColor: Colors.grey[400],
+          ),
+          Text(downcount()),
+        ],
+      ),
     );
   }
 }

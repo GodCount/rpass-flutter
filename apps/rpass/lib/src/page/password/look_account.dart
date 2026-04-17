@@ -303,9 +303,9 @@ class _LookAccountPageState extends State<LookAccountPage>
                     onTap: onAutoPop(() {
                       lanFill!.requestRemoteAutofill(
                         AutofillDto(
-                          key: key.key,
+                          key: "field",
                           fields: {
-                            key.key: widget.kdbxEntry.getActualString(key),
+                            "field": widget.kdbxEntry.getActualString(key),
                           },
                         ),
                       );
@@ -1073,7 +1073,7 @@ class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile> {
               ),
       ),
       trailing: _authOneTimePassword != null
-          ? _OtpDownCount(
+          ? OtpDownCount(
               authOneTimePassword: _authOneTimePassword!,
               onUpdate: () {
                 setState(() {});
@@ -1088,83 +1088,3 @@ class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile> {
   }
 }
 
-typedef OnUpdateCallback = void Function();
-
-class _OtpDownCount extends StatefulWidget {
-  const _OtpDownCount({
-    required this.authOneTimePassword,
-    required this.onUpdate,
-  });
-
-  final AuthOneTimePassword authOneTimePassword;
-  final OnUpdateCallback onUpdate;
-
-  @override
-  State<_OtpDownCount> createState() => _OtpDownCountState();
-}
-
-class _OtpDownCountState extends State<_OtpDownCount>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    _controller = AnimationController(
-      reverseDuration: const Duration(seconds: 1),
-      duration: Duration(seconds: widget.authOneTimePassword.period),
-      vsync: this,
-    )..repeat();
-
-    _animation = Tween(begin: 0.0, end: 1.0).animate(_controller);
-
-    _animation.addListener(() {
-      setState(() => {});
-    });
-
-    _controller.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _controller.reverse();
-      } else if (status == AnimationStatus.reverse) {
-        Timer(const Duration(milliseconds: 100), widget.onUpdate);
-      } else if (status == AnimationStatus.dismissed) {
-        _controller.forward(from: widget.authOneTimePassword.percent());
-      }
-    });
-
-    _controller.forward(from: widget.authOneTimePassword.percent());
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  String downcount() {
-    return (widget.authOneTimePassword.period -
-            (_animation.value * widget.authOneTimePassword.period))
-        .round()
-        .toString();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 24,
-      height: 24,
-      margin: const EdgeInsets.only(right: 8),
-      child: Stack(
-        alignment: AlignmentDirectional.center,
-        children: [
-          CircularProgressIndicator(
-            value: _animation.value,
-            backgroundColor: Colors.grey[400],
-          ),
-          Text(downcount()),
-        ],
-      ),
-    );
-  }
-}

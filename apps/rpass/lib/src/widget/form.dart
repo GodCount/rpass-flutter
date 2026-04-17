@@ -18,6 +18,7 @@ class EntryTitleFormField extends StatefulWidget {
     this.label,
     this.initialValue,
     required this.onSaved,
+    this.onChanged,
   });
 
   final String? label;
@@ -25,6 +26,7 @@ class EntryTitleFormField extends StatefulWidget {
   final KdbxIconWidgetData kdbxIcon;
 
   final FormFieldSetter<(String, KdbxIcon, KdbxCustomIcon?)> onSaved;
+  final ValueChanged<String>? onChanged;
 
   @override
   State<EntryTitleFormField> createState() => _EntryTitleFormFieldState();
@@ -40,6 +42,7 @@ class _EntryTitleFormFieldState extends State<EntryTitleFormField> {
     return TextFormField(
       key: _globalKey,
       initialValue: widget.initialValue,
+      onChanged: widget.onChanged,
       onSaved: (value) {
         widget.onSaved((value!, _kdbxIcon.icon, _kdbxIcon.customIcon));
       },
@@ -76,6 +79,7 @@ class EntryTextFormField extends StatefulWidget {
     this.trailingIcon,
     this.onTrailingTap,
     this.onSaved,
+    this.onChanged,
     this.validator,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
   });
@@ -86,6 +90,8 @@ class EntryTextFormField extends StatefulWidget {
   final OnTrailingTap? onTrailingTap;
 
   final FormFieldSetter<String>? onSaved;
+  final ValueChanged<String>? onChanged;
+
   final FormFieldValidator<String>? validator;
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
@@ -93,6 +99,11 @@ class EntryTextFormField extends StatefulWidget {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
+    if (SystemContextMenu.isSupportedByField(editableTextState)) {
+      return SystemContextMenu.editableText(
+        editableTextState: editableTextState,
+      );
+    }
     return AdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
     );
@@ -123,6 +134,7 @@ class _EntryTextFormFieldState extends State<EntryTextFormField> {
       validator: widget.validator,
       controller: _controller,
       onSaved: widget.onSaved,
+      onChanged: widget.onChanged,
       contextMenuBuilder: widget.contextMenuBuilder,
       decoration: InputDecoration(
         labelText: widget.label,
@@ -151,6 +163,7 @@ class EntryNotesFormField extends FormField<String> {
     String? label,
     super.initialValue,
     super.onSaved,
+    ValueChanged<String>? onChanged,
   }) : super(
          builder: (field) {
            return GestureDetector(
@@ -161,6 +174,7 @@ class EntryNotesFormField extends FormField<String> {
 
                if (text != null && text is String) {
                  field.didChange(text);
+                 onChanged?.call(text);
                }
              },
              child: InputDecorator(
@@ -392,9 +406,7 @@ class _EntryAutoFillAppFormFieldState extends State<EntryAutoFillAppFormField> {
                   return;
                 }
                 if (packageName != null && packageName is String) {
-                  _future = installedApps.getAppInfo(
-                    packageName,
-                  );
+                  _future = installedApps.getAppInfo(packageName);
 
                   field.didChange(packageName == "none" ? null : packageName);
                 }
@@ -438,6 +450,7 @@ class DropdownMenuFormField2 extends FormField<String> {
     EdgeInsets? expandedInsets,
     required List<DropdownMenuEntry<String>> dropdownMenuEntries,
     super.onSaved,
+    ValueChanged<String?>? onSelected,
     super.autovalidateMode = AutovalidateMode.disabled,
     super.validator,
     bool enableFilter = false,
@@ -457,6 +470,7 @@ class DropdownMenuFormField2 extends FormField<String> {
              expandedInsets: expandedInsets,
              requestFocusOnTap: requestFocusOnTap,
              dropdownMenuEntries: dropdownMenuEntries,
+             onSelected: onSelected,
            );
          },
        );

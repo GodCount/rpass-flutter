@@ -21,32 +21,50 @@ class AuthOneTimePassword {
   final String? issuer;
 
   static AuthOneTimePassword parse(String url) {
-    final uri = Uri.parse(url);
-    if (uri.scheme != "otpauth") {
-      throw AuthOTPError("url scheme not optauth");
-    }
-    if (!uri.queryParameters.containsKey("secret")) {
-      throw AuthOTPError("secret is not exist");
-    }
-
-    String secret = uri.queryParameters["secret"]!;
+    String? secret;
     int? period;
     String? account;
     String? issuer;
 
-    String pathSegment = uri.pathSegments[0];
-    if (pathSegment.contains(":")) {
-      account = pathSegment.split(":")[0];
-      issuer = pathSegment.split(":")[1];
+    if (url.startsWith("otpauth://")) {
+      final uri = Uri.parse(url);
+      if (uri.scheme != "otpauth") {
+        throw AuthOTPError("url scheme not optauth");
+      }
+      if (!uri.queryParameters.containsKey("secret")) {
+        throw AuthOTPError("secret is not exist");
+      }
+
+      secret = uri.queryParameters["secret"];
+
+      String pathSegment = uri.pathSegments[0];
+      if (pathSegment.contains(":")) {
+        account = pathSegment.split(":")[0];
+        issuer = pathSegment.split(":")[1];
+      }
+
+      if (uri.queryParameters.containsKey("issuer")) {
+        issuer = uri.queryParameters["issuer"];
+      }
+
+      if (uri.queryParameters.containsKey("period")) {
+        period = int.tryParse(uri.queryParameters["period"]!);
+      }
+
+      if (secret == null) {
+        throw AuthOTPError("secret is not exist");
+      }
+    } else {
+      secret = url;
     }
 
-    if (uri.queryParameters.containsKey("issuer")) {
-      issuer = uri.queryParameters["issuer"];
-    }
-
-    if (uri.queryParameters.containsKey("period")) {
-      period = int.tryParse(uri.queryParameters["period"]!);
-    }
+    OTP.generateTOTPCode(
+      secret,
+      DateTime.now().millisecondsSinceEpoch,
+      interval: period ?? 30,
+      isGoogle: true,
+      algorithm: Algorithm.SHA1,
+    );
 
     return AuthOneTimePassword(
       secret: secret,
@@ -54,6 +72,14 @@ class AuthOneTimePassword {
       account: account,
       issuer: issuer,
     );
+  }
+
+  static AuthOneTimePassword? tryParse(String url) {
+    try {
+      return parse(url);
+    } catch (e) {
+      return null;
+    }
   }
 
   int code() {
