@@ -1,5 +1,32 @@
 # 更新日志
 
+## 3.0.1 - 2026.04.18
+
+- 协议: 切换到 AGPL3
+
+- 移除: fluttertoast
+- 移除: installed_apps, 迁移到 common_native_channel InstalledApps
+- 重构: 添加 common_native_channel 包, 移除 prev_focus_window
+
+- 添加: 读取剪切板,并提示是否触发局域网填充
+- 添加: 在编辑账号时也支持局域网填充,方便注册账号等操作
+- 添加: 局域网附件传输
+
+- 优化: 局域网超时配置
+- 优化: otp 解析,强制识别成密钥,并进行一次生成code用于断言otp是否正确
+- 优化: android 自动填充
+- 优化: 主题效果
+- 优化: 移除 EmptyPageRoute 使用 AutoRouter 的 placeholder
+
+- 修复: 在没有触发invokeMethod 前无法接收MethodCall问题
+- 修复: 字段为空时保存没有效果;
+- 修复: 自定义字段重命名后显示还是之前的名称
+- 修复: macos _BackgroundLock 失效
+- 修复: DropdownMenuFormField2 过滤后选中项更改错误
+- 修复[lan_fill_server]: 心跳函数应该捕获_getDio异常
+- 修复:  macos 缺少一些权限声明
+
+
 ## 3.0.0 - 2026.03.25
 
 -   重构: 使用 melos 管理项目
