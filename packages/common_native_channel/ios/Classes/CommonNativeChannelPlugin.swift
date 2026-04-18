@@ -9,6 +9,11 @@ public class CommonNativeChannelPlugin: NSObject, FlutterPlugin {
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    if(call.method == "ensure_initialized") {
+        result(true)
+        return
+    }
+    
     switch call.method {
     default:
       result(FlutterMethodNotImplemented)

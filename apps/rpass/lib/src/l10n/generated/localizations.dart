@@ -1471,6 +1471,18 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'没有匹配, 尝试手动选择'**
   String get no_math_manual_select;
+
+  /// No description provided for @hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'提示'**
+  String get hint;
+
+  /// No description provided for @clipboard_lan_fill_message.
+  ///
+  /// In zh, this message translates to:
+  /// **'检测到连接了局域网填充服务, 是否填充剪切板数据.'**
+  String get clipboard_lan_fill_message;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

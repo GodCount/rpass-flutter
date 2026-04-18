@@ -348,5 +348,7 @@
     "close": "Close",
     "seed_color": "Seed Color",
     "lan_transfer": "LAN Transfer",
-    "no_math_manual_select": "No match, Try manual selection"
+    "no_math_manual_select": "No match, Try manual selection",
+    "hint": "Hint",
+    "clipboard_lan_fill_message": "local area network fill service detected. Fill clipboard data."
 }

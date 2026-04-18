@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:common_native_channel/common_native_channel.dart';
 import 'package:enigo_flutter/enigo_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -41,6 +42,7 @@ void main() async {
     await BiometricState.initCanAuthenticate();
   }
 
+  await CommonNativeChannelPlatform.instance.ensureInitialized();
   NativeInstancePlatform.ensureInitialized();
 
   if (Platform.isMacOS || Platform.isWindows) {
@@ -55,7 +57,6 @@ void main() async {
       await systemTray.ensureInitialized();
       await windowManager.setTitle(RpassInfo.appName);
     }
-
   } catch (e, s) {
     _logger.severe("init fail!", e, s);
     return runApp(

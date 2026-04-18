@@ -18,6 +18,12 @@ public class CommonNativeChannelPlugin: NSObject, FlutterPlugin {
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+
+        if(call.method == "ensure_initialized") {
+            result(true)
+            return
+        }
+
         if let feature = self.features.first(where: { $0.methods.contains(call.method) }) {
             feature.handle(call, result: result)
         } else {

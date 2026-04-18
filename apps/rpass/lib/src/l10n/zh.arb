@@ -348,5 +348,7 @@
     "close": "关闭",
     "seed_color": "种子色",
     "lan_transfer": "局域网传输",
-    "no_math_manual_select": "没有匹配, 尝试手动选择"
+    "no_math_manual_select": "没有匹配, 尝试手动选择",
+    "hint": "提示",
+    "clipboard_lan_fill_message": "检测到连接了局域网填充服务, 是否填充剪切板数据."
 }

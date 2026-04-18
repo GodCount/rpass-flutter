@@ -78,7 +78,7 @@ class LanFillCilent {
     final key = utf8.encode(registerDto.code);
 
     final baseOptions = BaseOptions(
-      sendTimeout: const Duration(seconds: 1),
+      connectTimeout: const Duration(milliseconds: 100),
       contentType: "application/octet-stream",
       responseType: ResponseType.bytes,
       headers: {
@@ -184,7 +184,6 @@ class LanFillCilent {
       _dio = Dio(
         baseOptions.copyWith(
           baseUrl: "https://$ip:${registerDto.port}",
-          sendTimeout: const Duration(seconds: 3),
           contentType: "application/json",
           responseType: ResponseType.json,
           headers: {

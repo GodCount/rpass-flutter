@@ -31,6 +31,12 @@ class CommonNativeChannelPlugin :
         call: MethodCall,
         result: Result
     ) {
+
+        if (call.method == "ensure_initialized") {
+            result.success(true)
+            return
+        }
+
         val feature = features.find {
             it.methods.contains(call.method)
         }

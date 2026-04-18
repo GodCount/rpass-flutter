@@ -22,7 +22,15 @@ class CommonNativeChannelPlatform extends PlatformInterface {
   late final InstalledApps installedApps = InstalledApps(methodChannel);
 
   @visibleForTesting
-  late final List<CommonFeaturesInterface> features = [prevFocusWindow, installedApps];
+  late final List<CommonFeaturesInterface> features = [
+    prevFocusWindow,
+    installedApps,
+  ];
+
+  Future<void> ensureInitialized() async {
+    // 进行一次通讯交互, 如果不就行的话, 直接在原生端回调, 会出现接收不到的问题
+    await methodChannel.invokeMethod("ensure_initialized");
+  }
 
   Future<dynamic> _methodCallHandler(MethodCall call) async {
     for (final feature in features) {

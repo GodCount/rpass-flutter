@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lan_fill_server/lan_fill_server.dart';
 import 'package:path/path.dart' as path;
 
@@ -70,9 +71,49 @@ class _LanFillServerState extends State<LanFillServerProvider>
   final SimpleAsyncQueue _validateFingerprintQueue = SimpleAsyncQueue();
   final SimpleAsyncQueue _requestQueue = SimpleAsyncQueue();
 
+  final DialogCloseController _dialogCloseController = DialogCloseController();
+
   // 不信任的指纹
   // 每次弹出二维码窗口时重置
   final List<String> _distrustList = [];
+
+  VoidCallback? _lifecycleDispose;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _captchaLanFill();
+  }
+
+  void _captchaLanFill() {
+    if (kIsMobile) {
+      String? lastText;
+      _lifecycleDispose = AppLifecycleListener(
+        onPause: () async {
+          lastText = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
+        },
+        onResume: () async {
+          final t = I18n.of(context)!;
+          final text = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
+
+          if (text != null &&
+              text != lastText &&
+              text.isNotEmpty &&
+              _cilent?.connecting == true &&
+              await showConfirmDialog(
+                title: t.hint,
+                message: t.clipboard_lan_fill_message,
+              )) {
+            requestRemoteAutofill(
+              AutofillDto(key: "field", fields: {"field": text}),
+            );
+          }
+          lastText = text;
+        },
+      ).dispose;
+    }
+  }
 
   Future<void> openQrCodeDialog() async {
     try {
@@ -96,6 +137,7 @@ class _LanFillServerState extends State<LanFillServerProvider>
 
       await QrCodeDialog.openDialog(
         context,
+        controller: _dialogCloseController,
         title: I18n.of(context)!.lan_fill,
         getQrData: () async {
           try {
@@ -240,9 +282,7 @@ class _LanFillServerState extends State<LanFillServerProvider>
 
   @override
   void onServerCilentFirstHeartbeat(String devicePlatform, String? deviceName) {
-    // TODO! pop QrCodeDialog.openDialog 弹窗
-    // ? 直接pop 可能有风险, 例如打开QrCodeDialog 进入 _BackgroundLock
-    // 这时回调到这里直接pop 会把VerifyOwnerRoute 关掉 ?
+    _dialogCloseController.close();
   }
 
   @override
@@ -263,6 +303,9 @@ class _LanFillServerState extends State<LanFillServerProvider>
     _validateFingerprintQueue.clear();
     _server?.close();
     _cilent?.close();
+    _dialogCloseController.dispose();
+
+    _lifecycleDispose?.call();
   }
 
   @override

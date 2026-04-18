@@ -578,14 +578,20 @@ class QrCodeDialog extends StatefulWidget {
     required ValueGetter<Future<(String, Duration)>> getQrData,
     VoidCallback? onClose,
     String? title,
+    DialogCloseController? controller,
   }) {
     return showDialog(
       context: context,
       builder: (context) {
-        return QrCodeDialog(
-          getQrData: getQrData,
-          title: title,
-          onClose: onClose,
+        if (controller != null) controller.context = context;
+
+        return Theme(
+          data: context.findAncestorWidgetOfExactType<MaterialApp>()!.theme!,
+          child: QrCodeDialog(
+            getQrData: getQrData,
+            title: title,
+            onClose: onClose,
+          ),
         );
       },
     );
@@ -739,5 +745,27 @@ class _OtpDownCountState extends State<OtpDownCount>
         ],
       ),
     );
+  }
+}
+
+class DialogCloseController {
+  BuildContext? _context;
+
+  set context(BuildContext? value) {
+    _context = value;
+  }
+
+  void close<T extends Object?>([T? result]) {
+    if (_context != null && _context!.mounted) {
+      final route = ModalRoute.of(_context!);
+      if (route != null) {
+        Navigator.of(_context!, rootNavigator: true).removeRoute(route);
+      }
+      _context = null;
+    }
+  }
+
+  void dispose() {
+    _context = null;
   }
 }

@@ -123,7 +123,13 @@ class _EditAccountPageState extends State<EditAccountPage>
       _kdbxDeleteSaved();
 
       if (await kdbxSave(KdbxProvider.of(context).kdbx!)) {
-        context.router.pop(true);
+        if (isDesktop) {
+          context.router.platformNavigate(
+            LookAccountRoute(kdbxEntry: _kdbxEntry, uuid: _kdbxEntry.uuid),
+          );
+        } else {
+          context.router.pop(true);
+        }
       }
     }
   }

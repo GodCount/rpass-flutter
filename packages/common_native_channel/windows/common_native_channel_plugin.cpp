@@ -56,6 +56,11 @@ namespace common_native_channel {
 		std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
 		const std::string method = method_call.method_name();
 
+		if (method == "ensure_initialized") {
+			result->Success(flutter::EncodableValue(true));
+			return;
+		}
+
 
 		for (auto& feature : features_) {
 			auto methods = feature->Methods();

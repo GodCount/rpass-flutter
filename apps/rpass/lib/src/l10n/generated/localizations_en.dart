@@ -742,4 +742,11 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get no_math_manual_select => 'No match, Try manual selection';
+
+  @override
+  String get hint => 'Hint';
+
+  @override
+  String get clipboard_lan_fill_message =>
+      'local area network fill service detected. Fill clipboard data.';
 }

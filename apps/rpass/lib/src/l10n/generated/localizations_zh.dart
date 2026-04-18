@@ -724,4 +724,10 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get no_math_manual_select => '没有匹配, 尝试手动选择';
+
+  @override
+  String get hint => '提示';
+
+  @override
+  String get clipboard_lan_fill_message => '检测到连接了局域网填充服务, 是否填充剪切板数据.';
 }

@@ -5,10 +5,12 @@ import 'package:logging/logging.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
 import '../../widget/form.dart';
 import '../../widget/kdbx_icon.dart';
+import '../route.dart';
 
 final _logger = Logger("page:edit_group_page");
 
@@ -103,7 +105,13 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
       }
 
       if (await kdbxSave(KdbxProvider.of(context).kdbx!)) {
-        context.router.pop(kdbxGroup.uuid);
+        if (isDesktop) {
+          context.router.platformNavigate(
+            ManageGroupEntryRoute(kdbxGroup: kdbxGroup, uuid: kdbxGroup.uuid),
+          );
+        } else {
+          context.router.pop(kdbxGroup.uuid);
+        }
       }
     }
   }
