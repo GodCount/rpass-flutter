@@ -469,37 +469,33 @@ extension KdbxAndroidAutoFill on KdbxBase {
 }
 
 extension KdbxEntryAndroidAutoFill on KdbxEntry {
-  Map<String, String?> toAutofillDataset(
-    Set<String> fieldTypes, [
-    Set<String>? keyFieldTypes,
-  ]) {
+  Map<String, String?> toAutofillDataset(Set<String> fieldTypes) {
     final title = getActualString(KdbxKeyCommon.TITLE);
     final password = getActualString(KdbxKeyCommon.PASSWORD);
     final email = getActualString(KdbxKeyCommon.EMAIL);
     final user = getActualString(KdbxKeyCommon.USER_NAME);
     final otp = getActualString(KdbxKeyCommon.OTP);
 
-    keyFieldTypes ??= AutofillDataset.getKeyFields(fieldTypes);
-
     return {
       AutofillDataset.DATASET_FIELD_LABEL: title != null && title.isNotEmpty
           ? title
           : user,
       AutofillDataset.DATASET_FIELD_PASSWORD:
-          keyFieldTypes.contains(AutofillDataset.DATASET_FIELD_PASSWORD)
+          fieldTypes.contains(AutofillDataset.DATASET_FIELD_PASSWORD)
           ? password
           : null,
       AutofillDataset.DATASET_FIELD_USERNAME:
-          keyFieldTypes.contains(AutofillDataset.DATASET_FIELD_EMAIL) &&
-              email != null &&
-              email
-                  .isNotEmpty // 存在邮箱,优先返回邮箱
+          fieldTypes.contains(AutofillDataset.DATASET_FIELD_EMAIL) &&
+              email?.isNotEmpty ==
+                  true // 存在邮箱,优先返回邮箱
           ? email
           : user ?? email,
+      AutofillDataset.DATASET_FIELD_EMAIL:
+          fieldTypes.contains(AutofillDataset.DATASET_FIELD_EMAIL)
+          ? email
+          : user,
       AutofillDataset.DATASET_FIELD_OTP:
-          keyFieldTypes.contains(AutofillDataset.DATASET_FIELD_OTP)
-          ? otp
-          : null,
+          fieldTypes.contains(AutofillDataset.DATASET_FIELD_OTP) ? otp : null,
     };
   }
 }

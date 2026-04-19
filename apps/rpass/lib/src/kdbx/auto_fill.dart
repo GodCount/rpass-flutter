@@ -109,11 +109,12 @@ Future<void> autoFillSequence(
   }
 }
 
-extension _MatchWebDomain on String {
-  bool matchWebDomain(String url) {
-    final domain = url.simpleToDomain();
-    return contains(domain) || domain.contains(this);
-  }
+bool _containsDomain(String a, String b) {
+  if (a == b) return true;
+  final a1 = a.split(".");
+  final b1 = b.split(".");
+
+  return a1.last == b1.last && a1[a1.length - 2] == b1[b1.length - 2];
 }
 
 ///
@@ -125,23 +126,24 @@ Future<AutofillDataset> androidAutofillSearch(
   List<KdbxEntry> kdbxEntrys,
 ) async {
   final result = kdbxEntrys.where((it) {
+    // 任意一个 url 匹配成功, 或者包名对应上
+
     final packageName = it.getActualString(
       KdbxKeySpecial.AUTO_FILL_PACKAGE_NAME,
     );
 
-    // 任意一个 url 匹配成功, 或者包名对应上
-    return (packageName != null &&
-            metadata.packageNames.contains(packageName)) ||
+    if (packageName != null && metadata.packageName == packageName) return true;
+
+    final webDomain = metadata.webDomain?.simpleToDomain();
+
+    return webDomain != null &&
         it.getUrls().any(
-          (url) =>
-              metadata.webDomains.any((it) => it.domain.matchWebDomain(url)),
+          (url) => _containsDomain(webDomain, url.simpleToDomain()),
         );
   });
 
-  final keyFieldTypes = AutofillDataset.getKeyFields(metadata.fieldTypes);
-
   final List<Map<String, String?>> dataset = result
-      .map((it) => it.toAutofillDataset(metadata.fieldTypes, keyFieldTypes))
+      .map((it) => it.toAutofillDataset(metadata.fieldTypes))
       .toList();
 
   return AutofillDataset(status: .FILL, data: dataset);

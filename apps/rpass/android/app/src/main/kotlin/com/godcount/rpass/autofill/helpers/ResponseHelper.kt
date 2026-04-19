@@ -12,6 +12,7 @@ import android.service.autofill.FillRequest
 import android.service.autofill.FillResponse
 import android.service.autofill.InlinePresentation
 import android.service.autofill.Presentations
+import android.view.View
 import android.view.autofill.AutofillId
 import android.view.autofill.AutofillManager
 import android.view.autofill.AutofillValue
@@ -32,7 +33,7 @@ class ResponseHelper private constructor(
     fun buildDatasetResponse(dataset: AutofillDataset): FillResponse? {
 
         if (dataset.status != DatasetStatus.FILL) {
-            return buildAuthResponse(dataset.status,true, dataset.message);
+            return buildAuthResponse(dataset.status, true, dataset.message);
         }
 
         if (dataset.data.isEmpty()) return null
@@ -50,31 +51,17 @@ class ResponseHelper private constructor(
         }
 
         return FillResponse.Builder().apply {
+
             dataset.data.forEach { data ->
 
                 val map = HashMap<AutofillId, AutofillValue>()
 
                 val label = data[AutofillDataset.DATASET_FIELD_LABEL]
-                val username = data[AutofillDataset.DATASET_FIELD_USERNAME]
+                val username = data[View.AUTOFILL_HINT_USERNAME]
 
                 parsed.fields.forEach { field ->
-
-                    if (data[AutofillDataset.DATASET_FIELD_PASSWORD] != null && ViewStructureParser.ATTRIBUTES_PASSWORD_MATCHES.containsMatchIn(
-                            field.key
-                        )
-                    ) {
-                        map[field.value] =
-                            AutofillValue.forText(data[AutofillDataset.DATASET_FIELD_PASSWORD])
-                    } else if (data[AutofillDataset.DATASET_FIELD_OTP] != null && ViewStructureParser.ATTRIBUTES_OTP_MATCHES.containsMatchIn(
-                            field.key
-                        )
-                    ) {
-                        map[field.value] =
-                            AutofillValue.forText(data[AutofillDataset.DATASET_FIELD_OTP])
-                    } else if (data[field.key] != null) {
+                    if (data[field.key] != null) {
                         map[field.value] = AutofillValue.forText(data[field.key])
-                    } else {
-                        map[field.value] = AutofillValue.forText(username)
                     }
                 }
 
@@ -254,9 +241,6 @@ data class AutofillDataset(
 
 
         const val DATASET_FIELD_LABEL = "label"
-        const val DATASET_FIELD_USERNAME = "username"
-        const val DATASET_FIELD_PASSWORD = "password"
-        const val DATASET_FIELD_OTP = "otp"
 
 
         fun fromJson(map: Map<String, Any?>): AutofillDataset = AutofillDataset(

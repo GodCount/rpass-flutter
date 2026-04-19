@@ -63,9 +63,11 @@ class MyAutofillService : AutofillService() {
         val responseHelper = ResponseHelper.createResponse(this, request)
         val metadata = responseHelper.parsed.toAutofillMetadata()
 
+        println("metadata $metadata")
+
+
         if (!responseHelper.parsed.canAutofill()) return callback.onSuccess(null)
 
-        println("metadata $metadata")
 
         fun setOnAutofillResponseByReply(finish: Boolean) {
             onAutofillResponse = ({ activity, dataset ->

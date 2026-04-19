@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import android.view.autofill.AutofillManager
-import android.view.autofill.AutofillManager.EXTRA_AUTHENTICATION_RESULT
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -82,10 +81,10 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
                 val metadata = this.getAutofillMetadata(intent)
 
                 if (metadata != null) {
-                    this.requestAutofill(metadata, true);
+                    this.requestAutofill(metadata, true)
                 }
 
-                return true;
+                return true
             }
             lastAutofillIntent = intent
         }

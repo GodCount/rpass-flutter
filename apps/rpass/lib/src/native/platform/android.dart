@@ -17,38 +17,36 @@ class AutofillField {
 
 class AutofillMetadata {
   AutofillMetadata({
-    required this.packageNames,
-    required this.webDomains,
     required this.fieldTypes,
+
+    this.packageName,
+    this.webDomain,
+    this.webScheme,
   });
 
   factory AutofillMetadata.fromJson(Map<dynamic, dynamic> json) =>
       AutofillMetadata(
-        packageNames: (json['packageNames'] as Iterable)
-            .map((dynamic e) => e as String)
-            .toSet(),
-        webDomains: (json['webDomains'] as Iterable)
-            .map(
-              (dynamic e) =>
-                  AutofillWebDomain.fromJson(e as Map<dynamic, dynamic>),
-            )
-            .toSet(),
         fieldTypes: (json['fieldTypes'] as Iterable)
             .map((dynamic e) => e as String)
             .toSet(),
+        packageName: json['packageName'] as String?,
+        webDomain: json['webDomain'] as String?,
+        webScheme: json['webScheme'] as String?,
       );
 
-  final Set<String> packageNames;
-  final Set<AutofillWebDomain> webDomains;
+  final String? packageName;
+  final String? webDomain;
+  final String? webScheme;
   final Set<String> fieldTypes;
 
   @override
   String toString() => toJson().toString();
 
-  Map<String, Object> toJson() => {
-    'packageNames': packageNames,
-    'webDomains': webDomains.map((e) => e.toJson()),
+  Map<String, Object?> toJson() => {
     'fieldTypes': fieldTypes,
+    'packageName': packageName,
+    'webDomain': webDomain,
+    'webScheme': webScheme,
   };
 }
 
@@ -76,22 +74,6 @@ enum AutofillDatasetStatus {
   FILL, // 直接填充
 }
 
-class _AutoFillFieldMatch {
-  static final PASSWORD = RegExp("password|密码", caseSensitive: false);
-  static final USERNAME = RegExp(
-    "login|username|user|name|账号|用户",
-    caseSensitive: false,
-  );
-  static final EMAIL = RegExp("email|mail|邮箱", caseSensitive: false);
-  static final OTP = RegExp("otp", caseSensitive: false);
-}
-
-extension _MatchSet on Set<String> {
-  bool hasMatch(RegExp reg) {
-    return any((item) => reg.hasMatch(item));
-  }
-}
-
 class AutofillDataset {
   AutofillDataset({required this.status, this.message, required this.data});
 
@@ -105,19 +87,6 @@ class AutofillDataset {
   final AutofillDatasetStatus status;
   final String? message;
   final List<Map<String, String?>> data;
-
-  static Set<String> getKeyFields(Set<String> fields) {
-    return {
-      if (fields.hasMatch(_AutoFillFieldMatch.PASSWORD))
-        AutofillDataset.DATASET_FIELD_PASSWORD,
-      if (fields.hasMatch(_AutoFillFieldMatch.EMAIL))
-        AutofillDataset.DATASET_FIELD_EMAIL,
-      if (fields.hasMatch(_AutoFillFieldMatch.USERNAME))
-        AutofillDataset.DATASET_FIELD_USERNAME,
-      if (fields.hasMatch(_AutoFillFieldMatch.OTP))
-        AutofillDataset.DATASET_FIELD_OTP,
-    };
-  }
 
   @override
   String toString() => toJson().toString();
