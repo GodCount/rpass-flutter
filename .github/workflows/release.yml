@@ -50,11 +50,6 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-
       - uses: bluefireteam/melos-action@v3
 
       - name: Build Android
@@ -93,11 +88,6 @@ jobs:
 
       - name: Echo build progress
         run: echo "Rpass-${{ env.tag }}.dmg build progress"
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
@@ -151,11 +141,6 @@ jobs:
 
       - name: Enable Git longpaths
         run: git config --system core.longpaths true
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
