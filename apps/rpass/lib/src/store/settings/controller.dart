@@ -22,6 +22,8 @@ class SettingsController with ChangeNotifier {
   Duration? _remoteSyncCycle;
   DateTime? _lastSyncTime;
   late bool _manualSelectFillItem;
+  late List<String> _autoFillAppIdBlacklist;
+  late List<String> _autoFillDomainBlacklist;
   late bool _startFocusSreach;
   FaviconSource? _faviconSource;
   late StoredSecurityContext _securityContext;
@@ -39,6 +41,8 @@ class SettingsController with ChangeNotifier {
   Duration? get remoteSyncCycle => _remoteSyncCycle;
   DateTime? get lastSyncTime => _lastSyncTime;
   bool get manualSelectFillItem => _manualSelectFillItem;
+  List<String> get autoFillAppIdBlacklist => _autoFillAppIdBlacklist;
+  List<String> get autoFillDomainBlacklist => _autoFillDomainBlacklist;
   bool get startFocusSreach => _startFocusSreach;
   FaviconSource? get faviconSource => _faviconSource;
   StoredSecurityContext get securityContext => _securityContext;
@@ -198,6 +202,22 @@ class SettingsController with ChangeNotifier {
     await _settingsService.setTrustFingerprints(value);
   }
 
+  Future<void> setAutoFillAppIdBlacklist(List<String> value) async {
+    _autoFillAppIdBlacklist = value;
+
+    notifyListeners();
+
+    await _settingsService.setAutoFillAppIdBlacklist(value);
+  }
+
+  Future<void> setAutoFillDomainBlacklist(List<String> value) async {
+    _autoFillDomainBlacklist = value;
+
+    notifyListeners();
+
+    await _settingsService.setAutoFillDomainBlacklist(value);
+  }
+
   Future<void> init() async {
     shortcutsStore = ShortcutsStore(
       settingsService: _settingsService,
@@ -217,6 +237,11 @@ class SettingsController with ChangeNotifier {
     _remoteSyncCycle = await _settingsService.getRemoteSyncCycle();
     _lastSyncTime = await _settingsService.getLastSyncTime();
     _manualSelectFillItem = await _settingsService.getManualSelectFillItem();
+    _autoFillAppIdBlacklist = await _settingsService
+        .getAutoFillAppIdBlacklist();
+    _autoFillDomainBlacklist = await _settingsService
+        .getAutoFillDomainBlacklist();
+
     _startFocusSreach = await _settingsService.getStartFocusSreach();
     _faviconSource = await _settingsService.getFaviconSource();
     _securityContext = await _settingsService.getStoredSecurityContext();

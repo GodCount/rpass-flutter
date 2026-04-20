@@ -752,4 +752,21 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get otp_format_error => 'OTP format error';
+
+  @override
+  String get autofill_setting => 'Autofill Settings';
+
+  @override
+  String get app_blacklist => 'App Blacklist';
+
+  @override
+  String get autofill_app_blacklist_message =>
+      'List of apps excluded from autofill';
+
+  @override
+  String get domain_blacklist => 'Domain Blacklist';
+
+  @override
+  String get autofill_domain_blacklist_message =>
+      'List of domains excluded from autofill';
 }

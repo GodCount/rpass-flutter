@@ -351,5 +351,10 @@
     "no_math_manual_select": "没有匹配, 尝试手动选择",
     "hint": "提示",
     "clipboard_lan_fill_message": "检测到连接了局域网填充服务, 是否填充剪切板数据.",
-    "otp_format_error": "OTP 格式错误"
+    "otp_format_error": "OTP 格式错误",
+    "autofill_setting": "自动填充设置",
+    "app_blacklist": "应用黑名单",
+    "autofill_app_blacklist_message": "用于排除自动填充的应用名单",
+    "domain_blacklist": "域名黑名单",
+    "autofill_domain_blacklist_message": "用于排除自动填充的域名名单"
 }

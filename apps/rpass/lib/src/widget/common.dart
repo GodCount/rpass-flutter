@@ -85,10 +85,18 @@ class InputDialogState extends State<InputDialog> {
 
   bool isLimitContent = false;
 
+  List<DropdownMenuEntry<String>>? _dropdownMenuEntries;
+
   @override
   void initState() {
     _controller = TextEditingController(text: widget.initialValue);
     _controller.addListener(_handleControllerChanged);
+    if (widget.promptItmes != null) {
+      _dropdownMenuEntries = widget.promptItmes!
+          .map((value) => DropdownMenuEntry(value: value, label: value))
+          .toList();
+    }
+
     super.initState();
   }
 
@@ -130,11 +138,11 @@ class InputDialogState extends State<InputDialog> {
       );
     }
 
-    if (widget.promptItmes != null && widget.promptItmes!.isNotEmpty) {
-      content = Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          DropdownMenu(
+    if (_dropdownMenuEntries != null && _dropdownMenuEntries!.isNotEmpty) {
+      content = LayoutBuilder(
+        builder: (_, constraints) {
+          return DropdownMenu(
+            width: constraints.biggest.width,
             menuHeight: 150,
             label: widget.label != null ? Text(widget.label!) : null,
             enableFilter: true,
@@ -145,11 +153,9 @@ class InputDialogState extends State<InputDialog> {
             controller: _controller,
             requestFocusOnTap: true,
             expandedInsets: const EdgeInsets.all(0),
-            dropdownMenuEntries: widget.promptItmes!
-                .map((value) => DropdownMenuEntry(value: value, label: value))
-                .toList(),
-          ),
-        ],
+            dropdownMenuEntries: _dropdownMenuEntries!,
+          );
+        },
       );
     } else {
       content = TextField(

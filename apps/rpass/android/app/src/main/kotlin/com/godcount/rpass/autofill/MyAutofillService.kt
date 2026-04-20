@@ -95,7 +95,7 @@ class MyAutofillService : AutofillService() {
 
             val response = responseHelper.buildDatasetResponse(dataset)
 
-            if (response != null && dataset.unlock == true) {
+            if (response != null && dataset.unlock == true && dataset.data.isNotEmpty()) {
                 lastResponse = LastResponse(responseHelper.parsed.toAutofillMetadata(null), dataset)
             }
 
@@ -117,6 +117,8 @@ class MyAutofillService : AutofillService() {
 
         val metadata = responseHelper.parsed.toAutofillMetadata(false)
 
+        println("metadata $metadata")
+
         if (!responseHelper.parsed.canAutofill()) return callback.onSuccess(null)
 
         assistStructure = responseHelper.structure
@@ -124,6 +126,7 @@ class MyAutofillService : AutofillService() {
 
         // 如果请求和上一次一样，则填充有一次的数据
         // 遇到一种情况，activity.finish() 后数据没有正确填充或丢失，导致有触发验证请求
+        // 当使用 moveTaskToBack 后退, 可能不会弹出菜单
         if (lastResponse != null && lastResponse!!.metadata == metadata) {
             callback.onSuccess(responseHelper.buildDatasetResponse(lastResponse!!.dataset))
             lastResponse = null

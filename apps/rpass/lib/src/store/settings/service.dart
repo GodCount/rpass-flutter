@@ -117,6 +117,26 @@ class SettingsService with SharedPreferencesService {
     return setBool("manual_select_fill_item", enbale);
   }
 
+  Future<List<String>> getAutoFillAppIdBlacklist() async {
+    return await getStringList("autofill_appid_blacklist") ?? [];
+  }
+
+  Future<bool> setAutoFillAppIdBlacklist(List<String>? list) async {
+    return list != null
+        ? setStringList("autofill_appid_blacklist", list)
+        : remove("autofill_appid_blacklist");
+  }
+
+  Future<List<String>> getAutoFillDomainBlacklist() async {
+    return await getStringList("autofill_domain_blacklist") ?? [];
+  }
+
+  Future<bool> setAutoFillDomainBlacklist(List<String>? list) async {
+    return list != null
+        ? setStringList("autofill_domain_blacklist", list)
+        : remove("autofill_domain_blacklist");
+  }
+
   Future<bool> getStartFocusSreach() async {
     return await getBool("start_focus_sreach") ?? false;
   }

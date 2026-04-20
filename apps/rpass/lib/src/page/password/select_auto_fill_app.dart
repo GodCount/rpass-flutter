@@ -8,12 +8,23 @@ import '../../i18n.dart';
 import '../../widget/common.dart';
 
 class _SelectAutoFillAppArgs extends PageRouteArgs {
-  _SelectAutoFillAppArgs({super.key});
+  _SelectAutoFillAppArgs({super.key, this.packageNames, this.single});
+
+  final List<String>? packageNames;
+  final bool? single;
 }
 
 class SelectAutoFillAppRoute extends PageRouteInfo<_SelectAutoFillAppArgs> {
-  SelectAutoFillAppRoute({Key? key, String? packageName})
-    : super(name, args: _SelectAutoFillAppArgs(key: key));
+  SelectAutoFillAppRoute({Key? key, List<String>? packageNames, bool? single})
+    : super(
+        name,
+        args: _SelectAutoFillAppArgs(
+          key: key,
+          packageNames: packageNames,
+          single: single,
+        ),
+        rawQueryParams: {"packageNames": packageNames, "single": single},
+      );
 
   static const name = "SelectAutoFillAppRoute";
 
@@ -21,15 +32,31 @@ class SelectAutoFillAppRoute extends PageRouteInfo<_SelectAutoFillAppArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<_SelectAutoFillAppArgs>(
-        orElse: () => _SelectAutoFillAppArgs(),
+        orElse: () {
+          return _SelectAutoFillAppArgs(
+            packageNames: data.queryParams.getList("packageNames", []),
+            single: data.queryParams.getBool("single", false),
+          );
+        },
       );
-      return SelectAutoFillAppPage(key: args.key);
+      return SelectAutoFillAppPage(
+        key: args.key,
+        packageNames: args.packageNames,
+        single: args.single ?? false,
+      );
     },
   );
 }
 
 class SelectAutoFillAppPage extends StatefulWidget {
-  const SelectAutoFillAppPage({super.key});
+  SelectAutoFillAppPage({
+    super.key,
+    List<String>? packageNames,
+    this.single = false,
+  }) : packageNames = packageNames ?? [];
+
+  final List<String> packageNames;
+  final bool single;
 
   @override
   State<SelectAutoFillAppPage> createState() => _SelectAutoFillAppPageState();
@@ -40,6 +67,11 @@ class _SelectAutoFillAppPageState extends State<SelectAutoFillAppPage> {
 
   Future<List<AppInfo>>? _future;
   bool _system = false;
+
+  bool _dirty = false;
+  bool _loading = false;
+
+  late List<String> packageNames = widget.packageNames;
 
   @override
   void initState() {
@@ -61,16 +93,32 @@ class _SelectAutoFillAppPageState extends State<SelectAutoFillAppPage> {
 
   Future<List<AppInfo>> _sreach({bool force = false, bool? system}) async {
     _system = system ?? _system;
+    _loading = true;
+
+    setState(() {});
 
     final text = _searchController.text.toLowerCase();
 
-    final result = (await installedApps.getInstalledApps(force)).where((it) {
-      if (it.packageName == RpassInfo.packageName) return false;
+    final result =
+        (await installedApps.getInstalledApps(force)).where((it) {
+          if (it.packageName == RpassInfo.packageName) return false;
 
-      if (!_system && it.isSystem) return false;
+          if (!_system && it.isSystem) return false;
 
-      return text.isNotEmpty ? it.name.toLowerCase().contains(text) : true;
-    }).toList()..sort((a, b) => b.installedTimestamp - a.installedTimestamp);
+          return text.isNotEmpty ? it.name.toLowerCase().contains(text) : true;
+        }).toList()..sort((a, b) {
+          final ac = packageNames.contains(a.packageName);
+          final bc = packageNames.contains(b.packageName);
+
+          if (ac != bc) {
+            return ac ? -1 : 1;
+          }
+
+          return b.installedTimestamp - a.installedTimestamp;
+        });
+
+    _loading = false;
+    setState(() {});
 
     return result;
   }
@@ -165,22 +213,27 @@ class _SelectAutoFillAppPageState extends State<SelectAutoFillAppPage> {
           final data = snapshot.data ?? [];
 
           return ListView.builder(
-            itemCount: data.length + 1,
+            itemCount: data.length,
             itemBuilder: (context, index) {
-              if (index == 0) {
-                return ListTile(
-                  onTap: () {
-                    context.router.pop("none");
-                  },
-                  leading: const Icon(Icons.android),
-                  title: Text(t.none),
-                  subtitle: Text(t.auto_fill_apps_none_subtitle),
-                );
-              }
-              final item = data[index - 1];
+              final item = data[index];
               return ListTile(
                 onTap: () {
-                  context.router.pop(item.packageName);
+                  if (widget.single) {
+                    if (packageNames.isEmpty ||
+                        packageNames.first != item.packageName) {
+                      packageNames = [item.packageName];
+                    } else {
+                      packageNames = [];
+                    }
+                  } else {
+                    if (packageNames.contains(item.packageName)) {
+                      packageNames.remove(item.packageName);
+                    } else {
+                      packageNames.add(item.packageName);
+                    }
+                  }
+                  _dirty = true;
+                  setState(() {});
                 },
                 leading: ClipRRect(
                   borderRadius: const BorderRadius.all(Radius.circular(6)),
@@ -195,11 +248,26 @@ class _SelectAutoFillAppPageState extends State<SelectAutoFillAppPage> {
                 ),
                 title: Text(item.name),
                 subtitle: Text(item.packageName),
+                trailing: packageNames.contains(item.packageName)
+                    ? const Icon(Icons.check)
+                    : null,
               );
             },
           );
         },
       ),
+      floatingActionButton: !_loading && _dirty
+          ? FloatingActionButton(
+              heroTag: const ValueKey("select_app_float"),
+              onPressed: () {
+                context.router.pop(packageNames);
+              },
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(56 / 2)),
+              ),
+              child: Icon(Icons.done),
+            )
+          : null,
     );
   }
 }

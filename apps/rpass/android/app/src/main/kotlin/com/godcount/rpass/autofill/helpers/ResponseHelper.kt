@@ -122,7 +122,6 @@ class ResponseHelper private constructor(
             return buildAuthOrManualResponse(true, dataset.manual, dataset.message)
         }
 
-        if (dataset.data.isEmpty()) return null
 
         return FillResponse.Builder().apply {
             dataset.data.forEach { data ->
@@ -146,24 +145,24 @@ class ResponseHelper private constructor(
 
                     addDataset(datasetBuilder.build())
                 }
+            }
 
-                if (dataset.manual == true) {
-                    val datasetBuilder =
-                        createDatasetBuilder(dataset.message ?: "Manual Select", null, null)
+            if (dataset.manual == true) {
+                val datasetBuilder =
+                    createDatasetBuilder(dataset.message ?: "Manual Select", null, null)
 
-                    parsed.fields.forEach { field ->
-                        datasetBuilder.addValue(field.value, null)
-                    }
-
-                    datasetBuilder.setAuthentication(
-                        createIntentSender(
-                            flags = true,
-                            manual = true
-                        )
-                    )
-
-                    addDataset(datasetBuilder.build())
+                parsed.fields.forEach { field ->
+                    datasetBuilder.addValue(field.value, null)
                 }
+
+                datasetBuilder.setAuthentication(
+                    createIntentSender(
+                        flags = true,
+                        manual = true
+                    )
+                )
+
+                addDataset(datasetBuilder.build())
             }
         }.build()
     }

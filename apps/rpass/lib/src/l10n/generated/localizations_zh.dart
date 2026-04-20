@@ -733,4 +733,19 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get otp_format_error => 'OTP 格式错误';
+
+  @override
+  String get autofill_setting => '自动填充设置';
+
+  @override
+  String get app_blacklist => '应用黑名单';
+
+  @override
+  String get autofill_app_blacklist_message => '用于排除自动填充的应用名单';
+
+  @override
+  String get domain_blacklist => '域名黑名单';
+
+  @override
+  String get autofill_domain_blacklist_message => '用于排除自动填充的域名名单';
 }

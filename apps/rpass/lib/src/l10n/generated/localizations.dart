@@ -1489,6 +1489,36 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'OTP 格式错误'**
   String get otp_format_error;
+
+  /// No description provided for @autofill_setting.
+  ///
+  /// In zh, this message translates to:
+  /// **'自动填充设置'**
+  String get autofill_setting;
+
+  /// No description provided for @app_blacklist.
+  ///
+  /// In zh, this message translates to:
+  /// **'应用黑名单'**
+  String get app_blacklist;
+
+  /// No description provided for @autofill_app_blacklist_message.
+  ///
+  /// In zh, this message translates to:
+  /// **'用于排除自动填充的应用名单'**
+  String get autofill_app_blacklist_message;
+
+  /// No description provided for @domain_blacklist.
+  ///
+  /// In zh, this message translates to:
+  /// **'域名黑名单'**
+  String get domain_blacklist;
+
+  /// No description provided for @autofill_domain_blacklist_message.
+  ///
+  /// In zh, this message translates to:
+  /// **'用于排除自动填充的域名名单'**
+  String get autofill_domain_blacklist_message;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

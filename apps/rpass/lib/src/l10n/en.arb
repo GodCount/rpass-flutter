@@ -351,5 +351,10 @@
     "no_math_manual_select": "No match, Try manual selection",
     "hint": "Hint",
     "clipboard_lan_fill_message": "local area network fill service detected. Fill clipboard data.",
-    "otp_format_error": "OTP format error"
+    "otp_format_error": "OTP format error",
+    "autofill_setting": "Autofill Settings",
+    "app_blacklist": "App Blacklist",
+    "autofill_app_blacklist_message": "List of apps excluded from autofill",
+    "domain_blacklist": "Domain Blacklist",
+    "autofill_domain_blacklist_message": "List of domains excluded from autofill"
 }

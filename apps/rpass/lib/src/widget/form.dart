@@ -398,18 +398,34 @@ class _EntryAutoFillAppFormFieldState extends State<EntryAutoFillAppFormField> {
           builder: (context, snapshot) {
             return GestureDetector(
               onTap: () async {
-                final packageName = await field.context.router.push(
-                  SelectAutoFillAppRoute(),
+                final packageNames = await field.context.router.push(
+                  SelectAutoFillAppRoute(
+                    single: true,
+                    packageNames: field.value != null ? [field.value!] : [],
+                  ),
                 );
-                if (field.value == packageName ||
-                    field.value == null && packageName == "none") {
+
+                if (packageNames == null) {
                   return;
                 }
-                if (packageName != null && packageName is String) {
-                  _future = installedApps.getAppInfo(packageName);
 
-                  field.didChange(packageName == "none" ? null : packageName);
+                final packageName = packageNames is List<String>
+                    ? packageNames.isNotEmpty
+                          ? packageNames.first
+                          : null
+                    : null;
+
+                if (field.value == packageName) {
+                  return;
                 }
+
+                if (packageName != null) {
+                  _future = installedApps.getAppInfo(packageName);
+                } else {
+                  _future = Future.value(null);
+                }
+
+                field.didChange(packageName);
               },
               child: InputDecorator(
                 isEmpty: field.value == null || field.value!.isEmpty,
