@@ -18,7 +18,7 @@ class AutofillField {
 class AutofillMetadata {
   AutofillMetadata({
     required this.fieldTypes,
-
+    this.manual,
     this.packageName,
     this.webDomain,
     this.webScheme,
@@ -29,11 +29,13 @@ class AutofillMetadata {
         fieldTypes: (json['fieldTypes'] as Iterable)
             .map((dynamic e) => e as String)
             .toSet(),
+        manual: json["manual"] as bool?,
         packageName: json['packageName'] as String?,
         webDomain: json['webDomain'] as String?,
         webScheme: json['webScheme'] as String?,
       );
 
+  final bool? manual;
   final String? packageName;
   final String? webDomain;
   final String? webScheme;
@@ -44,6 +46,7 @@ class AutofillMetadata {
 
   Map<String, Object?> toJson() => {
     'fieldTypes': fieldTypes,
+    "manual": manual,
     'packageName': packageName,
     'webDomain': webDomain,
     'webScheme': webScheme,
@@ -68,14 +71,8 @@ class AutofillWebDomain {
   Map<String, Object?> toJson() => {'scheme': scheme, 'domain': domain};
 }
 
-enum AutofillDatasetStatus {
-  AUTH, // 需要验证
-  MANUAL, // 需要手动选择
-  FILL, // 直接填充
-}
-
 class AutofillDataset {
-  AutofillDataset({required this.status, this.message, required this.data});
+  AutofillDataset({this.unlock, this.manual, this.message, required this.data});
 
   static final DATASET_FIELD_LABEL = "label";
   static final DATASET_FIELD_USERNAME = "username";
@@ -84,15 +81,20 @@ class AutofillDataset {
   static final DATASET_FIELD_PASSWORD = "password";
   static final DATASET_FIELD_OTP = "otp";
 
-  final AutofillDatasetStatus status;
-  final String? message;
-  final List<Map<String, String?>> data;
+  // 数据库已解锁
+  bool? unlock;
+
+  // 就算有数据页显示一个手动选择的选项
+  bool? manual;
+  String? message;
+  List<Map<String, String?>> data;
 
   @override
   String toString() => toJson().toString();
 
   Map<String, Object?> toJson() => {
-    'status': status.name,
+    'unlock': unlock,
+    "manual": manual,
     'message': message,
     'data': data,
   };
@@ -171,10 +173,7 @@ class _AndroidAutofillService extends MethodChannelInterface
     if (call.method == "request_autofill_metadata") {
       try {
         final metadata = AutofillMetadata.fromJson(call.arguments["metadata"]);
-        final manualSelect = call.arguments["manualSelect"] is bool
-            ? call.arguments["manualSelect"] as bool? ?? false
-            : false;
-        emit((listener) => listener.onRequestAutofill(metadata, manualSelect));
+        emit((listener) => listener.onRequestAutofill(metadata));
       } catch (e) {
         _logger.warning("request autofill metadata $e");
       }

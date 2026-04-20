@@ -2,9 +2,7 @@ package com.godcount.rpass
 
 import android.app.Activity
 import android.app.Activity.RESULT_OK
-import android.app.assist.AssistStructure
 import android.content.Intent
-import android.os.Build
 import android.provider.Settings
 import android.view.autofill.AutofillManager
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -18,8 +16,6 @@ import androidx.core.net.toUri
 import com.godcount.rpass.autofill.MyAutofillService
 import com.godcount.rpass.autofill.helpers.AutofillDataset
 import com.godcount.rpass.autofill.helpers.AutofillMetadata
-import com.godcount.rpass.autofill.helpers.DatasetStatus
-import com.godcount.rpass.autofill.helpers.ResponseHelper
 
 class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHandler,
     PluginRegistry.ActivityResultListener, PluginRegistry.NewIntentListener {
@@ -43,7 +39,7 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
             binding.applicationContext.getSystemService(AutofillManager::class.java)
 
         MyAutofillService.onAutofillRequest = {
-            requestAutofill(it, false)
+            requestAutofill(it)
         }
 
     }
@@ -77,11 +73,11 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
 
     override fun onNewIntent(intent: Intent): Boolean {
         if (intent.hasExtra(AutofillMetadata.EXTRA_AUTOFILL_METADATA)) {
-            if (intent.getStringExtra(AutofillDataset.EXTRA_AUTOFILL_DATASET_STATUS) == DatasetStatus.MANUAL.name) {
+            if (intent.getBooleanExtra(AutofillDataset.EXTRA_AUTOFILL_MANUAL_DATASET, false)) {
                 val metadata = this.getAutofillMetadata(intent)
 
                 if (metadata != null) {
-                    this.requestAutofill(metadata, true)
+                    this.requestAutofill(metadata)
                 }
 
                 return true
@@ -165,44 +161,12 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
         activity: Activity,
         dataset: AutofillDataset
     ): Boolean {
-        if (MyAutofillService.onAutofillResponse != null) {
-
-            MyAutofillService.onAutofillResponse!!(
-                activity,
-                dataset
-            )
-
-            return true
-        } else {
-
-            val intent = lastAutofillIntent ?: activityBinding?.activity?.intent
-
-            if (intent == null || !intent.hasExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE)) {
-                return false
-            }
-
-            val structure = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                intent.getParcelableExtra(
-                    AutofillManager.EXTRA_ASSIST_STRUCTURE,
-                    AssistStructure::class.java
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                intent.getParcelableExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE)
-            }
-
-            if (structure == null) return false
-
-            MyAutofillService.activitySetResult(
-                activity, ResponseHelper.createResponseByStructure(
-                    activity,
-                    structure,
-                ), dataset, lastAutofillIntent == null
-            )
-
-            return lastAutofillIntent != null
-
-        }
+        MyAutofillService.onAutofillResponse(
+            activity,
+            dataset,
+            lastAutofillIntent ?: activity.intent,
+        )
+        return true
     }
 
     private fun getAutofillMetadata(intent: Intent): AutofillMetadata? {
@@ -211,12 +175,11 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
         )?.let(AutofillMetadata.Companion::fromJsonString)
     }
 
-    private fun requestAutofill(metadata: AutofillMetadata, manualSelect: Boolean) {
+    private fun requestAutofill(metadata: AutofillMetadata) {
         channel?.invokeMethod(
             "request_autofill_metadata",
             mapOf(
                 "metadata" to metadata.toMap(),
-                "manualSelect" to manualSelect
             )
         )
     }

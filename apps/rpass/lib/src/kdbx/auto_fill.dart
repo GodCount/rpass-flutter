@@ -146,5 +146,5 @@ Future<AutofillDataset> androidAutofillSearch(
       .map((it) => it.toAutofillDataset(metadata.fieldTypes))
       .toList();
 
-  return AutofillDataset(status: .FILL, data: dataset);
+  return AutofillDataset(unlock: true, data: dataset);
 }

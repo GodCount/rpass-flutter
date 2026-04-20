@@ -749,4 +749,7 @@ class MyLocalizationsEn extends MyLocalizations {
   @override
   String get clipboard_lan_fill_message =>
       'local area network fill service detected. Fill clipboard data.';
+
+  @override
+  String get otp_format_error => 'OTP format error';
 }

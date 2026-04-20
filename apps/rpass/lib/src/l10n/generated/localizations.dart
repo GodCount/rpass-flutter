@@ -1483,6 +1483,12 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'检测到连接了局域网填充服务, 是否填充剪切板数据.'**
   String get clipboard_lan_fill_message;
+
+  /// No description provided for @otp_format_error.
+  ///
+  /// In zh, this message translates to:
+  /// **'OTP 格式错误'**
+  String get otp_format_error;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
+import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../native/channel.dart';
 import '../../native/platform/android.dart';
@@ -98,11 +99,17 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
 
     AutofillDataset result = await kdbx.autofillSearch(metadata);
 
-    if (result.data.isEmpty && Store.instance.settings.manualSelectFillItem) {
-      final kdbxEntry = await KdbxEntrySelectorDialog.openDialog(context);
-      final dataset = kdbxEntry?.toAutofillDataset(metadata.fieldTypes);
+    if (Store.instance.settings.manualSelectFillItem) {
+      result.manual = true;
+      result.message = I18n.of(context)!.manual_select_fill_item;
 
-      if (dataset != null) result.data.add(dataset);
+      // 手动选择
+      if (metadata.manual == true) {
+        final kdbxEntry = await KdbxEntrySelectorDialog.openDialog(context);
+        final dataset = kdbxEntry?.toAutofillDataset(metadata.fieldTypes);
+
+        if (dataset != null) result.data = [dataset];
+      }
     }
 
     await NativeInstancePlatform.instance.autofillService.responseDataset(

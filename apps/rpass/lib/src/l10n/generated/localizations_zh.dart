@@ -730,4 +730,7 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get clipboard_lan_fill_message => '检测到连接了局域网填充服务, 是否填充剪切板数据.';
+
+  @override
+  String get otp_format_error => 'OTP 格式错误';
 }

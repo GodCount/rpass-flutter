@@ -8,6 +8,7 @@ import android.view.autofill.AutofillId
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Locale
+import java.util.Objects
 
 
 class ViewStructureParser(private val structure: AssistStructure) {
@@ -62,13 +63,13 @@ class ViewStructureParser(private val structure: AssistStructure) {
     }
 
 
-    fun toAutofillMetadata(): AutofillMetadata {
-        return AutofillMetadata(fields.keys, packageName, webDomain, webScheme)
+    fun toAutofillMetadata(manual: Boolean?): AutofillMetadata {
+        return AutofillMetadata(fields.keys, manual, packageName, webDomain, webScheme)
     }
 
 
     private fun parse() {
-        this.fields.clear();
+        this.fields.clear()
         for (i in 0..<structure.windowNodeCount) {
             val node = structure.getWindowNodeAt(i).rootViewNode
             parseNode(this.fields, node)
@@ -83,14 +84,14 @@ class ViewStructureParser(private val structure: AssistStructure) {
 
         node.webDomain?.let {
             if (it.isNotEmpty()) {
-                webDomain = it;
+                webDomain = it
             }
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             node.webScheme?.let {
                 if (it.isNotEmpty()) {
-                    webScheme = it;
+                    webScheme = it
                 }
             }
         }
@@ -209,7 +210,7 @@ class ViewStructureParser(private val structure: AssistStructure) {
                 return manageTypeNumber(inputType)
             }
         }
-        return null;
+        return null
     }
 
 
@@ -311,6 +312,7 @@ class ViewStructureParser(private val structure: AssistStructure) {
 
 data class AutofillMetadata(
     val fieldTypes: Set<String>,
+    val manual: Boolean?,
     val packageName: String?,
     val webDomain: String?,
     val webScheme: String?,
@@ -324,22 +326,30 @@ data class AutofillMetadata(
                     fieldTypes = optJSONArray("fieldTypes")?.map { array, index ->
                         array.getString(index)
                     }?.toSet() ?: HashSet(),
-                    packageName = get("packageName") as String?,
-                    webDomain = get("webDomain") as String?,
-                    webScheme = get("webScheme") as String?,
+                    manual = get("manual") as? Boolean,
+                    packageName = get("packageName") as? String,
+                    webDomain = get("webDomain") as? String,
+                    webScheme = get("webScheme") as? String,
                 )
             }
     }
 
-    fun equal(data: AutofillMetadata): Boolean {
-        return packageName == data.packageName &&
-                webDomain == data.webDomain &&
-                webScheme == data.webScheme &&
-                fieldTypes.containsAll(data.fieldTypes)
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is AutofillMetadata) return false
+        return packageName == other.packageName &&
+                webDomain == other.webDomain &&
+                webScheme == other.webScheme &&
+                fieldTypes == other.fieldTypes
+    }
+
+    override fun hashCode(): Int {
+        return Objects.hash(packageName, webDomain, webScheme, fieldTypes)
     }
 
     fun toMap(): Map<Any, Any?> = mapOf(
         "fieldTypes" to fieldTypes.toList(),
+        "manual" to manual,
         "packageName" to packageName,
         "webDomain" to webDomain,
         "webScheme" to webScheme,

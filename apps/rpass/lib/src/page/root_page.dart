@@ -230,24 +230,22 @@ class _RootRpassAppState extends State<RootRpassApp>
   }
 
   @override
-  void onRequestAutofill(AutofillMetadata metadata, bool manualSelect) async {
+  void onRequestAutofill(AutofillMetadata metadata) async {
     final kdbx = KdbxProvider.of(context).kdbx;
 
     if (kdbx != null) {
       AutofillDataset result = await kdbx.autofillSearch(metadata);
 
-      if (result.data.isEmpty && Store.instance.settings.manualSelectFillItem) {
-        if (manualSelect) {
+      if (Store.instance.settings.manualSelectFillItem) {
+        result.manual = true;
+        result.message = I18n.of(context)!.manual_select_fill_item;
+
+        // 手动选择
+        if (metadata.manual == true) {
           final kdbxEntry = await KdbxEntrySelectorDialog.openDialog(context);
           final dataset = kdbxEntry?.toAutofillDataset(metadata.fieldTypes);
 
-          if (dataset != null) result.data.add(dataset);
-        } else {
-          result = AutofillDataset(
-            status: .MANUAL,
-            message: I18n.of(context)!.no_math_manual_select,
-            data: [],
-          );
+          if (dataset != null) result.data = [dataset];
         }
       }
 
@@ -256,7 +254,7 @@ class _RootRpassAppState extends State<RootRpassApp>
       );
     } else {
       await NativeInstancePlatform.instance.autofillService.responseDataset(
-        AutofillDataset(status: .AUTH, data: []),
+        AutofillDataset(data: []),
       );
     }
   }
