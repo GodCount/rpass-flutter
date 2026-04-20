@@ -55,7 +55,8 @@ class AuthOneTimePassword {
         throw AuthOTPError("secret is not exist");
       }
     } else {
-      secret = url;
+      // 移除空格, 有一些站点可能为了便于阅读, 给密钥按空格分割
+      secret = url.replaceAll(RegExp(r"\s+"), "");
     }
 
     OTP.generateTOTPCode(

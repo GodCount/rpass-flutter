@@ -804,8 +804,8 @@ class _EntryFieldState extends State<EntryField> {
         return (value) =>
             value != null &&
                 value.isNotEmpty &&
-                !CommonRegExp.oneTimePassword.hasMatch(value)
-            ? t.format_error(CommonRegExp.oneTimePassword.pattern)
+                AuthOneTimePassword.tryParse(value) == null
+            ? t.format_error(t.otp_format_error)
             : null;
       default:
         return null;
