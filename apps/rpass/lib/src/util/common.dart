@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart'
     show ObserverList, ValueChanged, protected;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart';
 
 // UI 布局使用, 后续可能会去掉; 而是通过屏幕大小决定
 final bool isMobile = Platform.isAndroid || Platform.isIOS;
@@ -20,8 +19,6 @@ final bool isDesktop = !isMobile;
 final bool kIsMobile = Platform.isAndroid || Platform.isIOS;
 final bool kIsDesktop =
     Platform.isWindows || Platform.isMacOS || Platform.isLinux;
-
-const uuid = Uuid();
 
 const letters = r"qwertyuiopasdfghjklzxcvbnm";
 const numbers = r"0123456789";
@@ -252,6 +249,8 @@ extension CommonString on String {
       return split("/")[0].trim();
     }
   }
+
+  String? get emptyToNull => isEmpty ? null : this;
 }
 
 mixin SimpleObserverListener<T> {

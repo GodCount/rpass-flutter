@@ -108,38 +108,32 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Align(
-          alignment: Alignment.center,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 6),
-            child: Text(
-              t.timeline,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
+        AppBar(
+          backgroundColor: Colors.transparent,
+          primary: true,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          title: Text(t.timeline),
+          titleTextStyle: Theme.of(context).textTheme.titleLarge,
+          actionsPadding: const EdgeInsets.only(right: 16),
         ),
-        history.isNotEmpty
-            ? Expanded(
-                child: isMobile
-                    ? SlidableAutoCloseBehavior(
-                        child: _buildHistoryList(history),
-                      )
-                    : _buildHistoryList(history),
-              )
-            : Expanded(
-                child: Center(
+        Expanded(
+          child: history.isNotEmpty
+              ? _buildHistoryList(history)
+              : Center(
                   child: Opacity(
                     opacity: .5,
                     child: Text(t.not_history_record),
                   ),
                 ),
-              ),
+        ),
       ],
     );
   }
 
   Widget _buildHistoryList(List<KdbxEntry> history) {
     return ListView.builder(
+      shrinkWrap: true,
       itemCount: history.length,
       itemBuilder: (context, index) {
         final entry = history[index];
@@ -149,7 +143,7 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
           minTileHeight: 48,
           title: Text(
             getKdbxObjectTitle(entry),
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.titleSmall,
           ),
           subtitle: Text(
             entry.times.lastModificationTime.get()!.toLocal().formatDate,

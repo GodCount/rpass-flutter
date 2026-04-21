@@ -16,6 +16,7 @@ class ViewStructureParser(private val structure: AssistStructure) {
 
     companion object {
 
+        const val APPLICATION_ID_POPUP_WINDOW = "PopupWindow:"
 
         val AUTOFILL_USERNAME_FIELD = arrayOf("login", "username", "user", "name")
         val AUTOFILL_EMAIL_FIELD = arrayOf("emailAddress", "email", "mail")
@@ -71,16 +72,21 @@ class ViewStructureParser(private val structure: AssistStructure) {
     private fun parse() {
         this.fields.clear()
         for (i in 0..<structure.windowNodeCount) {
-            val node = structure.getWindowNodeAt(i).rootViewNode
-            parseNode(this.fields, node)
+            val windowNode = structure.getWindowNodeAt(i)
+            val applicationId = windowNode.title.toString().split("/").first()
+            if (!applicationId.contains(APPLICATION_ID_POPUP_WINDOW)) {
+                packageName = applicationId
+                parseNode(this.fields, windowNode.rootViewNode)
+            }
+
         }
     }
 
 
     private fun parseNode(fields: HashMap<String, AutofillId>, node: AssistStructure.ViewNode) {
-        node.idPackage?.let {
-            packageName = it
-        }
+//        node.idPackage?.let {
+//            packageName = it
+//        }
 
         node.webDomain?.let {
             if (it.isNotEmpty()) {

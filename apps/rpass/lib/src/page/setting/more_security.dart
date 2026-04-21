@@ -186,7 +186,7 @@ class _AutoFillSetting extends StatefulWidget {
   const _AutoFillSetting();
 
   static Future<void> show(BuildContext context) async {
-    await showModalBottomSheet(
+    await showBottomSheetView(
       context: context,
       builder: (context) {
         return const _AutoFillSetting();
@@ -212,8 +212,8 @@ class _AutoFillSettingState extends State<_AutoFillSetting> {
     final t = I18n.of(context)!;
     final store = Store.instance;
 
-    return ListView(
-      shrinkWrap: true,
+    return Column(
+      mainAxisSize: .min,
       children: [
         AppBar(
           backgroundColor: Colors.transparent,
@@ -224,28 +224,33 @@ class _AutoFillSettingState extends State<_AutoFillSetting> {
           titleTextStyle: Theme.of(context).textTheme.titleLarge,
           actionsPadding: const EdgeInsets.only(right: 16),
         ),
-        ListTile(
-          onTap: () async {
-            await store.settings.setManualSelectFillItem(
-              !store.settings.manualSelectFillItem,
-            );
-            setState(() {});
-          },
-          title: Text(t.manual_select_fill_item),
-          subtitle: Text(t.manual_select_fill_item_subtitle),
-          trailing: store.settings.manualSelectFillItem
-              ? const Icon(Icons.check)
-              : null,
-        ),
-        ListTile(
-          onTap: showAppBlacklistDialog,
-          title: Text(t.app_blacklist),
-          subtitle: Text(t.autofill_app_blacklist_message),
-        ),
-        ListTile(
-          onTap: showDomainBlacklistDialog,
-          title: Text(t.domain_blacklist),
-          subtitle: Text(t.autofill_domain_blacklist_message),
+        ListView(
+          shrinkWrap: true,
+          children: [
+            ListTile(
+              onTap: () async {
+                await store.settings.setManualSelectFillItem(
+                  !store.settings.manualSelectFillItem,
+                );
+                setState(() {});
+              },
+              title: Text(t.manual_select_fill_item),
+              subtitle: Text(t.manual_select_fill_item_subtitle),
+              trailing: store.settings.manualSelectFillItem
+                  ? const Icon(Icons.check)
+                  : null,
+            ),
+            ListTile(
+              onTap: showAppBlacklistDialog,
+              title: Text(t.app_blacklist),
+              subtitle: Text(t.autofill_app_blacklist_message),
+            ),
+            ListTile(
+              onTap: showDomainBlacklistDialog,
+              title: Text(t.domain_blacklist),
+              subtitle: Text(t.autofill_domain_blacklist_message),
+            ),
+          ],
         ),
       ],
     );

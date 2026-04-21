@@ -133,17 +133,13 @@ extension StatefulDialog on State {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 6,
                     children: [
                       const Text('title(t) url[1-5]'),
-                      const SizedBox(height: 6),
                       const Text('user(u) email(e)'),
-                      const SizedBox(height: 6),
                       const Text('note(n) password(p)'),
-                      const SizedBox(height: 6),
                       const Text('OTPAuth(otp) tag'),
-                      const SizedBox(height: 6),
                       const Text('group(g)'),
-                      const SizedBox(height: 6),
                       Text(t.custom_field),
                     ],
                   ),
@@ -157,9 +153,9 @@ extension StatefulDialog on State {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 6,
                     children: [
                       Text(t.search_eg_1),
-                      const SizedBox(height: 6),
                       Text(t.search_eg_2),
                     ],
                   ),
@@ -187,11 +183,11 @@ extension StatefulBottomSheet on State {
     List<Widget>? actions,
     required List<Widget> children,
   }) {
-    showModalBottomSheet(
+    showBottomSheetView(
       context: context,
       builder: (context) {
-        return ListView(
-          shrinkWrap: true,
+        return Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             AppBar(
               backgroundColor: Colors.transparent,
@@ -203,7 +199,7 @@ extension StatefulBottomSheet on State {
               actionsPadding: const EdgeInsets.only(right: 16),
               actions: actions,
             ),
-            ...children,
+            ListView(shrinkWrap: true, children: children),
           ],
         );
       },
@@ -305,7 +301,7 @@ extension StatefulBottomSheet on State {
   }
 
   void showEntryHistoryList(KdbxEntry kdbxEntry) {
-    showModalBottomSheet(
+    showBottomSheetView(
       context: context,
       builder: (context) {
         return KdbxHistoryList(kdbxEntry: kdbxEntry);
@@ -331,7 +327,7 @@ extension StatefulBottomSheet on State {
       initialDateTime = maximumDate;
     }
 
-    final result = await showModalBottomSheet(
+    final result = await showBottomSheetView(
       context: context,
       builder: (context) {
         final t = I18n.of(context)!;
@@ -339,26 +335,24 @@ extension StatefulBottomSheet on State {
         DateTime? dateTime = initialDateTime;
 
         return Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 12, right: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const SizedBox(width: 40),
-                  Text(
-                    t.expires_time,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      context.router.pop(dateTime);
-                    },
-                    icon: const Icon(Icons.done),
-                  ),
-                ],
-              ),
+            AppBar(
+              backgroundColor: Colors.transparent,
+              primary: true,
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              title: Text(t.expires_time),
+              titleTextStyle: Theme.of(context).textTheme.titleLarge,
+              actionsPadding: const EdgeInsets.only(right: 16),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    context.router.pop(dateTime);
+                  },
+                  icon: const Icon(Icons.done),
+                ),
+              ],
             ),
             Expanded(
               child: CupertinoDatePicker(
@@ -412,7 +406,7 @@ class KdbxGroupData {
 extension StatefulKdbx on State {
   String getKdbxObjectTitle(KdbxObject kdbxObject) {
     return kdbxObject is KdbxEntry
-        ? kdbxObject.label ?? ''
+        ? kdbxObject.getLabel()
         : kdbxObject is KdbxGroup
         ? kdbxObject.name.get() ?? ''
         : '';

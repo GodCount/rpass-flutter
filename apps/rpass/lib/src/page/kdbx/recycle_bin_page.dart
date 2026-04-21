@@ -223,17 +223,12 @@ class _RecycleBinPageState extends State<RecycleBinPage>
         switch (type) {
           case ViewContextMenuItem():
             if (kdbxObject is KdbxEntry) {
-              showModalBottomSheet(
-                context: context,
-                builder: (context) {
-                  return ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(12)),
-                    child: LookAccountPage(
-                      kdbxEntry: kdbxObject,
-                      readOnly: true,
-                    ),
-                  );
-                },
+              context.router.platformNavigate(
+                LookAccountRoute(
+                  kdbxEntry: kdbxObject,
+                  uuid: kdbxObject.uuid,
+                  readOnly: true,
+                ),
               );
             }
             break;

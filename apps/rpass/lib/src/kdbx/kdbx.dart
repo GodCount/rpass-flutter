@@ -9,6 +9,7 @@ import 'package:uuid/uuid.dart';
 import '../i18n.dart';
 import '../native/platform/android.dart';
 import '../rpass.dart';
+import '../util/common.dart';
 import '../util/one_time_password.dart';
 import 'auto_fill.dart';
 import 'icons.dart';
@@ -663,6 +664,14 @@ extension KdbxEntryCommon on KdbxEntry {
 
   String? getActualString(KdbxKey key) {
     return key == KdbxKeyCommon.OTP ? getOTPCode() : getString(key)?.getText();
+  }
+
+  String getLabel() {
+    return getActualString(KdbxKeyCommon.TITLE)?.emptyToNull ??
+        getActualString(KdbxKeyCommon.USER_NAME)?.emptyToNull ??
+        getActualString(KdbxKeyCommon.EMAIL)?.emptyToNull ??
+        getActualString(KdbxKeyCommon.URL) ??
+        "";
   }
 
   List<String> getUrls() {

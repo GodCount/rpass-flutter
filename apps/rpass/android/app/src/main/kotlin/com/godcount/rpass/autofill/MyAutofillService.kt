@@ -132,8 +132,9 @@ class MyAutofillService : AutofillService() {
 
 
     private fun checkAppsBlacklist(packageName: String?): Boolean {
+        if (packageName == this.packageName) return  true
         if (packageName == null || appsBlacklist.isNullOrEmpty()) return false
-        return packageName == this.packageName || appsBlacklist!!.contains(packageName)
+        return appsBlacklist!!.contains(packageName)
     }
 
     private fun checkDomainBlacklist(domain: String?): Boolean {

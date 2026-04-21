@@ -245,7 +245,10 @@ class _LookAccountPageState extends State<LookAccountPage>
 
             final result = await context.router.push(
               EditAccountRoute(
-                initKdbxGroup: widget.kdbxEntry.parent,
+                initKdbxGroup:
+                    widget.kdbxEntry.parent != kdbx.kdbxFile.recycleBin
+                    ? widget.kdbxEntry.parent
+                    : null,
                 kdbxEntry: clone,
                 uuid: clone.uuid,
               ),
@@ -1087,4 +1090,3 @@ class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile> {
     );
   }
 }
-

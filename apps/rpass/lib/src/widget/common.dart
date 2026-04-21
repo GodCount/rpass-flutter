@@ -775,3 +775,61 @@ class DialogCloseController {
     _context = null;
   }
 }
+
+Future<T?> showBottomSheetView<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+  String? barrierLabel,
+  double? elevation,
+  ShapeBorder? shape,
+  Clip? clipBehavior,
+  BoxConstraints? constraints,
+  Color? barrierColor,
+  bool isScrollControlled = false,
+  double scrollControlDisabledMaxHeightRatio = 9.0 / 16.0,
+  bool useRootNavigator = false,
+  bool isDismissible = true,
+  bool enableDrag = true,
+  bool? showDragHandle,
+  bool useSafeArea = false,
+  RouteSettings? routeSettings,
+  AnimationController? transitionAnimationController,
+  Offset? anchorPoint,
+  AnimationStyle? sheetAnimationStyle,
+  bool? requestFocus,
+}) {
+  return showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.transparent,
+    barrierLabel: barrierLabel,
+    elevation: elevation,
+    shape: shape,
+    clipBehavior: clipBehavior,
+    constraints: constraints,
+    isScrollControlled: isScrollControlled,
+    useRootNavigator: useRootNavigator,
+    isDismissible: isDismissible,
+    enableDrag: enableDrag,
+    showDragHandle: showDragHandle,
+    useSafeArea: useSafeArea,
+    routeSettings: routeSettings,
+    transitionAnimationController: transitionAnimationController,
+    anchorPoint: anchorPoint,
+    sheetAnimationStyle: sheetAnimationStyle,
+    requestFocus: requestFocus,
+    builder: (context) {
+      return Padding(
+        padding: EdgeInsets.all(12),
+        child: Material(
+          color:
+              Theme.of(context).bottomSheetTheme.modalBackgroundColor ??
+              Theme.of(context).bottomSheetTheme.backgroundColor ??
+              Theme.of(context).colorScheme.surfaceContainerLow,
+          clipBehavior: .antiAlias,
+          borderRadius: .circular(12),
+          child: builder(context),
+        ),
+      );
+    },
+  );
+}
