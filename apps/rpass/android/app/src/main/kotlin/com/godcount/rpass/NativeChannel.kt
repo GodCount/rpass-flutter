@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.provider.Settings
+import android.util.Log
 import android.view.autofill.AutofillManager
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -21,6 +22,7 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
     PluginRegistry.ActivityResultListener, PluginRegistry.NewIntentListener {
 
     companion object {
+        private const val TAG = "NativeChannel"
         val REQUEST_CODE_SET_AUTOFILL_SERVICE =
             NativeChannel::class.java.hashCode() and 0xffff
     }
@@ -72,6 +74,7 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
     }
 
     override fun onNewIntent(intent: Intent): Boolean {
+        Log.d(TAG, "onNewIntent action=${intent.action} extras=${intent.extras?.keySet()}")
         if (intent.hasExtra(AutofillMetadata.EXTRA_AUTOFILL_METADATA)) {
             if (intent.getBooleanExtra(AutofillDataset.EXTRA_AUTOFILL_MANUAL_DATASET, false)) {
                 val metadata = this.getAutofillMetadata(intent)
@@ -134,7 +137,10 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
 
             "response_autofill_dataset" -> {
                 try {
-                    if (activityBinding == null) return result.success(false)
+                    if (activityBinding == null) {
+                        Log.w(TAG, "response_autofill_dataset called with no activityBinding")
+                        return result.success(false)
+                    }
 
                     val dataset =
                         AutofillDataset.fromJson(call.arguments<Map<String, Any?>>() ?: emptyMap())

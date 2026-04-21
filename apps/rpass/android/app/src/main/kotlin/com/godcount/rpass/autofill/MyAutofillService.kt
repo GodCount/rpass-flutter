@@ -8,9 +8,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.*
 import android.service.autofill.*
+import android.util.Log
 import android.view.autofill.AutofillManager
 import android.view.autofill.AutofillManager.EXTRA_AUTHENTICATION_RESULT
 import android.view.inputmethod.InlineSuggestionsRequest
+import com.godcount.rpass.PreferencesHelper
 import com.godcount.rpass.autofill.helpers.AutofillDataset
 import com.godcount.rpass.autofill.helpers.AutofillMetadata
 import com.godcount.rpass.autofill.helpers.ResponseHelper
@@ -19,9 +21,8 @@ import com.godcount.rpass.autofill.helpers.ResponseHelper
 data class LastResponse(val metadata: AutofillMetadata, val dataset: AutofillDataset)
 
 class MyAutofillService : AutofillService() {
-
-
     companion object {
+        private const val TAG = "MyAutofillService"
         var onAutofillRequest: ((metadata: AutofillMetadata) -> Unit)? = null
 
         private var fillCallback: FillCallback? = null
@@ -30,6 +31,7 @@ class MyAutofillService : AutofillService() {
         private var lastResponse: LastResponse? = null
 
         private fun getResponseHelper(context: Context, intent: Intent?): ResponseHelper? {
+            Log.d(TAG, "getResponseHelper intent=$intent assistStructureCached=${assistStructure != null}")
             if (assistStructure != null) return ResponseHelper.createResponseByStructure(
                 context,
                 assistStructure!!,
@@ -37,6 +39,7 @@ class MyAutofillService : AutofillService() {
             )
 
             if (intent == null || !intent.hasExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE)) {
+                Log.w(TAG, "getResponseHelper missing assist structure")
                 return null
             }
 
@@ -50,7 +53,10 @@ class MyAutofillService : AutofillService() {
                 intent.getParcelableExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE)
             }
 
-            if (structure == null) return null
+            if (structure == null) {
+                Log.w(TAG, "getResponseHelper structure was null")
+                return null
+            }
 
             return ResponseHelper.createResponseByStructure(
                 context,
@@ -65,6 +71,7 @@ class MyAutofillService : AutofillService() {
             this.fillCallback = null
 
             val finish = activity.intent.action == Intent.ACTION_RUN
+            Log.d(TAG, "setFillResult response=${response != null} finish=$finish callbackPresent=${callback != null}")
 
             if (callback != null) {
                 callback.onSuccess(response)
@@ -89,6 +96,7 @@ class MyAutofillService : AutofillService() {
             val responseHelper = getResponseHelper(activity, intent)
 
             if (responseHelper == null) {
+                Log.w(TAG, "onAutofillResponse responseHelper is null")
                 setFillResult(activity, null)
                 return
             }
@@ -104,22 +112,61 @@ class MyAutofillService : AutofillService() {
     }
 
 
+    private var appsBlacklist: Set<String>? = null
+    private var domainBlacklist: Set<String>? = null
+
+
+    private fun readPreferences() {
+        appsBlacklist = PreferencesHelper.getAutoFillAppIdBlacklist(this)
+        domainBlacklist = PreferencesHelper.getAutoFillDomainBlacklist(this)
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        readPreferences()
+    }
+
+    override fun onConnected() {
+        readPreferences()
+    }
+
+
+    private fun checkAppsBlacklist(packageName: String?): Boolean {
+        if (packageName == null || appsBlacklist.isNullOrEmpty()) return false
+        return packageName == this.packageName || appsBlacklist!!.contains(packageName)
+    }
+
+    private fun checkDomainBlacklist(domain: String?): Boolean {
+        if (domain == null || domainBlacklist.isNullOrEmpty()) return false
+        return domainBlacklist!!.any { domain.contains(it) }
+    }
+
     override fun onFillRequest(
         request: FillRequest, cancellationSignal: CancellationSignal, callback: FillCallback
     ) {
-
         fillCallback = null
-        assistStructure = null
-        inlineSuggestion = null
 
         val responseHelper =
             ResponseHelper.createResponse(this, request)
 
+        val packageName = responseHelper.parsed.packageName
+            ?: responseHelper.structure.activityComponent.packageName
         val metadata = responseHelper.parsed.toAutofillMetadata(false)
 
-        println("metadata $metadata")
+        Log.d(TAG, "onFillRequest packageName=$packageName metadata=$metadata")
 
-        if (!responseHelper.parsed.canAutofill()) return callback.onSuccess(null)
+        if (checkAppsBlacklist(packageName) || checkDomainBlacklist(responseHelper.parsed.webDomain)) {
+            Log.d(TAG, "onFillRequest blocked by blacklist")
+            return callback.onSuccess(null)
+        }
+
+        assistStructure = null
+        inlineSuggestion = null
+
+        if (!responseHelper.parsed.canAutofill()) {
+            Log.d(TAG, "onFillRequest cannot autofill")
+            return callback.onSuccess(null)
+        }
 
         assistStructure = responseHelper.structure
         inlineSuggestion = responseHelper.inlineSuggestion
@@ -128,12 +175,15 @@ class MyAutofillService : AutofillService() {
         // 遇到一种情况，activity.finish() 后数据没有正确填充或丢失，导致有触发验证请求
         // 当使用 moveTaskToBack 后退, 可能不会弹出菜单
         if (lastResponse != null && lastResponse!!.metadata == metadata) {
+            Log.d(TAG, "onFillRequest using lastResponse")
             callback.onSuccess(responseHelper.buildDatasetResponse(lastResponse!!.dataset))
             lastResponse = null
         } else if (onAutofillRequest != null) {
+            Log.d(TAG, "onFillRequest dispatching onAutofillRequest")
             fillCallback = callback
             onAutofillRequest!!(metadata)
         } else {
+            Log.d(TAG, "onFillRequest building auth response")
             callback.onSuccess(responseHelper.buildAuthResponse(false, null))
         }
 

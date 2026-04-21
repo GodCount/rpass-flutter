@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import android.os.Build
+import android.util.Log
 import android.service.autofill.Dataset
 import android.service.autofill.Field
 import android.service.autofill.FillRequest
@@ -18,12 +19,14 @@ import android.view.autofill.AutofillValue
 import android.view.inputmethod.InlineSuggestionsRequest
 import com.godcount.rpass.MainActivity
 
+private const val TAG = "ResponseHelper"
 
 class ResponseHelper private constructor(
     val context: Context,
     val structure: AssistStructure,
     val inlineSuggestion: InlineSuggestionsRequest?
 ) {
+
     private var unlockLabel = "Rpass with Autofill"
 
     val parsed = ViewStructureParser(structure)
@@ -106,6 +109,7 @@ class ResponseHelper private constructor(
             intent.putExtra(AutofillDataset.EXTRA_AUTOFILL_MANUAL_DATASET, true)
         }
 
+        Log.d(TAG, "createIntentSender flags=$flags manual=$manual")
         return PendingIntent.getActivity(
             context,
             0,
@@ -172,6 +176,7 @@ class ResponseHelper private constructor(
         manual: Boolean?,
         label: String?
     ): FillResponse {
+        Log.d(TAG, "buildAuthOrManualResponse flags=$flags manual=$manual label=$label")
 
         val title = label ?: unlockLabel
 
