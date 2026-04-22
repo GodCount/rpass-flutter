@@ -287,13 +287,6 @@ class _LookAccountPageState extends State<LookAccountPage>
             showBottomSheetList(
               title: key.key.fromKdbxKeyToI18n(context),
               children: [
-                ListTile(
-                  title: Text(t.copy),
-                  leading: const Icon(Icons.copy),
-                  onTap: onAutoPop(() {
-                    writeClipboard(widget.kdbxEntry.getActualString(key) ?? "");
-                  }),
-                ),
                 if (kIsMobile)
                   ListTile(
                     enabled: lanFill != null,
@@ -321,6 +314,21 @@ class _LookAccountPageState extends State<LookAccountPage>
                     leading: Icon(Icons.ads_click),
                     onTap: onAutoPop(() {
                       autoFill(widget.kdbxEntry, key);
+                    }),
+                  ),
+                ListTile(
+                  title: Text(t.copy),
+                  leading: const Icon(Icons.copy),
+                  onTap: onAutoPop(() {
+                    writeClipboard(widget.kdbxEntry.getActualString(key) ?? "");
+                  }),
+                ),
+                if (key == KdbxKeyCommon.URL || KdbxKeyURLS.all.contains(key))
+                  ListTile(
+                    title: Text(t.open),
+                    leading: Icon(Icons.open_in_new),
+                    onTap: onAutoPop(() {
+                      _launchUrl(widget.kdbxEntry.getActualString(key)!);
                     }),
                   ),
               ],

@@ -147,6 +147,7 @@ class _EntryTextFormFieldState extends State<EntryTextFormField> {
                   onPressed: () async {
                     _controller.text =
                         await widget.onTrailingTap!() ?? _controller.text;
+                    widget.onChanged?.call(_controller.text);
                   },
                   icon: widget.trailingIcon!,
                 ),

@@ -818,16 +818,18 @@ Future<T?> showBottomSheetView<T>({
     sheetAnimationStyle: sheetAnimationStyle,
     requestFocus: requestFocus,
     builder: (context) {
-      return Padding(
-        padding: EdgeInsets.all(12),
-        child: Material(
-          color:
-              Theme.of(context).bottomSheetTheme.modalBackgroundColor ??
-              Theme.of(context).bottomSheetTheme.backgroundColor ??
-              Theme.of(context).colorScheme.surfaceContainerLow,
-          clipBehavior: .antiAlias,
-          borderRadius: .circular(12),
-          child: builder(context),
+      return SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(12),
+          child: Material(
+            color:
+                Theme.of(context).bottomSheetTheme.modalBackgroundColor ??
+                Theme.of(context).bottomSheetTheme.backgroundColor ??
+                Theme.of(context).colorScheme.surfaceContainerLow,
+            clipBehavior: .antiAlias,
+            borderRadius: .circular(12),
+            child: builder(context),
+          ),
         ),
       );
     },

@@ -91,16 +91,18 @@ class _LanFillServerState extends State<LanFillServerProvider>
       String? lastText;
       _lifecycleDispose = AppLifecycleListener(
         onPause: () async {
+          if (_cilent?.connecting != true) return;
           lastText = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
         },
         onResume: () async {
+          if (_cilent?.connecting != true) return;
+
           final t = I18n.of(context)!;
           final text = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
 
           if (text != null &&
               text != lastText &&
               text.isNotEmpty &&
-              _cilent?.connecting == true &&
               await showConfirmDialog(
                 title: t.hint,
                 message: t.clipboard_lan_fill_message,
