@@ -1,10 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
+import '../../util/random_password.dart';
 import '../../util/route.dart';
 import '../../widget/match_text.dart';
 import '../../i18n.dart';
-import '../../util/common.dart';
 import '../../widget/extension_state.dart';
 
 class _GenPasswordArgs extends PageRouteArgs {
@@ -42,281 +42,292 @@ class GenPasswordPage extends StatefulWidget {
 }
 
 class _GenPasswordPageState extends State<GenPasswordPage> {
-  bool _enableLetterLow = true;
-  bool _enableLetterUp = true;
-  bool _enableNumber = true;
-  bool _enableSymbol = true;
-  bool _enableCustom = false;
+  late final HighlightTextEditingController _controller =
+      HighlightTextEditingController();
+
+  bool _includeLetterLow = true;
+  bool _includeLetterUp = true;
+  bool _includeNumber = true;
+  bool _includeSymbol = true;
+  bool _includeBrackets = true;
   String _customText = "";
 
   double _length = 10;
-
-  late String password;
-  late int entropy;
-
-  void _updatePassword() {
-    final value = randomPassword(
-      length: _length.toInt(),
-      enableNumber: _enableNumber,
-      enableSymbol: _enableSymbol,
-      enableLetterLowercase: _enableLetterLow,
-      enableLetterUppercase: _enableLetterUp,
-      customText: _enableCustom ? _customText : null,
-    );
-    password = value.$1;
-    entropy = value.$2;
-    setState(() {});
-  }
-
-  void _cahnged({
-    bool? enableNumber,
-    bool? enableSymbol,
-    bool? enableLetterLow,
-    bool? enableLetterUp,
-    bool? enableCustom,
-  }) {
-    enableNumber ??= _enableNumber;
-    enableSymbol ??= _enableSymbol;
-    enableLetterLow ??= _enableLetterLow;
-    enableLetterUp ??= _enableLetterUp;
-    enableCustom ??= _enableCustom;
-
-    if (!enableNumber &&
-        !enableSymbol &&
-        !enableLetterLow &&
-        !enableLetterUp &&
-        !enableCustom) {
-      return;
-    }
-
-    _enableNumber = enableNumber;
-    _enableLetterLow = enableLetterLow;
-    _enableLetterUp = enableLetterUp;
-    _enableSymbol = enableSymbol;
-    _enableCustom = enableCustom;
-    _updatePassword();
-  }
+  late String _password;
+  late int _entropy;
 
   @override
   void initState() {
     super.initState();
+
+    _controller.addListener(() {
+      if (_controller.text != _password) {
+        _password = _controller.text;
+        _entropy = passwordEntropy(_controller.text);
+        setState(() {});
+      }
+    });
+
     _updatePassword();
+  }
+
+  void _updatePassword() {
+    final charSet = [
+      if (_includeLetterLow) CharacterSet.lowerCaseLetters,
+      if (_includeLetterUp) CharacterSet.upperCaseLetters,
+      if (_includeNumber) CharacterSet.numbers,
+      if (_includeSymbol) CharacterSet.symbols,
+      if (_includeBrackets) CharacterSet.brackets,
+      _customText,
+    ];
+
+    _password = randomPassword(length: _length.toInt(), charSet: charSet);
+    _entropy = passwordEntropy(_password, charSet.join());
+
+    _controller.text = _password;
+
+    setState(() {});
+  }
+
+  void _cahnged({
+    bool? includeNumber,
+    bool? includeSymbol,
+    bool? includeLetterLow,
+    bool? includeLetterUp,
+    bool? includeBrackets,
+  }) {
+    includeNumber ??= _includeNumber;
+    includeSymbol ??= _includeSymbol;
+    includeLetterLow ??= _includeLetterLow;
+    includeLetterUp ??= _includeLetterUp;
+    includeBrackets ??= _includeBrackets;
+
+    if (!includeNumber &&
+        !includeSymbol &&
+        !includeLetterLow &&
+        !includeLetterUp &&
+        !includeBrackets) {
+      return;
+    }
+
+    _includeNumber = includeNumber;
+    _includeLetterLow = includeLetterLow;
+    _includeLetterUp = includeLetterUp;
+    _includeSymbol = includeSymbol;
+    _includeBrackets = includeBrackets;
+
+    _updatePassword();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
 
-    const shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.only(
-        bottomLeft: Radius.circular(12.0),
-        bottomRight: Radius.circular(12.0),
+    _controller.matchs = [
+      MatchHighlightItem(
+        regExp: RegExp(r"[a-zA-Z]+"),
+        style: Theme.of(context).textTheme.bodyLarge!,
       ),
-    );
+      MatchHighlightItem(
+        regExp: RegExp(r"\d+"),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyLarge!.copyWith(color: Colors.blue),
+      ),
+      MatchHighlightItem(
+        regExp: RegExp(r"[\(\)\[\]\{\}<>]+"),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyLarge!.copyWith(color: Colors.amberAccent),
+      ),
+      if (_customText.isNotEmpty)
+        MatchHighlightItem(
+          regExp: RegExp(
+            "[${RegExp.escape(Set.from(_customText.split("")).join())}]+",
+          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge!.copyWith(color: Colors.green),
+        ),
+    ];
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: widget.popPassword,
         title: Text(t.gen_password),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(6),
-        children: [
-          _cardColumn([
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(right: 6),
-                    child: Icon(Icons.password_rounded),
-                  ),
-                  Text(
-                    t.password,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ],
-              ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+        child: _cardColumn([
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            child: Row(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(right: 6),
+                  child: Icon(Icons.password_rounded),
+                ),
+                Text(t.password, style: Theme.of(context).textTheme.titleLarge),
+              ],
             ),
-            ListTile(
-              shape: shape,
-              title: Container(
-                alignment: Alignment.centerLeft,
-                child: MatchText(
-                  text: password,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _controller,
+                  enableSuggestions: false,
                   style: Theme.of(
                     context,
                   ).textTheme.bodyLarge!.copyWith(color: Colors.red),
-                  matchs: [
-                    MatchHighlightItem(
-                      regExp: RegExp(r"[a-zA-Z]+"),
-                      style: Theme.of(context).textTheme.bodyLarge!,
-                    ),
-                    MatchHighlightItem(
-                      regExp: RegExp(r"\d+"),
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyLarge!.copyWith(color: Colors.blue),
-                    ),
-                    if (_customText.isNotEmpty)
-                      MatchHighlightItem(
-                        regExp: RegExp(
-                          "[${Set.from(_customText.split("")).join()}]+",
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    label: Row(
+                      mainAxisSize: .min,
+                      spacing: 6,
+                      children: [
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: _entropy < 32
+                                ? Colors.red
+                                : _entropy < 56
+                                ? Colors.amber
+                                : Colors.green,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodyLarge!.copyWith(color: Colors.green),
+                        Text(
+                          "$_entropy bit",
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                    suffixIcon: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: IconButton(
+                        onPressed: _updatePassword,
+                        icon: const Icon(Icons.refresh),
                       ),
+                    ),
+                  ),
+                ),
+
+                Row(
+                  spacing: 0,
+                  children: [
+                    Expanded(
+                      child: Slider(
+                        value: _length,
+                        min: 4,
+                        max: 128,
+                        onChanged: (value) {
+                          setState(() {
+                            _length = value;
+                          });
+                        },
+                        onChangeEnd: (length) => _updatePassword(),
+                      ),
+                    ),
+                    SizedBox(width: 30, child: Text("${_length.toInt()}")),
                   ],
                 ),
-              ),
-              // subtitle: const SizedBox(),
-              trailing: IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: _updatePassword,
-              ),
-            ),
-            ListTile(
-              shape: shape,
-              title: LinearProgressIndicator(
-                value: entropy.toDouble() / 100,
-                minHeight: 24,
-                color: entropy < 32
-                    ? Colors.red
-                    : entropy < 56
-                    ? Colors.amber
-                    : Colors.green,
-                borderRadius: const BorderRadius.all(Radius.circular(4)),
-              ),
-              trailing: SizedBox(
-                width: 64,
-                child: Text(
-                  "$entropy bit",
-                  style: Theme.of(context).textTheme.bodyLarge,
+
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        _cahnged(includeLetterLow: !_includeLetterLow);
+                      },
+                      style: TextButton.styleFrom(
+                        side: _includeLetterLow
+                            ? BorderSide(color: Theme.of(context).primaryColor)
+                            : null,
+                      ),
+                      child: Text("a-z"),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _cahnged(includeLetterUp: !_includeLetterUp);
+                      },
+                      style: TextButton.styleFrom(
+                        side: _includeLetterUp
+                            ? BorderSide(color: Theme.of(context).primaryColor)
+                            : null,
+                      ),
+                      child: Text("A-Z"),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _cahnged(includeNumber: !_includeNumber);
+                      },
+                      style: TextButton.styleFrom(
+                        side: _includeNumber
+                            ? BorderSide(color: Theme.of(context).primaryColor)
+                            : null,
+                      ),
+                      child: Text("0-9"),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _cahnged(includeSymbol: !_includeSymbol);
+                      },
+                      style: TextButton.styleFrom(
+                        side: _includeSymbol
+                            ? BorderSide(color: Theme.of(context).primaryColor)
+                            : null,
+                      ),
+                      child: Text(CharacterSet.symbols),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _cahnged(includeBrackets: !_includeBrackets);
+                      },
+                      style: TextButton.styleFrom(
+                        side: _includeBrackets
+                            ? BorderSide(color: Theme.of(context).primaryColor)
+                            : null,
+                      ),
+                      child: Text(CharacterSet.brackets),
+                    ),
+                  ],
                 ),
-              ),
-            ),
-          ]),
-          _cardColumn([
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(right: 6),
-                    child: Icon(Icons.straighten),
+
+                Padding(
+                  padding: const EdgeInsetsGeometry.symmetric(vertical: 12),
+                  child: TextField(
+                    onEditingComplete: () {
+                      _updatePassword();
+                    },
+                    onChanged: (value) => _customText = value,
+                    decoration: InputDecoration(
+                      labelText: t.custom,
+                      border: const OutlineInputBorder(),
+                    ),
                   ),
-                  Text(
-                    t.pass_length,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            ListTile(
-              shape: shape,
-              title: Slider(
-                value: _length,
-                min: 4,
-                max: 128,
-                onChanged: (value) {
-                  setState(() {
-                    _length = value;
-                  });
-                },
-                onChangeEnd: (length) => _updatePassword(),
-              ),
-              trailing: Text("${_length.toInt()}"),
-            ),
-          ]),
-          _cardColumn([
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(right: 6),
-                    child: Icon(Icons.onetwothree),
-                  ),
-                  Text(
-                    t.include_cahr,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              title: Text("${t.letter} (abc)"),
-              trailing: _enableLetterLow ? const Icon(Icons.check) : null,
-              onTap: () {
-                _cahnged(enableLetterLow: !_enableLetterLow);
-              },
-            ),
-            ListTile(
-              title: Text("${t.letter} (ABC)"),
-              trailing: _enableLetterUp ? const Icon(Icons.check) : null,
-              onTap: () {
-                _cahnged(enableLetterUp: !_enableLetterUp);
-              },
-            ),
-            ListTile(
-              title: Text("${t.number} (01)"),
-              trailing: _enableNumber ? const Icon(Icons.check) : null,
-              onTap: () {
-                _cahnged(enableNumber: !_enableNumber);
-              },
-            ),
-            ListTile(
-              title: Text("${t.special_char} (!@)"),
-              trailing: _enableSymbol ? const Icon(Icons.check) : null,
-              onTap: () {
-                _cahnged(enableSymbol: !_enableSymbol);
-              },
-            ),
-            ListTile(
-              title: Text(t.custom),
-              trailing: _enableCustom ? const Icon(Icons.check) : null,
-              onTap: () {
-                _cahnged(enableCustom: !_enableCustom);
-              },
-            ),
-            ListTile(
-              shape: shape,
-              title: TextField(
-                onEditingComplete: () {
-                  if (_customText.isEmpty &&
-                      !_enableNumber &&
-                      !_enableSymbol &&
-                      !_enableLetterLow &&
-                      !_enableLetterUp) {
-                    _cahnged(
-                      enableNumber: true,
-                      enableSymbol: true,
-                      enableLetterLow: true,
-                      enableLetterUp: true,
-                      enableCustom: false,
-                    );
-                  } else {
-                    _updatePassword();
-                  }
-                },
-                onChanged: (value) => _customText = value,
-                enabled: _enableCustom,
-                decoration: const InputDecoration(border: OutlineInputBorder()),
-              ),
-              subtitle: SizedBox(height: 6),
-            ),
-          ]),
-          const SizedBox(height: 56),
-        ],
+          ),
+        ]),
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: const ValueKey("gen_password_float"),
         onPressed: () {
           if (widget.popPassword) {
-            context.router.pop(password);
+            context.router.pop(_controller.text);
           } else {
-            writeClipboard(password);
+            writeClipboard(_controller.text);
           }
         },
         shape: const RoundedRectangleBorder(
@@ -333,7 +344,12 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(12.0)),
       ),
-      child: Column(children: children),
+      child: ClipRRect(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 6, bottom: 12),
+          child: Column(spacing: 12, children: children),
+        ),
+      ),
     );
   }
 }

@@ -20,11 +20,6 @@ final bool kIsMobile = Platform.isAndroid || Platform.isIOS;
 final bool kIsDesktop =
     Platform.isWindows || Platform.isMacOS || Platform.isLinux;
 
-const letters = r"qwertyuiopasdfghjklzxcvbnm";
-const numbers = r"0123456789";
-const symbols =
-    r"!@#$%^&*_-=+'(),./\:;<>?[]`{}|~"
-    r'"';
 
 const storageUnitSuffixes = [
   "B",
@@ -42,74 +37,6 @@ String md5(String data) {
   return crypto.md5.convert(utf8.encode(data)).toString();
 }
 
-int randomInt(int min, int max) => min + math.Random().nextInt(max - min);
-
-int passwordEntropy(int length, int charSetLength) =>
-    (length * (math.log(charSetLength) / math.log(2))).round();
-
-/// (Random Password, Password Entropy)
-(String, int) randomPassword({
-  required int length,
-  bool enableNumber = true,
-  bool enableSymbol = true,
-  bool enableLetterUppercase = true,
-  bool enableLetterLowercase = true,
-  String? customText,
-}) {
-  final List<String> values = [];
-
-  final List<String> chars = customText != null ? customText.split("") : [];
-
-  if (chars.isNotEmpty) {
-    values.add(chars[randomInt(0, chars.length)]);
-  }
-
-  if (enableLetterUppercase) {
-    final list = letters.toUpperCase().split("");
-    chars.addAll(list);
-    values.add(list[randomInt(0, list.length)]);
-  }
-
-  if (enableLetterLowercase) {
-    final list = letters.split("");
-    chars.addAll(list);
-    values.add(list[randomInt(0, list.length)]);
-  }
-
-  if (enableNumber) {
-    final list = numbers.split("");
-    chars.addAll(list);
-    values.add(list[randomInt(0, list.length)]);
-  }
-
-  if (enableSymbol) {
-    final list = symbols.split("");
-    chars.addAll(list);
-    values.add(list[randomInt(0, list.length)]);
-  }
-
-  if (chars.isEmpty) {
-    throw Exception("enable at least one type");
-  }
-
-  chars.sort((a, b) => math.Random().nextInt(2));
-
-  if (values.length >= length) {
-    values.sort((a, b) => math.Random().nextInt(2));
-    return (
-      values.sublist(0, length).join(""),
-      passwordEntropy(length, chars.length),
-    );
-  }
-
-  length -= values.length;
-  for (var i = 0; i < length; i++) {
-    values.add(chars[randomInt(0, chars.length)]);
-  }
-  values.sort((a, b) => math.Random().nextInt(2));
-
-  return (values.join(""), passwordEntropy(values.length, chars.length));
-}
 
 List<Map<String, dynamic>> csvToJson(
   String csv, {

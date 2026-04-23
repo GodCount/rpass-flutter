@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 
 import '../../context/lan_fill_server.dart';
 import '../../util/one_time_password.dart';
+import '../../util/random_password.dart';
 import '../../util/route.dart';
 import '../../widget/form.dart';
 import '../../widget/kdbx_icon.dart';
@@ -113,7 +114,7 @@ class _EditAccountPageState extends State<EditAccountPage>
   KdbxEntry _createKdbxEntry() {
     return KdbxProvider.of(context).kdbx!.createVirtualEntry()..setString(
       KdbxKeyCommon.PASSWORD,
-      PlainValue(randomPassword(length: 10).$1),
+      PlainValue(randomPassword(length: 10)),
     );
   }
 

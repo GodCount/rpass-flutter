@@ -14,23 +14,14 @@ class MatchHighlightItem {
   }
 }
 
-class MatchText extends StatelessWidget {
-  const MatchText({
-    super.key,
-    required this.text,
-    required this.matchs,
-    this.style,
-  });
-
+class MatchTextSpan {
+  const MatchTextSpan({required this.text, required this.matchs, this.style});
   final String text;
   final List<MatchHighlightItem> matchs;
   final TextStyle? style;
 
-  @override
-  Widget build(BuildContext context) {
-    return RichText(
-      text: TextSpan(style: style, children: _matchText()),
-    );
+  TextSpan build() {
+    return TextSpan(style: style, children: _matchText());
   }
 
   List<TextSpan> _matchText() {
@@ -91,5 +82,54 @@ class MatchText extends StatelessWidget {
   ) {
     return matchs.where((item) => item.hasMatch(text)).firstOrNull ??
         matchs.first;
+  }
+}
+
+class MatchText extends StatelessWidget {
+  const MatchText({
+    super.key,
+    required this.text,
+    required this.matchs,
+    this.style,
+  });
+
+  final String text;
+  final List<MatchHighlightItem> matchs;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      text: MatchTextSpan(text: text, matchs: matchs, style: style).build(),
+    );
+  }
+}
+
+class HighlightTextEditingController extends TextEditingController {
+  HighlightTextEditingController({List<MatchHighlightItem>? matchs, super.text})
+    : _matchs = matchs ?? [];
+
+  List<MatchHighlightItem> _matchs;
+
+  List<MatchHighlightItem> get matchs => _matchs;
+
+  set matchs(List<MatchHighlightItem> newMatchs) {
+    _matchs = newMatchs;
+  }
+
+  @override
+  TextSpan buildTextSpan({
+    required BuildContext context,
+    TextStyle? style,
+    required bool withComposing,
+  }) {
+    if (text.isEmpty) {
+      return super.buildTextSpan(
+        context: context,
+        style: style,
+        withComposing: withComposing,
+      );
+    }
+    return MatchTextSpan(text: text, matchs: matchs, style: style).build();
   }
 }
