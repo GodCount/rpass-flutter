@@ -26,62 +26,32 @@ class MatchTextSpan {
 
   List<TextSpan> _matchText() {
     final List<TextSpan> children = [];
+    final List<(int, int, TextStyle)> allMatches = [];
 
-    final matchList = matchs.where((item) => item.hasMatch(text));
-
-    final regexp = _mergeRegexp(matchList);
-
-    final allMatches = regexp.allMatches(text);
-
-    int lastMatchEnd = 0;
-
-    for (final item in allMatches) {
-      final matchStart = item.start;
-      final matchEnd = item.end;
-
-      if (matchStart < 0 || matchEnd > text.length) continue;
-
-      if (matchStart > lastMatchEnd) {
-        final nonMatchText = text.substring(lastMatchEnd, matchStart);
-        children.add(TextSpan(text: nonMatchText));
+    for (final matchItem in matchs) {
+      if (!matchItem.hasMatch(text)) continue;
+      for (final match in matchItem.regExp.allMatches(text)) {
+        allMatches.add((match.start, match.end, matchItem.style));
       }
-
-      final matchText = item.group(0)!;
-
-      final matchedItem = _findMatchedByText(matchText, matchList);
-      children.add(TextSpan(text: matchText, style: matchedItem.style));
-
-      lastMatchEnd = matchEnd;
     }
 
-    if (lastMatchEnd < text.length) {
-      final remainingText = text.substring(lastMatchEnd);
-      children.add(TextSpan(text: remainingText));
+    allMatches.sort((a, b) => a.$1.compareTo(b.$1));
+
+    int lastEnd = 0;
+    for (final (start, end, style) in allMatches) {
+      if (start < lastEnd) continue; // Skip overlapping matches
+      if (start > lastEnd) {
+        children.add(TextSpan(text: text.substring(lastEnd, start)));
+      }
+      children.add(TextSpan(text: text.substring(start, end), style: style));
+      lastEnd = end;
+    }
+
+    if (lastEnd < text.length) {
+      children.add(TextSpan(text: text.substring(lastEnd)));
     }
 
     return children;
-  }
-
-  RegExp _mergeRegexp(Iterable<MatchHighlightItem> matchs) {
-    if (matchs.length == 1) return matchs.first.regExp;
-
-    final StringBuffer buffer = StringBuffer();
-    bool first = true;
-
-    for (final item in matchs) {
-      if (!first) buffer.write('|');
-      buffer.write('(${item.regExp.pattern})');
-      first = false;
-    }
-    return RegExp(buffer.toString());
-  }
-
-  MatchHighlightItem _findMatchedByText(
-    String text,
-    Iterable<MatchHighlightItem> matchs,
-  ) {
-    return matchs.where((item) => item.hasMatch(text)).firstOrNull ??
-        matchs.first;
   }
 }
 
@@ -111,6 +81,7 @@ class HighlightTextEditingController extends TextEditingController {
 
   List<MatchHighlightItem> _matchs;
 
+  // ignore: unnecessary_getters_setters
   List<MatchHighlightItem> get matchs => _matchs;
 
   set matchs(List<MatchHighlightItem> newMatchs) {
@@ -123,13 +94,6 @@ class HighlightTextEditingController extends TextEditingController {
     TextStyle? style,
     required bool withComposing,
   }) {
-    if (text.isEmpty) {
-      return super.buildTextSpan(
-        context: context,
-        style: style,
-        withComposing: withComposing,
-      );
-    }
     return MatchTextSpan(text: text, matchs: matchs, style: style).build();
   }
 }

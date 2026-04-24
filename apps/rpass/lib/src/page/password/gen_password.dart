@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
@@ -42,8 +44,8 @@ class GenPasswordPage extends StatefulWidget {
 }
 
 class _GenPasswordPageState extends State<GenPasswordPage> {
-  late final HighlightTextEditingController _controller =
-      HighlightTextEditingController();
+  late final _controller = HighlightTextEditingController();
+  late final _lengthController = TextEditingController(text: "10");
 
   bool _includeLetterLow = true;
   bool _includeLetterUp = true;
@@ -123,6 +125,7 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
   void dispose() {
     super.dispose();
     _controller.dispose();
+    _lengthController.dispose();
   }
 
   @override
@@ -130,26 +133,29 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
     final t = I18n.of(context)!;
 
     _controller.matchs = [
-      MatchHighlightItem(
-        regExp: RegExp(r"[a-zA-Z]+"),
-        style: Theme.of(context).textTheme.bodyLarge!,
-      ),
-      MatchHighlightItem(
-        regExp: RegExp(r"\d+"),
-        style: Theme.of(
-          context,
-        ).textTheme.bodyLarge!.copyWith(color: Colors.blue),
-      ),
-      MatchHighlightItem(
-        regExp: RegExp(r"[\(\)\[\]\{\}<>]+"),
-        style: Theme.of(
-          context,
-        ).textTheme.bodyLarge!.copyWith(color: Colors.amberAccent),
-      ),
+      if (_includeLetterLow)
+        MatchHighlightItem(
+          regExp: RegExp(r"[a-zA-Z]+"),
+          style: Theme.of(context).textTheme.bodyLarge!,
+        ),
+      if (_includeLetterUp)
+        MatchHighlightItem(
+          regExp: RegExp(r"\d+"),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge!.copyWith(color: Colors.blue),
+        ),
+      if (_includeBrackets)
+        MatchHighlightItem(
+          regExp: RegExp(r"[\(\)\[\]\{\}<>]+"),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge!.copyWith(color: Colors.amberAccent),
+        ),
       if (_customText.isNotEmpty)
         MatchHighlightItem(
           regExp: RegExp(
-            "[${RegExp.escape(Set.from(_customText.split("")).join())}]+",
+            "(${Set<String>.from(_customText.split("")).map(RegExp.escape).join("|")})+",
           ),
           style: Theme.of(
             context,
@@ -184,9 +190,11 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
                 TextField(
                   controller: _controller,
                   enableSuggestions: false,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge!.copyWith(color: Colors.red),
+                  style: _includeSymbol
+                      ? Theme.of(
+                          context,
+                        ).textTheme.bodyLarge!.copyWith(color: Colors.red)
+                      : null,
                   decoration: InputDecoration(
                     border: const OutlineInputBorder(),
                     label: Row(
@@ -226,18 +234,45 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
                   children: [
                     Expanded(
                       child: Slider(
-                        value: _length,
-                        min: 4,
+                        value: _length > 128 ? 128 : _length,
+                        min: 1,
                         max: 128,
                         onChanged: (value) {
-                          setState(() {
-                            _length = value;
-                          });
+                          _length = value;
+                          _lengthController.text = _length.toInt().toString();
+                          setState(() {});
                         },
                         onChangeEnd: (length) => _updatePassword(),
                       ),
                     ),
-                    SizedBox(width: 30, child: Text("${_length.toInt()}")),
+                    SizedBox(
+                      width: 45,
+                      child: TextField(
+                        controller: _lengthController,
+                        keyboardType: .number,
+
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        cursorWidth: 1,
+                        cursorHeight: 12,
+                        onEditingComplete: () {
+                          _length = max(
+                            double.tryParse(_lengthController.text) ?? _length,
+                            1,
+                          );
+                          _lengthController.text = _length.toInt().toString();
+                          _updatePassword();
+                        },
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          constraints: BoxConstraints(),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 6,
+                          ),
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
 

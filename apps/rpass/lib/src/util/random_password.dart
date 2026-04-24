@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 final class CharacterSet {
+  const CharacterSet._();
+
   static final lowerCaseLetters = r"qwertyuiopasdfghjklzxcvbnm";
   static final upperCaseLetters = r"QWERTYUIOPASDFGHJKLZXCVBNM";
   static final numbers = r"0123456789";
