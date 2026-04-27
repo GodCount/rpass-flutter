@@ -48,26 +48,52 @@ class EditAutoTypePage extends StatefulWidget {
 }
 
 class _EditAutoTypePageState extends State<EditAutoTypePage> {
-  RichTextController? _controller;
+  late final RichTextController _controller;
   final FocusNode _focusNode = FocusNode();
 
   @override
+  void initState() {
+    super.initState();
+    _controller = RichTextController(
+      text: widget.text,
+      onMatch: (_) {},
+      targetMatches: [
+        MatchTargetItem.pattern(
+          AutoTypeRichPattern.BUTTON,
+          allowInlineMatching: true,
+          style: const TextStyle(color: Colors.blueAccent),
+        ),
+        MatchTargetItem.pattern(
+          AutoTypeRichPattern.KDBX_KEY,
+          allowInlineMatching: true,
+          style: const TextStyle(color: Colors.green),
+        ),
+        MatchTargetItem.pattern(
+          AutoTypeRichPattern.SHORTCUT_KEY,
+          allowInlineMatching: true,
+          style: const TextStyle(color: Colors.orangeAccent),
+        ),
+      ],
+    );
+  }
+
+  @override
   void dispose() {
-    _controller?.dispose();
+    _controller.dispose();
     _focusNode.dispose();
     super.dispose();
   }
 
   void _insertTextAtCursor(String textToInsert) {
-    final selection = _controller!.selection;
+    final selection = _controller.selection;
 
     final start = selection.start == -1
-        ? _controller!.text.length
+        ? _controller.text.length
         : selection.start;
 
     final end = selection.end == -1 ? start : selection.end;
 
-    _controller!.text = _controller!.text.replaceRange(
+    _controller.text = _controller.text.replaceRange(
       start,
       end,
       textToInsert,
@@ -80,7 +106,7 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
     /// TODO! 可能会因为全选文本后又移动光标导致闪烁
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _controller!.selection = TextSelection.collapsed(
+      _controller.selection = TextSelection.collapsed(
         offset: start + textToInsert.length,
       );
     });
@@ -89,34 +115,6 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-
-    _controller ??= RichTextController(
-      text: widget.text,
-      onMatch: (_) {},
-      targetMatches: [
-        MatchTargetItem.pattern(
-          AutoTypeRichPattern.BUTTON,
-          allowInlineMatching: true,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyLarge!.copyWith(color: Colors.blueAccent),
-        ),
-        MatchTargetItem.pattern(
-          AutoTypeRichPattern.KDBX_KEY,
-          allowInlineMatching: true,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyLarge!.copyWith(color: Colors.green),
-        ),
-        MatchTargetItem.pattern(
-          AutoTypeRichPattern.SHORTCUT_KEY,
-          allowInlineMatching: true,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyLarge!.copyWith(color: Colors.orangeAccent),
-        ),
-      ],
-    );
 
     List<String> customFields = [];
     List<KdbxKey> moreUrlsFields = [];
@@ -195,8 +193,8 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
       floatingActionButton: FloatingActionButton(
         heroTag: const ValueKey("edit_auto_type_float"),
         onPressed: () {
-          if (_controller!.text != widget.text) {
-            context.router.pop(_controller!.text);
+          if (_controller.text != widget.text) {
+            context.router.pop(_controller.text);
           } else {
             context.router.pop();
           }

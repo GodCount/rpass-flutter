@@ -2,10 +2,10 @@ import 'dart:math';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:rich_text_controller/rich_text_controller.dart';
 
 import '../../util/random_password.dart';
 import '../../util/route.dart';
-import '../../widget/match_text.dart';
 import '../../i18n.dart';
 import '../../widget/extension_state.dart';
 
@@ -44,7 +44,10 @@ class GenPasswordPage extends StatefulWidget {
 }
 
 class _GenPasswordPageState extends State<GenPasswordPage> {
-  late final _controller = HighlightTextEditingController();
+  late final _controller = RichTextController(
+    targetMatches: [],
+    onMatch: (_) {},
+  );
   late final _lengthController = TextEditingController(text: "10");
 
   bool _includeLetterLow = true;
@@ -70,7 +73,41 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
       }
     });
 
+    _updateTargetMatches();
     _updatePassword();
+  }
+
+  void _updateTargetMatches() {
+    _controller.updateTargetMatches([
+      if (_includeSymbol)
+        MatchTargetItem(
+          regex: RegExp(
+            "(${Set<String>.from(CharacterSet.symbols.split("")).map(RegExp.escape).join("|")})+",
+          ),
+          allowInlineMatching: true,
+          style: const TextStyle(color: Colors.red),
+        ),
+      if (_includeNumber)
+        MatchTargetItem(
+          regex: RegExp(r"\d+"),
+          allowInlineMatching: true,
+          style: const TextStyle(color: Colors.blue),
+        ),
+      if (_includeBrackets)
+        MatchTargetItem(
+          regex: RegExp(r"[\(\)\[\]\{\}<>]+"),
+          allowInlineMatching: true,
+          style: const TextStyle(color: Colors.amberAccent),
+        ),
+      if (_customText.isNotEmpty)
+        MatchTargetItem(
+          regex: RegExp(
+            "(${Set<String>.from(_customText.split("")).map(RegExp.escape).join("|")})+",
+          ),
+          allowInlineMatching: true,
+          style: const TextStyle(color: Colors.green),
+        ),
+    ]);
   }
 
   void _updatePassword() {
@@ -118,6 +155,7 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
     _includeSymbol = includeSymbol;
     _includeBrackets = includeBrackets;
 
+    _updateTargetMatches();
     _updatePassword();
   }
 
@@ -131,37 +169,6 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-
-    _controller.matchs = [
-      if (_includeLetterLow)
-        MatchHighlightItem(
-          regExp: RegExp(r"[a-zA-Z]+"),
-          style: Theme.of(context).textTheme.bodyLarge!,
-        ),
-      if (_includeLetterUp)
-        MatchHighlightItem(
-          regExp: RegExp(r"\d+"),
-          style: Theme.of(
-            context,
-          ).textTheme.bodyLarge!.copyWith(color: Colors.blue),
-        ),
-      if (_includeBrackets)
-        MatchHighlightItem(
-          regExp: RegExp(r"[\(\)\[\]\{\}<>]+"),
-          style: Theme.of(
-            context,
-          ).textTheme.bodyLarge!.copyWith(color: Colors.amberAccent),
-        ),
-      if (_customText.isNotEmpty)
-        MatchHighlightItem(
-          regExp: RegExp(
-            "(${Set<String>.from(_customText.split("")).map(RegExp.escape).join("|")})+",
-          ),
-          style: Theme.of(
-            context,
-          ).textTheme.bodyLarge!.copyWith(color: Colors.green),
-        ),
-    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -190,11 +197,6 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
                 TextField(
                   controller: _controller,
                   enableSuggestions: false,
-                  style: _includeSymbol
-                      ? Theme.of(
-                          context,
-                        ).textTheme.bodyLarge!.copyWith(color: Colors.red)
-                      : null,
                   decoration: InputDecoration(
                     border: const OutlineInputBorder(),
                     label: Row(
@@ -342,6 +344,7 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
                   padding: const EdgeInsetsGeometry.symmetric(vertical: 12),
                   child: TextField(
                     onEditingComplete: () {
+                      _updateTargetMatches();
                       _updatePassword();
                     },
                     onChanged: (value) => _customText = value,
