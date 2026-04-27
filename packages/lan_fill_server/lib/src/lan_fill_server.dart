@@ -120,11 +120,11 @@ class _IdleCloseServerMiddleware {
   void start() {
     _timer?.cancel();
     _count = 0;
-    _start = DateTime.now().millisecond;
+    _start = DateTime.now().millisecondsSinceEpoch;
     _timer = Timer.periodic(duration, (timer) {
       if (_count > 0) return;
 
-      final milliseconds = DateTime.now().millisecond - _start;
+      final milliseconds = DateTime.now().millisecondsSinceEpoch - _start;
 
       if (milliseconds >= duration.inMilliseconds) {
         onIdleCallback();

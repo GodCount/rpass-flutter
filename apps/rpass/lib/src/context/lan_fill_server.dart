@@ -296,6 +296,7 @@ class _LanFillServerState extends State<LanFillServerProvider>
   @override
   void onServerClose() {
     _validateFingerprintQueue.clear();
+    _dialogCloseController.close();
     setState(() {});
   }
 
