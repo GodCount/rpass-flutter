@@ -83,8 +83,6 @@ class InputDialog extends StatefulWidget {
 class InputDialogState extends State<InputDialog> {
   late final TextEditingController _controller;
 
-  GlobalKey? _dropdownMenuKey;
-
   bool isLimitContent = false;
 
   List<DropdownMenuEntry<String>>? _dropdownMenuEntries;
@@ -97,7 +95,6 @@ class InputDialogState extends State<InputDialog> {
       _dropdownMenuEntries = widget.promptItmes!
           .map((value) => DropdownMenuEntry(value: value, label: value))
           .toList();
-      _dropdownMenuKey = GlobalKey();
     }
 
     super.initState();
@@ -122,15 +119,6 @@ class InputDialogState extends State<InputDialog> {
     });
   }
 
-  double? getWidth(GlobalKey key) {
-    final BuildContext? context = key.currentContext;
-    if (context != null) {
-      final RenderBox box = context.findRenderObject()! as RenderBox;
-      return box.hasSize ? box.size.width : null;
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
@@ -152,8 +140,7 @@ class InputDialogState extends State<InputDialog> {
 
     if (_dropdownMenuEntries != null && _dropdownMenuEntries!.isNotEmpty) {
       content = DropdownMenu(
-        key: _dropdownMenuKey,
-        width: _dropdownMenuKey != null ? getWidth(_dropdownMenuKey!) : null,
+        width: 230,
         menuHeight: 150,
         label: widget.label != null ? Text(widget.label!) : null,
         enableFilter: true,
@@ -182,7 +169,7 @@ class InputDialogState extends State<InputDialog> {
 
     return AlertDialog(
       title: widget.title != null ? Text(widget.title!) : null,
-      content: content,
+      content: SizedBox(width: 230, child: content),
       actions: [
         TextButton(
           onPressed: () {
