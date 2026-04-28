@@ -1387,6 +1387,12 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'用于排除自动填充的域名名单'**
   String get autofill_domain_blacklist_message;
+
+  /// No description provided for @add_large_files_warn.
+  ///
+  /// In zh, this message translates to:
+  /// **'文件太大了，添加大文件将严重影响数据库性能并增大体积。\n\n确认要添加吗？'**
+  String get add_large_files_warn;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

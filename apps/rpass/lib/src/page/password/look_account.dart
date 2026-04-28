@@ -760,16 +760,14 @@ class _LookAccountPageState extends State<LookAccountPage>
                   kdbxEntry.tagList.isEmpty,
                   ChipList(
                     maxHeight: 150,
-                    items: kdbxEntry.tagList
-                        .map(
-                          (item) => ChipListItem(
-                            label: item,
-                            value: item,
-                            select: true,
-                            deletable: false,
-                          ),
-                        )
-                        .toList(),
+                    items: [
+                      for (final item in kdbxEntry.tagList)
+                        ChipListItem(
+                          value: item,
+                          deletable: false,
+                          label: Text(item),
+                        ),
+                    ],
                   ),
                 ),
               ),
@@ -789,16 +787,28 @@ class _LookAccountPageState extends State<LookAccountPage>
                     onChipTap: (binary) {
                       showBinaryAction(binary);
                     },
-                    items: kdbxEntry.binaryEntries
-                        .map(
-                          (item) => ChipListItem(
-                            label: item.key.key,
-                            value: item,
-                            select: true,
-                            deletable: false,
+                    items: [
+                      for (final item in kdbxEntry.binaryEntries)
+                        ChipListItem(
+                          value: item,
+                          deletable: false,
+                          label: RichText(
+                            text: TextSpan(
+                              text: item.key.key,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              children: [
+                                TextSpan(
+                                  text:
+                                      " (${item.value.value.length.toStorageUnit(.KB)})",
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium,
+                                ),
+                              ],
+                            ),
                           ),
-                        )
-                        .toList(),
+                        ),
+                    ],
                   ),
                 ),
               ),

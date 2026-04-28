@@ -154,10 +154,7 @@ extension StatefulDialog on State {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 6,
-                    children: [
-                      Text(t.search_eg_1),
-                      Text(t.search_eg_2),
-                    ],
+                    children: [Text(t.search_eg_1), Text(t.search_eg_2)],
                   ),
                 ),
               ),
@@ -210,8 +207,10 @@ extension StatefulBottomSheet on State {
     final t = I18n.of(context)!;
     final lanFill = LanFillInherited.of(context);
 
+    final title = binary.value.key.key;
+
     showBottomSheetList(
-      title: binary.label,
+      title:title,
       children: [
         ListTile(
           leading: const Icon(Icons.save),
@@ -220,7 +219,7 @@ extension StatefulBottomSheet on State {
             try {
               final result = await SimpleFile.saveFile(
                 data: binary.value.value.value,
-                filename: binary.label,
+                filename: title,
               );
               showToast(result);
             } catch (e) {
@@ -244,7 +243,7 @@ extension StatefulBottomSheet on State {
             ),
             onTap: () {
               context.router.pop();
-              lanFill?.updateFile(binary.label, binary.value.value.value);
+              lanFill?.updateFile(title, binary.value.value.value);
             },
           ),
       ],

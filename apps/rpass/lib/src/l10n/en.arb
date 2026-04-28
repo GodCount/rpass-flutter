@@ -334,5 +334,6 @@
     "app_blacklist": "App Blacklist",
     "autofill_app_blacklist_message": "List of apps excluded from autofill",
     "domain_blacklist": "Domain Blacklist",
-    "autofill_domain_blacklist_message": "List of domains excluded from autofill"
+    "autofill_domain_blacklist_message": "List of domains excluded from autofill",
+    "add_large_files_warn": "File size is too large. Adding large files will significantly impact database performance and increase storage size.\n\nConfirm to add?"
 }

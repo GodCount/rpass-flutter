@@ -989,17 +989,15 @@ class _EntryFieldState extends State<EntryField> {
         final tags = widget.kdbxEntry.tagList;
         return ChipListFormField(
           label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
-          initialValue: kdbx.fieldStatistic
-              .getStatistic(widget.kdbxKey)
-              .map(
-                (item) => ChipListItem(
-                  value: item,
-                  label: item,
-                  select: tags.contains(item),
-                  deletable: false,
-                ),
-              )
-              .toList(),
+          initialValue: [
+            for (final item in kdbx.fieldStatistic.getStatistic(widget.kdbxKey))
+              ChipListItem(
+                value: item,
+                label: Text(item),
+                select: tags.contains(item),
+                deletable: false,
+              ),
+          ],
           onChipTap: (item) {
             item.select = !item.select;
             return true;
@@ -1020,15 +1018,25 @@ class _EntryFieldState extends State<EntryField> {
       case KdbxKeySpecial.KEY_ATTACH:
         return ChipListFormField(
           label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
-          initialValue: widget.kdbxEntry.binaryEntries
-              .map(
-                (item) => ChipListItem(
-                  value: item,
-                  label: item.key.key,
-                  deletable: !item.value.isProtected,
+          initialValue: [
+            for (final item in widget.kdbxEntry.binaryEntries)
+              ChipListItem(
+                value: item,
+                label: RichText(
+                  text: TextSpan(
+                    text: item.key.key,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    children: [
+                      TextSpan(
+                        text:
+                            " (${item.value.value.length.toStorageUnit(.KB)})",
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ],
+                  ),
                 ),
-              )
-              .toList(),
+              ),
+          ],
           onChanged: (list) {
             _binaryKeys = list.map((item) => item.value.key).toList();
           },
@@ -1038,12 +1046,37 @@ class _EntryFieldState extends State<EntryField> {
           },
           onAddChipTap: (list) async {
             try {
+              final t = I18n.of(context)!;
               final (filepath, bytes) = await SimpleFile.openFile();
+
+              if (transformStorageUnit(bytes.length, .B, .KB) >= 1024 &&
+                  !(await showConfirmDialog(
+                    title: t.warn,
+                    message: t.add_large_files_warn,
+                  ))) {
+                return null;
+              }
+
               final map = MapEntry(
                 _uniqueBinaryName(filepath),
                 KdbxBinary(isInline: false, isProtected: false, value: bytes),
               );
-              return ChipListItem(value: map, label: map.key.key);
+
+              return ChipListItem(
+                value: map,
+                label: RichText(
+                  text: TextSpan(
+                    text: map.key.key,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    children: [
+                      TextSpan(
+                        text: " (${map.value.value.length.toStorageUnit(.KB)})",
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ],
+                  ),
+                ),
+              );
             } catch (e) {
               if (e is! CancelException) {
                 _logger.warning("open file fail!", e);
@@ -1121,7 +1154,7 @@ class _EntryFieldState extends State<EntryField> {
     );
 
     if (result != null && result is String) {
-      return ChipListItem(value: result, label: result, select: true);
+      return ChipListItem(value: result, label: Text(result), select: true);
     }
 
     return null;

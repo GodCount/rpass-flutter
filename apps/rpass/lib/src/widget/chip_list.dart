@@ -13,7 +13,7 @@ class ChipListItem<T> {
   });
 
   T value;
-  String label;
+  Widget label;
 
   bool select;
   bool deletable;
@@ -47,24 +47,29 @@ class _ChipListState<T> extends State<ChipList<T>> {
           (item) => ElevatedButton.icon(
             iconAlignment: IconAlignment.end,
             style: TextButton.styleFrom(
-              padding: (item.deletable && widget.onDeleted != null)
-                  ? const EdgeInsets.only(top: 4, right: 0, bottom: 4, left: 24)
-                  : null,
+              padding: const EdgeInsets.all(6),
               side: item.select
-                  ? BorderSide(color: Theme.of(context).primaryColor)
-                  : null,
-              elevation: widget.onChipTap == null ? 0 : null,
+                  ? BorderSide(color: Theme.of(context).colorScheme.primary)
+                  : BorderSide(color: Theme.of(context).colorScheme.outline),
+              elevation: 0,
               overlayColor: widget.onChipTap == null
                   ? Colors.transparent
                   : null,
               enabledMouseCursor: widget.onChipTap == null
                   ? SystemMouseCursors.basic
                   : null,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(6)),
+              ),
+              foregroundColor: !item.select
+                  ? Theme.of(context).textTheme.bodyLarge?.color
+                  : null,
+              iconColor: Theme.of(context).colorScheme.primary,
             ),
             onPressed: () {
               widget.onChipTap?.call(item);
             },
-            label: Text(item.label),
+            label: item.label,
             icon: (item.deletable && widget.onDeleted != null)
                 ? SizedBox(
                     height: 32,
@@ -83,6 +88,13 @@ class _ChipListState<T> extends State<ChipList<T>> {
     if (widget.onAddChipTap != null) {
       children.add(
         ElevatedButton(
+          style: TextButton.styleFrom(
+            side: BorderSide(color: Theme.of(context).colorScheme.outline),
+            elevation: 0,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(6)),
+            ),
+          ),
           onPressed: widget.onAddChipTap,
           child: const Icon(Icons.add),
         ),
@@ -92,7 +104,7 @@ class _ChipListState<T> extends State<ChipList<T>> {
     return Container(
       constraints: BoxConstraints(maxHeight: widget.maxHeight),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.only(top: 8, bottom: 8),
+        padding: const EdgeInsets.only(left: 2, right: 2, top: 8, bottom: 8),
         child: Wrap(spacing: 6, runSpacing: 6, children: children),
       ),
     );

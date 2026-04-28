@@ -20,7 +20,6 @@ final bool kIsMobile = Platform.isAndroid || Platform.isIOS;
 final bool kIsDesktop =
     Platform.isWindows || Platform.isMacOS || Platform.isLinux;
 
-
 const storageUnitSuffixes = [
   "B",
   "KB",
@@ -33,10 +32,11 @@ const storageUnitSuffixes = [
   "YB",
 ];
 
+enum StorageUnit { B, KB, MB, GB, TB, PB, EB, ZB, YB }
+
 String md5(String data) {
   return crypto.md5.convert(utf8.encode(data)).toString();
 }
-
 
 List<Map<String, dynamic>> csvToJson(
   String csv, {
@@ -138,14 +138,30 @@ extension StringToEnum<T extends Enum> on Iterable<T> {
 
 /// format
 
-String bytesFormat(num bytes, [int decimals = 1]) {
+double transformStorageUnit<T extends num>(
+  T number,
+  StorageUnit source,
+  StorageUnit target,
+) {
+  return number / math.pow(1024, target.index - source.index);
+}
+
+String bytes2Unit(num bytes, StorageUnit unit, [int decimals = 1]) {
   if (bytes <= 0) return "0 B";
+  return "${transformStorageUnit(bytes, .B, unit).toStringAsFixed(decimals)} ${storageUnitSuffixes[unit.index]}";
+}
+
+String bytes2BestUnit(num bytes, [int decimals = 1]) {
   final i = (math.log(bytes) / math.log(1024)).floor();
-  return "${(bytes / math.pow(1024, i)).toStringAsFixed(decimals)} ${storageUnitSuffixes[i]}";
+  return bytes2Unit(bytes, StorageUnit.values[i], decimals);
 }
 
 extension BytesFormatByInt on num {
-  String get bytesToBestUnit => bytesFormat(this);
+  String get bytesToBestUnit => bytes2BestUnit(this);
+
+  String toStorageUnit(StorageUnit unit, [int decimals = 1]) {
+    return bytes2Unit(this, unit, decimals);
+  }
 }
 
 String dateFormat(DateTime date, [bool time = true]) {

@@ -93,11 +93,7 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
 
     final end = selection.end == -1 ? start : selection.end;
 
-    _controller.text = _controller.text.replaceRange(
-      start,
-      end,
-      textToInsert,
-    );
+    _controller.text = _controller.text.replaceRange(start, end, textToInsert);
 
     _focusNode.requestFocus();
 
@@ -146,19 +142,17 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
                   title: Text(t.default_field),
                   subtitle: ChipList(
                     onChipTap: (item) => _insertTextAtCursor(item.value),
-                    items:
-                        [
-                              ...KdbxKeyCommon.excludeURL,
-                              KdbxKeyCommon.URL,
-                              ...moreUrlsFields,
-                            ]
-                            .map(
-                              (item) => ChipListItem(
-                                label: "{${item.key}}",
-                                value: "{${item.key}}",
-                              ),
-                            )
-                            .toList(),
+                    items: [
+                      for (final item in [
+                        ...KdbxKeyCommon.excludeURL,
+                        KdbxKeyCommon.URL,
+                        ...moreUrlsFields,
+                      ])
+                        ChipListItem(
+                          value: "{${item.key}}",
+                          label: Text("{${item.key}}"),
+                        ),
+                    ],
                   ),
                 ),
                 if (customFields.isNotEmpty)
@@ -166,23 +160,23 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
                     title: Text(t.custom_field),
                     subtitle: ChipList(
                       onChipTap: (item) => _insertTextAtCursor(item.value),
-                      items: customFields
-                          .map(
-                            (item) => ChipListItem(
-                              label: "{S:$item}",
-                              value: "{S:$item}",
-                            ),
-                          )
-                          .toList(),
+                      items: [
+                        for (final item in customFields)
+                          ChipListItem(
+                            value: "{S:$item}",
+                            label: Text("{S:$item}"),
+                          ),
+                      ],
                     ),
                   ),
                 ListTile(
                   title: Text(t.keyboard_key),
                   subtitle: ChipList(
                     onChipTap: (item) => _insertTextAtCursor(item.value),
-                    items: AutoTypeKeys.BUTTON
-                        .map((item) => ChipListItem(label: item, value: item))
-                        .toList(),
+                    items: [
+                      for (final item in AutoTypeKeys.BUTTON)
+                        ChipListItem(value: item, label: Text(item)),
+                    ],
                   ),
                 ),
               ],

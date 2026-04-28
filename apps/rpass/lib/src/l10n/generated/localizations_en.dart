@@ -702,4 +702,8 @@ class MyLocalizationsEn extends MyLocalizations {
   @override
   String get autofill_domain_blacklist_message =>
       'List of domains excluded from autofill';
+
+  @override
+  String get add_large_files_warn =>
+      'File size is too large. Adding large files will significantly impact database performance and increase storage size.\n\nConfirm to add?';
 }
