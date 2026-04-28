@@ -134,42 +134,6 @@ abstract class MyLocalizations {
   /// **'密码不相等！'**
   String get password_not_equal;
 
-  /// No description provided for @init.
-  ///
-  /// In zh, this message translates to:
-  /// **'初始化'**
-  String get init;
-
-  /// No description provided for @question.
-  ///
-  /// In zh, this message translates to:
-  /// **'问题'**
-  String get question;
-
-  /// No description provided for @answer.
-  ///
-  /// In zh, this message translates to:
-  /// **'答案'**
-  String get answer;
-
-  /// No description provided for @cannot_emprty.
-  ///
-  /// In zh, this message translates to:
-  /// **'不能为空！'**
-  String get cannot_emprty;
-
-  /// No description provided for @prev.
-  ///
-  /// In zh, this message translates to:
-  /// **'上一条'**
-  String get prev;
-
-  /// No description provided for @next.
-  ///
-  /// In zh, this message translates to:
-  /// **'下一条'**
-  String get next;
-
   /// No description provided for @add.
   ///
   /// In zh, this message translates to:
@@ -188,29 +152,11 @@ abstract class MyLocalizations {
   /// **'返回'**
   String get back;
 
-  /// No description provided for @input_security_qa_hint.
-  ///
-  /// In zh, this message translates to:
-  /// **'回答安全问题以解密数据！'**
-  String get input_security_qa_hint;
-
-  /// No description provided for @security_qa_error.
-  ///
-  /// In zh, this message translates to:
-  /// **'不对啊, 再想想！'**
-  String get security_qa_error;
-
   /// No description provided for @verify_password.
   ///
   /// In zh, this message translates to:
   /// **'验证密码'**
   String get verify_password;
-
-  /// No description provided for @forget_password.
-  ///
-  /// In zh, this message translates to:
-  /// **'忘记密码'**
-  String get forget_password;
 
   /// No description provided for @password.
   ///
@@ -383,7 +329,7 @@ abstract class MyLocalizations {
   /// No description provided for @otp.
   ///
   /// In zh, this message translates to:
-  /// **'一次性密码(OTP)'**
+  /// **'OTP'**
   String get otp;
 
   /// No description provided for @label.
@@ -409,12 +355,6 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'刷新'**
   String get refresh;
-
-  /// No description provided for @symbol.
-  ///
-  /// In zh, this message translates to:
-  /// **'符号'**
-  String get symbol;
 
   /// No description provided for @remark.
   ///
@@ -446,12 +386,6 @@ abstract class MyLocalizations {
   /// **'查看'**
   String get lookup;
 
-  /// No description provided for @source.
-  ///
-  /// In zh, this message translates to:
-  /// **'来源'**
-  String get source;
-
   /// No description provided for @delete.
   ///
   /// In zh, this message translates to:
@@ -461,7 +395,7 @@ abstract class MyLocalizations {
   /// No description provided for @delete_warn_hit.
   ///
   /// In zh, this message translates to:
-  /// **'确定要删除吗？删除后将无法恢复．'**
+  /// **'确定要删除吗？删除后将无法恢复。'**
   String get delete_warn_hit;
 
   /// No description provided for @description.
@@ -500,12 +434,6 @@ abstract class MyLocalizations {
   /// **'新建标签'**
   String get new_label;
 
-  /// No description provided for @cannot_all_empty.
-  ///
-  /// In zh, this message translates to:
-  /// **'不能全为空！'**
-  String get cannot_all_empty;
-
   /// No description provided for @empty.
   ///
   /// In zh, this message translates to:
@@ -533,7 +461,7 @@ abstract class MyLocalizations {
   /// No description provided for @app_description.
   ///
   /// In zh, this message translates to:
-  /// **'Rpass 是一款免费的开源应用程序，可让您方便简洁的记录密码信息．'**
+  /// **'Rpass 是一款免费的开源应用程序，可让您方便简洁地记录密码信息。'**
   String get app_description;
 
   /// 带有指向信息的消息
@@ -557,7 +485,7 @@ abstract class MyLocalizations {
   /// No description provided for @biometric_prompt_subtitle.
   ///
   /// In zh, this message translates to:
-  /// **'使用指纹完成验证才能继续．'**
+  /// **'使用指纹完成验证才能继续。'**
   String get biometric_prompt_subtitle;
 
   /// No description provided for @throw_message.
@@ -632,12 +560,6 @@ abstract class MyLocalizations {
   /// **'管理组内密码'**
   String get man_group_pass;
 
-  /// No description provided for @empty_group.
-  ///
-  /// In zh, this message translates to:
-  /// **'组是空的！'**
-  String get empty_group;
-
   /// No description provided for @rename.
   ///
   /// In zh, this message translates to:
@@ -668,18 +590,6 @@ abstract class MyLocalizations {
   /// **'密码生成器'**
   String get gen_password;
 
-  /// No description provided for @pass_length.
-  ///
-  /// In zh, this message translates to:
-  /// **'密码长度'**
-  String get pass_length;
-
-  /// No description provided for @include_cahr.
-  ///
-  /// In zh, this message translates to:
-  /// **'包含字符'**
-  String get include_cahr;
-
   /// No description provided for @export_n_file.
   ///
   /// In zh, this message translates to:
@@ -704,12 +614,6 @@ abstract class MyLocalizations {
   /// **'分组'**
   String get group;
 
-  /// No description provided for @data_migrate_done.
-  ///
-  /// In zh, this message translates to:
-  /// **'数据迁移完成.'**
-  String get data_migrate_done;
-
   /// No description provided for @custom_field.
   ///
   /// In zh, this message translates to:
@@ -719,7 +623,7 @@ abstract class MyLocalizations {
   /// No description provided for @search_rule.
   ///
   /// In zh, this message translates to:
-  /// **'搜索规则:'**
+  /// **'搜索规则：'**
   String get search_rule;
 
   /// No description provided for @rule_detail.
@@ -731,13 +635,13 @@ abstract class MyLocalizations {
   /// No description provided for @field_name.
   ///
   /// In zh, this message translates to:
-  /// **'字段名:'**
+  /// **'字段名：'**
   String get field_name;
 
   /// No description provided for @search_eg.
   ///
   /// In zh, this message translates to:
-  /// **'例子:'**
+  /// **'例子：'**
   String get search_eg;
 
   /// No description provided for @search_eg_1.
@@ -788,30 +692,6 @@ abstract class MyLocalizations {
   /// **'添加字段'**
   String get add_field;
 
-  /// No description provided for @letter.
-  ///
-  /// In zh, this message translates to:
-  /// **'字母'**
-  String get letter;
-
-  /// No description provided for @number.
-  ///
-  /// In zh, this message translates to:
-  /// **'数字'**
-  String get number;
-
-  /// No description provided for @special_char.
-  ///
-  /// In zh, this message translates to:
-  /// **'特殊字符'**
-  String get special_char;
-
-  /// No description provided for @not_found_entry.
-  ///
-  /// In zh, this message translates to:
-  /// **'未找到项目！'**
-  String get not_found_entry;
-
   /// No description provided for @attachment.
   ///
   /// In zh, this message translates to:
@@ -839,7 +719,7 @@ abstract class MyLocalizations {
   /// No description provided for @plaintext_export_warn.
   ///
   /// In zh, this message translates to:
-  /// **'确认明文导出数据？\n注意导出的数据只包含对应的关键字段．'**
+  /// **'确认导出明文数据？\n注意导出的数据只包含对应的关键字段。'**
   String get plaintext_export_warn;
 
   /// No description provided for @manage.
@@ -866,12 +746,6 @@ abstract class MyLocalizations {
   /// **'密码错误！'**
   String get password_error;
 
-  /// No description provided for @data_migrate_hint.
-  ///
-  /// In zh, this message translates to:
-  /// **'正在进行软件数据迁移升级，解密数据后，将全部迁移到新的数据库 (kdbx) 存储数据，更好，更稳定，更安全，更多功能．'**
-  String get data_migrate_hint;
-
   /// No description provided for @search.
   ///
   /// In zh, this message translates to:
@@ -883,12 +757,6 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'全选 ({matchCount} / {totalCount})'**
   String all_select(int matchCount, int totalCount);
-
-  /// No description provided for @invert_select.
-  ///
-  /// In zh, this message translates to:
-  /// **'反选'**
-  String get invert_select;
 
   /// No description provided for @more_settings.
   ///
@@ -905,7 +773,7 @@ abstract class MyLocalizations {
   /// No description provided for @lock_subtitle.
   ///
   /// In zh, this message translates to:
-  /// **'程序后台运行或者失去焦点（桌面端），一段时间后锁定程序。'**
+  /// **'程序在后台运行或失去焦点时（桌面端），将在一段时间后自动锁定。'**
   String get lock_subtitle;
 
   /// No description provided for @never.
@@ -1379,7 +1247,7 @@ abstract class MyLocalizations {
   /// No description provided for @shortcut_autofill_subtitle.
   ///
   /// In zh, this message translates to:
-  /// **'触发密码页选中项的自动填充.\n注意自动填充是通过模拟键盘输入的会和快捷键冲突,按下后需要快速释放.'**
+  /// **'触发密码页选中项的自动填充。\n注意自动填充是通过模拟键盘输入的，可能与快捷键冲突，按下后需要快速释放。'**
   String get shortcut_autofill_subtitle;
 
   /// 字段
@@ -1469,7 +1337,7 @@ abstract class MyLocalizations {
   /// No description provided for @no_math_manual_select.
   ///
   /// In zh, this message translates to:
-  /// **'没有匹配, 尝试手动选择'**
+  /// **'未找到匹配项，请手动选择'**
   String get no_math_manual_select;
 
   /// No description provided for @hint.

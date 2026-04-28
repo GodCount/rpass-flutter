@@ -27,24 +27,6 @@ class MyLocalizationsEn extends MyLocalizations {
   String get password_not_equal => 'Passwords do not match!';
 
   @override
-  String get init => 'Initialize';
-
-  @override
-  String get question => 'Question';
-
-  @override
-  String get answer => 'Answer';
-
-  @override
-  String get cannot_emprty => 'Cannot be empty!';
-
-  @override
-  String get prev => 'Previous';
-
-  @override
-  String get next => 'Next';
-
-  @override
   String get add => 'Add';
 
   @override
@@ -54,23 +36,13 @@ class MyLocalizationsEn extends MyLocalizations {
   String get back => 'Back';
 
   @override
-  String get input_security_qa_hint =>
-      'Answer security question to decrypt data!';
-
-  @override
-  String get security_qa_error => 'That\'s not right, think again!';
-
-  @override
   String get verify_password => 'Verify password';
-
-  @override
-  String get forget_password => 'Forgot password';
 
   @override
   String get password => 'Password';
 
   @override
-  String get none_password => 'None Password';
+  String get none_password => 'No Password';
 
   @override
   String get setting => 'Settings';
@@ -155,7 +127,7 @@ class MyLocalizationsEn extends MyLocalizations {
   String get email => 'Email';
 
   @override
-  String get otp => 'One-Time Password (OTP)';
+  String get otp => 'OTP';
 
   @override
   String get label => 'Label';
@@ -168,9 +140,6 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get refresh => 'Refresh';
-
-  @override
-  String get symbol => 'Symbol';
 
   @override
   String get remark => 'Remark';
@@ -186,9 +155,6 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get lookup => 'View';
-
-  @override
-  String get source => 'Source';
 
   @override
   String get delete => 'Delete';
@@ -218,9 +184,6 @@ class MyLocalizationsEn extends MyLocalizations {
   String get new_label => 'New Label';
 
   @override
-  String get cannot_all_empty => 'Cannot be all for empty!';
-
-  @override
   String get empty => 'Empty';
 
   @override
@@ -234,7 +197,7 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get app_description =>
-      'Rpass is a free and open-source application that allows you to conveniently and concisely record password information';
+      'Rpass is a free and open-source application that allows you to conveniently and concisely record password information.';
 
   @override
   String source_code_location(String location) {
@@ -290,9 +253,6 @@ class MyLocalizationsEn extends MyLocalizations {
   String get man_group_pass => 'Manage Group Passwords';
 
   @override
-  String get empty_group => 'The group is empty!';
-
-  @override
   String get rename => 'Rename';
 
   @override
@@ -306,12 +266,6 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get gen_password => 'Password Generator';
-
-  @override
-  String get pass_length => 'Password Length';
-
-  @override
-  String get include_cahr => 'Include Characters';
 
   @override
   String export_n_file(String name) {
@@ -328,9 +282,6 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get group => 'Group';
-
-  @override
-  String get data_migrate_done => 'Data Migration Complete.';
 
   @override
   String get custom_field => 'Custom Field';
@@ -372,18 +323,6 @@ class MyLocalizationsEn extends MyLocalizations {
   String get add_field => 'Add Field';
 
   @override
-  String get letter => 'Letter';
-
-  @override
-  String get number => 'Number';
-
-  @override
-  String get special_char => 'Special Character';
-
-  @override
-  String get not_found_entry => 'No entries found!';
-
-  @override
   String get attachment => 'Attachment';
 
   @override
@@ -412,19 +351,12 @@ class MyLocalizationsEn extends MyLocalizations {
   String get password_error => 'Password Error!';
 
   @override
-  String get data_migrate_hint =>
-      'Data migration and upgrade is currently underway. After decrypting the data, it will be entirely migrated to a new database (kdbx) for storage. This new system offers improved performance, greater stability, enhanced security, and a wider range of features.';
-
-  @override
   String get search => 'Search';
 
   @override
   String all_select(int matchCount, int totalCount) {
     return 'Select ALL ($matchCount / $totalCount)';
   }
-
-  @override
-  String get invert_select => 'Select Invert';
 
   @override
   String get more_settings => 'More Settings';
@@ -462,7 +394,7 @@ class MyLocalizationsEn extends MyLocalizations {
   String get record_key_file_path => 'Record Key File Path';
 
   @override
-  String get lack_key_file => 'Lack of key file';
+  String get lack_key_file => 'Key file is missing';
 
   @override
   String get move_selected => 'Move Selected';
@@ -537,7 +469,7 @@ class MyLocalizationsEn extends MyLocalizations {
   String get select_account => 'Select Account';
 
   @override
-  String get custom => 'Customize';
+  String get custom => 'Custom';
 
   @override
   String get display => 'Display';
@@ -577,7 +509,7 @@ class MyLocalizationsEn extends MyLocalizations {
   String get fill_sequence => 'Fill Sequence';
 
   @override
-  String get sync_cycle => 'Synchronous Cycle';
+  String get sync_cycle => 'Sync Cycle';
 
   @override
   String get each_startup => 'Each Startup';
@@ -639,10 +571,10 @@ class MyLocalizationsEn extends MyLocalizations {
   String get all => 'All';
 
   @override
-  String get direct_download => 'Direct Dwnload';
+  String get direct_download => 'Direct Download';
 
   @override
-  String get select_source_refresh => 'Select the Source refresh icon';
+  String get select_source_refresh => 'Select the source to refresh icon';
 
   @override
   String get clear_favicon_cache => 'Clear Favicon Cache';
@@ -694,7 +626,7 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get shortcut_autofill_subtitle =>
-      'Trigger auto-fill for selected item on password page.\nNote: Auto-fill is simulated by keyboard input and conflicts with shortcuts, press and release quickly.';
+      'Trigger auto-fill for the selected item on password page.\nNote: Auto-fill is simulated by keyboard input and may conflict with shortcuts. Press and release quickly.';
 
   @override
   String shortcut_autofill_field(String field) {
@@ -741,14 +673,15 @@ class MyLocalizationsEn extends MyLocalizations {
   String get lan_transfer => 'LAN Transfer';
 
   @override
-  String get no_math_manual_select => 'No match, Try manual selection';
+  String get no_math_manual_select =>
+      'No match found. Please try manual selection.';
 
   @override
   String get hint => 'Hint';
 
   @override
   String get clipboard_lan_fill_message =>
-      'local area network fill service detected. Fill clipboard data.';
+      'LAN fill service detected. Would you like to fill clipboard data?';
 
   @override
   String get otp_format_error => 'OTP format error';

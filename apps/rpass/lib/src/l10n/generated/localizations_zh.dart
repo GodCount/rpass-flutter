@@ -27,24 +27,6 @@ class MyLocalizationsZh extends MyLocalizations {
   String get password_not_equal => '密码不相等！';
 
   @override
-  String get init => '初始化';
-
-  @override
-  String get question => '问题';
-
-  @override
-  String get answer => '答案';
-
-  @override
-  String get cannot_emprty => '不能为空！';
-
-  @override
-  String get prev => '上一条';
-
-  @override
-  String get next => '下一条';
-
-  @override
   String get add => '添加';
 
   @override
@@ -54,16 +36,7 @@ class MyLocalizationsZh extends MyLocalizations {
   String get back => '返回';
 
   @override
-  String get input_security_qa_hint => '回答安全问题以解密数据！';
-
-  @override
-  String get security_qa_error => '不对啊, 再想想！';
-
-  @override
   String get verify_password => '验证密码';
-
-  @override
-  String get forget_password => '忘记密码';
 
   @override
   String get password => '密码';
@@ -154,7 +127,7 @@ class MyLocalizationsZh extends MyLocalizations {
   String get email => '邮箱';
 
   @override
-  String get otp => '一次性密码(OTP)';
+  String get otp => 'OTP';
 
   @override
   String get label => '标签';
@@ -167,9 +140,6 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get refresh => '刷新';
-
-  @override
-  String get symbol => '符号';
 
   @override
   String get remark => '备注';
@@ -187,13 +157,10 @@ class MyLocalizationsZh extends MyLocalizations {
   String get lookup => '查看';
 
   @override
-  String get source => '来源';
-
-  @override
   String get delete => '删除';
 
   @override
-  String get delete_warn_hit => '确定要删除吗？删除后将无法恢复．';
+  String get delete_warn_hit => '确定要删除吗？删除后将无法恢复。';
 
   @override
   String get description => '描述';
@@ -216,9 +183,6 @@ class MyLocalizationsZh extends MyLocalizations {
   String get new_label => '新建标签';
 
   @override
-  String get cannot_all_empty => '不能全为空！';
-
-  @override
   String get empty => '空';
 
   @override
@@ -231,7 +195,7 @@ class MyLocalizationsZh extends MyLocalizations {
   String get other => '其他';
 
   @override
-  String get app_description => 'Rpass 是一款免费的开源应用程序，可让您方便简洁的记录密码信息．';
+  String get app_description => 'Rpass 是一款免费的开源应用程序，可让您方便简洁地记录密码信息。';
 
   @override
   String source_code_location(String location) {
@@ -245,7 +209,7 @@ class MyLocalizationsZh extends MyLocalizations {
   String get biometric_prompt_title => '验证您的身份！';
 
   @override
-  String get biometric_prompt_subtitle => '使用指纹完成验证才能继续．';
+  String get biometric_prompt_subtitle => '使用指纹完成验证才能继续。';
 
   @override
   String throw_message(String message) {
@@ -286,9 +250,6 @@ class MyLocalizationsZh extends MyLocalizations {
   String get man_group_pass => '管理组内密码';
 
   @override
-  String get empty_group => '组是空的！';
-
-  @override
   String get rename => '重命名';
 
   @override
@@ -302,12 +263,6 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get gen_password => '密码生成器';
-
-  @override
-  String get pass_length => '密码长度';
-
-  @override
-  String get include_cahr => '包含字符';
 
   @override
   String export_n_file(String name) {
@@ -326,22 +281,19 @@ class MyLocalizationsZh extends MyLocalizations {
   String get group => '分组';
 
   @override
-  String get data_migrate_done => '数据迁移完成.';
-
-  @override
   String get custom_field => '自定义字段';
 
   @override
-  String get search_rule => '搜索规则:';
+  String get search_rule => '搜索规则：';
 
   @override
   String get rule_detail => '[字段名:][\"]关键句[\"]';
 
   @override
-  String get field_name => '字段名:';
+  String get field_name => '字段名：';
 
   @override
-  String get search_eg => '例子:';
+  String get search_eg => '例子：';
 
   @override
   String get search_eg_1 => 'u:小明 note:\"到此一游，小明\"';
@@ -368,18 +320,6 @@ class MyLocalizationsZh extends MyLocalizations {
   String get add_field => '添加字段';
 
   @override
-  String get letter => '字母';
-
-  @override
-  String get number => '数字';
-
-  @override
-  String get special_char => '特殊字符';
-
-  @override
-  String get not_found_entry => '未找到项目！';
-
-  @override
   String get attachment => '附件';
 
   @override
@@ -392,7 +332,7 @@ class MyLocalizationsZh extends MyLocalizations {
   String get warn => '警告';
 
   @override
-  String get plaintext_export_warn => '确认明文导出数据？\n注意导出的数据只包含对应的关键字段．';
+  String get plaintext_export_warn => '确认导出明文数据？\n注意导出的数据只包含对应的关键字段。';
 
   @override
   String get manage => '管理';
@@ -407,10 +347,6 @@ class MyLocalizationsZh extends MyLocalizations {
   String get password_error => '密码错误！';
 
   @override
-  String get data_migrate_hint =>
-      '正在进行软件数据迁移升级，解密数据后，将全部迁移到新的数据库 (kdbx) 存储数据，更好，更稳定，更安全，更多功能．';
-
-  @override
   String get search => '搜索';
 
   @override
@@ -419,16 +355,13 @@ class MyLocalizationsZh extends MyLocalizations {
   }
 
   @override
-  String get invert_select => '反选';
-
-  @override
   String get more_settings => '更多设置';
 
   @override
   String get lock => '锁定';
 
   @override
-  String get lock_subtitle => '程序后台运行或者失去焦点（桌面端），一段时间后锁定程序。';
+  String get lock_subtitle => '程序在后台运行或失去焦点时（桌面端），将在一段时间后自动锁定。';
 
   @override
   String get never => '永不';
@@ -676,7 +609,7 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get shortcut_autofill_subtitle =>
-      '触发密码页选中项的自动填充.\n注意自动填充是通过模拟键盘输入的会和快捷键冲突,按下后需要快速释放.';
+      '触发密码页选中项的自动填充。\n注意自动填充是通过模拟键盘输入的，可能与快捷键冲突，按下后需要快速释放。';
 
   @override
   String shortcut_autofill_field(String field) {
@@ -723,7 +656,7 @@ class MyLocalizationsZh extends MyLocalizations {
   String get lan_transfer => '局域网传输';
 
   @override
-  String get no_math_manual_select => '没有匹配, 尝试手动选择';
+  String get no_math_manual_select => '未找到匹配项，请手动选择';
 
   @override
   String get hint => '提示';

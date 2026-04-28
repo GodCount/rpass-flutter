@@ -288,11 +288,10 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
                 : null,
           ),
           IconButton(
-            tooltip: t.invert_select,
             onPressed: _totalEntry.isNotEmpty && _selecteds.isNotEmpty
                 ? _showSelectorEntryAction
                 : null,
-            icon: const Icon(Icons.menu_open_rounded),
+            icon: const Icon(Icons.menu),
           ),
         ],
       ),
