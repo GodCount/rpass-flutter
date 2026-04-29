@@ -52,8 +52,6 @@ class RootRpassAppRoute extends PageRouteInfo<_RootRpassAppArgs> {
 class RootRpassApp extends StatefulWidget {
   const RootRpassApp({super.key});
 
-  // final Widget child;
-
   @override
   State<RootRpassApp> createState() => _RootRpassAppState();
 }
@@ -65,6 +63,8 @@ class _RootRpassAppState extends State<RootRpassApp>
         KdbxProviderListener,
         _BackgroundLock,
         NativeChannelListener {
+  final _lanFillKey = GlobalKey<LanFillServerState>();
+
   Locale? _locale;
 
   @override
@@ -79,13 +79,19 @@ class _RootRpassAppState extends State<RootRpassApp>
     Store.instance.settings.shortcutsStore.addListener(_hotKeyHandler);
     NativeInstancePlatform.instance.addListener(this);
 
-    _updateTrayMenu();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateTrayMenu();
+    });
   }
 
   void _updateTrayMenu() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      systemTray.updateTrayMenu(I18n.of(context)!);
-    });
+    systemTray.updateTrayMenu(
+      I18n.of(context)!,
+      lock: KdbxProvider.of(context).kdbx == null,
+      lanFillServer:
+          _lanFillKey.currentState != null &&
+          !_lanFillKey.currentState!.serverClosed,
+    );
   }
 
   void _settingsListener() {
@@ -95,61 +101,62 @@ class _RootRpassAppState extends State<RootRpassApp>
     }
   }
 
+  Future<void> _openWindow() async {
+    final alignment =
+        Store.instance.settings.shortcutsStore.shortcutsOpenAppAlignment;
+
+    switch (alignment) {
+      case ShortcutsOpenAppAlignment.mouse:
+        {
+          final location = enigo.location();
+          await windowManager.setPosition(
+            Offset(location.$1.toDouble(), location.$2.toDouble()),
+          );
+          windowManager.show(inactive: true);
+        }
+        break;
+      case ShortcutsOpenAppAlignment.mouseCenter:
+        {
+          final location = enigo.location();
+          final size = await windowManager.getSize();
+          await windowManager.setPosition(
+            Offset(
+              location.$1 - (size.width / 2),
+              location.$2 - (size.height / 2),
+            ),
+          );
+          windowManager.show(inactive: true);
+        }
+        break;
+      case ShortcutsOpenAppAlignment.mouseScreenCenter:
+        {
+          final location = enigo.location();
+          await windowManager.setPosition(
+            Offset(location.$1.toDouble(), location.$2.toDouble()),
+          );
+          await windowManager.center();
+          windowManager.show(inactive: true);
+        }
+        break;
+      case ShortcutsOpenAppAlignment.prev:
+        windowManager.show(inactive: true);
+        break;
+    }
+  }
+
   void _hotKeyHandler(HotKey hotKey, ShortcutsTrigger trigger) async {
     final kdbxProvider = KdbxProvider.of(context);
     switch (hotKey.identifier) {
       case "open":
         {
-          await windowManager.setSkipTaskbar(true);
           if (await windowManager.isFocused()) {
             await windowManager.hide();
             // 返还焦点,忽略异常
             unawaited(prevFocusWindow.activatePrevWindow());
           } else {
-            final alignment = Store
-                .instance
-                .settings
-                .shortcutsStore
-                .shortcutsOpenAppAlignment;
-
-            switch (alignment) {
-              case ShortcutsOpenAppAlignment.mouse:
-                {
-                  final location = enigo.location();
-                  await windowManager.setPosition(
-                    Offset(location.$1.toDouble(), location.$2.toDouble()),
-                  );
-                  windowManager.show(inactive: true);
-                }
-                break;
-              case ShortcutsOpenAppAlignment.mouseCenter:
-                {
-                  final location = enigo.location();
-                  final size = await windowManager.getSize();
-                  await windowManager.setPosition(
-                    Offset(
-                      location.$1 - (size.width / 2),
-                      location.$2 - (size.height / 2),
-                    ),
-                  );
-                  windowManager.show(inactive: true);
-                }
-                break;
-              case ShortcutsOpenAppAlignment.mouseScreenCenter:
-                {
-                  final location = enigo.location();
-                  await windowManager.setPosition(
-                    Offset(location.$1.toDouble(), location.$2.toDouble()),
-                  );
-                  await windowManager.center();
-                  windowManager.show(inactive: true);
-                }
-                break;
-              case ShortcutsOpenAppAlignment.prev:
-                windowManager.show(inactive: true);
-                break;
-            }
+            await _openWindow();
           }
+          await windowManager.setSkipTaskbar(true);
         }
         break;
       case "lock":
@@ -186,9 +193,7 @@ class _RootRpassAppState extends State<RootRpassApp>
 
   @override
   void onKdbxChanged(Kdbx? kdbx) {
-    systemTray.setIcon(
-      kdbx != null ? SystemTrayIcon.unlock : SystemTrayIcon.lock,
-    );
+    _updateTrayMenu();
   }
 
   @override
@@ -214,9 +219,12 @@ class _RootRpassAppState extends State<RootRpassApp>
           }
         }
         break;
-      case "open":
-        windowManager.setSkipTaskbar(false);
-        windowManager.show(inactive: true);
+      case "lan_fill":
+        _openWindow();
+        _lanFillKey.currentState?.openQrCodeDialog();
+        break;
+      case "close_lan_fill":
+        _lanFillKey.currentState?.closeServer();
         break;
       case "quit":
         windowManager.destroy();
@@ -272,7 +280,11 @@ class _RootRpassAppState extends State<RootRpassApp>
 
   @override
   Widget build(BuildContext context) {
-    return LanFillServerProvider(child: AutoRouter());
+    return LanFillServerProvider(
+      key: _lanFillKey,
+      onServerStatusChanged: _updateTrayMenu,
+      child: AutoRouter(),
+    );
   }
 }
 

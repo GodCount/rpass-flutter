@@ -684,4 +684,10 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get add_large_files_warn => '文件太大了，添加大文件将严重影响数据库性能并增大体积。\n\n确认要添加吗？';
+
+  @override
+  String get locked => '已锁定';
+
+  @override
+  String get close_lan_fill => '关闭局域网填充';
 }

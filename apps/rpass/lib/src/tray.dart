@@ -11,14 +11,15 @@ enum SystemTrayIcon { lock, unlock }
 class _SystemTray {
   Future<void> ensureInitialized() async {}
 
-  Future<void> setIcon(SystemTrayIcon icon) async {}
-
-  Future<void> updateTrayMenu(MyLocalizations t) async {}
+  Future<void> updateTrayMenu(
+    MyLocalizations t, {
+    bool lock = true,
+    bool lanFillServer = false,
+  }) async {}
 }
 
 class _DesktopSystemTray extends _SystemTray with TrayListener {
-  @override
-  Future<void> setIcon(SystemTrayIcon icon) async {
+  Future<void> _setIcon(SystemTrayIcon icon) async {
     final iconPath = switch (icon) {
       SystemTrayIcon.lock =>
         Platform.isMacOS
@@ -35,24 +36,30 @@ class _DesktopSystemTray extends _SystemTray with TrayListener {
 
   @override
   Future<void> ensureInitialized() async {
-    await setIcon(SystemTrayIcon.lock);
+    await _setIcon(SystemTrayIcon.lock);
     await trayManager.setToolTip(RpassInfo.appName);
 
     trayManager.addListener(this);
   }
 
   @override
-  Future<void> updateTrayMenu(MyLocalizations t) async {
-    await trayManager.setContextMenu(
-      Menu(
-        items: [
-          MenuItem(key: 'open', label: t.open),
-          MenuItem(key: 'lock', label: t.lock),
-          MenuItem.separator(),
-          MenuItem(key: 'quit', label: t.quit),
-        ],
-      ),
-    );
+  Future<void> updateTrayMenu(
+    MyLocalizations t, {
+    bool lock = true,
+    bool lanFillServer = false,
+  }) async {
+    final List<MenuItem> items = [
+      MenuItem(key: 'lock', label: lock ? t.locked : t.lock, disabled: lock),
+      lanFillServer
+          ? MenuItem(key: 'close_lan_fill', label: t.close_lan_fill)
+          : MenuItem(key: 'lan_fill', label: t.lan_fill),
+      MenuItem.separator(),
+      MenuItem(key: 'quit', label: t.quit),
+    ];
+
+    await _setIcon(lock ? .lock : .unlock);
+
+    await trayManager.setContextMenu(Menu(items: items));
   }
 
   @override

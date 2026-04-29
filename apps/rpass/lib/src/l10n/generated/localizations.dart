@@ -1393,6 +1393,18 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'文件太大了，添加大文件将严重影响数据库性能并增大体积。\n\n确认要添加吗？'**
   String get add_large_files_warn;
+
+  /// No description provided for @locked.
+  ///
+  /// In zh, this message translates to:
+  /// **'已锁定'**
+  String get locked;
+
+  /// No description provided for @close_lan_fill.
+  ///
+  /// In zh, this message translates to:
+  /// **'关闭局域网填充'**
+  String get close_lan_fill;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

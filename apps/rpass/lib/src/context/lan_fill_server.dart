@@ -55,15 +55,20 @@ class LanFillInherited extends InheritedWidget {
 }
 
 class LanFillServerProvider extends StatefulWidget {
-  const LanFillServerProvider({super.key, required this.child});
+  const LanFillServerProvider({
+    super.key,
+    this.onServerStatusChanged,
+    required this.child,
+  });
 
   final Widget child;
+  final VoidCallback? onServerStatusChanged;
 
   @override
-  State<LanFillServerProvider> createState() => _LanFillServerState();
+  State<LanFillServerProvider> createState() => LanFillServerState();
 }
 
-class _LanFillServerState extends State<LanFillServerProvider>
+class LanFillServerState extends State<LanFillServerProvider>
     with InteractiveManipulation {
   LanFillCilent? _cilent;
   LanFillServer? _server;
@@ -78,6 +83,17 @@ class _LanFillServerState extends State<LanFillServerProvider>
   final List<String> _distrustList = [];
 
   VoidCallback? _lifecycleDispose;
+
+  bool get cilentConnecting => _cilent?.connecting ?? false;
+  bool get serverClosed => _server?.isClosed ?? true;
+
+  void closeConnecting() {
+    _cilent?.close();
+  }
+
+  void closeServer() {
+    _server?.close();
+  }
 
   @override
   void initState() {
@@ -134,6 +150,8 @@ class _LanFillServerState extends State<LanFillServerProvider>
         ),
       );
       RegisterDto? dto = await _server!.start();
+
+      widget.onServerStatusChanged?.call();
 
       setState(() {});
 
@@ -297,6 +315,7 @@ class _LanFillServerState extends State<LanFillServerProvider>
   void onServerClose() {
     _validateFingerprintQueue.clear();
     _dialogCloseController.close();
+    widget.onServerStatusChanged?.call();
     setState(() {});
   }
 
@@ -314,8 +333,8 @@ class _LanFillServerState extends State<LanFillServerProvider>
   @override
   Widget build(BuildContext context) {
     return LanFillInherited(
-      cilentConnecting: _cilent?.connecting ?? false,
-      serverClosed: _server?.isClosed ?? true,
+      cilentConnecting: cilentConnecting,
+      serverClosed: serverClosed,
       openQrCodeDialog: openQrCodeDialog,
       openQrCodeScanner: openQrCodeScanner,
       requestRemoteAutofill: requestRemoteAutofill,

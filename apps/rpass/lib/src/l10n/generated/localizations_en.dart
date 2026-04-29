@@ -706,4 +706,10 @@ class MyLocalizationsEn extends MyLocalizations {
   @override
   String get add_large_files_warn =>
       'File size is too large. Adding large files will significantly impact database performance and increase storage size.\n\nConfirm to add?';
+
+  @override
+  String get locked => 'Locked';
+
+  @override
+  String get close_lan_fill => 'Close LAN Fill';
 }
