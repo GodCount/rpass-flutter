@@ -30,6 +30,9 @@ class SyncKdbxController with ChangeNotifier {
     try {
       if (kdbx.syncAccountEntry != null) {
         _config = RemoteFileKdbxEntryField.fromKdbx(kdbx.syncAccountEntry!);
+        if (_config == null) {
+          kdbx.syncAccountEntry = null;
+        }
       }
     } catch (e) {
       _logger.warning(e);

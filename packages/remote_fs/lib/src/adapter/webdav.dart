@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import 'package:path/path.dart' show basename, join;
+import 'package:path/path.dart' show posix;
 import 'package:webdav_client/webdav_client.dart';
 
 import '../remote_fs_base.dart';
@@ -102,7 +102,7 @@ class WebDavFile implements RemoteFile {
     required this.path,
   }) : _client = client,
        _config = config,
-       name = basename(path);
+       name = posix.basename(path);
 
   static Future<WebDavFile> open(WebDavConfig config) async {
     final debug = false;
@@ -224,7 +224,7 @@ class WebDavFile implements RemoteFile {
     return WebDavFile._(
       client: _client,
       config: _config,
-      path: join(this.path, path),
+      path: posix.join(this.path, path),
     );
   }
 

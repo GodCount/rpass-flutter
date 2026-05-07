@@ -46,11 +46,11 @@ extension RemoteFileKdbxEntryField on RemoteFileConfig {
     };
   }
 
-  static RemoteFileConfig fromKdbx(KdbxEntry entry) {
+  static RemoteFileConfig? fromKdbx(KdbxEntry entry) {
     final remoteType = entry.getActualString(kdbxKeyType);
     return switch (remoteType) {
       "webdav" => _WebDavKdbxEntryField.fromKdbx(entry),
-      _ => throw UnsupportedError("type is $remoteType"),
+      _ => null,
     };
   }
 }

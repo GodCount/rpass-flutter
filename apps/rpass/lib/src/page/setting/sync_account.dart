@@ -105,32 +105,37 @@ class _SyncAccountPageState extends State<SyncAccountPage>
 
     if (result2 == null || result2 is! RemoteFileConfig) return;
 
-    await store.syncKdbx.setRemoteFileConfig(context, result2);
+    try {
+      await store.syncKdbx.setRemoteFileConfig(context, result2);
 
-    if (store.syncKdbx.lastError == null) {
-      final kdbx = KdbxProvider.of(context).kdbx!;
-      if (kdbx.syncAccountEntry != null ||
-          await showConfirmDialog(
-            title: t.save,
-            message: t.save_sync_account_subtitle,
-          )) {
-        final entry =
-            kdbx.syncAccountEntry ??
-                  kdbx.createEntry(kdbx.kdbxFile.body.rootGroup)
-              ..setString(KdbxKeyCommon.TITLE, PlainValue(t.sync_config));
+      if (store.syncKdbx.lastError == null) {
+        final kdbx = KdbxProvider.of(context).kdbx!;
+        KdbxEntry? entry = kdbx.syncAccountEntry;
 
-        final config = RemoteFileKdbxEntryField.fromKdbx(entry);
-
-        if (config == store.syncKdbx.config) return;
-
-        for (final item in store.syncKdbx.config!.toKdbx().entries) {
-          entry.setString(item.key, item.value);
+        if (entry != null &&
+            store.syncKdbx.config == RemoteFileKdbxEntryField.fromKdbx(entry)) {
+          return;
         }
 
-        kdbx.syncAccountEntry = entry;
-        await kdbxSave(kdbx);
-        store.syncKdbx.sync(context);
+        if (entry != null ||
+            await showConfirmDialog(
+              title: t.save,
+              message: t.save_sync_account_subtitle,
+            )) {
+          entry ??= kdbx.createEntry(kdbx.kdbxFile.body.rootGroup)
+            ..setString(KdbxKeyCommon.TITLE, PlainValue(t.sync_config));
+
+          for (final item in store.syncKdbx.config!.toKdbx().entries) {
+            entry.setString(item.key, item.value);
+          }
+
+          kdbx.syncAccountEntry = entry;
+          await kdbxSave(kdbx);
+          store.syncKdbx.sync(context);
+        }
       }
+    } catch (e) {
+      showError(e);
     }
   }
 
