@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:biometric_storage/biometric_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
@@ -10,6 +11,7 @@ import '../../context/biometric.dart';
 import '../../context/lan_fill_server.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../remotes_fs/remote_fs.dart';
 import '../../store/index.dart';
 import '../../util/common.dart';
 import '../../util/file.dart';
@@ -96,8 +98,8 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
   }
 
   @protected
-  Future<void> importKdbxByWebDav() {
-    throw UnimplementedError('importKdbxByWebDav() has not been implemented.');
+  Future<void> importKdbxByRemote(RemoteType type) {
+    throw UnimplementedError('importKdbxByRemote() has not been implemented.');
   }
 
   @protected
@@ -131,9 +133,9 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
     }
   }
 
-  void _importKdbxByWebDav() async {
+  void _importKdbxByRemote(RemoteType type) async {
     try {
-      await importKdbxByWebDav();
+      await importKdbxByRemote(type);
     } catch (error) {
       _logger.warning("import remote file fail!", error);
       showError(error);
@@ -180,7 +182,7 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
           enabled: enableRemoteImport,
           onTap: () async {
             context.pop();
-            _importKdbxByWebDav();
+            _importKdbxByRemote(.webdav);
           },
         ),
       ],

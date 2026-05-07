@@ -1,9 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:remote_fs/remote_fs.dart';
 
+import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
-import '../../remotes_fs/adapter/webdav.dart';
+import '../../remotes_fs/remote_fs.dart';
 import '../../store/index.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
@@ -87,6 +89,51 @@ class _SyncAccountPageState extends State<SyncAccountPage>
     );
   }
 
+  void _setRemoteSyncCilent(RemoteType type) async {
+    final t = I18n.of(context)!;
+    final store = Store.instance;
+
+    final result = await context.router.push(
+      AuthRemoteFsRoute(config: store.syncKdbx.config?.toJson(), type: type),
+    );
+
+    if (result == null || result is! RemoteFileConfig) return;
+
+    final result2 = await context.router.push(
+      SelectRemoteFileRoute(config: result),
+    );
+
+    if (result2 == null || result2 is! RemoteFileConfig) return;
+
+    await store.syncKdbx.setRemoteFileConfig(context, result2);
+
+    if (store.syncKdbx.lastError == null) {
+      final kdbx = KdbxProvider.of(context).kdbx!;
+      if (kdbx.syncAccountEntry != null ||
+          await showConfirmDialog(
+            title: t.save,
+            message: t.save_sync_account_subtitle,
+          )) {
+        final entry =
+            kdbx.syncAccountEntry ??
+                  kdbx.createEntry(kdbx.kdbxFile.body.rootGroup)
+              ..setString(KdbxKeyCommon.TITLE, PlainValue(t.sync_config));
+
+        final config = RemoteFileKdbxEntryField.fromKdbx(entry);
+
+        if (config == store.syncKdbx.config) return;
+
+        for (final item in store.syncKdbx.config!.toKdbx().entries) {
+          entry.setString(item.key, item.value);
+        }
+
+        kdbx.syncAccountEntry = entry;
+        await kdbxSave(kdbx);
+        store.syncKdbx.sync(context);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
@@ -143,17 +190,7 @@ class _SyncAccountPageState extends State<SyncAccountPage>
                     !store.syncKdbx.isSyncing &&
                     store.settings.enableRemoteSync,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                onTap: () async {
-                  final result = await context.router.push(
-                    AuthRemoteFsRoute(
-                      config: store.syncKdbx.config ?? WebdavConfig(),
-                    ),
-                  );
-
-                  if (result != null && result is WebdavClient) {
-                    await store.syncKdbx.setWebdavClient(context, result);
-                  }
-                },
+                onTap: () => _setRemoteSyncCilent(.webdav),
                 trailing: InfiniteRotateWidget(
                   enabled: store.syncKdbx.isSyncing,
                   child: IconButton(

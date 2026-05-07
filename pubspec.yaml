@@ -10,6 +10,7 @@ workspace:
   - packages/common_native_channel
   - packages/enigo_flutter
   - packages/lan_fill_server
+  - packages/remote_fs
   - packages/webdav_client
 
 

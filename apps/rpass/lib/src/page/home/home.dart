@@ -59,7 +59,7 @@ class _HomePageState extends State<HomePage>
     super.initState();
     Store.instance.settings.addListener(_settingsListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Store.instance.syncKdbx.init(KdbxProvider.of(context).kdbx!);
+      Store.instance.syncKdbx.initConfig(KdbxProvider.of(context).kdbx!);
       _settingsListener();
     });
   }

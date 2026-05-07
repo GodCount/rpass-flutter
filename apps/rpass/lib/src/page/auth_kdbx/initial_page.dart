@@ -2,10 +2,11 @@ import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:remote_fs/remote_fs.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
-import '../../remotes_fs/adapter/webdav.dart';
+import '../../remotes_fs/remote_fs.dart';
 import '../../store/index.dart';
 import '../../util/file.dart';
 import '../../util/route.dart';
@@ -137,19 +138,14 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
   }
 
   @override
-  Future<void> importKdbxByWebDav() async {
+  Future<void> importKdbxByRemote(RemoteType type) async {
     // 登录 webdav
-    final result = await context.router.push(
-      AuthRemoteFsRoute(
-        config: WebdavConfig(),
-        type: AuthRemoteRouteType.import,
-      ),
-    );
+    final result = await context.router.push(AuthRemoteFsRoute(type: type));
 
-    if (result != null && result is WebdavClient) {
+    if (result != null && result is RemoteFileConfig) {
       // 导入 kdbx 文件
       final result2 = await context.router.push(
-        ImportRemoteKdbxRoute(client: result),
+        SelectRemoteFileRoute(config: result, importKdbx: true),
       );
 
       if (result2 != null && result2 is (Kdbx, String?)) {

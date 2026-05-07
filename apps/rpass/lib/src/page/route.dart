@@ -33,8 +33,7 @@ export 'setting/other_settings.dart' show OtherSettingsRoute;
 export 'setting/shortcuts_settings.dart' show ShortcutsSettingsRoute;
 export 'setting/change_theme.dart' show ChangeThemeRoute;
 
-export 'remotes_fs/auth_remote_fs.dart'
-    show AuthRemoteFsRoute, AuthRemoteRouteType;
-export 'remotes_fs/import_remote_kdbx.dart' show ImportRemoteKdbxRoute;
+export 'remotes_fs/auth_remote_fs.dart' show AuthRemoteFsRoute;
+export 'remotes_fs/select_remote_file.dart' show SelectRemoteFileRoute;
 
 export './root_page.dart' show RootRpassAppRoute;

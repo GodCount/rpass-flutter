@@ -436,9 +436,6 @@ class MyLocalizationsZh extends MyLocalizations {
   String get save_sync_account_subtitle => '将登录信息保存到数据库中';
 
   @override
-  String get logined_sync => '登录后同步数据';
-
-  @override
   String get import_remote_kdbx => '导入远程数据库';
 
   @override
@@ -690,4 +687,13 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get close_lan_fill => '关闭局域网填充';
+
+  @override
+  String get sync_config => '同步配置';
+
+  @override
+  String get api_url => '接口地址';
+
+  @override
+  String get auth_type => '验证类型';
 }

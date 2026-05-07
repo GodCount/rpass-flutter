@@ -441,9 +441,6 @@ class MyLocalizationsEn extends MyLocalizations {
   String get save_sync_account_subtitle => 'Save login info to database';
 
   @override
-  String get logined_sync => 'Sync data after login';
-
-  @override
   String get import_remote_kdbx => 'Import remote database';
 
   @override
@@ -712,4 +709,13 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get close_lan_fill => 'Close LAN Fill';
+
+  @override
+  String get sync_config => 'Sync Config';
+
+  @override
+  String get api_url => 'Api Url';
+
+  @override
+  String get auth_type => 'Auth Type';
 }

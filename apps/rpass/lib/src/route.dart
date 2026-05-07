@@ -14,7 +14,7 @@ final skipAuthGuard = [
   // 初始化时从外部导入 kdbx
   LoadExternalKdbxRoute.name,
   AuthRemoteFsRoute.name,
-  ImportRemoteKdbxRoute.name,
+  SelectRemoteFileRoute.name,
 ];
 
 class AuthGuard extends AutoRouteGuard {
@@ -88,8 +88,8 @@ RootStackRouter _createMobileAutoRoute() {
           AutoRoute(path: "sync_account", page: SyncAccountRoute.page),
           AutoRoute(path: "auth_remote_fs/:type", page: AuthRemoteFsRoute.page),
           AutoRoute(
-            path: "import_remote_file",
-            page: ImportRemoteKdbxRoute.page,
+            path: "select_remote_file",
+            page: SelectRemoteFileRoute.page,
           ),
           AutoRoute(
             path: "select_auto_fill_app",
@@ -196,8 +196,8 @@ RootStackRouter _createDesktopAutoRoute() {
           AutoRoute(path: "scanner_code", page: QrCodeScannerRoute.page),
           AutoRoute(path: "auth_remote_fs/:type", page: AuthRemoteFsRoute.page),
           AutoRoute(
-            path: "import_remote_kdbx",
-            page: ImportRemoteKdbxRoute.page,
+            path: "select_remote_file",
+            page: SelectRemoteFileRoute.page,
           ),
           AutoRoute(
             path: "select_auto_fill_app",

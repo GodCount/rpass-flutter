@@ -844,7 +844,7 @@ class _EntryFieldState extends State<EntryField> {
     EditableTextState editableTextState,
   ) {
     final isUrl = KdbxKeyURLS.all.contains(widget.kdbxKey);
-    if (widget.kdbxEntry.isCustomKey(widget.kdbxKey) || isUrl) {
+    if (kIsDesktop && (widget.kdbxEntry.isCustomKey(widget.kdbxKey) || isUrl)) {
       final t = I18n.of(context)!;
 
       return AdaptiveTextSelectionToolbar.buttonItems(

@@ -1,24 +1,21 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:remote_fs/remote_fs.dart';
 
 import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
 import '../../page/route.dart';
 import '../../rpass.dart';
 import '../../kdbx/kdbx.dart';
-import '../../remotes_fs/adapter/webdav.dart';
 import '../../remotes_fs/remote_fs.dart';
 import '../index.dart';
 
 final _logger = Logger("store:sync_kdbx");
 
 class SyncKdbxController with ChangeNotifier {
-  WebdavConfig? _config;
-  WebdavConfig? get config => _config;
-
-  WebdavClient? _client;
-  WebdavClient? get client => _client;
+  RemoteFileConfig? _config;
+  RemoteFileConfig? get config => _config;
 
   Object? _lastError;
   Object? get lastError => _lastError;
@@ -29,19 +26,41 @@ class SyncKdbxController with ChangeNotifier {
   bool _isSyncing = false;
   bool get isSyncing => _isSyncing;
 
-  Future<void> init(Kdbx kdbx) async {
-    if (kdbx.syncAccountEntry != null) {
-      _config ??= WebdavConfig()..updateByKdbx(kdbx.syncAccountEntry!);
-      _client ??= await _config?.buildClient();
+  Future<void> initConfig(Kdbx kdbx) async {
+    try {
+      if (kdbx.syncAccountEntry != null) {
+        _config = RemoteFileKdbxEntryField.fromKdbx(kdbx.syncAccountEntry!);
+      }
+    } catch (e) {
+      _logger.warning(e);
+      kdbx.syncAccountEntry = null;
     }
   }
 
-  Future<void> setWebdavClient(
+  Future<void> setRemoteFileConfig(
     BuildContext context,
-    WebdavClient client,
+    RemoteFileConfig config,
   ) async {
-    _config = client.config;
-    _client = client;
+    RemoteFile remoteFile = await config.open();
+
+    if (!await remoteFile.exists()) {
+      if (!remoteFile.name.endsWith(".kdbx")) {
+        await remoteFile.mkdir();
+        remoteFile = await remoteFile.relative(
+          RpassInfo.defaultSyncKdbxFileName,
+        );
+      }
+    } else {
+      final stat = await remoteFile.stat();
+      if (stat.type == .directory) {
+        remoteFile = await remoteFile.relative(
+          RpassInfo.defaultSyncKdbxFileName,
+        );
+      }
+    }
+
+    _config = await remoteFile.toConfig();
+
     return sync(context);
   }
 
@@ -55,44 +74,31 @@ class SyncKdbxController with ChangeNotifier {
 
       final kdbx = KdbxProvider.of(context).kdbx!;
 
-      await init(kdbx);
+      if (_config == null) {
+        await initConfig(kdbx);
+      }
 
-      if (_client == null) {
-        _logger.info("Remote client is null, Unable to synchronize.");
+      if (_config == null) {
+        _logger.info("Remote config is null, Unable to synchronize.");
         return;
       }
 
-      final isKdbxExt = _client!.config.uri.endsWith(".kdbx");
+      RemoteFile remoteFile = await _config!.open();
       final localFile = Store.instance.localInfo.localKdbxFile;
-      RemoteFile? remoteFile;
 
-      try {
-        remoteFile = await _client!.readFileInfo(
-          isKdbxExt ? "" : RpassInfo.defaultSyncKdbxFileName,
-        );
-      } catch (e) {
-        _logger.warning("remote read file info", e);
-      }
-
-      if (remoteFile != null && remoteFile.dir) {
-        throw Exception(
-          "${isKdbxExt ? _client!.config.uri : RpassInfo.defaultSyncKdbxFileName} is dir, Unable Sync File.",
-        );
-      } else if (remoteFile == null || remoteFile.size == 0) {
-        if (!isKdbxExt) {
-          // 尝试创建当前路径目录
-          await _client!.mkdir(path: "");
-        }
-
-        await _client!.writeFile(
-          path: isKdbxExt ? "" : RpassInfo.defaultSyncKdbxFileName,
-          data: await localFile.readAsBytes(),
-        );
+      if (!await remoteFile.exists()) {
+        remoteFile.write(await localFile.readAsBytes());
         Store.instance.settings.setLastSyncTime(DateTime.now());
         return;
       }
 
-      final remoteData = await remoteFile.readFile();
+      final stat = await remoteFile.stat();
+
+      if (stat.type != .file) {
+        throw Exception("not a file");
+      }
+
+      final remoteData = await remoteFile.read();
       Kdbx remoteKdbx;
 
       try {
@@ -148,9 +154,6 @@ class SyncKdbxController with ChangeNotifier {
       if (syncMergeContext.masterKeyChanged ||
           syncMergeContext.fieldChanged ||
           forceMerge) {
-        // TODO！上传因意外中断可能会导致远程数据丢失
-        // 解决 先上传为一个临时文件
-        // 成功后，删除原文件，再重命名临时文件为原文件
         await remoteFile.write(syncMergeContext.data!);
         _logger.info("sync data write to remote file, done.");
       } else {

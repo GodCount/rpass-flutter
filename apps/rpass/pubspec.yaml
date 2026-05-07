@@ -43,8 +43,8 @@ dependencies:
 
   # 网络和数据传输
   dio: ^5.9.0
-  webdav_client:
-    path: ../../packages/webdav_client
+  remote_fs:
+    path: ../../packages/remote_fs
   lan_fill_server:
     path: ../../packages/lan_fill_server
 

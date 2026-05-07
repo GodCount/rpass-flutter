@@ -200,7 +200,7 @@ class _RootRpassAppState extends State<RootRpassApp>
   void onSelectedKdbxEntryChanged(KdbxEntry? kdbxEntry) {}
 
   @override
-  void onTrayIconMouseDown() {
+  void onTrayIconMouseUp() {
     windowManager.setSkipTaskbar(false);
     windowManager.show(inactive: true);
   }

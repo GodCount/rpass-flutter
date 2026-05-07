@@ -1,203 +1,106 @@
-import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:remote_fs/remote_fs.dart';
 
+import '../i18n.dart';
 import '../kdbx/kdbx.dart';
 import 'auth_field.dart';
 
-class CancelSignalException implements Exception {
-  CancelSignalException(this.message, this.stackTrace);
+enum RemoteType { webdav }
 
-  final StackTrace stackTrace;
-  final Object message;
+extension _WebDavKdbxEntryField on WebDavConfig {
+  static final kdbxKeyType = KdbxKey("webdav_type");
+  static final kdbxKeyPath = KdbxKey("webdav_path");
+  static final kdbxKeyAuthHeader = KdbxKey("webdav_auth_header");
 
-  @override
-  String toString() {
-    return "CancelSignalException: $message";
+  Map<KdbxKey, StringValue> toKdbx() {
+    return {
+      RemoteFileKdbxEntryField.kdbxKeyType: PlainValue(RemoteType.webdav.name),
+      KdbxKeyCommon.URL: PlainValue(url),
+      KdbxKeyCommon.USER_NAME: PlainValue(username),
+      KdbxKeyCommon.PASSWORD: PlainValue(password),
+      kdbxKeyPath: PlainValue(path),
+      kdbxKeyType: PlainValue(type.name),
+      if (authHeader != null) kdbxKeyAuthHeader: PlainValue(authHeader),
+    };
+  }
+
+  static WebDavConfig fromKdbx(KdbxEntry entry) {
+    return WebDavConfig.fromJson({
+      "url": entry.getActualString(KdbxKeyCommon.URL),
+      "username": entry.getActualString(KdbxKeyCommon.USER_NAME),
+      "password": entry.getActualString(KdbxKeyCommon.PASSWORD),
+      "path": entry.getActualString(kdbxKeyPath),
+      "type": entry.getActualString(kdbxKeyType),
+      "authHeader": entry.getActualString(kdbxKeyAuthHeader),
+    });
   }
 }
 
-typedef OnCancelSignal = void Function(CancelSignalException reason);
-typedef OnProgress = void Function(int count, int total);
+extension RemoteFileKdbxEntryField on RemoteFileConfig {
+  static final kdbxKeyType = KdbxKey("remote_type");
 
-class CancelSignal {
-  CancelSignalException? _error;
+  Map<KdbxKey, StringValue> toKdbx() {
+    return switch (this) {
+      WebDavConfig config => config.toKdbx(),
+      _ => throw UnsupportedError("type is $runtimeType"),
+    };
+  }
 
-  CancelSignalException? get error => _error;
+  static RemoteFileConfig fromKdbx(KdbxEntry entry) {
+    final remoteType = entry.getActualString(kdbxKeyType);
+    return switch (remoteType) {
+      "webdav" => _WebDavKdbxEntryField.fromKdbx(entry),
+      _ => throw UnsupportedError("type is $remoteType"),
+    };
+  }
+}
 
-  OnCancelSignal? onCancelSignal;
-
-  void cacnel([Object? reason]) {
-    _error = CancelSignalException(reason ?? "Cancelled!", StackTrace.current);
-    if (onCancelSignal != null) {
-      onCancelSignal!(_error!);
+extension BuilderConfig on RemoteType {
+  RemoteFileConfig buildRemoteFileConfig(Map<String, AuthField> formData) {
+    final Map<String, String?> map = {};
+    for (final item in formData.values) {
+      map[item.key] = item.value.toString();
     }
-  }
-}
-
-abstract interface class RemoteFileSystem {
-  Future<RemoteFile> writeFile({
-    required String path,
-    required Uint8List data,
-    OnProgress? onProgress,
-    CancelSignal? cancelSignal,
-  });
-
-  Future<RemoteFile> move({
-    required String oldPath,
-    required String newPath,
-    bool overwrite = false,
-    CancelSignal? cancelSignal,
-  });
-
-  Future<RemoteFile> copy({
-    required String srcPath,
-    required String destPath,
-    bool overwrite = false,
-    CancelSignal? cancelSignal,
-  });
-
-  Future<RemoteFile> readFileInfo(String path, [CancelSignal? cancelSignal]);
-  Future<Uint8List> readFile({
-    required String path,
-    OnProgress? onProgress,
-    CancelSignal? cancelSignal,
-  });
-
-  Future<List<RemoteFile>> readdir(String path, [CancelSignal? cancelSignal]);
-
-  Future<RemoteFile> mkdir({
-    required String path,
-    bool recursive = false,
-    CancelSignal? cancelSignal,
-  });
-
-  Future<void> delete(String path, [CancelSignal? cancelSignal]);
-}
-
-class RemoteFile {
-  RemoteFile({
-    required RemoteClient client,
-    required String path,
-    required bool dir,
-    int size = 0,
-    DateTime? cTime,
-    DateTime? mTime,
-    String? name,
-  }) : _client = client,
-       _path = path,
-       _name =
-           name ??
-           (path.endsWith("/")
-               ? path.substring(0, path.length - 1).split("/").last
-               : path.split("/").last),
-       _dir = dir,
-       _size = size,
-       _cTime = cTime,
-       _mTime = mTime;
-
-  final RemoteClient _client;
-
-  late bool _dir;
-  late int _size;
-  late String _path;
-  late String _name;
-  late DateTime? _cTime;
-  late DateTime? _mTime;
-
-  bool get dir => _dir;
-  int get size => _size;
-  String get path => _path;
-  String get name => _name;
-  DateTime? get cTime => _cTime;
-  DateTime? get mTime => _mTime;
-
-  void _updateInfo(RemoteFile file) {
-    _dir = file.dir;
-    _size = file.size;
-    _path = file.path;
-    _cTime = file.cTime;
-    _mTime = file.mTime;
-    _name = file.name;
+    return switch (this) {
+      .webdav => WebDavConfig.fromJson(map),
+    };
   }
 
-  Future<void> write(Uint8List data, [CancelSignal? cancelSignal]) async {
-    if (dir) throw Exception("this is dir");
-    _updateInfo(
-      await _client.writeFile(
-        path: path,
-        data: data,
-        cancelSignal: cancelSignal,
-      ),
-    );
+  Map<String, AuthField> buildAuthFields(
+    BuildContext context,
+    Map<String, String?>? config,
+  ) {
+    final t = I18n.of(context)!;
+    config ??= {};
+    return switch (this) {
+      .webdav => {
+        "url": TextAuthField(
+          key: "url",
+          description: t.api_url,
+          value: config["url"] ?? "",
+        ),
+        "username": TextAuthField(
+          key: "username",
+          description: t.account,
+          value: config["username"] ?? "",
+        ),
+        "password": PasswordAuthField(
+          key: "password",
+          description: t.password,
+          value: config["password"] ?? "",
+        ),
+        "type": OptionAuthField(
+          key: "type",
+          description: t.auth_type,
+          value: config["type"] ?? AuthType.NoAuth.name,
+          optionList: AuthType.values.map((item) => item.name).toList(),
+        ),
+        "authHeader": TextAuthField(
+          key: "authHeader",
+          value: config["authHeader"] ?? "",
+          description: "Digest Auth Header",
+        ),
+      },
+    };
   }
-
-  Future<void> move({
-    required String newPath,
-    bool overwrite = false,
-    CancelSignal? cancelSignal,
-  }) async {
-    _updateInfo(
-      await _client.move(
-        oldPath: path,
-        newPath: newPath,
-        overwrite: overwrite,
-        cancelSignal: cancelSignal,
-      ),
-    );
-  }
-
-  Future<RemoteFile> copy({
-    required String destPath,
-    bool overwrite = false,
-    CancelSignal? cancelSignal,
-  }) {
-    return _client.copy(
-      srcPath: path,
-      destPath: destPath,
-      overwrite: overwrite,
-      cancelSignal: cancelSignal,
-    );
-  }
-
-  Future<Uint8List> readFile({
-    OnProgress? onProgress,
-    CancelSignal? cancelSignal,
-  }) {
-    return _client.readFile(
-      path: path,
-      onProgress: onProgress,
-      cancelSignal: cancelSignal,
-    );
-  }
-
-  Future<List<RemoteFile>> readdir([CancelSignal? cancelSignal]) {
-    if (!dir) throw Exception("this not dir");
-    return _client.readdir(path, cancelSignal);
-  }
-
-  Future<void> delete([CancelSignal? cancelSignal]) {
-    return _client.delete(path, cancelSignal);
-  }
-
-  @override
-  String toString() {
-    return "RemoteFile {path: $path, dir: $dir, size:$size, cTime:$cTime, mTime:$mTime}";
-  }
-}
-
-abstract class RemoteClientConfig {
-  Map<String, AuthField> toAuthFields();
-
-  Map<KdbxKey, StringValue> toKdbx();
-
-  void updateAuthField(Map<String, AuthField> data);
-  void updateByKdbx(KdbxEntry kdbxEntry);
-
-  Future<RemoteClient> buildClient();
-}
-
-abstract class RemoteClient<T extends RemoteClientConfig>
-    implements RemoteFileSystem {
-  RemoteClient(this.config);
-
-  final T config;
 }

@@ -1,0 +1,20 @@
+name: remote_fs
+description: A starting point for Dart libraries or applications.
+version: 1.0.0
+
+resolution: workspace
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+
+
+
+# Add regular dependencies here.
+dependencies:
+  path: ^1.9.1
+  webdav_client:
+    path: ../webdav_client
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.6

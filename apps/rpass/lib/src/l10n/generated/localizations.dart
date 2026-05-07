@@ -908,12 +908,6 @@ abstract class MyLocalizations {
   /// **'将登录信息保存到数据库中'**
   String get save_sync_account_subtitle;
 
-  /// No description provided for @logined_sync.
-  ///
-  /// In zh, this message translates to:
-  /// **'登录后同步数据'**
-  String get logined_sync;
-
   /// No description provided for @import_remote_kdbx.
   ///
   /// In zh, this message translates to:
@@ -1405,6 +1399,24 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'关闭局域网填充'**
   String get close_lan_fill;
+
+  /// No description provided for @sync_config.
+  ///
+  /// In zh, this message translates to:
+  /// **'同步配置'**
+  String get sync_config;
+
+  /// No description provided for @api_url.
+  ///
+  /// In zh, this message translates to:
+  /// **'接口地址'**
+  String get api_url;
+
+  /// No description provided for @auth_type.
+  ///
+  /// In zh, this message translates to:
+  /// **'验证类型'**
+  String get auth_type;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

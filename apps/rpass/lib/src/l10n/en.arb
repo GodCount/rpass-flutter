@@ -231,7 +231,6 @@
     "save_as": "Save As",
     "selected_sync_account_subtitle": "Select account from database",
     "save_sync_account_subtitle": "Save login info to database",
-    "logined_sync": "Sync data after login",
     "import_remote_kdbx": "Import remote database",
     "close_local_sync_subtitle": "Disable sync on this device",
     "sync_note_subtitle": "If the remote file is modified by a third-party kdbx manager, long-press the sync button to force a merge.",
@@ -336,6 +335,9 @@
     "domain_blacklist": "Domain Blacklist",
     "autofill_domain_blacklist_message": "List of domains excluded from autofill",
     "add_large_files_warn": "File size is too large. Adding large files will significantly impact database performance and increase storage size.\n\nConfirm to add?",
-     "locked": "Locked",
-    "close_lan_fill": "Close LAN Fill"
+    "locked": "Locked",
+    "close_lan_fill": "Close LAN Fill",
+    "sync_config": "Sync Config",
+    "api_url": "Api Url",
+    "auth_type": "Auth Type"
 }
