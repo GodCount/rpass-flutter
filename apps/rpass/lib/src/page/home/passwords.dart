@@ -277,10 +277,7 @@ class _PasswordsPageState extends State<PasswordsPage>
             kdbxEntry: _totalEntry[index],
             onTap: () {
               context.router.platformNavigate(
-                LookAccountRoute(
-                  kdbxEntry: _totalEntry[index],
-                  uuid: _totalEntry[index].uuid,
-                ),
+                LookAccountRoute(kdbxEntry: _totalEntry[index]),
               );
             },
           );
@@ -498,7 +495,7 @@ class _PasswordItemState extends State<_PasswordItem>
         switch (type) {
           case EditContextMenuItem():
             context.router.platformNavigate(
-              EditAccountRoute(kdbxEntry: kdbxEntry, uuid: kdbxEntry.uuid),
+              EditAccountRoute(kdbxEntry: kdbxEntry),
             );
             break;
           case CopyContextMenuItem(kdbxKey: final kdbxKey):

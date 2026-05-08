@@ -13,21 +13,16 @@ import '../../widget/extension_state.dart';
 import '../route.dart';
 
 class _ManageGroupEntryArgs extends PageRouteArgs {
-  _ManageGroupEntryArgs({super.key, required this.kdbxGroup});
-
-  final KdbxGroup kdbxGroup;
+  _ManageGroupEntryArgs({super.key});
 }
 
 class ManageGroupEntryRoute extends PageRouteInfo<_ManageGroupEntryArgs> {
-  ManageGroupEntryRoute({
-    Key? key,
-    required KdbxGroup kdbxGroup,
-    KdbxUuid? uuid,
-  }) : super(
-         name,
-         args: _ManageGroupEntryArgs(key: key, kdbxGroup: kdbxGroup),
-         rawPathParams: {"uuid": uuid?.deBase64Uuid},
-       );
+  ManageGroupEntryRoute({Key? key, required KdbxGroup kdbxGroup})
+    : super(
+        name,
+        args: _ManageGroupEntryArgs(key: key),
+        rawPathParams: {"uuid": kdbxGroup.uuid.uuid},
+      );
 
   static const name = "ManageGroupEntryRoute";
 
@@ -35,18 +30,18 @@ class ManageGroupEntryRoute extends PageRouteInfo<_ManageGroupEntryArgs> {
     name,
     builder: (context, data) {
       final args = data.argsAs<_ManageGroupEntryArgs>(
-        orElse: () {
-          final kdbx = KdbxProvider.of(context).kdbx!;
-          final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
-          final kdbxGroup = uuid != null ? kdbx.findGroupByUuid(uuid) : null;
-
-          if (kdbxGroup == null) {
-            throw Exception("kdbxGroup is null, Not found by uuid: $uuid");
-          }
-          return _ManageGroupEntryArgs(kdbxGroup: kdbxGroup);
-        },
+        orElse: () => _ManageGroupEntryArgs(),
       );
-      return ManageGroupEntryPage(key: args.key, kdbxGroup: args.kdbxGroup);
+
+      final kdbx = KdbxProvider.of(context).kdbx!;
+      final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
+      final kdbxGroup = uuid != null ? kdbx.findGroupByUuid(uuid) : null;
+
+      if (kdbxGroup == null) {
+        throw Exception("kdbxGroup is null, Not found by uuid: $uuid");
+      }
+
+      return ManageGroupEntryPage(key: args.key, kdbxGroup: kdbxGroup);
     },
   );
 }
@@ -61,7 +56,9 @@ class ManageGroupEntryPage extends StatefulWidget {
 }
 
 class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
-    with SecondLevelPageAutoBack<ManageGroupEntryPage>, PrevFocusWindowListener {
+    with
+        SecondLevelPageAutoBack<ManageGroupEntryPage>,
+        PrevFocusWindowListener {
   final TextEditingController _searchController = TextEditingController();
 
   final KbdxSearchHandler _kbdxSearchHandler = KbdxSearchHandler();
@@ -118,7 +115,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
     _selecteds.clear();
     _removeKdbxListener?.call();
     _removeKdbxListener = null;
-    prevFocusWindow.addListener(this);
+    prevFocusWindow.removeListener(this);
     super.dispose();
   }
 
@@ -181,7 +178,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
           onTap: () {
             context.router.pop();
             context.router.platformNavigate(
-              LookAccountRoute(kdbxEntry: kdbxEntry!, uuid: kdbxEntry.uuid),
+              LookAccountRoute(kdbxEntry: kdbxEntry!),
             );
           },
         ),
@@ -318,12 +315,12 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
         switch (type) {
           case ViewContextMenuItem():
             context.router.platformNavigate(
-              LookAccountRoute(kdbxEntry: kdbxEntry, uuid: kdbxEntry.uuid),
+              LookAccountRoute(kdbxEntry: kdbxEntry),
             );
             break;
           case EditContextMenuItem():
             context.router.platformNavigate(
-              EditAccountRoute(kdbxEntry: kdbxEntry, uuid: kdbxEntry.uuid),
+              EditAccountRoute(kdbxEntry: kdbxEntry),
             );
             break;
           case CopyContextMenuItem(kdbxKey: final kdbxKey):

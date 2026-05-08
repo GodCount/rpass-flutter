@@ -129,7 +129,7 @@ class _GroupsItemState extends State<_GroupsItem>
         context.topRoute.name == EditGroupPageRoute.name) {
       final selected =
           context.topRoute.inheritedPathParams.optString("uuid") ==
-          widget.kdbxGroup.uuid.deBase64Uuid;
+          widget.kdbxGroup.uuid.uuid;
 
       if (selected != _selected) {
         setState(() {
@@ -173,7 +173,7 @@ class _GroupsItemState extends State<_GroupsItem>
             break;
           case ModifyContextMenuItem():
             context.router.platformNavigate(
-              EditGroupPageRoute(kdbxGroup: kdbxGroup, uuid: kdbxGroup.uuid),
+              EditGroupPageRoute(kdbxGroup: kdbxGroup),
             );
             break;
           case DeleteContextMenuItem():
@@ -253,7 +253,7 @@ class _GroupsItemState extends State<_GroupsItem>
         ),
         onTap: () {
           context.router.platformNavigate(
-            ManageGroupEntryRoute(kdbxGroup: kdbxGroup, uuid: kdbxGroup.uuid),
+            ManageGroupEntryRoute(kdbxGroup: kdbxGroup),
           );
         },
         onLongPress: isMobile
@@ -265,10 +265,7 @@ class _GroupsItemState extends State<_GroupsItem>
                   );
                 },
                 onModifyTap: () => context.router.platformNavigate(
-                  EditGroupPageRoute(
-                    kdbxGroup: kdbxGroup,
-                    uuid: kdbxGroup.uuid,
-                  ),
+                  EditGroupPageRoute(kdbxGroup: kdbxGroup),
                 ),
                 onDeleteTap: kdbxGroup.parent != null
                     ? () => _kdbxGroupDelete(kdbxGroup)

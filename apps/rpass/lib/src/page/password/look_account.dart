@@ -29,9 +29,7 @@ import '../../widget/extension_state.dart';
 final _logger = Logger("page:look_account");
 
 class _LookAccountArgs extends PageRouteArgs {
-  _LookAccountArgs({super.key, this.readOnly = false, required this.kdbxEntry});
-  final bool readOnly;
-  final KdbxEntry kdbxEntry;
+  _LookAccountArgs({super.key});
 }
 
 class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
@@ -39,16 +37,10 @@ class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
     Key? key,
     bool readOnly = false,
     required KdbxEntry kdbxEntry,
-    KdbxUuid? uuid,
   }) : super(
          name,
-         args: _LookAccountArgs(
-           key: key,
-           readOnly: readOnly,
-           kdbxEntry: kdbxEntry,
-         ),
-         rawQueryParams: {"readOnly": readOnly},
-         rawPathParams: {"uuid": uuid?.deBase64Uuid},
+         args: _LookAccountArgs(key: key),
+         rawPathParams: {"uuid": kdbxEntry.uuid.uuid, "readOnly": readOnly.toString()},
        );
 
   static const name = "LookAccountRoute";
@@ -57,23 +49,22 @@ class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
     name,
     builder: (context, data) {
       final args = data.argsAs<_LookAccountArgs>(
-        orElse: () {
-          final kdbx = KdbxProvider.of(context).kdbx!;
-          final readOnly = data.queryParams.getBool("readOnly", false);
-          final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
-          final kdbxEntry = uuid != null ? kdbx.findEntryByUuid(uuid) : null;
-
-          if (kdbxEntry == null) {
-            throw Exception("kdbxEntry is null, Not found by uuid: $uuid");
-          }
-          return _LookAccountArgs(kdbxEntry: kdbxEntry, readOnly: readOnly);
-        },
+        orElse: () => _LookAccountArgs(),
       );
+
+      final kdbx = KdbxProvider.of(context).kdbx!;
+      final readOnly = data.inheritedPathParams.getBool("readOnly", false);
+      final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
+      final kdbxEntry = uuid != null ? kdbx.findEntryByUuid(uuid) : null;
+
+      if (kdbxEntry == null) {
+        throw Exception("kdbxEntry is null, Not found by uuid: $uuid");
+      }
 
       return LookAccountPage(
         key: args.key,
-        readOnly: args.readOnly,
-        kdbxEntry: args.kdbxEntry,
+        readOnly: readOnly,
+        kdbxEntry: kdbxEntry,
       );
     },
   );
@@ -250,13 +241,10 @@ class _LookAccountPageState extends State<LookAccountPage>
                     ? widget.kdbxEntry.parent
                     : null,
                 kdbxEntry: clone,
-                uuid: clone.uuid,
               ),
             );
             if (result is bool && result) {
-              context.router.replace(
-                LookAccountRoute(kdbxEntry: clone, uuid: clone.uuid),
-              );
+              context.router.replace(LookAccountRoute(kdbxEntry: clone));
             }
           }),
         ),
@@ -898,10 +886,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                   }
                 } else {
                   final result = await context.router.push(
-                    EditAccountRoute(
-                      kdbxEntry: kdbxEntry,
-                      uuid: kdbxEntry.uuid,
-                    ),
+                    EditAccountRoute(kdbxEntry: kdbxEntry),
                   );
                   if (result is bool && result) {
                     setState(() {});

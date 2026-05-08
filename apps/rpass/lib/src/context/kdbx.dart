@@ -51,6 +51,7 @@ class KdbxProviderState extends State<KdbxProvider>
   KdbxEntry? selectedKdbxEntry;
 
   void setKdbx(Kdbx? kdbx) {
+    this.kdbx?.dispose();
     this.kdbx = kdbx;
     selectedKdbxEntry = null;
     emit((listener) {
@@ -69,6 +70,8 @@ class KdbxProviderState extends State<KdbxProvider>
   @override
   void dispose() {
     super.dispose();
+    kdbx?.dispose();
+    kdbx = selectedKdbxEntry = null;
     removeAllListener();
   }
 

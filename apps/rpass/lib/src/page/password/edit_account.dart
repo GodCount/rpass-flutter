@@ -27,27 +27,19 @@ import '../../widget/shake_widget.dart';
 final _logger = Logger("page:edit_account");
 
 class _EditAccountArgs extends PageRouteArgs {
-  _EditAccountArgs({super.key, this.kdbxEntry, this.initKdbxGroup});
-
-  final KdbxEntry? kdbxEntry;
-  final KdbxGroup? initKdbxGroup;
+  _EditAccountArgs({super.key});
 }
 
 class EditAccountRoute extends PageRouteInfo<_EditAccountArgs> {
-  EditAccountRoute({
-    Key? key,
-    KdbxEntry? kdbxEntry,
-    KdbxGroup? initKdbxGroup,
-    KdbxUuid? uuid,
-  }) : super(
-         name,
-         args: _EditAccountArgs(
-           key: key,
-           kdbxEntry: kdbxEntry,
-           initKdbxGroup: initKdbxGroup,
-         ),
-         rawPathParams: {"uuid": uuid?.deBase64Uuid},
-       );
+  EditAccountRoute({Key? key, KdbxEntry? kdbxEntry, KdbxGroup? initKdbxGroup})
+    : super(
+        name,
+        args: _EditAccountArgs(key: key),
+        rawPathParams: {
+          "uuid": kdbxEntry?.uuid.uuid,
+          "groupUuid": initKdbxGroup?.uuid.uuid,
+        },
+      );
 
   static const name = "EditAccountRoute";
 
@@ -55,18 +47,24 @@ class EditAccountRoute extends PageRouteInfo<_EditAccountArgs> {
     name,
     builder: (context, data) {
       final args = data.argsAs<_EditAccountArgs>(
-        orElse: () {
-          final kdbx = KdbxProvider.of(context).kdbx!;
-          final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
-          final kdbxEntry = uuid != null ? kdbx.findEntryByUuid(uuid) : null;
-
-          return _EditAccountArgs(kdbxEntry: kdbxEntry);
-        },
+        orElse: () => _EditAccountArgs(),
       );
+
+      final kdbx = KdbxProvider.of(context).kdbx!;
+      final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
+      final groupUuid = data.inheritedPathParams
+          .optString("groupUuid")
+          ?.kdbxUuid;
+
+      final kdbxEntry = uuid != null ? kdbx.findEntryByUuid(uuid) : null;
+      final initKdbxGroup = groupUuid != null
+          ? kdbx.findGroupByUuid(groupUuid)
+          : null;
+
       return EditAccountPage(
         key: args.key,
-        kdbxEntry: args.kdbxEntry,
-        initKdbxGroup: args.initKdbxGroup,
+        kdbxEntry: kdbxEntry,
+        initKdbxGroup: initKdbxGroup,
       );
     },
   );
@@ -126,7 +124,7 @@ class _EditAccountPageState extends State<EditAccountPage>
       if (await kdbxSave(KdbxProvider.of(context).kdbx!)) {
         if (isDesktop) {
           context.router.platformNavigate(
-            LookAccountRoute(kdbxEntry: _kdbxEntry, uuid: _kdbxEntry.uuid),
+            LookAccountRoute(kdbxEntry: _kdbxEntry),
           );
         } else {
           context.router.pop(true);

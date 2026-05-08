@@ -74,11 +74,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
           onTap: () async {
             if (kdbxObject is KdbxEntry) {
               await context.router.popAndPush(
-                LookAccountRoute(
-                  kdbxEntry: kdbxObject,
-                  uuid: kdbxObject.uuid,
-                  readOnly: true,
-                ),
+                LookAccountRoute(kdbxEntry: kdbxObject, readOnly: true),
               );
             }
           },
@@ -224,11 +220,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
           case ViewContextMenuItem():
             if (kdbxObject is KdbxEntry) {
               context.router.platformNavigate(
-                LookAccountRoute(
-                  kdbxEntry: kdbxObject,
-                  uuid: kdbxObject.uuid,
-                  readOnly: true,
-                ),
+                LookAccountRoute(kdbxEntry: kdbxObject, readOnly: true),
               );
             }
             break;

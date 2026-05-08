@@ -15,17 +15,15 @@ import '../route.dart';
 final _logger = Logger("page:edit_group_page");
 
 class _EditGroupPageArgs extends PageRouteArgs {
-  _EditGroupPageArgs({super.key, this.kdbxGroup});
-
-  final KdbxGroup? kdbxGroup;
+  _EditGroupPageArgs({super.key});
 }
 
 class EditGroupPageRoute extends PageRouteInfo<_EditGroupPageArgs> {
-  EditGroupPageRoute({Key? key, KdbxGroup? kdbxGroup, KdbxUuid? uuid})
+  EditGroupPageRoute({Key? key, KdbxGroup? kdbxGroup})
     : super(
         name,
-        args: _EditGroupPageArgs(key: key, kdbxGroup: kdbxGroup),
-        rawPathParams: {"uuid": uuid?.deBase64Uuid},
+        args: _EditGroupPageArgs(key: key),
+        rawPathParams: {"uuid": kdbxGroup?.uuid.uuid},
       );
 
   static const name = "EditGroupPageRoute";
@@ -34,15 +32,16 @@ class EditGroupPageRoute extends PageRouteInfo<_EditGroupPageArgs> {
     name,
     builder: (context, data) {
       final args = data.argsAs<_EditGroupPageArgs>(
-        orElse: () {
-          final kdbx = KdbxProvider.of(context).kdbx!;
-          final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
-          final kdbxGroup = uuid != null ? kdbx.findGroupByUuid(uuid) : null;
-
-          return _EditGroupPageArgs(kdbxGroup: kdbxGroup);
-        },
+        orElse: () => _EditGroupPageArgs(),
       );
-      return EditGroupPagePage(key: args.key, kdbxGroup: args.kdbxGroup);
+
+      final kdbx = KdbxProvider.of(context).kdbx!;
+      final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
+
+      return EditGroupPagePage(
+        key: args.key,
+        kdbxGroup: uuid != null ? kdbx.findGroupByUuid(uuid) : null,
+      );
     },
   );
 }
@@ -107,7 +106,7 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
       if (await kdbxSave(KdbxProvider.of(context).kdbx!)) {
         if (isDesktop) {
           context.router.platformNavigate(
-            ManageGroupEntryRoute(kdbxGroup: kdbxGroup, uuid: kdbxGroup.uuid),
+            ManageGroupEntryRoute(kdbxGroup: kdbxGroup),
           );
         } else {
           context.router.pop(kdbxGroup.uuid);

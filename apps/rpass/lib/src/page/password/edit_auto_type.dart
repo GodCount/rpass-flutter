@@ -2,36 +2,43 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
 
+import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../util/route.dart';
 import '../../widget/chip_list.dart';
 
 class _EditAutoTypeArgs extends PageRouteArgs {
-  _EditAutoTypeArgs({super.key, required this.text, this.kdbxEntry});
+  _EditAutoTypeArgs({super.key, required this.text});
   final String text;
-  final KdbxEntry? kdbxEntry;
 }
 
 class EditAutoTypeRoute extends PageRouteInfo<_EditAutoTypeArgs> {
   EditAutoTypeRoute({Key? key, required String text, KdbxEntry? kdbxEntry})
     : super(
         name,
-        args: _EditAutoTypeArgs(key: key, text: text, kdbxEntry: kdbxEntry),
+        args: _EditAutoTypeArgs(key: key, text: text),
+        rawPathParams: {"uuid": kdbxEntry?.uuid.uuid},
       );
 
   static const name = "EditAutoTypeRoute";
 
-  static final PageInfo page = PageInfo(
+  static final PageInfo page = PageInfo.builder(
     name,
-    builder: (data) {
+    builder: (context, data) {
       final args = data.argsAs<_EditAutoTypeArgs>(
         orElse: () => _EditAutoTypeArgs(text: ""),
       );
+
+      final kdbx = KdbxProvider.of(context).kdbx!;
+      final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
+
+      final kdbxEntry = uuid != null ? kdbx.findEntryByUuid(uuid) : null;
+
       return EditAutoTypePage(
         key: args.key,
         text: args.text,
-        kdbxEntry: args.kdbxEntry,
+        kdbxEntry: kdbxEntry,
       );
     },
   );

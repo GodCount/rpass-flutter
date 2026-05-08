@@ -4,7 +4,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:kdbx/kdbx.dart' hide KdbxException, KdbxKeyCommon;
-import 'package:uuid/uuid.dart';
 
 import '../i18n.dart';
 import '../native/platform/android.dart';
@@ -609,6 +608,12 @@ class Kdbx extends KdbxBase
 
     return syncMergeContext;
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _kdbxFile.dispose();
+  }
 }
 
 extension KdbxEntryTagExt on KdbxEntry {
@@ -755,20 +760,8 @@ extension KdbxEntryAutoType on KdbxEntry {
   }
 }
 
-extension KdbxUuidCommon on KdbxUuid {
-  static final _uuids = <String, String>{};
-  String get deBase64Uuid {
-    if (_uuids[uuid] != null) {
-      return _uuids[uuid]!;
-    }
-    _uuids[uuid] = Uuid.unparse(toBytes());
-    return _uuids[uuid]!;
-  }
-}
-
 extension KdbxUuidString on String {
-  KdbxUuid get kdbxUuid =>
-      KdbxUuid.fromBytes(Uint8List.fromList(Uuid.parse(this)));
+  KdbxUuid get kdbxUuid => KdbxUuid(this);
 
   String fromKdbxKeyToI18n(BuildContext context) {
     final t = I18n.of(context)!;
