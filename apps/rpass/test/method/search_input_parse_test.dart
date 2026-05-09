@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rpass/src/kdbx/common.dart';
+import 'package:rpass/src/kdbx/search_handler.dart';
 
 void main() {
   group("解析搜索输入", () {

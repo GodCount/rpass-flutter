@@ -115,7 +115,7 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
   void _confirm() async {
     try {
       await confirm();
-    } on KdbxInvalidKeyException {
+    } on InvalidCredentialsError {
       showError(I18n.of(context)!.password_error);
     } catch (error) {
       showError(error);

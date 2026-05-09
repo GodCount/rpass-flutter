@@ -4,6 +4,7 @@ import 'package:flutter_context_menu/flutter_context_menu.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
+import '../../kdbx/extension.dart';
 import '../../kdbx/kdbx.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
@@ -74,7 +75,7 @@ class _GroupsPageState extends State<GroupsPage>
 
     final kdbx = KdbxProvider.of(context).kdbx!;
 
-    final groups = [kdbx.kdbxFile.body.rootGroup, ...kdbx.rootGroups];
+    final groups = kdbx.rootGroups;
 
     return Scaffold(
       appBar: AppBar(
@@ -129,7 +130,7 @@ class _GroupsItemState extends State<_GroupsItem>
         context.topRoute.name == EditGroupPageRoute.name) {
       final selected =
           context.topRoute.inheritedPathParams.optString("uuid") ==
-          widget.kdbxGroup.uuid.uuid;
+          widget.kdbxGroup.uuid.string;
 
       if (selected != _selected) {
         setState(() {
@@ -156,6 +157,7 @@ class _GroupsItemState extends State<_GroupsItem>
   @override
   Widget build(BuildContext context) {
     final kdbxGroup = widget.kdbxGroup;
+
     return CustomContextMenuRegion<MyContextMenuItem>(
       enabled: isDesktop,
       onItemSelected: (type) {
@@ -168,7 +170,7 @@ class _GroupsItemState extends State<_GroupsItem>
         switch (type) {
           case SearchContextMenuItem():
             context.router.navigate(
-              PasswordsRoute(search: 'g:"${kdbxGroup.name.get() ?? ''}"'),
+              PasswordsRoute(search: 'g:"${kdbxGroup.name}"'),
             );
             break;
           case ModifyContextMenuItem():
@@ -218,13 +220,13 @@ class _GroupsItemState extends State<_GroupsItem>
         isThreeLine: true,
         leading: KdbxIconWidget(
           kdbxIcon: KdbxIconWidgetData(
-            icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
-            customIcon: kdbxGroup.customIcon,
+            icon: kdbxGroup.icon,
+            customIconUuid: kdbxGroup.customIcon,
           ),
           size: 24,
         ),
         title: Text(
-          kdbxGroup.name.get() ?? "",
+          kdbxGroup.name,
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
         ),
@@ -234,17 +236,14 @@ class _GroupsItemState extends State<_GroupsItem>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                kdbxGroup.notes.get() ?? "",
+                kdbxGroup.notes,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
               Align(
                 alignment: Alignment.centerRight,
                 child: Text(
-                  (kdbxGroup.times.creationTime.get() ??
-                          DateTime.fromMillisecondsSinceEpoch(0))
-                      .toLocal()
-                      .formatDate,
+                  (kdbxGroup.times.creation.timeOrZero).toLocal().formatDate,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -258,10 +257,10 @@ class _GroupsItemState extends State<_GroupsItem>
         },
         onLongPress: isMobile
             ? () => showKdbxGroupAction(
-                kdbxGroup.name.get() ?? '',
+                kdbxGroup.name,
                 onSearchTap: () {
                   context.router.navigate(
-                    PasswordsRoute(search: 'g:"${kdbxGroup.name.get() ?? ''}"'),
+                    PasswordsRoute(search: 'g:"${kdbxGroup.name}"'),
                   );
                 },
                 onModifyTap: () => context.router.platformNavigate(

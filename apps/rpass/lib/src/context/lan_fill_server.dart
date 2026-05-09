@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import '../i18n.dart';
 import '../kdbx/auto_fill.dart';
+import '../kdbx/extension.dart';
 import '../kdbx/kdbx.dart';
 import '../page/route.dart';
 import '../rpass.dart';

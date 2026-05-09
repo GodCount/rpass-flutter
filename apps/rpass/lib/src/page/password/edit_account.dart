@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import '../../context/lan_fill_server.dart';
+import '../../kdbx/extension.dart';
 import '../../util/one_time_password.dart';
 import '../../util/random_password.dart';
 import '../../util/route.dart';
@@ -36,8 +37,8 @@ class EditAccountRoute extends PageRouteInfo<_EditAccountArgs> {
         name,
         args: _EditAccountArgs(key: key),
         rawPathParams: {
-          "uuid": kdbxEntry?.uuid.uuid,
-          "groupUuid": initKdbxGroup?.uuid.uuid,
+          "uuid": kdbxEntry?.uuid.string,
+          "groupUuid": initKdbxGroup?.uuid.string,
         },
       );
 
@@ -86,13 +87,11 @@ class _EditAccountPageState extends State<EditAccountPage>
 
   late KdbxEntry _kdbxEntry = widget.kdbxEntry ?? _createKdbxEntry();
 
-  late Set<KdbxKey> _entryFields = _kdbxEntry.customEntries
-      .map((item) => item.key)
-      .toSet();
+  late Set<String> _entryFields = _kdbxEntry.customEntries.toSet();
 
-  late Set<KdbxKey> _urlsFields = _kdbxEntry.moreUrlsKeys.toSet();
+  late Set<String> _urlsFields = _kdbxEntry.moreUrlsKeys.toSet();
 
-  Set<KdbxKey> _deleteFields = {};
+  Set<String> _deleteFields = {};
 
   bool _isDirty = false;
 
@@ -101,7 +100,7 @@ class _EditAccountPageState extends State<EditAccountPage>
     /// 触发整个 form 表进行重建
     if (widget.kdbxEntry != oldWidget.kdbxEntry) {
       _kdbxEntry = widget.kdbxEntry ?? _createKdbxEntry();
-      _entryFields = _kdbxEntry.customEntries.map((item) => item.key).toSet();
+      _entryFields = _kdbxEntry.customEntries.toSet();
       _urlsFields = _kdbxEntry.moreUrlsKeys.toSet();
       _deleteFields = {};
       _from = GlobalKey();
@@ -112,7 +111,8 @@ class _EditAccountPageState extends State<EditAccountPage>
   KdbxEntry _createKdbxEntry() {
     return KdbxProvider.of(context).kdbx!.createVirtualEntry()..setString(
       KdbxKeyCommon.PASSWORD,
-      PlainValue(randomPassword(length: 10)),
+      value: randomPassword(length: 10),
+      protected: true,
     );
   }
 
@@ -135,14 +135,14 @@ class _EditAccountPageState extends State<EditAccountPage>
 
   void _kdbxDeleteSaved() {
     for (final item in _deleteFields) {
-      _kdbxEntry.setString(item, null);
+      _kdbxEntry.setString(item, value: null);
     }
   }
 
   void _kdbxEntryGroupSaved(KdbxGroup? group) {
     final kdbx = KdbxProvider.of(context).kdbx!;
     if (group != null && _kdbxEntry.parent != group) {
-      kdbx.kdbxFile.move(_kdbxEntry, group);
+      kdbx.kdbxDatabase.move(item: _kdbxEntry, target: group);
     }
   }
 
@@ -150,63 +150,66 @@ class _EditAccountPageState extends State<EditAccountPage>
     debugPrint("_entryFieldSaved===>  ${field.key} == ${field.runtimeType}");
     if (field is EntryBinaryFieldSaved) {
       final binarys = field.value;
-      final oldBinaryKeys = _kdbxEntry.binaryEntries.map((item) => item.key);
       // 删除不包含
-      for (var key in oldBinaryKeys) {
-        if (!binarys.any((item) => item.key == key)) {
+      for (var key in _kdbxEntry.binaries.keys) {
+        if (!binarys.containsKey(key)) {
           _kdbxEntry.removeBinary(key);
         }
       }
-      for (var binary in binarys) {
-        if (_kdbxEntry.getBinary(binary.key) == null) {
-          // TODO! isProtected 应该怎么设置
-          _kdbxEntry.createBinary(
-            isProtected: binary.value.isProtected,
-            name: binary.key.key,
-            bytes: binary.value.value,
+
+      for (var binary in binarys.entries) {
+        final data = binary.value;
+        if (data is KdbxDataBinary) {
+          _kdbxEntry.addBinary(
+            KdbxProvider.of(context).kdbx!.kdbxDatabase,
+            key: binary.key,
+            binary: data,
           );
         }
       }
     } else if (field is EntryAutoTypeFieldSaved) {
       _kdbxEntry.setAutoTyprSequence(field.value);
     } else if (field is EntryAutoFillAppFieldSaved) {
-      _kdbxEntry.setString(
-        field.key,
-        field.value != null ? PlainValue(field.value) : null,
-      );
+      _kdbxEntry.setString(field.key, value: field.value);
     } else if (field is EntryTagsFieldSaved) {
       _kdbxEntry.tagList = field.value;
     } else if (field is EntryTextFieldSaved) {
-      final oldValue = _kdbxEntry.getString(field.key)?.getText() ?? "";
-      final newValue = field.value?.getText() ?? "";
+      final oldValue = _kdbxEntry.getNonNullString(field.key);
+      final newValue = field.value ?? "";
 
+      // TODO! 如果值没变化, 但重命名了
       if (newValue != oldValue) {
         if (field.renameKdbxKey != null) {
-          _kdbxEntry.renameKey(field.key, field.renameKdbxKey!);
+          _kdbxEntry.renameKey(field.renameKdbxKey!, field.key);
         }
 
-        _kdbxEntry.setString(field.renameKdbxKey ?? field.key, field.value);
+        _kdbxEntry.setString(
+          field.renameKdbxKey ?? field.key,
+          value: field.value,
+          protected: field.protected,
+        );
       }
     } else if (field is EntryTitleFieldSaved) {
-      if (field.customIcon != null) {
-        _kdbxEntry.customIcon = field.customIcon;
-      } else {
-        _kdbxEntry.icon.set(field.icon);
-        _kdbxEntry.customIcon = null;
-      }
-      _kdbxEntry.setString(field.key, field.value);
+      _kdbxEntry.icon = field.icon;
+      _kdbxEntry.setCustomIcon(
+        KdbxProvider.of(context).kdbx!.kdbxDatabase,
+        uuid: field.customIconUuid,
+        icon: field.customIcon,
+      );
+
+      _kdbxEntry.setString(field.key, value: field.value);
     } else if (field is EntryExpiresFieldSaved) {
-      _kdbxEntry.times.expires.set(field.value.$1);
-      _kdbxEntry.times.expiryTime.set(field.value.$2.toUtc());
+      _kdbxEntry.times.expires = field.value.$1;
+      _kdbxEntry.times.expiry = KdbxTime(field.value.$2.toUtc());
     } else {
       _logger.warning("untreated class $field");
     }
   }
 
-  void _entryUrlDelete(KdbxKey key) {
+  void _entryUrlDelete(String key) {
     setState(() {
       _urlsFields.remove(key);
-      if (_kdbxEntry.stringEntries.any((item) => item.key == key)) {
+      if (_kdbxEntry.fields.containsKey(key)) {
         _isDirty = true;
         _deleteFields.add(key);
       }
@@ -225,10 +228,10 @@ class _EditAccountPageState extends State<EditAccountPage>
     }
   }
 
-  void _entryFieldDelete(KdbxKey key) {
+  void _entryFieldDelete(String key) {
     setState(() {
       _entryFields.remove(key);
-      if (_kdbxEntry.stringEntries.any((item) => item.key == key)) {
+      if (_kdbxEntry.fields.containsKey(key)) {
         _isDirty = true;
         _deleteFields.add(key);
       }
@@ -239,10 +242,7 @@ class _EditAccountPageState extends State<EditAccountPage>
     final t = I18n.of(context)!;
     final kdbx = KdbxProvider.of(context).kdbx!;
 
-    final limitItmes = [
-      ...defaultKdbxKeys,
-      ..._entryFields,
-    ].map((item) => item.key).toList();
+    final limitItmes = [...defaultKdbxKeys, ..._entryFields];
 
     final result = await InputDialog.openDialog(
       context,
@@ -255,8 +255,8 @@ class _EditAccountPageState extends State<EditAccountPage>
     );
     if (result != null && result is String) {
       setState(() {
-        _entryFields.add(KdbxKey(result));
-        _deleteFields.remove(KdbxKey(result));
+        _entryFields.add(result);
+        _deleteFields.remove(result);
       });
     }
   }
@@ -290,7 +290,7 @@ class _EditAccountPageState extends State<EditAccountPage>
             KdbxEntryGroup(
               initialValue: _kdbxEntry.parent != kdbx.virtualGroup
                   ? _kdbxEntry.parent
-                  : widget.initKdbxGroup ?? kdbx.kdbxFile.body.rootGroup,
+                  : widget.initKdbxGroup ?? kdbx.kdbxDatabase.root,
               onSaved: _kdbxEntryGroupSaved,
             ),
             EntryField(
@@ -521,29 +521,33 @@ class _EditAccountPageState extends State<EditAccountPage>
 abstract class EntryFieldSaved<T> {
   EntryFieldSaved({required this.key, required this.value});
 
-  final KdbxKey key;
+  final String key;
   final T value;
 }
 
-class EntryTitleFieldSaved extends EntryFieldSaved<StringValue> {
+class EntryTitleFieldSaved extends EntryFieldSaved<String> {
   EntryTitleFieldSaved({
     required super.key,
     required super.value,
     required this.icon,
+    this.customIconUuid,
     this.customIcon,
   });
 
   final KdbxIcon icon;
+  final KdbxUuid? customIconUuid;
   final KdbxCustomIcon? customIcon;
 }
 
-class EntryTextFieldSaved extends EntryFieldSaved<StringValue?> {
+class EntryTextFieldSaved extends EntryFieldSaved<String?> {
   EntryTextFieldSaved({
     required super.key,
     required super.value,
     this.renameKdbxKey,
+    this.protected,
   });
-  final KdbxKey? renameKdbxKey;
+  final String? renameKdbxKey;
+  final bool? protected;
 }
 
 class EntryAutoTypeFieldSaved extends EntryFieldSaved<String> {
@@ -558,8 +562,7 @@ class EntryTagsFieldSaved extends EntryFieldSaved<List<String>> {
   EntryTagsFieldSaved({required super.key, required super.value});
 }
 
-class EntryBinaryFieldSaved
-    extends EntryFieldSaved<List<MapEntry<KdbxKey, KdbxBinary>>> {
+class EntryBinaryFieldSaved extends EntryFieldSaved<Map<String, KdbxBinary>> {
   EntryBinaryFieldSaved({required super.key, required super.value});
 }
 
@@ -567,7 +570,7 @@ class EntryExpiresFieldSaved extends EntryFieldSaved<(bool, DateTime)> {
   EntryExpiresFieldSaved({required super.key, required super.value});
 }
 
-typedef OnEntryFidleDeleted = void Function(KdbxKey key);
+typedef OnEntryFidleDeleted = void Function(String key);
 typedef OnEntryFieldSaved = void Function(EntryFieldSaved field);
 
 class KdbxEntryGroup extends FormField<KdbxGroup> {
@@ -590,9 +593,7 @@ class KdbxEntryGroup extends FormField<KdbxGroup> {
                   labelText: I18n.of(field.context)!.group,
                   border: const OutlineInputBorder(),
                 ),
-                child: field.value != null
-                    ? Text(field.value!.name.get() ?? '')
-                    : null,
+                child: field.value != null ? Text(field.value!.name) : null,
               ),
             ),
           );
@@ -609,7 +610,7 @@ class EntryField extends StatefulWidget {
     required this.onSaved,
   });
 
-  final KdbxKey kdbxKey;
+  final String kdbxKey;
   final KdbxEntry kdbxEntry;
   final OnEntryFidleDeleted? onDeleted;
   final OnEntryFieldSaved onSaved;
@@ -619,7 +620,7 @@ class EntryField extends StatefulWidget {
 }
 
 class _EntryFieldState extends State<EntryField> {
-  KdbxKey? _renameKdbxKey;
+  String? _renameKdbxKey;
 
   List<KdbxKey> _binaryKeys = [];
 
@@ -644,7 +645,7 @@ class _EntryFieldState extends State<EntryField> {
 
   @override
   void initState() {
-    _value = widget.kdbxEntry.getString(widget.kdbxKey)?.getText();
+    _value = widget.kdbxEntry.getActualString(widget.kdbxKey);
     parseOtp(_value);
     super.initState();
   }
@@ -660,30 +661,27 @@ class _EntryFieldState extends State<EntryField> {
   void _onRenameKdbxKey() async {
     final t = I18n.of(context)!;
     final kdbx = KdbxProvider.of(context).kdbx!;
-    final limitItmes = {
-      ...defaultKdbxKeys,
-      ...widget.kdbxEntry.stringEntries.map((item) => item.key),
-    }.map((item) => item.key).toList();
+    final limitItmes = {...defaultKdbxKeys, ...widget.kdbxEntry.fields.keys};
 
-    limitItmes.remove(widget.kdbxKey.key);
+    limitItmes.remove(widget.kdbxKey);
 
     if (_renameKdbxKey != null) {
-      limitItmes.remove(_renameKdbxKey!.key);
+      limitItmes.remove(_renameKdbxKey!);
     }
 
     final result = await InputDialog.openDialog(
       context,
       title: t.rename,
       label: t.new_field,
-      initialValue: _renameKdbxKey?.key ?? widget.kdbxKey.key,
+      initialValue: _renameKdbxKey ?? widget.kdbxKey,
       promptItmes: kdbx.fieldStatistic.customFields
           .where((item) => !limitItmes.contains(item))
           .toList(),
-      limitItems: limitItmes,
+      limitItems: limitItmes.toList(),
     );
     if (result != null && result is String) {
       setState(() {
-        _renameKdbxKey = KdbxKey(result);
+        _renameKdbxKey = result;
       });
     }
   }
@@ -779,27 +777,27 @@ class _EntryFieldState extends State<EntryField> {
   FormFieldValidator<String?>? _entryFieldValidator() {
     final t = I18n.of(context)!;
 
-    switch (widget.kdbxKey.key) {
-      case KdbxKeyCommon.KEY_URL:
-      case KdbxKeyURLS.KEY_URL1:
-      case KdbxKeyURLS.KEY_URL2:
-      case KdbxKeyURLS.KEY_URL3:
-      case KdbxKeyURLS.KEY_URL4:
-      case KdbxKeyURLS.KEY_URL5:
+    switch (widget.kdbxKey) {
+      case KdbxKeyCommon.URL:
+      case KdbxKeyURLS.URL1:
+      case KdbxKeyURLS.URL2:
+      case KdbxKeyURLS.URL3:
+      case KdbxKeyURLS.URL4:
+      case KdbxKeyURLS.URL5:
         return (value) =>
             value != null &&
                 value.isNotEmpty &&
                 !CommonRegExp.domain.hasMatch(value)
             ? t.format_error(CommonRegExp.domain.pattern)
             : null;
-      case KdbxKeyCommon.KEY_EMAIL:
+      case KdbxKeyCommon.EMAIL:
         return (value) =>
             value != null &&
                 value.isNotEmpty &&
                 !CommonRegExp.email.hasMatch(value)
             ? t.format_error(CommonRegExp.email.pattern)
             : null;
-      case KdbxKeyCommon.KEY_OTP:
+      case KdbxKeyCommon.OTP:
         return (value) =>
             value != null &&
                 value.isNotEmpty &&
@@ -812,16 +810,17 @@ class _EntryFieldState extends State<EntryField> {
   }
 
   void _kdbxTextFieldSaved(String? value) {
+    // TODO! protected 字段需要实现
     widget.onSaved(
       EntryTextFieldSaved(
         key: widget.kdbxKey,
         renameKdbxKey: _renameKdbxKey,
-        value: value != null ? PlainValue(value) : null,
+        value: value,
       ),
     );
   }
 
-  KdbxKey _uniqueBinaryName(String filepath) {
+  String _uniqueBinaryName(String filepath) {
     final fileName = path.basename(filepath);
     final lastIndex = fileName.lastIndexOf('.');
     final baseName = lastIndex > -1
@@ -829,7 +828,7 @@ class _EntryFieldState extends State<EntryField> {
         : fileName;
     final ext = lastIndex > -1 ? fileName.substring(lastIndex + 1) : 'ext';
     for (var i = 0; i < 1000; i++) {
-      final k = i == 0 ? KdbxKey(fileName) : KdbxKey('$baseName$i.$ext');
+      final k = i == 0 ? fileName : '$baseName$i.$ext';
       if (!_binaryKeys.contains(k)) {
         return k;
       }
@@ -871,32 +870,33 @@ class _EntryFieldState extends State<EntryField> {
   Widget _buildFormFieldFactory() {
     final kdbx = KdbxProvider.of(context).kdbx!;
 
-    final initialValue = widget.kdbxEntry.getString(widget.kdbxKey)?.getText();
+    final initialValue = widget.kdbxEntry.getActualString(widget.kdbxKey);
 
-    switch (widget.kdbxKey.key) {
-      case KdbxKeyCommon.KEY_TITLE:
+    switch (widget.kdbxKey) {
+      case KdbxKeyCommon.TITLE:
         return EntryTitleFormField(
           initialValue: initialValue,
-          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
+          label: widget.kdbxKey.fromKdbxKeyToI18n(context),
           kdbxIcon: KdbxIconWidgetData(
-            icon: widget.kdbxEntry.icon.get() ?? KdbxIcon.Key,
-            customIcon: widget.kdbxEntry.customIcon,
+            icon: widget.kdbxEntry.icon,
+            customIconUuid: widget.kdbxEntry.customIcon,
           ),
           onSaved: (data) {
             widget.onSaved(
               EntryTitleFieldSaved(
                 key: widget.kdbxKey,
-                value: PlainValue(data!.$1),
-                icon: data.$2,
-                customIcon: data.$3,
+                value: data!.$1,
+                icon: data.$2.icon,
+                customIcon: data.$2.customIcon,
+                customIconUuid: data.$2.customIconUuid,
               ),
             );
           },
           onChanged: _onChanged,
         );
-      case KdbxKeyCommon.KEY_URL:
-      case KdbxKeyCommon.KEY_USER_NAME:
-      case KdbxKeyCommon.KEY_EMAIL:
+      case KdbxKeyCommon.URL:
+      case KdbxKeyCommon.USER_NAME:
+      case KdbxKeyCommon.EMAIL:
         return ShakeFormField<String>(
           validator: _entryFieldValidator(),
           builder: (context, validator) {
@@ -906,7 +906,7 @@ class _EntryFieldState extends State<EntryField> {
                   width: constraints.biggest.width,
                   initialValue: initialValue,
                   dropdownMenuEntries: _dropdownMenuEntries,
-                  label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
+                  label: widget.kdbxKey.fromKdbxKeyToI18n(context),
                   onSaved: _kdbxTextFieldSaved,
                   onSelected: _onChanged,
                   expandedInsets: const EdgeInsets.all(0),
@@ -919,10 +919,10 @@ class _EntryFieldState extends State<EntryField> {
             );
           },
         );
-      case KdbxKeyCommon.KEY_PASSWORD:
+      case KdbxKeyCommon.PASSWORD:
         return EntryTextFormField(
           initialValue: initialValue,
-          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
+          label: widget.kdbxKey.fromKdbxKeyToI18n(context),
           trailingIcon: const Icon(Icons.create),
           onTrailingTap: () async {
             final password = await context.router.push(
@@ -936,10 +936,10 @@ class _EntryFieldState extends State<EntryField> {
           onSaved: _kdbxTextFieldSaved,
           onChanged: _onChanged,
         );
-      case KdbxKeyCommon.KEY_OTP:
+      case KdbxKeyCommon.OTP:
         return EntryTextFormField(
           initialValue: initialValue,
-          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
+          label: widget.kdbxKey.fromKdbxKeyToI18n(context),
           trailingIcon: isMobile ? const Icon(Icons.qr_code_scanner) : null,
           onTrailingTap: isMobile
               ? () async {
@@ -956,16 +956,16 @@ class _EntryFieldState extends State<EntryField> {
           onChanged: _onChanged,
           validator: _entryFieldValidator(),
         );
-      case KdbxKeyCommon.KEY_NOTES:
+      case KdbxKeyCommon.NOTES:
         return EntryNotesFormField(
           initialValue: initialValue,
-          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
+          label: widget.kdbxKey.fromKdbxKeyToI18n(context),
           onSaved: _kdbxTextFieldSaved,
           onChanged: _onChanged,
         );
-      case KdbxKeySpecial.KEY_AUTO_TYPE:
+      case KdbxKeySpecial.AUTO_TYPE:
         return EntryAutoTypeFormField(
-          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
+          label: widget.kdbxKey.fromKdbxKeyToI18n(context),
           kdbxEntry: widget.kdbxEntry,
           onSaved: (value) {
             widget.onSaved(
@@ -973,9 +973,9 @@ class _EntryFieldState extends State<EntryField> {
             );
           },
         );
-      case KdbxKeySpecial.KEY_AUTO_FILL_PACKAGE_NAME:
+      case KdbxKeySpecial.AUTO_FILL_PACKAGE_NAME:
         return EntryAutoFillAppFormField(
-          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
+          label: widget.kdbxKey.fromKdbxKeyToI18n(context),
           initialValue: initialValue,
           onSaved: (value) {
             widget.onSaved(
@@ -983,10 +983,10 @@ class _EntryFieldState extends State<EntryField> {
             );
           },
         );
-      case KdbxKeySpecial.KEY_TAGS:
+      case KdbxKeySpecial.TAGS:
         final tags = widget.kdbxEntry.tagList;
         return ChipListFormField(
-          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
+          label: widget.kdbxKey.fromKdbxKeyToI18n(context),
           initialValue: [
             for (final item in kdbx.fieldStatistic.getStatistic(widget.kdbxKey))
               ChipListItem(
@@ -1013,21 +1013,21 @@ class _EntryFieldState extends State<EntryField> {
             );
           },
         );
-      case KdbxKeySpecial.KEY_ATTACH:
+      case KdbxKeySpecial.ATTACH:
         return ChipListFormField(
-          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
+          label: widget.kdbxKey.fromKdbxKeyToI18n(context),
           initialValue: [
-            for (final item in widget.kdbxEntry.binaryEntries)
-              ChipListItem(
+            for (final item in widget.kdbxEntry.binaries.entries)
+              ChipListItem<MapEntry<String, KdbxBinary>>(
                 value: item,
                 label: RichText(
                   text: TextSpan(
-                    text: item.key.key,
+                    text: item.key,
                     style: Theme.of(context).textTheme.bodyMedium,
                     children: [
                       TextSpan(
                         text:
-                            " (${item.value.value.length.toStorageUnit(.KB)})",
+                            " (${item.value.length.toStorageUnit(.KB)})",
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ],
@@ -1092,9 +1092,9 @@ class _EntryFieldState extends State<EntryField> {
             );
           },
         );
-      case KdbxKeySpecial.KEY_EXPIRES:
+      case KdbxKeySpecial.EXPIRES:
         return EntryExpiresFormField(
-          label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
+          label: widget.kdbxKey.fromKdbxKeyToI18n(context),
           initialValue: (
             widget.kdbxEntry.times.expires.get() ?? false,
             widget.kdbxEntry.times.expiryTime.get()?.toLocal() ??
@@ -1106,17 +1106,17 @@ class _EntryFieldState extends State<EntryField> {
             );
           },
         );
-      case KdbxKeyURLS.KEY_URL1:
-      case KdbxKeyURLS.KEY_URL2:
-      case KdbxKeyURLS.KEY_URL3:
-      case KdbxKeyURLS.KEY_URL4:
-      case KdbxKeyURLS.KEY_URL5:
+      case KdbxKeyURLS.URL1:
+      case KdbxKeyURLS.URL2:
+      case KdbxKeyURLS.URL3:
+      case KdbxKeyURLS.URL4:
+      case KdbxKeyURLS.URL5:
         return ShakeFormField<String>(
           validator: _entryFieldValidator(),
           builder: (context, validator) {
             return EntryTextFormField(
               initialValue: initialValue,
-              label: widget.kdbxKey.key.fromKdbxKeyToI18n(context),
+              label: widget.kdbxKey.fromKdbxKeyToI18n(context),
               validator: validator,
               onSaved: _kdbxTextFieldSaved,
               onChanged: _onChanged,
@@ -1127,7 +1127,7 @@ class _EntryFieldState extends State<EntryField> {
       default:
         return EntryTextFormField(
           initialValue: initialValue,
-          label: (_renameKdbxKey?.key ?? widget.kdbxKey.key).fromKdbxKeyToI18n(
+          label: (_renameKdbxKey?.key ?? widget.kdbxKey).fromKdbxKeyToI18n(
             context,
           ),
           onSaved: _kdbxTextFieldSaved,

@@ -6,6 +6,7 @@ import 'package:remote_fs/remote_fs.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
+import '../../kdbx/extension.dart';
 import '../../remotes_fs/remote_fs.dart';
 import '../../store/index.dart';
 import '../../util/file.dart';
@@ -54,20 +55,26 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
   void _addPresetGroup(Kdbx kdbx) {
     final t = I18n.of(context)!;
 
-    if (kdbx.kdbxFile.body.rootGroup.name.get() != t.default_) {
-      kdbx.kdbxFile.body.rootGroup.name.set(t.default_);
+    if (kdbx.kdbxDatabase.root.name != t.default_) {
+      kdbx.kdbxDatabase.root.name = t.default_;
     }
 
-    String? uuid = kdbx.customData[KdbxCustomDataKey.GENERAL_GROUP_UUID];
-    if (uuid == null || kdbx.findGroupByUuid(KdbxUuid(uuid)) == null) {
+    String? uuid = kdbx.customData.get(KdbxCustomDataKey.GENERAL_GROUP_UUID);
+    if (uuid == null || kdbx.findGroupByUuid(uuid.kdbxUuid) == null) {
       final general = kdbx.createGroup(t.common);
-      kdbx.customData[KdbxCustomDataKey.GENERAL_GROUP_UUID] = general.uuid.uuid;
+      kdbx.customData.set(
+        KdbxCustomDataKey.GENERAL_GROUP_UUID,
+        general.uuid.string,
+      );
     }
 
-    uuid = kdbx.customData[KdbxCustomDataKey.EMAIL_GROUP_UUID];
-    if (uuid == null || kdbx.findGroupByUuid(KdbxUuid(uuid)) == null) {
-      final email = kdbx.createGroup(t.email)..icon.set(KdbxIcon.EMail);
-      kdbx.customData[KdbxCustomDataKey.EMAIL_GROUP_UUID] = email.uuid.uuid;
+    uuid = kdbx.customData.get(KdbxCustomDataKey.EMAIL_GROUP_UUID);
+    if (uuid == null || kdbx.findGroupByUuid(uuid.kdbxUuid) == null) {
+      final email = kdbx.createGroup(t.email)..icon = KdbxIcon.eMail;
+      kdbx.customData.set(
+        KdbxCustomDataKey.EMAIL_GROUP_UUID,
+        email.uuid.string,
+      );
     }
   }
 

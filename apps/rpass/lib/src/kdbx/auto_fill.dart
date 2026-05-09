@@ -5,6 +5,8 @@ import 'package:enigo_flutter/enigo_flutter.dart';
 
 import '../native/platform/android.dart';
 import '../util/common.dart';
+import 'auto_type.dart';
+import 'extension.dart';
 import 'kdbx.dart';
 
 final _logger = Logger("kdbx:auto_fill");

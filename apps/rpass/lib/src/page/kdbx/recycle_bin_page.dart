@@ -40,11 +40,11 @@ class RecycleBinPage extends StatefulWidget {
 
 class _RecycleBinPageState extends State<RecycleBinPage>
     with SecondLevelPageAutoBack<RecycleBinPage> {
-  final List<KdbxObject> _selecteds = [];
+  final List<KdbxItem> _selecteds = [];
 
   VoidCallback? _removeKdbxListener;
 
-  KdbxObject? _showMenu;
+  KdbxItem? _showMenu;
 
   void _save() async {
     await kdbxSave(KdbxProvider.of(context).kdbx!);
@@ -61,7 +61,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     }
   }
 
-  void _showRecycleBinAction(KdbxObject kdbxObject) {
+  void _showRecycleBinAction(KdbxItem kdbxObject) {
     final t = I18n.of(context)!;
 
     showBottomSheetList(
@@ -103,7 +103,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     );
   }
 
-  void _restoreObjects(List<KdbxObject> values) {
+  void _restoreObjects(List<KdbxItem> values) {
     if (values.isEmpty) return;
     final kdbx = KdbxProvider.of(context).kdbx!;
     for (var item in values) {
@@ -112,7 +112,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     _save();
   }
 
-  void _deletePermanentlys(List<KdbxObject> values) {
+  void _deletePermanentlys(List<KdbxItem> values) {
     if (values.isEmpty) return;
     final kdbx = KdbxProvider.of(context).kdbx!;
     for (var item in values) {
@@ -121,7 +121,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     _save();
   }
 
-  void _onItemTap(KdbxObject kdbxObject) {
+  void _onItemTap(KdbxItem kdbxObject) {
     setState(() {
       if (_selecteds.contains(kdbxObject)) {
         _selecteds.remove(kdbxObject);
@@ -131,7 +131,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     });
   }
 
-  void _onItemLongPress(KdbxObject kdbxObject) {
+  void _onItemLongPress(KdbxItem kdbxObject) {
     _showRecycleBinAction(kdbxObject);
   }
 
@@ -205,7 +205,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     );
   }
 
-  Widget _buildListItem(KdbxObject kdbxObject) {
+  Widget _buildListItem(KdbxItem kdbxObject) {
     return CustomContextMenuRegion<MyContextMenuItem>(
       enabled: isDesktop,
       onItemSelected: (type) {
@@ -286,7 +286,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
         selected: _showMenu == kdbxObject,
         leading: KdbxIconWidget(
           kdbxIcon: KdbxIconWidgetData(
-            icon: kdbxObject is KdbxEntry ? KdbxIcon.Key : KdbxIcon.Folder,
+            icon: kdbxObject is KdbxEntry ? KdbxIcon.key : KdbxIcon.folder,
           ),
         ),
         trailing: _selecteds.contains(kdbxObject)

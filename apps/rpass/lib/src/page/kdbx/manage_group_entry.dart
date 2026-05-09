@@ -5,7 +5,9 @@ import 'package:flutter_context_menu/flutter_context_menu.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
+import '../../kdbx/extension.dart';
 import '../../kdbx/kdbx.dart';
+import '../../kdbx/search_handler.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/kdbx_icon.dart';
@@ -21,7 +23,7 @@ class ManageGroupEntryRoute extends PageRouteInfo<_ManageGroupEntryArgs> {
     : super(
         name,
         args: _ManageGroupEntryArgs(key: key),
-        rawPathParams: {"uuid": kdbxGroup.uuid.uuid},
+        rawPathParams: {"uuid": kdbxGroup.uuid.string},
       );
 
   static const name = "ManageGroupEntryRoute";
@@ -158,7 +160,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
     if (group != null) {
       final kdbx = KdbxProvider.of(context).kdbx!;
       for (var item in kdbxEntrys) {
-        kdbx.kdbxFile.move(item, group);
+        kdbx.kdbxDatabase.move(item: item, target: group);
       }
       await kdbxSave(kdbx);
       kdbxEntrys.clear();
@@ -421,8 +423,8 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
             : null,
         leading: KdbxIconWidget(
           kdbxIcon: KdbxIconWidgetData(
-            icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
-            customIcon: kdbxEntry.customIcon,
+            icon: kdbxEntry.icon,
+            customIconUuid: kdbxEntry.customIcon,
             domain: kdbxEntry.getActualString(KdbxKeyCommon.URL),
           ),
         ),

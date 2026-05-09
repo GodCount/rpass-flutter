@@ -1,32 +1,5 @@
+import 'extension.dart';
 import 'kdbx.dart';
-
-class KdbxError extends Error {
-  KdbxError([this.message]);
-
-  final Object? message;
-
-  @override
-  String toString() {
-    if (message != null) {
-      return "KdbxError failed: ${Error.safeToString(message)}";
-    }
-    return "KdbxError failed";
-  }
-}
-
-enum KdbxExceptionCode { NeverLeave_RecycleBin }
-
-class KdbxException implements Exception {
-  final dynamic message;
-  final KdbxExceptionCode? code;
-
-  KdbxException([this.message, this.code]);
-
-  @override
-  String toString() {
-    return "KdbxException {code: $code, message: $message}";
-  }
-}
 
 class ParseObject {
   ParseObject({this.field, required this.value});
@@ -36,7 +9,9 @@ class ParseObject {
 
   @override
   bool operator ==(Object other) {
-    return other is ParseObject && other.field == field && other.value == value;
+    return other is ParseObject &&
+        other.field == field &&
+        other.value == value;
   }
 
   @override
@@ -170,7 +145,7 @@ class KbdxSearchHandler {
         case null:
           if (!_allContains(kdbxEntry, item.value.toLowerCase())) return false;
           break;
-        case KdbxKeySpecial.KEY_TAGS:
+        case KdbxKeySpecial.TAGS:
           if (!kdbxEntry.tagList
               .map((item) => item.toLowerCase())
               .contains(item.value.toLowerCase())) {
@@ -179,13 +154,14 @@ class KbdxSearchHandler {
           break;
         case "Group":
           if (item.value.isNotEmpty &&
-              kdbxEntry.parent.name.get() != item.value) {
+              kdbxEntry.parent != null &&
+              kdbxEntry.parent!.name != item.value) {
             return false;
           }
           break;
         default:
           if (!kdbxEntry
-              .getNonNullString(KdbxKey(item.field!))
+              .getNonNullString(item.field!)
               .toLowerCase()
               .contains(item.value.toLowerCase())) {
             return false;
@@ -225,17 +201,9 @@ class KbdxSearchHandler {
     }
 
     return result.toList()..sort(
-      (a, b) => b.times.lastModificationTime.get()!.compareTo(
-        a.times.lastModificationTime.get()!,
+      (a, b) => b.times.modification.timeOrZero.compareTo(
+        a.times.modification.timeOrZero,
       ),
     );
   }
-}
-
-abstract class FormatTransform {
-  String get name;
-
-  List<Map<KdbxKey, String>> import(List<Map<String, dynamic>> input);
-
-  List<Map<String, dynamic>> export(List<Map<KdbxKey, String>> input);
 }

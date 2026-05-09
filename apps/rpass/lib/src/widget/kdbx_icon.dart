@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
+import '../context/kdbx.dart';
 import '../kdbx/icons.dart';
 import '../kdbx/kdbx.dart';
 import '../store/index.dart';
@@ -12,25 +15,39 @@ typedef ImageLoadErrorCallback = void Function(Object error);
 class KdbxIconWidgetData {
   KdbxIconWidgetData({
     required this.icon,
+    this.customIconUuid,
     this.customIcon,
     this.source,
     String? domain,
   }) : domain = domain != null ? domain.simpleToDomain().toLowerCase() : domain;
 
   final KdbxIcon icon;
+  final KdbxUuid? customIconUuid;
   final KdbxCustomIcon? customIcon;
   // TODO! url 现在是支持复数个了 KdbxKeyURLS favicon 需要兼容
   final String? domain;
   final FaviconSource? source;
 
+  Uint8List? getCustomIcon(Kdbx kdbx) {
+    if (customIconUuid != null &&
+        kdbx.customIcons.containsKey(customIconUuid)) {
+      return kdbx.getCustomIcon(customIconUuid!);
+    } else if (customIcon != null) {
+      return Uint8List.fromList(customIcon!.data);
+    }
+    return null;
+  }
+
   KdbxIconWidgetData copyWith({
     KdbxIcon? icon,
+    KdbxUuid? customIconUuid,
     KdbxCustomIcon? customIcon,
     FaviconSource? source,
     String? domain,
   }) {
     return KdbxIconWidgetData(
       icon: icon ?? this.icon,
+      customIconUuid: customIconUuid ?? this.customIconUuid,
       customIcon: customIcon ?? this.customIcon,
       source: source ?? this.source,
       domain: domain ?? this.domain,
@@ -54,8 +71,11 @@ class KdbxIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (kdbxIcon.customIcon != null) {
-      return Image.memory(kdbxIcon.customIcon!.data, width: size, height: size);
+    final kdbx = KdbxProvider.of(context).kdbx!;
+    final customIcon = kdbxIcon.getCustomIcon(kdbx);
+
+    if (customIcon != null) {
+      return Image.memory(customIcon, width: size, height: size);
     }
 
     final faviconSource = Store.instance.settings.faviconSource;

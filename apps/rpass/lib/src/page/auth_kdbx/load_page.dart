@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
+import '../../kdbx/extension.dart';
 import '../../kdbx/kdbx.dart';
 import '../../native/channel.dart';
 import '../../native/platform/android.dart';

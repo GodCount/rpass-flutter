@@ -6,7 +6,9 @@ import 'package:flutter_context_menu/flutter_context_menu.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
+import '../../kdbx/extension.dart';
 import '../../kdbx/kdbx.dart';
+import '../../kdbx/search_handler.dart';
 import '../../store/index.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
@@ -571,8 +573,8 @@ class _PasswordItemState extends State<_PasswordItem>
           padding: const EdgeInsets.only(top: 6),
           child: KdbxIconWidget(
             kdbxIcon: KdbxIconWidgetData(
-              icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
-              customIcon: kdbxEntry.customIcon,
+              icon: kdbxEntry.icon,
+              customIconUuid: kdbxEntry.customIcon,
               domain: kdbxEntry.getActualString(KdbxKeyCommon.URL),
             ),
             size: 24,
@@ -611,7 +613,7 @@ class _PasswordItemState extends State<_PasswordItem>
             Align(
               alignment: Alignment.centerRight,
               child: Text(
-                kdbxEntry.parent.name.get() ?? '',
+                kdbxEntry.parent?.name ?? "",
                 overflow: TextOverflow.ellipsis,
               ),
             ),

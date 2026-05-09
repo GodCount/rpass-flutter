@@ -1,11 +1,11 @@
-import '../kdbx.dart';
+import '../extension.dart';
 
 class FirefoxCsvAdapter extends FormatTransform {
   @override
   String get name => "Firefox";
 
   @override
-  List<Map<KdbxKey, String>> import(List<Map<String, dynamic>> input) {
+  List<Map<String, String>> import(List<Map<String, dynamic>> input) {
     return input
         .map(
           (item) => {
@@ -18,7 +18,7 @@ class FirefoxCsvAdapter extends FormatTransform {
   }
 
   @override
-  List<Map<String, dynamic>> export(List<Map<KdbxKey, String>> input) {
+  List<Map<String, dynamic>> export(List<Map<String, String>> input) {
     return input
         .map(
           (item) => {

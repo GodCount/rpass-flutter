@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
+import '../../kdbx/extension.dart';
 import '../../rpass.dart';
 import '../../store/index.dart';
 import '../../util/common.dart';
@@ -222,7 +223,7 @@ class _SettingsPageState extends State<SettingsPage>
                     final enableBiometric = !store.settings.enableBiometric;
                     await biometric.updateCredentials(
                       context,
-                      enableBiometric ? kdbx.credentials.getHash() : null,
+                      enableBiometric ? kdbx.credentials.getHashUint8() : null,
                     );
                     store.settings.seEnableBiometric(enableBiometric);
                     _logger.finest("biometric status is $enableBiometric");

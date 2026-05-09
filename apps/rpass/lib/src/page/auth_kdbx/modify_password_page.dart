@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 
 import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
+import '../../kdbx/extension.dart';
 import '../../kdbx/kdbx.dart';
 import '../../store/index.dart';
 import '../../util/route.dart';
@@ -70,7 +71,7 @@ class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
 
       if (biometric.enable) {
         try {
-          await biometric.updateCredentials(context, credentials.getHash());
+          await biometric.updateCredentials(context, credentials.getHashUint8());
           _logger.finest("update credentials to biometric done!");
         } catch (error, stackTrace) {
           if (error is AuthException &&
@@ -96,7 +97,7 @@ class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
       } catch (error, stackTrace) {
         kdbx.modifyCredentials(oldCredentials);
         if (biometric.enable) {
-          await biometric.updateCredentials(context, oldCredentials.getHash());
+          await biometric.updateCredentials(context, oldCredentials.getHashUint8());
         }
 
         _logger.severe("update credentials fail!", error, stackTrace);

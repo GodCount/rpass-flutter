@@ -4,6 +4,8 @@ import 'package:rich_text_controller/rich_text_controller.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
+import '../../kdbx/auto_type.dart';
+import '../../kdbx/extension.dart';
 import '../../kdbx/kdbx.dart';
 import '../../util/route.dart';
 import '../../widget/chip_list.dart';
@@ -18,7 +20,7 @@ class EditAutoTypeRoute extends PageRouteInfo<_EditAutoTypeArgs> {
     : super(
         name,
         args: _EditAutoTypeArgs(key: key, text: text),
-        rawPathParams: {"uuid": kdbxEntry?.uuid.uuid},
+        rawPathParams: {"uuid": kdbxEntry?.uuid.string},
       );
 
   static const name = "EditAutoTypeRoute";
@@ -120,12 +122,10 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
     final t = I18n.of(context)!;
 
     List<String> customFields = [];
-    List<KdbxKey> moreUrlsFields = [];
+    List<String> moreUrlsFields = [];
 
     if (widget.kdbxEntry != null) {
-      customFields = widget.kdbxEntry!.customEntries
-          .map((item) => item.key.key)
-          .toList();
+      customFields = widget.kdbxEntry!.customEntries;
       moreUrlsFields = widget.kdbxEntry!.moreUrlsKeys;
     }
 
@@ -156,8 +156,8 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
                         ...moreUrlsFields,
                       ])
                         ChipListItem(
-                          value: "{${item.key}}",
-                          label: Text("{${item.key}}"),
+                          value: "{$item}",
+                          label: Text("{$item}"),
                         ),
                     ],
                   ),

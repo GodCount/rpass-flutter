@@ -3,239 +3,103 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:kdbx/kdbx.dart' hide KdbxException, KdbxKeyCommon;
+import 'package:kpasslib/kpasslib.dart';
 
 import '../i18n.dart';
 import '../native/platform/android.dart';
-import '../rpass.dart';
-import '../util/common.dart';
-import '../util/one_time_password.dart';
 import 'auto_fill.dart';
-import 'icons.dart';
+import 'extension.dart';
+import 'field_statistic.dart';
 
-export 'common.dart';
 export 'adapter/adapter.dart';
-export 'auto_type.dart';
-export 'package:kdbx/kdbx.dart'
+export 'package:kpasslib/kpasslib.dart'
     show
         KdbxEntry,
         KdbxGroup,
-        KdbxObject,
-        KdbxKey,
-        PlainValue,
-        StringValue,
+        KdbxItem,
+        KdbxTextField,
         KdbxBinary,
+        KdbxUuid,
         KdbxIcon,
         KdbxCustomIcon,
-        KdbxDao,
-        KdbxUuid,
-        KdbxInvalidKeyException,
-        MergeContext;
-
-const defaultAutoTypeSequence = "{UserName}{TAB}{Password}{ENTER}";
+        KdbxCustomItem,
+        KdbxDataBinary,
+        PlainBinary,
+        ProtectedBinary,
+        KdbxTime,
+        KdbxError,
+        FileCorruptedError,
+        UnsupportedValueError,
+        InvalidStateError,
+        InvalidCredentialsError,
+        MergeError;
 
 abstract class KdbxBase {
-  KdbxFile get kdbxFile;
-}
-
-class KdbxCustomDataKey {
-  static const GENERAL_GROUP_UUID = 'general_group_uuid';
-  static const EMAIL_GROUP_UUID = 'email_group_uuid';
-
-  static const SYNC_ACCPUNT_UUID = "sync_account_uuid";
-}
-
-class KdbxKeySpecial {
-  static const KEY_TAGS = 'Tags';
-  static const KEY_ATTACH = 'Attach';
-  static const KEY_EXPIRES = "Expires";
-  static const KEY_AUTO_TYPE = "AutoType";
-  static const KEY_AUTO_FILL_PACKAGE_NAME = "AutoFillPackageName";
-
-  static KdbxKey TAGS = KdbxKey(KEY_TAGS);
-  static KdbxKey ATTACH = KdbxKey(KEY_ATTACH);
-  static KdbxKey EXPIRES = KdbxKey(KEY_EXPIRES);
-  static KdbxKey AUTO_TYPE = KdbxKey(KEY_AUTO_TYPE);
-  static KdbxKey AUTO_FILL_PACKAGE_NAME = KdbxKey(KEY_AUTO_FILL_PACKAGE_NAME);
-
-  static List<KdbxKey> all = [
-    AUTO_TYPE,
-    AUTO_FILL_PACKAGE_NAME,
-    TAGS,
-    ATTACH,
-    EXPIRES,
-  ];
-}
-
-class KdbxKeyCommon {
-  static const KEY_TITLE = 'Title';
-  static const KEY_URL = 'URL';
-  static const KEY_USER_NAME = 'UserName';
-  static const KEY_EMAIL = 'Email';
-  static const KEY_PASSWORD = 'Password';
-  static const KEY_OTP = 'OTPAuth';
-  static const KEY_NOTES = 'Notes';
-
-  static KdbxKey TITLE = KdbxKey(KEY_TITLE);
-  static KdbxKey URL = KdbxKey(KEY_URL);
-  static KdbxKey USER_NAME = KdbxKey(KEY_USER_NAME);
-  static KdbxKey EMAIL = KdbxKey(KEY_EMAIL);
-  static KdbxKey PASSWORD = KdbxKey(KEY_PASSWORD);
-  static KdbxKey OTP = KdbxKey(KEY_OTP);
-  static KdbxKey NOTES = KdbxKey(KEY_NOTES);
-
-  // 注意顺序
-  static List<KdbxKey> all = [
-    TITLE,
-    URL,
-    USER_NAME,
-    EMAIL,
-    PASSWORD,
-    OTP,
-    NOTES,
-  ];
-
-  static List<KdbxKey> excludeURL = [
-    TITLE,
-    USER_NAME,
-    EMAIL,
-    PASSWORD,
-    OTP,
-    NOTES,
-  ];
-}
-
-class KdbxKeyURLS {
-  static const KEY_URL1 = 'URL1';
-  static KdbxKey URL1 = KdbxKey(KEY_URL1);
-
-  static const KEY_URL2 = 'URL2';
-  static KdbxKey URL2 = KdbxKey(KEY_URL2);
-
-  static const KEY_URL3 = 'URL3';
-  static KdbxKey URL3 = KdbxKey(KEY_URL3);
-
-  static const KEY_URL4 = 'URL4';
-  static KdbxKey URL4 = KdbxKey(KEY_URL4);
-
-  static const KEY_URL5 = 'URL5';
-  static KdbxKey URL5 = KdbxKey(KEY_URL5);
-
-  static List<KdbxKey> all = [URL1, URL2, URL3, URL4, URL5];
-}
-
-final defaultKdbxKeys = [
-  ...KdbxKeyCommon.all,
-  ...KdbxKeyURLS.all,
-  ...KdbxKeySpecial.all,
-];
-
-class FieldStatistic {
-  FieldStatistic({
-    Set<String>? urls,
-    Set<String>? userNames,
-    Set<String>? emails,
-    Set<String>? tags,
-    Set<String>? customFields,
-    Set<String>? customIcons,
-  }) : urls = urls ?? {},
-       userNames = userNames ?? {},
-       emails = emails ?? {},
-       tags = tags ?? {},
-       customFields = customFields ?? {},
-       customIcons = customIcons ?? {};
-  final Set<String> urls;
-  final Set<String> userNames;
-  final Set<String> emails;
-  final Set<String> tags;
-  final Set<String> customFields;
-  final Set<String> customIcons;
-
-  Set<String> getStatistic(KdbxKey kdbxKey) {
-    switch (kdbxKey.key) {
-      case KdbxKeyCommon.KEY_URL:
-      case KdbxKeyURLS.KEY_URL1:
-      case KdbxKeyURLS.KEY_URL2:
-      case KdbxKeyURLS.KEY_URL3:
-      case KdbxKeyURLS.KEY_URL4:
-      case KdbxKeyURLS.KEY_URL5:
-        return urls;
-      case KdbxKeyCommon.KEY_USER_NAME:
-        return userNames;
-      case KdbxKeyCommon.KEY_EMAIL:
-        return emails;
-      case KdbxKeySpecial.KEY_TAGS:
-        return tags;
-      case "CustomFields":
-        return customFields;
-      case "CustomIcons":
-        return customIcons;
-    }
-    return {};
-  }
+  KdbxDatabase get kdbxDatabase;
 }
 
 extension KdbxMetaCommon on KdbxBase {
-  String get version => kdbxFile.header.version.toString();
-  String get generator => kdbxFile.body.meta.generator.get() ?? '';
-  String get databaseName => kdbxFile.body.meta.databaseName.get() ?? '';
-  String get databaseDescription =>
-      kdbxFile.body.meta.databaseDescription.get() ?? '';
-  int get historyMaxItems => kdbxFile.body.meta.historyMaxItems.get() ?? 20;
+  (int, int) get version => kdbxDatabase.header.version;
+  String get generator => kdbxDatabase.meta.generator ?? '';
+  String get databaseName => kdbxDatabase.meta.name;
+  String get databaseDescription => kdbxDatabase.meta.description ?? '';
+  int get historyMaxItems => kdbxDatabase.meta.historyMaxItems ?? 20;
   int get historyMaxSize =>
-      kdbxFile.body.meta.historyMaxSize.get() ?? 10 * 1024 * 1024;
-  bool get recycleBinEnabled =>
-      kdbxFile.body.meta.recycleBinEnabled.get() ?? false;
-  String get recycleBinUuid =>
-      kdbxFile.body.meta.recycleBinUUID.get()?.uuid ?? KdbxUuid.NIL.uuid;
+      kdbxDatabase.meta.historyMaxSize ?? 10 * 1024 * 1024;
+  bool get recycleBinEnabled => kdbxDatabase.meta.recycleBinEnabled;
+  KdbxUuid get recycleBinUuid =>
+      kdbxDatabase.meta.recycleBinUuid ?? KdbxUuid.zero;
 
-  Iterable<KdbxBinary> get binariesIterablea => kdbxFile.ctx.binariesIterable;
-  Iterable<KdbxCustomIcon> get customIcons =>
-      kdbxFile.body.meta.customIcons.values;
+  KdbxBinaries get binaries => kdbxDatabase.binaries;
+  Map<KdbxUuid, KdbxCustomIcon> get customIcons =>
+      kdbxDatabase.meta.customIcons;
 
-  KdbxCustomData get customData => kdbxFile.body.meta.customData;
+  KdbxCustomData get customData => kdbxDatabase.meta.customData;
 
   set databaseName(String value) {
-    kdbxFile.body.meta.databaseName.set(value);
+    kdbxDatabase.meta.name = value;
   }
 
   set databaseDescription(String value) {
-    kdbxFile.body.meta.databaseDescription.set(value);
+    kdbxDatabase.meta.description = value;
   }
 
   set historyMaxItems(int value) {
-    kdbxFile.body.meta.historyMaxItems.set(value);
+    kdbxDatabase.meta.historyMaxItems = value;
   }
 
   set historyMaxSize(int value) {
-    kdbxFile.body.meta.historyMaxSize.set(value);
+    kdbxDatabase.meta.historyMaxSize = value;
   }
 
   set recycleBinEnabled(bool enabled) {
-    kdbxFile.body.meta.recycleBinEnabled.set(enabled);
+    kdbxDatabase.meta.recycleBinEnabled = enabled;
+  }
+
+  Uint8List? getCustomIcon(KdbxUuid uuid) {
+    final data = customIcons[uuid]?.data;
+    return data != null ? Uint8List.fromList(data) : null;
   }
 }
 
 extension KdbxGroupExt on KdbxBase {
   // 是不带垃圾箱组的
-  List<KdbxGroup> get rootGroups => kdbxFile.body.rootGroup.groups
-      .where((group) => !group.isInRecycleBin() && group != kdbxFile.recycleBin)
+  List<KdbxGroup> get rootGroups => kdbxDatabase.groups
+      .where((group) => !kdbxDatabase.isInRecycleBin(group))
       .toList(growable: false);
 
   // 只考虑在根组下添加新组, 不打算嵌套组
   KdbxGroup createGroup(String name) {
-    return kdbxFile.createGroup(parent: kdbxFile.body.rootGroup, name: name);
+    return kdbxDatabase.createGroup(parent: kdbxDatabase.root, name: name);
   }
 
   void deleteGroup(KdbxGroup group) {
-    kdbxFile.deleteGroup(group);
+    kdbxDatabase.remove(group);
   }
 
   KdbxGroup? findGroupByUuid(KdbxUuid uuid) {
     try {
-      return kdbxFile.body.rootGroup.getAllGroups().firstWhere(
-        (group) => group.uuid == uuid,
-      );
+      return kdbxDatabase.groups.firstWhere((group) => group.uuid == uuid);
     } catch (e) {
       return null;
     }
@@ -250,10 +114,10 @@ mixin KdbxVirtualObject on KdbxBase {
   KdbxGroup _getVirtualGroup() {
     if (_kdbxVirtualGroup != null) return _kdbxVirtualGroup!;
     _kdbxVirtualGroup = KdbxGroup.create(
-      ctx: kdbxFile.ctx,
-      parent: null,
       name: "Virtual-Group",
-    )..file = kdbxFile;
+      icon: .feather,
+      id: KdbxUuid.zero,
+    );
     return _kdbxVirtualGroup!;
   }
 
@@ -265,16 +129,25 @@ mixin KdbxVirtualObject on KdbxBase {
 extension KdbxEntryExt on KdbxBase {
   // 除垃圾桶的全部 KdbxEntry
   List<KdbxEntry> get totalEntry => [
-    ...kdbxFile.body.rootGroup.entries,
-    ...rootGroups.expand((group) => group.getAllEntries()),
+    ...rootGroups.expand((group) => group.allEntries),
   ];
 
   KdbxEntry createEntry(KdbxGroup parent) {
-    final entry = KdbxEntry.create(kdbxFile, parent);
+    final entry = KdbxEntry.create(
+      parent: parent,
+      meta: kdbxDatabase.meta,
+      id: KdbxUuid.random(),
+    );
     for (var key in KdbxKeyCommon.all) {
-      entry.setString(key, PlainValue(''));
+      if (!entry.fields.containsKey(key)) {
+        entry.setString(
+          key,
+          value: "",
+          protection: kdbxDatabase.meta.memoryProtection,
+        );
+      }
     }
-    parent.addEntry(entry);
+    parent.entries.add(entry);
     return entry;
   }
 
@@ -287,138 +160,81 @@ extension KdbxEntryExt on KdbxBase {
   }
 
   void deleteEntry(KdbxEntry entry) {
-    kdbxFile.deleteEntry(entry);
+    kdbxDatabase.remove(entry);
   }
 }
 
 extension KdbxRecycleBinExt on KdbxBase {
-  List<KdbxObject> get recycleBinObjects => [
-    ...kdbxFile.getRecycleBinOrCreate().groups,
-    ...kdbxFile.getRecycleBinOrCreate().entries,
-  ];
+  List<KdbxItem> get recycleBinObjects => _getRecycleBinOrCreate().allItems;
 
-  void deletePermanently(KdbxObject object) {
-    kdbxFile.deletePermanently(object);
+  KdbxGroup _getRecycleBinOrCreate() {
+    kdbxDatabase.meta.recycleBinEnabled = true;
+    return kdbxDatabase.recycleBin!;
   }
 
-  void restoreObject(KdbxObject object) {
+  void deletePermanently(KdbxItem item) {
+    // 不指定目标组, 则会永久删除
+    kdbxDatabase.move(item: item);
+  }
+
+  void restoreObject(KdbxItem item) {
     KdbxGroup? prveGroup;
 
-    try {
-      prveGroup = kdbxFile.findGroupByUuid(object.previousParentGroup.get());
-      if (prveGroup.isInRecycleBin() || prveGroup == kdbxFile.recycleBin) {
-        prveGroup = kdbxFile.body.rootGroup;
-      }
-    } catch (e) {
-      prveGroup = kdbxFile.body.rootGroup;
+    prveGroup =
+        kdbxDatabase.getGroup(uuid: item.previousParent) ?? kdbxDatabase.root;
+    if (kdbxDatabase.isInRecycleBin(prveGroup)) {
+      prveGroup = kdbxDatabase.root;
     }
 
-    kdbxFile.move(object, prveGroup);
+    kdbxDatabase.move(item: item, target: prveGroup);
   }
 }
 
-extension Base64Credentials on Credentials {
+extension Base64Credentials on KdbxCredentials {
   String toBase64() {
     return base64.encode(getHash());
   }
 }
 
 extension KdbxCredentialsExt on KdbxBase {
-  Credentials get credentials => kdbxFile.credentials;
+  KdbxCredentials get credentials => kdbxDatabase.header.credentials;
 
-  Credentials createCredentials(String password) {
-    return Credentials(ProtectedValue.fromString(password));
+  KdbxCredentials createCredentials(String password) {
+    return KdbxCredentials(password: ProtectedData.fromString(password));
   }
 
   void modifyPassword(String password) {
-    kdbxFile.credentials = createCredentials(password);
+    modifyCredentials(createCredentials(password));
   }
 
-  void modifyCredentials(Credentials credentials) {
-    kdbxFile.credentials = credentials;
+  void modifyCredentials(KdbxCredentials credentials) {
+    kdbxDatabase.header.credentials = credentials;
   }
 }
 
 mixin KdbxEntryFieldStatistic on KdbxBase {
-  FieldStatistic? _fieldStatistic;
-
-  FieldStatistic get fieldStatistic => _getFieldStatistic();
-
-  FieldStatistic _getFieldStatistic() {
-    if (_fieldStatistic != null) {
-      return _fieldStatistic!;
-    }
-
-    _fieldStatistic = FieldStatistic();
-
-    _fieldStatistic!.customIcons.addAll(
-      customIcons.map((item) => item.uuid.uuid),
-    );
-
-    void setFieldStatistic(KdbxEntry entry) {
-      final url = entry.getString(KdbxKeyCommon.URL)?.getText();
-      final userName = entry.getString(KdbxKeyCommon.USER_NAME)?.getText();
-      final email = entry.getString(KdbxKeyCommon.EMAIL)?.getText();
-
-      url != null && url.isNotEmpty && _fieldStatistic!.urls.add(url);
-      userName != null &&
-          userName.isNotEmpty &&
-          _fieldStatistic!.userNames.add(userName);
-
-      email != null && email.isNotEmpty && _fieldStatistic!.emails.add(email);
-
-      _fieldStatistic!.tags.addAll(entry.tagList);
-
-      for (final item in entry.stringEntries) {
-        if (entry.isCustomKey(item.key)) {
-          _fieldStatistic!.customFields.add(item.key.key);
-        } else if (KdbxKeyURLS.all.contains(item.key)) {
-          final url = entry.getActualString(item.key);
-          if (url != null && url.isNotEmpty) {
-            _fieldStatistic!.urls.add(url);
-          }
-        }
-      }
-    }
-
-    totalEntry.forEach(setFieldStatistic);
-
-    kdbxFile.dirtyObjectsChanged.listen((event) {
-      _fieldStatistic!.customIcons.addAll(
-        customIcons.map((item) => item.uuid.uuid),
-      );
-      for (var item in event) {
-        if (item is KdbxEntry) {
-          setFieldStatistic(item);
-        }
-      }
-    });
-
-    return _fieldStatistic!;
-  }
-}
-
-extension KdbxIconExt on KdbxObject {
-  IconData toMaterialIcon() {
-    return KdbxIcon2Material.to(icon.get() ?? KdbxIcon.Key);
-  }
+  FieldStatistic get fieldStatistic => FieldStatistic.statistic(this);
 }
 
 extension KdbxExternalImport on KdbxBase {
-  void import(List<Map<KdbxKey, String>> list, {KdbxGroup? kdbxGroup}) {
+  void import(List<Map<String, String>> list, {KdbxGroup? kdbxGroup}) {
     if (kdbxGroup == null) {
-      final uuid = customData[KdbxCustomDataKey.GENERAL_GROUP_UUID];
+      final uuid = customData.get(KdbxCustomDataKey.GENERAL_GROUP_UUID);
       kdbxGroup = uuid != null
-          ? findGroupByUuid(KdbxUuid(uuid)) ?? kdbxFile.body.rootGroup
-          : kdbxFile.body.rootGroup;
+          ? findGroupByUuid(KdbxUuid.fromString(uuid)) ?? kdbxDatabase.root
+          : kdbxDatabase.root;
     }
     for (var item in list) {
       final kdbxEntry = createEntry(kdbxGroup);
       for (var entry in item.entries) {
         if (entry.key == KdbxKeySpecial.TAGS) {
-          kdbxEntry.tags.set(entry.value);
+          kdbxEntry.tags = entry.value.split(";");
         } else {
-          kdbxEntry.setString(entry.key, PlainValue(entry.value));
+          kdbxEntry.setString(
+            entry.key,
+            value: entry.value,
+            protection: kdbxDatabase.meta.memoryProtection,
+          );
         }
       }
     }
@@ -427,40 +243,41 @@ extension KdbxExternalImport on KdbxBase {
 
 extension KdbxSync on KdbxBase {
   KdbxEntry? get syncAccountEntry =>
-      customData[KdbxCustomDataKey.SYNC_ACCPUNT_UUID] != null
+      customData.get(KdbxCustomDataKey.SYNC_ACCPUNT_UUID) != null
       ? findEntryByUuid(
-          KdbxUuid(customData[KdbxCustomDataKey.SYNC_ACCPUNT_UUID]!),
+          customData.get(KdbxCustomDataKey.SYNC_ACCPUNT_UUID)!.kdbxUuid,
         )
       : null;
 
   set syncAccountEntry(KdbxEntry? entry) {
-    customData[KdbxCustomDataKey.SYNC_ACCPUNT_UUID] = entry != null
-        ? entry.uuid.uuid
-        : KdbxUuid.NIL.uuid;
+    customData.set(
+      KdbxCustomDataKey.SYNC_ACCPUNT_UUID,
+      entry != null ? entry.uuid.string : KdbxUuid.zero.string,
+    );
   }
 }
 
-class SyncMergeContext {
-  SyncMergeContext({
-    required this.mergeContext,
-    this.isUpdateMasterKey = false,
-    this.masterKeyChanged = false,
-  });
+// class SyncMergeContext {
+//   SyncMergeContext({
+//     required this.mergeContext,
+//     this.isUpdateMasterKey = false,
+//     this.masterKeyChanged = false,
+//   });
 
-  final MergeContext mergeContext;
+//   final MergeContext mergeContext;
 
-  /// 当远程 kdbx 密钥是新的，则需要更新本地 指纹密钥
-  final bool isUpdateMasterKey;
+//   /// 当远程 kdbx 密钥是新的，则需要更新本地 指纹密钥
+//   final bool isUpdateMasterKey;
 
-  /// 本地和远程密钥不一致
-  final bool masterKeyChanged;
+//   /// 本地和远程密钥不一致
+//   final bool masterKeyChanged;
 
-  /// 字段有变化
-  bool get fieldChanged => mergeContext.changes.isNotEmpty;
+//   /// 字段有变化
+//   bool get fieldChanged => mergeContext.changes.isNotEmpty;
 
-  /// kdbx 文件
-  Uint8List? data;
-}
+//   /// kdbx 文件
+//   Uint8List? data;
+// }
 
 extension KdbxAndroidAutoFill on KdbxBase {
   Future<AutofillDataset> autofillSearch(AutofillMetadata metadata) {
@@ -468,86 +285,58 @@ extension KdbxAndroidAutoFill on KdbxBase {
   }
 }
 
-extension KdbxEntryAndroidAutoFill on KdbxEntry {
-  Map<String, String?> toAutofillDataset(Set<String> fieldTypes) {
-    final title = getActualString(KdbxKeyCommon.TITLE);
-    final password = getActualString(KdbxKeyCommon.PASSWORD);
-    final email = getActualString(KdbxKeyCommon.EMAIL);
-    final user = getActualString(KdbxKeyCommon.USER_NAME);
-    final otp = getActualString(KdbxKeyCommon.OTP);
-
-    return {
-      AutofillDataset.DATASET_FIELD_LABEL: title != null && title.isNotEmpty
-          ? title
-          : user,
-      AutofillDataset.DATASET_FIELD_PASSWORD:
-          fieldTypes.contains(AutofillDataset.DATASET_FIELD_PASSWORD)
-          ? password
-          : null,
-      AutofillDataset.DATASET_FIELD_USERNAME:
-          fieldTypes.contains(AutofillDataset.DATASET_FIELD_EMAIL) &&
-              email?.isNotEmpty ==
-                  true // 存在邮箱,优先返回邮箱
-          ? email
-          : user ?? email,
-      AutofillDataset.DATASET_FIELD_EMAIL:
-          fieldTypes.contains(AutofillDataset.DATASET_FIELD_EMAIL)
-          ? email
-          : user,
-      AutofillDataset.DATASET_FIELD_OTP:
-          fieldTypes.contains(AutofillDataset.DATASET_FIELD_OTP) ? otp : null,
-    };
-  }
-}
-
 class Kdbx extends KdbxBase
     with KdbxEntryFieldStatistic, KdbxVirtualObject, ChangeNotifier {
-  Kdbx({required KdbxFile kdbxFile, this.filepath}) : _kdbxFile = kdbxFile;
+  Kdbx({required KdbxDatabase kdbxDatabase, this.filepath})
+    : _kdbxDatabase = kdbxDatabase;
 
-  KdbxFile _kdbxFile;
+  final KdbxDatabase _kdbxDatabase;
 
   String? filepath;
 
   @override
-  KdbxFile get kdbxFile => _kdbxFile;
+  KdbxDatabase get kdbxDatabase => _kdbxDatabase;
 
   static Kdbx create({
-    required Credentials credentials,
+    required KdbxCredentials credentials,
     required String name,
     String? generator,
   }) {
     return Kdbx(
-      kdbxFile: KdbxFormat().create(
-        credentials,
-        name,
-        generator: generator ?? RpassInfo.appName,
-      ),
+      kdbxDatabase: KdbxDatabase.create(credentials: credentials, name: name)
+        ..meta.generator = generator,
     );
   }
 
-  static Credentials createCredentials(String? password, Uint8List? keyFile) {
-    if (password == null && keyFile == null) {
+  static KdbxCredentials createCredentials(
+    String? password,
+    Uint8List? keyData,
+  ) {
+    if (password == null && keyData == null) {
       throw Exception("Must include a password / key file.");
     }
 
-    return Credentials.composite(
-      password != null ? ProtectedValue.fromString(password) : null,
-      keyFile,
+    return KdbxCredentials(
+      password: password != null ? ProtectedData.fromString(password) : null,
+      keyData: keyData,
     );
   }
 
   static Uint8List randomKeyFile() {
-    return KeyFileCredentials.random().getBinary();
+    return Uint8List.fromList(KdbxCredentials.createRandomKeyFile(version: 2));
   }
 
   static Future<Kdbx> loadBytesFromCredentials({
     required Uint8List data,
-    required Credentials credentials,
+    required KdbxCredentials credentials,
     String? filepath,
   }) async {
     return Kdbx(
       filepath: filepath,
-      kdbxFile: await KdbxFormat().read(data, credentials),
+      kdbxDatabase: await KdbxDatabase.fromBytes(
+        data: data,
+        credentials: credentials,
+      ),
     );
   }
 
@@ -556,16 +345,17 @@ class Kdbx extends KdbxBase
     required Uint8List token,
     String? filepath,
   }) async {
-    return Kdbx(
+    return loadBytesFromCredentials(
+      data: data,
       filepath: filepath,
-      kdbxFile: await KdbxFormat().read(data, Credentials.fromHash(token)),
+      credentials: KdbxCredentials(keyData: token),
     );
   }
 
   Future<Uint8List> save([String? filepath]) async {
     this.filepath ??= filepath;
     if (this.filepath != null) {
-      final data = await kdbxFile.save();
+      final data = Uint8List.fromList(await kdbxDatabase.save());
 
       await File(this.filepath!).writeAsBytes(data);
 
@@ -576,229 +366,82 @@ class Kdbx extends KdbxBase
     }
   }
 
-  Future<SyncMergeContext> sync(Kdbx remoteKdbx) async {
-    final isUpdateMasterKey = remoteKdbx.kdbxFile.body.meta.masterKeyChanged
-        .isAfter(kdbxFile.body.meta.masterKeyChanged);
+  Future<void> sync(Kdbx remoteKdbx) async {
+    throw UnsupportedError("需要处理并验证");
+    // TODO! 需要处理并验证
+    kdbxDatabase.merge(remoteKdbx.kdbxDatabase);
+    // final isUpdateMasterKey = remoteKdbx.kdbxFile.body.meta.masterKeyChanged
+    //     .isAfter(kdbxFile.body.meta.masterKeyChanged);
 
-    final masterKeyChanged =
-        isUpdateMasterKey ||
-        remoteKdbx.kdbxFile.body.meta.masterKeyChanged.get() !=
-            kdbxFile.body.meta.masterKeyChanged.get();
+    // final masterKeyChanged =
+    //     isUpdateMasterKey ||
+    //     remoteKdbx.kdbxFile.body.meta.masterKeyChanged.get() !=
+    //         kdbxFile.body.meta.masterKeyChanged.get();
 
-    // 以远程的为基准
-    // 从远程的 合并 本地的
-    // 始终保持本地和远程数据一致
-    final syncMergeContext = SyncMergeContext(
-      // TODO! changes 只记录了本地的更改，远程更改没有记录
-      // 影响日志展示
-      mergeContext: remoteKdbx.kdbxFile.merge(kdbxFile),
-      isUpdateMasterKey: isUpdateMasterKey,
-      masterKeyChanged: masterKeyChanged,
-    );
+    // // 以远程的为基准
+    // // 从远程的 合并 本地的
+    // // 始终保持本地和远程数据一致
+    // final syncMergeContext = SyncMergeContext(
+    //   // TODO! changes 只记录了本地的更改，远程更改没有记录
+    //   // 影响日志展示
+    //   mergeContext: remoteKdbx.kdbxFile.merge(kdbxFile),
+    //   isUpdateMasterKey: isUpdateMasterKey,
+    //   masterKeyChanged: masterKeyChanged,
+    // );
 
-    final tmpKdbxFile = kdbxFile;
+    // final tmpKdbxFile = kdbxFile;
 
-    try {
-      _kdbxFile = remoteKdbx.kdbxFile;
-      syncMergeContext.data = await save();
-    } catch (e) {
-      _kdbxFile = tmpKdbxFile;
-      rethrow;
-    }
+    // try {
+    //   _kdbxFile = remoteKdbx.kdbxFile;
+    //   syncMergeContext.data = await save();
+    // } catch (e) {
+    //   _kdbxFile = tmpKdbxFile;
+    //   rethrow;
+    // }
 
-    return syncMergeContext;
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _kdbxFile.dispose();
-  }
-}
-
-extension KdbxEntryTagExt on KdbxEntry {
-  List<String> get tagList =>
-      (tags.get() ?? "").split(";").where((item) => item.isNotEmpty).toList();
-
-  set tagList(List<String> list) => tags.set(list.join(";"));
-
-  void addTag(String value) {
-    if (!tagList.contains(value)) {
-      tags.set("$tags;$value");
-    }
-  }
-
-  void removeTag(String value) {
-    final tmpTagList = tagList;
-    if (tmpTagList.remove(value)) {
-      tags.set(tmpTagList.join(";"));
-    }
-  }
-
-  Map<KdbxKey, String> toPlainMapEntry() {
-    return Map.fromEntries(
-      KdbxKeyCommon.all.map((item) => MapEntry(item, getNonNullString(item))),
-    );
-  }
-}
-
-enum _FindEnabledType { display, Searching }
-
-extension KdbxEntryCommon on KdbxEntry {
-  Iterable<MapEntry<KdbxKey, StringValue?>> get customEntries =>
-      stringEntries.where((item) => isCustomKey(item.key));
-
-  List<KdbxKey> get moreUrlsKeys {
-    final keys = stringEntries.map((item) => item.key);
-    return KdbxKeyURLS.all.where((item) => keys.contains(item)).toList();
-  }
-
-  bool isDefaultKey(KdbxKey key) => defaultKdbxKeys.contains(key);
-
-  bool isCustomKey(KdbxKey key) => !isDefaultKey(key);
-
-  bool isExpiry() {
-    return times.expires.get() == true &&
-        times.expiryTime.get() != null &&
-        times.expiryTime.get()!.isBefore(DateTime.now());
-  }
-
-  String getNonNullString(KdbxKey key) {
-    return getString(key)?.getText() ?? '';
-  }
-
-  String? getActualString(KdbxKey key) {
-    return key == KdbxKeyCommon.OTP ? getOTPCode() : getString(key)?.getText();
-  }
-
-  String getLabel() {
-    return getActualString(KdbxKeyCommon.TITLE)?.emptyToNull ??
-        getActualString(KdbxKeyCommon.USER_NAME)?.emptyToNull ??
-        getActualString(KdbxKeyCommon.EMAIL)?.emptyToNull ??
-        getActualString(KdbxKeyCommon.URL) ??
-        "";
-  }
-
-  List<String> getUrls() {
-    return [KdbxKeyCommon.URL, ...KdbxKeyURLS.all]
-        .map((item) => getActualString(item))
-        .where((item) => item != null && item.isNotEmpty)
-        .cast<String>()
-        .toList();
-  }
-
-  String? getOTPCode() {
-    final url = getString(KdbxKeyCommon.OTP)?.getText();
-    return url != null
-        ? AuthOneTimePassword.tryParse(url)?.code().toString()
-        : null;
-  }
-
-  String copyBasicString() {
-    return "title: ${getNonNullString(KdbxKeyCommon.TITLE)}\n"
-        "url: ${getNonNullString(KdbxKeyCommon.URL)}\n"
-        "username: ${getNonNullString(KdbxKeyCommon.USER_NAME)}\n"
-        "email: ${getNonNullString(KdbxKeyCommon.EMAIL)}\n"
-        "password: ${getNonNullString(KdbxKeyCommon.PASSWORD)}";
-  }
-
-  bool _findEnabled(_FindEnabledType type, [KdbxGroup? group]) {
-    if (group == null) return true;
-
-    switch (type) {
-      case _FindEnabledType.display:
-        if (group.enableDisplay.get() != null) {
-          return group.enableDisplay.get()!;
-        }
-        break;
-      case _FindEnabledType.Searching:
-        if (group.enableSearching.get() != null) {
-          return group.enableSearching.get()!;
-        }
-        break;
-    }
-
-    return _findEnabled(type, group.parent);
-  }
-
-  /// 当前 Entry 是否包含在首页列表中
-  /// 默认 包含
-  bool enableDisplay() => _findEnabled(_FindEnabledType.display, parent);
-
-  /// 当前 Entry 是否包含在搜索结果中
-  /// 默认 包含
-  bool enableSearching() => _findEnabled(_FindEnabledType.Searching, parent);
-}
-
-extension KdbxEntryAutoType on KdbxEntry {
-  String _findAutoTypeSequence(KdbxGroup? group) {
-    if (group == null) return defaultAutoTypeSequence;
-
-    final sequence = group.defaultAutoTypeSequence.get();
-    if (sequence != null && sequence.isNotEmpty) {
-      return sequence;
-    }
-
-    return _findAutoTypeSequence(group.parent);
-  }
-
-  String getAutoTypeSequence() {
-    String sequence = defaultSequence.get() ?? "";
-    return sequence.isNotEmpty ? sequence : _findAutoTypeSequence(parent);
-  }
-
-  void setAutoTyprSequence(String sequence) {
-    defaultSequence.set(sequence);
-  }
-
-  Future<void> autoFill([KdbxKey? key]) {
-    return autoFillSequence(
-      getAutoTypeSequence(),
-      key: key?.key,
-      getValue: (key) => getActualString(KdbxKey(key)),
-    );
+    // return syncMergeContext;
   }
 }
 
 extension KdbxUuidString on String {
-  KdbxUuid get kdbxUuid => KdbxUuid(this);
+  KdbxUuid get kdbxUuid => KdbxUuid.fromString(this);
 
   String fromKdbxKeyToI18n(BuildContext context) {
     final t = I18n.of(context)!;
     switch (this) {
-      case KdbxKeyCommon.KEY_TITLE:
+      case KdbxKeyCommon.TITLE:
         return t.title;
-      case KdbxKeyCommon.KEY_URL:
+      case KdbxKeyCommon.URL:
         return t.domain;
-      case KdbxKeyURLS.KEY_URL1:
+      case KdbxKeyURLS.URL1:
         return t.domain_num(1);
-      case KdbxKeyURLS.KEY_URL2:
+      case KdbxKeyURLS.URL2:
         return t.domain_num(2);
-      case KdbxKeyURLS.KEY_URL3:
+      case KdbxKeyURLS.URL3:
         return t.domain_num(3);
-      case KdbxKeyURLS.KEY_URL4:
+      case KdbxKeyURLS.URL4:
         return t.domain_num(4);
-      case KdbxKeyURLS.KEY_URL5:
+      case KdbxKeyURLS.URL5:
         return t.domain_num(5);
-      case KdbxKeyCommon.KEY_USER_NAME:
+      case KdbxKeyCommon.USER_NAME:
         return t.account;
-      case KdbxKeyCommon.KEY_EMAIL:
+      case KdbxKeyCommon.EMAIL:
         return t.email;
-      case KdbxKeyCommon.KEY_PASSWORD:
+      case KdbxKeyCommon.PASSWORD:
         return t.password;
-      case KdbxKeyCommon.KEY_OTP:
+      case KdbxKeyCommon.OTP:
         return t.otp;
-      case KdbxKeyCommon.KEY_NOTES:
+      case KdbxKeyCommon.NOTES:
         return t.description;
-      case KdbxKeySpecial.KEY_AUTO_TYPE:
+      case KdbxKeySpecial.AUTO_TYPE:
         return t.fill_sequence;
-      case KdbxKeySpecial.KEY_AUTO_FILL_PACKAGE_NAME:
+      case KdbxKeySpecial.AUTO_FILL_PACKAGE_NAME:
         return t.auto_fill_match_app;
-      case KdbxKeySpecial.KEY_TAGS:
+      case KdbxKeySpecial.TAGS:
         return t.label;
-      case KdbxKeySpecial.KEY_ATTACH:
+      case KdbxKeySpecial.ATTACH:
         return t.attachment;
-      case KdbxKeySpecial.KEY_EXPIRES:
+      case KdbxKeySpecial.EXPIRES:
         return t.expires_time;
       default:
         return this;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kdbx/kdbx.dart';
+import 'package:kpasslib/kpasslib.dart';
 
 class KdbxIcon2Material {
   static const icons = [
@@ -74,7 +74,7 @@ class KdbxIcon2Material {
     Icons.smartphone_rounded,
   ];
 
-  static IconData to(KdbxIcon index) {
-    return icons[index.index];
+  static IconData to(KdbxIcon icon) {
+    return icons[icon.value];
   }
 }

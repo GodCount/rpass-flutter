@@ -3,6 +3,8 @@ import 'package:common_native_channel/common_native_channel.dart';
 import 'package:flutter/material.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
 
+import '../kdbx/auto_type.dart';
+import '../kdbx/extension.dart';
 import '../kdbx/kdbx.dart';
 import '../page/route.dart';
 import '../util/common.dart';
@@ -25,7 +27,7 @@ class EntryTitleFormField extends StatefulWidget {
   final String? initialValue;
   final KdbxIconWidgetData kdbxIcon;
 
-  final FormFieldSetter<(String, KdbxIcon, KdbxCustomIcon?)> onSaved;
+  final FormFieldSetter<(String, KdbxIconWidgetData)> onSaved;
   final ValueChanged<String>? onChanged;
 
   @override
@@ -44,7 +46,7 @@ class _EntryTitleFormFieldState extends State<EntryTitleFormField> {
       initialValue: widget.initialValue,
       onChanged: widget.onChanged,
       onSaved: (value) {
-        widget.onSaved((value!, _kdbxIcon.icon, _kdbxIcon.customIcon));
+        widget.onSaved((value!, _kdbxIcon));
       },
       decoration: InputDecoration(
         labelText: widget.label,

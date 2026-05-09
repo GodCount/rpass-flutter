@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
+import '../../kdbx/extension.dart';
 import '../../kdbx/kdbx.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
@@ -23,7 +24,7 @@ class EditGroupPageRoute extends PageRouteInfo<_EditGroupPageArgs> {
     : super(
         name,
         args: _EditGroupPageArgs(key: key),
-        rawPathParams: {"uuid": kdbxGroup?.uuid.uuid},
+        rawPathParams: {"uuid": kdbxGroup?.uuid.string},
       );
 
   static const name = "EditGroupPageRoute";
@@ -66,20 +67,20 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
   KdbxGroupData _getKdbxGroupData() {
     return widget.kdbxGroup != null
         ? KdbxGroupData(
-            name: widget.kdbxGroup!.name.get() ?? '',
-            notes: widget.kdbxGroup!.notes.get() ?? '',
-            enableSearching: widget.kdbxGroup!.enableSearching.get(),
-            enableDisplay: widget.kdbxGroup!.enableDisplay.get(),
+            name: widget.kdbxGroup!.name,
+            notes: widget.kdbxGroup!.notes,
+            enableSearching: widget.kdbxGroup!.enableSearching,
+            enableDisplay: widget.kdbxGroup!.enableDisplay,
             kdbxIcon: KdbxIconWidgetData(
-              icon: widget.kdbxGroup!.icon.get() ?? KdbxIcon.Folder,
-              customIcon: widget.kdbxGroup!.customIcon,
+              icon: widget.kdbxGroup!.icon,
+              customIconUuid: widget.kdbxGroup!.customIcon,
             ),
             kdbxGroup: widget.kdbxGroup,
           )
         : KdbxGroupData(
             name: '',
             notes: '',
-            kdbxIcon: KdbxIconWidgetData(icon: KdbxIcon.Folder),
+            kdbxIcon: KdbxIconWidgetData(icon: KdbxIcon.folder),
           );
   }
 
@@ -92,15 +93,20 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
       final kdbxGroup =
           _kdbxGroupData.kdbxGroup ?? kdbx.createGroup(_kdbxGroupData.name);
 
-      kdbxGroup.name.set(_kdbxGroupData.name);
-      kdbxGroup.notes.set(_kdbxGroupData.notes);
-      kdbxGroup.enableDisplay.set(_kdbxGroupData.enableDisplay);
-      kdbxGroup.enableSearching.set(_kdbxGroupData.enableSearching);
+      kdbxGroup.name = _kdbxGroupData.name;
+      kdbxGroup.notes = _kdbxGroupData.notes;
+      kdbxGroup.enableDisplay = _kdbxGroupData.enableDisplay;
+      kdbxGroup.enableSearching = _kdbxGroupData.enableSearching;
 
-      if (_kdbxGroupData.kdbxIcon.customIcon != null) {
-        kdbxGroup.customIcon = _kdbxGroupData.kdbxIcon.customIcon;
-      } else if (_kdbxGroupData.kdbxIcon.icon != kdbxGroup.icon.get()) {
-        kdbxGroup.icon.set(_kdbxGroupData.kdbxIcon.icon);
+      if (_kdbxGroupData.kdbxIcon.customIconUuid != null ||
+          _kdbxGroupData.kdbxIcon.customIcon != null) {
+        kdbxGroup.setCustomIcon(
+          kdbx.kdbxDatabase,
+          uuid: _kdbxGroupData.kdbxIcon.customIconUuid,
+          icon: _kdbxGroupData.kdbxIcon.customIcon,
+        );
+      } else if (_kdbxGroupData.kdbxIcon.icon != kdbxGroup.icon) {
+        kdbxGroup.icon = _kdbxGroupData.kdbxIcon.icon;
       }
 
       if (await kdbxSave(KdbxProvider.of(context).kdbx!)) {
@@ -177,7 +183,11 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
                     onSaved: (data) {
                       _kdbxGroupData.name = data!.$1;
                       _kdbxGroupData.kdbxIcon = _kdbxGroupData.kdbxIcon
-                          .copyWith(icon: data.$2, customIcon: data.$3);
+                          .copyWith(
+                            icon: data.$2.icon,
+                            customIconUuid: data.$2.customIconUuid,
+                            customIcon: data.$2.customIcon,
+                          );
                     },
                   ),
                 ),

@@ -11,6 +11,8 @@ import 'package:rich_text_controller/rich_text_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../context/lan_fill_server.dart';
+import '../../kdbx/auto_type.dart';
+import '../../kdbx/extension.dart';
 import '../../store/index.dart';
 import '../../util/cache_network_image.dart';
 import '../../util/fetch_favicon.dart';
@@ -40,7 +42,10 @@ class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
   }) : super(
          name,
          args: _LookAccountArgs(key: key),
-         rawPathParams: {"uuid": kdbxEntry.uuid.uuid, "readOnly": readOnly.toString()},
+         rawPathParams: {
+           "uuid": kdbxEntry.uuid.string,
+           "readOnly": readOnly.toString(),
+         },
        );
 
   static const name = "LookAccountRoute";
@@ -90,8 +95,8 @@ class _LookAccountPageState extends State<LookAccountPage>
         SecondLevelPageAutoBack<LookAccountPage>,
         PrevFocusWindowListener {
   late KdbxIconWidgetData _kdbxIcon = KdbxIconWidgetData(
-    icon: widget.kdbxEntry.icon.get() ?? KdbxIcon.Key,
-    customIcon: widget.kdbxEntry.customIcon,
+    icon: widget.kdbxEntry.icon,
+    customIconUuid: widget.kdbxEntry.customIcon,
     domain: widget.kdbxEntry.getActualString(KdbxKeyCommon.URL),
   );
 
@@ -112,8 +117,8 @@ class _LookAccountPageState extends State<LookAccountPage>
   void didUpdateWidget(covariant LookAccountPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     _kdbxIcon = KdbxIconWidgetData(
-      icon: widget.kdbxEntry.icon.get() ?? KdbxIcon.Key,
-      customIcon: widget.kdbxEntry.customIcon,
+      icon: widget.kdbxEntry.icon,
+      customIconUuid: widget.kdbxEntry.customIcon,
       domain: widget.kdbxEntry.getActualString(KdbxKeyCommon.URL),
     );
 
@@ -186,6 +191,7 @@ class _LookAccountPageState extends State<LookAccountPage>
   void _showMenu() {
     final t = I18n.of(context)!;
     final lanFill = LanFillInherited.of(context);
+    final kdbx = KdbxProvider.of(context).kdbx!;
 
     GestureTapCallback? onAutoPop(GestureTapCallback func) {
       return () async {
@@ -210,10 +216,12 @@ class _LookAccountPageState extends State<LookAccountPage>
               lanFill.requestRemoteAutofill(
                 AutofillDto(
                   fields: {
-                    KdbxKeyCommon.KEY_USER_NAME: widget.kdbxEntry
-                        .getActualString(KdbxKeyCommon.USER_NAME),
-                    KdbxKeyCommon.KEY_PASSWORD: widget.kdbxEntry
-                        .getActualString(KdbxKeyCommon.PASSWORD),
+                    KdbxKeyCommon.USER_NAME: widget.kdbxEntry.getActualString(
+                      KdbxKeyCommon.USER_NAME,
+                    ),
+                    KdbxKeyCommon.PASSWORD: widget.kdbxEntry.getActualString(
+                      KdbxKeyCommon.PASSWORD,
+                    ),
                   },
                 ),
               );
@@ -230,14 +238,12 @@ class _LookAccountPageState extends State<LookAccountPage>
           title: Text(t.clone),
           leading: const Icon(Icons.copy),
           onTap: onAutoPop(() async {
-            final kdbx = KdbxProvider.of(context).kdbx!;
-
             final clone = widget.kdbxEntry.clone(kdbx.virtualGroup);
 
             final result = await context.router.push(
               EditAccountRoute(
                 initKdbxGroup:
-                    widget.kdbxEntry.parent != kdbx.kdbxFile.recycleBin
+                    widget.kdbxEntry.parent != kdbx.kdbxDatabase.recycleBin
                     ? widget.kdbxEntry.parent
                     : null,
                 kdbxEntry: clone,
@@ -249,7 +255,9 @@ class _LookAccountPageState extends State<LookAccountPage>
           }),
         ),
         ListTile(
-          enabled: !widget.readOnly && !widget.kdbxEntry.isInRecycleBin(),
+          enabled:
+              !widget.readOnly &&
+              !kdbx.kdbxDatabase.isInRecycleBin(widget.kdbxEntry),
           title: Text(t.delete),
           leading: const Icon(Icons.delete),
           onTap: onAutoPop(_deleteAccount),
@@ -258,7 +266,7 @@ class _LookAccountPageState extends State<LookAccountPage>
     );
   }
 
-  VoidCallback? createOnTileClick(KdbxKey key) {
+  VoidCallback? createOnTileClick(String key) {
     return widget.kdbxEntry.getActualString(key)?.isNotEmpty == true
         ? () {
             final t = I18n.of(context)!;
@@ -273,7 +281,7 @@ class _LookAccountPageState extends State<LookAccountPage>
             }
 
             showBottomSheetList(
-              title: key.key.fromKdbxKeyToI18n(context),
+              title: key.fromKdbxKeyToI18n(context),
               children: [
                 if (kIsMobile)
                   ListTile(
@@ -334,6 +342,7 @@ class _LookAccountPageState extends State<LookAccountPage>
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
+    final kdbx = KdbxProvider.of(context).kdbx!;
 
     final kdbxEntry = widget.kdbxEntry;
     final readOnly = widget.readOnly;
@@ -379,17 +388,17 @@ class _LookAccountPageState extends State<LookAccountPage>
                     padding: const EdgeInsets.only(right: 6),
                     child: KdbxIconWidget(
                       kdbxIcon: KdbxIconWidgetData(
-                        icon: kdbxEntry.parent.icon.get() ?? KdbxIcon.Key,
-                        customIcon: kdbxEntry.parent.customIcon,
+                        icon: kdbxEntry.parent?.icon ?? KdbxIcon.folder,
+                        customIconUuid: kdbxEntry.parent?.customIcon,
                       ),
                       size: 24,
                     ),
                   ),
                   hintEmptyText(
-                    (kdbxEntry.parent.name.get() ?? '').isEmpty,
+                    (kdbxEntry.parent?.name ?? '').isEmpty,
                     Expanded(
                       child: Text(
-                        kdbxEntry.parent.name.get() ?? '',
+                        kdbxEntry.parent?.name ?? '',
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
@@ -617,30 +626,30 @@ class _LookAccountPageState extends State<LookAccountPage>
               onTap: createOnTileClick(KdbxKeyCommon.URL),
               onLongPress: url.isNotEmpty ? () => writeClipboard(url) : null,
             ),
-            ...moreUrlsKeys.asMap().entries.map((item) {
-              final url = kdbxEntry.getNonNullString(item.value);
-              String text = item.value.key;
+            ...moreUrlsKeys.map((item) {
+              final url = kdbxEntry.getNonNullString(item);
+              String text = item;
 
-              switch (item.value.key) {
-                case KdbxKeyURLS.KEY_URL1:
+              switch (item) {
+                case KdbxKeyURLS.URL1:
                   text = t.domain_num(1);
                   break;
-                case KdbxKeyURLS.KEY_URL2:
+                case KdbxKeyURLS.URL2:
                   text = t.domain_num(2);
                   break;
-                case KdbxKeyURLS.KEY_URL3:
+                case KdbxKeyURLS.URL3:
                   text = t.domain_num(3);
                   break;
-                case KdbxKeyURLS.KEY_URL4:
+                case KdbxKeyURLS.URL4:
                   text = t.domain_num(4);
                   break;
-                case KdbxKeyURLS.KEY_URL5:
+                case KdbxKeyURLS.URL5:
                   text = t.domain_num(5);
                   break;
               }
 
               return ListTile(
-                shape: item.value == moreUrlsKeys.last ? shape : null,
+                shape: item == moreUrlsKeys.last ? shape : null,
                 title: Padding(
                   padding: const EdgeInsets.only(left: 6),
                   child: Text(text),
@@ -656,7 +665,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                   onPressed: url.isNotEmpty ? () => _launchUrl(url) : null,
                   icon: const Icon(Icons.open_in_new),
                 ),
-                onTap: createOnTileClick(item.value),
+                onTap: createOnTileClick(item),
                 onLongPress: url.isNotEmpty ? () => writeClipboard(url) : null,
               );
             }),
@@ -684,22 +693,21 @@ class _LookAccountPageState extends State<LookAccountPage>
                   shape: shape,
                   title: Padding(
                     padding: const EdgeInsets.only(left: 6),
-                    child: Text(item.key.key),
+                    child: Text(item),
                   ),
                   subtitle: Padding(
                     padding: const EdgeInsets.only(left: 12),
                     child: hintEmptyText(
-                      kdbxEntry.getNonNullString(item.key).isEmpty,
+                      kdbxEntry.getNonNullString(item).isEmpty,
                       Text(
-                        kdbxEntry.getNonNullString(item.key),
+                        kdbxEntry.getNonNullString(item),
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                     ),
                   ),
-                  onTap: createOnTileClick(item.key),
-                  onLongPress: kdbxEntry.getNonNullString(item.key).isNotEmpty
-                      ? () =>
-                            writeClipboard(kdbxEntry.getNonNullString(item.key))
+                  onTap: createOnTileClick(item),
+                  onLongPress: kdbxEntry.getNonNullString(item).isNotEmpty
+                      ? () => writeClipboard(kdbxEntry.getNonNullString(item))
                       : null,
                 ),
               ),
@@ -769,25 +777,25 @@ class _LookAccountPageState extends State<LookAccountPage>
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: hintEmptyText(
-                  kdbxEntry.binaryEntries.isEmpty,
+                  kdbxEntry.binaries.isEmpty,
                   ChipList(
                     maxHeight: 150,
                     onChipTap: (binary) {
                       showBinaryAction(binary);
                     },
                     items: [
-                      for (final item in kdbxEntry.binaryEntries)
+                      for (final item in kdbxEntry.binaries.entries)
                         ChipListItem(
                           value: item,
                           deletable: false,
                           label: RichText(
                             text: TextSpan(
-                              text: item.key.key,
+                              text: item.key,
                               style: Theme.of(context).textTheme.bodyMedium,
                               children: [
                                 TextSpan(
                                   text:
-                                      " (${item.value.value.length.toStorageUnit(.KB)})",
+                                      " (${(kdbx.binaries.getByRef(item.value)?.data.length ?? 0).toStorageUnit(.KB)})",
                                   style: Theme.of(
                                     context,
                                   ).textTheme.titleMedium,
@@ -824,7 +832,7 @@ class _LookAccountPageState extends State<LookAccountPage>
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: Text(
-                  kdbxEntry.times.creationTime.get()!.toLocal().formatDate,
+                  kdbxEntry.times.creation.timeOrZero.toLocal().formatDate,
                 ),
               ),
             ),
@@ -837,15 +845,12 @@ class _LookAccountPageState extends State<LookAccountPage>
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: Text(
-                  kdbxEntry.times.lastModificationTime
-                      .get()!
-                      .toLocal()
-                      .formatDate,
+                  kdbxEntry.times.modification.timeOrZero.toLocal().formatDate,
                 ),
               ),
             ),
-            if (kdbxEntry.times.expires.get() == true &&
-                kdbxEntry.times.expiryTime.get() != null)
+            if (kdbxEntry.times.expires == true &&
+                kdbxEntry.times.expiry.time != null)
               ListTile(
                 shape: shape,
                 title: Padding(
@@ -855,7 +860,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                 subtitle: Padding(
                   padding: const EdgeInsets.only(left: 12),
                   child: Text(
-                    kdbxEntry.times.expiryTime.get()!.toLocal().formatDate,
+                    kdbxEntry.times.expiry.timeOrZero.toLocal().formatDate,
                   ),
                 ),
               ),
@@ -867,7 +872,7 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(kdbxEntry.uuid.uuid),
+                child: Text(kdbxEntry.uuid.string),
               ),
             ),
           ]),
@@ -878,7 +883,7 @@ class _LookAccountPageState extends State<LookAccountPage>
           ? FloatingActionButton(
               heroTag: const ValueKey("look_account_float"),
               onPressed: () async {
-                if (kdbxEntry.isInRecycleBin()) {
+                if (kdbx.kdbxDatabase.isInRecycleBin(kdbxEntry)) {
                   final kdbx = KdbxProvider.of(context).kdbx!;
                   kdbx.restoreObject(kdbxEntry);
                   if (await kdbxSave(kdbx)) {
@@ -896,7 +901,7 @@ class _LookAccountPageState extends State<LookAccountPage>
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(56 / 2)),
               ),
-              child: kdbxEntry.isInRecycleBin()
+              child: kdbx.kdbxDatabase.isInRecycleBin(kdbxEntry)
                   ? const Icon(Icons.restore_from_trash)
                   : const Icon(Icons.edit),
             )

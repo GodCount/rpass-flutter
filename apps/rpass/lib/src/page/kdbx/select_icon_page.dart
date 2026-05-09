@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' show basename;
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
@@ -57,10 +58,10 @@ class _SelectIconPageState extends State<SelectIconPage> {
       body: GridView.count(
         crossAxisCount: width ~/ 64,
         children: [
-          ...kdbx.customIcons.map((item) {
+          ...kdbx.customIcons.keys.map((item) {
             final kdbxIcon = KdbxIconWidgetData(
-              icon: KdbxIcon.Key,
-              customIcon: item,
+              icon: KdbxIcon.key,
+              customIconUuid: item,
             );
             return InkWell(
               onTap: () => _onIconTap(kdbxIcon),
@@ -88,13 +89,13 @@ class _SelectIconPageState extends State<SelectIconPage> {
         heroTag: const ValueKey("select_icon_float"),
         onPressed: () async {
           try {
-            final (_, bytes) = await SimpleFile.openFile(type: FileType.image);
+            final (filepath, bytes) = await SimpleFile.openFile(type: FileType.image);
             _onIconTap(
               KdbxIconWidgetData(
-                icon: KdbxIcon.Key,
+                icon: KdbxIcon.key,
                 customIcon: KdbxCustomIcon(
-                  uuid: KdbxUuid.random(),
                   data: bytes,
+                  name: basename(filepath)
                 ),
               ),
             );
