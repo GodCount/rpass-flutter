@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kdbx/kdbx.dart';
+import 'package:kpasslib/kpasslib.dart';
 
 class KdbxIcon2Material {
   static const icons = [

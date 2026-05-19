@@ -1,3 +1,7 @@
 [submodule "packages/kdbx.dart"]
 	path = packages/kdbx.dart
 	url = https://github.com/rongyu-zhen/kdbx.dart
+[submodule "packages/kpasslib"]
+	path = packages/kpasslib
+	url = https://github.com/rongyu-zhen/kpasslib.git
+	branch = rpass

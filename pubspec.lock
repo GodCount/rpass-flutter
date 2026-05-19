@@ -588,6 +588,13 @@ packages:
       relative: true
     source: path
     version: "2.4.1"
+  kpasslib:
+    dependency: transitive
+    description:
+      path: "packages/kpasslib"
+      relative: true
+    source: path
+    version: "1.1.2"
   leak_tracker:
     dependency: transitive
     description:

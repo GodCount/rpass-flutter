@@ -29,6 +29,8 @@ dependencies:
   # 密码管理相关
   kdbx:
     path: ../../packages/kdbx.dart
+  kpasslib:
+    path: ../../packages/kpasslib
   crypto: ^3.0.3
   otp: ^3.1.4
   uuid: ^4.4.0
