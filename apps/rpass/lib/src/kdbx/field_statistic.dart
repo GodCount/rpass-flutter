@@ -4,7 +4,7 @@ import 'constants.dart';
 import 'extension.dart';
 
 class FieldStatistic {
-  FieldStatistic._({
+  FieldStatistic({
     Set<String>? urls,
     Set<String>? userNames,
     Set<String>? emails,
@@ -49,7 +49,7 @@ class FieldStatistic {
   }
 
   factory FieldStatistic.formDB(KdbxDatabase db) {
-    final statistic = FieldStatistic._();
+    final statistic = FieldStatistic();
 
     void setFieldStatistic(KdbxEntry entry) {
       final url = entry.getActualString(KdbxKeyCommon.URL);

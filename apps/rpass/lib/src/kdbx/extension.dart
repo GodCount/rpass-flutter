@@ -50,6 +50,14 @@ extension KdbxDatabaseCommon on KdbxDatabase {
     return recycleBin!;
   }
 
+  KdbxGroup? findGroupByUuid(KdbxUuid uuid) {
+    try {
+      return groups.firstWhere((group) => group.uuid == uuid);
+    } catch (e) {
+      return null;
+    }
+  }
+
   KdbxEntry? findEntryByUuid(KdbxUuid uuid) {
     try {
       return totalEntry.firstWhere((group) => group.uuid == uuid);

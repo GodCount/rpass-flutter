@@ -3,11 +3,12 @@ import 'dart:isolate';
 
 import 'package:kpasslib/kpasslib.dart';
 
+import '../field_statistic.dart';
+import '../search_handler.dart';
+import 'event.dart';
+
 class OpenKdbxIsolateInitState {
-  OpenKdbxIsolateInitState({
-    required this.filepath,
-    required this.credentials,
-  });
+  OpenKdbxIsolateInitState({required this.filepath, required this.credentials});
 
   final String filepath;
 
@@ -32,10 +33,7 @@ class CreateKdbxIsolateInitState extends OpenKdbxIsolateInitState {
 
   @override
   Future<KdbxDatabase> _open() async {
-    return KdbxDatabase.create(
-      credentials: credentials,
-      name: name,
-    );
+    return KdbxDatabase.create(credentials: credentials, name: name);
   }
 }
 
@@ -54,5 +52,37 @@ void kdbxIsolate((SendPort, OpenKdbxIsolateInitState) data) async {
 
   sendPort.send(receive.sendPort);
 
-  receive.handler = (request) {};
+  final fieldStatistic = FieldStatistic.formDB(db);
+  final searchHandler = KbdxSearchHandler()
+    ..setFieldOther(fieldStatistic.customFields);
+
+  receive.handler = (request) async {
+    if (request is KdbxIsolateEvent) {
+      try {
+        switch (request) {
+          case GeneralHandler req:
+            await req.handler(db);
+            break;
+          case SreachEntryEvent req:
+            await req.handler(db, searchHandler);
+            break;
+          case FieldStatisticEvent req:
+            await req.handler(fieldStatistic);
+            break;
+          default:
+            request.error = (
+              UnimplementedError("event ${request.runtimeType}"),
+              StackTrace.current,
+            );
+        }
+      } catch (e, s) {
+        request.error = (e, s);
+      }
+
+      sendPort.send(request);
+    }else {
+      print("exit");
+      Isolate.exit();
+    }
+  };
 }

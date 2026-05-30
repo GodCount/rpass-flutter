@@ -91,7 +91,7 @@ class InputParse {
 }
 
 class KbdxSearchHandler {
-  KbdxSearchHandler({this.useKdbxEntryConfig = false});
+  KbdxSearchHandler();
 
   /// 对指定字段进行匹配
   /// 字段映射表, 可以缩写映射到完整字段
@@ -121,9 +121,6 @@ class KbdxSearchHandler {
     "g": "Group",
     "group": "Group",
   };
-
-  /// 使用 enableDisplay , enableSearching 过滤列表
-  final bool useKdbxEntryConfig;
 
   final Map<String, String> _customFieldTable = {};
 
@@ -178,7 +175,13 @@ class KbdxSearchHandler {
     }
   }
 
-  List<KdbxEntry> search(String input, Iterable<KdbxEntry> sourceList) {
+  List<KdbxEntry> search(
+    String input,
+    Iterable<KdbxEntry> sourceList, {
+
+    // 使用 enableDisplay , enableSearching 过滤列表
+    bool useKdbxEntryConfig = false,
+  }) {
     final isSearch = input.isNotEmpty;
 
     Iterable<KdbxEntry> result = sourceList;

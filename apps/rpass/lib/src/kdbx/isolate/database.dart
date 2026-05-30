@@ -3,6 +3,7 @@ import 'dart:isolate';
 
 import 'package:kpasslib/kpasslib.dart';
 
+import '../field_statistic.dart';
 import 'event.dart';
 import 'kdbx_isolate.dart';
 
@@ -16,8 +17,16 @@ class IsolateDataBase {
   final SendPort _sendPort;
 
   bool _close = false;
-
   bool get isClose => _close;
+
+  FieldStatistic _fieldStatistic = FieldStatistic();
+  FieldStatistic get fieldStatistic => _fieldStatistic;
+
+  Map<String, KdbxCustomIcon> _customIcons = {};
+  Map<String, KdbxCustomIcon> get customIcons => _customIcons;
+
+  Map<int, KdbxDataBinary> _binaries = {};
+  Map<int, KdbxDataBinary> get binaries => _binaries;
 
   static Future<IsolateDataBase> create({
     required String name,
@@ -96,7 +105,49 @@ class IsolateDataBase {
       completer.completeError(e, s);
     }
 
-    return completer.future;
+    final db = await completer.future;
+
+    await db._init();
+
+    return db;
+  }
+
+  Future<T?> _sendEvent<T>(KdbxIsolateEvent<T> event) {
+    _sendPort.send(event);
+    return event.future;
+  }
+
+  Future<void> _init() async {
+    await _getFieldStatistic();
+    await _getCustomIcon();
+    await _getBinaries();
+  }
+
+  Future<void> _getFieldStatistic() async {
+    try {
+      final result = await _sendEvent(FieldStatisticEvent());
+      _fieldStatistic = result ?? _fieldStatistic;
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> _getCustomIcon() async {
+    try {
+      final result = await _sendEvent(CustomIconsEvent());
+      _customIcons = result ?? _customIcons;
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> _getBinaries() async {
+    try {
+      final result = await _sendEvent(DataBinaryEvent());
+      _binaries = result ?? _binaries;
+    } catch (e) {
+      print(e);
+    }
   }
 
   void _handler(dynamic response) {
@@ -111,9 +162,10 @@ class IsolateDataBase {
     }
   }
 
-  void close() {
+  Future<void> close() async {
     if (!_close) {
       _close = true;
+      _sendPort.send(null);
       _receivePort.close();
       _isolate.kill(priority: Isolate.immediate);
     }
