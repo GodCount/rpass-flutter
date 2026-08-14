@@ -1,0 +1,229 @@
+---
+name: CI on Pull Requests
+
+on:
+  pull_request:
+
+env:
+  RUSTFLAGS: -D warnings -A deprecated
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  commitlint:
+    name: Lint Commit Messages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: wagoid/commitlint-github-action@v6
+        with:
+          configFile: commitlintrc.json
+
+  doc:
+    name: Build Doc
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - name: Get Nix version
+        id: nix-version
+        run: echo "version=$(cat .nix-version)" >> $GITHUB_OUTPUT
+      - uses: cachix/install-nix-action@1ca7d21a94afc7c957383a2d217460d980de4934 # v31.10.1
+        with:
+          install_url: https://releases.nixos.org/nix/nix-${{ steps.nix-version.outputs.version }}/install
+      - name: run cargo doc
+        run: nix develop --command cargo doc
+
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Get Nix version
+        id: nix-version
+        run: echo "version=$(cat .nix-version)" >> $GITHUB_OUTPUT
+      - uses: cachix/install-nix-action@1ca7d21a94afc7c957383a2d217460d980de4934 # v31.10.1
+        with:
+          install_url: https://releases.nixos.org/nix/nix-${{ steps.nix-version.outputs.version }}/install
+      - name: typecheck the tests
+        run: nix develop --command cargo check --tests
+      - name: run cargo check on all feature combinations
+        run: nix develop --command cargo hack check --feature-powerset --no-dev-deps
+
+  build-windows:
+    name: Build the project (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Build the project with the default features
+        run: cargo build
+
+      - name: Build the project with all the features
+        run: cargo build --all-features
+
+      - name: Build the project with no default features
+        run: cargo build --no-default-features
+
+  test:
+    name: Test Suite on ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            name: x86_64
+            with_cross_compilation: false
+          - os: ubuntu-latest
+            target: armv7-unknown-linux-musleabihf
+            name: armv7
+            with_cross_compilation: true
+          # - os: ubuntu-latest-arm64
+          #   target: aarch64-unknown-linux-gnu
+          #   name: armv8
+          #   with_cross_compilation: false
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: install ${{ matrix.target }} target
+        if: matrix.with_cross_compilation
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Install cross
+        if: matrix.with_cross_compilation
+        run: cargo install cross
+
+      - name: Install cross-tool test dependencies
+        if: '!matrix.with_cross_compilation'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y keepassxc mono-complete unzip
+          curl -fsSL "https://sourceforge.net/projects/keepass/files/KeePass%202.x/2.61.1/KeePass-2.61.1.zip/download" -o /tmp/KeePass.zip
+          curl -fsSL "https://keepass.info/extensions/v2/kpscript/KPScript-2.61.1.zip" -o /tmp/KPScript.zip
+          # Verify sha256 checksums before extracting
+          echo "3952354db9b117e906f7cd4f9f5591065b95186472370da47f46f3e246fea864  /tmp/KeePass.zip" | sha256sum -c - || (echo 'KeePass zip sha256 mismatch' && exit 1)
+          echo "06c9d95332fe7b2730e4e7fd0aba846c5fa9a1b0cd3119defea9875727a3bffb  /tmp/KPScript.zip" | sha256sum -c - || (echo 'KPScript zip sha256 mismatch' && exit 1)
+          sudo mkdir -p /usr/local/lib/kpscript
+          sudo unzip -o /tmp/KeePass.zip -d /usr/local/lib/kpscript
+          sudo unzip -o /tmp/KPScript.zip -d /usr/local/lib/kpscript
+          printf '#!/bin/sh\nexec mono /usr/local/lib/kpscript/KPScript.exe "$@"\n' | sudo tee /usr/local/bin/kpscript > /dev/null
+          sudo chmod +x /usr/local/bin/kpscript
+
+      - name: check that keepassxc and kpscript are installed correctly
+        if: '!matrix.with_cross_compilation'
+        run: |
+          keepassxc-cli --version || exit 1
+          kpscript || exit 1
+
+      - name: run cargo test
+        if: '!matrix.with_cross_compilation'
+        run: cargo test --all-features
+
+      - name: run cross test
+        if: matrix.with_cross_compilation
+        run: cross test --release --target ${{ matrix.target }} --all-features
+
+  test-suite:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    needs: test
+    if: always()
+    steps:
+      - name: Check test job result
+        if: needs.test.result != 'success'
+        run: |
+          echo "The test job was not successful (result: ${{ needs.test.result }})."
+          exit 1
+      - name: All tests passed
+        run: echo "All tests passed"
+
+  msrv:
+    name: MSRV Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Get Nix version
+        id: nix-version
+        run: echo "version=$(cat .nix-version)" >> $GITHUB_OUTPUT
+      - uses: cachix/install-nix-action@1ca7d21a94afc7c957383a2d217460d980de4934 # v31.10.1
+        with:
+          install_url: https://releases.nixos.org/nix/nix-${{ steps.nix-version.outputs.version }}/install
+      - name: check msrv
+        run: |
+          nix develop --command cargo msrv verify
+
+  formatting:
+    name: Code Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Get Nix version
+        id: nix-version
+        run: echo "version=$(cat .nix-version)" >> $GITHUB_OUTPUT
+      - uses: cachix/install-nix-action@1ca7d21a94afc7c957383a2d217460d980de4934 # v31.10.1
+        with:
+          install_url: https://releases.nixos.org/nix/nix-${{ steps.nix-version.outputs.version }}/install
+      - name: running rustfmt
+        run: nix develop --command cargo fmt --check
+
+  coverage:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Get Nix version
+        id: nix-version
+        run: echo "version=$(cat .nix-version)" >> $GITHUB_OUTPUT
+      - uses: cachix/install-nix-action@1ca7d21a94afc7c957383a2d217460d980de4934 # v31.10.1
+        with:
+          install_url: https://releases.nixos.org/nix/nix-${{ steps.nix-version.outputs.version }}/install
+      - name: Generate code coverage
+        run: |
+          nix develop --command cargo tarpaulin --verbose --timeout 120
+      - name: Upload code coverage to Codecov
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        with:
+          fail_ci_if_error: false
+          verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  wasm32-tests:
+    name: WASM32 Tests (Node)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+      - name: Add wasm32 target
+        run: rustup target add wasm32-unknown-unknown
+      - name: Install wasm-pack
+        run: cargo install wasm-pack
+      - name: Run wasm tests (Node)
+        run: wasm-pack test --node
+
+  wasm32-check:
+    name: WASM32 Compile Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+      - name: Add wasm32 target
+        run: rustup target add wasm32-unknown-unknown
+      - name: Cargo check keepass lib for wasm32 (no default features)
+        run: cargo check --target wasm32-unknown-unknown --no-default-features --lib -p keepass

@@ -1,0 +1,133 @@
+---
+name: CI on Master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+      - name: Install cross-tool test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y keepassxc mono-complete unzip
+          curl -fsSL "https://sourceforge.net/projects/keepass/files/KeePass%202.x/2.61.1/KeePass-2.61.1.zip/download" -o /tmp/KeePass.zip
+          curl -fsSL "https://keepass.info/extensions/v2/kpscript/KPScript-2.61.1.zip" -o /tmp/KPScript.zip
+          # Verify sha256 checksums before extracting
+          echo "3952354db9b117e906f7cd4f9f5591065b95186472370da47f46f3e246fea864  /tmp/KeePass.zip" | sha256sum -c - || (echo 'KeePass zip sha256 mismatch' && exit 1)
+          echo "06c9d95332fe7b2730e4e7fd0aba846c5fa9a1b0cd3119defea9875727a3bffb  /tmp/KPScript.zip" | sha256sum -c - || (echo 'KPScript zip sha256 mismatch' && exit 1)
+          sudo mkdir -p /usr/local/lib/kpscript
+          sudo unzip -o /tmp/KeePass.zip -d /usr/local/lib/kpscript
+          sudo unzip -o /tmp/KPScript.zip -d /usr/local/lib/kpscript
+          printf '#!/bin/sh\nexec mono /usr/local/lib/kpscript/KPScript.exe "$@"\n' | sudo tee /usr/local/bin/kpscript > /dev/null
+          sudo chmod +x /usr/local/bin/kpscript
+
+      - name: check that keepassxc and kpscript are installed correctly
+        if: '!matrix.with_cross_compilation'
+        run: |
+          keepassxc-cli --version || exit 1
+          kpscript || exit 1
+
+      - name: run cargo test
+        run: cargo test --all-features
+
+  coverage:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Get Nix version
+        id: nix-version
+        run: echo "version=$(cat .nix-version)" >> $GITHUB_OUTPUT
+      - uses: cachix/install-nix-action@1ca7d21a94afc7c957383a2d217460d980de4934 # v31.10.1
+        with:
+          install_url: https://releases.nixos.org/nix/nix-${{ steps.nix-version.outputs.version }}/install
+      - name: Generate code coverage
+        run: |
+          nix develop --command cargo tarpaulin --verbose --timeout 120
+      - name: Upload code coverage
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        with:
+          fail_ci_if_error: true
+          verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  get-next-version:
+    name: Get the next version
+    runs-on: ubuntu-latest
+    outputs:
+      version : ${{ steps.semantic-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: paulhatch/semantic-version@9f72830310d5ed81233b641ee59253644cd8a8fc # v6.0.2
+        id: semantic-version
+        with:
+          tag_prefix: "v"
+          major_pattern: "/!:|breaking change:/"
+          major_regexp_flags: "ig"
+          minor_pattern: "/^feat(\\(.*\\))?:/"
+          minor_regexp_flags: "ig"
+          version_format: "${major}.${minor}.${patch}"
+          bump_each_commit: false
+          search_commit_body: true
+          enable_prerelease_mode: true
+
+  release:
+    name: Publish a new release
+    needs:
+      - get-next-version
+      - test
+      - coverage
+    permissions:
+      contents: write # required to push the new git tag
+      id-token: write # required for trusted publishing
+    runs-on: ubuntu-latest
+    env:
+      next-version: ${{ needs.get-next-version.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Print the next version
+        run: |
+          echo "The next version is ${{ env.next-version }}"
+
+      - name: Patch the Cargo version
+        run: |
+          sed -i 's/0.0.0-placeholder-version/${{ env.next-version }}/' Cargo.toml
+          git diff
+
+      - name: Get Nix version
+        id: nix-version
+        run: echo "version=$(cat .nix-version)" >> $GITHUB_OUTPUT
+      - uses: cachix/install-nix-action@1ca7d21a94afc7c957383a2d217460d980de4934 # v31.10.1
+        with:
+          install_url: https://releases.nixos.org/nix/nix-${{ steps.nix-version.outputs.version }}/install
+
+      - uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1.0.4
+        id: auth
+
+      - name: Publish new Cargo version
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+        run: |
+          nix develop --command cargo publish --allow-dirty
+
+      - name: Tag the next version
+        run: |
+          new_tag_name="v${{ env.next-version }}"
+          git tag "$new_tag_name" "${{ github.sha }}"
+          git push origin "$new_tag_name"
