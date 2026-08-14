@@ -1,0 +1,151 @@
+pub(crate) mod kdb;
+pub(crate) mod kdbx3;
+pub(crate) mod kdbx4;
+
+pub(crate) mod hmac_block_stream;
+pub(crate) mod variant_dictionary;
+pub(crate) mod xml_db;
+
+#[cfg(feature = "save_kdbx4")]
+mod io;
+
+#[cfg(feature = "save_kdbx4")]
+use std::io::Write;
+
+#[cfg(feature = "save_kdbx4")]
+use byteorder::WriteBytesExt;
+use byteorder::{ByteOrder, LittleEndian};
+use thiserror::Error;
+
+const KDBX_IDENTIFIER: [u8; 4] = [0x03, 0xd9, 0xa2, 0x9a];
+
+/// Identifier for KeePass 1 format.
+pub const KEEPASS_1_ID: u32 = 0xb54bfb65;
+/// Identifier for KeePass 2 pre-release format.
+pub const KEEPASS_2_ID: u32 = 0xb54bfb66;
+/// Identifier for the latest KeePass formats.
+pub const KEEPASS_LATEST_ID: u32 = 0xb54bfb67;
+
+pub const KDBX3_MAJOR_VERSION: u16 = 3;
+pub const KDBX4_MAJOR_VERSION: u16 = 4;
+
+pub const KDBX4_CURRENT_MINOR_VERSION: u16 = 1;
+
+/// Supported KDB database versions, with the associated
+/// minor version.
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize))]
+pub enum DatabaseVersion {
+    /// KeePass 1 format
+    KDB(u16),
+
+    /// KeePass 2 pre-release format
+    KDB2(u16),
+
+    /// KeePass 2 format, version 3.x
+    KDB3(u16),
+
+    /// KeePass 2 format, version 4.x
+    KDB4(u16),
+}
+
+impl DatabaseVersion {
+    /// Parses the database version from the given byte slice, which should contain the first 12
+    /// bytes of a KDBX file.
+    #[allow(clippy::indexing_slicing)] // we check slice length at the beginnning
+    pub fn parse(data: &[u8]) -> Result<DatabaseVersion, DatabaseVersionParseError> {
+        if data.len() < DatabaseVersion::get_version_header_size() {
+            return Err(DatabaseVersionParseError::UnexpectedEof);
+        }
+
+        // check identifier
+        if data[0..4] != KDBX_IDENTIFIER {
+            return Err(DatabaseVersionParseError::InvalidKDBXIdentifier);
+        }
+
+        let version = LittleEndian::read_u32(&data[4..8]);
+        let file_minor_version = LittleEndian::read_u16(&data[8..10]);
+        let file_major_version = LittleEndian::read_u16(&data[10..12]);
+
+        let response = match version {
+            KEEPASS_1_ID => DatabaseVersion::KDB(file_minor_version),
+            KEEPASS_2_ID => DatabaseVersion::KDB2(file_minor_version),
+            KEEPASS_LATEST_ID if file_major_version == KDBX3_MAJOR_VERSION => {
+                DatabaseVersion::KDB3(file_minor_version)
+            }
+            KEEPASS_LATEST_ID if file_major_version == KDBX4_MAJOR_VERSION => {
+                DatabaseVersion::KDB4(file_minor_version)
+            }
+            _ => {
+                return Err(DatabaseVersionParseError::InvalidKDBXVersion {
+                    version,
+                    file_major_version: u32::from(file_major_version),
+                    file_minor_version: u32::from(file_minor_version),
+                })
+            }
+        };
+
+        Ok(response)
+    }
+
+    #[cfg(feature = "save_kdbx4")]
+    fn dump(&self, writer: &mut dyn Write) -> Result<(), std::io::Error> {
+        if let DatabaseVersion::KDB4(minor_version) = self {
+            writer.write_all(&crate::format::KDBX_IDENTIFIER)?;
+            writer.write_u32::<LittleEndian>(KEEPASS_LATEST_ID)?;
+            writer.write_u16::<LittleEndian>(*minor_version)?;
+            writer.write_u16::<LittleEndian>(KDBX4_MAJOR_VERSION)?;
+
+            Ok(())
+        } else {
+            panic!("DatabaseVersion::dump only supports dumping KDBX4.");
+        }
+    }
+
+    pub(crate) fn get_version_header_size() -> usize {
+        12
+    }
+}
+
+impl std::fmt::Display for DatabaseVersion {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DatabaseVersion::KDB(_) => write!(f, "KDB"),
+            DatabaseVersion::KDB2(_) => write!(f, "KDBX2"),
+            DatabaseVersion::KDB3(minor_version) => write!(f, "KDBX3.{}", minor_version),
+            DatabaseVersion::KDB4(minor_version) => write!(f, "KDBX4.{}", minor_version),
+        }
+    }
+}
+
+/// Errors that can occur during parsing of the database version from a KDBX file
+#[derive(Debug, Error)]
+#[non_exhaustive]
+pub enum DatabaseVersionParseError {
+    /// Encountered an unexpected end of file while reading the database version header, which
+    /// should be at least 12 bytes long.
+    #[error("Unexpected end of file while reading database version")]
+    UnexpectedEof,
+
+    /// The first 4 bytes of a KDBX file did not match the expected KDBX identifier
+    #[error("Invalid KDBX identifier")]
+    InvalidKDBXIdentifier,
+
+    /// The version information in the KDBX file did not match any supported database versions
+    #[error(
+        "Invalid KDBX version: {}.{}.{}",
+        version,
+        file_major_version,
+        file_minor_version
+    )]
+    InvalidKDBXVersion {
+        /// The raw version field from the KDBX header
+        version: u32,
+
+        /// The major version field from the KDBX header
+        file_major_version: u32,
+
+        /// The minor version field from the KDBX header
+        file_minor_version: u32,
+    },
+}
