@@ -1,11 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
-import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
-import '../../kdbx/kdbx.dart';
 
 class _KdbxSettingArgs extends PageRouteArgs {
   _KdbxSettingArgs({super.key});
@@ -43,31 +41,21 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
 
   @override
   void initState() {
-    Future.delayed(Duration.zero, () {
-      final kdbx = KdbxProvider.of(context).kdbx!;
-      _historyMaxItems = kdbx.historyMaxItems;
-      _historyMaxSize = _b2mb(kdbx.historyMaxSize).toInt();
-      setState(() {});
-    });
+    // TODO! 重构数据库设置
     super.initState();
   }
 
+  // ignore: unused_element
   double _b2mb(num size) {
     return size / (1024 * 1024);
   }
 
+  // ignore: unused_element
   double _mb2b(num size) {
     return size * 1024 * 1024;
   }
 
-  void _save() async {
-    final kdbx = KdbxProvider.of(context).kdbx!;
-    kdbx.historyMaxItems = _historyMaxItems;
-    kdbx.historyMaxSize = _mb2b(_historyMaxSize).toInt();
-    if (await kdbxSave(kdbx)) {
-      context.router.pop();
-    }
-  }
+  void _save() async {}
 
   @override
   Widget build(BuildContext context) {

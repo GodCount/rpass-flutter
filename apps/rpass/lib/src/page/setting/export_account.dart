@@ -72,9 +72,8 @@ class _ExportAccountPageState extends State<ExportAccountPage>
 
       final kdbx = KdbxProvider.of(context).kdbx!;
       try {
-        final filepath = await SimpleFile.saveText(
-          data:
-              '<?xml version="1.0" encoding="UTF-8"?>\n${kdbx.kdbxFile.body.toXml().toXmlString(pretty: true)}',
+        final filepath = await SimpleFile.saveFile(
+          data: await kdbx.exportXml(),
           filename: "${RpassInfo.appName}.xml",
         );
         showToast(t.export_done_location(filepath));
@@ -100,7 +99,9 @@ class _ExportAccountPageState extends State<ExportAccountPage>
       try {
         final result = jsonToCsv(
           adapter.export(
-            kdbx.totalEntry.map((item) => item.toPlainMapEntry()).toList(),
+            (await kdbx.getEntrys())
+                .map((item) => item.toPlainMapEntry())
+                .toList(),
           ),
         );
         final filepath = await SimpleFile.saveText(

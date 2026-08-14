@@ -39,7 +39,8 @@ impl CustomIconId {
         Self(Uuid::new_v4())
     }
 
-    pub(crate) const fn from_uuid(uuid: Uuid) -> Self {
+    /// Build a `CustomIconId` from an existing [Uuid].
+    pub const fn from_uuid(uuid: Uuid) -> Self {
         Self(uuid)
     }
 

@@ -1,0 +1,5 @@
+rust_input: crate::api
+rust_root: rust/bridge
+dart_output: lib/src/rust
+dart_preamble: import 'package:flutter/services.dart';
+stop_on_error: true

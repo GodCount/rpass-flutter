@@ -110,6 +110,7 @@ class LanFillCilent {
         final uri = Uri.parse("https://$ip:${registerDto.port}/register");
         res = await dio.getUri(uri);
       } catch (e) {
+        // ignore: avoid_print
         print(e);
         continue;
       }

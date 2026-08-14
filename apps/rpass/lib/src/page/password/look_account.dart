@@ -5,6 +5,7 @@ import 'package:common_native_channel/common_native_channel.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
+import 'package:keepass_core/keepass_core.dart';
 import 'package:lan_fill_server/lan_fill_server.dart';
 import 'package:logging/logging.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
@@ -36,11 +37,16 @@ class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
   LookAccountRoute({
     Key? key,
     bool readOnly = false,
-    required KdbxEntry kdbxEntry,
+    int? historyIndex,
+    required String id,
   }) : super(
          name,
          args: _LookAccountArgs(key: key),
-         rawPathParams: {"uuid": kdbxEntry.uuid.uuid, "readOnly": readOnly.toString()},
+         rawPathParams: {
+           "uuid": id,
+           "readOnly": readOnly.toString(),
+           "historyIndex": historyIndex,
+         },
        );
 
   static const name = "LookAccountRoute";
@@ -52,19 +58,21 @@ class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
         orElse: () => _LookAccountArgs(),
       );
 
-      final kdbx = KdbxProvider.of(context).kdbx!;
-      final readOnly = data.inheritedPathParams.getBool("readOnly", false);
-      final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
-      final kdbxEntry = uuid != null ? kdbx.findEntryByUuid(uuid) : null;
+      final historyIndex = data.inheritedPathParams.optInt("historyIndex");
+      final readOnly = historyIndex != null
+          ? true
+          : data.inheritedPathParams.getBool("readOnly", false);
+      final uuid = data.inheritedPathParams.optString("uuid");
 
-      if (kdbxEntry == null) {
-        throw Exception("kdbxEntry is null, Not found by uuid: $uuid");
+      if (uuid == null) {
+        throw Exception("uuid is null");
       }
 
       return LookAccountPage(
         key: args.key,
         readOnly: readOnly,
-        kdbxEntry: kdbxEntry,
+        id: uuid,
+        historyIndex: historyIndex,
       );
     },
   );
@@ -74,11 +82,13 @@ class LookAccountPage extends StatefulWidget {
   const LookAccountPage({
     super.key,
     this.readOnly = false,
-    required this.kdbxEntry,
+    this.historyIndex,
+    required this.id,
   });
 
   final bool readOnly;
-  final KdbxEntry kdbxEntry;
+  final int? historyIndex;
+  final String id;
 
   @override
   State<LookAccountPage> createState() => _LookAccountPageState();
@@ -88,49 +98,74 @@ class _LookAccountPageState extends State<LookAccountPage>
     with
         HintEmptyTextUtil,
         SecondLevelPageAutoBack<LookAccountPage>,
-        PrevFocusWindowListener {
+        PrevFocusWindowListener,
+        KdbxProviderListener {
+  late EntryData _kdbxEntry = EntryData(parent: "empty");
+  GroupData? _groupData;
+  bool _inRecycleBin = false;
+
   late KdbxIconWidgetData _kdbxIcon = KdbxIconWidgetData(
-    icon: widget.kdbxEntry.icon.get() ?? KdbxIcon.Key,
-    customIcon: widget.kdbxEntry.customIcon,
-    domain: widget.kdbxEntry.getActualString(KdbxKeyCommon.URL),
+    icon: _kdbxEntry.icon ?? KdbxIconType.Key.toKdbxIcon(),
+    domain: _kdbxEntry.getActualString(KdbxKeyCommon.URL),
   );
 
-  late String? packageName = widget.kdbxEntry.getActualString(
-    KdbxKeySpecial.AUTO_FILL_PACKAGE_NAME,
-  );
+  String? _packageName;
+
+  String _defaultSequence = defaultAutoTypeSequence;
 
   Future<AppInfo?>? _appInfoFuture;
 
   @override
   void initState() {
     prevFocusWindow.addListener(this);
-    _getAppInfo();
+    KdbxProvider.of(context).addListener(this);
+    _getEntryData();
     super.initState();
+  }
+
+  void _getEntryData() async {
+    final kdbxProvider = KdbxProvider.of(context);
+
+    _kdbxEntry = await kdbxProvider.kdbx!.getEntry(
+      id: widget.id,
+      historyIndex: widget.historyIndex,
+    );
+
+    _groupData = kdbxProvider.getGroup(_kdbxEntry.parent);
+
+    _kdbxIcon = KdbxIconWidgetData(
+      icon: _kdbxEntry.icon ?? KdbxIconType.Key.toKdbxIcon(),
+      domain: _kdbxEntry.getActualString(KdbxKeyCommon.URL),
+    );
+
+    final newPackageName = _kdbxEntry.getActualString(
+      KdbxKeySpecial.AUTO_FILL_PACKAGE_NAME,
+    );
+
+    if (_packageName != newPackageName) {
+      _packageName = newPackageName;
+
+      if (kIsMobile && _packageName != null && _packageName!.isNotEmpty) {
+        _appInfoFuture = installedApps.getAppInfo(_packageName!);
+      }
+    }
+
+    _inRecycleBin = kdbxProvider.isInRecycleBin(_kdbxEntry.parent);
+    _defaultSequence =
+        _kdbxEntry.autotype?.defaultSequence ??
+        kdbxProvider.getAutoTypeSequence(_kdbxEntry.parent);
+    setState(() {});
+  }
+
+  @override
+  void onKdbxSaved() {
+    _getEntryData();
   }
 
   @override
   void didUpdateWidget(covariant LookAccountPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _kdbxIcon = KdbxIconWidgetData(
-      icon: widget.kdbxEntry.icon.get() ?? KdbxIcon.Key,
-      customIcon: widget.kdbxEntry.customIcon,
-      domain: widget.kdbxEntry.getActualString(KdbxKeyCommon.URL),
-    );
-
-    final newPackageName = widget.kdbxEntry.getActualString(
-      KdbxKeySpecial.AUTO_FILL_PACKAGE_NAME,
-    );
-
-    if (packageName != newPackageName) {
-      packageName = newPackageName;
-      _getAppInfo();
-    }
-  }
-
-  void _getAppInfo() {
-    if (kIsMobile && packageName != null && packageName!.isNotEmpty) {
-      _appInfoFuture = installedApps.getAppInfo(packageName!);
-    }
+    _getEntryData();
   }
 
   @override
@@ -210,10 +245,12 @@ class _LookAccountPageState extends State<LookAccountPage>
               lanFill.requestRemoteAutofill(
                 AutofillDto(
                   fields: {
-                    KdbxKeyCommon.KEY_USER_NAME: widget.kdbxEntry
-                        .getActualString(KdbxKeyCommon.USER_NAME),
-                    KdbxKeyCommon.KEY_PASSWORD: widget.kdbxEntry
-                        .getActualString(KdbxKeyCommon.PASSWORD),
+                    KdbxKeyCommon.USER_NAME: _kdbxEntry.getActualString(
+                      KdbxKeyCommon.USER_NAME,
+                    ),
+                    KdbxKeyCommon.PASSWORD: _kdbxEntry.getActualString(
+                      KdbxKeyCommon.PASSWORD,
+                    ),
                   },
                 ),
               );
@@ -224,32 +261,22 @@ class _LookAccountPageState extends State<LookAccountPage>
           enabled: !widget.readOnly,
           title: Text(t.history_record),
           leading: const Icon(Icons.history),
-          onTap: onAutoPop(() => showEntryHistoryList(widget.kdbxEntry)),
+          onTap: onAutoPop(() => showEntryHistoryList(_kdbxEntry)),
         ),
         ListTile(
           title: Text(t.clone),
           leading: const Icon(Icons.copy),
           onTap: onAutoPop(() async {
-            final kdbx = KdbxProvider.of(context).kdbx!;
-
-            final clone = widget.kdbxEntry.clone(kdbx.virtualGroup);
-
             final result = await context.router.push(
-              EditAccountRoute(
-                initKdbxGroup:
-                    widget.kdbxEntry.parent != kdbx.kdbxFile.recycleBin
-                    ? widget.kdbxEntry.parent
-                    : null,
-                kdbxEntry: clone,
-              ),
+              EditAccountRoute(id: _kdbxEntry.id, clone: true),
             );
-            if (result is bool && result) {
-              context.router.replace(LookAccountRoute(kdbxEntry: clone));
+            if (result is String) {
+              context.router.replace(LookAccountRoute(id: result));
             }
           }),
         ),
         ListTile(
-          enabled: !widget.readOnly && !widget.kdbxEntry.isInRecycleBin(),
+          enabled: !widget.readOnly && !_inRecycleBin,
           title: Text(t.delete),
           leading: const Icon(Icons.delete),
           onTap: onAutoPop(_deleteAccount),
@@ -258,8 +285,8 @@ class _LookAccountPageState extends State<LookAccountPage>
     );
   }
 
-  VoidCallback? createOnTileClick(KdbxKey key) {
-    return widget.kdbxEntry.getActualString(key)?.isNotEmpty == true
+  VoidCallback? createOnTileClick(String key) {
+    return _kdbxEntry.getActualString(key)?.isNotEmpty == true
         ? () {
             final t = I18n.of(context)!;
 
@@ -273,7 +300,7 @@ class _LookAccountPageState extends State<LookAccountPage>
             }
 
             showBottomSheetList(
-              title: key.key.fromKdbxKeyToI18n(context),
+              title: key.fromKdbxKeyToI18n(context),
               children: [
                 if (kIsMobile)
                   ListTile(
@@ -288,9 +315,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                       lanFill!.requestRemoteAutofill(
                         AutofillDto(
                           key: "field",
-                          fields: {
-                            "field": widget.kdbxEntry.getActualString(key),
-                          },
+                          fields: {"field": _kdbxEntry.getActualString(key)},
                         ),
                       );
                     }),
@@ -301,14 +326,14 @@ class _LookAccountPageState extends State<LookAccountPage>
                     title: Text(t.auto_fill),
                     leading: Icon(Icons.ads_click),
                     onTap: onAutoPop(() {
-                      autoFill(widget.kdbxEntry, key);
+                      KdbxProvider.of(context).autoFill(_kdbxEntry.id, key);
                     }),
                   ),
                 ListTile(
                   title: Text(t.copy),
                   leading: const Icon(Icons.copy),
                   onTap: onAutoPop(() {
-                    writeClipboard(widget.kdbxEntry.getActualString(key) ?? "");
+                    writeClipboard(_kdbxEntry.getActualString(key) ?? "");
                   }),
                 ),
                 if (key == KdbxKeyCommon.URL || KdbxKeyURLS.all.contains(key))
@@ -316,7 +341,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                     title: Text(t.open),
                     leading: Icon(Icons.open_in_new),
                     onTap: onAutoPop(() {
-                      _launchUrl(widget.kdbxEntry.getActualString(key)!);
+                      _launchUrl(_kdbxEntry.getActualString(key)!);
                     }),
                   ),
               ],
@@ -328,6 +353,7 @@ class _LookAccountPageState extends State<LookAccountPage>
   @override
   void dispose() {
     prevFocusWindow.removeListener(this);
+    KdbxProvider.of(context).removeListener(this);
     super.dispose();
   }
 
@@ -335,10 +361,9 @@ class _LookAccountPageState extends State<LookAccountPage>
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
 
-    final kdbxEntry = widget.kdbxEntry;
     final readOnly = widget.readOnly;
 
-    final customFields = kdbxEntry.customEntries;
+    final customFields = _kdbxEntry.customEntries;
 
     const shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
@@ -347,16 +372,16 @@ class _LookAccountPageState extends State<LookAccountPage>
       ),
     );
 
-    final title = kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE);
-    final url = kdbxEntry.getNonNullString(KdbxKeyCommon.URL);
-    final username = kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME);
-    final password = kdbxEntry.getNonNullString(KdbxKeyCommon.PASSWORD);
-    final email = kdbxEntry.getNonNullString(KdbxKeyCommon.EMAIL);
-    final notes = kdbxEntry.getNonNullString(KdbxKeyCommon.NOTES);
+    final title = _kdbxEntry.getNonNullString(KdbxKeyCommon.TITLE);
+    final url = _kdbxEntry.getNonNullString(KdbxKeyCommon.URL);
+    final username = _kdbxEntry.getNonNullString(KdbxKeyCommon.USER_NAME);
+    final password = _kdbxEntry.getNonNullString(KdbxKeyCommon.PASSWORD);
+    final email = _kdbxEntry.getNonNullString(KdbxKeyCommon.EMAIL);
+    final notes = _kdbxEntry.getNonNullString(KdbxKeyCommon.NOTES);
 
     final faviconSource = Store.instance.settings.faviconSource;
 
-    final moreUrlsKeys = kdbxEntry.moreUrlsKeys;
+    final moreUrlsKeys = _kdbxEntry.moreUrlsKeys;
 
     return Scaffold(
       appBar: AppBar(
@@ -379,17 +404,18 @@ class _LookAccountPageState extends State<LookAccountPage>
                     padding: const EdgeInsets.only(right: 6),
                     child: KdbxIconWidget(
                       kdbxIcon: KdbxIconWidgetData(
-                        icon: kdbxEntry.parent.icon.get() ?? KdbxIcon.Key,
-                        customIcon: kdbxEntry.parent.customIcon,
+                        icon:
+                            _groupData?.icon ??
+                            KdbxIconType.Folder.toKdbxIcon(),
                       ),
                       size: 24,
                     ),
                   ),
                   hintEmptyText(
-                    (kdbxEntry.parent.name.get() ?? '').isEmpty,
+                    (_groupData?.name ?? '').isEmpty,
                     Expanded(
                       child: Text(
-                        kdbxEntry.parent.name.get() ?? '',
+                        _groupData?.name ?? '',
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
@@ -429,11 +455,11 @@ class _LookAccountPageState extends State<LookAccountPage>
                   ),
                   Expanded(
                     child: Text(
-                      kdbxEntry.isExpiry() ? "$title (${t.expires})" : title,
+                      _kdbxEntry.isExpiry() ? "$title (${t.expires})" : title,
                       softWrap: false,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
-                      style: kdbxEntry.isExpiry()
+                      style: _kdbxEntry.isExpiry()
                           ? Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: Theme.of(context).colorScheme.error,
                             )
@@ -513,7 +539,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                 subtitle: Padding(
                   padding: const EdgeInsets.only(left: 12),
                   child: RichWrapper(
-                    initialText: kdbxEntry.getAutoTypeSequence(),
+                    initialText: _defaultSequence,
                     targetMatches: [
                       MatchTargetItem.pattern(
                         AutoTypeRichPattern.BUTTON,
@@ -552,12 +578,12 @@ class _LookAccountPageState extends State<LookAccountPage>
                 ),
                 trailing: IconButton(
                   onPressed: prevFocusWindow.isTargetWindowExist
-                      ? () => autoFill(kdbxEntry)
+                      ? () => KdbxProvider.of(context).autoFill(_kdbxEntry.id)
                       : null,
                   icon: const Icon(Icons.ads_click),
                 ),
               ),
-            if (kIsMobile && packageName != null && packageName!.isNotEmpty)
+            if (kIsMobile && _packageName != null && _packageName!.isNotEmpty)
               FutureBuilder(
                 future: _appInfoFuture,
                 builder: (context, snapshot) {
@@ -618,23 +644,23 @@ class _LookAccountPageState extends State<LookAccountPage>
               onLongPress: url.isNotEmpty ? () => writeClipboard(url) : null,
             ),
             ...moreUrlsKeys.asMap().entries.map((item) {
-              final url = kdbxEntry.getNonNullString(item.value);
-              String text = item.value.key;
+              final url = _kdbxEntry.getNonNullString(item.value);
+              String text = item.value;
 
-              switch (item.value.key) {
-                case KdbxKeyURLS.KEY_URL1:
+              switch (item.value) {
+                case KdbxKeyURLS.URL1:
                   text = t.domain_num(1);
                   break;
-                case KdbxKeyURLS.KEY_URL2:
+                case KdbxKeyURLS.URL2:
                   text = t.domain_num(2);
                   break;
-                case KdbxKeyURLS.KEY_URL3:
+                case KdbxKeyURLS.URL3:
                   text = t.domain_num(3);
                   break;
-                case KdbxKeyURLS.KEY_URL4:
+                case KdbxKeyURLS.URL4:
                   text = t.domain_num(4);
                   break;
-                case KdbxKeyURLS.KEY_URL5:
+                case KdbxKeyURLS.URL5:
                   text = t.domain_num(5);
                   break;
               }
@@ -684,22 +710,23 @@ class _LookAccountPageState extends State<LookAccountPage>
                   shape: shape,
                   title: Padding(
                     padding: const EdgeInsets.only(left: 6),
-                    child: Text(item.key.key),
+                    child: Text(item.key),
                   ),
                   subtitle: Padding(
                     padding: const EdgeInsets.only(left: 12),
                     child: hintEmptyText(
-                      kdbxEntry.getNonNullString(item.key).isEmpty,
+                      _kdbxEntry.getNonNullString(item.key).isEmpty,
                       Text(
-                        kdbxEntry.getNonNullString(item.key),
+                        _kdbxEntry.getNonNullString(item.key),
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                     ),
                   ),
                   onTap: createOnTileClick(item.key),
-                  onLongPress: kdbxEntry.getNonNullString(item.key).isNotEmpty
-                      ? () =>
-                            writeClipboard(kdbxEntry.getNonNullString(item.key))
+                  onLongPress: _kdbxEntry.getNonNullString(item.key).isNotEmpty
+                      ? () => writeClipboard(
+                          _kdbxEntry.getNonNullString(item.key),
+                        )
                       : null,
                 ),
               ),
@@ -745,11 +772,11 @@ class _LookAccountPageState extends State<LookAccountPage>
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: hintEmptyText(
-                  kdbxEntry.tagList.isEmpty,
+                  _kdbxEntry.tags.isEmpty,
                   ChipList(
                     maxHeight: 150,
                     items: [
-                      for (final item in kdbxEntry.tagList)
+                      for (final item in _kdbxEntry.tags)
                         ChipListItem(
                           value: item,
                           deletable: false,
@@ -769,25 +796,24 @@ class _LookAccountPageState extends State<LookAccountPage>
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: hintEmptyText(
-                  kdbxEntry.binaryEntries.isEmpty,
+                  _kdbxEntry.attachments.isEmpty,
                   ChipList(
                     maxHeight: 150,
                     onChipTap: (binary) {
                       showBinaryAction(binary);
                     },
                     items: [
-                      for (final item in kdbxEntry.binaryEntries)
+                      for (final item in _kdbxEntry.attachments)
                         ChipListItem(
                           value: item,
                           deletable: false,
                           label: RichText(
                             text: TextSpan(
-                              text: item.key.key,
+                              text: item.name,
                               style: Theme.of(context).textTheme.bodyMedium,
                               children: [
                                 TextSpan(
-                                  text:
-                                      " (${item.value.value.length.toStorageUnit(.KB)})",
+                                  text: " (${item.size.toStorageUnit(.KB)})",
                                   style: Theme.of(
                                     context,
                                   ).textTheme.titleMedium,
@@ -823,8 +849,9 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(
-                  kdbxEntry.times.creationTime.get()!.toLocal().formatDate,
+                child: hintEmptyText(
+                  _kdbxEntry.times.creation == null,
+                  Text(_kdbxEntry.times.creation?.toLocal().formatDate ?? ""),
                 ),
               ),
             ),
@@ -836,16 +863,17 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(
-                  kdbxEntry.times.lastModificationTime
-                      .get()!
-                      .toLocal()
-                      .formatDate,
+                child: hintEmptyText(
+                  _kdbxEntry.times.lastModification == null,
+                  Text(
+                    _kdbxEntry.times.lastModification?.toLocal().formatDate ??
+                        "",
+                  ),
                 ),
               ),
             ),
-            if (kdbxEntry.times.expires.get() == true &&
-                kdbxEntry.times.expiryTime.get() != null)
+            if (_kdbxEntry.times.expires == true &&
+                _kdbxEntry.times.expiry != null)
               ListTile(
                 shape: shape,
                 title: Padding(
@@ -854,9 +882,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                 ),
                 subtitle: Padding(
                   padding: const EdgeInsets.only(left: 12),
-                  child: Text(
-                    kdbxEntry.times.expiryTime.get()!.toLocal().formatDate,
-                  ),
+                  child: Text(_kdbxEntry.times.expiry!.toLocal().formatDate),
                 ),
               ),
             ListTile(
@@ -867,7 +893,7 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(kdbxEntry.uuid.uuid),
+                child: Text(_kdbxEntry.id),
               ),
             ),
           ]),
@@ -878,17 +904,15 @@ class _LookAccountPageState extends State<LookAccountPage>
           ? FloatingActionButton(
               heroTag: const ValueKey("look_account_float"),
               onPressed: () async {
-                if (kdbxEntry.isInRecycleBin()) {
-                  final kdbx = KdbxProvider.of(context).kdbx!;
-                  kdbx.restoreObject(kdbxEntry);
-                  if (await kdbxSave(kdbx)) {
+                if (_inRecycleBin) {
+                  if (await kdbxAction(KdbxAction.restore([_kdbxEntry.id]))) {
                     context.router.pop();
                   }
                 } else {
                   final result = await context.router.push(
-                    EditAccountRoute(kdbxEntry: kdbxEntry),
+                    EditAccountRoute(id: _kdbxEntry.id),
                   );
-                  if (result is bool && result) {
+                  if (result is String) {
                     setState(() {});
                   }
                 }
@@ -896,7 +920,7 @@ class _LookAccountPageState extends State<LookAccountPage>
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(56 / 2)),
               ),
-              child: kdbxEntry.isInRecycleBin()
+              child: _inRecycleBin
                   ? const Icon(Icons.restore_from_trash)
                   : const Icon(Icons.edit),
             )
@@ -907,9 +931,7 @@ class _LookAccountPageState extends State<LookAccountPage>
   void _deleteAccount() async {
     final t = I18n.of(context)!;
     if (await showConfirmDialog(title: t.delete, message: t.is_move_recycle)) {
-      final kdbx = KdbxProvider.of(context).kdbx!;
-      kdbx.deleteEntry(widget.kdbxEntry);
-      if (await kdbxSave(kdbx)) {
+      if (await kdbxAction(KdbxAction.delete([_kdbxEntry.id]))) {
         context.router.pop();
       }
     }
@@ -926,7 +948,7 @@ class _LookAccountPageState extends State<LookAccountPage>
   }
 
   Widget _otp(ShapeBorder? shape) {
-    return widget.kdbxEntry.getNonNullString(KdbxKeyCommon.OTP).isNotEmpty
+    return _kdbxEntry.getNonNullString(KdbxKeyCommon.OTP).isNotEmpty
         ? _cardColumn([
             Padding(
               padding: const EdgeInsets.all(12),
@@ -945,9 +967,7 @@ class _LookAccountPageState extends State<LookAccountPage>
             ),
             _LookOtPasswordListTile(
               shape: shape,
-              oneTimePassword: widget.kdbxEntry.getNonNullString(
-                KdbxKeyCommon.OTP,
-              ),
+              oneTimePassword: _kdbxEntry.getNonNullString(KdbxKeyCommon.OTP),
               onTap: createOnTileClick(KdbxKeyCommon.OTP),
             ),
           ])
@@ -957,7 +977,7 @@ class _LookAccountPageState extends State<LookAccountPage>
   void _showDescriptionDialog() {
     context.router.push(
       EditNotesRoute(
-        text: widget.kdbxEntry.getNonNullString(KdbxKeyCommon.NOTES),
+        text: _kdbxEntry.getNonNullString(KdbxKeyCommon.NOTES),
         readOnly: true,
       ),
     );

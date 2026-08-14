@@ -2,7 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:keepass_core/keepass_core.dart';
 
+import '../context/kdbx.dart';
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
 import '../page/password/look_account.dart';
@@ -72,17 +74,30 @@ class _MyMotionState extends State<MyMotion> {
 class KdbxHistoryList extends StatefulWidget {
   const KdbxHistoryList({super.key, required this.kdbxEntry});
 
-  final KdbxEntry kdbxEntry;
+  final EntryData kdbxEntry;
 
   @override
   State<StatefulWidget> createState() => _KdbxHistoryListState();
 }
 
 class _KdbxHistoryListState extends State<KdbxHistoryList> {
-  KdbxEntry? _showMenu;
+  EntryData? _showMenu;
 
-  void _remove(KdbxEntry entry) async {
-    // TODO! 删除后, 同步远程,数据会重新覆盖回来,需要 kdbx.dart 兼容
+  List<EntryData> _history = [];
+
+  @override
+  void initState() {
+    KdbxProvider.of(
+      context,
+    ).kdbx!.getEntryHistorys(id: widget.kdbxEntry.id).then((value) {
+      _history = value;
+      setState(() {});
+    });
+    super.initState();
+  }
+
+  void _remove(EntryData entry) async {
+    // TODO! 删除后, 同步远程,数据会重新覆盖回来,需要 keepass 兼容
     // final t = I18n.of(context)!;
 
     // if (await showConfirmDialog(
@@ -97,13 +112,11 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
     // }
   }
 
-  void _restore(KdbxEntry entry) {}
+  void _restore(EntryData entry) {}
 
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-
-    final history = widget.kdbxEntry.history.reversed.toList();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -118,8 +131,8 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
           actionsPadding: const EdgeInsets.only(right: 16),
         ),
         Expanded(
-          child: history.isNotEmpty
-              ? _buildHistoryList(history)
+          child: _history.isNotEmpty
+              ? _buildHistoryList(_history)
               : Center(
                   child: Opacity(
                     opacity: .5,
@@ -131,7 +144,7 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
     );
   }
 
-  Widget _buildHistoryList(List<KdbxEntry> history) {
+  Widget _buildHistoryList(List<EntryData> history) {
     return ListView.builder(
       shrinkWrap: true,
       itemCount: history.length,
@@ -142,16 +155,20 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
           selected: _showMenu == entry,
           minTileHeight: 48,
           title: Text(
-            getKdbxObjectTitle(entry),
+            entry.getLabel(),
             style: Theme.of(context).textTheme.titleSmall,
           ),
           subtitle: Text(
-            entry.times.lastModificationTime.get()!.toLocal().formatDate,
+            entry.times.lastModification!.toLocal().formatDate,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           onTap: () {
             context.router.popAndPush(
-              LookAccountRoute(kdbxEntry: entry, readOnly: true),
+              LookAccountRoute(
+                id: entry.id,
+                readOnly: true,
+                historyIndex: index,
+              ),
             );
           },
         );

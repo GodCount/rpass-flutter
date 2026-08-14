@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:keepass_core/keepass_core.dart';
 import 'package:logging/logging.dart';
 import 'package:remote_fs/remote_fs.dart';
 
@@ -7,7 +8,6 @@ import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
 import '../../page/route.dart';
 import '../../rpass.dart';
-import '../../kdbx/kdbx.dart';
 import '../../remotes_fs/remote_fs.dart';
 import '../index.dart';
 
@@ -20,25 +20,11 @@ class SyncKdbxController with ChangeNotifier {
   Object? _lastError;
   Object? get lastError => _lastError;
 
-  MergeContext? _lastMergeContext;
-  MergeContext? get lastMergeContext => _lastMergeContext;
+  MergeLog? _lastMergeLog;
+  MergeLog? get lastMergeLog => _lastMergeLog;
 
   bool _isSyncing = false;
   bool get isSyncing => _isSyncing;
-
-  Future<void> initConfig(Kdbx kdbx) async {
-    try {
-      if (kdbx.syncAccountEntry != null) {
-        _config = RemoteFileKdbxEntryField.fromKdbx(kdbx.syncAccountEntry!);
-        if (_config == null) {
-          kdbx.syncAccountEntry = null;
-        }
-      }
-    } catch (e) {
-      _logger.warning(e);
-      kdbx.syncAccountEntry = null;
-    }
-  }
 
   Future<void> setRemoteFileConfig(
     BuildContext context,
@@ -70,15 +56,20 @@ class SyncKdbxController with ChangeNotifier {
   Future<void> sync(BuildContext context, {bool forceMerge = false}) async {
     try {
       _lastError = null;
-      _lastMergeContext = null;
+      _lastMergeLog = null;
 
       _isSyncing = true;
       notifyListeners();
 
-      final kdbx = KdbxProvider.of(context).kdbx!;
+      final kdbxProvider = KdbxProvider.of(context);
+
+      final kdbx = kdbxProvider.kdbx!;
 
       if (_config == null) {
-        await initConfig(kdbx);
+        final entry = await kdbxProvider.getSyncEntryData();
+        _config = entry != null
+            ? RemoteFileKdbxEntryField.fromKdbx(entry)
+            : null;
       }
 
       if (_config == null) {
@@ -105,9 +96,11 @@ class SyncKdbxController with ChangeNotifier {
       Kdbx remoteKdbx;
 
       try {
-        remoteKdbx = await Kdbx.loadBytesFromCredentials(
-          data: remoteData,
-          credentials: kdbx.credentials,
+        remoteKdbx = await Kdbx.openBytes(
+          bytes: remoteData,
+          credentials: Credentials.formCompositeKey(
+            key: await kdbx.getCompositeKey(),
+          ),
         );
       } catch (e) {
         _logger.warning("local credentials Unable open remote kdbx.", e);
@@ -123,14 +116,13 @@ class SyncKdbxController with ChangeNotifier {
         }
       }
 
-      final syncMergeContext = await kdbx.sync(remoteKdbx);
-      _lastMergeContext = syncMergeContext.mergeContext;
+      _lastMergeLog = await kdbx.merge(kdbx: remoteKdbx);
 
       Store.instance.settings.setLastSyncTime(DateTime.now());
 
       _logger.info("merge save in local.");
 
-      if (syncMergeContext.isUpdateMasterKey) {
+      if (_lastMergeLog!.isUpdateMasterKey) {
         final biometric = Biometric.of(context);
 
         if (biometric.enable) {
@@ -138,7 +130,7 @@ class SyncKdbxController with ChangeNotifier {
             _logger.info("update biometric");
             await biometric.updateCredentials(
               context,
-              kdbx.credentials.getHash(),
+              await kdbx.getCompositeKey(),
             );
           } catch (e) {
             _logger.warning("update biometric failed! remove biometric data");
@@ -149,19 +141,19 @@ class SyncKdbxController with ChangeNotifier {
       }
 
       _logger.info(
-        "{masterKeyChanged=${syncMergeContext.masterKeyChanged}, "
-        "fieldChanged=${syncMergeContext.fieldChanged}, forceMerge=$forceMerge}",
+        "{masterKeyChanged=${_lastMergeLog?.masterKeyChanged}, "
+        "forceMerge=$forceMerge}",
       );
 
       // 在这种情况下需要更新远程文件
-      if (syncMergeContext.masterKeyChanged ||
-          syncMergeContext.fieldChanged ||
+      if (_lastMergeLog!.masterKeyChanged ||
+          _lastMergeLog!.events.isNotEmpty ||
           forceMerge) {
-        await remoteFile.write(syncMergeContext.data!);
+        await remoteFile.write(await kdbx.save());
         _logger.info("sync data write to remote file, done.");
       } else {
         // 没有变化
-        _lastMergeContext = null;
+        _lastMergeLog = null;
       }
     } catch (e) {
       _lastError = e;

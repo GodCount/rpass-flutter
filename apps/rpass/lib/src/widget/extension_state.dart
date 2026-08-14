@@ -4,11 +4,14 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:keepass_core/keepass_core.dart';
 import 'package:logging/logging.dart';
 
 import '../context/biometric.dart';
+import '../context/kdbx.dart';
 import '../context/lan_fill_server.dart';
 import '../i18n.dart';
+import '../kdbx/auto_fill.dart';
 import '../kdbx/kdbx.dart';
 import '../page/kdbx/edit_group_page.dart';
 import '../page/route.dart';
@@ -19,7 +22,6 @@ import 'chip_list.dart';
 import 'common.dart';
 import 'extension_state.dart';
 import 'kdbx_history_list.dart';
-import 'kdbx_icon.dart';
 
 export "context_menu.dart";
 
@@ -103,7 +105,7 @@ extension StatefulDialog on State {
     return result is bool && result ? true : false;
   }
 
-  Future<KdbxGroup?> showGroupSelectorDialog(KdbxGroup? kdbxGroup) {
+  Future<String?> showGroupSelectorDialog(String? kdbxGroup) {
     return GroupSelectorDialog.openDialog(context, value: kdbxGroup);
   }
 
@@ -203,22 +205,26 @@ extension StatefulBottomSheet on State {
     );
   }
 
-  void showBinaryAction(ChipListItem<MapEntry<KdbxKey, KdbxBinary>> binary) {
+  void showBinaryAction(ChipListItem<Attachment> binary) {
     final t = I18n.of(context)!;
     final lanFill = LanFillInherited.of(context);
+    final kdbxProvider = KdbxProvider.of(context);
 
-    final title = binary.value.key.key;
+    final title = binary.value.name;
 
     showBottomSheetList(
-      title:title,
+      title: title,
       children: [
         ListTile(
           leading: const Icon(Icons.save),
           title: Text(t.save),
           onTap: () async {
             try {
+              final data =
+                  binary.value.data ??
+                  await kdbxProvider.kdbx!.getAttachment(id: binary.value.id);
               final result = await SimpleFile.saveFile(
-                data: binary.value.value.value,
+                data: data,
                 filename: title,
               );
               showToast(result);
@@ -241,9 +247,12 @@ extension StatefulBottomSheet on State {
                   ? Icons.connect_without_contact_rounded
                   : Icons.cast_connected,
             ),
-            onTap: () {
+            onTap: () async {
               context.router.pop();
-              lanFill?.updateFile(title, binary.value.value.value);
+              final data =
+                  binary.value.data ??
+                  await kdbxProvider.kdbx!.getAttachment(id: binary.value.id);
+              lanFill?.updateFile(title, data);
             },
           ),
       ],
@@ -299,7 +308,7 @@ extension StatefulBottomSheet on State {
     );
   }
 
-  void showEntryHistoryList(KdbxEntry kdbxEntry) {
+  void showEntryHistoryList(EntryData kdbxEntry) {
     showBottomSheetView(
       context: context,
       builder: (context) {
@@ -373,53 +382,34 @@ extension StatefulBottomSheet on State {
   }
 }
 
-class KdbxGroupData {
-  KdbxGroupData({
-    required this.name,
-    required this.notes,
-    this.enableDisplay,
-    this.enableSearching,
-    required this.kdbxIcon,
-    this.kdbxGroup,
-  });
-
-  String name;
-  String notes;
-  bool? enableDisplay;
-  bool? enableSearching;
-  KdbxIconWidgetData kdbxIcon;
-  KdbxGroup? kdbxGroup;
-
-  KdbxGroupData clone() {
-    return KdbxGroupData(
-      name: name,
-      notes: notes,
-      enableDisplay: enableDisplay,
-      enableSearching: enableSearching,
-      kdbxIcon: kdbxIcon,
-      kdbxGroup: kdbxGroup,
-    );
-  }
-}
-
 extension StatefulKdbx on State {
-  String getKdbxObjectTitle(KdbxObject kdbxObject) {
-    return kdbxObject is KdbxEntry
-        ? kdbxObject.getLabel()
-        : kdbxObject is KdbxGroup
-        ? kdbxObject.name.get() ?? ''
-        : '';
+  Future<bool> kdbxAction(KdbxAction action) async {
+    final kdbx = KdbxProvider.of(context).kdbx;
+    if (kdbx != null) {
+      try {
+        await kdbx.action(action: action);
+        return true;
+      } catch (e) {
+        showError(e);
+      }
+    }
+    return false;
   }
 
-  Future<bool> kdbxSave(Kdbx kdbx) async {
+  void autoFill(String id, [String? key]) async {
+    final kdbx = KdbxProvider.of(context).kdbx;
+
+    if (kdbx == null) return;
+
     try {
-      debugPrint("kdbxSave ${DateTime.now()}");
-      await kdbx.save();
-      return true;
-    } catch (e, s) {
-      _logger.severe("kdbx save fail!", e, s);
+      final (entry, sequence) = await kdbx.getAutoTypeSequence(id: id);
+      return autoFillSequence(
+        sequence,
+        key: key,
+        getValue: (key) => entry.getActualString(key),
+      );
+    } catch (e) {
       showError(e);
-      return false;
     }
   }
 
@@ -442,14 +432,6 @@ extension StatefulKdbx on State {
       );
     } else {
       return await context.router.push(EditGroupPageRoute());
-    }
-  }
-
-  Future<void> autoFill(KdbxEntry kdbxEntry, [KdbxKey? key]) async {
-    try {
-      await kdbxEntry.autoFill(key);
-    } catch (e) {
-      showError(e);
     }
   }
 }

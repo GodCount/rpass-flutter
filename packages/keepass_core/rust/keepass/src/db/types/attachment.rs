@@ -14,7 +14,8 @@ use crate::{
 pub struct AttachmentId(usize);
 
 impl AttachmentId {
-    pub(crate) fn new(id: usize) -> Self {
+    /// new AttachmentId
+    pub fn new(id: usize) -> Self {
         AttachmentId(id)
     }
 

@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:keepass_core/keepass_core.dart';
 import 'package:remote_fs/remote_fs.dart';
 
 import '../../context/kdbx.dart';
@@ -109,8 +110,8 @@ class _SyncAccountPageState extends State<SyncAccountPage>
       await store.syncKdbx.setRemoteFileConfig(context, result2);
 
       if (store.syncKdbx.lastError == null) {
-        final kdbx = KdbxProvider.of(context).kdbx!;
-        KdbxEntry? entry = kdbx.syncAccountEntry;
+        final kdbxProvider = KdbxProvider.of(context);
+        EntryData? entry = await kdbxProvider.getSyncEntryData();
 
         if (entry != null &&
             store.syncKdbx.config == RemoteFileKdbxEntryField.fromKdbx(entry)) {
@@ -122,15 +123,14 @@ class _SyncAccountPageState extends State<SyncAccountPage>
               title: t.save,
               message: t.save_sync_account_subtitle,
             )) {
-          entry ??= kdbx.createEntry(kdbx.kdbxFile.body.rootGroup)
-            ..setString(KdbxKeyCommon.TITLE, PlainValue(t.sync_config));
+          entry ??= kdbxProvider.kdbx!.newEntry()
+            ..fields[KdbxKeyCommon.TITLE] = FieldValue.plaintext(t.sync_config);
 
           for (final item in store.syncKdbx.config!.toKdbx().entries) {
-            entry.setString(item.key, item.value);
+            entry.fields[item.key] = item.value;
           }
 
-          kdbx.syncAccountEntry = entry;
-          await kdbxSave(kdbx);
+          await kdbxAction(KdbxAction.updateSyncEntry(entry));
           store.syncKdbx.sync(context);
         }
       }
@@ -223,12 +223,12 @@ class _SyncAccountPageState extends State<SyncAccountPage>
                     showError(store.syncKdbx.lastError);
                   },
                 ),
-              if (store.syncKdbx.lastMergeContext != null)
+              if (store.syncKdbx.lastMergeLog != null)
                 Theme(
                   data: ThemeData(dividerColor: Colors.transparent),
                   child: ExpansionTile(
                     title: Text(t.sync_merge_log),
-                    children: _buildMergeTile(store.syncKdbx.lastMergeContext!),
+                    children: _buildMergeTile(store.syncKdbx.lastMergeLog!),
                   ),
                 ),
             ],
@@ -238,61 +238,46 @@ class _SyncAccountPageState extends State<SyncAccountPage>
     );
   }
 
-  List<Widget> _buildMergeTile(MergeContext merge) {
+  List<Widget> _buildMergeTile(MergeLog mergeLog) {
     final t = I18n.of(context)!;
 
     return [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Text(merge.debugSummary()),
-      ),
-      if (merge.changes.isNotEmpty)
-        ListTile(
-          isThreeLine: true,
-          title: Text(t.change),
-          subtitle: Padding(
-            padding: const EdgeInsets.only(left: 12),
-            child: Column(
-              spacing: 6,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: merge.changes.map((item) {
-                return Text("[${item.debug}] ${item.object}");
-              }).toList(),
-            ),
+      ListTile(
+        textColor: Colors.amber,
+        isThreeLine: true,
+        title: Text(t.warn),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(left: 12),
+          child: Column(
+            spacing: 6,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: mergeLog.warnings.map((item) {
+              return Text(item);
+            }).toList(),
           ),
         ),
-      if (merge.warnings.isNotEmpty)
+      ),
+      for (final item in mergeLog.events)
         ListTile(
           textColor: Colors.amber,
           isThreeLine: true,
-          title: Text(t.warn),
-          subtitle: Padding(
-            padding: const EdgeInsets.only(left: 12),
-            child: Column(
-              spacing: 6,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: merge.warnings.map((item) {
-                return Text(item.debug);
-              }).toList(),
-            ),
-          ),
-        ),
-      if (merge.deletedObjects.isNotEmpty)
-        ListTile(
-          textColor: Theme.of(context).colorScheme.error,
-          isThreeLine: true,
-          title: Text(t.remove),
-          subtitle: Padding(
-            padding: const EdgeInsets.only(left: 12),
-            child: Column(
-              spacing: 6,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: merge.deletedObjects.entries.map((item) {
-                return Text("${item.key}");
-              }).toList(),
-            ),
-          ),
+          title: Text(item.eventType.name), // TODO! 翻译
+          dense: true,
+          subtitle: Text(item.target.toDisplay()),
         ),
     ];
+  }
+}
+
+extension _MergeEventTargetString on MergeEventTarget {
+  String toDisplay() {
+    switch (this) {
+      case MergeEventTarget_Entry():
+        return "Entry($field0)";
+      case MergeEventTarget_Group():
+        return "Group($field0)";
+      case MergeEventTarget_Icon():
+        return "Icon($field0)";
+    }
   }
 }

@@ -27,8 +27,8 @@ dependencies:
   package_info_plus: ^9.0.0
 
   # 密码管理相关
-  kdbx:
-    path: ../../packages/kdbx.dart
+  keepass_core:
+    path: ../../packages/keepass_core
   crypto: ^3.0.3
   otp: ^3.1.4
   uuid: ^4.4.0
@@ -70,8 +70,6 @@ dependencies:
   window_manager: ^0.5.1
   tray_manager: ^0.5.2
   hotkey_manager: ^0.2.3
-  enigo_flutter:
-    path: ../../packages/enigo_flutter
   common_native_channel:
     path: ../../packages/common_native_channel
 

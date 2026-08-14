@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:keepass_core/keepass_core.dart';
 import 'package:logging/logging.dart';
-import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../util/common.dart';
@@ -45,11 +45,9 @@ class _ImportAccountPageState extends State<ImportAccountPage>
     final t = I18n.of(context)!;
 
     try {
-      final kdbx = KdbxProvider.of(context).kdbx!;
       final result = await SimpleFile.openText(allowedExtensions: ["csv"]);
       final list = adapter.import(csvToJson(result, shouldParseNumbers: false));
-      kdbx.import(list);
-      if (await kdbxSave(kdbx)) {
+      if (await kdbxAction(KdbxAction.importEntry(items: list))) {
         showToast("${t.import_done} ${list.length}");
       }
     } catch (e) {

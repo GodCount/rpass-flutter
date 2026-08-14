@@ -1,0 +1,37 @@
+[package]
+name = "bridge"
+version = "0.1.0"
+edition = "2021"
+
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+anyhow = { version = "1", features = ["backtrace"] }
+chrono = { version = "0.4.23", default-features = false, features = [
+    "serde",
+    "clock",
+    "std",
+] }
+enigo = { version="0.6.1", features = ["wayland"] }
+flutter_rust_bridge = { version = "=2.13.0-beta.5", features = ["chrono", "log"] }
+futures = "0.3"
+keepass = { path = "../keepass", features = [
+    "save_kdbx4",
+    "serialization",
+    "_merge",
+    "totp"
+] }
+phf = { version = "0.14.0", features = ["macros"] }
+thiserror = "2"
+zeroize = { version = "1", features = ["zeroize_derive"] }
+utils_proc_macro = { path = "../utils_proc_macro" }
+rand = "0.8"
+log="0.4"
+[target.'cfg(target_os = "macos")'.dependencies.core-foundation]
+version = "0.10"
+
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }

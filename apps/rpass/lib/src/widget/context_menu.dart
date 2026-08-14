@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
+import 'package:keepass_core/keepass_core.dart';
 
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
@@ -19,19 +20,19 @@ sealed class MyContextMenuItem {
   factory MyContextMenuItem.revert([bool selected = false]) =>
       RevertContextMenuItem(selected);
 
-  factory MyContextMenuItem.autoFill([KdbxKey? kdbxKey]) =>
+  factory MyContextMenuItem.autoFill([String? kdbxKey]) =>
       AutoFillContextMenuItem(kdbxKey);
-  factory MyContextMenuItem.copy([KdbxKey? kdbxKey]) =>
+  factory MyContextMenuItem.copy([String? kdbxKey]) =>
       CopyContextMenuItem(kdbxKey);
 
   static List<MenuItem<MyContextMenuItem>> buildSubmenuAutoFill(
     BuildContext context,
-    KdbxEntry kdbxEntry,
+    EntryData kdbxEntry,
   ) => AutoFillContextMenuItem.buildSubmenuItem(context, kdbxEntry);
 
   static List<MenuItem<MyContextMenuItem>> buildSubmenuCopy(
     BuildContext context,
-    KdbxEntry kdbxEntry,
+    EntryData kdbxEntry,
   ) => CopyContextMenuItem.buildSubmenuItem(context, kdbxEntry);
 }
 
@@ -58,20 +59,19 @@ class RevertContextMenuItem extends MyContextMenuItem {
   final bool selected;
 }
 
-typedef BuildMenuItemValue<T> = T Function(KdbxKey key);
+typedef BuildMenuItemValue<T> = T Function(String key);
 
 mixin class _KdbxKeyContextMenuItem {
-
   static List<MenuItem<T>> _buildKdbxKeyMenuItem<T>(
     BuildContext context,
-    KdbxEntry kdbxEntry,
+    EntryData kdbxEntry,
     BuildMenuItemValue<T> buildValue,
   ) {
     final urls = [KdbxKeyCommon.URL, ...kdbxEntry.moreUrlsKeys];
     return [
       ...KdbxKeyCommon.excludeURL.map(
         (item) => MenuItem(
-          label: item.key.fromKdbxKeyToI18n(context),
+          label: item.fromKdbxKeyToI18n(context),
           enabled: kdbxEntry.getNonNullString(item).isNotEmpty,
           value: buildValue(item),
         ),
@@ -82,7 +82,7 @@ mixin class _KdbxKeyContextMenuItem {
               items: [KdbxKeyCommon.URL, ...kdbxEntry.moreUrlsKeys]
                   .map(
                     (item) => MenuItem(
-                      label: item.key.fromKdbxKeyToI18n(context),
+                      label: item.fromKdbxKeyToI18n(context),
                       enabled: kdbxEntry.getNonNullString(item).isNotEmpty,
                       value: buildValue(item),
                     ),
@@ -90,7 +90,7 @@ mixin class _KdbxKeyContextMenuItem {
                   .toList(),
             )
           : MenuItem(
-              label: KdbxKeyCommon.KEY_URL.fromKdbxKeyToI18n(context),
+              label: KdbxKeyCommon.URL.fromKdbxKeyToI18n(context),
               enabled: kdbxEntry.getNonNullString(KdbxKeyCommon.URL).isNotEmpty,
               value: buildValue(KdbxKeyCommon.URL),
             ),
@@ -100,7 +100,7 @@ mixin class _KdbxKeyContextMenuItem {
         items: kdbxEntry.customEntries
             .map(
               (item) => MenuItem(
-                label: item.key.key.fromKdbxKeyToI18n(context),
+                label: item.key.fromKdbxKeyToI18n(context),
                 enabled: kdbxEntry.getNonNullString(item.key).isNotEmpty,
                 value: buildValue(item.key),
               ),
@@ -114,11 +114,11 @@ mixin class _KdbxKeyContextMenuItem {
 class CopyContextMenuItem extends MyContextMenuItem {
   CopyContextMenuItem([this.kdbxKey]);
 
-  final KdbxKey? kdbxKey;
+  final String? kdbxKey;
 
   static List<MenuItem<CopyContextMenuItem>> buildSubmenuItem(
     BuildContext context,
-    KdbxEntry kdbxEntry,
+    EntryData kdbxEntry,
   ) {
     return _KdbxKeyContextMenuItem._buildKdbxKeyMenuItem(
       context,
@@ -131,11 +131,11 @@ class CopyContextMenuItem extends MyContextMenuItem {
 class AutoFillContextMenuItem extends MyContextMenuItem {
   AutoFillContextMenuItem([this.kdbxKey]);
 
-  final KdbxKey? kdbxKey;
+  final String? kdbxKey;
 
   static List<MenuItem<AutoFillContextMenuItem>> buildSubmenuItem(
     BuildContext context,
-    KdbxEntry kdbxEntry,
+    EntryData kdbxEntry,
   ) {
     return _KdbxKeyContextMenuItem._buildKdbxKeyMenuItem(
       context,

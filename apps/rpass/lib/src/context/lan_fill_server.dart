@@ -27,6 +27,7 @@ class LanFillInherited extends InheritedWidget {
     super.key,
     required this.cilentConnecting,
     required this.serverClosed,
+    required this.closeServer,
     required this.openQrCodeDialog,
     required this.openQrCodeScanner,
     required this.requestRemoteAutofill,
@@ -38,6 +39,7 @@ class LanFillInherited extends InheritedWidget {
   final bool cilentConnecting;
   final bool serverClosed;
 
+  final ValueGetter<void> closeServer;
   final ValueGetter<Future<void>> openQrCodeDialog;
   final ValueGetter<Future<void>> openQrCodeScanner;
   final RequestRemoteAutofill requestRemoteAutofill;
@@ -55,14 +57,9 @@ class LanFillInherited extends InheritedWidget {
 }
 
 class LanFillServerProvider extends StatefulWidget {
-  const LanFillServerProvider({
-    super.key,
-    this.onServerStatusChanged,
-    required this.child,
-  });
+  const LanFillServerProvider({super.key, required this.child});
 
   final Widget child;
-  final VoidCallback? onServerStatusChanged;
 
   @override
   State<LanFillServerProvider> createState() => LanFillServerState();
@@ -150,8 +147,6 @@ class LanFillServerState extends State<LanFillServerProvider>
         ),
       );
       RegisterDto? dto = await _server!.start();
-
-      widget.onServerStatusChanged?.call();
 
       setState(() {});
 
@@ -315,7 +310,6 @@ class LanFillServerState extends State<LanFillServerProvider>
   void onServerClose() {
     _validateFingerprintQueue.clear();
     _dialogCloseController.close();
-    widget.onServerStatusChanged?.call();
     setState(() {});
   }
 
@@ -335,6 +329,7 @@ class LanFillServerState extends State<LanFillServerProvider>
     return LanFillInherited(
       cilentConnecting: cilentConnecting,
       serverClosed: serverClosed,
+      closeServer: closeServer,
       openQrCodeDialog: openQrCodeDialog,
       openQrCodeScanner: openQrCodeScanner,
       requestRemoteAutofill: requestRemoteAutofill,

@@ -1,10 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
+import 'package:keepass_core/keepass_core.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
-import '../../kdbx/kdbx.dart';
+import '../../kdbx/icons.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/kdbx_icon.dart';
@@ -38,28 +39,25 @@ class GroupsPage extends StatefulWidget {
 }
 
 class _GroupsPageState extends State<GroupsPage>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, KdbxProviderListener {
   @override
   bool get wantKeepAlive => true;
 
-  VoidCallback? _removeKdbxListener;
-
-  void _update() {
+  @override
+  Future<void> onKdbxSaved() async {
     setState(() {});
   }
 
   @override
   void initState() {
-    final kdbx = KdbxProvider.of(context).kdbx!;
-    kdbx.addListener(_update);
-    _removeKdbxListener = () => kdbx.removeListener(_update);
+    KdbxProvider.of(context).addListener(this);
+    onKdbxSaved();
     super.initState();
   }
 
   @override
   void dispose() {
-    _removeKdbxListener?.call();
-    _removeKdbxListener = null;
+    KdbxProvider.of(context).removeListener(this);
     super.dispose();
   }
 
@@ -72,9 +70,9 @@ class _GroupsPageState extends State<GroupsPage>
   Widget _buildMobile() {
     final t = I18n.of(context)!;
 
-    final kdbx = KdbxProvider.of(context).kdbx!;
+    final groups = KdbxProvider.of(context).groups;
 
-    final groups = [kdbx.kdbxFile.body.rootGroup, ...kdbx.rootGroups];
+    // TODO! 加载动画, 或许?
 
     return Scaffold(
       appBar: AppBar(
@@ -112,7 +110,7 @@ class _GroupsPageState extends State<GroupsPage>
 class _GroupsItem extends StatefulWidget {
   const _GroupsItem({required this.kdbxGroup});
 
-  final KdbxGroup kdbxGroup;
+  final GroupData kdbxGroup;
 
   @override
   State<_GroupsItem> createState() => _GroupsItemState();
@@ -129,7 +127,7 @@ class _GroupsItemState extends State<_GroupsItem>
         context.topRoute.name == EditGroupPageRoute.name) {
       final selected =
           context.topRoute.inheritedPathParams.optString("uuid") ==
-          widget.kdbxGroup.uuid.uuid;
+          widget.kdbxGroup.id;
 
       if (selected != _selected) {
         setState(() {
@@ -143,13 +141,11 @@ class _GroupsItemState extends State<_GroupsItem>
     }
   }
 
-  void _kdbxGroupDelete(KdbxGroup kdbxGroup) async {
+  void _kdbxGroupDelete(GroupData kdbxGroup) async {
     final t = I18n.of(context)!;
 
     if (await showConfirmDialog(title: t.delete, message: t.is_move_recycle)) {
-      final kdbx = KdbxProvider.of(context).kdbx!;
-      kdbx.deleteGroup(kdbxGroup);
-      await kdbxSave(kdbx);
+      await kdbxAction(KdbxAction.delete([kdbxGroup.id]));
     }
   }
 
@@ -168,12 +164,12 @@ class _GroupsItemState extends State<_GroupsItem>
         switch (type) {
           case SearchContextMenuItem():
             context.router.navigate(
-              PasswordsRoute(search: 'g:"${kdbxGroup.name.get() ?? ''}"'),
+              PasswordsRoute(search: 'g:"${kdbxGroup.name}"'),
             );
             break;
           case ModifyContextMenuItem():
             context.router.platformNavigate(
-              EditGroupPageRoute(kdbxGroup: kdbxGroup),
+              EditGroupPageRoute(id: kdbxGroup.id),
             );
             break;
           case DeleteContextMenuItem():
@@ -218,13 +214,12 @@ class _GroupsItemState extends State<_GroupsItem>
         isThreeLine: true,
         leading: KdbxIconWidget(
           kdbxIcon: KdbxIconWidgetData(
-            icon: kdbxGroup.icon.get() ?? KdbxIcon.Folder,
-            customIcon: kdbxGroup.customIcon,
+            icon: kdbxGroup.icon ?? KdbxIconType.Folder.toKdbxIcon(),
           ),
           size: 24,
         ),
         title: Text(
-          kdbxGroup.name.get() ?? "",
+          kdbxGroup.name,
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
         ),
@@ -234,14 +229,14 @@ class _GroupsItemState extends State<_GroupsItem>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                kdbxGroup.notes.get() ?? "",
+                kdbxGroup.notes ?? "",
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
               Align(
                 alignment: Alignment.centerRight,
                 child: Text(
-                  (kdbxGroup.times.creationTime.get() ??
+                  (kdbxGroup.times.creation ??
                           DateTime.fromMillisecondsSinceEpoch(0))
                       .toLocal()
                       .formatDate,
@@ -253,19 +248,19 @@ class _GroupsItemState extends State<_GroupsItem>
         ),
         onTap: () {
           context.router.platformNavigate(
-            ManageGroupEntryRoute(kdbxGroup: kdbxGroup),
+            ManageGroupEntryRoute(id: kdbxGroup.id),
           );
         },
         onLongPress: isMobile
             ? () => showKdbxGroupAction(
-                kdbxGroup.name.get() ?? '',
+                kdbxGroup.name,
                 onSearchTap: () {
                   context.router.navigate(
-                    PasswordsRoute(search: 'g:"${kdbxGroup.name.get() ?? ''}"'),
+                    PasswordsRoute(search: 'g:"${kdbxGroup.name}"'),
                   );
                 },
                 onModifyTap: () => context.router.platformNavigate(
-                  EditGroupPageRoute(kdbxGroup: kdbxGroup),
+                  EditGroupPageRoute(id: kdbxGroup.id),
                 ),
                 onDeleteTap: kdbxGroup.parent != null
                     ? () => _kdbxGroupDelete(kdbxGroup)

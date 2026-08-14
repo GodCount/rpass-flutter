@@ -2,24 +2,39 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
 
-import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../util/route.dart';
 import '../../widget/chip_list.dart';
 
 class _EditAutoTypeArgs extends PageRouteArgs {
-  _EditAutoTypeArgs({super.key, required this.text});
+  _EditAutoTypeArgs({
+    super.key,
+    required this.text,
+    this.customFields,
+    this.moreUrlsFields,
+  });
+
   final String text;
+  final List<String>? customFields;
+  final List<String>? moreUrlsFields;
 }
 
 class EditAutoTypeRoute extends PageRouteInfo<_EditAutoTypeArgs> {
-  EditAutoTypeRoute({Key? key, required String text, KdbxEntry? kdbxEntry})
-    : super(
-        name,
-        args: _EditAutoTypeArgs(key: key, text: text),
-        rawPathParams: {"uuid": kdbxEntry?.uuid.uuid},
-      );
+  EditAutoTypeRoute({
+    Key? key,
+    required String text,
+    List<String>? customFields,
+    List<String>? moreUrlsFields,
+  }) : super(
+         name,
+         args: _EditAutoTypeArgs(
+           key: key,
+           text: text,
+           customFields: customFields,
+           moreUrlsFields: moreUrlsFields,
+         ),
+       );
 
   static const name = "EditAutoTypeRoute";
 
@@ -30,25 +45,27 @@ class EditAutoTypeRoute extends PageRouteInfo<_EditAutoTypeArgs> {
         orElse: () => _EditAutoTypeArgs(text: ""),
       );
 
-      final kdbx = KdbxProvider.of(context).kdbx!;
-      final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
-
-      final kdbxEntry = uuid != null ? kdbx.findEntryByUuid(uuid) : null;
-
       return EditAutoTypePage(
         key: args.key,
         text: args.text,
-        kdbxEntry: kdbxEntry,
+        customFields: args.customFields,
+        moreUrlsFields: args.moreUrlsFields,
       );
     },
   );
 }
 
 class EditAutoTypePage extends StatefulWidget {
-  const EditAutoTypePage({super.key, required this.text, this.kdbxEntry});
+  const EditAutoTypePage({
+    super.key,
+    required this.text,
+    this.customFields,
+    this.moreUrlsFields,
+  });
 
   final String text;
-  final KdbxEntry? kdbxEntry;
+  final List<String>? customFields;
+  final List<String>? moreUrlsFields;
 
   @override
   State<EditAutoTypePage> createState() => _EditAutoTypePageState();
@@ -119,15 +136,8 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
 
-    List<String> customFields = [];
-    List<KdbxKey> moreUrlsFields = [];
-
-    if (widget.kdbxEntry != null) {
-      customFields = widget.kdbxEntry!.customEntries
-          .map((item) => item.key.key)
-          .toList();
-      moreUrlsFields = widget.kdbxEntry!.moreUrlsKeys;
-    }
+    List<String> customFields = widget.customFields ?? [];
+    List<String> moreUrlsFields = widget.moreUrlsFields ?? [];
 
     return Scaffold(
       appBar: AppBar(title: Text(t.edit_auto_fill_sequence)),
@@ -155,10 +165,7 @@ class _EditAutoTypePageState extends State<EditAutoTypePage> {
                         KdbxKeyCommon.URL,
                         ...moreUrlsFields,
                       ])
-                        ChipListItem(
-                          value: "{${item.key}}",
-                          label: Text("{${item.key}}"),
-                        ),
+                        ChipListItem(value: "{$item}", label: Text("{$item}")),
                     ],
                   ),
                 ),

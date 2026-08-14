@@ -76,6 +76,7 @@ fn build_kdbx41_rich_database() -> (Database, EntryId) {
         root.default_autotype_sequence = Some("{USERNAME}{TAB}{PASSWORD}{ENTER}".to_string());
         root.enable_autotype = Some(false);
         root.enable_searching = Some(true);
+        root.enable_display = Some(true);
         root.custom_data.insert(
             "group.cd".to_string(),
             CustomDataItem {
@@ -247,6 +248,8 @@ fn group_enable_flags_round_trip() {
     let root = parsed.root();
     assert_eq!(root.enable_autotype, Some(false));
     assert_eq!(root.enable_searching, Some(true));
+    assert_eq!(root.enable_display, Some(true));
+
 }
 
 #[test]

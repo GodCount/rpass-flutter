@@ -5,6 +5,7 @@ use thiserror::Error;
 use std::convert::TryFrom;
 
 pub use crate::format::DatabaseVersion;
+pub use argon2::Version;
 
 #[cfg(feature = "save_kdbx4")]
 use crate::crypt::ciphers::Cipher;

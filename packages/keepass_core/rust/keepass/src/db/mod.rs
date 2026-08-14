@@ -70,6 +70,14 @@ pub use crate::db::{
 #[cfg(feature = "totp")]
 pub use crate::db::otp::{TOTPAlgorithm, TOTPError, TOTP};
 
+pub use uuid::Uuid;
+
+/// Parses a `Uuid` from a string of hexadecimal digits with optional
+/// hyphens.
+pub fn uuid_by_str(uuid: &str) -> Result<uuid::Uuid, uuid::Error> {
+    uuid::Uuid::parse_str(uuid)
+}
+
 #[cfg(test)]
 #[allow(clippy::unwrap_used)]
 mod database_tests {

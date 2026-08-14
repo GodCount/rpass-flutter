@@ -70,9 +70,7 @@ pub fn dump_kdbx4(
     writer.write_all(&header_sha256)?;
 
     // derive master key from composite key, transform_seed, transform_rounds and master_seed
-    let key_elements = db_key.get_key_elements()?;
-    let key_elements: Vec<&[u8]> = key_elements.iter().map(|v| &v[..]).collect();
-    let composite_key = crypt::calculate_sha256(&key_elements);
+    let composite_key = db_key.get_composite_key()?;
     let transformed_key = kdf.transform_key(&composite_key)?;
     let master_key = crypt::calculate_sha256(&[&master_seed, &transformed_key]);
 

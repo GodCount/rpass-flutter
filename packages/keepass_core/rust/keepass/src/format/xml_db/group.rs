@@ -58,6 +58,9 @@ pub struct Group {
     #[serde(default, with = "cs_opt_bool")]
     pub enable_searching: Option<bool>,
 
+    #[serde(default, with = "cs_opt_bool")]
+    pub enable_display: Option<bool>,
+
     #[serde(default, with = "cs_opt_string", skip_serializing_if = "Option::is_none")]
     pub last_top_visible_entry: Option<UUID>,
 
@@ -103,6 +106,7 @@ impl Group {
         target.default_autotype_sequence = self.default_auto_type_sequence;
         target.enable_autotype = self.enable_auto_type;
         target.enable_searching = self.enable_searching;
+        target.enable_display = self.enable_display;
         target.last_top_visible_entry = self.last_top_visible_entry.map(|u| EntryId::from_uuid(u.0));
 
         if let Some(cd) = self.custom_data {
@@ -166,6 +170,7 @@ impl Group {
             default_auto_type_sequence: source.default_autotype_sequence.clone(),
             enable_auto_type: source.enable_autotype,
             enable_searching: source.enable_searching,
+            enable_display: source.enable_display,
             last_top_visible_entry: source.last_top_visible_entry.map(|eid| UUID(eid.uuid())),
             custom_data,
             children,
@@ -203,6 +208,7 @@ mod tests {
             <DefaultAutoTypeSequence>{USERNAME}{TAB}{PASSWORD}{ENTER}</DefaultAutoTypeSequence>
             <EnableAutoType>True</EnableAutoType>
             <EnableSearching>False</EnableSearching>
+            <EnableDisplay>True</EnableDisplay>
             <LastTopVisibleEntry>AAECAwQFBgcICQoLDA0ODw==</LastTopVisibleEntry>
             <CustomData>
                 <Item>
@@ -243,6 +249,7 @@ mod tests {
         );
         assert!(group.0.enable_auto_type.unwrap());
         assert!(!group.0.enable_searching.unwrap());
+        assert!(group.0.enable_searching.unwrap());
         assert!(group.0.custom_data.is_some());
         assert_eq!(group.0.children.len(), 4);
     }

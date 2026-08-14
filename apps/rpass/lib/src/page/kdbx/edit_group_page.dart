@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:keepass_core/keepass_core.dart';
 import 'package:logging/logging.dart';
 
 import '../../context/kdbx.dart';
@@ -19,11 +20,11 @@ class _EditGroupPageArgs extends PageRouteArgs {
 }
 
 class EditGroupPageRoute extends PageRouteInfo<_EditGroupPageArgs> {
-  EditGroupPageRoute({Key? key, KdbxGroup? kdbxGroup})
+  EditGroupPageRoute({Key? key, String? id})
     : super(
         name,
         args: _EditGroupPageArgs(key: key),
-        rawPathParams: {"uuid": kdbxGroup?.uuid.uuid},
+        rawPathParams: {"uuid": id},
       );
 
   static const name = "EditGroupPageRoute";
@@ -35,21 +36,18 @@ class EditGroupPageRoute extends PageRouteInfo<_EditGroupPageArgs> {
         orElse: () => _EditGroupPageArgs(),
       );
 
-      final kdbx = KdbxProvider.of(context).kdbx!;
-      final uuid = data.inheritedPathParams.optString("uuid")?.kdbxUuid;
+      final uuid = data.inheritedPathParams.optString("uuid");
 
-      return EditGroupPagePage(
-        key: args.key,
-        kdbxGroup: uuid != null ? kdbx.findGroupByUuid(uuid) : null,
-      );
+      return EditGroupPagePage(key: args.key, id: uuid);
     },
   );
 }
 
 class EditGroupPagePage extends StatefulWidget {
-  const EditGroupPagePage({super.key, this.kdbxGroup});
+  const EditGroupPagePage({super.key, this.id, this.dialog = false});
 
-  final KdbxGroup? kdbxGroup;
+  final String? id;
+  final bool dialog;
 
   @override
   State<EditGroupPagePage> createState() => _EditGroupPagePageState();
@@ -59,57 +57,40 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
     with SecondLevelPageAutoBack<EditGroupPagePage> {
   GlobalKey<FormState> _from = GlobalKey();
 
-  late KdbxGroupData _kdbxGroupData = _getKdbxGroupData();
+  late GroupData _kdbxGroupData = KdbxProvider.of(context).kdbx!.newGroup();
 
   bool _isDirty = false;
 
-  KdbxGroupData _getKdbxGroupData() {
-    return widget.kdbxGroup != null
-        ? KdbxGroupData(
-            name: widget.kdbxGroup!.name.get() ?? '',
-            notes: widget.kdbxGroup!.notes.get() ?? '',
-            enableSearching: widget.kdbxGroup!.enableSearching.get(),
-            enableDisplay: widget.kdbxGroup!.enableDisplay.get(),
-            kdbxIcon: KdbxIconWidgetData(
-              icon: widget.kdbxGroup!.icon.get() ?? KdbxIcon.Folder,
-              customIcon: widget.kdbxGroup!.customIcon,
-            ),
-            kdbxGroup: widget.kdbxGroup,
-          )
-        : KdbxGroupData(
-            name: '',
-            notes: '',
-            kdbxIcon: KdbxIconWidgetData(icon: KdbxIcon.Folder),
-          );
+  @override
+  void initState() {
+    _getKdbxGroupData();
+    super.initState();
+  }
+
+  void _getKdbxGroupData() async {
+    final kdbxProvider = KdbxProvider.of(context);
+
+    if (widget.id != null && widget.id != _kdbxGroupData.id) {
+      try {
+        _kdbxGroupData = await kdbxProvider.kdbx!.getGroup(id: widget.id!);
+        setState(() {});
+      } catch (e) {
+        showError(e);
+      }
+    }
   }
 
   void _kdbxGroupSave() async {
     if (_from.currentState!.validate()) {
       _from.currentState!.save();
 
-      final kdbx = KdbxProvider.of(context).kdbx!;
-
-      final kdbxGroup =
-          _kdbxGroupData.kdbxGroup ?? kdbx.createGroup(_kdbxGroupData.name);
-
-      kdbxGroup.name.set(_kdbxGroupData.name);
-      kdbxGroup.notes.set(_kdbxGroupData.notes);
-      kdbxGroup.enableDisplay.set(_kdbxGroupData.enableDisplay);
-      kdbxGroup.enableSearching.set(_kdbxGroupData.enableSearching);
-
-      if (_kdbxGroupData.kdbxIcon.customIcon != null) {
-        kdbxGroup.customIcon = _kdbxGroupData.kdbxIcon.customIcon;
-      } else if (_kdbxGroupData.kdbxIcon.icon != kdbxGroup.icon.get()) {
-        kdbxGroup.icon.set(_kdbxGroupData.kdbxIcon.icon);
-      }
-
-      if (await kdbxSave(KdbxProvider.of(context).kdbx!)) {
-        if (isDesktop) {
+      if (await kdbxAction(KdbxAction.updateGroup(_kdbxGroupData))) {
+        if (isDesktop && widget.dialog) {
           context.router.platformNavigate(
-            ManageGroupEntryRoute(kdbxGroup: kdbxGroup),
+            ManageGroupEntryRoute(id: _kdbxGroupData.id),
           );
         } else {
-          context.router.pop(kdbxGroup.uuid);
+          context.router.pop(_kdbxGroupData.id);
         }
       }
     }
@@ -118,8 +99,12 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
   @override
   void didUpdateWidget(covariant EditGroupPagePage oldWidget) {
     /// 触发整个 form 表进行重建
-    if (widget.kdbxGroup != oldWidget.kdbxGroup) {
-      _kdbxGroupData = _getKdbxGroupData();
+    if (widget.id != oldWidget.id) {
+      if (widget.id != null) {
+        _getKdbxGroupData();
+      } else {
+        _kdbxGroupData = KdbxProvider.of(context).kdbx!.newGroup();
+      }
       _from = GlobalKey();
     }
     super.didUpdateWidget(oldWidget);
@@ -173,11 +158,14 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
                   child: EntryTitleFormField(
                     initialValue: _kdbxGroupData.name,
                     label: t.title,
-                    kdbxIcon: _kdbxGroupData.kdbxIcon,
+                    kdbxIcon: KdbxIconWidgetData(
+                      icon:
+                          _kdbxGroupData.icon ??
+                          KdbxIconType.Folder.toKdbxIcon(),
+                    ),
                     onSaved: (data) {
                       _kdbxGroupData.name = data!.$1;
-                      _kdbxGroupData.kdbxIcon = _kdbxGroupData.kdbxIcon
-                          .copyWith(icon: data.$2, customIcon: data.$3);
+                      _kdbxGroupData.icon = data.$2;
                     },
                   ),
                 ),

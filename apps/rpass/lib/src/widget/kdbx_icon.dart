@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:keepass_core/keepass_core.dart';
 
+import '../context/kdbx.dart';
 import '../kdbx/icons.dart';
-import '../kdbx/kdbx.dart';
 import '../store/index.dart';
 import '../util/cache_network_image.dart';
 import '../util/common.dart';
@@ -10,28 +11,21 @@ import '../util/fetch_favicon.dart';
 typedef ImageLoadErrorCallback = void Function(Object error);
 
 class KdbxIconWidgetData {
-  KdbxIconWidgetData({
-    required this.icon,
-    this.customIcon,
-    this.source,
-    String? domain,
-  }) : domain = domain != null ? domain.simpleToDomain().toLowerCase() : domain;
+  KdbxIconWidgetData({required this.icon, this.source, String? domain})
+    : domain = domain != null ? domain.simpleToDomain().toLowerCase() : domain;
 
   final KdbxIcon icon;
-  final KdbxCustomIcon? customIcon;
   // TODO! url 现在是支持复数个了 KdbxKeyURLS favicon 需要兼容
   final String? domain;
   final FaviconSource? source;
 
   KdbxIconWidgetData copyWith({
     KdbxIcon? icon,
-    KdbxCustomIcon? customIcon,
     FaviconSource? source,
     String? domain,
   }) {
     return KdbxIconWidgetData(
       icon: icon ?? this.icon,
-      customIcon: customIcon ?? this.customIcon,
       source: source ?? this.source,
       domain: domain ?? this.domain,
     );
@@ -54,13 +48,24 @@ class KdbxIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (kdbxIcon.customIcon != null) {
-      return Image.memory(kdbxIcon.customIcon!.data, width: size, height: size);
+    int iconIndex = 2;
+
+    if (kdbxIcon.icon is KdbxIcon_Custom) {
+      final icon = kdbxIcon.icon as KdbxIcon_Custom;
+      final data =
+          icon.field1 ??
+          KdbxProvider.of(context).fieldSummary?.customIcons[icon.field0];
+      if (data != null) {
+        return Image.memory(data, width: size, height: size);
+      }
+    } else {
+      final icon = kdbxIcon.icon as KdbxIcon_BuiltIn;
+      iconIndex = icon.field0;
     }
 
     final faviconSource = Store.instance.settings.faviconSource;
 
-    final icon = Icon(KdbxIcon2Material.to(kdbxIcon.icon), size: size);
+    final icon = Icon(KdbxIcon2Material.to(iconIndex), size: size);
 
     if (kdbxIcon.domain == null ||
         kdbxIcon.domain!.isEmpty ||

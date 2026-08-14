@@ -1,6 +1,7 @@
-use std::io::Read;
+use std::{convert::TryInto, io::Read};
 
 use base64::{engine::general_purpose as base64_engine, Engine as _};
+use hybrid_array::{typenum::U32, Array as GenericArray};
 use quick_xml::{encoding::EncodingError, events::Event, reader::Reader};
 use thiserror::Error;
 use zeroize::{Zeroize, ZeroizeOnDrop};
@@ -128,6 +129,7 @@ fn parse_keyfile(buffer: &[u8]) -> Result<KeyElement, DatabaseKeyError> {
 pub struct DatabaseKey {
     password: Option<String>,
     keyfile: Option<Vec<u8>>,
+    composite_key: Option<Vec<u8>>,
     #[cfg(feature = "challenge_response")]
     challenge_response_key: Option<ChallengeResponseKey>,
     #[cfg(feature = "challenge_response")]
@@ -135,6 +137,17 @@ pub struct DatabaseKey {
 }
 
 impl DatabaseKey {
+    /// Create database key from composite_key
+    pub fn form_composite_key(key: Vec<u8>) -> Result<Self, DatabaseKeyError> {
+        if key.len() != 32 {
+            return Err(DatabaseKeyError::IncorrectKey);
+        }
+
+        let mut db_key = Self::new();
+        db_key.composite_key = Some(key);
+        Ok(db_key)
+    }
+
     /// Modify the database key to include a password
     pub fn with_password(mut self, password: &str) -> Self {
         self.password = Some(password.to_string());
@@ -223,11 +236,32 @@ impl DatabaseKey {
         Ok(out)
     }
 
+    /// Returns composite key
+    pub fn get_composite_key(&self) -> Result<GenericArray<u8, U32>, DatabaseKeyError> {
+        if let Some(key) = &self.composite_key {
+            return Ok(key
+                .as_slice()
+                .try_into()
+                .map_err(|_| DatabaseKeyError::IncorrectKey)?);
+        }
+
+        let key_elements = self.get_key_elements()?;
+        let key_elements: Vec<&[u8]> = key_elements.iter().map(|v| &v[..]).collect();
+        let composite_key = calculate_sha256(&key_elements);
+
+        Ok(composite_key)
+    }
+
     /// Returns true if the database key is not associated with any key component.
     pub fn is_empty(&self) -> bool {
+        if self.composite_key.is_some() {
+            return false;
+        }
+
         if self.password.is_some() || self.keyfile.is_some() {
             return false;
         }
+
         #[cfg(feature = "challenge_response")]
         if self.challenge_response_key.is_some() {
             return false;
@@ -336,6 +370,7 @@ mod key_tests {
         assert!(DatabaseKey {
             password: None,
             keyfile: None,
+            composite_key: None,
             #[cfg(feature = "challenge_response")]
             challenge_response_key: None,
             #[cfg(feature = "challenge_response")]

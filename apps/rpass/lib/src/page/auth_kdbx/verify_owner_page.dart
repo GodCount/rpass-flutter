@@ -1,9 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/widgets.dart';
+import 'package:keepass_core/keepass_core.dart';
 
 import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
-import '../../kdbx/kdbx.dart';
 import '../../util/route.dart';
 import 'authorized_page.dart';
 
@@ -62,7 +62,7 @@ class _VerifyOwnerPageState extends AuthorizedPageState<VerifyOwnerPage> {
   @override
   Future<void> confirm() async {
     if (form.currentState!.validate()) {
-      final passowrd = passwordController.text;
+      final password = passwordController.text;
       final keyFile = keyFilecontroller.keyFile;
 
       if (!isPassword && keyFile == null) {
@@ -71,12 +71,12 @@ class _VerifyOwnerPageState extends AuthorizedPageState<VerifyOwnerPage> {
 
       final kdbx = KdbxProvider.of(context).kdbx!;
 
-      final credentials = Kdbx.createCredentials(
-        isPassword ? passowrd : null,
-        keyFile?.$2,
+      final credentials = Credentials.from(
+        password: isPassword ? password : null,
+        keyfile: keyFile?.$2,
       );
 
-      if (credentials.toBase64() != kdbx.credentials.toBase64()) {
+      if (await kdbx.verifyCredentials(credentials: credentials)) {
         throw Exception("password verify error");
       }
 

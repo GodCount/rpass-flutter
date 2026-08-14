@@ -2,19 +2,16 @@ import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:keepass_core/keepass_core.dart';
 import 'package:remote_fs/remote_fs.dart';
 
 import '../../context/kdbx.dart';
-import '../../i18n.dart';
 import '../../remotes_fs/remote_fs.dart';
 import '../../store/index.dart';
 import '../../util/file.dart';
 import '../../util/route.dart';
 import '../route.dart';
 import 'authorized_page.dart';
-import '../../widget/extension_state.dart';
-import '../../kdbx/kdbx.dart';
-import '../../rpass.dart';
 
 class _InitialArgs extends PageRouteArgs {
   _InitialArgs({super.key});
@@ -51,39 +48,12 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
   @override
   bool get enableRemoteImport => true;
 
-  void _addPresetGroup(Kdbx kdbx) {
-    final t = I18n.of(context)!;
-
-    if (kdbx.kdbxFile.body.rootGroup.name.get() != t.default_) {
-      kdbx.kdbxFile.body.rootGroup.name.set(t.default_);
-    }
-
-    String? uuid = kdbx.customData[KdbxCustomDataKey.GENERAL_GROUP_UUID];
-    if (uuid == null || kdbx.findGroupByUuid(KdbxUuid(uuid)) == null) {
-      final general = kdbx.createGroup(t.common);
-      kdbx.customData[KdbxCustomDataKey.GENERAL_GROUP_UUID] = general.uuid.uuid;
-    }
-
-    uuid = kdbx.customData[KdbxCustomDataKey.EMAIL_GROUP_UUID];
-    if (uuid == null || kdbx.findGroupByUuid(KdbxUuid(uuid)) == null) {
-      final email = kdbx.createGroup(t.email)..icon.set(KdbxIcon.EMail);
-      kdbx.customData[KdbxCustomDataKey.EMAIL_GROUP_UUID] = email.uuid.uuid;
-    }
-  }
-
-  Future<void> _setInitKdbx(
-    (Kdbx, String?) result, [
-    bool initPresetGroup = false,
-  ]) async {
+  Future<void> _setInitKdbx((Kdbx, String?) result) async {
     final store = Store.instance;
 
     final kdbx = result.$1;
-    kdbx.filepath = store.localInfo.localKdbxFile.path;
-    if (initPresetGroup) {
-      _addPresetGroup(kdbx);
-    }
 
-    await kdbxSave(kdbx);
+    await kdbx.saveFile();
 
     if (store.settings.enableRecordKeyFilePath) {
       await store.settings.setKeyFilePath(result.$2);
@@ -96,24 +66,24 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
   @override
   Future<void> confirm() async {
     if (form.currentState!.validate()) {
-      final passowrd = passwordController.text;
+      final password = passwordController.text;
       final keyFile = keyFilecontroller.keyFile;
 
       if (!isPassword && keyFile == null) {
         throw Exception("Lack of key file.");
       }
 
-      final credentials = Kdbx.createCredentials(
-        isPassword ? passowrd : null,
-        keyFile?.$2,
+      final credentials = Credentials.from(
+        password: isPassword ? password : null,
+        keyfile: keyFile?.$2,
       );
 
       final kdbx = Kdbx.create(
         credentials: credentials,
-        name: RpassInfo.defaultKdbxName,
+        filepath: Store.instance.localInfo.localKdbxFile.path,
       );
 
-      await _setInitKdbx((kdbx, keyFile?.$1), true);
+      await _setInitKdbx((kdbx, keyFile?.$1));
     }
   }
 

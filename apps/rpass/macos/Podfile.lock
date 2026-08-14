@@ -3,8 +3,6 @@ PODS:
     - FlutterMacOS
   - common_native_channel (0.0.1):
     - FlutterMacOS
-  - enigo_flutter (0.0.1):
-    - FlutterMacOS
   - file_picker (0.0.1):
     - FlutterMacOS
   - FlutterMacOS (1.0.0)
@@ -35,7 +33,6 @@ PODS:
 DEPENDENCIES:
   - biometric_storage (from `Flutter/ephemeral/.symlinks/plugins/biometric_storage/macos`)
   - common_native_channel (from `Flutter/ephemeral/.symlinks/plugins/common_native_channel/macos`)
-  - enigo_flutter (from `Flutter/ephemeral/.symlinks/plugins/enigo_flutter/macos`)
   - file_picker (from `Flutter/ephemeral/.symlinks/plugins/file_picker/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - hotkey_manager_macos (from `Flutter/ephemeral/.symlinks/plugins/hotkey_manager_macos/macos`)
@@ -57,8 +54,6 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/biometric_storage/macos
   common_native_channel:
     :path: Flutter/ephemeral/.symlinks/plugins/common_native_channel/macos
-  enigo_flutter:
-    :path: Flutter/ephemeral/.symlinks/plugins/enigo_flutter/macos
   file_picker:
     :path: Flutter/ephemeral/.symlinks/plugins/file_picker/macos
   FlutterMacOS:
@@ -85,7 +80,6 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   biometric_storage: 9de0cb4e591e52329ca0da7df42e964db6c526cf
   common_native_channel: 7df2ad28406c638f820af8548a3dca86beda9067
-  enigo_flutter: bd48b6f0205d67230c22aead1ee71a5e01caed56
   file_picker: 7584aae6fa07a041af2b36a2655122d42f578c1a
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
   HotKey: 400beb7caa29054ea8d864c96f5ba7e5b4852277

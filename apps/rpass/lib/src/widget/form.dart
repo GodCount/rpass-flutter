@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:common_native_channel/common_native_channel.dart';
 import 'package:flutter/material.dart';
+import 'package:keepass_core/keepass_core.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
 
 import '../kdbx/kdbx.dart';
@@ -25,7 +26,7 @@ class EntryTitleFormField extends StatefulWidget {
   final String? initialValue;
   final KdbxIconWidgetData kdbxIcon;
 
-  final FormFieldSetter<(String, KdbxIcon, KdbxCustomIcon?)> onSaved;
+  final FormFieldSetter<(String, KdbxIcon)> onSaved;
   final ValueChanged<String>? onChanged;
 
   @override
@@ -44,7 +45,7 @@ class _EntryTitleFormFieldState extends State<EntryTitleFormField> {
       initialValue: widget.initialValue,
       onChanged: widget.onChanged,
       onSaved: (value) {
-        widget.onSaved((value!, _kdbxIcon.icon, _kdbxIcon.customIcon));
+        widget.onSaved((value!, _kdbxIcon.icon));
       },
       decoration: InputDecoration(
         labelText: widget.label,
@@ -300,21 +301,25 @@ class EntryExpiresFormField extends FormField<(bool, DateTime)> {
 class EntryAutoTypeFormField extends StatelessWidget {
   const EntryAutoTypeFormField({
     super.key,
+
     this.label,
-    required this.kdbxEntry,
+    this.customFields,
+    this.moreUrlsFields,
+    required this.autoTypeSequence,
     this.onSaved,
   });
 
+  final List<String>? customFields;
+  final List<String>? moreUrlsFields;
   final String? label;
-
-  final KdbxEntry kdbxEntry;
+  final String autoTypeSequence;
 
   final FormFieldSetter<String>? onSaved;
 
   @override
   Widget build(BuildContext context) {
     return RichWrapper(
-      initialText: kdbxEntry.getAutoTypeSequence(),
+      initialText: autoTypeSequence,
       targetMatches: [
         MatchTargetItem.pattern(
           AutoTypeRichPattern.BUTTON,
@@ -349,7 +354,11 @@ class EntryAutoTypeFormField extends StatelessWidget {
           ),
           onTap: () async {
             final text = await context.router.push(
-              EditAutoTypeRoute(text: controller.text, kdbxEntry: kdbxEntry),
+              EditAutoTypeRoute(
+                text: controller.text,
+                customFields: customFields,
+                moreUrlsFields: moreUrlsFields,
+              ),
             );
 
             if (text != null && text is String) {

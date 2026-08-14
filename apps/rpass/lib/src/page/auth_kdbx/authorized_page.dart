@@ -5,12 +5,12 @@ import 'package:auto_route/auto_route.dart';
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:keepass_core/keepass_core.dart';
 import 'package:logging/logging.dart';
 
 import '../../context/biometric.dart';
 import '../../context/lan_fill_server.dart';
 import '../../i18n.dart';
-import '../../kdbx/kdbx.dart';
 import '../../remotes_fs/remote_fs.dart';
 import '../../store/index.dart';
 import '../../util/common.dart';
@@ -115,9 +115,11 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
   void _confirm() async {
     try {
       await confirm();
-    } on KdbxInvalidKeyException {
-      showError(I18n.of(context)!.password_error);
-    } catch (error) {
+    }
+    // on KdbxInvalidKeyException {
+    //   showError(I18n.of(context)!.password_error);
+    // }
+    catch (error) {
       showError(error);
     }
   }
@@ -436,7 +438,7 @@ class KeyFileController with ChangeNotifier {
   }
 
   Future<void> genKeyFile() async {
-    final keyFile = Kdbx.randomKeyFile();
+    final keyFile = await Credentials.randomKeyFile();
     final keyFilePath = await SimpleFile.saveFile(
       data: keyFile,
       filename: "rpass.key",

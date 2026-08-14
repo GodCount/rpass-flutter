@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
+import '../../kdbx/kdbx.dart';
 import '../../native/channel.dart';
 import '../../native/platform/android.dart';
 import '../../store/index.dart';
@@ -419,7 +420,7 @@ class _AutoFillDomainBlacklist extends StatefulWidget {
 class _AutoFillDomainBlacklistState extends State<_AutoFillDomainBlacklist> {
   void _addDomain() async {
     final t = I18n.of(context)!;
-    final kdbx = KdbxProvider.of(context).kdbx!;
+    final kdbxProvider = KdbxProvider.of(context);
 
     final autoFillDomainBlacklist =
         Store.instance.settings.autoFillDomainBlacklist;
@@ -428,7 +429,7 @@ class _AutoFillDomainBlacklistState extends State<_AutoFillDomainBlacklist> {
       context,
       title: t.add,
       label: t.domain,
-      promptItmes: kdbx.fieldStatistic.urls
+      promptItmes: kdbxProvider.fieldSummary!.urls
           .where((item) => !autoFillDomainBlacklist.contains(item))
           .toList(),
       limitItems: autoFillDomainBlacklist,
@@ -475,7 +476,10 @@ class _AutoFillDomainBlacklistState extends State<_AutoFillDomainBlacklist> {
                   return ListTile(
                     leading: KdbxIconWidget(
                       size: 24,
-                      kdbxIcon: KdbxIconWidgetData(icon: .World, domain: item),
+                      kdbxIcon: KdbxIconWidgetData(
+                        icon: KdbxIconType.World.toKdbxIcon(),
+                        domain: item,
+                      ),
                     ),
                     title: Text(item),
                     trailing: IconButton(

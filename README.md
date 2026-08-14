@@ -27,7 +27,7 @@
 1. 通过 git 克隆代码库：
 
 ```
-$ git clone --recursive https://github.com/GodCount/rpass-flutter.git
+$ git clone https://github.com/GodCount/rpass-flutter.git
 ```
 
 2. 切换到 `rpass-flutter` 目录
@@ -36,9 +36,8 @@ $ git clone --recursive https://github.com/GodCount/rpass-flutter.git
 $ cd ~/rpass-flutter
 ```
 
-3. 你可能需要 [rust](https://rust-lang.org/tools/install/)
-
-    [enigo_flutter](https://github.com/GodCount/rpass-flutter/packages/enigo_flutter)
+3. 需要安装 [rust](https://rust-lang.org/tools/install/)
+    [keepass_core](https://github.com/GodCount/rpass-flutter/packages/keepass_core)
 
 4. 安装依赖项
 

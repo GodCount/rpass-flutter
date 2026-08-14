@@ -7,13 +7,9 @@ use crate::{
 };
 
 use byteorder::{ByteOrder, LittleEndian};
-use hybrid_array::Array as GenericArray;
 use thiserror::Error;
 
-use std::{
-    collections::HashMap,
-    convert::{TryFrom, TryInto},
-};
+use std::{collections::HashMap, convert::TryFrom};
 
 #[derive(Debug)]
 struct KDBHeader {
@@ -399,17 +395,7 @@ pub(crate) fn parse_kdb(data: &[u8], db_key: &DatabaseKey) -> Result<Database, D
     let payload_encrypted = data.get(HEADER_SIZE..).ok_or(DatabaseOpenError::UnexpectedEof)?;
 
     // derive master key from composite key, transform_seed, transform_rounds and master_seed
-    let key_elements = db_key.get_key_elements()?;
-    let key_elements: Vec<&[u8]> = key_elements.iter().map(|v| &v[..]).collect();
-    let composite_key = if key_elements.len() == 1 {
-        #[allow(clippy::indexing_slicing, clippy::expect_used)] // key_elements is guaranteed to be 1 byte
-        let key_element: [u8; 32] = key_elements[0]
-            .try_into()
-            .expect("initializing from single element should always succeed");
-        GenericArray::from(key_element) // single pass of SHA256, already done before the call to parse()
-    } else {
-        calculate_sha256(&key_elements) // second pass of SHA256
-    };
+    let composite_key = db_key.get_composite_key()?;
 
     // KDF is always AES
     let kdf_config = KdfConfig::Aes {

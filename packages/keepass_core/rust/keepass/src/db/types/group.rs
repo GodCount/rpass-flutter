@@ -21,7 +21,8 @@ use crate::{
 pub struct GroupId(Uuid);
 
 impl GroupId {
-    pub(crate) fn new() -> Self {
+    /// create random group id
+    pub fn new() -> Self {
         Self(Uuid::new_v4())
     }
 
@@ -98,16 +99,25 @@ pub struct Group {
     /// Whether searching is enabled
     pub enable_searching: Option<bool>,
 
-    /// UUID for the last top visible entry
-    pub(crate) last_top_visible_entry: Option<EntryId>,
+    /// Whether display is enabled
+    pub enable_display: Option<bool>,
 
-    pub(crate) previous_parent_group: Option<GroupId>,
+    /// UUID for the last top visible entry
+    pub last_top_visible_entry: Option<EntryId>,
+
+    /// previous group
+    pub previous_parent_group: Option<GroupId>,
 }
 
 impl Group {
     /// Get the unique identifier for this group
     pub fn id(&self) -> GroupId {
         self.id
+    }
+
+    /// Get the unique identifier for this parent
+    pub fn parent_id(&self) -> Option<GroupId> {
+        self.parent
     }
 
     pub(crate) fn new(parent: Option<GroupId>) -> Group {
@@ -126,6 +136,7 @@ impl Group {
             default_autotype_sequence: None,
             enable_autotype: None,
             enable_searching: None,
+            enable_display: None,
             last_top_visible_entry: None,
             previous_parent_group: None,
         }
@@ -147,6 +158,7 @@ impl Group {
             default_autotype_sequence: None,
             enable_autotype: None,
             enable_searching: None,
+            enable_display: None,
             last_top_visible_entry: None,
             previous_parent_group: None,
         }
@@ -208,6 +220,11 @@ impl GroupRef<'_> {
             .map(move |id| EntryRef::new(self.database, *id))
     }
 
+    /// Get the number of entries in the group
+    pub fn num_entries(&self) -> usize {
+        self.entries.len()
+    }
+
     /// Find a contained group by name, case-insensitively.
     pub fn group_by_name(&self, name: &str) -> Option<GroupRef<'_>> {
         self.groups().find(|g| g.name.eq_ignore_ascii_case(name))
@@ -263,6 +280,21 @@ impl GroupRef<'_> {
         } else {
             None
         }
+    }
+
+    /// Starting from the current node, search for the parent node step by step,
+    /// and return the first result that makes the closure return Some. If it cannot find it, it returns default.
+    pub fn find_parent<T>(&self, default: Option<T>, f: impl Fn(&GroupRef<'_>) -> Option<T>) -> Option<T> {
+        let result = f(self);
+        if result.is_some() {
+            return result;
+        }
+
+        if let Some(parent) = self.parent() {
+            return parent.find_parent(default, f);
+        }
+
+        default
     }
 }
 

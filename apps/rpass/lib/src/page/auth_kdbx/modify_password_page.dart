@@ -1,11 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/widgets.dart';
+import 'package:keepass_core/keepass_core.dart';
 import 'package:logging/logging.dart';
 
 import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
-import '../../kdbx/kdbx.dart';
 import '../../store/index.dart';
 import '../../util/route.dart';
 import 'authorized_page.dart';
@@ -51,7 +51,7 @@ class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
   @override
   Future<void> confirm() async {
     if (form.currentState!.validate()) {
-      final passowrd = passwordController.text;
+      final password = passwordController.text;
       final keyFile = keyFilecontroller.keyFile;
 
       if (!isPassword && keyFile == null) {
@@ -62,15 +62,25 @@ class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
       final kdbx = KdbxProvider.of(context).kdbx!;
       final biometric = Biometric.of(context);
 
-      final oldCredentials = kdbx.credentials;
-      final credentials = Kdbx.createCredentials(
-        isPassword ? passowrd : null,
-        keyFile?.$2,
+      final credentials = Credentials.from(
+        password: isPassword ? password : null,
+        keyfile: keyFile?.$2,
       );
+
+      try {
+        await kdbx.modifyPassword(credentials: credentials);
+        _logger.finest("update credentials done!");
+      } catch (error, stackTrace) {
+        _logger.severe("update credentials fail!", error, stackTrace);
+        rethrow;
+      }
 
       if (biometric.enable) {
         try {
-          await biometric.updateCredentials(context, credentials.getHash());
+          await biometric.updateCredentials(
+            context,
+            credentials.getCompositeKey(),
+          );
           _logger.finest("update credentials to biometric done!");
         } catch (error, stackTrace) {
           if (error is AuthException &&
@@ -79,28 +89,13 @@ class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
                   error.code == AuthExceptionCode.timeout)) {
             return;
           }
-          _logger.severe(
+          await biometric.updateCredentials(context, null);
+          _logger.warning(
             "update credentials to biometric fail!",
             error,
             stackTrace,
           );
-          rethrow;
         }
-      }
-
-      try {
-        kdbx
-          ..modifyCredentials(credentials)
-          ..save();
-        _logger.finest("update credentials done!");
-      } catch (error, stackTrace) {
-        kdbx.modifyCredentials(oldCredentials);
-        if (biometric.enable) {
-          await biometric.updateCredentials(context, oldCredentials.getHash());
-        }
-
-        _logger.severe("update credentials fail!", error, stackTrace);
-        rethrow;
       }
 
       if (store.settings.enableRecordKeyFilePath) {

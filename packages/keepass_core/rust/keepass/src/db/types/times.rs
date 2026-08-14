@@ -5,7 +5,6 @@ use chrono::NaiveDateTime;
 /// As the KeePass file format does not store time zone information and does not store sub-second
 /// precision, all times are stored as [NaiveDateTime] with second precision.
 #[derive(Debug, Default, PartialEq, Eq, Clone)]
-#[non_exhaustive]
 #[cfg_attr(feature = "serialization", derive(serde::Serialize))]
 pub struct Times {
     /// The time of creation

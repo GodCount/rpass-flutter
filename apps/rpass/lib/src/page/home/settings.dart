@@ -14,7 +14,6 @@ import '../../util/route.dart';
 import '../../widget/extension_state.dart';
 import '../route.dart';
 import 'route_wrap.dart';
-import '../../kdbx/kdbx.dart';
 
 final _logger = Logger("page:settings");
 
@@ -222,7 +221,7 @@ class _SettingsPageState extends State<SettingsPage>
                     final enableBiometric = !store.settings.enableBiometric;
                     await biometric.updateCredentials(
                       context,
-                      enableBiometric ? kdbx.credentials.getHash() : null,
+                      enableBiometric ? await kdbx.getCompositeKey() : null,
                     );
                     store.settings.seEnableBiometric(enableBiometric);
                     _logger.finest("biometric status is $enableBiometric");

@@ -490,6 +490,7 @@ class WdDio with DioMixin implements Dio {
         }
       });
     }
+    // ignore: invalid_use_of_internal_member
     await DioMixin.listenCancelForAsyncTask(cancelToken, future);
   }
 

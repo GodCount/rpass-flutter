@@ -114,6 +114,12 @@ impl Database {
         }
     }
 
+
+    /// Get the unique identifier for this parent
+    pub fn root_id(&self) -> GroupId {
+        self.root
+    }
+
     /// Get an immutable reference to the root group of the database.
     pub fn root(&self) -> GroupRef<'_> {
         GroupRef::new(self, self.root)

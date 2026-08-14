@@ -197,7 +197,6 @@ impl VariantDictionary {
 /// A value in a VariantDictionary, which can be one of several types
 #[derive(Debug, PartialEq, Eq, Clone)]
 #[cfg_attr(feature = "serialization", derive(serde::Serialize))]
-#[non_exhaustive]
 pub enum VariantDictionaryValue {
     /// An unsigned 32-bit integer value
     UInt32(u32),

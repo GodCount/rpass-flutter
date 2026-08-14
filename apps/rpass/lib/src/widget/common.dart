@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:keepass_core/keepass_core.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 
 import '../context/kdbx.dart';
@@ -193,13 +194,10 @@ class InputDialogState extends State<InputDialog> {
 class GroupSelectorDialog extends StatefulWidget {
   const GroupSelectorDialog({super.key, this.value, required this.onResult});
 
-  final KdbxGroup? value;
-  final FormFieldSetter<KdbxGroup> onResult;
+  final String? value;
+  final FormFieldSetter<String> onResult;
 
-  static Future<KdbxGroup?> openDialog(
-    BuildContext context, {
-    KdbxGroup? value,
-  }) {
+  static Future<String?> openDialog(BuildContext context, {String? value}) {
     return showDialog(
       context: context,
       // fix 在 GroupSelectorDialog 里触发导航 context.router.push 会把页面插入到弹窗下发的问题
@@ -223,7 +221,7 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-    final kdbx = KdbxProvider.of(context).kdbx!;
+    final kdbxProvider = KdbxProvider.of(context);
 
     return AlertDialog(
       title: Row(
@@ -232,8 +230,8 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
           IconButton(
             onPressed: () async {
               final uuid = await addKdbxGroup();
-              if (uuid != null && uuid is KdbxUuid) {
-                return widget.onResult(kdbx.findGroupByUuid(uuid));
+              if (uuid != null && uuid is String) {
+                return widget.onResult(uuid);
               }
               setState(() {});
             },
@@ -252,21 +250,20 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
         constraints: const BoxConstraints(maxWidth: 312),
         child: ListView(
           shrinkWrap: true,
-          children: [kdbx.kdbxFile.body.rootGroup, ...kdbx.rootGroups]
+          children: kdbxProvider.groups
               .map(
                 (item) => ListTile(
                   leading: KdbxIconWidget(
                     kdbxIcon: KdbxIconWidgetData(
-                      icon: item.icon.get() ?? KdbxIcon.Folder,
-                      customIcon: item.customIcon,
+                      icon: item.icon ?? KdbxIconType.Folder.toKdbxIcon(),
                     ),
                   ),
-                  title: Text(getKdbxObjectTitle(item)),
-                  trailing: item == widget.value
+                  title: Text(item.name),
+                  trailing: item.id == widget.value
                       ? const Icon(Icons.done)
                       : null,
                   onTap: () {
-                    widget.onResult(item == widget.value ? null : item);
+                    widget.onResult(item.id == widget.value ? null : item.id);
                   },
                 ),
               )
@@ -288,18 +285,18 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
 class KdbxEntrySelectorDialog extends StatefulWidget {
   const KdbxEntrySelectorDialog({
     super.key,
-    this.value,
+    this.id,
     this.title,
     required this.onResult,
   });
 
-  final KdbxEntry? value;
+  final String? id;
   final String? title;
-  final FormFieldSetter<KdbxEntry> onResult;
+  final FormFieldSetter<String> onResult;
 
-  static Future<KdbxEntry?> openDialog(
+  static Future<String?> openDialog(
     BuildContext context, {
-    KdbxEntry? value,
+    String? id,
     String? title,
   }) {
     return showDialog(
@@ -307,7 +304,7 @@ class KdbxEntrySelectorDialog extends StatefulWidget {
       barrierDismissible: false,
       builder: (context) {
         return KdbxEntrySelectorDialog(
-          value: value,
+          id: id,
           title: title,
           onResult: (value) {
             context.router.pop(value);
@@ -324,10 +321,9 @@ class KdbxEntrySelectorDialog extends StatefulWidget {
 
 class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
   final TextEditingController _searchController = TextEditingController();
-  final KbdxSearchHandler _kbdxSearchHandler = KbdxSearchHandler();
-  final List<KdbxEntry> _totalEntry = [];
 
-  late KdbxEntry? _selectedKdbxEntry = widget.value;
+  late String? _selectedKdbxEntry = widget.id;
+  final List<EntryData> _totalEntry = [];
 
   @override
   void initState() {
@@ -344,19 +340,18 @@ class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
     super.dispose();
   }
 
-  void _searchAccounts() {
+  void _searchAccounts() async {
     _totalEntry.clear();
     final kdbx = KdbxProvider.of(context).kdbx!;
 
-    _totalEntry.addAll(
-      _kbdxSearchHandler.search(_searchController.text, kdbx.totalEntry),
-    );
+    _totalEntry.addAll(await kdbx.getEntrys(sreach: _searchController.text));
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
+    final kdbxProvider = KdbxProvider.of(context);
 
     return AlertDialog(
       title: Column(
@@ -392,14 +387,13 @@ class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
           shrinkWrap: true,
           itemCount: _totalEntry.length,
           itemBuilder: (context, index) {
-            KdbxEntry kdbxEntry = _totalEntry[index];
+            EntryData kdbxEntry = _totalEntry[index];
             return ListTile(
               isThreeLine: true,
-              selected: _selectedKdbxEntry == kdbxEntry,
+              selected: _selectedKdbxEntry == kdbxEntry.id,
               leading: KdbxIconWidget(
                 kdbxIcon: KdbxIconWidgetData(
-                  icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
-                  customIcon: kdbxEntry.customIcon,
+                  icon: kdbxEntry.icon ?? KdbxIconType.Key.toKdbxIcon(),
                   domain: kdbxEntry.getActualString(KdbxKeyCommon.URL),
                 ),
                 size: 24,
@@ -436,7 +430,7 @@ class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: Text(
-                      kdbxEntry.parent.name.get() ?? '',
+                      kdbxProvider.getGroup(kdbxEntry.parent)?.name ?? '',
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -444,10 +438,10 @@ class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
               ),
               onTap: () {
                 setState(() {
-                  if (_selectedKdbxEntry == kdbxEntry) {
+                  if (_selectedKdbxEntry == kdbxEntry.id) {
                     _selectedKdbxEntry = null;
                   } else {
-                    _selectedKdbxEntry = kdbxEntry;
+                    _selectedKdbxEntry = kdbxEntry.id;
                   }
                 });
               },
@@ -458,7 +452,7 @@ class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
       actions: [
         TextButton(
           onPressed: () {
-            widget.onResult(widget.value);
+            widget.onResult(widget.id);
           },
           child: Text(t.cancel),
         ),

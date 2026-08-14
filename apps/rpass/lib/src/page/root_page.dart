@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:common_native_channel/common_native_channel.dart';
-import 'package:enigo_flutter/enigo_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
+import 'package:keepass_core/keepass_core.dart';
 import 'package:logging/logging.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
@@ -13,9 +13,7 @@ import 'package:window_manager/window_manager.dart';
 import '../context/kdbx.dart';
 import '../context/lan_fill_server.dart';
 import '../i18n.dart';
-import '../kdbx/kdbx.dart';
 import '../native/channel.dart';
-import '../native/platform/android.dart';
 import '../store/index.dart';
 import '../store/settings/shortcuts.dart';
 import '../tray.dart';
@@ -44,7 +42,7 @@ class RootRpassAppRoute extends PageRouteInfo<_RootRpassAppArgs> {
       final args = data.argsAs<_RootRpassAppArgs>(
         orElse: () => _RootRpassAppArgs(),
       );
-      return RootRpassApp(key: args.key);
+      return LanFillServerProvider(child: RootRpassApp(key: args.key));
     },
   );
 }
@@ -63,8 +61,7 @@ class _RootRpassAppState extends State<RootRpassApp>
         KdbxProviderListener,
         _BackgroundLock,
         NativeChannelListener {
-  final _lanFillKey = GlobalKey<LanFillServerState>();
-
+  bool _lanFillServerClosed = true;
   Locale? _locale;
 
   @override
@@ -84,13 +81,20 @@ class _RootRpassAppState extends State<RootRpassApp>
     });
   }
 
+  @override
+  void didChangeDependencies() {
+    if (_lanFillServerClosed != LanFillInherited.of(context)!.serverClosed) {
+      _lanFillServerClosed = LanFillInherited.of(context)!.serverClosed;
+      _updateTrayMenu();
+    }
+    super.didChangeDependencies();
+  }
+
   void _updateTrayMenu() {
     systemTray.updateTrayMenu(
       I18n.of(context)!,
       lock: KdbxProvider.of(context).kdbx == null,
-      lanFillServer:
-          _lanFillKey.currentState != null &&
-          !_lanFillKey.currentState!.serverClosed,
+      lanFillServer: !_lanFillServerClosed,
     );
   }
 
@@ -183,7 +187,7 @@ class _RootRpassAppState extends State<RootRpassApp>
 
             if (kdbxProvider.selectedKdbxEntry != null) {
               await Future.delayed(const Duration(milliseconds: 500));
-              autoFill(kdbxProvider.selectedKdbxEntry!, KdbxKey(key));
+              autoFill(kdbxProvider.selectedKdbxEntry!, key);
             }
           }
         }
@@ -195,9 +199,6 @@ class _RootRpassAppState extends State<RootRpassApp>
   void onKdbxChanged(Kdbx? kdbx) {
     _updateTrayMenu();
   }
-
-  @override
-  void onSelectedKdbxEntryChanged(KdbxEntry? kdbxEntry) {}
 
   @override
   void onTrayIconMouseUp() {
@@ -221,10 +222,10 @@ class _RootRpassAppState extends State<RootRpassApp>
         break;
       case "lan_fill":
         _openWindow();
-        _lanFillKey.currentState?.openQrCodeDialog();
+        LanFillInherited.of(context)?.openQrCodeDialog();
         break;
       case "close_lan_fill":
-        _lanFillKey.currentState?.closeServer();
+        LanFillInherited.of(context)?.closeServer();
         break;
       case "quit":
         windowManager.destroy();
@@ -242,7 +243,7 @@ class _RootRpassAppState extends State<RootRpassApp>
     final kdbx = KdbxProvider.of(context).kdbx;
 
     if (kdbx != null) {
-      AutofillDataset result = await kdbx.autofillSearch(metadata);
+      AutofillDataset result = await kdbx.autofillSearch(metadata: metadata);
 
       if (Store.instance.settings.manualSelectFillItem) {
         result.manual = true;
@@ -250,10 +251,11 @@ class _RootRpassAppState extends State<RootRpassApp>
 
         // 手动选择
         if (metadata.manual == true) {
-          final kdbxEntry = await KdbxEntrySelectorDialog.openDialog(context);
-          final dataset = kdbxEntry?.toAutofillDataset(metadata.fieldTypes);
-
-          if (dataset != null) result.data = [dataset];
+          final kdbxEntryId = await KdbxEntrySelectorDialog.openDialog(context);
+          result = await kdbx.autofillSearch(
+            metadata: metadata,
+            entryId: kdbxEntryId,
+          );
         }
       }
 
@@ -280,11 +282,7 @@ class _RootRpassAppState extends State<RootRpassApp>
 
   @override
   Widget build(BuildContext context) {
-    return LanFillServerProvider(
-      key: _lanFillKey,
-      onServerStatusChanged: _updateTrayMenu,
-      child: AutoRouter(),
-    );
+    return AutoRouter();
   }
 }
 

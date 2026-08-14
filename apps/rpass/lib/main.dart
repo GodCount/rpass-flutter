@@ -1,7 +1,5 @@
-import 'dart:io';
-
 import 'package:common_native_channel/common_native_channel.dart';
-import 'package:enigo_flutter/enigo_flutter.dart';
+import 'package:keepass_core/keepass_core.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:window_manager/window_manager.dart';
@@ -45,9 +43,7 @@ void main() async {
   await CommonNativeChannelPlatform.instance.ensureInitialized();
   NativeInstancePlatform.ensureInitialized();
 
-  if (Platform.isMacOS || Platform.isWindows) {
-    await RustLib.init();
-  }
+  await initRustLib();
 
   try {
     await RpassInfo.init();

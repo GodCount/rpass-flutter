@@ -2,13 +2,12 @@ import 'dart:typed_data';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:keepass_core/keepass_core.dart';
 
 import '../../context/biometric.dart';
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
-import '../../kdbx/kdbx.dart';
 import '../../native/channel.dart';
-import '../../native/platform/android.dart';
 import '../../store/index.dart';
 import '../../util/route.dart';
 import '../../widget/common.dart';
@@ -59,22 +58,22 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
   Future<void> confirm() async {
     if (form.currentState!.validate()) {
       final store = Store.instance;
-      final passowrd = passwordController.text;
+      final password = passwordController.text;
       final keyFile = keyFilecontroller.keyFile;
 
       if (!isPassword && keyFile == null) {
         throw Exception("Lack of key file.");
       }
 
-      final credentials = Kdbx.createCredentials(
-        isPassword ? passowrd : null,
-        keyFile?.$2,
+      final credentials = Credentials.from(
+        password: isPassword ? password : null,
+        keyfile: keyFile?.$2,
       );
 
       kdbxFile = kdbxFile ?? await store.localInfo.localKdbxFile.readAsBytes();
 
-      Kdbx kdbx = await Kdbx.loadBytesFromCredentials(
-        data: kdbxFile!,
+      Kdbx kdbx = await Kdbx.openBytes(
+        bytes: kdbxFile!,
         credentials: credentials,
         filepath: store.localInfo.localKdbxFile.path,
       );
@@ -97,7 +96,7 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
 
     if (metadata == null) return;
 
-    AutofillDataset result = await kdbx.autofillSearch(metadata);
+    AutofillDataset result = await kdbx.autofillSearch(metadata: metadata);
 
     if (Store.instance.settings.manualSelectFillItem) {
       result.manual = true;
@@ -105,10 +104,11 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
 
       // 手动选择
       if (metadata.manual == true) {
-        final kdbxEntry = await KdbxEntrySelectorDialog.openDialog(context);
-        final dataset = kdbxEntry?.toAutofillDataset(metadata.fieldTypes);
-
-        if (dataset != null) result.data = [dataset];
+        final kdbxEntryId = await KdbxEntrySelectorDialog.openDialog(context);
+        result = await kdbx.autofillSearch(
+          metadata: metadata,
+          entryId: kdbxEntryId,
+        );
       }
     }
 
@@ -130,9 +130,9 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
     kdbxFile = kdbxFile ?? await store.localInfo.localKdbxFile.readAsBytes();
 
     final hash = await biometric.getCredentials(context);
-    final kdbx = await Kdbx.loadBytesFromHash(
-      data: kdbxFile!,
-      token: hash,
+    final kdbx = await Kdbx.openBytes(
+      bytes: kdbxFile!,
+      credentials: Credentials.formCompositeKey(key: hash),
       filepath: store.localInfo.localKdbxFile.path,
     );
 

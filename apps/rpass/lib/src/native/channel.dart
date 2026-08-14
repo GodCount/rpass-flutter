@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:keepass_core/keepass_core.dart';
 
 import '../util/common.dart';
 import 'platform/android.dart';

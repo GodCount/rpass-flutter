@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:keepass_core/keepass_core.dart';
 import 'package:logging/logging.dart';
 
 import '../../context/kdbx.dart';
@@ -50,17 +51,16 @@ class _SelectIconPageState extends State<SelectIconPage> {
 
     final mediaQuery = MediaQuery.of(context);
     final width = mediaQuery.size.width;
-    final kdbx = KdbxProvider.of(context).kdbx!;
+    final fieldSummary = KdbxProvider.of(context).fieldSummary!;
 
     return Scaffold(
       appBar: AppBar(title: Text(t.select_icon)),
       body: GridView.count(
         crossAxisCount: width ~/ 64,
         children: [
-          ...kdbx.customIcons.map((item) {
+          ...fieldSummary.customIcons.entries.map((item) {
             final kdbxIcon = KdbxIconWidgetData(
-              icon: KdbxIcon.Key,
-              customIcon: item,
+              icon: KdbxIcon.custom(item.key, item.value),
             );
             return InkWell(
               onTap: () => _onIconTap(kdbxIcon),
@@ -71,8 +71,8 @@ class _SelectIconPageState extends State<SelectIconPage> {
             );
           }),
           const SizedBox(width: 64, height: 64),
-          ...KdbxIcon.values.map((item) {
-            final kdbxIcon = KdbxIconWidgetData(icon: item);
+          ...KdbxIconType.values.map((item) {
+            final kdbxIcon = KdbxIconWidgetData(icon: item.toKdbxIcon());
             return InkWell(
               onTap: () => _onIconTap(kdbxIcon),
               child: Padding(
@@ -89,15 +89,7 @@ class _SelectIconPageState extends State<SelectIconPage> {
         onPressed: () async {
           try {
             final (_, bytes) = await SimpleFile.openFile(type: FileType.image);
-            _onIconTap(
-              KdbxIconWidgetData(
-                icon: KdbxIcon.Key,
-                customIcon: KdbxCustomIcon(
-                  uuid: KdbxUuid.random(),
-                  data: bytes,
-                ),
-              ),
-            );
+            _onIconTap(KdbxIconWidgetData(icon: KdbxIcon.custom("custom", bytes)));
           } catch (e) {
             if (e is! CancelException) {
               _logger.warning("read image file fail!", e);

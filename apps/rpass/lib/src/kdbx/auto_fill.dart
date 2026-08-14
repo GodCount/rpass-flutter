@@ -1,9 +1,8 @@
 import 'package:common_native_channel/common_native_channel.dart';
 import 'package:flutter/material.dart';
+import 'package:keepass_core/keepass_core.dart';
 import 'package:logging/logging.dart';
-import 'package:enigo_flutter/enigo_flutter.dart';
 
-import '../native/platform/android.dart';
 import '../util/common.dart';
 import 'kdbx.dart';
 
@@ -107,44 +106,4 @@ Future<void> autoFillSequence(
       _runing = false;
     }
   }
-}
-
-bool _containsDomain(String a, String b) {
-  if (a == b) return true;
-  final a1 = a.split(".");
-  final b1 = b.split(".");
-
-  return a1.last == b1.last && a1[a1.length - 2] == b1[b1.length - 2];
-}
-
-///
-/// 安卓端
-/// 返回自动填充数据集
-/// 给 AutofillService 服务
-Future<AutofillDataset> androidAutofillSearch(
-  AutofillMetadata metadata,
-  List<KdbxEntry> kdbxEntrys,
-) async {
-  final result = kdbxEntrys.where((it) {
-    // 任意一个 url 匹配成功, 或者包名对应上
-
-    final packageName = it.getActualString(
-      KdbxKeySpecial.AUTO_FILL_PACKAGE_NAME,
-    );
-
-    if (packageName != null && metadata.packageName == packageName) return true;
-
-    final webDomain = metadata.webDomain?.simpleToDomain();
-
-    return webDomain != null &&
-        it.getUrls().any(
-          (url) => _containsDomain(webDomain, url.simpleToDomain()),
-        );
-  });
-
-  final List<Map<String, String?>> dataset = result
-      .map((it) => it.toAutofillDataset(metadata.fieldTypes))
-      .toList();
-
-  return AutofillDataset(unlock: true, data: dataset);
 }

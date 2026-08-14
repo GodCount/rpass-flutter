@@ -1,9 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:keepass_core/keepass_core.dart';
 import 'package:remote_fs/remote_fs.dart';
 
 import '../../i18n.dart';
-import '../../kdbx/kdbx.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/common.dart';

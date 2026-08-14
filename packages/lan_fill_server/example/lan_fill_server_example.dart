@@ -5,17 +5,14 @@ import 'package:lan_fill_server/lan_fill_server.dart';
 class TIM extends InteractiveManipulation {
   @override
   void onCilentClose() {
-    // TODO: implement onCilentClose
   }
 
   @override
   void onServerClose() {
-    // TODO: implement onServerClose
   }
 
   @override
   Future<void> onRemoteAutofill(AutofillDto dto) {
-    // TODO: implement remoteAutofill
     throw UnimplementedError();
   }
 
@@ -25,18 +22,15 @@ class TIM extends InteractiveManipulation {
     String devicePlatform,
     String? deviceName,
   ) {
-    // TODO: implement validateFingerprint
     throw UnimplementedError();
   }
 
   @override
   void onServerCilentFirstHeartbeat(String devicePlatform, String? deviceName) {
-    // TODO: implement onServerCilentFirstHeartbeat
   }
 
   @override
   Future<void> onSaveUploadFile(String filename, Uint8List bytes) {
-    // TODO: implement onSaveUploadFile
     throw UnimplementedError();
   }
   

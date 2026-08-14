@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
+import 'package:keepass_core/keepass_core.dart';
 
 import '../../util/common.dart';
 import '../../util/route.dart';
@@ -39,15 +40,18 @@ class RecycleBinPage extends StatefulWidget {
 }
 
 class _RecycleBinPageState extends State<RecycleBinPage>
-    with SecondLevelPageAutoBack<RecycleBinPage> {
-  final List<KdbxObject> _selecteds = [];
+    with SecondLevelPageAutoBack<RecycleBinPage>, KdbxProviderListener {
+  final List<Object> _objects = [];
 
-  VoidCallback? _removeKdbxListener;
+  final List<Object> _selecteds = [];
 
-  KdbxObject? _showMenu;
+  Object? _showMenu;
 
-  void _save() async {
-    await kdbxSave(KdbxProvider.of(context).kdbx!);
+  @override
+  void initState() {
+    KdbxProvider.of(context).addListener(this);
+    onKdbxSaved();
+    super.initState();
   }
 
   void _deleteWarnDialog(VoidCallback confirmCallback) async {
@@ -61,20 +65,24 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     }
   }
 
-  void _showRecycleBinAction(KdbxObject kdbxObject) {
+  void _showRecycleBinAction(Object object) {
     final t = I18n.of(context)!;
 
     showBottomSheetList(
-      title: getKdbxObjectTitle(kdbxObject),
+      title: object is GroupData
+          ? object.name
+          : object is EntryData
+          ? object.getLabel()
+          : "",
       children: [
         ListTile(
           leading: const Icon(Icons.person_search),
           title: Text(t.lookup),
-          enabled: kdbxObject is KdbxEntry,
+          enabled: object is EntryData,
           onTap: () async {
-            if (kdbxObject is KdbxEntry) {
+            if (object is EntryData) {
               await context.router.popAndPush(
-                LookAccountRoute(kdbxEntry: kdbxObject, readOnly: true),
+                LookAccountRoute(id: object.id, readOnly: true),
               );
             }
           },
@@ -85,7 +93,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
           leading: const Icon(Icons.restore_from_trash),
           title: Text(t.revert),
           onTap: () {
-            _restoreObjects([kdbxObject]);
+            _restoreObjects([object]);
             context.router.pop();
           },
         ),
@@ -95,7 +103,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
           leading: const Icon(Icons.delete_forever),
           title: Text(t.completely_delete),
           onTap: () => _deleteWarnDialog(() {
-            _deletePermanentlys([kdbxObject]);
+            _deletePermanentlys([object]);
             context.router.pop();
           }),
         ),
@@ -103,25 +111,46 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     );
   }
 
-  void _restoreObjects(List<KdbxObject> values) {
+  void _restoreObjects(List<Object> values) async {
     if (values.isEmpty) return;
-    final kdbx = KdbxProvider.of(context).kdbx!;
-    for (var item in values) {
-      kdbx.restoreObject(item);
-    }
-    _save();
+
+    await kdbxAction(
+      KdbxAction.restore(
+        values
+            .map(
+              (item) => item is GroupData
+                  ? item.id
+                  : item is EntryData
+                  ? item.id
+                  : null,
+            )
+            .where((item) => item != null)
+            .cast<String>()
+            .toList(),
+      ),
+    );
   }
 
-  void _deletePermanentlys(List<KdbxObject> values) {
+  void _deletePermanentlys(List<Object> values) async {
     if (values.isEmpty) return;
-    final kdbx = KdbxProvider.of(context).kdbx!;
-    for (var item in values) {
-      kdbx.deletePermanently(item);
-    }
-    _save();
+    await kdbxAction(
+      KdbxAction.delete(
+        values
+            .map(
+              (item) => item is GroupData
+                  ? item.id
+                  : item is EntryData
+                  ? item.id
+                  : null,
+            )
+            .where((item) => item != null)
+            .cast<String>()
+            .toList(),
+      ),
+    );
   }
 
-  void _onItemTap(KdbxObject kdbxObject) {
+  void _onItemTap(Object kdbxObject) {
     setState(() {
       if (_selecteds.contains(kdbxObject)) {
         _selecteds.remove(kdbxObject);
@@ -131,39 +160,32 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     });
   }
 
-  void _onItemLongPress(KdbxObject kdbxObject) {
+  void _onItemLongPress(Object kdbxObject) {
     _showRecycleBinAction(kdbxObject);
   }
 
   @override
-  void initState() {
-    final kdbx = KdbxProvider.of(context).kdbx!;
-    kdbx.addListener(_update);
-    _removeKdbxListener = () => kdbx.removeListener(_update);
-    super.initState();
-  }
-
-  void _update() {
-    setState(() {
-      final kdbx = KdbxProvider.of(context).kdbx!;
-      final allObjects = kdbx.recycleBinObjects;
-      _selecteds.removeWhere(((item) => !allObjects.contains(item)));
-    });
+  void onKdbxSaved() async {
+    final (groups, entrys) = await KdbxProvider.of(
+      context,
+    ).kdbx!.getRecycleItems();
+    _objects.clear();
+    _objects.addAll(groups);
+    _objects.addAll(entrys);
+    _selecteds.removeWhere(((item) => !_objects.contains(item)));
+    setState(() {});
   }
 
   @override
   void dispose() {
     _selecteds.clear();
-    _removeKdbxListener?.call();
-    _removeKdbxListener = null;
+    KdbxProvider.of(context).removeListener(this);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-
-    final kdbx = KdbxProvider.of(context).kdbx!;
 
     return Scaffold(
       appBar: AppBar(
@@ -197,15 +219,15 @@ class _RecycleBinPageState extends State<RecycleBinPage>
             : null,
       ),
       body: ListView.builder(
-        itemCount: kdbx.recycleBinObjects.length,
+        itemCount: _objects.length,
         itemBuilder: (context, index) {
-          return _buildListItem(kdbx.recycleBinObjects[index]);
+          return _buildListItem(_objects[index]);
         },
       ),
     );
   }
 
-  Widget _buildListItem(KdbxObject kdbxObject) {
+  Widget _buildListItem(Object kdbxObject) {
     return CustomContextMenuRegion<MyContextMenuItem>(
       enabled: isDesktop,
       onItemSelected: (type) {
@@ -218,9 +240,9 @@ class _RecycleBinPageState extends State<RecycleBinPage>
         }
         switch (type) {
           case ViewContextMenuItem():
-            if (kdbxObject is KdbxEntry) {
+            if (kdbxObject is EntryData) {
               context.router.platformNavigate(
-                LookAccountRoute(kdbxEntry: kdbxObject, readOnly: true),
+                LookAccountRoute(id: kdbxObject.id, readOnly: true),
               );
             }
             break;
@@ -248,7 +270,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
             MenuItem(
               label: t.lookup,
               icon: Icons.person_search,
-              enabled: kdbxObject is KdbxEntry,
+              enabled: kdbxObject is EntryData,
               value: MyContextMenuItem.view(),
             ),
             const MenuDivider(),
@@ -286,13 +308,21 @@ class _RecycleBinPageState extends State<RecycleBinPage>
         selected: _showMenu == kdbxObject,
         leading: KdbxIconWidget(
           kdbxIcon: KdbxIconWidgetData(
-            icon: kdbxObject is KdbxEntry ? KdbxIcon.Key : KdbxIcon.Folder,
+            icon: kdbxObject is EntryData
+                ? KdbxIconType.Key.toKdbxIcon()
+                : KdbxIconType.Folder.toKdbxIcon(),
           ),
         ),
         trailing: _selecteds.contains(kdbxObject)
             ? const Icon(Icons.done)
             : null,
-        title: Text(getKdbxObjectTitle(kdbxObject)),
+        title: Text(
+          kdbxObject is GroupData
+              ? kdbxObject.name
+              : kdbxObject is EntryData
+              ? kdbxObject.getLabel()
+              : "",
+        ),
       ),
     );
   }

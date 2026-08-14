@@ -224,10 +224,7 @@ pub(crate) fn decrypt_kdbx3(
     // Rest of file after header is payload
     let payload_encrypted = data.get(pos..).ok_or(DatabaseOpenError::UnexpectedEof)?;
 
-    // derive master key from composite key, transform_seed, transform_rounds and master_seed
-    let key_elements = db_key.get_key_elements()?;
-    let key_elements: Vec<&[u8]> = key_elements.iter().map(|v| &v[..]).collect();
-    let composite_key = calculate_sha256(&key_elements);
+    let composite_key = db_key.get_composite_key()?;
 
     // transform the key
     let transformed_key = config

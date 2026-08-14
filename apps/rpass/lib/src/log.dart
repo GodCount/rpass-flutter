@@ -10,6 +10,8 @@ final _logger = Logger("Logger");
 class Log {
   static RotatingFileAppender? _rotatingFileAppender;
 
+  static String? get baseFilePath => _rotatingFileAppender?.baseFilePath;
+
   static Future<Directory> getLogDirectory() async {
     Directory? dir = await switch (Platform.operatingSystem) {
       "android" => getExternalStorageDirectory(),

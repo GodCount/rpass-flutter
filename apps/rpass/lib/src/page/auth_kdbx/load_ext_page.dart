@@ -2,8 +2,8 @@ import 'dart:typed_data';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:keepass_core/keepass_core.dart';
 
-import '../../kdbx/kdbx.dart';
 import '../../util/route.dart';
 import 'authorized_page.dart';
 
@@ -63,18 +63,18 @@ class _LoadExternalKdbxPageState
   @override
   Future<void> confirm() async {
     if (form.currentState!.validate()) {
-      final passowrd = passwordController.text;
+      final password = passwordController.text;
       final keyFile = keyFilecontroller.keyFile;
 
       if (!isPassword && keyFile == null) {
         throw Exception("Lack of key file.");
       }
 
-      Kdbx kdbx = await Kdbx.loadBytesFromCredentials(
-        data: widget.kdbxFile,
-        credentials: Kdbx.createCredentials(
-          isPassword ? passowrd : null,
-          keyFile?.$2,
+      Kdbx kdbx = await Kdbx.openBytes(
+        bytes: widget.kdbxFile,
+        credentials: Credentials.from(
+          password: isPassword ? password : null,
+          keyfile: keyFile?.$2,
         ),
       );
       context.router.pop((kdbx, keyFile?.$1));

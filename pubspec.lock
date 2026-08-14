@@ -218,6 +218,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.2"
+  code_assets:
+    dependency: transitive
+    description:
+      name: code_assets
+      sha256: bf394f466ba9205f1812a0433b392d6af280f155f56651eda7c18cc32ed493b8
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.1"
   code_builder:
     dependency: transitive
     description:
@@ -338,14 +346,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.5"
-  ffigen:
-    dependency: transitive
-    description:
-      name: ffigen
-      sha256: dead012f29db2be71ea152458f5eab600de98fbc244e01088ae6bf2616bceca7
-      url: "https://pub.dev"
-    source: hosted
-    version: "11.0.0"
   file:
     dependency: transitive
     description:
@@ -413,10 +413,18 @@ packages:
     dependency: transitive
     description:
       name: flutter_rust_bridge
-      sha256: "37ef40bc6f863652e865f0b2563ea07f0d3c58d8efad803cc01933a4b2ee067e"
+      sha256: d9d819e3f39efe08a68309ff7cadc9d8bcfd65d86319e0c5735cd4f4fee16c4a
       url: "https://pub.dev"
     source: hosted
-    version: "2.11.1"
+    version: "2.13.0-beta.5"
+  flutter_rust_bridge_hooks:
+    dependency: transitive
+    description:
+      name: flutter_rust_bridge_hooks
+      sha256: "33f96e930af9016405f519696574f6fcb96ec37a515188d1da484fa81f9a90f7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.13.0-beta.5"
   flutter_slidable:
     dependency: transitive
     description:
@@ -435,6 +443,22 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  freezed:
+    dependency: transitive
+    description:
+      name: freezed
+      sha256: "13065f10e135263a4f5a4391b79a8efc5fb8106f8dd555a9e49b750b45393d77"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.3"
+  freezed_annotation:
+    dependency: transitive
+    description:
+      name: freezed_annotation
+      sha256: "7294967ff0a6d98638e7acb774aac3af2550777accd8149c90af5b014e6d44d8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   frontend_server_client:
     dependency: transitive
     description:
@@ -464,6 +488,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
+  hooks:
+    dependency: transitive
+    description:
+      name: hooks
+      sha256: "9a62a50b50b769a737bc0a8ff381f333529df3ab746b2f6b02e83760231455ba"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
   hotkey_manager:
     dependency: transitive
     description:
@@ -549,14 +581,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
-  isolates:
-    dependency: transitive
-    description:
-      name: isolates
-      sha256: ce89e4141b27b877326d3715be2dceac7a7ba89f3229785816d2d318a75ddf28
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.3+8"
   js:
     dependency: transitive
     description:
@@ -581,13 +605,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.11.2"
-  kdbx:
-    dependency: transitive
-    description:
-      path: "packages/kdbx.dart"
-      relative: true
-    source: path
-    version: "2.4.1"
   leak_tracker:
     dependency: transitive
     description:
@@ -700,6 +717,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
+  native_toolchain_rust:
+    dependency: transitive
+    description:
+      name: native_toolchain_rust
+      sha256: faa57d2258a3b0fd2a634054f54e4496c9fcbd971977e7d2b7e6916d56892857
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.4+0"
   node_preamble:
     dependency: transitive
     description:
@@ -900,14 +925,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
-  quiver:
+  record_use:
     dependency: transitive
     description:
-      name: quiver
-      sha256: ea0b925899e64ecdfbf9c7becb60d5b50e706ade44a85b2363be2a22d88117d2
+      name: record_use
+      sha256: "2551bd8eecfe95d14ae75f6021ad0248be5c27f138c2ec12fcb52b500b3ba1ed"
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.2"
+    version: "0.6.0"
   relic:
     dependency: transitive
     description:
@@ -1153,14 +1178,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
-  supercharged_dart:
-    dependency: transitive
-    description:
-      name: supercharged_dart
-      sha256: cb95edda32eacd27664089700a750120be41daa84aa6cd2aeded46227c16b867
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.1"
   sync_http:
     dependency: transitive
     description:
@@ -1169,14 +1186,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.1"
-  synchronized:
-    dependency: transitive
-    description:
-      name: synchronized
-      sha256: c254ade258ec8282947a0acbbc90b9575b4f19673533ee46f2f6e9b3aeefd7c0
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.4.0"
   term_glyph:
     dependency: transitive
     description:
@@ -1217,6 +1226,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.10.1"
+  toml:
+    dependency: transitive
+    description:
+      name: toml
+      sha256: "35a35f782228656a2af31e8c73d1353cc4ef3d683fd68af1111b44631879c05e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.18.0"
   tray_manager:
     dependency: transitive
     description:

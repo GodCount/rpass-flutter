@@ -3,6 +3,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:common_native_channel/common_native_channel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
+import 'package:keepass_core/keepass_core.dart';
 
 import '../../context/kdbx.dart';
 import '../../i18n.dart';
@@ -56,19 +57,15 @@ class PasswordsPage extends StatefulWidget {
 class _PasswordsPageState extends State<PasswordsPage>
     with
         AutomaticKeepAliveClientMixin,
-        NavigationHistoryObserver<PasswordsPage> {
+        NavigationHistoryObserver<PasswordsPage>,
+        KdbxProviderListener {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
 
   @override
   bool get wantKeepAlive => true;
 
-  final KbdxSearchHandler _kbdxSearchHandler = KbdxSearchHandler(
-    useKdbxEntryConfig: true,
-  );
-  final List<KdbxEntry> _totalEntry = [];
-
-  VoidCallback? _removeKdbxListener;
+  final List<EntryData> _totalEntry = [];
 
   @override
   void didUpdateWidget(covariant PasswordsPage oldWidget) {
@@ -80,12 +77,9 @@ class _PasswordsPageState extends State<PasswordsPage>
 
   @override
   void initState() {
-    final kdbx = KdbxProvider.of(context).kdbx!;
+    KdbxProvider.of(context).addListener(this);
     _searchController.addListener(_searchAccounts);
     _searchAccounts();
-
-    kdbx.addListener(_onKdbxSave);
-    _removeKdbxListener = () => kdbx.removeListener(_onKdbxSave);
 
     super.initState();
 
@@ -97,14 +91,12 @@ class _PasswordsPageState extends State<PasswordsPage>
   }
 
   @override
-  void didNavigationHistory() {
+  void didNavigationHistory() async {
     final kdbxProvider = KdbxProvider.of(context);
     if (context.topRoute.name == LookAccountRoute.name ||
         context.topRoute.name == EditAccountRoute.name) {
       final uuid = context.topRoute.inheritedPathParams.optString("uuid");
-      kdbxProvider.setSelectedKdbxEntry(
-        uuid != null ? kdbxProvider.kdbx!.findEntryByUuid(uuid.kdbxUuid) : null,
-      );
+      kdbxProvider.setSelectedKdbxEntry(uuid);
     } else if (kIsMobile) {
       kdbxProvider.setSelectedKdbxEntry(null);
     } else if (context.router.isPathActive("/passwords/empty")) {
@@ -116,25 +108,21 @@ class _PasswordsPageState extends State<PasswordsPage>
   void dispose() {
     _searchController.dispose();
     _searchFocusNode.dispose();
-    _removeKdbxListener?.call();
-    _removeKdbxListener = null;
+    KdbxProvider.of(context).removeListener(this);
     _totalEntry.clear();
     super.dispose();
   }
 
-  void _onKdbxSave() {
-    final kdbx = KdbxProvider.of(context).kdbx!;
-    _kbdxSearchHandler.setFieldOther(kdbx.fieldStatistic.customFields);
+  @override
+  void onKdbxSaved() {
     _searchAccounts();
   }
 
-  void _searchAccounts() {
+  void _searchAccounts() async {
     _totalEntry.clear();
     final kdbx = KdbxProvider.of(context).kdbx!;
 
-    _totalEntry.addAll(
-      _kbdxSearchHandler.search(_searchController.text, kdbx.totalEntry),
-    );
+    _totalEntry.addAll(await kdbx.getEntrys(sreach: _searchController.text));
     setState(() {});
   }
 
@@ -145,7 +133,7 @@ class _PasswordsPageState extends State<PasswordsPage>
   }
 
   Widget _buildMobile() {
-    final kdbx = KdbxProvider.of(context).kdbx!;
+    final kdbxProvider = KdbxProvider.of(context);
 
     final mainColor = Theme.of(context).colorScheme.primaryContainer;
 
@@ -155,7 +143,8 @@ class _PasswordsPageState extends State<PasswordsPage>
         title: _AppBarTitleToSearch(
           controller: _searchController,
           focusNode: _searchFocusNode,
-          itemCount: kdbx.totalEntry.length,
+          itemCount:
+              kdbxProvider.fieldSummary?.totalEntryCount ?? _totalEntry.length,
           matchCount: _searchController.text.isNotEmpty
               ? _totalEntry.length
               : 0,
@@ -277,7 +266,7 @@ class _PasswordsPageState extends State<PasswordsPage>
             kdbxEntry: _totalEntry[index],
             onTap: () {
               context.router.platformNavigate(
-                LookAccountRoute(kdbxEntry: _totalEntry[index]),
+                LookAccountRoute(id: _totalEntry[index].id),
               );
             },
           );
@@ -391,7 +380,7 @@ class _AppBarTitleToSearchState extends State<_AppBarTitleToSearch> {
 class _OpenContainerPasswordItem extends StatelessWidget {
   const _OpenContainerPasswordItem({required this.kdbxEntry});
 
-  final KdbxEntry kdbxEntry;
+  final EntryData kdbxEntry;
 
   @override
   Widget build(BuildContext context) {
@@ -408,8 +397,8 @@ class _OpenContainerPasswordItem extends StatelessWidget {
       middleColor: mainColor,
       openBuilder: (BuildContext context, VoidCallback _) {
         return isLogPress
-            ? EditAccountPage(kdbxEntry: kdbxEntry)
-            : LookAccountPage(kdbxEntry: kdbxEntry);
+            ? EditAccountPage(id: kdbxEntry.id)
+            : LookAccountPage(id: kdbxEntry.id);
       },
       closedElevation: 4,
       closedShape: const RoundedRectangleBorder(
@@ -435,7 +424,7 @@ class _OpenContainerPasswordItem extends StatelessWidget {
 class _PasswordItem extends StatefulWidget {
   const _PasswordItem({required this.kdbxEntry, this.onTap, this.onLongPress});
 
-  final KdbxEntry kdbxEntry;
+  final EntryData kdbxEntry;
   final GestureTapCallback? onTap;
   final GestureLongPressCallback? onLongPress;
 
@@ -461,9 +450,7 @@ class _PasswordItemState extends State<_PasswordItem>
   void _deletePassword() async {
     final t = I18n.of(context)!;
     if (await showConfirmDialog(title: t.delete, message: t.is_move_recycle)) {
-      final kdbx = KdbxProvider.of(context).kdbx!;
-      kdbx.deleteEntry(widget.kdbxEntry);
-      await kdbxSave(kdbx);
+      await kdbxAction(KdbxAction.move2Trash([widget.kdbxEntry.id]));
     }
   }
 
@@ -476,12 +463,13 @@ class _PasswordItemState extends State<_PasswordItem>
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
+    final kdbxProvider = KdbxProvider.of(context);
 
     final kdbxEntry = widget.kdbxEntry;
 
-    final selected =
-        KdbxProvider.of(context).selectedKdbxEntry?.uuid ==
-        widget.kdbxEntry.uuid;
+    final selected = kdbxProvider.selectedKdbxEntry == widget.kdbxEntry.id;
+
+    final groupData = kdbxProvider.getGroup(widget.kdbxEntry.parent);
 
     return CustomContextMenuRegion<MyContextMenuItem>(
       enabled: isDesktop,
@@ -494,9 +482,7 @@ class _PasswordItemState extends State<_PasswordItem>
         }
         switch (type) {
           case EditContextMenuItem():
-            context.router.platformNavigate(
-              EditAccountRoute(kdbxEntry: kdbxEntry),
-            );
+            context.router.platformNavigate(EditAccountRoute(id: kdbxEntry.id));
             break;
           case CopyContextMenuItem(kdbxKey: final kdbxKey):
             writeClipboard(
@@ -506,7 +492,7 @@ class _PasswordItemState extends State<_PasswordItem>
             );
             break;
           case AutoFillContextMenuItem(kdbxKey: final kdbxKey):
-            autoFill(widget.kdbxEntry, kdbxKey);
+            kdbxProvider.autoFill(widget.kdbxEntry.id, kdbxKey);
             break;
           case DeleteContextMenuItem():
             _deletePassword();
@@ -571,8 +557,7 @@ class _PasswordItemState extends State<_PasswordItem>
           padding: const EdgeInsets.only(top: 6),
           child: KdbxIconWidget(
             kdbxIcon: KdbxIconWidgetData(
-              icon: kdbxEntry.icon.get() ?? KdbxIcon.Key,
-              customIcon: kdbxEntry.customIcon,
+              icon: kdbxEntry.icon ?? KdbxIconType.Key.toKdbxIcon(),
               domain: kdbxEntry.getActualString(KdbxKeyCommon.URL),
             ),
             size: 24,
@@ -607,11 +592,11 @@ class _PasswordItemState extends State<_PasswordItem>
               t.email_ab,
               kdbxEntry.getNonNullString(KdbxKeyCommon.EMAIL),
             ),
-            _subtitleText(t.label_ab, kdbxEntry.tagList.join(", ")),
+            _subtitleText(t.label_ab, kdbxEntry.tags.join(", ")),
             Align(
               alignment: Alignment.centerRight,
               child: Text(
-                kdbxEntry.parent.name.get() ?? '',
+                groupData?.name ?? '',
                 overflow: TextOverflow.ellipsis,
               ),
             ),

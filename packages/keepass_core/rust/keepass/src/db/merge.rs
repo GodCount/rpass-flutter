@@ -16,7 +16,6 @@ use crate::{
 
 /// The kind of change a merge applied to an object.
 #[derive(Debug, Clone)]
-#[non_exhaustive]
 pub enum MergeEventType {
     /// The object existed only in the source and was created in the destination.
     Created,
@@ -30,7 +29,6 @@ pub enum MergeEventType {
 
 /// The object a [`MergeEvent`] applies to.
 #[derive(Debug, Clone)]
-#[non_exhaustive]
 pub enum MergeEventTarget {
     /// An entry, identified by its UUID.
     Entry(EntryId),
@@ -195,6 +193,7 @@ fn merge_groups(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog
             dest_group.default_autotype_sequence = source.default_autotype_sequence.clone();
             dest_group.enable_autotype = source.enable_autotype;
             dest_group.enable_searching = source.enable_searching;
+            dest_group.enable_display  = source.enable_display;
             dest_group.last_top_visible_entry = source.last_top_visible_entry;
 
             log.events.push(MergeEvent {
@@ -352,6 +351,7 @@ fn merge_groups(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog
         dest.default_autotype_sequence = source.default_autotype_sequence.clone();
         dest.enable_autotype = source.enable_autotype;
         dest.enable_searching = source.enable_searching;
+        dest.enable_display  = source.enable_display;
         dest.last_top_visible_entry = source.last_top_visible_entry;
 
         log.events.push(MergeEvent {

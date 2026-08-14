@@ -1,5 +1,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:keepass_core/keepass_core.dart';
 import 'package:logging/logging.dart';
 
 import '../channel.dart';
@@ -13,91 +14,6 @@ class AutofillField {
   static const USERNAME = "username";
   static const EMAIL = "email";
   static const OTP = "otp";
-}
-
-class AutofillMetadata {
-  AutofillMetadata({
-    required this.fieldTypes,
-    this.manual,
-    this.packageName,
-    this.webDomain,
-    this.webScheme,
-  });
-
-  factory AutofillMetadata.fromJson(Map<dynamic, dynamic> json) =>
-      AutofillMetadata(
-        fieldTypes: (json['fieldTypes'] as Iterable)
-            .map((dynamic e) => e as String)
-            .toSet(),
-        manual: json["manual"] as bool?,
-        packageName: json['packageName'] as String?,
-        webDomain: json['webDomain'] as String?,
-        webScheme: json['webScheme'] as String?,
-      );
-
-  final bool? manual;
-  final String? packageName;
-  final String? webDomain;
-  final String? webScheme;
-  final Set<String> fieldTypes;
-
-  @override
-  String toString() => toJson().toString();
-
-  Map<String, Object?> toJson() => {
-    'fieldTypes': fieldTypes,
-    "manual": manual,
-    'packageName': packageName,
-    'webDomain': webDomain,
-    'webScheme': webScheme,
-  };
-}
-
-class AutofillWebDomain {
-  AutofillWebDomain({this.scheme, required this.domain});
-
-  factory AutofillWebDomain.fromJson(Map<dynamic, dynamic> json) =>
-      AutofillWebDomain(
-        scheme: json['scheme'] as String?,
-        domain: json['domain'] as String,
-      );
-
-  final String? scheme;
-  final String domain;
-
-  @override
-  String toString() => toJson().toString();
-
-  Map<String, Object?> toJson() => {'scheme': scheme, 'domain': domain};
-}
-
-class AutofillDataset {
-  AutofillDataset({this.unlock, this.manual, this.message, required this.data});
-
-  static final DATASET_FIELD_LABEL = "label";
-  static final DATASET_FIELD_USERNAME = "username";
-  static final DATASET_FIELD_EMAIL = "email";
-
-  static final DATASET_FIELD_PASSWORD = "password";
-  static final DATASET_FIELD_OTP = "otp";
-
-  // 数据库已解锁
-  bool? unlock;
-
-  // 就算有数据页显示一个手动选择的选项
-  bool? manual;
-  String? message;
-  List<Map<String, String?>> data;
-
-  @override
-  String toString() => toJson().toString();
-
-  Map<String, Object?> toJson() => {
-    'unlock': unlock,
-    "manual": manual,
-    'message': message,
-    'data': data,
-  };
 }
 
 class AutofillService {

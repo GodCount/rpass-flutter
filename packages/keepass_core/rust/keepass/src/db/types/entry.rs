@@ -22,7 +22,8 @@ use crate::{
 pub struct EntryId(Uuid);
 
 impl EntryId {
-    pub(crate) fn new() -> Self {
+    /// create entry id
+    pub fn new() -> Self {
         Self(Uuid::new_v4())
     }
 
@@ -86,10 +87,10 @@ pub struct Entry {
     pub quality_check: bool,
 
     /// attachments associated with this entry, mapped by attachment name to attachment ID
-    pub(crate) attachments: HashMap<String, AttachmentId>,
+    pub attachments: HashMap<String, AttachmentId>,
 
     /// Identifier of the group that the Entry was previously contained in
-    pub(crate) previous_parent_group: Option<GroupId>,
+    pub previous_parent_group: Option<GroupId>,
 
     /// history of this entry
     pub history: Option<History>,
