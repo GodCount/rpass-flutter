@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rpass/src/theme/theme.dart';
+import '../src/theme/theme.dart';
 
 import 'page/shake_test.dart';
 

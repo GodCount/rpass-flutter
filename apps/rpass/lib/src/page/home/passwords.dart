@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:keepass_core/keepass_core.dart';
 
-import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../store/index.dart';
@@ -77,13 +76,13 @@ class _PasswordsPageState extends State<PasswordsPage>
 
   @override
   void initState() {
-    KdbxProvider.of(context).addListener(this);
+    Store.kdbx.addListener(this);
     _searchController.addListener(_searchAccounts);
     _searchAccounts();
 
     super.initState();
 
-    if (Store.instance.settings.startFocusSreach) {
+    if (Store.settings.startFocusSreach) {
       Future.delayed(Duration(milliseconds: 300)).then((_) {
         _searchFocusNode.requestFocus();
       });
@@ -92,15 +91,15 @@ class _PasswordsPageState extends State<PasswordsPage>
 
   @override
   void didNavigationHistory() async {
-    final kdbxProvider = KdbxProvider.of(context);
+    final kdbxController = Store.kdbx;
     if (context.topRoute.name == LookAccountRoute.name ||
         context.topRoute.name == EditAccountRoute.name) {
       final uuid = context.topRoute.inheritedPathParams.optString("uuid");
-      kdbxProvider.setSelectedKdbxEntry(uuid);
+      kdbxController.setSelectedKdbxEntry(uuid);
     } else if (kIsMobile) {
-      kdbxProvider.setSelectedKdbxEntry(null);
+      kdbxController.setSelectedKdbxEntry(null);
     } else if (context.router.isPathActive("/passwords/empty")) {
-      kdbxProvider.setSelectedKdbxEntry(null);
+      kdbxController.setSelectedKdbxEntry(null);
     }
   }
 
@@ -108,7 +107,7 @@ class _PasswordsPageState extends State<PasswordsPage>
   void dispose() {
     _searchController.dispose();
     _searchFocusNode.dispose();
-    KdbxProvider.of(context).removeListener(this);
+    Store.kdbx.removeListener(this);
     _totalEntry.clear();
     super.dispose();
   }
@@ -120,7 +119,7 @@ class _PasswordsPageState extends State<PasswordsPage>
 
   void _searchAccounts() async {
     _totalEntry.clear();
-    final kdbx = KdbxProvider.of(context).kdbx!;
+    final kdbx = Store.kdbx.kdbx!;
 
     _totalEntry.addAll(await kdbx.getEntrys(sreach: _searchController.text));
     setState(() {});
@@ -133,7 +132,7 @@ class _PasswordsPageState extends State<PasswordsPage>
   }
 
   Widget _buildMobile() {
-    final kdbxProvider = KdbxProvider.of(context);
+    final kdbxController = Store.kdbx;
 
     final mainColor = Theme.of(context).colorScheme.primaryContainer;
 
@@ -144,7 +143,8 @@ class _PasswordsPageState extends State<PasswordsPage>
           controller: _searchController,
           focusNode: _searchFocusNode,
           itemCount:
-              kdbxProvider.fieldSummary?.totalEntryCount ?? _totalEntry.length,
+              kdbxController.fieldSummary?.totalEntryCount ??
+              _totalEntry.length,
           matchCount: _searchController.text.isNotEmpty
               ? _totalEntry.length
               : 0,
@@ -463,13 +463,13 @@ class _PasswordItemState extends State<_PasswordItem>
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-    final kdbxProvider = KdbxProvider.of(context);
+    final kdbxController = Store.kdbx;
 
     final kdbxEntry = widget.kdbxEntry;
 
-    final selected = kdbxProvider.selectedKdbxEntry == widget.kdbxEntry.id;
+    final selected = kdbxController.selectedKdbxEntry == widget.kdbxEntry.id;
 
-    final groupData = kdbxProvider.getGroup(widget.kdbxEntry.parent);
+    final groupData = kdbxController.getGroup(widget.kdbxEntry.parent);
 
     return CustomContextMenuRegion<MyContextMenuItem>(
       enabled: isDesktop,
@@ -492,7 +492,7 @@ class _PasswordItemState extends State<_PasswordItem>
             );
             break;
           case AutoFillContextMenuItem(kdbxKey: final kdbxKey):
-            kdbxProvider.autoFill(widget.kdbxEntry.id, kdbxKey);
+            autoFill(widget.kdbxEntry.id, kdbxKey);
             break;
           case DeleteContextMenuItem():
             _deletePassword();

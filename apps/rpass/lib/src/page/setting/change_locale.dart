@@ -55,7 +55,7 @@ class _ChangeLocalePageState extends State<ChangeLocalePage>
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-    final store = Store.instance;
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: automaticallyImplyLeading,
@@ -68,11 +68,11 @@ class _ChangeLocalePageState extends State<ChangeLocalePage>
             title: Text(
               locale != null ? _locales[locale.toString()]! : t.system,
             ),
-            trailing: store.settings.locale == locale
+            trailing: Store.settings.locale == locale
                 ? const Icon(Icons.check)
                 : null,
             onTap: () {
-              store.settings.setLocale(locale);
+              Store.settings.setLocale(locale);
             },
           );
         }).toList(),

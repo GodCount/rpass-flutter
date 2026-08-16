@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:keepass_core/keepass_core.dart';
 import 'package:remote_fs/remote_fs.dart';
 
-import '../../context/kdbx.dart';
 import '../../remotes_fs/remote_fs.dart';
 import '../../store/index.dart';
 import '../../util/file.dart';
@@ -49,17 +48,15 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
   bool get enableRemoteImport => true;
 
   Future<void> _setInitKdbx((Kdbx, String?) result) async {
-    final store = Store.instance;
-
     final kdbx = result.$1;
 
     await kdbx.saveFile();
 
-    if (store.settings.enableRecordKeyFilePath) {
-      await store.settings.setKeyFilePath(result.$2);
+    if (Store.settings.enableRecordKeyFilePath) {
+      await Store.settings.setKeyFilePath(result.$2);
     }
 
-    KdbxProvider.of(context).setKdbx(kdbx);
+    Store.kdbx.setKdbx(kdbx);
     context.router.replace(HomeRoute());
   }
 
@@ -80,7 +77,7 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
 
       final kdbx = Kdbx.create(
         credentials: credentials,
-        filepath: Store.instance.localInfo.localKdbxFile.path,
+        filepath: Store.localInfo.localKdbxFile.path,
       );
 
       await _setInitKdbx((kdbx, keyFile?.$1));

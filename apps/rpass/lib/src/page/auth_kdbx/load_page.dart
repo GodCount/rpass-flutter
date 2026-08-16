@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:keepass_core/keepass_core.dart';
 
 import '../../context/biometric.dart';
-import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../native/channel.dart';
 import '../../store/index.dart';
@@ -57,7 +56,6 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
   @override
   Future<void> confirm() async {
     if (form.currentState!.validate()) {
-      final store = Store.instance;
       final password = passwordController.text;
       final keyFile = keyFilecontroller.keyFile;
 
@@ -70,19 +68,19 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
         keyfile: keyFile?.$2,
       );
 
-      kdbxFile = kdbxFile ?? await store.localInfo.localKdbxFile.readAsBytes();
+      kdbxFile = kdbxFile ?? await Store.localInfo.localKdbxFile.readAsBytes();
 
       Kdbx kdbx = await Kdbx.openBytes(
         bytes: kdbxFile!,
         credentials: credentials,
-        filepath: store.localInfo.localKdbxFile.path,
+        filepath: Store.localInfo.localKdbxFile.path,
       );
 
-      if (store.settings.enableRecordKeyFilePath) {
-        await store.settings.setKeyFilePath(keyFile?.$1);
+      if (Store.settings.enableRecordKeyFilePath) {
+        await Store.settings.setKeyFilePath(keyFile?.$1);
       }
 
-      KdbxProvider.of(context).setKdbx(kdbx);
+      Store.kdbx.setKdbx(kdbx);
 
       await _responseAutoFill(kdbx);
 
@@ -98,7 +96,7 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
 
     AutofillDataset result = await kdbx.autofillSearch(metadata: metadata);
 
-    if (Store.instance.settings.manualSelectFillItem) {
+    if (Store.settings.manualSelectFillItem) {
       result.manual = true;
       result.message = I18n.of(context)!.manual_select_fill_item;
 
@@ -125,18 +123,16 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
 
     if (!biometric.enable) return;
 
-    final store = Store.instance;
-
-    kdbxFile = kdbxFile ?? await store.localInfo.localKdbxFile.readAsBytes();
+    kdbxFile = kdbxFile ?? await Store.localInfo.localKdbxFile.readAsBytes();
 
     final hash = await biometric.getCredentials(context);
     final kdbx = await Kdbx.openBytes(
       bytes: kdbxFile!,
       credentials: Credentials.formCompositeKey(key: hash),
-      filepath: store.localInfo.localKdbxFile.path,
+      filepath: Store.localInfo.localKdbxFile.path,
     );
 
-    KdbxProvider.of(context).setKdbx(kdbx);
+    Store.kdbx.setKdbx(kdbx);
 
     await _responseAutoFill(kdbx);
 

@@ -141,9 +141,9 @@ class LanFillServerState extends State<LanFillServerProvider>
             deviceName: Platform.localHostname,
             appVersion: RpassInfo.version,
             fingerprint:
-                Store.instance.settings.securityContext.certificateHash,
+                Store.settings.securityContext.certificateHash,
           ),
-          securityContext: Store.instance.settings.securityContext,
+          securityContext: Store.settings.securityContext,
         ),
       );
       RegisterDto? dto = await _server!.start();
@@ -187,7 +187,7 @@ class LanFillServerState extends State<LanFillServerProvider>
             deviceName: Platform.localHostname,
             appVersion: RpassInfo.version,
             fingerprint:
-                Store.instance.settings.securityContext.certificateHash,
+                Store.settings.securityContext.certificateHash,
           ),
         ),
       );
@@ -236,7 +236,7 @@ class LanFillServerState extends State<LanFillServerProvider>
       return false;
     }
 
-    if (Store.instance.settings.trustFingerprints.contains(fingerprint)) {
+    if (Store.settings.trustFingerprints.contains(fingerprint)) {
       return true;
     }
 
@@ -245,7 +245,7 @@ class LanFillServerState extends State<LanFillServerProvider>
         return false;
       }
 
-      if (Store.instance.settings.trustFingerprints.contains(fingerprint)) {
+      if (Store.settings.trustFingerprints.contains(fingerprint)) {
         return true;
       }
 
@@ -257,8 +257,8 @@ class LanFillServerState extends State<LanFillServerProvider>
         cancel: t.cancel,
         confirm: t.trust,
       )) {
-        Store.instance.settings.setTrustFingerprints([
-          ...Store.instance.settings.trustFingerprints,
+        Store.settings.setTrustFingerprints([
+          ...Store.settings.trustFingerprints,
           fingerprint,
         ]);
         return true;

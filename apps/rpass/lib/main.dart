@@ -47,7 +47,7 @@ void main() async {
 
   try {
     await RpassInfo.init();
-    await Store.instance.loadStore();
+    await Store.loadStore();
 
     if (kIsDesktop) {
       await systemTray.ensureInitialized();

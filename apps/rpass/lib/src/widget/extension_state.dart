@@ -8,13 +8,13 @@ import 'package:keepass_core/keepass_core.dart';
 import 'package:logging/logging.dart';
 
 import '../context/biometric.dart';
-import '../context/kdbx.dart';
 import '../context/lan_fill_server.dart';
 import '../i18n.dart';
 import '../kdbx/auto_fill.dart';
 import '../kdbx/kdbx.dart';
 import '../page/kdbx/edit_group_page.dart';
 import '../page/route.dart';
+import '../store/index.dart';
 import '../util/common.dart';
 import '../util/file.dart';
 import '../util/route.dart';
@@ -208,7 +208,7 @@ extension StatefulBottomSheet on State {
   void showBinaryAction(ChipListItem<Attachment> binary) {
     final t = I18n.of(context)!;
     final lanFill = LanFillInherited.of(context);
-    final kdbxProvider = KdbxProvider.of(context);
+    final kdbxProvider = Store.kdbx;
 
     final title = binary.value.name;
 
@@ -384,7 +384,7 @@ extension StatefulBottomSheet on State {
 
 extension StatefulKdbx on State {
   Future<bool> kdbxAction(KdbxAction action) async {
-    final kdbx = KdbxProvider.of(context).kdbx;
+    final kdbx = Store.kdbx.kdbx;
     if (kdbx != null) {
       try {
         await kdbx.action(action: action);
@@ -397,7 +397,7 @@ extension StatefulKdbx on State {
   }
 
   void autoFill(String id, [String? key]) async {
-    final kdbx = KdbxProvider.of(context).kdbx;
+    final kdbx = Store.kdbx.kdbx;
 
     if (kdbx == null) return;
 

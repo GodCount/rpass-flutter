@@ -10,7 +10,6 @@ import 'package:logging/logging.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../context/kdbx.dart';
 import '../context/lan_fill_server.dart';
 import '../i18n.dart';
 import '../native/channel.dart';
@@ -24,6 +23,7 @@ import '../widget/extension_state.dart';
 import 'auth_kdbx/load_page.dart';
 import 'auth_kdbx/verify_owner_page.dart';
 
+// ignore: unused_element
 final _logger = Logger("page:root");
 
 class _RootRpassAppArgs extends PageRouteArgs {
@@ -67,13 +67,13 @@ class _RootRpassAppState extends State<RootRpassApp>
   @override
   void initState() {
     super.initState();
-    _locale = Store.instance.settings.locale;
+    _locale = Store.settings.locale;
 
     windowManager.addListener(this);
     trayManager.addListener(this);
-    KdbxProvider.of(context).addListener(this);
-    Store.instance.settings.addListener(_settingsListener);
-    Store.instance.settings.shortcutsStore.addListener(_hotKeyHandler);
+    Store.kdbx.addListener(this);
+    Store.settings.addListener(_settingsListener);
+    Store.settings.shortcutsStore.addListener(_hotKeyHandler);
     NativeInstancePlatform.instance.addListener(this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -93,21 +93,21 @@ class _RootRpassAppState extends State<RootRpassApp>
   void _updateTrayMenu() {
     systemTray.updateTrayMenu(
       I18n.of(context)!,
-      lock: KdbxProvider.of(context).kdbx == null,
+      lock: Store.kdbx.kdbx == null,
       lanFillServer: !_lanFillServerClosed,
     );
   }
 
   void _settingsListener() {
-    if (_locale != Store.instance.settings.locale) {
-      _locale = Store.instance.settings.locale;
+    if (_locale != Store.settings.locale) {
+      _locale = Store.settings.locale;
       _updateTrayMenu();
     }
   }
 
   Future<void> _openWindow() async {
     final alignment =
-        Store.instance.settings.shortcutsStore.shortcutsOpenAppAlignment;
+        Store.settings.shortcutsStore.shortcutsOpenAppAlignment;
 
     switch (alignment) {
       case ShortcutsOpenAppAlignment.mouse:
@@ -149,7 +149,7 @@ class _RootRpassAppState extends State<RootRpassApp>
   }
 
   void _hotKeyHandler(HotKey hotKey, ShortcutsTrigger trigger) async {
-    final kdbxProvider = KdbxProvider.of(context);
+    final kdbxProvider = Store.kdbx;
     switch (hotKey.identifier) {
       case "open":
         {
@@ -208,7 +208,7 @@ class _RootRpassAppState extends State<RootRpassApp>
 
   @override
   void onTrayMenuItemClick(MenuItem menuItem) {
-    final kdbxProvider = KdbxProvider.of(context);
+    final kdbxProvider = Store.kdbx;
 
     switch (menuItem.key) {
       case "lock":
@@ -240,12 +240,12 @@ class _RootRpassAppState extends State<RootRpassApp>
 
   @override
   void onRequestAutofill(AutofillMetadata metadata) async {
-    final kdbx = KdbxProvider.of(context).kdbx;
+    final kdbx = Store.kdbx.kdbx;
 
     if (kdbx != null) {
       AutofillDataset result = await kdbx.autofillSearch(metadata: metadata);
 
-      if (Store.instance.settings.manualSelectFillItem) {
+      if (Store.settings.manualSelectFillItem) {
         result.manual = true;
         result.message = I18n.of(context)!.manual_select_fill_item;
 
@@ -274,9 +274,9 @@ class _RootRpassAppState extends State<RootRpassApp>
     super.dispose();
     windowManager.removeListener(this);
     trayManager.removeListener(this);
-    KdbxProvider.of(context).removeListener(this);
-    Store.instance.settings.removeListener(_settingsListener);
-    Store.instance.settings.shortcutsStore.removeListener(_hotKeyHandler);
+    Store.kdbx.removeListener(this);
+    Store.settings.removeListener(_settingsListener);
+    Store.settings.shortcutsStore.removeListener(_hotKeyHandler);
     NativeInstancePlatform.instance.removeListener(this);
   }
 
@@ -346,10 +346,10 @@ mixin _BackgroundLock on State<RootRpassApp> {
   void _start() {
     _cancel();
 
-    final kdbx = KdbxProvider.of(context).kdbx;
+    final kdbx = Store.kdbx.kdbx;
     if (kdbx == null) return;
 
-    final lockDelay = Store.instance.settings.lockDelay;
+    final lockDelay = Store.settings.lockDelay;
     if (lockDelay == null) return;
 
     _timerVerifyOwner = SimpleTimestampTimer(lockDelay, _runTimerVerifyOwner);
@@ -366,7 +366,7 @@ mixin _BackgroundLock on State<RootRpassApp> {
           .whenComplete(() => _isVerifyOwnerRoute = false);
     }
 
-    final lockDelay = Store.instance.settings.lockDelay;
+    final lockDelay = Store.settings.lockDelay;
     if (lockDelay == null) return;
     _timerLockKdbx = SimpleTimestampTimer(lockDelay, _runTimerLockKdbx);
   }
@@ -375,7 +375,7 @@ mixin _BackgroundLock on State<RootRpassApp> {
     _timerLockKdbx?.cancel();
     _timerLockKdbx = null;
     _isVerifyOwnerRoute = false;
-    KdbxProvider.of(context).setKdbx(null);
+    Store.kdbx.setKdbx(null);
     context.router.replaceAll([LoadKdbxRoute()]);
   }
 

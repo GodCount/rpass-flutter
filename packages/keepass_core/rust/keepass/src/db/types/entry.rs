@@ -700,6 +700,11 @@ pub struct EntryTrack<'a> {
 }
 
 impl EntryTrack<'_> {
+    /// Get Parent Id
+    pub fn parent_id(&self) -> GroupId {
+        self.parent
+    }
+
     /// Turn this tracked entry into a normal mutable reference to the entry
     pub fn as_mut(&mut self) -> EntryMut<'_> {
         EntryMut {

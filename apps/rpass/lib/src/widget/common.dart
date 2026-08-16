@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:keepass_core/keepass_core.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 
-import '../context/kdbx.dart';
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
+import '../store/index.dart';
 import '../util/common.dart';
 import '../util/one_time_password.dart';
 import 'extension_state.dart';
@@ -221,7 +221,7 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-    final kdbxProvider = KdbxProvider.of(context);
+    final kdbxProvider = Store.kdbx;
 
     return AlertDialog(
       title: Row(
@@ -342,7 +342,7 @@ class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
 
   void _searchAccounts() async {
     _totalEntry.clear();
-    final kdbx = KdbxProvider.of(context).kdbx!;
+    final kdbx = Store.kdbx.kdbx!;
 
     _totalEntry.addAll(await kdbx.getEntrys(sreach: _searchController.text));
     setState(() {});
@@ -351,7 +351,7 @@ class _KdbxEntrySelectorDialogState extends State<KdbxEntrySelectorDialog> {
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-    final kdbxProvider = KdbxProvider.of(context);
+    final kdbxProvider = Store.kdbx;
 
     return AlertDialog(
       title: Column(

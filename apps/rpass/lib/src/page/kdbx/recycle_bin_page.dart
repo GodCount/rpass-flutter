@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:keepass_core/keepass_core.dart';
 
+import '../../store/index.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
-import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../widget/kdbx_icon.dart';
@@ -49,7 +49,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
 
   @override
   void initState() {
-    KdbxProvider.of(context).addListener(this);
+    Store.kdbx.addListener(this);
     onKdbxSaved();
     super.initState();
   }
@@ -166,9 +166,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
 
   @override
   void onKdbxSaved() async {
-    final (groups, entrys) = await KdbxProvider.of(
-      context,
-    ).kdbx!.getRecycleItems();
+    final (groups, entrys) = await Store.kdbx.kdbx!.getRecycleItems();
     _objects.clear();
     _objects.addAll(groups);
     _objects.addAll(entrys);
@@ -179,7 +177,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
   @override
   void dispose() {
     _selecteds.clear();
-    KdbxProvider.of(context).removeListener(this);
+    Store.kdbx.removeListener(this);
     super.dispose();
   }
 

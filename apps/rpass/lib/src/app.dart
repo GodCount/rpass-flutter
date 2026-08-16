@@ -4,12 +4,13 @@ import 'package:logging/logging.dart';
 
 import './store/index.dart';
 import 'context/biometric.dart';
-import 'context/kdbx.dart';
 import 'route.dart';
 import 'theme/theme.dart';
 import 'i18n.dart';
 import 'util/common.dart';
 
+
+// ignore: unused_element
 final _logger = Logger("mobile:app");
 
 /// 导航路由时关闭输入焦点
@@ -45,28 +46,25 @@ class RpassApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final store = Store.instance;
-    return KdbxProvider(
-      child: Biometric(
-        child: ListenableBuilder(
-          listenable: store.settings,
-          builder: (context, child) {
-            return MaterialApp.router(
-              restorationScopeId: 'app',
-              theme: theme(Brightness.light, store.settings.themeSeedColor),
-              darkTheme: theme(Brightness.dark, store.settings.themeSeedColor),
-              themeMode: store.settings.themeMode,
-              locale: store.settings.locale,
-              localizationsDelegates: I18n.localizationsDelegates,
-              supportedLocales: I18n.supportedLocales,
-              routerConfig: router.config(
-                navigatorObservers: () => [
-                  if (kIsMobile) UnfocusNavigatorRoute(),
-                ],
-              ),
-            );
-          },
-        ),
+    return Biometric(
+      child: ListenableBuilder(
+        listenable: Store.settings,
+        builder: (context, child) {
+          return MaterialApp.router(
+            restorationScopeId: 'app',
+            theme: theme(Brightness.light, Store.settings.themeSeedColor),
+            darkTheme: theme(Brightness.dark, Store.settings.themeSeedColor),
+            themeMode: Store.settings.themeMode,
+            locale: Store.settings.locale,
+            localizationsDelegates: I18n.localizationsDelegates,
+            supportedLocales: I18n.supportedLocales,
+            routerConfig: router.config(
+              navigatorObservers: () => [
+                if (kIsMobile) UnfocusNavigatorRoute(),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

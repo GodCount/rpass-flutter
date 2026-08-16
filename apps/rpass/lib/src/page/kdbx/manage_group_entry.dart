@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:keepass_core/keepass_core.dart';
 
-import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../store/index.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/kdbx_icon.dart';
@@ -72,7 +72,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
 
   @override
   void initState() {
-    KdbxProvider.of(context).addListener(this);
+    Store.kdbx.addListener(this);
     _searchController.addListener(_search);
     prevFocusWindow.addListener(this);
 
@@ -107,7 +107,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
   void dispose() {
     _searchController.dispose();
     _selecteds.clear();
-    KdbxProvider.of(context).removeListener(this);
+    Store.kdbx.removeListener(this);
     prevFocusWindow.removeListener(this);
     super.dispose();
   }
@@ -115,7 +115,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
   void _search() async {
     _totalEntry.clear();
     _totalEntry.addAll(
-      await KdbxProvider.of(context).kdbx!.getEntrys(
+      await Store.kdbx.kdbx!.getEntrys(
         sreach: _searchController.text,
         groupId: widget.id,
         ignoreGroupConfig: true,
@@ -307,14 +307,10 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
         }
         switch (type) {
           case ViewContextMenuItem():
-            context.router.platformNavigate(
-              LookAccountRoute(id: kdbxEntry.id),
-            );
+            context.router.platformNavigate(LookAccountRoute(id: kdbxEntry.id));
             break;
           case EditContextMenuItem():
-            context.router.platformNavigate(
-              EditAccountRoute(id: kdbxEntry.id),
-            );
+            context.router.platformNavigate(EditAccountRoute(id: kdbxEntry.id));
             break;
           case CopyContextMenuItem(kdbxKey: final kdbxKey):
             writeClipboard(
@@ -324,7 +320,7 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
             );
             break;
           case AutoFillContextMenuItem(kdbxKey: final kdbxKey):
-            KdbxProvider.of(context).autoFill(kdbxEntry.id, kdbxKey);
+            autoFill(kdbxEntry.id, kdbxKey);
             break;
           case MoveContextMenuItem(selected: final selected):
             _move(selected ? _selecteds : [kdbxEntry]);

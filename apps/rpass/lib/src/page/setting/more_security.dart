@@ -4,7 +4,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:common_native_channel/common_native_channel.dart';
 import 'package:flutter/material.dart';
 
-import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../native/channel.dart';
@@ -60,7 +59,7 @@ class _MoreSecurityPageState extends State<MoreSecurityPage>
   void _setLockDelay() {
     final t = I18n.of(context)!;
 
-    final settings = Store.instance.settings;
+    final settings = Store.settings;
 
     GestureTapCallback? autoSavePop(Duration? delay) {
       return () {
@@ -106,9 +105,8 @@ class _MoreSecurityPageState extends State<MoreSecurityPage>
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-    final store = Store.instance;
 
-    final lockDelay = store.settings.lockDelay;
+    final lockDelay = Store.settings.lockDelay;
 
     return Scaffold(
       appBar: AppBar(
@@ -134,13 +132,13 @@ class _MoreSecurityPageState extends State<MoreSecurityPage>
           ),
           ListTile(
             onTap: () async {
-              await store.settings.settEnableRecordKeyFilePath(
-                !store.settings.enableRecordKeyFilePath,
+              await Store.settings.settEnableRecordKeyFilePath(
+                !Store.settings.enableRecordKeyFilePath,
               );
               setState(() {});
             },
             title: Text(t.record_key_file_path),
-            trailing: store.settings.enableRecordKeyFilePath
+            trailing: Store.settings.enableRecordKeyFilePath
                 ? const Icon(Icons.check)
                 : null,
           ),
@@ -211,7 +209,6 @@ class _AutoFillSettingState extends State<_AutoFillSetting> {
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-    final store = Store.instance;
 
     return Column(
       mainAxisSize: .min,
@@ -230,14 +227,14 @@ class _AutoFillSettingState extends State<_AutoFillSetting> {
           children: [
             ListTile(
               onTap: () async {
-                await store.settings.setManualSelectFillItem(
-                  !store.settings.manualSelectFillItem,
+                await Store.settings.setManualSelectFillItem(
+                  !Store.settings.manualSelectFillItem,
                 );
                 setState(() {});
               },
               title: Text(t.manual_select_fill_item),
               subtitle: Text(t.manual_select_fill_item_subtitle),
-              trailing: store.settings.manualSelectFillItem
+              trailing: Store.settings.manualSelectFillItem
                   ? const Icon(Icons.check)
                   : null,
             ),
@@ -307,12 +304,12 @@ class _AutoFillAppIdBlacklistState extends State<_AutoFillAppIdBlacklist> {
             onPressed: () async {
               final packageNames = await context.router.push(
                 SelectAutoFillAppRoute(
-                  packageNames: Store.instance.settings.autoFillAppIdBlacklist,
+                  packageNames: Store.settings.autoFillAppIdBlacklist,
                 ),
               );
 
               if (packageNames != null && packageNames is List<String>) {
-                Store.instance.settings.setAutoFillAppIdBlacklist(packageNames);
+                Store.settings.setAutoFillAppIdBlacklist(packageNames);
                 setState(() {});
               }
             },
@@ -343,7 +340,7 @@ class _AutoFillAppIdBlacklistState extends State<_AutoFillAppIdBlacklist> {
               );
             }
             final autoFillAppIdBlacklist =
-                Store.instance.settings.autoFillAppIdBlacklist;
+                Store.settings.autoFillAppIdBlacklist;
 
             if (autoFillAppIdBlacklist.isEmpty) {
               return SizedBox(height: 200, child: Center(child: Text(t.empty)));
@@ -380,7 +377,7 @@ class _AutoFillAppIdBlacklistState extends State<_AutoFillAppIdBlacklist> {
                   subtitle: item != null ? Text(item.packageName) : null,
                   trailing: IconButton(
                     onPressed: () {
-                      Store.instance.settings.setAutoFillAppIdBlacklist(
+                      Store.settings.setAutoFillAppIdBlacklist(
                         autoFillAppIdBlacklist
                             .where((it) => it != packageName)
                             .toList(),
@@ -420,10 +417,10 @@ class _AutoFillDomainBlacklist extends StatefulWidget {
 class _AutoFillDomainBlacklistState extends State<_AutoFillDomainBlacklist> {
   void _addDomain() async {
     final t = I18n.of(context)!;
-    final kdbxProvider = KdbxProvider.of(context);
+    final kdbxProvider = Store.kdbx;
 
     final autoFillDomainBlacklist =
-        Store.instance.settings.autoFillDomainBlacklist;
+        Store.settings.autoFillDomainBlacklist;
 
     final result = await InputDialog.openDialog(
       context,
@@ -435,7 +432,7 @@ class _AutoFillDomainBlacklistState extends State<_AutoFillDomainBlacklist> {
       limitItems: autoFillDomainBlacklist,
     );
     if (result != null && result is String) {
-      Store.instance.settings.setAutoFillDomainBlacklist([
+      Store.settings.setAutoFillDomainBlacklist([
         result,
         ...autoFillDomainBlacklist,
       ]);
@@ -449,7 +446,7 @@ class _AutoFillDomainBlacklistState extends State<_AutoFillDomainBlacklist> {
     final t = I18n.of(context)!;
 
     final autoFillDomainBlacklist =
-        Store.instance.settings.autoFillDomainBlacklist;
+        Store.settings.autoFillDomainBlacklist;
 
     return AlertDialog(
       title: Row(
@@ -484,7 +481,7 @@ class _AutoFillDomainBlacklistState extends State<_AutoFillDomainBlacklist> {
                     title: Text(item),
                     trailing: IconButton(
                       onPressed: () {
-                        Store.instance.settings.setAutoFillDomainBlacklist(
+                        Store.settings.setAutoFillDomainBlacklist(
                           autoFillDomainBlacklist
                               .where((it) => it != item)
                               .toList(),

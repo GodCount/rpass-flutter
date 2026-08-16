@@ -5,7 +5,6 @@ import 'package:keepass_core/keepass_core.dart';
 import 'package:logging/logging.dart';
 
 import '../../context/biometric.dart';
-import '../../context/kdbx.dart';
 import '../../store/index.dart';
 import '../../util/route.dart';
 import 'authorized_page.dart';
@@ -58,8 +57,7 @@ class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
         throw Exception("Lack of key file.");
       }
 
-      final store = Store.instance;
-      final kdbx = KdbxProvider.of(context).kdbx!;
+      final kdbx = Store.kdbx.kdbx!;
       final biometric = Biometric.of(context);
 
       final credentials = Credentials.from(
@@ -98,8 +96,8 @@ class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
         }
       }
 
-      if (store.settings.enableRecordKeyFilePath) {
-        await store.settings.setKeyFilePath(keyFile?.$1);
+      if (Store.settings.enableRecordKeyFilePath) {
+        await Store.settings.setKeyFilePath(keyFile?.$1);
       }
 
       context.router.pop();

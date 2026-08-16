@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:keepass_core/keepass_core.dart';
 
-import '../context/kdbx.dart';
 import '../kdbx/icons.dart';
 import '../store/index.dart';
 import '../util/cache_network_image.dart';
@@ -54,7 +53,7 @@ class KdbxIconWidget extends StatelessWidget {
       final icon = kdbxIcon.icon as KdbxIcon_Custom;
       final data =
           icon.field1 ??
-          KdbxProvider.of(context).fieldSummary?.customIcons[icon.field0];
+          Store.kdbx.fieldSummary?.customIcons[icon.field0];
       if (data != null) {
         return Image.memory(data, width: size, height: size);
       }
@@ -63,7 +62,7 @@ class KdbxIconWidget extends StatelessWidget {
       iconIndex = icon.field0;
     }
 
-    final faviconSource = Store.instance.settings.faviconSource;
+    final faviconSource = Store.settings.faviconSource;
 
     final icon = Icon(KdbxIcon2Material.to(iconIndex), size: size);
 

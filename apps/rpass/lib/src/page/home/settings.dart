@@ -5,7 +5,6 @@ import 'package:logging/logging.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../context/biometric.dart';
-import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../rpass.dart';
 import '../../store/index.dart';
@@ -91,7 +90,6 @@ class _SettingsPageState extends State<SettingsPage>
 
     final t = I18n.of(context)!;
 
-    final store = Store.instance;
     final biometric = Biometric.of(context);
 
     return Scaffold(
@@ -114,14 +112,14 @@ class _SettingsPageState extends State<SettingsPage>
             ),
             ListTile(
               shape: shape,
-              title: Text(switch (store.settings.themeMode) {
+              title: Text(switch (Store.settings.themeMode) {
                 ThemeMode.system => t.system,
                 ThemeMode.light => t.light,
                 ThemeMode.dark => t.dark,
               }),
               trailing: Icon(
                 Icons.color_lens_rounded,
-                color: store.settings.themeSeedColor,
+                color: Store.settings.themeSeedColor,
               ),
               selected: childRouteName == ChangeThemeRoute.name,
               onTap: () {
@@ -183,7 +181,7 @@ class _SettingsPageState extends State<SettingsPage>
             ListTile(
               shape: shape,
               title: Text(
-                store.settings.locale != null ? t.locale_name : t.system,
+                Store.settings.locale != null ? t.locale_name : t.system,
               ),
               trailing: const Icon(Icons.chevron_right_rounded),
               selected: childRouteName == ChangeLocaleRoute.name,
@@ -211,19 +209,19 @@ class _SettingsPageState extends State<SettingsPage>
             if (biometric.isSupport)
               ListTile(
                 title: Text(t.biometric),
-                trailing: store.settings.enableBiometric
+                trailing: Store.settings.enableBiometric
                     ? const Icon(Icons.check)
                     : null,
                 onTap: () async {
                   try {
-                    final kdbx = KdbxProvider.of(context).kdbx!;
+                    final kdbx = Store.kdbx.kdbx!;
 
-                    final enableBiometric = !store.settings.enableBiometric;
+                    final enableBiometric = !Store.settings.enableBiometric;
                     await biometric.updateCredentials(
                       context,
                       enableBiometric ? await kdbx.getCompositeKey() : null,
                     );
-                    store.settings.seEnableBiometric(enableBiometric);
+                    Store.settings.seEnableBiometric(enableBiometric);
                     _logger.finest("biometric status is $enableBiometric");
                   } catch (e, s) {
                     if (e is AuthException &&

@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
-import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../rpass.dart';
@@ -48,7 +47,7 @@ class _ExportAccountPageState extends State<ExportAccountPage>
     try {
       if (await operateConfirm()) {
         final filepath = await SimpleFile.saveFile(
-          data: await Store.instance.localInfo.localKdbxFile.readAsBytes(),
+          data: await Store.localInfo.localKdbxFile.readAsBytes(),
           filename: "${RpassInfo.appName}.kdbx",
         );
         showToast(I18n.of(context)!.export_done_location(filepath));
@@ -70,7 +69,7 @@ class _ExportAccountPageState extends State<ExportAccountPage>
     )) {
       if (!(await operateConfirm())) return;
 
-      final kdbx = KdbxProvider.of(context).kdbx!;
+      final kdbx = Store.kdbx.kdbx!;
       try {
         final filepath = await SimpleFile.saveFile(
           data: await kdbx.exportXml(),
@@ -95,7 +94,7 @@ class _ExportAccountPageState extends State<ExportAccountPage>
     )) {
       if (!(await operateConfirm())) return;
 
-      final kdbx = KdbxProvider.of(context).kdbx!;
+      final kdbx = Store.kdbx.kdbx!;
       try {
         final result = jsonToCsv(
           adapter.export(

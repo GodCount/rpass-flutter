@@ -22,11 +22,11 @@ class _DesktopSystemTray extends _SystemTray with TrayListener {
   Future<void> _setIcon(SystemTrayIcon icon) async {
     final iconPath = switch (icon) {
       SystemTrayIcon.lock =>
-        Platform.isMacOS
+        Platform.isMacOS || Platform.isLinux
             ? "assets/icons/tray_lock.png"
             : "assets/icons/tray_lock.ico",
       SystemTrayIcon.unlock =>
-        Platform.isMacOS
+        Platform.isMacOS || Platform.isLinux
             ? "assets/icons/tray_unlock.png"
             : "assets/icons/tray_unlock.ico",
     };
@@ -37,8 +37,9 @@ class _DesktopSystemTray extends _SystemTray with TrayListener {
   @override
   Future<void> ensureInitialized() async {
     await _setIcon(SystemTrayIcon.lock);
-    await trayManager.setToolTip(RpassInfo.appName);
-
+    if (!Platform.isLinux) {
+      await trayManager.setToolTip(RpassInfo.appName);
+    }
     trayManager.addListener(this);
   }
 

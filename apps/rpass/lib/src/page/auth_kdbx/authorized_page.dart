@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:biometric_storage/biometric_storage.dart';
@@ -75,11 +74,10 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
         authType == AuthorizedType.modify_password;
 
     if (readHistoryKeyFile) {
-      final store = Store.instance;
-      if (store.settings.enableRecordKeyFilePath &&
-          store.settings.keyFilePath != null) {
+      if (Store.settings.enableRecordKeyFilePath &&
+          Store.settings.keyFilePath != null) {
         try {
-          await keyFilecontroller.setKeyFile(store.settings.keyFilePath!);
+          await keyFilecontroller.setKeyFile(Store.settings.keyFilePath!);
         } catch (error) {
           _logger.warning("read history key file", error);
         }

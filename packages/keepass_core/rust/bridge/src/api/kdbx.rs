@@ -141,6 +141,10 @@ impl Kdbx {
 
         database.meta.generator = Some("frb_keepass".into());
 
+        let mut root = database.root_mut();
+        root.name = "Default".into();
+        root.times.last_modification = Some(Times::now());
+
         Self::enable_recyclebin(&mut database);
 
         Self {
@@ -516,9 +520,11 @@ impl Kdbx {
                 ))?;
 
                 if let Some(mut entry) = db.entry_mut(uuid.clone()) {
-                    let entry_ref = entry.as_ref();
 
-                    if group_uuid != entry_ref.parent().id() {
+                    let mut entry = entry.track_changes();
+
+
+                    if group_uuid != entry.parent_id() {
                         entry.move_to(group_uuid)?;
                     }
 
@@ -585,13 +591,14 @@ impl Kdbx {
                         .collect();
 
                     for item in remove_ids {
-                        entry.remove_attachment_by_id(item);
+                        entry.as_mut().remove_attachment_by_id(item);
                     }
 
                     for item in entry_data.attachments {
                         if let Some(data) = item.data {
-                            if let Some(mut attach) =
-                                entry.attachment_mut(AttachmentId::new(item.id as usize))
+                            if let Some(mut attach) = entry
+                                .as_mut()
+                                .attachment_mut(AttachmentId::new(item.id as usize))
                             {
                                 attach.data = Value::unprotected(data);
                             } else {
@@ -682,6 +689,7 @@ impl Kdbx {
 
                     if parent.is_some() && group_ref.parent_id() != parent {
                         group.move_to(parent.unwrap())?;
+                        group.times.location_changed = Some(Times::now());
                     }
 
                     group.name = group_data.name;

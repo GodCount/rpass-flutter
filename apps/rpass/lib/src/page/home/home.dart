@@ -11,6 +11,7 @@ import '../../widget/extension_state.dart';
 import '../../widget/infinite_rotate.dart';
 import '../../util/common.dart';
 
+// ignore: unused_element
 final _logger = Logger("page:home");
 
 class _HomeArgs extends PageRouteArgs {
@@ -56,29 +57,29 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
-    Store.instance.settings.addListener(_settingsListener);
+    Store.settings.addListener(_settingsListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _settingsListener();
     });
   }
 
   void _settingsListener() {
-    if (_enableRemoteSync != Store.instance.settings.enableRemoteSync &&
-        Store.instance.settings.enableRemoteSync) {
-      final cycle = Store.instance.settings.remoteSyncCycle;
-      final time = Store.instance.settings.lastSyncTime;
+    if (_enableRemoteSync != Store.settings.enableRemoteSync &&
+        Store.settings.enableRemoteSync) {
+      final cycle = Store.settings.remoteSyncCycle;
+      final time = Store.settings.lastSyncTime;
       if (cycle == null ||
           time == null ||
           time.add(cycle).isBefore(DateTime.now())) {
-        Store.instance.syncKdbx.sync(context);
+        Store.kdbx.syncController.sync(context);
       }
     }
-    _enableRemoteSync = Store.instance.settings.enableRemoteSync;
+    _enableRemoteSync = Store.settings.enableRemoteSync;
   }
 
   @override
   void dispose() {
-    Store.instance.settings.removeListener(_settingsListener);
+    Store.settings.removeListener(_settingsListener);
     super.dispose();
   }
 
@@ -158,8 +159,6 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
 
     final tabsRouter = AutoTabsRouter.of(context);
 
-    final store = Store.instance;
-
     final lanFill = LanFillInherited.of(context);
 
     return Scaffold(
@@ -197,34 +196,34 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
                     ),
                   ListenableBuilder(
                     listenable: Listenable.merge([
-                      store.syncKdbx,
-                      store.settings,
+                      Store.kdbx.syncController,
+                      Store.settings,
                     ]),
                     builder: (context, _) {
-                      return store.settings.enableRemoteSync &&
-                              (store.syncKdbx.isSyncing ||
-                                  store.syncKdbx.lastError != null)
+                      return Store.settings.enableRemoteSync &&
+                              (Store.kdbx.syncController.isSyncing ||
+                                  Store.kdbx.syncController.lastError != null)
                           ? InfiniteRotateWidget(
-                              enabled: store.syncKdbx.isSyncing,
+                              enabled: Store.kdbx.syncController.isSyncing,
                               child: IconButton(
                                 disabledColor: Theme.of(
                                   context,
                                 ).iconTheme.color,
                                 color:
-                                    !store.syncKdbx.isSyncing &&
-                                        store.syncKdbx.lastError != null
+                                    !Store.kdbx.syncController.isSyncing &&
+                                        Store.kdbx.syncController.lastError != null
                                     ? Theme.of(context).colorScheme.error
                                     : null,
                                 onPressed:
-                                    !store.syncKdbx.isSyncing &&
-                                        store.syncKdbx.lastError != null
+                                    !Store.kdbx.syncController.isSyncing &&
+                                        Store.kdbx.syncController.lastError != null
                                     ? () {
-                                        showError(store.syncKdbx.lastError);
+                                        showError(Store.kdbx.syncController.lastError);
                                       }
                                     : null,
                                 icon:
-                                    !store.syncKdbx.isSyncing &&
-                                        store.syncKdbx.lastError != null
+                                    !Store.kdbx.syncController.isSyncing &&
+                                        Store.kdbx.syncController.lastError != null
                                     ? const Icon(Icons.sync_problem)
                                     : const Icon(Icons.sync),
                               ),

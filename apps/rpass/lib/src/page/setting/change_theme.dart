@@ -37,19 +37,18 @@ class ChangeThemePage extends StatefulWidget {
 class _ChangeThemePageState extends State<ChangeThemePage>
     with SecondLevelPageAutoBack<ChangeThemePage> {
   void setThemeMode(ThemeMode mode) {
-    Store.instance.settings.setThemeMode(mode);
+    Store.settings.setThemeMode(mode);
     setState(() {});
   }
 
   void setThemeSeedColor(Color color) {
-    Store.instance.settings.setThemeSeedColor(color);
+    Store.settings.setThemeSeedColor(color);
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-    final store = Store.instance;
 
     return Scaffold(
       appBar: AppBar(
@@ -61,7 +60,7 @@ class _ChangeThemePageState extends State<ChangeThemePage>
         children: [
           ListTile(
             title: Text(t.system),
-            trailing: store.settings.themeMode == ThemeMode.system
+            trailing: Store.settings.themeMode == ThemeMode.system
                 ? const Icon(Icons.check)
                 : null,
             onTap: () {
@@ -70,7 +69,7 @@ class _ChangeThemePageState extends State<ChangeThemePage>
           ),
           ListTile(
             title: Text(t.light),
-            trailing: store.settings.themeMode == ThemeMode.light
+            trailing: Store.settings.themeMode == ThemeMode.light
                 ? const Icon(Icons.check)
                 : null,
             onTap: () {
@@ -79,7 +78,7 @@ class _ChangeThemePageState extends State<ChangeThemePage>
           ),
           ListTile(
             title: Text(t.dark),
-            trailing: store.settings.themeMode == ThemeMode.dark
+            trailing: Store.settings.themeMode == ThemeMode.dark
                 ? const Icon(Icons.check)
                 : null,
             onTap: () {
@@ -93,7 +92,7 @@ class _ChangeThemePageState extends State<ChangeThemePage>
               width: 24,
               height: 24,
               decoration: BoxDecoration(
-                color: Store.instance.settings.themeSeedColor,
+                color: Store.settings.themeSeedColor,
                 borderRadius: BorderRadius.circular(24),
               ),
             ),
@@ -138,7 +137,7 @@ class _ChangeThemePageState extends State<ChangeThemePage>
           color: color,
           borderRadius: BorderRadius.circular(32),
         ),
-        child: color == Store.instance.settings.themeSeedColor
+        child: color == Store.settings.themeSeedColor
             ? Center(child: Icon(Icons.check, color: Colors.white, size: 16))
             : null,
       ),

@@ -61,7 +61,7 @@ class BiometricState extends State<Biometric> {
       _authenticateResponse == CanAuthenticateResponse.success ||
       _authenticateResponse == CanAuthenticateResponse.statusUnknown;
 
-  bool get enable => isSupport && Store.instance.settings.enableBiometric;
+  bool get enable => isSupport && Store.settings.enableBiometric;
 
   static Future<void> initCanAuthenticate() async {
     try {
@@ -134,7 +134,7 @@ class BiometricState extends State<Biometric> {
       BiometricStorageKey.credentials,
     )).read(promptInfo: _getPromptInfo(context));
     if (credentials == null || credentials.isEmpty) {
-      Store.instance.settings.seEnableBiometric(false);
+      Store.settings.seEnableBiometric(false);
       throw Exception("no record token from biometric");
     }
 

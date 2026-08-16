@@ -75,11 +75,11 @@ class _OtherSettingsPageState extends State<OtherSettingsPage>
   void _setFaviconSource() {
     final t = I18n.of(context)!;
 
-    final faviconSource = Store.instance.settings.faviconSource;
+    final faviconSource = Store.settings.faviconSource;
 
     GestureTapCallback? autoSavePop(FaviconSource? value) {
       return () {
-        Store.instance.settings.setFaviconSource(value);
+        Store.settings.setFaviconSource(value);
         context.router.pop();
         setState(() {});
       };
@@ -135,7 +135,6 @@ class _OtherSettingsPageState extends State<OtherSettingsPage>
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-    final store = Store.instance;
 
     return Scaffold(
       appBar: AppBar(
@@ -147,12 +146,12 @@ class _OtherSettingsPageState extends State<OtherSettingsPage>
         children: [
           ListTile(
             title: Text(t.start_focus_sreach),
-            trailing: store.settings.startFocusSreach
+            trailing: Store.settings.startFocusSreach
                 ? const Icon(Icons.check)
                 : null,
             onTap: () {
-              store.settings.setStartFocusSreach(
-                !store.settings.startFocusSreach,
+              Store.settings.setStartFocusSreach(
+                !Store.settings.startFocusSreach,
               );
               setState(() {});
             },
@@ -160,7 +159,7 @@ class _OtherSettingsPageState extends State<OtherSettingsPage>
           ListTile(
             title: Text(t.show_favicon),
             subtitle: Text(t.show_favicon_sub),
-            trailing: store.settings.faviconSource != null
+            trailing: Store.settings.faviconSource != null
                 ? const Icon(Icons.check)
                 : null,
             onTap: _setFaviconSource,

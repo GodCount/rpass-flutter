@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rpass/src/widget/shake_widget.dart';
+import '../../src/widget/shake_widget.dart';
 
 class ShakeTestPage extends StatefulWidget {
   const ShakeTestPage({super.key});

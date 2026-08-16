@@ -9,13 +9,13 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import '../../context/lan_fill_server.dart';
+import '../../store/index.dart';
 import '../../util/one_time_password.dart';
 import '../../util/random_password.dart';
 import '../../util/route.dart';
 import '../../widget/form.dart';
 import '../../widget/kdbx_icon.dart';
 import '../route.dart';
-import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../util/common.dart';
@@ -36,7 +36,7 @@ class EditAccountRoute extends PageRouteInfo<_EditAccountArgs> {
     : super(
         name,
         args: _EditAccountArgs(key: key),
-        rawPathParams: {"uuid": id, "clone": clone},
+        rawPathParams: {"uuid": id, "clone": clone.toString()},
       );
 
   static const name = "EditAccountRoute";
@@ -72,7 +72,7 @@ class _EditAccountPageState extends State<EditAccountPage>
 
   late EntryData _kdbxEntry = EntryData(parent: "empty");
 
-  late GroupData _groupData = KdbxProvider.of(context).rootGroup();
+  late GroupData _groupData = Store.kdbx.rootGroup();
 
   Set<String> _entryFields = {};
   Set<String> _urlsFields = {};
@@ -96,12 +96,12 @@ class _EditAccountPageState extends State<EditAccountPage>
   }
 
   Future<void> _getKdbxEntry() async {
-    final kdbxProvider = KdbxProvider.of(context);
+    final kdbxController = Store.kdbx;
 
     _kdbxEntry =
         widget.id != null
-              ? await kdbxProvider.kdbx!.getEntry(id: widget.id!)
-              : kdbxProvider.kdbx!.newEntry()
+              ? await kdbxController.kdbx!.getEntry(id: widget.id!)
+              : kdbxController.kdbx!.newEntry()
           ..fields[KdbxKeyCommon.PASSWORD] = FieldValue.protected(
             randomPassword(length: 10),
           );
@@ -111,7 +111,8 @@ class _EditAccountPageState extends State<EditAccountPage>
     }
 
     _groupData =
-        kdbxProvider.getGroup(_kdbxEntry.parent) ?? kdbxProvider.rootGroup();
+        kdbxController.getGroup(_kdbxEntry.parent) ??
+        kdbxController.rootGroup();
 
     _entryFields = _kdbxEntry.customEntries.map((item) => item.key).toSet();
     _urlsFields = _kdbxEntry.moreUrlsKeys.toSet();
@@ -228,7 +229,7 @@ class _EditAccountPageState extends State<EditAccountPage>
 
   void _addEntryField() async {
     final t = I18n.of(context)!;
-    final kdbxProvider = KdbxProvider.of(context);
+    final kdbxProvider = Store.kdbx;
 
     final limitItmes = [
       ...defaultKdbxKeys,
@@ -575,10 +576,7 @@ class KdbxEntryGroup extends FormField<String> {
                   labelText: I18n.of(field.context)!.group,
                   border: const OutlineInputBorder(),
                 ),
-                child: Text(
-                  KdbxProvider.of(field.context).getGroup(field.value!)?.name ??
-                      "",
-                ),
+                child: Text(Store.kdbx.getGroup(field.value!)?.name ?? ""),
               ),
             ),
           );
@@ -612,21 +610,22 @@ class _EntryFieldState extends State<EntryField> {
   String? _value;
   AuthOneTimePassword? _otp;
 
-  late final List<DropdownMenuEntry<String>> _dropdownMenuEntries =
-      KdbxProvider.of(context).fieldSummary!
-          .getStatistic(widget.kdbxKey)
-          .map(
-            (value) => DropdownMenuEntry(
-              value: value,
-              label: value,
-              labelWidget: Text(
-                value,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          )
-          .toList();
+  late final List<DropdownMenuEntry<String>> _dropdownMenuEntries = Store
+      .kdbx
+      .fieldSummary!
+      .getStatistic(widget.kdbxKey)
+      .map(
+        (value) => DropdownMenuEntry(
+          value: value,
+          label: value,
+          labelWidget: Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      )
+      .toList();
 
   @override
   void initState() {
@@ -645,7 +644,7 @@ class _EntryFieldState extends State<EntryField> {
 
   void _onRenameKdbxKey() async {
     final t = I18n.of(context)!;
-    final kdbxProvider = KdbxProvider.of(context);
+    final kdbxController = Store.kdbx;
     final limitItmes = {
       ...defaultKdbxKeys,
       ...widget.kdbxEntry.fields.keys,
@@ -662,7 +661,7 @@ class _EntryFieldState extends State<EntryField> {
       title: t.rename,
       label: t.new_field,
       initialValue: _renameKdbxKey ?? widget.kdbxKey,
-      promptItmes: kdbxProvider.fieldSummary!.customFields
+      promptItmes: kdbxController.fieldSummary!.customFields
           .where((item) => !limitItmes.contains(item))
           .toList(),
       limitItems: limitItmes,
@@ -855,7 +854,7 @@ class _EntryFieldState extends State<EntryField> {
   }
 
   Widget _buildFormFieldFactory() {
-    final kdbxProvider = KdbxProvider.of(context);
+    final kdbxProvider = Store.kdbx;
 
     final initialValue = widget.kdbxEntry.fields[widget.kdbxKey]?.get();
 
@@ -1128,7 +1127,7 @@ class _EntryFieldState extends State<EntryField> {
 
   Future<ChipListItem<String>?> _addTag(List<ChipListItem<String>> list) async {
     final t = I18n.of(context)!;
-    final kdbxProvider = KdbxProvider.of(context);
+    final kdbxProvider = Store.kdbx;
 
     final result = await InputDialog.openDialog(
       context,

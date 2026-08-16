@@ -18,7 +18,6 @@ import '../../util/fetch_favicon.dart';
 import '../../util/route.dart';
 import '../../widget/kdbx_icon.dart';
 import '../route.dart';
-import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../util/common.dart';
@@ -27,6 +26,7 @@ import '../../widget/chip_list.dart';
 import '../../widget/common.dart';
 import '../../widget/extension_state.dart';
 
+// ignore: unused_element
 final _logger = Logger("page:look_account");
 
 class _LookAccountArgs extends PageRouteArgs {
@@ -118,13 +118,13 @@ class _LookAccountPageState extends State<LookAccountPage>
   @override
   void initState() {
     prevFocusWindow.addListener(this);
-    KdbxProvider.of(context).addListener(this);
+    Store.kdbx.addListener(this);
     _getEntryData();
     super.initState();
   }
 
   void _getEntryData() async {
-    final kdbxProvider = KdbxProvider.of(context);
+    final kdbxProvider = Store.kdbx;
 
     _kdbxEntry = await kdbxProvider.kdbx!.getEntry(
       id: widget.id,
@@ -326,7 +326,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                     title: Text(t.auto_fill),
                     leading: Icon(Icons.ads_click),
                     onTap: onAutoPop(() {
-                      KdbxProvider.of(context).autoFill(_kdbxEntry.id, key);
+                      autoFill(_kdbxEntry.id, key);
                     }),
                   ),
                 ListTile(
@@ -353,7 +353,7 @@ class _LookAccountPageState extends State<LookAccountPage>
   @override
   void dispose() {
     prevFocusWindow.removeListener(this);
-    KdbxProvider.of(context).removeListener(this);
+    Store.kdbx.removeListener(this);
     super.dispose();
   }
 
@@ -379,7 +379,7 @@ class _LookAccountPageState extends State<LookAccountPage>
     final email = _kdbxEntry.getNonNullString(KdbxKeyCommon.EMAIL);
     final notes = _kdbxEntry.getNonNullString(KdbxKeyCommon.NOTES);
 
-    final faviconSource = Store.instance.settings.faviconSource;
+    final faviconSource = Store.settings.faviconSource;
 
     final moreUrlsKeys = _kdbxEntry.moreUrlsKeys;
 
@@ -578,7 +578,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                 ),
                 trailing: IconButton(
                   onPressed: prevFocusWindow.isTargetWindowExist
-                      ? () => KdbxProvider.of(context).autoFill(_kdbxEntry.id)
+                      ? () => autoFill(_kdbxEntry.id)
                       : null,
                   icon: const Icon(Icons.ads_click),
                 ),

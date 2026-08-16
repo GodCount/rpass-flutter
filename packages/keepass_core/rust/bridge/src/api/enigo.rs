@@ -51,34 +51,29 @@ mod permission {
 #[cfg(any(target_os = "windows", target_os = "linux"))]
 #[frb(ignore)]
 mod permission {
-    pub fn has_permission(open_prompt_to_get_permissions: bool) -> bool {
+    pub fn has_permission(_open_prompt_to_get_permissions: bool) -> bool {
         true
     }
 }
 
-#[frb]
+#[frb(opaque)]
 pub struct Enigo {
-    #[frb(ignore)]
     enigo: Mutex<enigo::Enigo>,
 }
 
-unsafe impl Send for Enigo {}
-
-unsafe impl Sync for Enigo {}
-
 impl Enigo {
     #[frb(sync)]
-    pub fn new(settings: &Settings) -> Self {
-        Self {
-            enigo: Mutex::new(enigo::Enigo::new(settings).unwrap()),
-        }
+    pub fn new(settings: &Settings) -> anyhow::Result<Self> {
+        Ok(Self {
+            enigo: Mutex::new(enigo::Enigo::new(settings)?),
+        })
     }
 
     #[frb(sync)]
-    pub fn preset() -> Self {
-        Self {
+    pub fn preset() -> anyhow::Result<Self> {
+        Ok(Self {
             enigo: Mutex::new(enigo::Enigo::new(&Settings::default()).unwrap()),
-        }
+        })
     }
 
     #[frb(sync)]
@@ -87,51 +82,49 @@ impl Enigo {
     }
 
     #[frb(sync)]
-    pub fn button(&mut self, button: _Button, direction: Direction) {
-        self.enigo
-            .lock()
-            .unwrap()
-            .button(button.value, direction)
-            .unwrap();
+    pub fn button(&mut self, button: _Button, direction: Direction) -> anyhow::Result<()> {
+        self.enigo.lock().unwrap().button(button.value, direction)?;
+        Ok(())
     }
 
     #[frb(sync)]
-    pub fn move_mouse(&mut self, x: i32, y: i32, coordinate: Coordinate) {
-        self.enigo
-            .lock()
-            .unwrap()
-            .move_mouse(x, y, coordinate)
-            .unwrap();
+    pub fn move_mouse(&mut self, x: i32, y: i32, coordinate: Coordinate) -> anyhow::Result<()> {
+        self.enigo.lock().unwrap().move_mouse(x, y, coordinate)?;
+        Ok(())
     }
 
     #[frb(sync)]
-    pub fn scroll(&mut self, length: i32, axis: Axis) {
-        self.enigo.lock().unwrap().scroll(length, axis).unwrap();
+    pub fn scroll(&mut self, length: i32, axis: Axis) -> anyhow::Result<()> {
+        self.enigo.lock().unwrap().scroll(length, axis)?;
+        Ok(())
     }
 
     #[frb(sync)]
-    pub fn main_display(&self) -> (i32, i32) {
-        self.enigo.lock().unwrap().main_display().unwrap()
+    pub fn main_display(&self) -> anyhow::Result<(i32, i32)> {
+        Ok(self.enigo.lock().unwrap().main_display()?)
     }
 
     #[frb(sync)]
-    pub fn location(&self) -> (i32, i32) {
-        self.enigo.lock().unwrap().location().unwrap()
+    pub fn location(&self) -> anyhow::Result<(i32, i32)> {
+        Ok(self.enigo.lock().unwrap().location()?)
     }
 
     #[frb(sync)]
-    pub fn text(&mut self, text: &str) {
-        self.enigo.lock().unwrap().text(text).unwrap();
+    pub fn text(&mut self, text: &str) -> anyhow::Result<()> {
+        self.enigo.lock().unwrap().text(text)?;
+        Ok(())
     }
 
     #[frb(sync)]
-    pub fn key(&mut self, key: Key, direction: Direction) {
-        self.enigo.lock().unwrap().key(key, direction).unwrap();
+    pub fn key(&mut self, key: Key, direction: Direction) -> anyhow::Result<()> {
+        self.enigo.lock().unwrap().key(key, direction)?;
+        Ok(())
     }
 
     #[frb(sync)]
-    pub fn raw(&mut self, keycode: u16, direction: Direction) {
-        self.enigo.lock().unwrap().raw(keycode, direction).unwrap()
+    pub fn raw(&mut self, keycode: u16, direction: Direction) -> anyhow::Result<()> {
+        self.enigo.lock().unwrap().raw(keycode, direction)?;
+        Ok(())
     }
 }
 

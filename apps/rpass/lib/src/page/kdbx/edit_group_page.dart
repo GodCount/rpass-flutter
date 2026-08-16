@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:keepass_core/keepass_core.dart';
 import 'package:logging/logging.dart';
 
-import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../store/index.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
@@ -13,6 +13,7 @@ import '../../widget/form.dart';
 import '../../widget/kdbx_icon.dart';
 import '../route.dart';
 
+// ignore: unused_element
 final _logger = Logger("page:edit_group_page");
 
 class _EditGroupPageArgs extends PageRouteArgs {
@@ -57,7 +58,7 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
     with SecondLevelPageAutoBack<EditGroupPagePage> {
   GlobalKey<FormState> _from = GlobalKey();
 
-  late GroupData _kdbxGroupData = KdbxProvider.of(context).kdbx!.newGroup();
+  late GroupData _kdbxGroupData = Store.kdbx.kdbx!.newGroup();
 
   bool _isDirty = false;
 
@@ -68,11 +69,11 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
   }
 
   void _getKdbxGroupData() async {
-    final kdbxProvider = KdbxProvider.of(context);
+    final kdbxController = Store.kdbx;
 
     if (widget.id != null && widget.id != _kdbxGroupData.id) {
       try {
-        _kdbxGroupData = await kdbxProvider.kdbx!.getGroup(id: widget.id!);
+        _kdbxGroupData = await kdbxController.kdbx!.getGroup(id: widget.id!);
         setState(() {});
       } catch (e) {
         showError(e);
@@ -103,7 +104,7 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
       if (widget.id != null) {
         _getKdbxGroupData();
       } else {
-        _kdbxGroupData = KdbxProvider.of(context).kdbx!.newGroup();
+        _kdbxGroupData = Store.kdbx.kdbx!.newGroup();
       }
       _from = GlobalKey();
     }

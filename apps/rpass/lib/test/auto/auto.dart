@@ -40,8 +40,8 @@ mixin SrceenSizeObserver<T extends StatefulWidget> on State<T> {
     final view = WidgetsBinding.instance.platformDispatcher.views.first;
     srceenSize = view.physicalSize / view.devicePixelRatio;
 
-    final oldIsIdeaSrceen = this.isIdeaSrceen;
-    final oldIsSingleScreen = this.isSingleScreen;
+    final oldIsIdeaSrceen = isIdeaSrceen;
+    final oldIsSingleScreen = isSingleScreen;
 
     isIdeaSrceen = srceenSize.width > ideaSrceenWidth;
     isSingleScreen = srceenSize.width <= singleSrceenWidth;

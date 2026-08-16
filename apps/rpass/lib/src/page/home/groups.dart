@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:keepass_core/keepass_core.dart';
 
-import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/icons.dart';
+import '../../store/index.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/kdbx_icon.dart';
@@ -50,14 +50,14 @@ class _GroupsPageState extends State<GroupsPage>
 
   @override
   void initState() {
-    KdbxProvider.of(context).addListener(this);
+    Store.kdbx.addListener(this);
     onKdbxSaved();
     super.initState();
   }
 
   @override
   void dispose() {
-    KdbxProvider.of(context).removeListener(this);
+    Store.kdbx.removeListener(this);
     super.dispose();
   }
 
@@ -70,9 +70,7 @@ class _GroupsPageState extends State<GroupsPage>
   Widget _buildMobile() {
     final t = I18n.of(context)!;
 
-    final groups = KdbxProvider.of(context).groups;
-
-    // TODO! 加载动画, 或许?
+    final groups = Store.kdbx.groups;
 
     return Scaffold(
       appBar: AppBar(

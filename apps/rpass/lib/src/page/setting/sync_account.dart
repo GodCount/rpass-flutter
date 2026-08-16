@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:keepass_core/keepass_core.dart';
 import 'package:remote_fs/remote_fs.dart';
 
-import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../remotes_fs/remote_fs.dart';
@@ -45,7 +44,7 @@ class _SyncAccountPageState extends State<SyncAccountPage>
   void _setRemoteSyncCycle() {
     final t = I18n.of(context)!;
 
-    final settings = Store.instance.settings;
+    final settings = Store.settings;
 
     GestureTapCallback? autoSavePop(Duration? delay) {
       return () {
@@ -92,10 +91,12 @@ class _SyncAccountPageState extends State<SyncAccountPage>
 
   void _setRemoteSyncCilent(RemoteType type) async {
     final t = I18n.of(context)!;
-    final store = Store.instance;
 
     final result = await context.router.push(
-      AuthRemoteFsRoute(config: store.syncKdbx.config?.toJson(), type: type),
+      AuthRemoteFsRoute(
+        config: Store.kdbx.syncController.config?.toJson(),
+        type: type,
+      ),
     );
 
     if (result == null || result is! RemoteFileConfig) return;
@@ -107,14 +108,14 @@ class _SyncAccountPageState extends State<SyncAccountPage>
     if (result2 == null || result2 is! RemoteFileConfig) return;
 
     try {
-      await store.syncKdbx.setRemoteFileConfig(context, result2);
+      await Store.kdbx.syncController.setRemoteFileConfig(context, result2);
 
-      if (store.syncKdbx.lastError == null) {
-        final kdbxProvider = KdbxProvider.of(context);
+      if (Store.kdbx.syncController.lastError == null) {
+        final kdbxProvider = Store.kdbx;
         EntryData? entry = await kdbxProvider.getSyncEntryData();
 
         if (entry != null &&
-            store.syncKdbx.config == RemoteFileKdbxEntryField.fromKdbx(entry)) {
+            Store.kdbx.syncController.config == RemoteFileKdbxEntryField.fromKdbx(entry)) {
           return;
         }
 
@@ -126,12 +127,12 @@ class _SyncAccountPageState extends State<SyncAccountPage>
           entry ??= kdbxProvider.kdbx!.newEntry()
             ..fields[KdbxKeyCommon.TITLE] = FieldValue.plaintext(t.sync_config);
 
-          for (final item in store.syncKdbx.config!.toKdbx().entries) {
+          for (final item in Store.kdbx.syncController.config!.toKdbx().entries) {
             entry.fields[item.key] = item.value;
           }
 
           await kdbxAction(KdbxAction.updateSyncEntry(entry));
-          store.syncKdbx.sync(context);
+          Store.kdbx.syncController.sync(context);
         }
       }
     } catch (e) {
@@ -142,9 +143,8 @@ class _SyncAccountPageState extends State<SyncAccountPage>
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-    final store = Store.instance;
 
-    final remoteSyncCycle = store.settings.remoteSyncCycle;
+    final remoteSyncCycle = Store.settings.remoteSyncCycle;
 
     return Scaffold(
       appBar: AppBar(
@@ -153,34 +153,34 @@ class _SyncAccountPageState extends State<SyncAccountPage>
         title: Text(t.sync_settings),
       ),
       body: ListenableBuilder(
-        listenable: store.syncKdbx,
+        listenable: Store.kdbx.syncController,
         builder: (context, child) {
           return ListView(
             children: [
               ListTile(
                 title: Text(t.sync),
                 subtitle: Text(t.close_local_sync_subtitle),
-                enabled: !store.syncKdbx.isSyncing,
+                enabled: !Store.kdbx.syncController.isSyncing,
                 onTap: () async {
-                  await store.settings.setEnableRemoteSync(
-                    !store.settings.enableRemoteSync,
+                  await Store.settings.setEnableRemoteSync(
+                    !Store.settings.enableRemoteSync,
                   );
                   setState(() {});
                 },
-                trailing: store.settings.enableRemoteSync
+                trailing: Store.settings.enableRemoteSync
                     ? const Icon(Icons.check)
                     : null,
               ),
               ListTile(
                 onTap: _setRemoteSyncCycle,
-                enabled: store.settings.enableRemoteSync,
+                enabled: Store.settings.enableRemoteSync,
                 title: Text(t.sync_cycle),
                 trailing: Text(
                   remoteSyncCycle == null
                       ? t.each_startup
                       : t.days(remoteSyncCycle.inDays),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: store.settings.enableRemoteSync
+                    color: Store.settings.enableRemoteSync
                         ? Theme.of(context).colorScheme.primary
                         : Theme.of(
                             context,
@@ -192,43 +192,43 @@ class _SyncAccountPageState extends State<SyncAccountPage>
                 title: const Text("WebDAV"),
                 subtitle: Text(t.sync_note_subtitle),
                 enabled:
-                    !store.syncKdbx.isSyncing &&
-                    store.settings.enableRemoteSync,
+                    !Store.kdbx.syncController.isSyncing &&
+                    Store.settings.enableRemoteSync,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 onTap: () => _setRemoteSyncCilent(.webdav),
                 trailing: InfiniteRotateWidget(
-                  enabled: store.syncKdbx.isSyncing,
+                  enabled: Store.kdbx.syncController.isSyncing,
                   child: IconButton(
                     onPressed:
-                        !store.syncKdbx.isSyncing &&
-                            store.settings.enableRemoteSync &&
-                            store.syncKdbx.config != null
-                        ? () => store.syncKdbx.sync(context)
+                        !Store.kdbx.syncController.isSyncing &&
+                            Store.settings.enableRemoteSync &&
+                            Store.kdbx.syncController.config != null
+                        ? () => Store.kdbx.syncController.sync(context)
                         : null,
                     onLongPress:
-                        !store.syncKdbx.isSyncing &&
-                            store.settings.enableRemoteSync &&
-                            store.syncKdbx.config != null
-                        ? () => store.syncKdbx.sync(context, forceMerge: true)
+                        !Store.kdbx.syncController.isSyncing &&
+                            Store.settings.enableRemoteSync &&
+                            Store.kdbx.syncController.config != null
+                        ? () => Store.kdbx.syncController.sync(context, forceMerge: true)
                         : null,
                     icon: const Icon(Icons.sync),
                   ),
                 ),
               ),
-              if (store.syncKdbx.lastError != null)
+              if (Store.kdbx.syncController.lastError != null)
                 ListTile(
                   title: Text(t.sync_error_log),
-                  subtitle: Text("${store.syncKdbx.lastError}"),
+                  subtitle: Text("${Store.kdbx.syncController.lastError}"),
                   onTap: () {
-                    showError(store.syncKdbx.lastError);
+                    showError(Store.kdbx.syncController.lastError);
                   },
                 ),
-              if (store.syncKdbx.lastMergeLog != null)
+              if (Store.kdbx.syncController.lastMergeLog != null)
                 Theme(
                   data: ThemeData(dividerColor: Colors.transparent),
                   child: ExpansionTile(
                     title: Text(t.sync_merge_log),
-                    children: _buildMergeTile(store.syncKdbx.lastMergeLog!),
+                    children: _buildMergeTile(Store.kdbx.syncController.lastMergeLog!),
                   ),
                 ),
             ],

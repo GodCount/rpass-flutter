@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:keepass_core/keepass_core.dart';
 
 import '../../context/biometric.dart';
-import '../../context/kdbx.dart';
+import '../../store/index.dart';
 import '../../util/route.dart';
 import 'authorized_page.dart';
 
@@ -69,7 +69,7 @@ class _VerifyOwnerPageState extends AuthorizedPageState<VerifyOwnerPage> {
         throw Exception("Lack of key file.");
       }
 
-      final kdbx = KdbxProvider.of(context).kdbx!;
+      final kdbx = Store.kdbx.kdbx!;
 
       final credentials = Credentials.from(
         password: isPassword ? password : null,

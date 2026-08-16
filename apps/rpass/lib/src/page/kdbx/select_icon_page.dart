@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:keepass_core/keepass_core.dart';
 import 'package:logging/logging.dart';
 
-import '../../context/kdbx.dart';
 import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
+import '../../store/index.dart';
 import '../../util/file.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
@@ -51,7 +51,7 @@ class _SelectIconPageState extends State<SelectIconPage> {
 
     final mediaQuery = MediaQuery.of(context);
     final width = mediaQuery.size.width;
-    final fieldSummary = KdbxProvider.of(context).fieldSummary!;
+    final fieldSummary = Store.kdbx.fieldSummary!;
 
     return Scaffold(
       appBar: AppBar(title: Text(t.select_icon)),

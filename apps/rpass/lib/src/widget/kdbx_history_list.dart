@@ -4,10 +4,10 @@ import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:keepass_core/keepass_core.dart';
 
-import '../context/kdbx.dart';
 import '../i18n.dart';
 import '../kdbx/kdbx.dart';
 import '../page/password/look_account.dart';
+import '../store/index.dart';
 import '../util/common.dart';
 import 'extension_state.dart';
 
@@ -87,9 +87,9 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
 
   @override
   void initState() {
-    KdbxProvider.of(
-      context,
-    ).kdbx!.getEntryHistorys(id: widget.kdbxEntry.id).then((value) {
+    Store.kdbx.kdbx!.getEntryHistorys(id: widget.kdbxEntry.id).then((
+      value,
+    ) {
       _history = value;
       setState(() {});
     });
@@ -106,7 +106,7 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
     //   confirm: t.delete,
     // )) {
     //   if (widget.kdbxEntry.history.remove(entry)) {
-    //     kdbxSave(KdbxProvider.of(context).kdbx!);
+    //     kdbxSave(Store.kdbx.kdbx!);
     //     setState(() {});
     //   }
     // }

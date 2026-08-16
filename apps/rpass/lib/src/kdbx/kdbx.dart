@@ -150,6 +150,32 @@ extension KdbxEntryCommon on EntryData {
   }
 }
 
+extension FieldSummaryCommon on FieldSummary {
+  Set<String> getStatistic(String kdbxKey) {
+    switch (kdbxKey) {
+      case KdbxKeyCommon.URL:
+      case KdbxKeyURLS.URL1:
+      case KdbxKeyURLS.URL2:
+      case KdbxKeyURLS.URL3:
+      case KdbxKeyURLS.URL4:
+      case KdbxKeyURLS.URL5:
+        return urls;
+      case KdbxKeyCommon.USER_NAME:
+        return userNames;
+      case KdbxKeyCommon.EMAIL:
+        return emails;
+      case KdbxKeySpecial.TAGS:
+        return tags;
+      case "CustomFields":
+        return customFields;
+      case "CustomIcons":
+        return customIcons.keys.toSet();
+    }
+    return {};
+  }
+}
+
+
 extension KdbxUuidString on String {
   // KdbxUuid get kdbxUuid => KdbxUuid(this);
 

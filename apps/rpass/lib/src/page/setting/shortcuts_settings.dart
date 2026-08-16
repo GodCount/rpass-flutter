@@ -47,7 +47,7 @@ class _ShortcutsSettingsPageState extends State<ShortcutsSettingsPage>
     );
 
     if (result != hotKey) {
-      await Store.instance.settings.shortcutsStore.setShrtcutsHot(
+      await Store.settings.shortcutsStore.setShrtcutsHot(
         result ?? hotKey!,
         result == null,
       );
@@ -58,7 +58,7 @@ class _ShortcutsSettingsPageState extends State<ShortcutsSettingsPage>
   void _setOpenAppAlignment() {
     final t = I18n.of(context)!;
 
-    final shortcutsStore = Store.instance.settings.shortcutsStore;
+    final shortcutsStore = Store.settings.shortcutsStore;
 
     GestureTapCallback? autoSavePop(ShortcutsOpenAppAlignment value) {
       return () {
@@ -153,7 +153,7 @@ class _ShortcutsSettingsPageState extends State<ShortcutsSettingsPage>
   List<Widget> _buildList() {
     final t = I18n.of(context)!;
 
-    final shortcutsStore = Store.instance.settings.shortcutsStore;
+    final shortcutsStore = Store.settings.shortcutsStore;
     final defaultHotkeys = shortcutsStore.defaultHotKeys.keys.toList();
 
     final List<Widget> children = [
@@ -337,11 +337,7 @@ class _ModifyHotKeyDialogState extends State<ModifyHotKeyDialog> {
           TextButton(
             onPressed: () {
               widget.onResult(
-                Store
-                    .instance
-                    .settings
-                    .shortcutsStore
-                    .defaultHotKeys[widget.identifier]!
+                Store.settings.shortcutsStore.defaultHotKeys[widget.identifier]!
                     .clone(),
               );
             },
