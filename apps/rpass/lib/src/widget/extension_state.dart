@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:keepass_core/keepass_core.dart';
@@ -41,14 +42,27 @@ extension StatefulClipboard on State {
 }
 
 extension StatefulDialog on State {
-  Future<void> showError(Object? error) async {
+  Future<void> showError(Object error, [StackTrace? s]) async {
+    String message;
+
+    if (error is KdbxError) {
+      message = "${error.runtimeType}(${error.message})";
+      if (kDebugMode) {
+        message += "\nRust StackTrace: ${error.backtrace}";
+      }
+    } else {
+      message = error.toString();
+    }
+
+    if (s != null && kDebugMode) {
+      message += "\nDart StackTrace: $s";
+    }
+
     await showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          content: SelectableText(
-            I18n.of(context)!.throw_message(error.toString()),
-          ),
+          content: SelectableText(I18n.of(context)!.throw_message(message)),
           actions: [
             TextButton(
               onPressed: () {
@@ -228,10 +242,10 @@ extension StatefulBottomSheet on State {
                 filename: title,
               );
               showToast(result);
-            } catch (e) {
+            } catch (e, s) {
               if (e is! CancelException) {
-                _logger.warning("save as attachment fail!", e);
-                showError(e);
+                _logger.warning("save as attachment fail!", e, s);
+                showError(e, s);
               }
             } finally {
               context.router.pop();
@@ -249,10 +263,14 @@ extension StatefulBottomSheet on State {
             ),
             onTap: () async {
               context.router.pop();
-              final data =
-                  binary.value.data ??
-                  await kdbxProvider.kdbx!.getAttachment(id: binary.value.id);
-              lanFill?.updateFile(title, data);
+              try {
+                final data =
+                    binary.value.data ??
+                    await kdbxProvider.kdbx!.getAttachment(id: binary.value.id);
+                lanFill?.updateFile(title, data);
+              } catch (e, s) {
+                showError(e, s);
+              }
             },
           ),
       ],
@@ -389,8 +407,8 @@ extension StatefulKdbx on State {
       try {
         await kdbx.action(action: action);
         return true;
-      } catch (e) {
-        showError(e);
+      } catch (e, s) {
+        showError(e, s);
       }
     }
     return false;
@@ -408,8 +426,8 @@ extension StatefulKdbx on State {
         key: key,
         getValue: (key) => entry.getActualString(key),
       );
-    } catch (e) {
-      showError(e);
+    } catch (e, s) {
+      showError(e, s);
     }
   }
 

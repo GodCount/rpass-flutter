@@ -34,20 +34,12 @@ class _LookAccountArgs extends PageRouteArgs {
 }
 
 class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
-  LookAccountRoute({
-    Key? key,
-    bool readOnly = false,
-    int? historyIndex,
-    required String id,
-  }) : super(
-         name,
-         args: _LookAccountArgs(key: key),
-         rawPathParams: {
-           "uuid": id,
-           "readOnly": readOnly.toString(),
-           "historyIndex": historyIndex,
-         },
-       );
+  LookAccountRoute({Key? key, int? historyIndex, required String id})
+    : super(
+        name,
+        args: _LookAccountArgs(key: key),
+        rawPathParams: {"uuid": id, "historyIndex": historyIndex},
+      );
 
   static const name = "LookAccountRoute";
 
@@ -59,9 +51,7 @@ class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
       );
 
       final historyIndex = data.inheritedPathParams.optInt("historyIndex");
-      final readOnly = historyIndex != null
-          ? true
-          : data.inheritedPathParams.getBool("readOnly", false);
+
       final uuid = data.inheritedPathParams.optString("uuid");
 
       if (uuid == null) {
@@ -70,7 +60,6 @@ class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
 
       return LookAccountPage(
         key: args.key,
-        readOnly: readOnly,
         id: uuid,
         historyIndex: historyIndex,
       );
@@ -79,14 +68,8 @@ class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
 }
 
 class LookAccountPage extends StatefulWidget {
-  const LookAccountPage({
-    super.key,
-    this.readOnly = false,
-    this.historyIndex,
-    required this.id,
-  });
+  const LookAccountPage({super.key, this.historyIndex, required this.id});
 
-  final bool readOnly;
   final int? historyIndex;
   final String id;
 
@@ -124,37 +107,43 @@ class _LookAccountPageState extends State<LookAccountPage>
   }
 
   void _getEntryData() async {
-    final kdbxProvider = Store.kdbx;
+    try {
+      final kdbxProvider = Store.kdbx;
 
-    _kdbxEntry = await kdbxProvider.kdbx!.getEntry(
-      id: widget.id,
-      historyIndex: widget.historyIndex,
-    );
+      _kdbxEntry = await kdbxProvider.kdbx!.getEntry(
+        id: widget.id,
+        historyIndex: widget.historyIndex,
+      );
 
-    _groupData = kdbxProvider.getGroup(_kdbxEntry.parent);
+      _groupData = kdbxProvider.getGroup(_kdbxEntry.parent);
 
-    _kdbxIcon = KdbxIconWidgetData(
-      icon: _kdbxEntry.icon ?? KdbxIconType.Key.toKdbxIcon(),
-      domain: _kdbxEntry.getActualString(KdbxKeyCommon.URL),
-    );
+      _kdbxIcon = KdbxIconWidgetData(
+        icon: _kdbxEntry.icon ?? KdbxIconType.Key.toKdbxIcon(),
+        domain: _kdbxEntry.getActualString(KdbxKeyCommon.URL),
+      );
 
-    final newPackageName = _kdbxEntry.getActualString(
-      KdbxKeySpecial.AUTO_FILL_PACKAGE_NAME,
-    );
+      final newPackageName = _kdbxEntry.getActualString(
+        KdbxKeySpecial.AUTO_FILL_PACKAGE_NAME,
+      );
 
-    if (_packageName != newPackageName) {
-      _packageName = newPackageName;
+      if (_packageName != newPackageName) {
+        _packageName = newPackageName;
 
-      if (kIsMobile && _packageName != null && _packageName!.isNotEmpty) {
-        _appInfoFuture = installedApps.getAppInfo(_packageName!);
+        if (kIsMobile && _packageName != null && _packageName!.isNotEmpty) {
+          _appInfoFuture = installedApps.getAppInfo(_packageName!);
+        }
       }
-    }
 
-    _inRecycleBin = kdbxProvider.isInRecycleBin(_kdbxEntry.parent);
-    _defaultSequence =
-        _kdbxEntry.autotype?.defaultSequence ??
-        kdbxProvider.getAutoTypeSequence(_kdbxEntry.parent);
-    setState(() {});
+      _inRecycleBin = kdbxProvider.isInRecycleBin(_kdbxEntry.parent);
+      _defaultSequence =
+          _kdbxEntry.autotype?.defaultSequence ??
+          kdbxProvider.getAutoTypeSequence(_kdbxEntry.parent);
+      setState(() {});
+    } on KdbxError_NotFound {
+      context.router.pop();
+    } catch (e, s) {
+      showError(e, s);
+    }
   }
 
   @override
@@ -234,7 +223,6 @@ class _LookAccountPageState extends State<LookAccountPage>
       children: [
         if (kIsMobile && lanFill != null)
           ListTile(
-            enabled: !widget.readOnly,
             title: Text(t.lan_fill),
             leading: Icon(
               lanFill.cilentConnecting
@@ -258,7 +246,7 @@ class _LookAccountPageState extends State<LookAccountPage>
           ),
 
         ListTile(
-          enabled: !widget.readOnly,
+          enabled: !_inRecycleBin && widget.historyIndex == null,
           title: Text(t.history_record),
           leading: const Icon(Icons.history),
           onTap: onAutoPop(() => showEntryHistoryList(_kdbxEntry)),
@@ -276,7 +264,7 @@ class _LookAccountPageState extends State<LookAccountPage>
           }),
         ),
         ListTile(
-          enabled: !widget.readOnly && !_inRecycleBin,
+          enabled: !_inRecycleBin && widget.historyIndex == null,
           title: Text(t.delete),
           leading: const Icon(Icons.delete),
           onTap: onAutoPop(_deleteAccount),
@@ -360,8 +348,6 @@ class _LookAccountPageState extends State<LookAccountPage>
   @override
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
-
-    final readOnly = widget.readOnly;
 
     final customFields = _kdbxEntry.customEntries;
 
@@ -900,7 +886,7 @@ class _LookAccountPageState extends State<LookAccountPage>
           const SizedBox(height: 42),
         ],
       ),
-      floatingActionButton: !readOnly
+      floatingActionButton: !_inRecycleBin && widget.historyIndex == null
           ? FloatingActionButton(
               heroTag: const ValueKey("look_account_float"),
               onPressed: () async {
@@ -931,7 +917,7 @@ class _LookAccountPageState extends State<LookAccountPage>
   void _deleteAccount() async {
     final t = I18n.of(context)!;
     if (await showConfirmDialog(title: t.delete, message: t.is_move_recycle)) {
-      if (await kdbxAction(KdbxAction.delete([_kdbxEntry.id]))) {
+      if (await kdbxAction(KdbxAction.move2Trash([_kdbxEntry.id]))) {
         context.router.pop();
       }
     }

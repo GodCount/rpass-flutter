@@ -1,8 +1,13 @@
 use std::{convert::TryInto, io::Read};
 
 use base64::{engine::general_purpose as base64_engine, Engine as _};
+use hex::FromHexError;
 use hybrid_array::{typenum::U32, Array as GenericArray};
-use quick_xml::{encoding::EncodingError, events::Event, reader::Reader};
+use quick_xml::{
+    de::{from_str, Deserializer},
+    se::to_string,
+};
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
@@ -17,111 +22,160 @@ mod yubikey;
 #[cfg(feature = "challenge_response")]
 pub use yubikey::{ChallengeResponseKey, ChallengeResponseKeyError};
 
-fn parse_xml_keyfile(xml: &[u8]) -> Result<KeyElement, ParseXmlKeyFileError> {
-    let mut tag_stack = Vec::new();
 
-    let mut key_version: Option<String> = None;
-    let mut key_value: Option<String> = None;
+/// A KeePass keyfile
+#[derive(Debug, PartialEq, Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
+pub struct KeyFile {
+    #[serde(rename = "Meta")]
+    meta: Meta,
+    #[serde(rename = "Key")]
+    key: Key,
+}
 
-    let mut reader = Reader::from_reader(xml);
-    let mut buf = Vec::new();
+#[derive(Debug, PartialEq, Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
+struct Meta {
+    #[serde(rename = "Version")]
+    version: String,
+}
 
-    loop {
-        match reader.read_event_into(&mut buf)? {
-            Event::Eof => break,
+#[derive(Debug, PartialEq, Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
+struct Key {
+    #[serde(rename = "@Hash", skip_serializing_if = "Option::is_none")]
+    hash: Option<String>,
+    #[serde(rename = "Data")]
+    data: String,
+}
 
-            Event::Start(e) => {
-                tag_stack.push(String::from_utf8_lossy(e.name().as_ref()).to_string());
-            }
+impl KeyFile {
+    /// Parse keyfile from string slice
+    pub fn parse<T: AsRef<str>>(value: T) -> Result<Self, KeyFileError> {
+        let keyfile: KeyFile = from_str(value.as_ref())?;
+        return Ok(keyfile);
+    }
 
-            Event::End(_) => {
-                tag_stack.pop();
-            }
+    /// Parse keyfile from bytes
+    pub fn parse_bytes<T: AsRef<[u8]>>(value: T) -> Result<Self, KeyFileError> {
+        let mut de = Deserializer::from_reader(value.as_ref());
+        let keyfile: KeyFile = KeyFile::deserialize(&mut de)?;
+        return Ok(keyfile);
+    }
 
-            Event::Text(e) => {
-                let s = e.decode()?.into_owned();
+    /// Create random keyfile
+    pub fn random() -> Result<Self, getrandom::Error> {
+        let mut bytes = vec![0u8; 32];
 
-                if tag_stack == ["KeyFile", "Meta", "Version"] {
-                    key_version = Some(s);
-                    continue;
+        getrandom::fill(&mut bytes)?;
+
+        let hash = hex::encode_upper(&calculate_sha256(&[&bytes])[..4]);
+
+        let data = hex::encode_upper(&bytes)
+            .chars()
+            .collect::<Vec<_>>()
+            .chunks(32)
+            .map(|line| {
+                line.chunks(8)
+                    .map(|group| group.iter().collect::<String>())
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        Ok(KeyFile {
+            meta: Meta {
+                version: String::from("2.0"),
+            },
+            key: Key {
+                hash: Some(hash),
+                data,
+            },
+        })
+    }
+
+    /// Get key
+    pub fn get_data(&self) -> Result<Vec<u8>, KeyFileError> {
+        match self.meta.version.as_str() {
+            "2.0" => {
+                let data = self
+                    .key
+                    .data
+                    .trim()
+                    .replace(" ", "")
+                    .replace("\n", "")
+                    .replace("\t", "")
+                    .replace("\r", "")
+                    .as_bytes()
+                    .to_vec();
+
+                let bytes = hex::decode(&data)?;
+
+                if let Some(hash) = &self.key.hash {
+                    let expect_hash = hash.clone();
+                    let current_hash = hex::encode_upper(&calculate_sha256(&[&bytes])[..4]);
+                    if current_hash != expect_hash {
+                        return Err(KeyFileError::HashMismatch(expect_hash, current_hash));
+                    }
                 }
 
-                if tag_stack == ["KeyFile", "Key", "Data"] {
-                    key_value = Some(s);
-                    continue;
+                Ok(bytes)
+            }
+            "1.00" => {
+                let bytes = self.key.data.as_bytes().to_vec();
+                if let Ok(data) = base64_engine::STANDARD.decode(&bytes) {
+                    Ok(data)
+                } else {
+                    Ok(bytes)
                 }
             }
-
-            _ => (),
+            _ => Err(KeyFileError::Unsupport(self.meta.version.clone())),
         }
     }
 
-    let key_value = key_value.ok_or(ParseXmlKeyFileError::EmptyKey)?;
-
-    let key_bytes = key_value.as_bytes().to_vec();
-
-    if key_version == Some("2.0".to_string()) {
-        // TODO we should also validate the integrity of a v2 keyfile using the hash value
-
-        let trimmed_key = key_value
-            .trim()
-            .replace(" ", "")
-            .replace("\n", "")
-            .replace("\t", "")
-            .replace("\r", "");
-
-        return if let Ok(key) = hex::decode(&trimmed_key) {
-            Ok(key)
-        } else {
-            Ok(key_bytes)
-        };
-    }
-
-    // Check if the key is base64-encoded. If yes, return decoded bytes
-    if let Ok(key) = base64_engine::STANDARD.decode(&key_bytes) {
-        Ok(key)
-    } else {
-        Ok(key_bytes)
+    /// to xml
+    pub fn to_xml(&self) -> Result<String, quick_xml::SeError> {
+        to_string(&self)
     }
 }
 
 /// Errors that can occur when parsing an XML keyfile
 #[derive(Debug, Error)]
-#[non_exhaustive]
-pub enum ParseXmlKeyFileError {
-    /// No key data element was found in the XML keyfile
-    #[error("The XML keyfile is missing a key data element")]
-    EmptyKey,
-
-    /// A tag in the XML keyfile contains text that cannot be decoded as UTF-8
+pub enum KeyFileError {
+    /// base16 decoding error
     #[error(transparent)]
-    Encoding(#[from] EncodingError),
-
-    /// An error occurred while reading the XML keyfile
+    FromHexError(#[from] FromHexError),
+    /// keyfile version is unsupport
+    #[error("unsupport version: {0}")]
+    Unsupport(String),
+    /// key hash mismatch
+    #[error("hash mismatch: expect: {0}, actual: {1}")]
+    HashMismatch(String, String),
+    /// An error occurred while parsing the XML keyfile
     #[error(transparent)]
-    Xml(#[from] quick_xml::Error),
+    XmlDeError(#[from] quick_xml::DeError),
 }
 
-fn parse_keyfile(buffer: &[u8]) -> Result<KeyElement, DatabaseKeyError> {
-    // try to parse the buffer as XML, if successful, use that data instead of full file
-    if let Ok(v) = parse_xml_keyfile(buffer) {
-        return Ok(v);
+fn parse_xml_keyfile(data: &[u8]) -> Result<Vec<u8>, KeyFileError> {
+    let keyfile = KeyFile::parse_bytes(data)?;
+
+    keyfile.get_data()
+}
+
+pub fn parse_keyfile(data: &[u8]) -> Result<Vec<u8>, DatabaseKeyError> {
+    if let Ok(result) = parse_xml_keyfile(data) {
+        return Ok(result);
     }
 
-    // legacy binary key format
-    if buffer.len() == 32 {
-        return Ok(buffer.to_vec());
-    }
-
-    // legacy hex key format
-    if buffer.len() == 64 {
-        if let Ok(key_bytes) = hex::decode(buffer) {
-            return Ok(key_bytes);
+    if data.len() == 64 {
+        if let Ok(result) = hex::decode(data) {
+            return Ok(result);
         }
     }
 
-    // interpret as a "bare" keyfile and hash the entire file contents
-    Ok(calculate_sha256(&[buffer]).as_slice().to_vec())
+    if data.len() == 32 {
+        return Ok(data.to_vec());
+    }
+
+    Ok(calculate_sha256(&[data]).as_slice().to_vec())
 }
 
 /// A KeePass key, which might consist of a password and/or a keyfile
@@ -209,7 +263,7 @@ impl DatabaseKey {
         Default::default()
     }
 
-    pub(crate) fn get_key_elements(&self) -> Result<KeyElements, DatabaseKeyError> {
+    fn get_key_elements(&self) -> Result<KeyElements, DatabaseKeyError> {
         let mut out = Vec::new();
 
         if let Some(p) = &self.password {
@@ -303,7 +357,7 @@ pub enum DatabaseKeyError {
 #[cfg(test)]
 mod key_tests {
 
-    use super::{DatabaseKey, DatabaseKeyError};
+    use super::{KeyFile, DatabaseKey, DatabaseKeyError};
 
     #[test]
     fn test_key() -> Result<(), DatabaseKeyError> {
@@ -380,5 +434,14 @@ mod key_tests {
         .is_err());
 
         Ok(())
+    }
+
+    #[test]
+    fn keyfile_random() {
+        let keyfile1 = KeyFile::random().unwrap();
+        let keyfile2 = KeyFile::random().unwrap();
+
+
+        assert_ne!(keyfile1.key, keyfile2.key);
     }
 }

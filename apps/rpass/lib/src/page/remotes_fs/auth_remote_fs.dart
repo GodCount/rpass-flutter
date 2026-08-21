@@ -74,8 +74,8 @@ class _AuthRemoteFsState extends State<AuthRemoteFsPage> {
         await config.open();
 
         context.router.pop(config);
-      } catch (e) {
-        showError(e);
+      } catch (e, s) {
+        showError(e, s);
       } finally {
         setState(() {
           _loading = false;

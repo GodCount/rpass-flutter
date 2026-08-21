@@ -61,6 +61,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             MergeEventType::Deleted => "deleted",
             MergeEventType::LocationUpdated => "moved",
             MergeEventType::Updated => "updated",
+            #[warn(unreachable_patterns)]
             _ => "changed",
         };
         let what = match target {

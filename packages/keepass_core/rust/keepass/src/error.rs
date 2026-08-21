@@ -16,8 +16,10 @@ pub use crate::{
         xml_db::ParseXmlError,
         DatabaseVersionParseError,
     },
-    key::{DatabaseKeyError, ParseXmlKeyFileError},
+    key::{DatabaseKeyError, KeyFileError},
 };
+
+pub use getrandom::Error as RandomError;
 
 #[cfg(feature = "challenge_response")]
 pub use crate::key::ChallengeResponseKeyError;

@@ -41,7 +41,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0-beta.5";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1247116195;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1720923843;
 
 // Section: executor
 
@@ -411,12 +411,10 @@ fn wire__crate__api__kdbx__Credentials_form_composite_key_impl(
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_key = <Vec<u8>>::sse_decode(&mut deserializer);
             deserializer.end();
-            transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                (move || {
-                    let output_ok = crate::api::kdbx::Credentials::form_composite_key(api_key)?;
-                    Ok(output_ok)
-                })(),
-            )
+            transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                let output_ok = crate::api::kdbx::Credentials::form_composite_key(api_key)?;
+                Ok(output_ok)
+            })())
         },
     )
 }
@@ -444,12 +442,10 @@ fn wire__crate__api__kdbx__Credentials_from_impl(
             let api_password = <Option<String>>::sse_decode(&mut deserializer);
             let api_keyfile = <Option<Vec<u8>>>::sse_decode(&mut deserializer);
             deserializer.end();
-            transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                (move || {
-                    let output_ok = crate::api::kdbx::Credentials::from(api_password, api_keyfile)?;
-                    Ok(output_ok)
-                })(),
-            )
+            transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                let output_ok = crate::api::kdbx::Credentials::from(api_password, api_keyfile)?;
+                Ok(output_ok)
+            })())
         },
     )
 }
@@ -478,27 +474,24 @@ fn wire__crate__api__kdbx__Credentials_get_composite_key_impl(
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Credentials>,
             >>::sse_decode(&mut deserializer);
             deserializer.end();
-            transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                (move || {
-                    let mut api_that_guard = None;
-                    let decode_indices_ =
-                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
-                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                &api_that, 0, false,
-                            ),
-                        ]);
-                    for i in decode_indices_ {
-                        match i {
-                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                            _ => unreachable!(),
-                        }
+            transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                let mut api_that_guard = None;
+                let decode_indices_ =
+                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                            &api_that, 0, false,
+                        ),
+                    ]);
+                for i in decode_indices_ {
+                    match i {
+                        0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                        _ => unreachable!(),
                     }
-                    let api_that_guard = api_that_guard.unwrap();
-                    let output_ok =
-                        crate::api::kdbx::Credentials::get_composite_key(&*api_that_guard)?;
-                    Ok(output_ok)
-                })(),
-            )
+                }
+                let api_that_guard = api_that_guard.unwrap();
+                let output_ok = crate::api::kdbx::Credentials::get_composite_key(&*api_that_guard)?;
+                Ok(output_ok)
+            })())
         },
     )
 }
@@ -526,12 +519,10 @@ fn wire__crate__api__kdbx__Credentials_random_key_file_impl(
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let output_ok = crate::api::kdbx::Credentials::random_key_file()?;
-                        Ok(output_ok)
-                    })(),
-                )
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let output_ok = crate::api::kdbx::Credentials::random_key_file()?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -1076,27 +1067,24 @@ fn wire__crate__api__kdbx__Kdbx_action_impl(
             let api_action = <crate::api::kdbx::KdbxAction>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
                         }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok =
-                            crate::api::kdbx::Kdbx::action(&*api_that_guard, api_action)?;
-                        Ok(output_ok)
-                    })(),
-                )
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::kdbx::Kdbx::action(&*api_that_guard, api_action)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -1130,30 +1118,28 @@ fn wire__crate__api__kdbx__Kdbx_autofill_search_impl(
             let api_entry_id = <Option<String>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
                         }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok = crate::api::kdbx::Kdbx::autofill_search(
-                            &*api_that_guard,
-                            api_metadata,
-                            api_entry_id,
-                        )?;
-                        Ok(output_ok)
-                    })(),
-                )
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::kdbx::Kdbx::autofill_search(
+                        &*api_that_guard,
+                        api_metadata,
+                        api_entry_id,
+                    )?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -1245,57 +1231,6 @@ fn wire__crate__api__kdbx__Kdbx_create_impl(
         },
     )
 }
-fn wire__crate__api__kdbx__Kdbx_export_xml_impl(
-    port_: flutter_rust_bridge::for_generated::MessagePort,
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "Kdbx_export_xml",
-            port: Some(port_),
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_that = <RustOpaqueMoi<
-                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Kdbx>,
-            >>::sse_decode(&mut deserializer);
-            deserializer.end();
-            move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
-                        }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok = crate::api::kdbx::Kdbx::export_xml(&*api_that_guard)?;
-                        Ok(output_ok)
-                    })(),
-                )
-            }
-        },
-    )
-}
 fn wire__crate__api__kdbx__Kdbx_get_attachment_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -1324,27 +1259,25 @@ fn wire__crate__api__kdbx__Kdbx_get_attachment_impl(
             let api_id = <i32>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
                         }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok =
-                            crate::api::kdbx::Kdbx::get_attachment(&*api_that_guard, api_id)?;
-                        Ok(output_ok)
-                    })(),
-                )
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok =
+                        crate::api::kdbx::Kdbx::get_attachment(&*api_that_guard, api_id)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -1377,44 +1310,39 @@ fn wire__crate__api__kdbx__Kdbx_get_auto_type_sequence_impl(
             let api_id = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
                         }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok = crate::api::kdbx::Kdbx::get_auto_type_sequence(
-                            &*api_that_guard,
-                            api_id,
-                        )?;
-                        Ok(output_ok)
-                    })(),
-                )
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok =
+                        crate::api::kdbx::Kdbx::get_auto_type_sequence(&*api_that_guard, api_id)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
 }
 fn wire__crate__api__kdbx__Kdbx_get_composite_key_impl(
-    port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
     data_len_: i32,
-) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "Kdbx_get_composite_key",
-            port: Some(port_),
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
         },
         move || {
             let message = unsafe {
@@ -1430,29 +1358,24 @@ fn wire__crate__api__kdbx__Kdbx_get_composite_key_impl(
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Kdbx>,
             >>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
-                        }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok =
-                            crate::api::kdbx::Kdbx::get_composite_key(&*api_that_guard)?;
-                        Ok(output_ok)
-                    })(),
-                )
-            }
+            transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                let mut api_that_guard = None;
+                let decode_indices_ =
+                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                            &api_that, 0, false,
+                        ),
+                    ]);
+                for i in decode_indices_ {
+                    match i {
+                        0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                        _ => unreachable!(),
+                    }
+                }
+                let api_that_guard = api_that_guard.unwrap();
+                let output_ok = crate::api::kdbx::Kdbx::get_composite_key(&*api_that_guard)?;
+                Ok(output_ok)
+            })())
         },
     )
 }
@@ -1483,26 +1406,24 @@ fn wire__crate__api__kdbx__Kdbx_get_config_impl(
             >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
                         }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok = crate::api::kdbx::Kdbx::get_config(&*api_that_guard)?;
-                        Ok(output_ok)
-                    })(),
-                )
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::kdbx::Kdbx::get_config(&*api_that_guard)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -1591,30 +1512,28 @@ fn wire__crate__api__kdbx__Kdbx_get_entry_impl(
             let api_history_index = <Option<i32>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
                         }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok = crate::api::kdbx::Kdbx::get_entry(
-                            &*api_that_guard,
-                            api_id,
-                            api_history_index,
-                        )?;
-                        Ok(output_ok)
-                    })(),
-                )
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::kdbx::Kdbx::get_entry(
+                        &*api_that_guard,
+                        api_id,
+                        api_history_index,
+                    )?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -1647,27 +1566,25 @@ fn wire__crate__api__kdbx__Kdbx_get_entry_historys_impl(
             let api_id = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
                         }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok =
-                            crate::api::kdbx::Kdbx::get_entry_historys(&*api_that_guard, api_id)?;
-                        Ok(output_ok)
-                    })(),
-                )
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok =
+                        crate::api::kdbx::Kdbx::get_entry_historys(&*api_that_guard, api_id)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -1704,33 +1621,31 @@ fn wire__crate__api__kdbx__Kdbx_get_entrys_impl(
             let api_case_sensitive = <Option<bool>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
                         }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok = crate::api::kdbx::Kdbx::get_entrys(
-                            &*api_that_guard,
-                            api_sreach,
-                            api_group_id,
-                            api_ignore_group_config,
-                            api_include_recycle,
-                            api_case_sensitive,
-                        )?;
-                        Ok(output_ok)
-                    })(),
-                )
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::kdbx::Kdbx::get_entrys(
+                        &*api_that_guard,
+                        api_sreach,
+                        api_group_id,
+                        api_ignore_group_config,
+                        api_include_recycle,
+                        api_case_sensitive,
+                    )?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -1763,27 +1678,24 @@ fn wire__crate__api__kdbx__Kdbx_get_group_impl(
             let api_id = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
                         }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok =
-                            crate::api::kdbx::Kdbx::get_group(&*api_that_guard, api_id)?;
-                        Ok(output_ok)
-                    })(),
-                )
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::kdbx::Kdbx::get_group(&*api_that_guard, api_id)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -1815,26 +1727,24 @@ fn wire__crate__api__kdbx__Kdbx_get_groups_impl(
             >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
                         }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok = crate::api::kdbx::Kdbx::get_groups(&*api_that_guard)?;
-                        Ok(output_ok)
-                    })(),
-                )
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::kdbx::Kdbx::get_groups(&*api_that_guard)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -1866,26 +1776,24 @@ fn wire__crate__api__kdbx__Kdbx_get_meta_impl(
             >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
                         }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok = crate::api::kdbx::Kdbx::get_meta(&*api_that_guard)?;
-                        Ok(output_ok)
-                    })(),
-                )
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::kdbx::Kdbx::get_meta(&*api_that_guard)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -1969,27 +1877,73 @@ fn wire__crate__api__kdbx__Kdbx_get_recycle_items_impl(
             >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
                         }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok =
-                            crate::api::kdbx::Kdbx::get_recycle_items(&*api_that_guard)?;
-                        Ok(output_ok)
-                    })(),
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::kdbx::Kdbx::get_recycle_items(&*api_that_guard)?;
+                    Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__api__kdbx__Kdbx_get_update_meta_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "Kdbx_get_update_meta",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
                 )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Kdbx>,
+            >>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
+                        }
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::kdbx::Kdbx::get_update_meta(&*api_that_guard)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -2022,27 +1976,24 @@ fn wire__crate__api__kdbx__Kdbx_merge_impl(
             let api_kdbx = <Kdbx>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, true,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref_mut()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, true,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref_mut()),
+                            _ => unreachable!(),
                         }
-                        let mut api_that_guard = api_that_guard.unwrap();
-                        let output_ok =
-                            crate::api::kdbx::Kdbx::merge(&mut *api_that_guard, api_kdbx)?;
-                        Ok(output_ok)
-                    })(),
-                )
+                    }
+                    let mut api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::kdbx::Kdbx::merge(&mut *api_that_guard, api_kdbx)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -2075,29 +2026,27 @@ fn wire__crate__api__kdbx__Kdbx_modify_password_impl(
             let api_credentials = <Credentials>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, true,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref_mut()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, true,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref_mut()),
+                            _ => unreachable!(),
                         }
-                        let mut api_that_guard = api_that_guard.unwrap();
-                        let output_ok = crate::api::kdbx::Kdbx::modify_password(
-                            &mut *api_that_guard,
-                            api_credentials,
-                        )?;
-                        Ok(output_ok)
-                    })(),
-                )
+                    }
+                    let mut api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::kdbx::Kdbx::modify_password(
+                        &mut *api_that_guard,
+                        api_credentials,
+                    )?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -2127,26 +2076,24 @@ fn wire__crate__api__kdbx__Kdbx_new_entry_impl(
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Kdbx>,
             >>::sse_decode(&mut deserializer);
             deserializer.end();
-            transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                (move || {
-                    let mut api_that_guard = None;
-                    let decode_indices_ =
-                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
-                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                &api_that, 0, false,
-                            ),
-                        ]);
-                    for i in decode_indices_ {
-                        match i {
-                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                            _ => unreachable!(),
-                        }
+            transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                let mut api_that_guard = None;
+                let decode_indices_ =
+                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                            &api_that, 0, false,
+                        ),
+                    ]);
+                for i in decode_indices_ {
+                    match i {
+                        0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                        _ => unreachable!(),
                     }
-                    let api_that_guard = api_that_guard.unwrap();
-                    let output_ok = crate::api::kdbx::Kdbx::new_entry(&*api_that_guard)?;
-                    Ok(output_ok)
-                })(),
-            )
+                }
+                let api_that_guard = api_that_guard.unwrap();
+                let output_ok = crate::api::kdbx::Kdbx::new_entry(&*api_that_guard)?;
+                Ok(output_ok)
+            })())
         },
     )
 }
@@ -2175,26 +2122,24 @@ fn wire__crate__api__kdbx__Kdbx_new_group_impl(
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Kdbx>,
             >>::sse_decode(&mut deserializer);
             deserializer.end();
-            transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                (move || {
-                    let mut api_that_guard = None;
-                    let decode_indices_ =
-                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
-                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                &api_that, 0, false,
-                            ),
-                        ]);
-                    for i in decode_indices_ {
-                        match i {
-                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                            _ => unreachable!(),
-                        }
+            transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                let mut api_that_guard = None;
+                let decode_indices_ =
+                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                            &api_that, 0, false,
+                        ),
+                    ]);
+                for i in decode_indices_ {
+                    match i {
+                        0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                        _ => unreachable!(),
                     }
-                    let api_that_guard = api_that_guard.unwrap();
-                    let output_ok = crate::api::kdbx::Kdbx::new_group(&*api_that_guard)?;
-                    Ok(output_ok)
-                })(),
-            )
+                }
+                let api_that_guard = api_that_guard.unwrap();
+                let output_ok = crate::api::kdbx::Kdbx::new_group(&*api_that_guard)?;
+                Ok(output_ok)
+            })())
         },
     )
 }
@@ -2224,13 +2169,10 @@ fn wire__crate__api__kdbx__Kdbx_open_impl(
             let api_filepath = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let output_ok =
-                            crate::api::kdbx::Kdbx::open(api_credentials, api_filepath)?;
-                        Ok(output_ok)
-                    })(),
-                )
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let output_ok = crate::api::kdbx::Kdbx::open(api_credentials, api_filepath)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -2262,16 +2204,14 @@ fn wire__crate__api__kdbx__Kdbx_open_bytes_impl(
             let api_filepath = <Option<String>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let output_ok = crate::api::kdbx::Kdbx::open_bytes(
-                            api_credentials,
-                            api_bytes,
-                            api_filepath,
-                        )?;
-                        Ok(output_ok)
-                    })(),
-                )
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let output_ok = crate::api::kdbx::Kdbx::open_bytes(
+                        api_credentials,
+                        api_bytes,
+                        api_filepath,
+                    )?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -2303,26 +2243,24 @@ fn wire__crate__api__kdbx__Kdbx_save_impl(
             >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
                         }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok = crate::api::kdbx::Kdbx::save(&*api_that_guard)?;
-                        Ok(output_ok)
-                    })(),
-                )
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::kdbx::Kdbx::save(&*api_that_guard)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -2355,27 +2293,25 @@ fn wire__crate__api__kdbx__Kdbx_save_file_impl(
             let api_filepath = <Option<String>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
                         }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok =
-                            crate::api::kdbx::Kdbx::save_file(&*api_that_guard, api_filepath)?;
-                        Ok(output_ok)
-                    })(),
-                )
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok =
+                        crate::api::kdbx::Kdbx::save_file(&*api_that_guard, api_filepath)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -2407,26 +2343,73 @@ fn wire__crate__api__kdbx__Kdbx_summary_impl(
             >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
                         }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok = crate::api::kdbx::Kdbx::summary(&*api_that_guard)?;
-                        Ok(output_ok)
-                    })(),
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::kdbx::Kdbx::summary(&*api_that_guard)?;
+                    Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__api__kdbx__Kdbx_to_xml_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "Kdbx_to_xml",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
                 )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Kdbx>,
+            >>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
+                        }
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::kdbx::Kdbx::to_xml(&*api_that_guard)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -2459,29 +2442,27 @@ fn wire__crate__api__kdbx__Kdbx_verify_credentials_impl(
             let api_credentials = <Credentials>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let mut api_that_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_that, 0, false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                                _ => unreachable!(),
-                            }
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
                         }
-                        let api_that_guard = api_that_guard.unwrap();
-                        let output_ok = crate::api::kdbx::Kdbx::verify_credentials(
-                            &*api_that_guard,
-                            api_credentials,
-                        )?;
-                        Ok(output_ok)
-                    })(),
-                )
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::kdbx::Kdbx::verify_credentials(
+                        &*api_that_guard,
+                        api_credentials,
+                    )?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -2737,36 +2718,6 @@ fn wire__crate__api__frb_internal_logging_setup_dart_logging_output_impl(
                 let output_ok = Result::<_, ()>::Ok(
                     crate::api::frb_internal_logging_setup_dart_logging_output(),
                 )?;
-                Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__kdbx__greet_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "greet",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_name = <String>::sse_decode(&mut deserializer);
-            deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let output_ok = Result::<_, ()>::Ok(crate::api::kdbx::greet(api_name))?;
                 Ok(output_ok)
             })())
         },
@@ -3581,20 +3532,8 @@ impl SseDecode for crate::api::kdbx::KdbxAction {
                 return crate::api::kdbx::KdbxAction::UpdateGroup(var_field0);
             }
             2 => {
-                let mut var_databaseName = <Option<String>>::sse_decode(deserializer);
-                let mut var_databaseDescription = <Option<String>>::sse_decode(deserializer);
-                let mut var_maintenanceHistoryDays = <Option<isize>>::sse_decode(deserializer);
-                let mut var_color = <Option<Color>>::sse_decode(deserializer);
-                let mut var_historyMaxItems = <Option<isize>>::sse_decode(deserializer);
-                let mut var_historyMaxSize = <Option<isize>>::sse_decode(deserializer);
-                return crate::api::kdbx::KdbxAction::UpdateMeta {
-                    database_name: var_databaseName,
-                    database_description: var_databaseDescription,
-                    maintenance_history_days: var_maintenanceHistoryDays,
-                    color: var_color,
-                    history_max_items: var_historyMaxItems,
-                    history_max_size: var_historyMaxSize,
-                };
+                let mut var_field0 = <crate::api::kdbx::UpdateMeta>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxAction::UpdateMeta(var_field0);
             }
             3 => {
                 let mut var_field0 = <std::collections::HashMap<
@@ -3676,6 +3615,162 @@ impl SseDecode for crate::api::kdbx::KdbxConfig {
             inner_cipher_config: var_innerCipherConfig,
             kdf_config: var_kdfConfig,
         };
+    }
+}
+
+impl SseDecode for crate::api::kdbx::KdbxError {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut tag_ = <i32>::sse_decode(deserializer);
+        match tag_ {
+            0 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::ParseUuid {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            1 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::NotFound {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            2 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::CredentialsEmpty {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            3 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::Io {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            4 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::IncorrectCredentials {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            5 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::XML {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            6 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::InvalidKeyFile {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            7 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::Unknown {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            8 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::UnexpectedEof {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            9 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::InvalidKDBXIdentifier {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            10 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::InvalidKDBXVersion {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            11 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::Cryptography {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            12 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::DatabaseFormat {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            13 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::GenerateRandom {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            14 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::DuplicateUuid {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            15 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::MoveGroup {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            16 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::Merge {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            17 => {
+                let mut var_message = <String>::sse_decode(deserializer);
+                let mut var_backtrace = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxError::CannotDeleteRoot {
+                    message: var_message,
+                    backtrace: var_backtrace,
+                };
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
     }
 }
 
@@ -4054,7 +4149,7 @@ impl SseDecode for crate::api::kdbx::Meta {
         let mut var_defaultUsername = <Option<String>>::sse_decode(deserializer);
         let mut var_defaultUsernameChanged =
             <Option<chrono::NaiveDateTime>>::sse_decode(deserializer);
-        let mut var_maintenanceHistoryDays = <Option<usize>>::sse_decode(deserializer);
+        let mut var_maintenanceHistoryDays = <Option<isize>>::sse_decode(deserializer);
         let mut var_color = <Option<Color>>::sse_decode(deserializer);
         let mut var_masterKeyChanged = <Option<chrono::NaiveDateTime>>::sse_decode(deserializer);
         let mut var_masterKeyChangeRec = <Option<isize>>::sse_decode(deserializer);
@@ -4557,6 +4652,41 @@ impl SseDecode for () {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {}
 }
 
+impl SseDecode for crate::api::kdbx::UpdateMeta {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_databaseName = <Option<String>>::sse_decode(deserializer);
+        let mut var_databaseDescription = <Option<String>>::sse_decode(deserializer);
+        let mut var_defaultUsername = <Option<String>>::sse_decode(deserializer);
+        let mut var_maintenanceHistoryDays = <Option<isize>>::sse_decode(deserializer);
+        let mut var_color = <Option<Color>>::sse_decode(deserializer);
+        let mut var_masterKeyChangeRec = <Option<isize>>::sse_decode(deserializer);
+        let mut var_masterKeyChangeForce = <Option<isize>>::sse_decode(deserializer);
+        let mut var_memoryProtection =
+            <Option<crate::api::kdbx::MemoryProtection>>::sse_decode(deserializer);
+        let mut var_entryTemplatesGroup = <Option<String>>::sse_decode(deserializer);
+        let mut var_lastSelectedGroup = <Option<String>>::sse_decode(deserializer);
+        let mut var_lastTopVisibleGroup = <Option<String>>::sse_decode(deserializer);
+        let mut var_historyMaxItems = <Option<isize>>::sse_decode(deserializer);
+        let mut var_historyMaxSize = <Option<isize>>::sse_decode(deserializer);
+        return crate::api::kdbx::UpdateMeta {
+            database_name: var_databaseName,
+            database_description: var_databaseDescription,
+            default_username: var_defaultUsername,
+            maintenance_history_days: var_maintenanceHistoryDays,
+            color: var_color,
+            master_key_change_rec: var_masterKeyChangeRec,
+            master_key_change_force: var_masterKeyChangeForce,
+            memory_protection: var_memoryProtection,
+            entry_templates_group: var_entryTemplatesGroup,
+            last_selected_group: var_lastSelectedGroup,
+            last_top_visible_group: var_lastTopVisibleGroup,
+            history_max_items: var_historyMaxItems,
+            history_max_size: var_historyMaxSize,
+        };
+    }
+}
+
 impl SseDecode for usize {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -4621,36 +4751,33 @@ fn pde_ffi_dispatcher_primary_impl(
         ),
         27 => wire__crate__api__kdbx__Kdbx_action_impl(port, ptr, rust_vec_len, data_len),
         28 => wire__crate__api__kdbx__Kdbx_autofill_search_impl(port, ptr, rust_vec_len, data_len),
-        31 => wire__crate__api__kdbx__Kdbx_export_xml_impl(port, ptr, rust_vec_len, data_len),
-        32 => wire__crate__api__kdbx__Kdbx_get_attachment_impl(port, ptr, rust_vec_len, data_len),
-        33 => wire__crate__api__kdbx__Kdbx_get_auto_type_sequence_impl(
+        31 => wire__crate__api__kdbx__Kdbx_get_attachment_impl(port, ptr, rust_vec_len, data_len),
+        32 => wire__crate__api__kdbx__Kdbx_get_auto_type_sequence_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        34 => {
-            wire__crate__api__kdbx__Kdbx_get_composite_key_impl(port, ptr, rust_vec_len, data_len)
-        }
-        35 => wire__crate__api__kdbx__Kdbx_get_config_impl(port, ptr, rust_vec_len, data_len),
-        36 => wire__crate__api__kdbx__Kdbx_get_custom_data_impl(port, ptr, rust_vec_len, data_len),
-        37 => wire__crate__api__kdbx__Kdbx_get_entry_impl(port, ptr, rust_vec_len, data_len),
-        38 => {
+        34 => wire__crate__api__kdbx__Kdbx_get_config_impl(port, ptr, rust_vec_len, data_len),
+        35 => wire__crate__api__kdbx__Kdbx_get_custom_data_impl(port, ptr, rust_vec_len, data_len),
+        36 => wire__crate__api__kdbx__Kdbx_get_entry_impl(port, ptr, rust_vec_len, data_len),
+        37 => {
             wire__crate__api__kdbx__Kdbx_get_entry_historys_impl(port, ptr, rust_vec_len, data_len)
         }
-        39 => wire__crate__api__kdbx__Kdbx_get_entrys_impl(port, ptr, rust_vec_len, data_len),
-        40 => wire__crate__api__kdbx__Kdbx_get_group_impl(port, ptr, rust_vec_len, data_len),
-        41 => wire__crate__api__kdbx__Kdbx_get_groups_impl(port, ptr, rust_vec_len, data_len),
-        42 => wire__crate__api__kdbx__Kdbx_get_meta_impl(port, ptr, rust_vec_len, data_len),
-        43 => wire__crate__api__kdbx__Kdbx_get_public_custom_data_impl(
+        38 => wire__crate__api__kdbx__Kdbx_get_entrys_impl(port, ptr, rust_vec_len, data_len),
+        39 => wire__crate__api__kdbx__Kdbx_get_group_impl(port, ptr, rust_vec_len, data_len),
+        40 => wire__crate__api__kdbx__Kdbx_get_groups_impl(port, ptr, rust_vec_len, data_len),
+        41 => wire__crate__api__kdbx__Kdbx_get_meta_impl(port, ptr, rust_vec_len, data_len),
+        42 => wire__crate__api__kdbx__Kdbx_get_public_custom_data_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        44 => {
+        43 => {
             wire__crate__api__kdbx__Kdbx_get_recycle_items_impl(port, ptr, rust_vec_len, data_len)
         }
+        44 => wire__crate__api__kdbx__Kdbx_get_update_meta_impl(port, ptr, rust_vec_len, data_len),
         45 => wire__crate__api__kdbx__Kdbx_merge_impl(port, ptr, rust_vec_len, data_len),
         46 => wire__crate__api__kdbx__Kdbx_modify_password_impl(port, ptr, rust_vec_len, data_len),
         49 => wire__crate__api__kdbx__Kdbx_open_impl(port, ptr, rust_vec_len, data_len),
@@ -4658,11 +4785,12 @@ fn pde_ffi_dispatcher_primary_impl(
         51 => wire__crate__api__kdbx__Kdbx_save_impl(port, ptr, rust_vec_len, data_len),
         52 => wire__crate__api__kdbx__Kdbx_save_file_impl(port, ptr, rust_vec_len, data_len),
         53 => wire__crate__api__kdbx__Kdbx_summary_impl(port, ptr, rust_vec_len, data_len),
-        54 => {
+        54 => wire__crate__api__kdbx__Kdbx_to_xml_impl(port, ptr, rust_vec_len, data_len),
+        55 => {
             wire__crate__api__kdbx__Kdbx_verify_credentials_impl(port, ptr, rust_vec_len, data_len)
         }
-        57 => wire__crate__api__kdbx__field_summary_default_impl(port, ptr, rust_vec_len, data_len),
-        60 => wire__crate__api__frb_internal_init_logger_impl(port, ptr, rust_vec_len, data_len),
+        58 => wire__crate__api__kdbx__field_summary_default_impl(port, ptr, rust_vec_len, data_len),
+        61 => wire__crate__api__frb_internal_init_logger_impl(port, ptr, rust_vec_len, data_len),
         65 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
@@ -4707,19 +4835,19 @@ fn pde_ffi_dispatcher_sync_impl(
         26 => wire__crate__api__enigo__Enigo_text_impl(ptr, rust_vec_len, data_len),
         29 => wire__crate__api__kdbx__Kdbx_bind_event_callback_impl(ptr, rust_vec_len, data_len),
         30 => wire__crate__api__kdbx__Kdbx_create_impl(ptr, rust_vec_len, data_len),
+        33 => wire__crate__api__kdbx__Kdbx_get_composite_key_impl(ptr, rust_vec_len, data_len),
         47 => wire__crate__api__kdbx__Kdbx_new_entry_impl(ptr, rust_vec_len, data_len),
         48 => wire__crate__api__kdbx__Kdbx_new_group_impl(ptr, rust_vec_len, data_len),
-        55 => wire__crate__api__kdbx__entry_data_clone_impl(ptr, rust_vec_len, data_len),
-        56 => wire__crate__api__kdbx__entry_data_new_impl(ptr, rust_vec_len, data_len),
-        58 => wire__crate__api__kdbx__field_value_new_impl(ptr, rust_vec_len, data_len),
-        59 => wire__crate__api__frb_internal_dispose_logger_impl(ptr, rust_vec_len, data_len),
-        61 => wire__crate__api__frb_internal_logging_max_level_impl(ptr, rust_vec_len, data_len),
-        62 => wire__crate__api__frb_internal_logging_setup_dart_logging_output_impl(
+        56 => wire__crate__api__kdbx__entry_data_clone_impl(ptr, rust_vec_len, data_len),
+        57 => wire__crate__api__kdbx__entry_data_new_impl(ptr, rust_vec_len, data_len),
+        59 => wire__crate__api__kdbx__field_value_new_impl(ptr, rust_vec_len, data_len),
+        60 => wire__crate__api__frb_internal_dispose_logger_impl(ptr, rust_vec_len, data_len),
+        62 => wire__crate__api__frb_internal_logging_max_level_impl(ptr, rust_vec_len, data_len),
+        63 => wire__crate__api__frb_internal_logging_setup_dart_logging_output_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        63 => wire__crate__api__kdbx__greet_impl(ptr, rust_vec_len, data_len),
         64 => wire__crate__api__kdbx__group_data_new_impl(ptr, rust_vec_len, data_len),
         66 => wire__crate__api__enigo__test_key2key_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
@@ -5261,23 +5389,9 @@ impl flutter_rust_bridge::IntoDart for crate::api::kdbx::KdbxAction {
             crate::api::kdbx::KdbxAction::UpdateGroup(field0) => {
                 [1.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
-            crate::api::kdbx::KdbxAction::UpdateMeta {
-                database_name,
-                database_description,
-                maintenance_history_days,
-                color,
-                history_max_items,
-                history_max_size,
-            } => [
-                2.into_dart(),
-                database_name.into_into_dart().into_dart(),
-                database_description.into_into_dart().into_dart(),
-                maintenance_history_days.into_into_dart().into_dart(),
-                color.into_into_dart().into_dart(),
-                history_max_items.into_into_dart().into_dart(),
-                history_max_size.into_into_dart().into_dart(),
-            ]
-            .into_dart(),
+            crate::api::kdbx::KdbxAction::UpdateMeta(field0) => {
+                [2.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
             crate::api::kdbx::KdbxAction::UpdateMetaCustomData(field0) => {
                 [3.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
@@ -5349,6 +5463,132 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::kdbx::KdbxConfig>
     for crate::api::kdbx::KdbxConfig
 {
     fn into_into_dart(self) -> crate::api::kdbx::KdbxConfig {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::kdbx::KdbxError {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            crate::api::kdbx::KdbxError::ParseUuid { message, backtrace } => [
+                0.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::kdbx::KdbxError::NotFound { message, backtrace } => [
+                1.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::kdbx::KdbxError::CredentialsEmpty { message, backtrace } => [
+                2.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::kdbx::KdbxError::Io { message, backtrace } => [
+                3.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::kdbx::KdbxError::IncorrectCredentials { message, backtrace } => [
+                4.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::kdbx::KdbxError::XML { message, backtrace } => [
+                5.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::kdbx::KdbxError::InvalidKeyFile { message, backtrace } => [
+                6.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::kdbx::KdbxError::Unknown { message, backtrace } => [
+                7.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::kdbx::KdbxError::UnexpectedEof { message, backtrace } => [
+                8.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::kdbx::KdbxError::InvalidKDBXIdentifier { message, backtrace } => [
+                9.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::kdbx::KdbxError::InvalidKDBXVersion { message, backtrace } => [
+                10.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::kdbx::KdbxError::Cryptography { message, backtrace } => [
+                11.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::kdbx::KdbxError::DatabaseFormat { message, backtrace } => [
+                12.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::kdbx::KdbxError::GenerateRandom { message, backtrace } => [
+                13.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::kdbx::KdbxError::DuplicateUuid { message, backtrace } => [
+                14.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::kdbx::KdbxError::MoveGroup { message, backtrace } => [
+                15.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::kdbx::KdbxError::Merge { message, backtrace } => [
+                16.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::kdbx::KdbxError::CannotDeleteRoot { message, backtrace } => [
+                17.into_dart(),
+                message.into_into_dart().into_dart(),
+                backtrace.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::kdbx::KdbxError {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::kdbx::KdbxError>
+    for crate::api::kdbx::KdbxError
+{
+    fn into_into_dart(self) -> crate::api::kdbx::KdbxError {
         self
     }
 }
@@ -5699,6 +5939,35 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::kdbx::Times>>
 {
     fn into_into_dart(self) -> FrbWrapper<crate::api::kdbx::Times> {
         self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::kdbx::UpdateMeta {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.database_name.into_into_dart().into_dart(),
+            self.database_description.into_into_dart().into_dart(),
+            self.default_username.into_into_dart().into_dart(),
+            self.maintenance_history_days.into_into_dart().into_dart(),
+            self.color.into_into_dart().into_dart(),
+            self.master_key_change_rec.into_into_dart().into_dart(),
+            self.master_key_change_force.into_into_dart().into_dart(),
+            self.memory_protection.into_into_dart().into_dart(),
+            self.entry_templates_group.into_into_dart().into_dart(),
+            self.last_selected_group.into_into_dart().into_dart(),
+            self.last_top_visible_group.into_into_dart().into_dart(),
+            self.history_max_items.into_into_dart().into_dart(),
+            self.history_max_size.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::kdbx::UpdateMeta {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::kdbx::UpdateMeta>
+    for crate::api::kdbx::UpdateMeta
+{
+    fn into_into_dart(self) -> crate::api::kdbx::UpdateMeta {
+        self
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -6250,21 +6519,9 @@ impl SseEncode for crate::api::kdbx::KdbxAction {
                 <i32>::sse_encode(1, serializer);
                 <crate::api::kdbx::GroupData>::sse_encode(field0, serializer);
             }
-            crate::api::kdbx::KdbxAction::UpdateMeta {
-                database_name,
-                database_description,
-                maintenance_history_days,
-                color,
-                history_max_items,
-                history_max_size,
-            } => {
+            crate::api::kdbx::KdbxAction::UpdateMeta(field0) => {
                 <i32>::sse_encode(2, serializer);
-                <Option<String>>::sse_encode(database_name, serializer);
-                <Option<String>>::sse_encode(database_description, serializer);
-                <Option<isize>>::sse_encode(maintenance_history_days, serializer);
-                <Option<Color>>::sse_encode(color, serializer);
-                <Option<isize>>::sse_encode(history_max_items, serializer);
-                <Option<isize>>::sse_encode(history_max_size, serializer);
+                <crate::api::kdbx::UpdateMeta>::sse_encode(field0, serializer);
             }
             crate::api::kdbx::KdbxAction::UpdateMetaCustomData(field0) => {
                 <i32>::sse_encode(3, serializer);
@@ -6331,6 +6588,107 @@ impl SseEncode for crate::api::kdbx::KdbxConfig {
         <crate::api::kdbx::CompressionConfig>::sse_encode(self.compression_config, serializer);
         <crate::api::kdbx::InnerCipherConfig>::sse_encode(self.inner_cipher_config, serializer);
         <crate::api::kdbx::KdfConfig>::sse_encode(self.kdf_config, serializer);
+    }
+}
+
+impl SseEncode for crate::api::kdbx::KdbxError {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        match self {
+            crate::api::kdbx::KdbxError::ParseUuid { message, backtrace } => {
+                <i32>::sse_encode(0, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            crate::api::kdbx::KdbxError::NotFound { message, backtrace } => {
+                <i32>::sse_encode(1, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            crate::api::kdbx::KdbxError::CredentialsEmpty { message, backtrace } => {
+                <i32>::sse_encode(2, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            crate::api::kdbx::KdbxError::Io { message, backtrace } => {
+                <i32>::sse_encode(3, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            crate::api::kdbx::KdbxError::IncorrectCredentials { message, backtrace } => {
+                <i32>::sse_encode(4, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            crate::api::kdbx::KdbxError::XML { message, backtrace } => {
+                <i32>::sse_encode(5, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            crate::api::kdbx::KdbxError::InvalidKeyFile { message, backtrace } => {
+                <i32>::sse_encode(6, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            crate::api::kdbx::KdbxError::Unknown { message, backtrace } => {
+                <i32>::sse_encode(7, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            crate::api::kdbx::KdbxError::UnexpectedEof { message, backtrace } => {
+                <i32>::sse_encode(8, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            crate::api::kdbx::KdbxError::InvalidKDBXIdentifier { message, backtrace } => {
+                <i32>::sse_encode(9, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            crate::api::kdbx::KdbxError::InvalidKDBXVersion { message, backtrace } => {
+                <i32>::sse_encode(10, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            crate::api::kdbx::KdbxError::Cryptography { message, backtrace } => {
+                <i32>::sse_encode(11, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            crate::api::kdbx::KdbxError::DatabaseFormat { message, backtrace } => {
+                <i32>::sse_encode(12, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            crate::api::kdbx::KdbxError::GenerateRandom { message, backtrace } => {
+                <i32>::sse_encode(13, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            crate::api::kdbx::KdbxError::DuplicateUuid { message, backtrace } => {
+                <i32>::sse_encode(14, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            crate::api::kdbx::KdbxError::MoveGroup { message, backtrace } => {
+                <i32>::sse_encode(15, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            crate::api::kdbx::KdbxError::Merge { message, backtrace } => {
+                <i32>::sse_encode(16, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            crate::api::kdbx::KdbxError::CannotDeleteRoot { message, backtrace } => {
+                <i32>::sse_encode(17, serializer);
+                <String>::sse_encode(message, serializer);
+                <String>::sse_encode(backtrace, serializer);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
     }
 }
 
@@ -6646,7 +7004,7 @@ impl SseEncode for crate::api::kdbx::Meta {
         <Option<chrono::NaiveDateTime>>::sse_encode(self.database_description_changed, serializer);
         <Option<String>>::sse_encode(self.default_username, serializer);
         <Option<chrono::NaiveDateTime>>::sse_encode(self.default_username_changed, serializer);
-        <Option<usize>>::sse_encode(self.maintenance_history_days, serializer);
+        <Option<isize>>::sse_encode(self.maintenance_history_days, serializer);
         <Option<Color>>::sse_encode(self.color, serializer);
         <Option<chrono::NaiveDateTime>>::sse_encode(self.master_key_changed, serializer);
         <Option<isize>>::sse_encode(self.master_key_change_rec, serializer);
@@ -7062,6 +7420,28 @@ impl SseEncode for u8 {
 impl SseEncode for () {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {}
+}
+
+impl SseEncode for crate::api::kdbx::UpdateMeta {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <Option<String>>::sse_encode(self.database_name, serializer);
+        <Option<String>>::sse_encode(self.database_description, serializer);
+        <Option<String>>::sse_encode(self.default_username, serializer);
+        <Option<isize>>::sse_encode(self.maintenance_history_days, serializer);
+        <Option<Color>>::sse_encode(self.color, serializer);
+        <Option<isize>>::sse_encode(self.master_key_change_rec, serializer);
+        <Option<isize>>::sse_encode(self.master_key_change_force, serializer);
+        <Option<crate::api::kdbx::MemoryProtection>>::sse_encode(
+            self.memory_protection,
+            serializer,
+        );
+        <Option<String>>::sse_encode(self.entry_templates_group, serializer);
+        <Option<String>>::sse_encode(self.last_selected_group, serializer);
+        <Option<String>>::sse_encode(self.last_top_visible_group, serializer);
+        <Option<isize>>::sse_encode(self.history_max_items, serializer);
+        <Option<isize>>::sse_encode(self.history_max_size, serializer);
+    }
 }
 
 impl SseEncode for usize {

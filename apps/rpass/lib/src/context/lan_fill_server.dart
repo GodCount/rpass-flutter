@@ -140,8 +140,7 @@ class LanFillServerState extends State<LanFillServerProvider>
           deviceInfo: DeviceInfoDto(
             deviceName: Platform.localHostname,
             appVersion: RpassInfo.version,
-            fingerprint:
-                Store.settings.securityContext.certificateHash,
+            fingerprint: Store.settings.securityContext.certificateHash,
           ),
           securityContext: Store.settings.securityContext,
         ),
@@ -170,7 +169,7 @@ class LanFillServerState extends State<LanFillServerProvider>
         },
       );
     } catch (e, s) {
-      showError("$e\n$s");
+      showError(e, s);
     }
   }
 
@@ -186,15 +185,14 @@ class LanFillServerState extends State<LanFillServerProvider>
           deviceInfo: DeviceInfoDto(
             deviceName: Platform.localHostname,
             appVersion: RpassInfo.version,
-            fingerprint:
-                Store.settings.securityContext.certificateHash,
+            fingerprint: Store.settings.securityContext.certificateHash,
           ),
         ),
       );
 
       await _cilent!.register(data);
     } catch (e, s) {
-      showError("$e\n$s");
+      showError(e, s);
     }
   }
 
@@ -212,7 +210,7 @@ class LanFillServerState extends State<LanFillServerProvider>
         await _cilent!.autofill(dto);
       }
     } catch (e, s) {
-      showError("$e\n$s");
+      showError(e, s);
     }
   }
 
@@ -222,7 +220,7 @@ class LanFillServerState extends State<LanFillServerProvider>
         await _cilent!.uploadFile(filename, bytes);
       }
     } catch (e, s) {
-      showError("$e\n$s");
+      showError(e, s);
     }
   }
 
@@ -288,9 +286,9 @@ class LanFillServerState extends State<LanFillServerProvider>
           filename: path.basename(filename),
         );
       });
-    } catch (e) {
+    } catch (e, s) {
       if (e is! CancelException) {
-        showError(e);
+        showError(e, s);
       }
     }
   }

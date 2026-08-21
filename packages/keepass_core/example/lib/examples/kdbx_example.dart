@@ -193,7 +193,7 @@ class _KdbxExamplePageState extends State<KdbxExamplePage> {
             times: kdbx.Times(),
             customData: const {},
             isExpanded: true,
-            isRecycleBin: false
+            isRecycleBin: false,
           ),
         ),
       );
@@ -210,7 +210,10 @@ class _KdbxExamplePageState extends State<KdbxExamplePage> {
     if (name == null) return;
 
     await _run('重命名数据库', () async {
-      await _db!.action(action: kdbx.KdbxAction.updateMeta(databaseName: name));
+      final updateMeta = await _db!.getUpdateMeta();
+      updateMeta.databaseName = name;
+
+      await _db!.action(action: kdbx.KdbxAction.updateMeta(updateMeta));
       await _reload();
     });
   }

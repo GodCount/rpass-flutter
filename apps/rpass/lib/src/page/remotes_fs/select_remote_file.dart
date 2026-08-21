@@ -134,8 +134,8 @@ class _SelectRemoteFileState extends State<SelectRemoteFilePage> {
         }
         _currentFileNode = node;
       }
-    } catch (e) {
-      showError(e);
+    } catch (e, s) {
+      showError(e, s);
     } finally {
       setState(() {
         _loading = false;
@@ -163,8 +163,8 @@ class _SelectRemoteFileState extends State<SelectRemoteFilePage> {
       } else {
         context.router.pop(await _selectedNode!.file.toConfig());
       }
-    } catch (e) {
-      showError(e);
+    } catch (e, s) {
+      showError(e, s);
     }
   }
 
@@ -202,8 +202,8 @@ class _SelectRemoteFileState extends State<SelectRemoteFilePage> {
                   final file = await _currentFileNode!.file.relative(result);
                   await file.mkdir();
                   _readdir();
-                } catch (e) {
-                  showError(e);
+                } catch (e, s) {
+                  showError(e, s);
                 }
               }
             }

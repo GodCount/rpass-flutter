@@ -86,7 +86,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0-beta.5';
 
   @override
-  int get rustContentHash => -1247116195;
+  int get rustContentHash => 1720923843;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -196,8 +196,6 @@ abstract class RustLibApi extends BaseApi {
     String? filepath,
   });
 
-  Future<Uint8List> crateApiKdbxKdbxExportXml({required Kdbx that});
-
   Future<Uint8List> crateApiKdbxKdbxGetAttachment({
     required Kdbx that,
     required int id,
@@ -208,7 +206,7 @@ abstract class RustLibApi extends BaseApi {
     required String id,
   });
 
-  Future<Uint8List> crateApiKdbxKdbxGetCompositeKey({required Kdbx that});
+  Uint8List crateApiKdbxKdbxGetCompositeKey({required Kdbx that});
 
   Future<KdbxConfig> crateApiKdbxKdbxGetConfig({required Kdbx that});
 
@@ -258,6 +256,8 @@ abstract class RustLibApi extends BaseApi {
     required Kdbx that,
   });
 
+  Future<UpdateMeta> crateApiKdbxKdbxGetUpdateMeta({required Kdbx that});
+
   Future<MergeLog> crateApiKdbxKdbxMerge({
     required Kdbx that,
     required Kdbx kdbx,
@@ -291,6 +291,8 @@ abstract class RustLibApi extends BaseApi {
     required Kdbx that,
   });
 
+  Future<Uint8List> crateApiKdbxKdbxToXml({required Kdbx that});
+
   Future<bool> crateApiKdbxKdbxVerifyCredentials({
     required Kdbx that,
     required Credentials credentials,
@@ -316,8 +318,6 @@ abstract class RustLibApi extends BaseApi {
   String crateApiFrbInternalLoggingMaxLevel();
 
   bool crateApiFrbInternalLoggingSetupDartLoggingOutput();
-
-  String crateApiKdbxGreet({required String name});
 
   GroupData crateApiKdbxGroupDataNew({required String parent});
 
@@ -633,7 +633,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         codec: SseCodec(
           decodeSuccessData:
               sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCredentials,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxCredentialsFormCompositeKeyConstMeta,
         argValues: [key],
@@ -664,7 +664,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         codec: SseCodec(
           decodeSuccessData:
               sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCredentials,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxCredentialsFromConstMeta,
         argValues: [password, keyfile],
@@ -695,7 +695,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxCredentialsGetCompositeKeyConstMeta,
         argValues: [that],
@@ -725,7 +725,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxCredentialsRandomKeyFileConstMeta,
         argValues: [],
@@ -1094,7 +1094,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxActionConstMeta,
         argValues: [that, action],
@@ -1133,7 +1133,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_autofill_dataset,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxAutofillSearchConstMeta,
         argValues: [that, metadata, entryId],
@@ -1220,37 +1220,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
-  Future<Uint8List> crateApiKdbxKdbxExportXml({required Kdbx that}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKdbx(
-            that,
-            serializer,
-          );
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 31,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_list_prim_u_8_strict,
-          decodeErrorData: sse_decode_AnyhowException,
-        ),
-        constMeta: kCrateApiKdbxKdbxExportXmlConstMeta,
-        argValues: [that],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiKdbxKdbxExportXmlConstMeta =>
-      const TaskConstMeta(debugName: "Kdbx_export_xml", argNames: ["that"]);
-
-  @override
   Future<Uint8List> crateApiKdbxKdbxGetAttachment({
     required Kdbx that,
     required int id,
@@ -1267,13 +1236,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 32,
+            funcId: 31,
             port: port_,
           );
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxGetAttachmentConstMeta,
         argValues: [that, id],
@@ -1305,13 +1274,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 33,
+            funcId: 32,
             port: port_,
           );
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_record_entry_data_string,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxGetAutoTypeSequenceConstMeta,
         argValues: [that, id],
@@ -1327,25 +1296,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<Uint8List> crateApiKdbxKdbxGetCompositeKey({required Kdbx that}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
+  Uint8List crateApiKdbxKdbxGetCompositeKey({required Kdbx that}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKdbx(
             that,
             serializer,
           );
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 34,
-            port: port_,
-          );
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 33)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxGetCompositeKeyConstMeta,
         argValues: [that],
@@ -1373,13 +1337,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 35,
+            funcId: 34,
             port: port_,
           );
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_kdbx_config,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxGetConfigConstMeta,
         argValues: [that],
@@ -1410,7 +1374,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 36,
+            funcId: 35,
             port: port_,
           );
         },
@@ -1450,13 +1414,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 37,
+            funcId: 36,
             port: port_,
           );
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_entry_data,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxGetEntryConstMeta,
         argValues: [that, id, historyIndex],
@@ -1487,13 +1451,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 38,
+            funcId: 37,
             port: port_,
           );
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_entry_data,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxGetEntryHistorysConstMeta,
         argValues: [that, id],
@@ -1533,13 +1497,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 39,
+            funcId: 38,
             port: port_,
           );
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_entry_data,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxGetEntrysConstMeta,
         argValues: [
@@ -1584,13 +1548,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 40,
+            funcId: 39,
             port: port_,
           );
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_group_data,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxGetGroupConstMeta,
         argValues: [that, id],
@@ -1619,13 +1583,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 41,
+            funcId: 40,
             port: port_,
           );
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_Map_String_group_data_None,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxGetGroupsConstMeta,
         argValues: [that],
@@ -1650,13 +1614,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 42,
+            funcId: 41,
             port: port_,
           );
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_meta,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxGetMetaConstMeta,
         argValues: [that],
@@ -1685,7 +1649,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 43,
+            funcId: 42,
             port: port_,
           );
         },
@@ -1722,13 +1686,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 44,
+            funcId: 43,
             port: port_,
           );
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_record_list_group_data_list_entry_data,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxGetRecycleItemsConstMeta,
         argValues: [that],
@@ -1740,6 +1704,40 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiKdbxKdbxGetRecycleItemsConstMeta =>
       const TaskConstMeta(
         debugName: "Kdbx_get_recycle_items",
+        argNames: ["that"],
+      );
+
+  @override
+  Future<UpdateMeta> crateApiKdbxKdbxGetUpdateMeta({required Kdbx that}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKdbx(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 44,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_update_meta,
+          decodeErrorData: sse_decode_kdbx_error,
+        ),
+        constMeta: kCrateApiKdbxKdbxGetUpdateMetaConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKdbxKdbxGetUpdateMetaConstMeta =>
+      const TaskConstMeta(
+        debugName: "Kdbx_get_update_meta",
         argNames: ["that"],
       );
 
@@ -1769,7 +1767,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_merge_log,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxMergeConstMeta,
         argValues: [that, kdbx],
@@ -1807,7 +1805,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxModifyPasswordConstMeta,
         argValues: [that, credentials],
@@ -1836,7 +1834,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_entry_data,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxNewEntryConstMeta,
         argValues: [that],
@@ -1862,7 +1860,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_group_data,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxNewGroupConstMeta,
         argValues: [that],
@@ -1898,7 +1896,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         codec: SseCodec(
           decodeSuccessData:
               sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKdbx,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxOpenConstMeta,
         argValues: [credentials, filepath],
@@ -1938,7 +1936,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         codec: SseCodec(
           decodeSuccessData:
               sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKdbx,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxOpenBytesConstMeta,
         argValues: [credentials, bytes, filepath],
@@ -1971,7 +1969,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxSaveConstMeta,
         argValues: [that],
@@ -2006,7 +2004,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxSaveFileConstMeta,
         argValues: [that, filepath],
@@ -2042,7 +2040,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         codec: SseCodec(
           decodeSuccessData:
               sse_decode_record_field_summary_meta_map_string_group_data_none,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxSummaryConstMeta,
         argValues: [that],
@@ -2053,6 +2051,37 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiKdbxKdbxSummaryConstMeta =>
       const TaskConstMeta(debugName: "Kdbx_summary", argNames: ["that"]);
+
+  @override
+  Future<Uint8List> crateApiKdbxKdbxToXml({required Kdbx that}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKdbx(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 54,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_prim_u_8_strict,
+          decodeErrorData: sse_decode_kdbx_error,
+        ),
+        constMeta: kCrateApiKdbxKdbxToXmlConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKdbxKdbxToXmlConstMeta =>
+      const TaskConstMeta(debugName: "Kdbx_to_xml", argNames: ["that"]);
 
   @override
   Future<bool> crateApiKdbxKdbxVerifyCredentials({
@@ -2074,13 +2103,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 54,
+            funcId: 55,
             port: port_,
           );
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_bool,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxVerifyCredentialsConstMeta,
         argValues: [that, credentials],
@@ -2102,7 +2131,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_box_autoadd_entry_data(that, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 55)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 56)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_entry_data,
@@ -2125,7 +2154,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(parent, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 56)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 57)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_entry_data,
@@ -2150,7 +2179,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 57,
+            funcId: 58,
             port: port_,
           );
         },
@@ -2179,7 +2208,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(value, serializer);
           sse_encode_opt_box_autoadd_bool(protected, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 58)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 59)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_field_value,
@@ -2203,7 +2232,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 59)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 60)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -2237,7 +2266,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 60,
+              funcId: 61,
               port: port_,
             );
           },
@@ -2266,7 +2295,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 61)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 62)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -2291,7 +2320,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 62)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 63)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_bool,
@@ -2310,29 +2339,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         debugName: "frb_internal_logging_setup_dart_logging_output",
         argNames: [],
       );
-
-  @override
-  String crateApiKdbxGreet({required String name}) {
-    return handler.executeSync(
-      SyncTask(
-        callFfi: () {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(name, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 63)!;
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiKdbxGreetConstMeta,
-        argValues: [name],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiKdbxGreetConstMeta =>
-      const TaskConstMeta(debugName: "greet", argNames: ["name"]);
 
   @override
   GroupData crateApiKdbxGroupDataNew({required String parent}) {
@@ -2954,6 +2960,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  UpdateMeta dco_decode_box_autoadd_update_meta(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_update_meta(raw);
+  }
+
+  @protected
   BigInt dco_decode_box_autoadd_usize(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_usize(raw);
@@ -3163,15 +3175,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         );
       case 2:
         return KdbxAction_UpdateMeta(
-          databaseName: dco_decode_opt_String(raw[1]),
-          databaseDescription: dco_decode_opt_String(raw[2]),
-          maintenanceHistoryDays: dco_decode_opt_box_autoadd_isize(raw[3]),
-          color:
-              dco_decode_opt_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerColor(
-                raw[4],
-              ),
-          historyMaxItems: dco_decode_opt_box_autoadd_isize(raw[5]),
-          historyMaxSize: dco_decode_opt_box_autoadd_isize(raw[6]),
+          dco_decode_box_autoadd_update_meta(raw[1]),
         );
       case 3:
         return KdbxAction_UpdateMetaCustomData(
@@ -3227,6 +3231,105 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       innerCipherConfig: dco_decode_inner_cipher_config(arr[2]),
       kdfConfig: dco_decode_kdf_config(arr[3]),
     );
+  }
+
+  @protected
+  KdbxError dco_decode_kdbx_error(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    switch (raw[0]) {
+      case 0:
+        return KdbxError_ParseUuid(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      case 1:
+        return KdbxError_NotFound(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      case 2:
+        return KdbxError_CredentialsEmpty(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      case 3:
+        return KdbxError_Io(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      case 4:
+        return KdbxError_IncorrectCredentials(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      case 5:
+        return KdbxError_XML(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      case 6:
+        return KdbxError_InvalidKeyFile(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      case 7:
+        return KdbxError_Unknown(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      case 8:
+        return KdbxError_UnexpectedEof(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      case 9:
+        return KdbxError_InvalidKDBXIdentifier(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      case 10:
+        return KdbxError_InvalidKDBXVersion(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      case 11:
+        return KdbxError_Cryptography(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      case 12:
+        return KdbxError_DatabaseFormat(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      case 13:
+        return KdbxError_GenerateRandom(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      case 14:
+        return KdbxError_DuplicateUuid(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      case 15:
+        return KdbxError_MoveGroup(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      case 16:
+        return KdbxError_Merge(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      case 17:
+        return KdbxError_CannotDeleteRoot(
+          message: dco_decode_String(raw[1]),
+          backtrace: dco_decode_String(raw[2]),
+        );
+      default:
+        throw Exception("unreachable");
+    }
   }
 
   @protected
@@ -3498,7 +3601,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       defaultUsernameChanged: dco_decode_opt_box_autoadd_Chrono_NaiveDateTime(
         arr[6],
       ),
-      maintenanceHistoryDays: dco_decode_opt_box_autoadd_usize(arr[7]),
+      maintenanceHistoryDays: dco_decode_opt_box_autoadd_isize(arr[7]),
       color:
           dco_decode_opt_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerColor(
             arr[8],
@@ -3860,6 +3963,32 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void dco_decode_unit(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return;
+  }
+
+  @protected
+  UpdateMeta dco_decode_update_meta(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 13)
+      throw Exception('unexpected arr length: expect 13 but see ${arr.length}');
+    return UpdateMeta(
+      databaseName: dco_decode_opt_String(arr[0]),
+      databaseDescription: dco_decode_opt_String(arr[1]),
+      defaultUsername: dco_decode_opt_String(arr[2]),
+      maintenanceHistoryDays: dco_decode_opt_box_autoadd_isize(arr[3]),
+      color:
+          dco_decode_opt_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerColor(
+            arr[4],
+          ),
+      masterKeyChangeRec: dco_decode_opt_box_autoadd_isize(arr[5]),
+      masterKeyChangeForce: dco_decode_opt_box_autoadd_isize(arr[6]),
+      memoryProtection: dco_decode_opt_box_autoadd_memory_protection(arr[7]),
+      entryTemplatesGroup: dco_decode_opt_String(arr[8]),
+      lastSelectedGroup: dco_decode_opt_String(arr[9]),
+      lastTopVisibleGroup: dco_decode_opt_String(arr[10]),
+      historyMaxItems: dco_decode_opt_box_autoadd_isize(arr[11]),
+      historyMaxSize: dco_decode_opt_box_autoadd_isize(arr[12]),
+    );
   }
 
   @protected
@@ -4427,6 +4556,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  UpdateMeta sse_decode_box_autoadd_update_meta(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_update_meta(deserializer));
+  }
+
+  @protected
   BigInt sse_decode_box_autoadd_usize(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_usize(deserializer));
@@ -4681,27 +4816,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         var var_field0 = sse_decode_box_autoadd_group_data(deserializer);
         return KdbxAction_UpdateGroup(var_field0);
       case 2:
-        var var_databaseName = sse_decode_opt_String(deserializer);
-        var var_databaseDescription = sse_decode_opt_String(deserializer);
-        var var_maintenanceHistoryDays = sse_decode_opt_box_autoadd_isize(
-          deserializer,
-        );
-        var var_color =
-            sse_decode_opt_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerColor(
-              deserializer,
-            );
-        var var_historyMaxItems = sse_decode_opt_box_autoadd_isize(
-          deserializer,
-        );
-        var var_historyMaxSize = sse_decode_opt_box_autoadd_isize(deserializer);
-        return KdbxAction_UpdateMeta(
-          databaseName: var_databaseName,
-          databaseDescription: var_databaseDescription,
-          maintenanceHistoryDays: var_maintenanceHistoryDays,
-          color: var_color,
-          historyMaxItems: var_historyMaxItems,
-          historyMaxSize: var_historyMaxSize,
-        );
+        var var_field0 = sse_decode_box_autoadd_update_meta(deserializer);
+        return KdbxAction_UpdateMeta(var_field0);
       case 3:
         var var_field0 =
             sse_decode_Map_String_opt_box_autoadd_custom_data_value_None(
@@ -4760,6 +4876,134 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       innerCipherConfig: var_innerCipherConfig,
       kdfConfig: var_kdfConfig,
     );
+  }
+
+  @protected
+  KdbxError sse_decode_kdbx_error(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var tag_ = sse_decode_i_32(deserializer);
+    switch (tag_) {
+      case 0:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_ParseUuid(
+          message: var_message,
+          backtrace: var_backtrace,
+        );
+      case 1:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_NotFound(
+          message: var_message,
+          backtrace: var_backtrace,
+        );
+      case 2:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_CredentialsEmpty(
+          message: var_message,
+          backtrace: var_backtrace,
+        );
+      case 3:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_Io(message: var_message, backtrace: var_backtrace);
+      case 4:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_IncorrectCredentials(
+          message: var_message,
+          backtrace: var_backtrace,
+        );
+      case 5:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_XML(message: var_message, backtrace: var_backtrace);
+      case 6:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_InvalidKeyFile(
+          message: var_message,
+          backtrace: var_backtrace,
+        );
+      case 7:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_Unknown(
+          message: var_message,
+          backtrace: var_backtrace,
+        );
+      case 8:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_UnexpectedEof(
+          message: var_message,
+          backtrace: var_backtrace,
+        );
+      case 9:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_InvalidKDBXIdentifier(
+          message: var_message,
+          backtrace: var_backtrace,
+        );
+      case 10:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_InvalidKDBXVersion(
+          message: var_message,
+          backtrace: var_backtrace,
+        );
+      case 11:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_Cryptography(
+          message: var_message,
+          backtrace: var_backtrace,
+        );
+      case 12:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_DatabaseFormat(
+          message: var_message,
+          backtrace: var_backtrace,
+        );
+      case 13:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_GenerateRandom(
+          message: var_message,
+          backtrace: var_backtrace,
+        );
+      case 14:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_DuplicateUuid(
+          message: var_message,
+          backtrace: var_backtrace,
+        );
+      case 15:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_MoveGroup(
+          message: var_message,
+          backtrace: var_backtrace,
+        );
+      case 16:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_Merge(message: var_message, backtrace: var_backtrace);
+      case 17:
+        var var_message = sse_decode_String(deserializer);
+        var var_backtrace = sse_decode_String(deserializer);
+        return KdbxError_CannotDeleteRoot(
+          message: var_message,
+          backtrace: var_backtrace,
+        );
+      default:
+        throw UnimplementedError('');
+    }
   }
 
   @protected
@@ -5123,7 +5367,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_defaultUsername = sse_decode_opt_String(deserializer);
     var var_defaultUsernameChanged =
         sse_decode_opt_box_autoadd_Chrono_NaiveDateTime(deserializer);
-    var var_maintenanceHistoryDays = sse_decode_opt_box_autoadd_usize(
+    var var_maintenanceHistoryDays = sse_decode_opt_box_autoadd_isize(
       deserializer,
     );
     var var_color =
@@ -5652,6 +5896,48 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   void sse_decode_unit(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
+  }
+
+  @protected
+  UpdateMeta sse_decode_update_meta(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_databaseName = sse_decode_opt_String(deserializer);
+    var var_databaseDescription = sse_decode_opt_String(deserializer);
+    var var_defaultUsername = sse_decode_opt_String(deserializer);
+    var var_maintenanceHistoryDays = sse_decode_opt_box_autoadd_isize(
+      deserializer,
+    );
+    var var_color =
+        sse_decode_opt_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerColor(
+          deserializer,
+        );
+    var var_masterKeyChangeRec = sse_decode_opt_box_autoadd_isize(deserializer);
+    var var_masterKeyChangeForce = sse_decode_opt_box_autoadd_isize(
+      deserializer,
+    );
+    var var_memoryProtection = sse_decode_opt_box_autoadd_memory_protection(
+      deserializer,
+    );
+    var var_entryTemplatesGroup = sse_decode_opt_String(deserializer);
+    var var_lastSelectedGroup = sse_decode_opt_String(deserializer);
+    var var_lastTopVisibleGroup = sse_decode_opt_String(deserializer);
+    var var_historyMaxItems = sse_decode_opt_box_autoadd_isize(deserializer);
+    var var_historyMaxSize = sse_decode_opt_box_autoadd_isize(deserializer);
+    return UpdateMeta(
+      databaseName: var_databaseName,
+      databaseDescription: var_databaseDescription,
+      defaultUsername: var_defaultUsername,
+      maintenanceHistoryDays: var_maintenanceHistoryDays,
+      color: var_color,
+      masterKeyChangeRec: var_masterKeyChangeRec,
+      masterKeyChangeForce: var_masterKeyChangeForce,
+      memoryProtection: var_memoryProtection,
+      entryTemplatesGroup: var_entryTemplatesGroup,
+      lastSelectedGroup: var_lastSelectedGroup,
+      lastTopVisibleGroup: var_lastTopVisibleGroup,
+      historyMaxItems: var_historyMaxItems,
+      historyMaxSize: var_historyMaxSize,
+    );
   }
 
   @protected
@@ -6309,6 +6595,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_box_autoadd_update_meta(
+    UpdateMeta self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_update_meta(self, serializer);
+  }
+
+  @protected
   void sse_encode_box_autoadd_usize(BigInt self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(self, serializer);
@@ -6506,24 +6801,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case KdbxAction_UpdateGroup(field0: final field0):
         sse_encode_i_32(1, serializer);
         sse_encode_box_autoadd_group_data(field0, serializer);
-      case KdbxAction_UpdateMeta(
-        databaseName: final databaseName,
-        databaseDescription: final databaseDescription,
-        maintenanceHistoryDays: final maintenanceHistoryDays,
-        color: final color,
-        historyMaxItems: final historyMaxItems,
-        historyMaxSize: final historyMaxSize,
-      ):
+      case KdbxAction_UpdateMeta(field0: final field0):
         sse_encode_i_32(2, serializer);
-        sse_encode_opt_String(databaseName, serializer);
-        sse_encode_opt_String(databaseDescription, serializer);
-        sse_encode_opt_box_autoadd_isize(maintenanceHistoryDays, serializer);
-        sse_encode_opt_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerColor(
-          color,
-          serializer,
-        );
-        sse_encode_opt_box_autoadd_isize(historyMaxItems, serializer);
-        sse_encode_opt_box_autoadd_isize(historyMaxSize, serializer);
+        sse_encode_box_autoadd_update_meta(field0, serializer);
       case KdbxAction_UpdateMetaCustomData(field0: final field0):
         sse_encode_i_32(3, serializer);
         sse_encode_Map_String_opt_box_autoadd_custom_data_value_None(
@@ -6580,6 +6860,130 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_compression_config(self.compressionConfig, serializer);
     sse_encode_inner_cipher_config(self.innerCipherConfig, serializer);
     sse_encode_kdf_config(self.kdfConfig, serializer);
+  }
+
+  @protected
+  void sse_encode_kdbx_error(KdbxError self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    switch (self) {
+      case KdbxError_ParseUuid(
+        message: final message,
+        backtrace: final backtrace,
+      ):
+        sse_encode_i_32(0, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+      case KdbxError_NotFound(
+        message: final message,
+        backtrace: final backtrace,
+      ):
+        sse_encode_i_32(1, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+      case KdbxError_CredentialsEmpty(
+        message: final message,
+        backtrace: final backtrace,
+      ):
+        sse_encode_i_32(2, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+      case KdbxError_Io(message: final message, backtrace: final backtrace):
+        sse_encode_i_32(3, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+      case KdbxError_IncorrectCredentials(
+        message: final message,
+        backtrace: final backtrace,
+      ):
+        sse_encode_i_32(4, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+      case KdbxError_XML(message: final message, backtrace: final backtrace):
+        sse_encode_i_32(5, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+      case KdbxError_InvalidKeyFile(
+        message: final message,
+        backtrace: final backtrace,
+      ):
+        sse_encode_i_32(6, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+      case KdbxError_Unknown(
+        message: final message,
+        backtrace: final backtrace,
+      ):
+        sse_encode_i_32(7, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+      case KdbxError_UnexpectedEof(
+        message: final message,
+        backtrace: final backtrace,
+      ):
+        sse_encode_i_32(8, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+      case KdbxError_InvalidKDBXIdentifier(
+        message: final message,
+        backtrace: final backtrace,
+      ):
+        sse_encode_i_32(9, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+      case KdbxError_InvalidKDBXVersion(
+        message: final message,
+        backtrace: final backtrace,
+      ):
+        sse_encode_i_32(10, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+      case KdbxError_Cryptography(
+        message: final message,
+        backtrace: final backtrace,
+      ):
+        sse_encode_i_32(11, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+      case KdbxError_DatabaseFormat(
+        message: final message,
+        backtrace: final backtrace,
+      ):
+        sse_encode_i_32(12, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+      case KdbxError_GenerateRandom(
+        message: final message,
+        backtrace: final backtrace,
+      ):
+        sse_encode_i_32(13, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+      case KdbxError_DuplicateUuid(
+        message: final message,
+        backtrace: final backtrace,
+      ):
+        sse_encode_i_32(14, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+      case KdbxError_MoveGroup(
+        message: final message,
+        backtrace: final backtrace,
+      ):
+        sse_encode_i_32(15, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+      case KdbxError_Merge(message: final message, backtrace: final backtrace):
+        sse_encode_i_32(16, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+      case KdbxError_CannotDeleteRoot(
+        message: final message,
+        backtrace: final backtrace,
+      ):
+        sse_encode_i_32(17, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_String(backtrace, serializer);
+    }
   }
 
   @protected
@@ -6911,7 +7315,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       self.defaultUsernameChanged,
       serializer,
     );
-    sse_encode_opt_box_autoadd_usize(self.maintenanceHistoryDays, serializer);
+    sse_encode_opt_box_autoadd_isize(self.maintenanceHistoryDays, serializer);
     sse_encode_opt_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerColor(
       self.color,
       serializer,
@@ -7401,6 +7805,30 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_update_meta(UpdateMeta self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_opt_String(self.databaseName, serializer);
+    sse_encode_opt_String(self.databaseDescription, serializer);
+    sse_encode_opt_String(self.defaultUsername, serializer);
+    sse_encode_opt_box_autoadd_isize(self.maintenanceHistoryDays, serializer);
+    sse_encode_opt_CustomSerializer_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerColor(
+      self.color,
+      serializer,
+    );
+    sse_encode_opt_box_autoadd_isize(self.masterKeyChangeRec, serializer);
+    sse_encode_opt_box_autoadd_isize(self.masterKeyChangeForce, serializer);
+    sse_encode_opt_box_autoadd_memory_protection(
+      self.memoryProtection,
+      serializer,
+    );
+    sse_encode_opt_String(self.entryTemplatesGroup, serializer);
+    sse_encode_opt_String(self.lastSelectedGroup, serializer);
+    sse_encode_opt_String(self.lastTopVisibleGroup, serializer);
+    sse_encode_opt_box_autoadd_isize(self.historyMaxItems, serializer);
+    sse_encode_opt_box_autoadd_isize(self.historyMaxSize, serializer);
+  }
+
+  @protected
   void sse_encode_usize(BigInt self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putBigUint64(self);
@@ -7586,9 +8014,6 @@ class KdbxImpl extends RustOpaque implements Kdbx {
     callback: callback,
   );
 
-  Future<Uint8List> exportXml() =>
-      RustLib.instance.api.crateApiKdbxKdbxExportXml(that: this);
-
   Future<Uint8List> getAttachment({required int id}) =>
       RustLib.instance.api.crateApiKdbxKdbxGetAttachment(that: this, id: id);
 
@@ -7598,7 +8023,7 @@ class KdbxImpl extends RustOpaque implements Kdbx {
         id: id,
       );
 
-  Future<Uint8List> getCompositeKey() =>
+  Uint8List getCompositeKey() =>
       RustLib.instance.api.crateApiKdbxKdbxGetCompositeKey(that: this);
 
   Future<KdbxConfig> getConfig() =>
@@ -7652,6 +8077,9 @@ class KdbxImpl extends RustOpaque implements Kdbx {
   Future<(List<GroupData>, List<EntryData>)> getRecycleItems() =>
       RustLib.instance.api.crateApiKdbxKdbxGetRecycleItems(that: this);
 
+  Future<UpdateMeta> getUpdateMeta() =>
+      RustLib.instance.api.crateApiKdbxKdbxGetUpdateMeta(that: this);
+
   Future<MergeLog> merge({required Kdbx kdbx}) =>
       RustLib.instance.api.crateApiKdbxKdbxMerge(that: this, kdbx: kdbx);
 
@@ -7674,6 +8102,9 @@ class KdbxImpl extends RustOpaque implements Kdbx {
 
   Future<(FieldSummary, Meta, Map<String, GroupData>)> summary() =>
       RustLib.instance.api.crateApiKdbxKdbxSummary(that: this);
+
+  Future<Uint8List> toXml() =>
+      RustLib.instance.api.crateApiKdbxKdbxToXml(that: this);
 
   Future<bool> verifyCredentials({required Credentials credentials}) => RustLib
       .instance

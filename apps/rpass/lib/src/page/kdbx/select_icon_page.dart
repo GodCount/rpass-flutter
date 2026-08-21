@@ -89,11 +89,13 @@ class _SelectIconPageState extends State<SelectIconPage> {
         onPressed: () async {
           try {
             final (_, bytes) = await SimpleFile.openFile(type: FileType.image);
-            _onIconTap(KdbxIconWidgetData(icon: KdbxIcon.custom("custom", bytes)));
-          } catch (e) {
+            _onIconTap(
+              KdbxIconWidgetData(icon: KdbxIcon.custom("custom", bytes)),
+            );
+          } catch (e, s) {
             if (e is! CancelException) {
-              _logger.warning("read image file fail!", e);
-              showError(e);
+              _logger.warning("read image file fail!", e, s);
+              showError(e, s);
             }
           }
         },

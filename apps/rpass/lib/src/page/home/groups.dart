@@ -143,7 +143,7 @@ class _GroupsItemState extends State<_GroupsItem>
     final t = I18n.of(context)!;
 
     if (await showConfirmDialog(title: t.delete, message: t.is_move_recycle)) {
-      await kdbxAction(KdbxAction.delete([kdbxGroup.id]));
+      await kdbxAction(KdbxAction.move2Trash([kdbxGroup.id]));
     }
   }
 

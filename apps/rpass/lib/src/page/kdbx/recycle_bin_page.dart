@@ -81,9 +81,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
           enabled: object is EntryData,
           onTap: () async {
             if (object is EntryData) {
-              await context.router.popAndPush(
-                LookAccountRoute(id: object.id, readOnly: true),
-              );
+              await context.router.popAndPush(LookAccountRoute(id: object.id));
             }
           },
         ),
@@ -240,7 +238,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
           case ViewContextMenuItem():
             if (kdbxObject is EntryData) {
               context.router.platformNavigate(
-                LookAccountRoute(id: kdbxObject.id, readOnly: true),
+                LookAccountRoute(id: kdbxObject.id),
               );
             }
             break;

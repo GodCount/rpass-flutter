@@ -59,6 +59,7 @@ class _HomePageState extends State<HomePage>
     super.initState();
     Store.settings.addListener(_settingsListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      Store.kdbx.syncController.initConfig();
       _settingsListener();
     });
   }
@@ -218,7 +219,7 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
                                     !Store.kdbx.syncController.isSyncing &&
                                         Store.kdbx.syncController.lastError != null
                                     ? () {
-                                        showError(Store.kdbx.syncController.lastError);
+                                        showError(Store.kdbx.syncController.lastError!);
                                       }
                                     : null,
                                 icon:

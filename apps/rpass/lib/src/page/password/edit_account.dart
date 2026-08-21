@@ -96,30 +96,36 @@ class _EditAccountPageState extends State<EditAccountPage>
   }
 
   Future<void> _getKdbxEntry() async {
-    final kdbxController = Store.kdbx;
+    try {
+      final kdbxController = Store.kdbx;
 
-    _kdbxEntry =
-        widget.id != null
-              ? await kdbxController.kdbx!.getEntry(id: widget.id!)
-              : kdbxController.kdbx!.newEntry()
-          ..fields[KdbxKeyCommon.PASSWORD] = FieldValue.protected(
-            randomPassword(length: 10),
-          );
+      _kdbxEntry =
+          widget.id != null
+                ? await kdbxController.kdbx!.getEntry(id: widget.id!)
+                : kdbxController.kdbx!.newEntry()
+            ..fields[KdbxKeyCommon.PASSWORD] = FieldValue.protected(
+              randomPassword(length: 10),
+            );
 
-    if (widget.id != null && widget.clone) {
-      _kdbxEntry = _kdbxEntry.clone();
+      if (widget.id != null && widget.clone) {
+        _kdbxEntry = _kdbxEntry.clone();
+      }
+
+      _groupData =
+          kdbxController.getGroup(_kdbxEntry.parent) ??
+          kdbxController.rootGroup();
+
+      _entryFields = _kdbxEntry.customEntries.map((item) => item.key).toSet();
+      _urlsFields = _kdbxEntry.moreUrlsKeys.toSet();
+      _deleteFields = {};
+      _from = GlobalKey();
+
+      setState(() {});
+    } on KdbxError_NotFound {
+      context.router.pop();
+    } catch (e, s) {
+      showError(e, s);
     }
-
-    _groupData =
-        kdbxController.getGroup(_kdbxEntry.parent) ??
-        kdbxController.rootGroup();
-
-    _entryFields = _kdbxEntry.customEntries.map((item) => item.key).toSet();
-    _urlsFields = _kdbxEntry.moreUrlsKeys.toSet();
-    _deleteFields = {};
-    _from = GlobalKey();
-
-    setState(() {});
   }
 
   void _kdbxEntrySave() async {
@@ -180,9 +186,10 @@ class _EditAccountPageState extends State<EditAccountPage>
         _kdbxEntry.fields.remove(field.key);
       }
 
-      if (oldValue != null) {
-        _kdbxEntry.fields[field.renameKdbxKey ?? field.key] =
-            field.value ?? oldValue;
+      final value = field.value ?? oldValue;
+
+      if (value != null) {
+        _kdbxEntry.fields[field.renameKdbxKey ?? field.key] = value;
       }
     } else if (field is EntryTitleFieldSaved) {
       _kdbxEntry.icon = field.icon;
@@ -1066,10 +1073,10 @@ class _EntryFieldState extends State<EntryField> {
                   ),
                 ),
               );
-            } catch (e) {
+            } catch (e, s) {
               if (e is! CancelException) {
-                _logger.warning("open file fail!", e);
-                showError(e);
+                _logger.warning("open file fail!", e, s);
+                showError(e, s);
               }
             }
             return null;

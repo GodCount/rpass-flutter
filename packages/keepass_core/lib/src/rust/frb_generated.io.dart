@@ -268,6 +268,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   int dco_decode_box_autoadd_u_32(dynamic raw);
 
   @protected
+  UpdateMeta dco_decode_box_autoadd_update_meta(dynamic raw);
+
+  @protected
   BigInt dco_decode_box_autoadd_usize(dynamic raw);
 
   @protected
@@ -325,6 +328,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   KdbxConfig dco_decode_kdbx_config(dynamic raw);
+
+  @protected
+  KdbxError dco_decode_kdbx_error(dynamic raw);
 
   @protected
   KdbxEvent dco_decode_kdbx_event(dynamic raw);
@@ -546,6 +552,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void dco_decode_unit(dynamic raw);
+
+  @protected
+  UpdateMeta dco_decode_update_meta(dynamic raw);
 
   @protected
   BigInt dco_decode_usize(dynamic raw);
@@ -809,6 +818,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   int sse_decode_box_autoadd_u_32(SseDeserializer deserializer);
 
   @protected
+  UpdateMeta sse_decode_box_autoadd_update_meta(SseDeserializer deserializer);
+
+  @protected
   BigInt sse_decode_box_autoadd_usize(SseDeserializer deserializer);
 
   @protected
@@ -870,6 +882,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   KdbxConfig sse_decode_kdbx_config(SseDeserializer deserializer);
+
+  @protected
+  KdbxError sse_decode_kdbx_error(SseDeserializer deserializer);
 
   @protected
   KdbxEvent sse_decode_kdbx_event(SseDeserializer deserializer);
@@ -1135,6 +1150,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_decode_unit(SseDeserializer deserializer);
+
+  @protected
+  UpdateMeta sse_decode_update_meta(SseDeserializer deserializer);
 
   @protected
   BigInt sse_decode_usize(SseDeserializer deserializer);
@@ -1473,6 +1491,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_box_autoadd_u_32(int self, SseSerializer serializer);
 
   @protected
+  void sse_encode_box_autoadd_update_meta(
+    UpdateMeta self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_usize(BigInt self, SseSerializer serializer);
 
   @protected
@@ -1546,6 +1570,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_kdbx_config(KdbxConfig self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_kdbx_error(KdbxError self, SseSerializer serializer);
 
   @protected
   void sse_encode_kdbx_event(KdbxEvent self, SseSerializer serializer);
@@ -1877,6 +1904,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_unit(void self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_update_meta(UpdateMeta self, SseSerializer serializer);
 
   @protected
   void sse_encode_usize(BigInt self, SseSerializer serializer);

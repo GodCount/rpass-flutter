@@ -52,10 +52,10 @@ class _ExportAccountPageState extends State<ExportAccountPage>
         );
         showToast(I18n.of(context)!.export_done_location(filepath));
       }
-    } catch (e) {
+    } catch (e, s) {
       if (e is! CancelException) {
-        _logger.warning("export kdbx file fail!", e);
-        showError(e);
+        _logger.warning("export kdbx file fail!", e, s);
+        showError(e, s);
       }
     }
   }
@@ -72,14 +72,14 @@ class _ExportAccountPageState extends State<ExportAccountPage>
       final kdbx = Store.kdbx.kdbx!;
       try {
         final filepath = await SimpleFile.saveFile(
-          data: await kdbx.exportXml(),
+          data: await kdbx.toXml(),
           filename: "${RpassInfo.appName}.xml",
         );
         showToast(t.export_done_location(filepath));
-      } catch (e) {
+      } catch (e, s) {
         if (e is! CancelException) {
-          _logger.warning("export file file fail!", e);
-          showError(e);
+          _logger.warning("export file file fail!", e, s);
+          showError(e, s);
         }
       }
     }
@@ -108,10 +108,10 @@ class _ExportAccountPageState extends State<ExportAccountPage>
           filename: "${RpassInfo.appName}_${adapter.name}.csv",
         );
         showToast(t.export_done_location(filepath));
-      } catch (e) {
+      } catch (e, s) {
         if (e is! CancelException) {
-          _logger.warning("export file file fail!", e);
-          showError(e);
+          _logger.warning("export file file fail!", e, s);
+          showError(e, s);
         }
       }
     }

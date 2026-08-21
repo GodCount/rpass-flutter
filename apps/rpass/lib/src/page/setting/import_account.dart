@@ -50,10 +50,10 @@ class _ImportAccountPageState extends State<ImportAccountPage>
       if (await kdbxAction(KdbxAction.importEntry(items: list))) {
         showToast("${t.import_done} ${list.length}");
       }
-    } catch (e) {
+    } catch (e, s) {
       if (e is! CancelException) {
-        _logger.warning("import csv file fail!", e);
-        showError(e);
+        _logger.warning("import csv file fail!", e, s);
+        showError(e, s);
       }
     }
   }

@@ -93,10 +93,6 @@ void kdbxTests() {
     return (db, groups.values.firstWhere((group) => group.parent == null).id);
   }
 
-  test('bridge is reachable', () {
-    expect(greet(name: 'Tom'), 'Hello, Tom!');
-  });
-
   test('a new database has a root group and a recycle bin', () async {
     final (db, rootId) = await createDatabase('fresh');
 
@@ -107,7 +103,10 @@ void kdbxTests() {
     expect(meta.recyclebinEnabled, isTrue);
     expect(meta.recyclebinUuid, isNotNull);
     expect(groups, hasLength(2));
-    expect(groups.values.where((group) => group.parent == rootId), hasLength(1));
+    expect(
+      groups.values.where((group) => group.parent == rootId),
+      hasLength(1),
+    );
     expect(File(pathFor('fresh')).existsSync(), isTrue);
   });
 
@@ -254,12 +253,12 @@ void kdbxTests() {
   test('meta can be updated', () async {
     final (db, _) = await createDatabase('meta');
 
-    await db.action(
-      action: const KdbxAction.updateMeta(
-        databaseName: 'Demo',
-        databaseDescription: 'created by the integration test',
-      ),
-    );
+    final updateMeta = await db.getUpdateMeta();
+
+    updateMeta.databaseName = 'Demo';
+    updateMeta.databaseDescription = 'created by the integration test';
+
+    await db.action(action: KdbxAction.updateMeta(updateMeta));
     await db.saveFile();
 
     final reopened = await Kdbx.open(

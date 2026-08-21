@@ -67,8 +67,8 @@ class _OtherSettingsPageState extends State<OtherSettingsPage>
           _existsCache = false;
         });
       }
-    } catch (e) {
-      showError(e);
+    } catch (e, s) {
+      showError(e, s);
     }
   }
 

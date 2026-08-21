@@ -5,14 +5,21 @@ use std::sync::{Arc, RwLock};
 use std::{collections::HashSet, fs::File};
 
 use flutter_rust_bridge::{frb, BaseAsyncRuntime, DartFnFuture};
-use keepass::db::{AttachmentId, CustomIconId, EntryId, GroupId, GroupRef, Value};
+use keepass::db::merge::MergeError;
+use keepass::db::{
+    AttachmentId, CannotDeleteRootError, CustomIconId, CustomIconNotFoundError,
+    DatabaseFormatError, DatabaseOpenError, DatabaseSaveError, DestinationGroupNotFoundError,
+    DuplicateEntryIdError, DuplicateGroupIdError, EntryId, GroupId, GroupRef, MoveGroupError,
+    Value,
+};
+use keepass::error::{DatabaseKeyError, DatabaseVersionParseError, RandomError};
 use keepass::{
     config::{DatabaseConfig, KdfConfig as KdfConfig2},
-    db::{uuid_by_str, EntryRef, Uuid},
-    Database, DatabaseKey,
+    db::{uuid_by_str, EntryRef, Error as UuidError, Uuid},
+    Database, DatabaseKey, KeyFile,
 };
 
-use chrono::{DateTime, NaiveDateTime};
+use chrono::NaiveDateTime;
 pub use keepass::{
     config::{
         CompressionConfig, InnerCipherConfig, OuterCipherConfig, VariantDictionaryValue,
@@ -183,7 +190,7 @@ impl Kdbx {
         db.meta.recyclebin_changed = Some(Times::now());
     }
 
-    pub fn open(credentials: Credentials, filepath: String) -> anyhow::Result<Self> {
+    pub fn open(credentials: Credentials, filepath: String) -> Result<Self, KdbxError> {
         let mut file = File::open(&filepath)?;
 
         let database = Database::open(&mut file, credentials.key.clone())?;
@@ -200,7 +207,7 @@ impl Kdbx {
         credentials: Credentials,
         bytes: Vec<u8>,
         filepath: Option<String>,
-    ) -> anyhow::Result<Self> {
+    ) -> Result<Self, KdbxError> {
         let database = Database::parse(&bytes, credentials.key.clone())?;
 
         Ok(Self {
@@ -211,13 +218,14 @@ impl Kdbx {
         })
     }
 
-    pub fn save_file(&self, filepath: Option<String>) -> anyhow::Result<()> {
-        let file_path = filepath
-            .as_ref()
-            .or(self.filepath.as_ref())
-            .ok_or(anyhow::anyhow!(
-                "Cannot save database: no filepath was provided."
-            ))?;
+    pub fn save_file(&self, filepath: Option<String>) -> Result<(), KdbxError> {
+        let file_path =
+            filepath
+                .as_ref()
+                .or(self.filepath.as_ref())
+                .ok_or(KdbxError::not_found(
+                    "Cannot save database: no filepath was provided.",
+                ))?;
 
         let mut file = File::create(file_path)?;
 
@@ -229,7 +237,7 @@ impl Kdbx {
         Ok(())
     }
 
-    pub fn save(&self) -> anyhow::Result<Vec<u8>> {
+    pub fn save(&self) -> Result<Vec<u8>, KdbxError> {
         let db = self.database.read().unwrap();
 
         let mut buf = Vec::new();
@@ -239,8 +247,10 @@ impl Kdbx {
         Ok(buf)
     }
 
-    pub fn export_xml(&self) -> anyhow::Result<Vec<u8>> {
-        todo!("")
+    pub fn to_xml(&self) -> Result<Vec<u8>, KdbxError> {
+        let db = self.database.read().unwrap();
+
+        Ok(db.to_xml()?)
     }
 
     #[frb(sync)]
@@ -260,12 +270,17 @@ impl Kdbx {
         }
     }
 
-    pub fn get_meta(&self) -> anyhow::Result<Meta> {
+    pub fn get_meta(&self) -> Result<Meta, KdbxError> {
         let db = self.database.read().unwrap();
         Ok(Meta::from(&db.meta))
     }
 
-    pub fn get_config(&self) -> anyhow::Result<KdbxConfig> {
+    pub fn get_update_meta(&self) -> Result<UpdateMeta, KdbxError> {
+        let db = self.database.read().unwrap();
+        Ok(UpdateMeta::from(&db.meta))
+    }
+
+    pub fn get_config(&self) -> Result<KdbxConfig, KdbxError> {
         let db = self.database.read().unwrap();
         Ok(KdbxConfig::from(&db.config))
     }
@@ -277,13 +292,26 @@ impl Kdbx {
         ignore_group_config: Option<bool>,
         include_recycle: Option<bool>,
         case_sensitive: Option<bool>,
-    ) -> anyhow::Result<Vec<EntryData>> {
+    ) -> Result<Vec<EntryData>, KdbxError> {
         let db = self.database.read().unwrap();
 
         let mut result: Vec<EntryData> = Vec::new();
 
-        let ignore_group_config = ignore_group_config.unwrap_or(false);
-        let include_recycle = include_recycle.unwrap_or(false);
+        // 如果指定了具体的组,则获取组内的 entry
+        // 并且忽略传入的 ignore_group_config, include_recycle 配置
+        let specify_group = group_id.is_some();
+
+        let ignore_group_config = if specify_group {
+            true
+        } else {
+            ignore_group_config.unwrap_or(false)
+        };
+
+        let include_recycle = if specify_group {
+            true
+        } else {
+            include_recycle.unwrap_or(false)
+        };
 
         let sreach_parse = sreach.and_then(|input| {
             if input.trim().is_empty() {
@@ -298,12 +326,14 @@ impl Kdbx {
 
         let group = if let Some(id) = group_id {
             db.group(GroupId::from_uuid(uuid_by_str(id.as_str())?))
-                .ok_or(anyhow::anyhow!("Group with ID {id} not found"))?
+                .ok_or(KdbxError::not_found(format!(
+                    "Group with ID {id} not found"
+                )))?
         } else {
             db.root()
         };
 
-        let recycle_id = if include_recycle {
+        let recycle_id = if !include_recycle {
             db.recycle_bin().map(|it| it.id())
         } else {
             None
@@ -314,6 +344,7 @@ impl Kdbx {
         while let Some(group_id) = stack.pop() {
             let group = db.group(group_id).unwrap();
 
+            // 如果存在, 就排除掉回收站的
             if let Some(id) = recycle_id {
                 if group
                     .find_parent(None, |group| {
@@ -351,35 +382,45 @@ impl Kdbx {
                 result.extend(group.entries().map(|item| EntryData::from(&item)));
             }
 
-            stack.extend(group.group_ids());
+            if !specify_group {
+                stack.extend(group.group_ids());
+            }
         }
 
         Ok(result)
     }
 
-    pub fn get_entry(&self, id: String, history_index: Option<i32>) -> anyhow::Result<EntryData> {
+    pub fn get_entry(
+        &self,
+        id: String,
+        history_index: Option<i32>,
+    ) -> Result<EntryData, KdbxError> {
         let db = self.database.read().unwrap();
         let entry = db
             .entry(EntryId::from_uuid(uuid_by_str(id.as_str())?))
-            .ok_or(anyhow::anyhow!("Entry with ID {id} not found"))?;
+            .ok_or(KdbxError::not_found(format!(
+                "Entry with ID {id} not found"
+            )))?;
 
         if let Some(index) = history_index {
             if let Some(entry) = entry.historical(index as usize) {
                 return Ok(EntryData::from(&entry));
             }
-            return Err(anyhow::anyhow!(
+            return Err(KdbxError::not_found(format!(
                 "History entry with index {index} not found for entry with ID {id}"
-            ));
+            )));
         }
 
         Ok(EntryData::from(&entry))
     }
 
-    pub fn get_auto_type_sequence(&self, id: String) -> anyhow::Result<(EntryData, String)> {
+    pub fn get_auto_type_sequence(&self, id: String) -> Result<(EntryData, String), KdbxError> {
         let db = self.database.read().unwrap();
         let entry = db
             .entry(EntryId::from_uuid(uuid_by_str(id.as_str())?))
-            .ok_or(anyhow::anyhow!("Entry with ID {id} not found"))?;
+            .ok_or(KdbxError::not_found(format!(
+                "Entry with ID {id} not found"
+            )))?;
 
         let sequence = entry
             .autotype
@@ -396,11 +437,13 @@ impl Kdbx {
         Ok((EntryData::from(&entry), sequence))
     }
 
-    pub fn get_entry_historys(&self, id: String) -> anyhow::Result<Vec<EntryData>> {
+    pub fn get_entry_historys(&self, id: String) -> Result<Vec<EntryData>, KdbxError> {
         let db = self.database.read().unwrap();
         let entry = db
             .entry(EntryId::from_uuid(uuid_by_str(id.as_str())?))
-            .ok_or(anyhow::anyhow!("Entry with ID {id} not found"))?;
+            .ok_or(KdbxError::not_found(format!(
+                "Entry with ID {id} not found"
+            )))?;
 
         if let Some(history) = &entry.history {
             Ok((0..history.get_entries().len())
@@ -411,12 +454,14 @@ impl Kdbx {
         }
     }
 
-    pub fn get_attachment(&self, id: i32) -> anyhow::Result<Vec<u8>> {
+    pub fn get_attachment(&self, id: i32) -> Result<Vec<u8>, KdbxError> {
         let db = self.database.read().unwrap();
         if let Some(attach) = db.attachment(AttachmentId::new(id as usize)) {
             Ok(attach.get().clone())
         } else {
-            Err(anyhow::anyhow!("Attachment with ID {id} not found"))
+            Err(KdbxError::not_found(format!(
+                "Attachment with ID {id} not found"
+            )))
         }
     }
 
@@ -446,7 +491,7 @@ impl Kdbx {
             .and_then(|var| var.get(&key).cloned())
     }
 
-    pub fn get_groups(&self) -> anyhow::Result<HashMap<String, GroupData>> {
+    pub fn get_groups(&self) -> Result<HashMap<String, GroupData>, KdbxError> {
         let db = self.database.read().unwrap();
         Ok(db
             .iter_all_groups()
@@ -455,16 +500,18 @@ impl Kdbx {
             .collect())
     }
 
-    pub fn get_group(&self, id: String) -> anyhow::Result<GroupData> {
+    pub fn get_group(&self, id: String) -> Result<GroupData, KdbxError> {
         let db = self.database.read().unwrap();
         let group = db
             .group(GroupId::from_uuid(uuid_by_str(id.as_str())?))
-            .ok_or(anyhow::anyhow!("Entry with ID {id} not found"))?;
+            .ok_or(KdbxError::not_found(format!(
+                "Entry with ID {id} not found"
+            )))?;
 
         Ok(GroupData::from(&group))
     }
 
-    pub fn get_recycle_items(&self) -> anyhow::Result<(Vec<GroupData>, Vec<EntryData>)> {
+    pub fn get_recycle_items(&self) -> Result<(Vec<GroupData>, Vec<EntryData>), KdbxError> {
         let db = self.database.read().unwrap();
 
         if let Some(recycle) = db.recycle_bin() {
@@ -484,18 +531,18 @@ impl Kdbx {
     }
 
     #[frb(sync)]
-    pub fn new_entry(&self) -> anyhow::Result<EntryData> {
+    pub fn new_entry(&self) -> Result<EntryData, KdbxError> {
         let db = self.database.read().unwrap();
         Ok(EntryData::new(db.root().id().to_string()))
     }
 
     #[frb(sync)]
-    pub fn new_group(&self) -> anyhow::Result<GroupData> {
+    pub fn new_group(&self) -> Result<GroupData, KdbxError> {
         let db = self.database.read().unwrap();
         Ok(GroupData::new(db.root().id().to_string()))
     }
 
-    pub fn action(&self, action: KdbxAction) -> anyhow::Result<()> {
+    pub fn action(&self, action: KdbxAction) -> Result<(), KdbxError> {
         let mut db = self.database.write().unwrap();
 
         Self::impl_action(&mut db, action)?;
@@ -507,7 +554,7 @@ impl Kdbx {
         Ok(())
     }
 
-    fn impl_action(db: &mut Database, action: KdbxAction) -> anyhow::Result<()> {
+    fn impl_action(db: &mut Database, action: KdbxAction) -> Result<(), KdbxError> {
         match action {
             KdbxAction::UpdateEntry(entry_data) => {
                 let uuid = EntryId::from_uuid(uuid_by_str(&entry_data.id)?);
@@ -515,14 +562,12 @@ impl Kdbx {
                 let group_uuid = GroupId::from_uuid(uuid_by_str(&entry_data.parent)?);
 
                 // 验证组是否存在
-                let _ = db.group(group_uuid).ok_or(anyhow::anyhow!(
+                let _ = db.group(group_uuid).ok_or(KdbxError::not_found(format!(
                     "Destination group with ID {group_uuid} not found"
-                ))?;
+                )))?;
 
                 if let Some(mut entry) = db.entry_mut(uuid.clone()) {
-
                     let mut entry = entry.track_changes();
-
 
                     if group_uuid != entry.parent_id() {
                         entry.move_to(group_uuid)?;
@@ -609,9 +654,11 @@ impl Kdbx {
 
                     entry.times.last_modification = Some(Times::now())
                 } else {
-                    let mut group = db.group_mut(group_uuid).ok_or(anyhow::anyhow!(
-                        "Destination group with ID {group_uuid} not found"
-                    ))?;
+                    let mut group =
+                        db.group_mut(group_uuid)
+                            .ok_or(KdbxError::not_found(format!(
+                                "Destination group with ID {group_uuid} not found"
+                            )))?;
 
                     let mut entry = group.add_entry_with_id(uuid)?;
 
@@ -685,9 +732,7 @@ impl Kdbx {
                 };
 
                 if let Some(mut group) = db.group_mut(uuid) {
-                    let group_ref = group.as_ref();
-
-                    if parent.is_some() && group_ref.parent_id() != parent {
+                    if parent.is_some() && group.parent_id() != parent {
                         group.move_to(parent.unwrap())?;
                         group.times.location_changed = Some(Times::now());
                     }
@@ -751,9 +796,9 @@ impl Kdbx {
                     group.times.last_modification = Some(Times::now())
                 } else {
                     let mut parent_group = match parent {
-                        Some(id) => db
-                            .group_mut(id)
-                            .ok_or(anyhow::anyhow!("Destination group with ID {id} not found"))?,
+                        Some(id) => db.group_mut(id).ok_or(KdbxError::not_found(format!(
+                            "Destination group with ID {id} not found"
+                        )))?,
                         None => db.root_mut(),
                     };
 
@@ -812,39 +857,73 @@ impl Kdbx {
                     };
                 }
             }
-            KdbxAction::UpdateMeta {
-                database_name,
-                database_description,
-                maintenance_history_days,
-                color,
-                history_max_items,
-                history_max_size,
-            } => {
-                if let Some(value) = database_name {
-                    db.meta.database_name = Some(value);
+            KdbxAction::UpdateMeta(meta) => {
+                if db.meta.database_name != meta.database_name {
+                    db.meta.database_name = meta.database_name;
                     db.meta.database_name_changed = Some(Times::now());
                 }
 
-                if let Some(value) = database_description {
-                    db.meta.database_description = Some(value);
+                if db.meta.database_description != meta.database_description {
+                    db.meta.database_description = meta.database_description;
                     db.meta.database_description_changed = Some(Times::now());
                 }
 
-                if let Some(value) = maintenance_history_days {
-                    db.meta.maintenance_history_days = Some(value as usize);
+                if db.meta.default_username != meta.default_username {
+                    db.meta.default_username = meta.default_username;
+                    db.meta.default_username_changed = Some(Times::now());
                 }
 
-                if let Some(value) = color {
-                    db.meta.color = Some(value);
+                let maintenance_history_days = meta.maintenance_history_days.map(|v| v as usize);
+                if db.meta.maintenance_history_days != maintenance_history_days {
+                    db.meta.maintenance_history_days = maintenance_history_days;
                 }
 
-                if let Some(value) = history_max_items {
-                    db.meta.history_max_items = Some(value);
+                if db.meta.color != meta.color {
+                    db.meta.color = meta.color;
                 }
 
-                if let Some(value) = history_max_size {
-                    db.meta.history_max_size = Some(value);
+                if db.meta.master_key_change_rec != meta.master_key_change_rec {
+                    db.meta.master_key_change_rec = meta.master_key_change_rec;
                 }
+
+                if db.meta.memory_protection != meta.memory_protection {
+                    db.meta.memory_protection = meta.memory_protection;
+                }
+
+                if db.meta.master_key_change_force != meta.master_key_change_force {
+                    db.meta.master_key_change_force = meta.master_key_change_force;
+                }
+
+                let entry_templates_group = meta
+                    .entry_templates_group
+                    .and_then(|item| uuid_by_str(&item).ok());
+                if db.meta.entry_templates_group != entry_templates_group {
+                    db.meta.entry_templates_group = entry_templates_group
+                }
+
+                let last_selected_group = meta
+                    .last_selected_group
+                    .and_then(|item| uuid_by_str(&item).ok());
+                if db.meta.last_selected_group != last_selected_group {
+                    db.meta.last_selected_group = last_selected_group;
+                }
+
+                let last_top_visible_group = meta
+                    .last_top_visible_group
+                    .and_then(|item| uuid_by_str(&item).ok());
+                if db.meta.last_top_visible_group != last_top_visible_group {
+                    db.meta.last_top_visible_group = last_top_visible_group;
+                }
+
+                if db.meta.history_max_items != meta.history_max_items {
+                    db.meta.history_max_items = meta.history_max_items;
+                }
+
+                if db.meta.history_max_size != meta.history_max_size {
+                    db.meta.history_max_size = meta.history_max_size;
+                }
+
+                db.meta.settings_changed = Some(Times::now());
             }
             KdbxAction::UpdateMetaCustomData(hash_map) => {
                 for (key, value) in hash_map {
@@ -900,9 +979,9 @@ impl Kdbx {
 
                 for uuid in ids {
                     if let Some(mut entry) = db.entry_mut(EntryId::from_uuid(uuid)) {
-                        entry.move_to(recyclebin_id)?;
+                        entry.track_changes().move_to(recyclebin_id)?;
                     } else if let Some(mut group) = db.group_mut(GroupId::from_uuid(uuid)) {
-                        group.move_to(recyclebin_id)?;
+                        group.track_changes().move_to(recyclebin_id)?;
                     } else {
                         warn!(
                             "Cannot move entry or group with ID {uuid} to recycle bin because it does not exist in the database."
@@ -918,10 +997,10 @@ impl Kdbx {
                 }
 
                 for uuid in ids {
-                    if let Some(entry) = db.entry_mut(EntryId::from_uuid(uuid)) {
-                        entry.remove();
-                    } else if let Some(group) = db.group_mut(GroupId::from_uuid(uuid)) {
-                        group.remove();
+                    if let Some(mut entry) = db.entry_mut(EntryId::from_uuid(uuid)) {
+                        entry.track_changes().remove();
+                    } else if let Some(mut group) = db.group_mut(GroupId::from_uuid(uuid)) {
+                        group.track_changes().remove()?;
                     } else {
                         warn!(
                             "Cannot delete entry or group with ID {uuid} because it does not exist in the database."
@@ -934,7 +1013,7 @@ impl Kdbx {
 
                 let mut recycle = db
                     .recycle_bin_mut()
-                    .ok_or(anyhow::anyhow!("Recycle bin has not been created yet"))?;
+                    .ok_or(KdbxError::not_found("Recycle bin has not been created yet"))?;
 
                 let mut ids: Vec<Uuid> = Vec::with_capacity(items.len());
 
@@ -946,10 +1025,10 @@ impl Kdbx {
                 for uuid in ids {
                     if let Some(mut entry) = recycle.entry_mut(EntryId::from_uuid(uuid)) {
                         let group_id = entry.previous_parent_group.unwrap_or(root_id);
-                        entry.move_to(group_id)?;
+                        entry.track_changes().move_to(group_id)?;
                     } else if let Some(mut group) = recycle.group_mut(GroupId::from_uuid(uuid)) {
                         let group_id = group.previous_parent_group.unwrap_or(root_id);
-                        group.move_to(group_id)?;
+                        group.track_changes().move_to(group_id)?;
                     } else {
                         warn!(
                             "Cannot restore entry or group with ID {uuid} because it does not exist in the recycle bin."
@@ -960,7 +1039,9 @@ impl Kdbx {
             KdbxAction::Move2Group { from, to } => {
                 let group_id = db
                     .group(GroupId::from_uuid(uuid_by_str(to.as_str())?))
-                    .ok_or(anyhow::anyhow!("Entry with ID {to} not found"))?
+                    .ok_or(KdbxError::not_found(format!(
+                        "Entry with ID {to} not found"
+                    )))?
                     .id();
 
                 let mut ids: Vec<Uuid> = Vec::with_capacity(from.len());
@@ -972,9 +1053,9 @@ impl Kdbx {
                 // TODO! 效验组移动到组是否合法的
                 for uuid in ids {
                     if let Some(mut entry) = db.entry_mut(EntryId::from_uuid(uuid)) {
-                        entry.move_to(group_id)?;
+                        entry.track_changes().move_to(group_id)?;
                     } else if let Some(mut group) = db.group_mut(GroupId::from_uuid(uuid)) {
-                        group.move_to(group_id)?;
+                        group.track_changes().move_to(group_id)?;
                     } else {
                         warn!(
                             "Cannot move entry or group with ID {uuid} to recycle bin because it does not exist in the database."
@@ -984,9 +1065,9 @@ impl Kdbx {
             }
             KdbxAction::ImportEntry { items, to } => {
                 let mut group = match to {
-                    Some(id) => db
-                        .group_mut(GroupId::from_uuid(uuid_by_str(&id)?))
-                        .ok_or(anyhow::anyhow!("Destination group with ID {id} not found"))?,
+                    Some(id) => db.group_mut(GroupId::from_uuid(uuid_by_str(&id)?)).ok_or(
+                        KdbxError::not_found(format!("Destination group with ID {id} not found")),
+                    )?,
                     None => db.root_mut(),
                 };
 
@@ -1022,7 +1103,7 @@ impl Kdbx {
         Ok(())
     }
 
-    pub fn modify_password(&mut self, credentials: Credentials) -> anyhow::Result<()> {
+    pub fn modify_password(&mut self, credentials: Credentials) -> Result<(), KdbxError> {
         let mut db = self.database.write().unwrap();
 
         let _ = std::mem::replace(&mut self.credentials, credentials);
@@ -1034,45 +1115,52 @@ impl Kdbx {
         Ok(())
     }
 
-    pub fn verify_credentials(&self, credentials: Credentials) -> anyhow::Result<bool> {
-        Ok(credentials.get_composite_key()? == self.credentials.get_composite_key()?)
+    pub fn verify_credentials(&self, credentials: Credentials) -> Result<bool, KdbxError> {
+        let a = credentials.get_composite_key()?;
+        let b = self.credentials.get_composite_key()?;
+        Ok(a == b)
     }
 
-    pub fn get_composite_key(&self) -> anyhow::Result<Vec<u8>> {
-        self.credentials.get_composite_key()
+    #[frb(sync)]
+    pub fn get_composite_key(&self) -> Result<Vec<u8>, KdbxError> {
+        Ok(self.credentials.get_composite_key()?)
     }
 
-    pub fn merge(&mut self, kdbx: Kdbx) -> anyhow::Result<MergeLog> {
+    pub fn merge(&mut self, kdbx: Kdbx) -> Result<MergeLog, KdbxError> {
         let mut dest_db = self.database.write().unwrap();
         let source_db = kdbx.database.read().unwrap();
 
         if dest_db.root_id() != source_db.root_id() {
-            return Err(anyhow::anyhow!(
-                "Root groups of source and dest file do not match."
+            return Err(KdbxError::merge(
+                "Root groups of source and dest file do not match.",
             ));
         }
+
+        let epoch_baseline = Times::epoch();
 
         let dest_master_key_changed = dest_db
             .meta
             .master_key_changed
             .clone()
-            .unwrap_or(DateTime::from_timestamp(0, 0).unwrap().naive_utc());
+            .unwrap_or(epoch_baseline.clone());
 
         let source_master_key_changed = source_db
             .meta
             .master_key_changed
             .clone()
-            .unwrap_or(DateTime::from_timestamp(0, 0).unwrap().naive_utc());
+            .unwrap_or(epoch_baseline.clone());
 
         let mut merge_log = MergeLog::from(dest_db.merge(&source_db)?);
 
-        if match (
+        let master_key_changed = match (
             self.credentials.get_composite_key(),
             kdbx.credentials.get_composite_key(),
         ) {
-            (Ok(a), Ok(b)) => a == b,
+            (Ok(a), Ok(b)) => a != b,
             _ => false,
-        } {
+        };
+
+        if master_key_changed {
             merge_log.master_key_changed = true;
             if source_master_key_changed.gt(&dest_master_key_changed) {
                 merge_log.is_update_master_key = true;
@@ -1088,7 +1176,7 @@ impl Kdbx {
         Ok(merge_log)
     }
 
-    pub fn summary(&self) -> anyhow::Result<(FieldSummary, Meta, HashMap<String, GroupData>)> {
+    pub fn summary(&self) -> Result<(FieldSummary, Meta, HashMap<String, GroupData>), KdbxError> {
         let db = self.database.read().unwrap();
 
         Ok((
@@ -1105,7 +1193,7 @@ impl Kdbx {
         &self,
         metadata: AutofillMetadata,
         entry_id: Option<String>,
-    ) -> anyhow::Result<AutofillDataset> {
+    ) -> Result<AutofillDataset, KdbxError> {
         let db = self.database.read().unwrap();
 
         let mut datasets: Vec<HashMap<String, Option<String>>> = Vec::new();
@@ -1233,17 +1321,7 @@ impl Drop for Kdbx {
 pub enum KdbxAction {
     UpdateEntry(EntryData),
     UpdateGroup(GroupData),
-    UpdateMeta {
-        database_name: Option<String>,
-        database_description: Option<String>,
-        #[frb(type_64bit_int)]
-        maintenance_history_days: Option<isize>,
-        color: Option<Color>,
-        #[frb(type_64bit_int)]
-        history_max_items: Option<isize>,
-        #[frb(type_64bit_int)]
-        history_max_size: Option<isize>,
-    },
+    UpdateMeta(UpdateMeta),
     UpdateMetaCustomData(HashMap<String, Option<CustomDataValue>>),
     UpdateConfig {
         outer_cipher_config: Option<OuterCipherConfig>,
@@ -1543,6 +1621,86 @@ impl From<&GroupRef<'_>> for GroupData {
 
 #[frb]
 #[derive(Clone)]
+pub struct UpdateMeta {
+    #[frb(non_final)]
+    pub database_name: Option<String>,
+    #[frb(non_final)]
+    pub database_description: Option<String>,
+    #[frb(non_final)]
+    pub default_username: Option<String>,
+    #[frb(type_64bit_int, non_final)]
+    pub maintenance_history_days: Option<isize>,
+    #[frb(non_final)]
+    pub color: Option<Color>,
+    #[frb(type_64bit_int, non_final)]
+    pub master_key_change_rec: Option<isize>,
+    #[frb(type_64bit_int, non_final)]
+    pub master_key_change_force: Option<isize>,
+    #[frb(non_final)]
+    pub memory_protection: Option<MemoryProtection>,
+    #[frb(non_final)]
+    pub entry_templates_group: Option<String>,
+    #[frb(non_final)]
+    pub last_selected_group: Option<String>,
+    #[frb(non_final)]
+    pub last_top_visible_group: Option<String>,
+    #[frb(type_64bit_int, non_final)]
+    pub history_max_items: Option<isize>,
+    #[frb(type_64bit_int, non_final)]
+    pub history_max_size: Option<isize>,
+}
+
+impl From<&keepass::db::Meta> for UpdateMeta {
+    fn from(value: &keepass::db::Meta) -> Self {
+        Self {
+            database_name: value.database_name.clone(),
+            database_description: value.database_description.clone(),
+            default_username: value.default_username.clone(),
+            maintenance_history_days: value.maintenance_history_days.map(|v| v as isize),
+            color: value.color.clone(),
+            master_key_change_rec: value.master_key_change_rec.clone(),
+            master_key_change_force: value.master_key_change_force.clone(),
+            memory_protection: value.memory_protection.clone(),
+            entry_templates_group: match value.entry_templates_group {
+                Some(id) => Some(id.to_string()),
+                _ => None,
+            },
+            last_selected_group: match value.last_selected_group {
+                Some(id) => Some(id.to_string()),
+                _ => None,
+            },
+            last_top_visible_group: match value.last_top_visible_group {
+                Some(id) => Some(id.to_string()),
+                _ => None,
+            },
+            history_max_items: value.history_max_items.clone(),
+            history_max_size: value.history_max_size.clone(),
+        }
+    }
+}
+
+impl From<Meta> for UpdateMeta {
+    fn from(value: Meta) -> Self {
+        Self {
+            database_name: value.database_name,
+            database_description: value.database_description,
+            default_username: value.default_username,
+            maintenance_history_days: value.maintenance_history_days,
+            color: value.color,
+            master_key_change_rec: value.master_key_change_rec,
+            master_key_change_force: value.master_key_change_force,
+            memory_protection: value.memory_protection,
+            entry_templates_group: value.entry_templates_group,
+            last_selected_group: value.last_selected_group,
+            last_top_visible_group: value.last_top_visible_group,
+            history_max_items: value.history_max_items,
+            history_max_size: value.history_max_size,
+        }
+    }
+}
+
+#[frb]
+#[derive(Clone)]
 pub struct Meta {
     pub generator: Option<String>,
     pub database_name: Option<String>,
@@ -1552,7 +1710,7 @@ pub struct Meta {
     pub default_username: Option<String>,
     pub default_username_changed: Option<NaiveDateTime>,
     #[frb(type_64bit_int)]
-    pub maintenance_history_days: Option<usize>,
+    pub maintenance_history_days: Option<isize>,
     pub color: Option<Color>,
     pub master_key_changed: Option<NaiveDateTime>,
     #[frb(type_64bit_int)]
@@ -1585,7 +1743,7 @@ impl From<&keepass::db::Meta> for Meta {
             database_description_changed: value.database_description_changed.clone(),
             default_username: value.default_username.clone(),
             default_username_changed: value.default_username_changed.clone(),
-            maintenance_history_days: value.maintenance_history_days.clone(),
+            maintenance_history_days: value.maintenance_history_days.map(|v| v as isize),
             color: value.color.clone(),
             master_key_changed: value.master_key_changed.clone(),
             master_key_change_rec: value.master_key_change_rec.clone(),
@@ -1635,9 +1793,11 @@ pub struct Credentials {
 
 impl Credentials {
     #[frb(sync)]
-    pub fn from(password: Option<String>, keyfile: Option<Vec<u8>>) -> anyhow::Result<Self> {
+    pub fn from(password: Option<String>, keyfile: Option<Vec<u8>>) -> Result<Self, KdbxError> {
         if password.is_none() && keyfile.is_none() {
-            return Err(anyhow::anyhow!("No password or keyfile was provided."));
+            return Err(KdbxError::credentials_empty(
+                "No password or keyfile was provided.",
+            ));
         }
 
         let mut key = DatabaseKey::new();
@@ -1655,19 +1815,23 @@ impl Credentials {
     }
 
     #[frb(sync)]
-    pub fn form_composite_key(key: Vec<u8>) -> anyhow::Result<Self> {
+    pub fn form_composite_key(key: Vec<u8>) -> Result<Self, KdbxError> {
         Ok(Self {
             key: DatabaseKey::form_composite_key(key)?,
         })
     }
 
     #[frb(sync)]
-    pub fn get_composite_key(&self) -> anyhow::Result<Vec<u8>> {
+    pub fn get_composite_key(&self) -> Result<Vec<u8>, KdbxError> {
         Ok(self.key.get_composite_key()?.to_vec())
     }
 
-    pub fn random_key_file() -> anyhow::Result<Vec<u8>> {
-        todo!("未实现")
+    pub fn random_key_file() -> Result<Vec<u8>, KdbxError> {
+        let keyfile = KeyFile::random()?;
+        Ok(keyfile
+            .to_xml()
+            .map_err(|err| KdbxError::xml(err.to_string()))?
+            .into_bytes())
     }
 }
 
@@ -2114,7 +2278,7 @@ impl SearchInputParse {
                         }
                     }
                 } else if key == "Group" {
-                    if (self.ignore_case && &entry.parent().name == value)
+                    if (self.ignore_case && &entry.parent().name.to_lowercase() == value)
                         || &entry.parent().name == value
                     {
                         return true;
@@ -2202,10 +2366,346 @@ pub fn decode_color_type(val: u32) -> Color {
     }
 }
 
-#[frb(sync)]
-pub fn greet(name: String) -> String {
-    format!("Hello, {name}!")
+#[frb(unignore)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub enum KdbxError {
+    // 解析uuid 错误
+    ParseUuid { message: String, backtrace: String },
+    // entry or group 不存在
+    NotFound { message: String, backtrace: String },
+    // 密钥是空的
+    CredentialsEmpty { message: String, backtrace: String },
+    // Io 错误
+    Io { message: String, backtrace: String },
+    // 密钥不准确
+    IncorrectCredentials { message: String, backtrace: String },
+    // 解析xml 错误
+    XML { message: String, backtrace: String },
+    // 密钥文件错误
+    InvalidKeyFile { message: String, backtrace: String },
+    // 未知错误, 一般不会出现, 为了处理 #[non_exhaustive]
+    Unknown { message: String, backtrace: String },
+    // kdbx 数据库损坏
+    UnexpectedEof { message: String, backtrace: String },
+    // 可能不是kdbx数据库/数据库损坏
+    InvalidKDBXIdentifier { message: String, backtrace: String },
+    // 不支持的kdbx版本
+    InvalidKDBXVersion { message: String, backtrace: String },
+    // 解密相关
+    Cryptography { message: String, backtrace: String },
+    // 数据库解析失败
+    DatabaseFormat { message: String, backtrace: String },
+    // 生成随机数失败
+    GenerateRandom { message: String, backtrace: String },
+    // 出现重复uuid
+    DuplicateUuid { message: String, backtrace: String },
+    // 移动组失败
+    MoveGroup { message: String, backtrace: String },
+    // 合并失败
+    Merge { message: String, backtrace: String },
+    // 无法删除根目录
+    CannotDeleteRoot { message: String, backtrace: String },
 }
+
+impl KdbxError {
+    fn parse_uuid(err: UuidError) -> KdbxError {
+        KdbxError::ParseUuid {
+            message: err.to_string(),
+            backtrace: std::backtrace::Backtrace::capture().to_string(),
+        }
+    }
+
+    fn not_found(message: impl Into<String>) -> KdbxError {
+        KdbxError::NotFound {
+            message: message.into(),
+            backtrace: std::backtrace::Backtrace::capture().to_string(),
+        }
+    }
+
+    fn credentials_empty(message: impl Into<String>) -> KdbxError {
+        KdbxError::CredentialsEmpty {
+            message: message.into(),
+            backtrace: std::backtrace::Backtrace::capture().to_string(),
+        }
+    }
+
+    fn io(err: std::io::Error) -> KdbxError {
+        KdbxError::Io {
+            message: err.to_string(),
+            backtrace: std::backtrace::Backtrace::capture().to_string(),
+        }
+    }
+
+    fn xml(message: impl Into<String>) -> KdbxError {
+        KdbxError::XML {
+            message: message.into(),
+            backtrace: std::backtrace::Backtrace::capture().to_string(),
+        }
+    }
+
+    fn merge(message: impl Into<String>) -> KdbxError {
+        KdbxError::Merge {
+            message: message.into(),
+            backtrace: std::backtrace::Backtrace::capture().to_string(),
+        }
+    }
+}
+
+impl From<UuidError> for KdbxError {
+    fn from(err: UuidError) -> Self {
+        KdbxError::parse_uuid(err)
+    }
+}
+
+impl From<std::io::Error> for KdbxError {
+    fn from(err: std::io::Error) -> Self {
+        KdbxError::io(err)
+    }
+}
+
+impl From<DatabaseKeyError> for KdbxError {
+    fn from(err: DatabaseKeyError) -> Self {
+        match err {
+            DatabaseKeyError::EmptyKey => KdbxError::credentials_empty(err.to_string()),
+            DatabaseKeyError::IncorrectKey => KdbxError::IncorrectCredentials {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+            DatabaseKeyError::Io(_) => KdbxError::Io {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+            DatabaseKeyError::Xml(_) => KdbxError::XML {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+            DatabaseKeyError::InvalidKeyFile => KdbxError::InvalidKeyFile {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+            _ => KdbxError::Unknown {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+        }
+    }
+}
+impl From<DatabaseOpenError> for KdbxError {
+    fn from(err: DatabaseOpenError) -> Self {
+        match err {
+            DatabaseOpenError::Io(_) => KdbxError::Io {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+            DatabaseOpenError::UnexpectedEof => KdbxError::UnexpectedEof {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+            DatabaseOpenError::VersionParse(database_version_parse_error) => {
+                database_version_parse_error.into()
+            }
+            DatabaseOpenError::UnsupportedVersion => KdbxError::InvalidKDBXVersion {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+            DatabaseOpenError::Key(database_key_error) => database_key_error.into(),
+            DatabaseOpenError::Cryptography(_) => KdbxError::Cryptography {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+            DatabaseOpenError::Format(database_format_error) => database_format_error.into(),
+            _ => KdbxError::Unknown {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+        }
+    }
+}
+
+impl From<DatabaseVersionParseError> for KdbxError {
+    fn from(err: DatabaseVersionParseError) -> Self {
+        match err {
+            DatabaseVersionParseError::UnexpectedEof => KdbxError::UnexpectedEof {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+            DatabaseVersionParseError::InvalidKDBXIdentifier => KdbxError::InvalidKDBXIdentifier {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+            DatabaseVersionParseError::InvalidKDBXVersion { .. } => KdbxError::InvalidKDBXVersion {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+            _ => KdbxError::Unknown {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+        }
+    }
+}
+
+impl From<DatabaseFormatError> for KdbxError {
+    fn from(err: DatabaseFormatError) -> Self {
+        KdbxError::DatabaseFormat {
+            message: err.to_string(),
+            backtrace: std::backtrace::Backtrace::capture().to_string(),
+        }
+    }
+}
+
+impl From<DestinationGroupNotFoundError> for KdbxError {
+    fn from(err: DestinationGroupNotFoundError) -> Self {
+        KdbxError::NotFound {
+            message: err.to_string(),
+            backtrace: std::backtrace::Backtrace::capture().to_string(),
+        }
+    }
+}
+
+impl From<CustomIconNotFoundError> for KdbxError {
+    fn from(err: CustomIconNotFoundError) -> Self {
+        KdbxError::NotFound {
+            message: err.to_string(),
+            backtrace: std::backtrace::Backtrace::capture().to_string(),
+        }
+    }
+}
+
+impl From<DatabaseSaveError> for KdbxError {
+    fn from(err: DatabaseSaveError) -> Self {
+        match err {
+            DatabaseSaveError::Io(error) => error.into(),
+            DatabaseSaveError::Serialization(_) => KdbxError::XML {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+            DatabaseSaveError::Key(database_key_error) => database_key_error.into(),
+            DatabaseSaveError::Cryptography(_) => KdbxError::Cryptography {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+            DatabaseSaveError::Random(error) => error.into(),
+            DatabaseSaveError::UnsupportedVersion => KdbxError::InvalidKDBXVersion {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+            _ => KdbxError::Unknown {
+                message: err.to_string(),
+                backtrace: std::backtrace::Backtrace::capture().to_string(),
+            },
+        }
+    }
+}
+
+impl From<RandomError> for KdbxError {
+    fn from(err: RandomError) -> Self {
+        KdbxError::GenerateRandom {
+            message: err.to_string(),
+            backtrace: std::backtrace::Backtrace::capture().to_string(),
+        }
+    }
+}
+
+impl From<DuplicateEntryIdError> for KdbxError {
+    fn from(err: DuplicateEntryIdError) -> Self {
+        KdbxError::DuplicateUuid {
+            message: err.to_string(),
+            backtrace: std::backtrace::Backtrace::capture().to_string(),
+        }
+    }
+}
+
+impl From<DuplicateGroupIdError> for KdbxError {
+    fn from(err: DuplicateGroupIdError) -> Self {
+        KdbxError::DuplicateUuid {
+            message: err.to_string(),
+            backtrace: std::backtrace::Backtrace::capture().to_string(),
+        }
+    }
+}
+
+impl From<MoveGroupError> for KdbxError {
+    fn from(err: MoveGroupError) -> Self {
+        KdbxError::MoveGroup {
+            message: err.to_string(),
+            backtrace: std::backtrace::Backtrace::capture().to_string(),
+        }
+    }
+}
+
+impl From<MergeError> for KdbxError {
+    fn from(err: MergeError) -> Self {
+        KdbxError::Merge {
+            message: err.to_string(),
+            backtrace: std::backtrace::Backtrace::capture().to_string(),
+        }
+    }
+}
+
+impl From<CannotDeleteRootError> for KdbxError {
+    fn from(err: CannotDeleteRootError) -> Self {
+        KdbxError::CannotDeleteRoot {
+            message: err.to_string(),
+            backtrace: std::backtrace::Backtrace::capture().to_string(),
+        }
+    }
+}
+
+impl std::fmt::Display for KdbxError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            KdbxError::ParseUuid { message, .. } => write!(f, "ParseUuid: {}", message),
+            KdbxError::NotFound { message, .. } => write!(f, "NotFound: {}", message),
+            KdbxError::CredentialsEmpty { message, .. } => {
+                write!(f, "CredentialsEmpty: {}", message)
+            }
+            KdbxError::Io { message, .. } => write!(f, "Io: {}", message),
+            KdbxError::IncorrectCredentials { message, .. } => {
+                write!(f, "IncorrectCredentials: {}", message)
+            }
+            KdbxError::XML { message, .. } => write!(f, "XML: {}", message),
+            KdbxError::InvalidKeyFile { message, .. } => {
+                write!(f, "InvalidKeyFile: {}", message)
+            }
+            KdbxError::Unknown { message, .. } => {
+                write!(f, "CredentialsUnknown: {}", message)
+            }
+            KdbxError::UnexpectedEof { message, .. } => {
+                write!(f, "UnexpectedEof: {}", message)
+            }
+            KdbxError::InvalidKDBXIdentifier { message, .. } => {
+                write!(f, "InvalidKDBXIdentifier: {}", message)
+            }
+            KdbxError::InvalidKDBXVersion { message, .. } => {
+                write!(f, "InvalidKDBXVersion: {}", message)
+            }
+            KdbxError::Cryptography { message, .. } => {
+                write!(f, "Cryptography: {}", message)
+            }
+            KdbxError::DatabaseFormat { message, .. } => {
+                write!(f, "DatabaseFormat: {}", message)
+            }
+            KdbxError::GenerateRandom { message, .. } => {
+                write!(f, "GenerateRandom: {}", message)
+            }
+            KdbxError::DuplicateUuid { message, .. } => {
+                write!(f, "DuplicateUuid: {}", message)
+            }
+            KdbxError::MoveGroup { message, .. } => {
+                write!(f, "MoveGroup: {}", message)
+            }
+            KdbxError::Merge { message, .. } => {
+                write!(f, "Merge: {}", message)
+            }
+            KdbxError::CannotDeleteRoot { message, .. } => {
+                write!(f, "CannotDeleteRoot: {}", message)
+            }
+        }
+    }
+}
+
+impl std::error::Error for KdbxError {}
 
 #[cfg(test)]
 mod test {
@@ -2429,17 +2929,13 @@ mod test {
             let kdbx = new_kdbx(&file);
             let root = root_id(&kdbx);
 
+            let mut update_meta: UpdateMeta = kdbx.get_meta().unwrap().into();
+
+            update_meta.database_name = Some("MyDatabase".to_string());
+
             kdbx.action(KdbxAction::UpdateEntry(new_entry(&root, "Alice")))
                 .unwrap();
-            kdbx.action(KdbxAction::UpdateMeta {
-                database_name: Some("MyDatabase".to_string()),
-                database_description: None,
-                maintenance_history_days: None,
-                color: None,
-                history_max_items: None,
-                history_max_size: None,
-            })
-            .unwrap();
+            kdbx.action(KdbxAction::UpdateMeta(update_meta)).unwrap();
         }
 
         let opened = Kdbx::open(credentials("password"), file.path()).unwrap();

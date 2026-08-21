@@ -87,9 +87,7 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
 
   @override
   void initState() {
-    Store.kdbx.kdbx!.getEntryHistorys(id: widget.kdbxEntry.id).then((
-      value,
-    ) {
+    Store.kdbx.kdbx!.getEntryHistorys(id: widget.kdbxEntry.id).then((value) {
       _history = value;
       setState(() {});
     });
@@ -129,6 +127,7 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
           title: Text(t.timeline),
           titleTextStyle: Theme.of(context).textTheme.titleLarge,
           actionsPadding: const EdgeInsets.only(right: 16),
+          forceMaterialTransparency: true,
         ),
         Expanded(
           child: _history.isNotEmpty
@@ -164,11 +163,7 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
           ),
           onTap: () {
             context.router.popAndPush(
-              LookAccountRoute(
-                id: entry.id,
-                readOnly: true,
-                historyIndex: index,
-              ),
+              LookAccountRoute(id: entry.id, historyIndex: index),
             );
           },
         );

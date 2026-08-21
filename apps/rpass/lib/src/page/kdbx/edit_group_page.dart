@@ -75,8 +75,10 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
       try {
         _kdbxGroupData = await kdbxController.kdbx!.getGroup(id: widget.id!);
         setState(() {});
-      } catch (e) {
-        showError(e);
+      } on KdbxError_NotFound {
+        context.router.pop();
+      } catch (e, s) {
+        showError(e, s);
       }
     }
   }

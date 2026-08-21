@@ -113,22 +113,20 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
   void _confirm() async {
     try {
       await confirm();
-    }
-    // on KdbxInvalidKeyException {
-    //   showError(I18n.of(context)!.password_error);
-    // }
-    catch (error) {
-      showError(error);
+    } on KdbxError_IncorrectCredentials {
+      showError(I18n.of(context)!.password_error);
+    } catch (e, s) {
+      showError(e, s);
     }
   }
 
   void _importKdbx() async {
     try {
       await importKdbx();
-    } catch (error) {
-      if (error is! CancelException) {
-        _logger.warning("import file fail!", error);
-        showError(error);
+    } catch (e, s) {
+      if (e is! CancelException) {
+        _logger.warning("import file fail!", e, s);
+        showError(e, s);
       }
     }
   }
@@ -136,9 +134,9 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
   void _importKdbxByRemote(RemoteType type) async {
     try {
       await importKdbxByRemote(type);
-    } catch (error) {
-      _logger.warning("import remote file fail!", error);
-      showError(error);
+    } catch (e, s) {
+      _logger.warning("import remote file fail!", e, s);
+      showError(e, s);
     }
   }
 
@@ -146,16 +144,16 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
   void startBiometric() async {
     try {
       await verifyBiometric();
-    } catch (error) {
-      if (error is AuthException &&
-          (error.code == AuthExceptionCode.userCanceled ||
-              error.code == AuthExceptionCode.canceled ||
-              error.code == AuthExceptionCode.timeout)) {
+    } catch (e, s) {
+      if (e is AuthException &&
+          (e.code == AuthExceptionCode.userCanceled ||
+              e.code == AuthExceptionCode.canceled ||
+              e.code == AuthExceptionCode.timeout)) {
         return;
       }
 
-      _logger.warning("verify biometric fail!", error);
-      showError(error);
+      _logger.warning("verify biometric fail!", e, s);
+      showError(e, s);
       setState(() {
         disableClickBiometric = true;
       });
@@ -489,10 +487,10 @@ class _KeyFileFormFieldState extends State<KeyFileFormField> {
     try {
       final file = await SimpleFile.openFile();
       await widget.controller.setKeyFile(file.$1, file.$2);
-    } catch (e) {
+    } catch (e, s) {
       if (e is! CancelException) {
-        _logger.warning("open key file fail!", e);
-        showError(e);
+        _logger.warning("open key file fail!", e, s);
+        showError(e, s);
       }
     }
   }
@@ -500,10 +498,10 @@ class _KeyFileFormFieldState extends State<KeyFileFormField> {
   void _genKeyFile() async {
     try {
       await widget.controller.genKeyFile();
-    } catch (e) {
+    } catch (e, s) {
       if (e is! CancelException) {
-        _logger.warning("open key file fail!", e);
-        showError(e);
+        _logger.warning("generate key file fail!", e, s);
+        showError(e, s);
       }
     }
   }

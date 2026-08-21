@@ -115,7 +115,8 @@ class _SyncAccountPageState extends State<SyncAccountPage>
         EntryData? entry = await kdbxProvider.getSyncEntryData();
 
         if (entry != null &&
-            Store.kdbx.syncController.config == RemoteFileKdbxEntryField.fromKdbx(entry)) {
+            Store.kdbx.syncController.config ==
+                RemoteFileKdbxEntryField.fromKdbx(entry)) {
           return;
         }
 
@@ -127,7 +128,8 @@ class _SyncAccountPageState extends State<SyncAccountPage>
           entry ??= kdbxProvider.kdbx!.newEntry()
             ..fields[KdbxKeyCommon.TITLE] = FieldValue.plaintext(t.sync_config);
 
-          for (final item in Store.kdbx.syncController.config!.toKdbx().entries) {
+          for (final item
+              in Store.kdbx.syncController.config!.toKdbx().entries) {
             entry.fields[item.key] = item.value;
           }
 
@@ -135,8 +137,8 @@ class _SyncAccountPageState extends State<SyncAccountPage>
           Store.kdbx.syncController.sync(context);
         }
       }
-    } catch (e) {
-      showError(e);
+    } catch (e, s) {
+      showError(e, s);
     }
   }
 
@@ -209,7 +211,10 @@ class _SyncAccountPageState extends State<SyncAccountPage>
                         !Store.kdbx.syncController.isSyncing &&
                             Store.settings.enableRemoteSync &&
                             Store.kdbx.syncController.config != null
-                        ? () => Store.kdbx.syncController.sync(context, forceMerge: true)
+                        ? () => Store.kdbx.syncController.sync(
+                            context,
+                            forceMerge: true,
+                          )
                         : null,
                     icon: const Icon(Icons.sync),
                   ),
@@ -220,7 +225,7 @@ class _SyncAccountPageState extends State<SyncAccountPage>
                   title: Text(t.sync_error_log),
                   subtitle: Text("${Store.kdbx.syncController.lastError}"),
                   onTap: () {
-                    showError(Store.kdbx.syncController.lastError);
+                    showError(Store.kdbx.syncController.lastError!);
                   },
                 ),
               if (Store.kdbx.syncController.lastMergeLog != null)
@@ -228,7 +233,9 @@ class _SyncAccountPageState extends State<SyncAccountPage>
                   data: ThemeData(dividerColor: Colors.transparent),
                   child: ExpansionTile(
                     title: Text(t.sync_merge_log),
-                    children: _buildMergeTile(Store.kdbx.syncController.lastMergeLog!),
+                    children: _buildMergeTile(
+                      Store.kdbx.syncController.lastMergeLog!,
+                    ),
                   ),
                 ),
             ],
@@ -241,29 +248,119 @@ class _SyncAccountPageState extends State<SyncAccountPage>
   List<Widget> _buildMergeTile(MergeLog mergeLog) {
     final t = I18n.of(context)!;
 
+    final deleted = mergeLog.events.where((item) => item.eventType == .deleted);
+    final created = mergeLog.events.where((item) => item.eventType == .created);
+    final updated = mergeLog.events.where((item) => item.eventType == .updated);
+    final locationUpdated = mergeLog.events.where(
+      (item) => item.eventType == .locationUpdated,
+    );
+
     return [
-      ListTile(
-        textColor: Colors.amber,
-        isThreeLine: true,
-        title: Text(t.warn),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(left: 12),
-          child: Column(
-            spacing: 6,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: mergeLog.warnings.map((item) {
-              return Text(item);
-            }).toList(),
+      if (mergeLog.warnings.isNotEmpty)
+        ListTile(
+          dense: true,
+          isThreeLine: true,
+          title: Text(t.warn),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: Column(
+              spacing: 6,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: mergeLog.warnings.map((item) {
+                return Text(
+                  item,
+                  maxLines: 1,
+                  overflow: .ellipsis,
+                  style: TextStyle(color: Colors.amber),
+                );
+              }).toList(),
+            ),
           ),
         ),
-      ),
-      for (final item in mergeLog.events)
+
+      if (deleted.isNotEmpty)
         ListTile(
-          textColor: Colors.amber,
-          isThreeLine: true,
-          title: Text(item.eventType.name), // TODO! 翻译
           dense: true,
-          subtitle: Text(item.target.toDisplay()),
+          isThreeLine: true,
+          title: Text("Deleted"),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: Column(
+              spacing: 6,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: deleted.map((item) {
+                return Text(
+                  item.target.toDisplay(),
+                  maxLines: 1,
+                  overflow: .ellipsis,
+                  style: TextStyle(color: Colors.redAccent),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      if (created.isNotEmpty)
+        ListTile(
+          dense: true,
+          isThreeLine: true,
+          title: Text("Created"),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: Column(
+              spacing: 6,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: created.map((item) {
+                return Text(
+                  item.target.toDisplay(),
+                  maxLines: 1,
+                  overflow: .ellipsis,
+                  style: TextStyle(color: Colors.greenAccent),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      if (updated.isNotEmpty)
+        ListTile(
+          dense: true,
+          isThreeLine: true,
+          title: Text("Updated"),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: Column(
+              spacing: 6,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: updated.map((item) {
+                return Text(
+                  item.target.toDisplay(),
+                  maxLines: 1,
+                  overflow: .ellipsis,
+                  style: TextStyle(color: Colors.amber),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      if (locationUpdated.isNotEmpty)
+        ListTile(
+          dense: true,
+          isThreeLine: true,
+          title: Text("LocationUpdated"),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: Column(
+              spacing: 6,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: locationUpdated.map((item) {
+                return Text(
+                  item.target.toDisplay(),
+                  maxLines: 1,
+                  overflow: .ellipsis,
+                  style: TextStyle(color: Colors.amber),
+                );
+              }).toList(),
+            ),
+          ),
         ),
     ];
   }

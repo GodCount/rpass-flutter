@@ -18,8 +18,8 @@ pub use color::{Color, ParseColorError};
 pub use custom_data::{CustomDataItem, CustomDataValue};
 pub use entry::{DestinationGroupNotFoundError, Entry, EntryId, EntryMut, EntryRef, EntryTrack};
 pub use group::{
-    DuplicateEntryIdError, DuplicateGroupIdError, Group, GroupId, GroupMut, GroupRef, GroupTrack,
-    MoveGroupError,
+    CannotDeleteRootError, DuplicateEntryIdError, DuplicateGroupIdError, Group, GroupId, GroupMut, GroupRef,
+    GroupTrack, MoveGroupError,
 };
 pub use history::History;
 pub use icon::{CustomIcon, CustomIconId, CustomIconMut, CustomIconNotFoundError, CustomIconRef, Icon};
@@ -113,7 +113,6 @@ impl Database {
             deleted_objects: HashMap::new(),
         }
     }
-
 
     /// Get the unique identifier for this parent
     pub fn root_id(&self) -> GroupId {

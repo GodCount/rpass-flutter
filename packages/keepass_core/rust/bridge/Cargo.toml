@@ -24,7 +24,6 @@ keepass = { path = "../keepass", features = [
     "totp"
 ] }
 phf = { version = "0.14.0", features = ["macros"] }
-thiserror = "2"
 zeroize = { version = "1", features = ["zeroize_derive"] }
 utils_proc_macro = { path = "../utils_proc_macro" }
 rand = "0.8"

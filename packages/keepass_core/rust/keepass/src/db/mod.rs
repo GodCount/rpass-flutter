@@ -70,7 +70,7 @@ pub use crate::db::{
 #[cfg(feature = "totp")]
 pub use crate::db::otp::{TOTPAlgorithm, TOTPError, TOTP};
 
-pub use uuid::Uuid;
+pub use uuid::{Uuid, Error};
 
 /// Parses a `Uuid` from a string of hexadecimal digits with optional
 /// hyphens.

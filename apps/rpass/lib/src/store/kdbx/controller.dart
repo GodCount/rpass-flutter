@@ -134,7 +134,7 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
   Future<EntryData?> getSyncEntryData() async {
     if (syncAccountUuid == null) return null;
     try {
-      return kdbx!.getEntry(id: syncAccountUuid!);
+      return await kdbx!.getEntry(id: syncAccountUuid!);
     } catch (e) {
       return null;
     }
@@ -164,6 +164,13 @@ class SyncKdbxController with ChangeNotifier {
   bool _isSyncing = false;
 
   bool get isSyncing => _isSyncing;
+
+  Future<void> initConfig() async {
+    if (_config == null) {
+      final entry = await _kdbxController.getSyncEntryData();
+      _config = entry != null ? RemoteFileKdbxEntryField.fromKdbx(entry) : null;
+    }
+  }
 
   Future<void> setRemoteFileConfig(
     BuildContext context,
@@ -202,12 +209,7 @@ class SyncKdbxController with ChangeNotifier {
 
       final kdbx = _kdbxController.kdbx!;
 
-      if (_config == null) {
-        final entry = await _kdbxController.getSyncEntryData();
-        _config = entry != null
-            ? RemoteFileKdbxEntryField.fromKdbx(entry)
-            : null;
-      }
+      await initConfig();
 
       if (_config == null) {
         _logger.info("Remote config is null, Unable to synchronize.");
@@ -236,7 +238,7 @@ class SyncKdbxController with ChangeNotifier {
         remoteKdbx = await Kdbx.openBytes(
           bytes: remoteData,
           credentials: Credentials.formCompositeKey(
-            key: await kdbx.getCompositeKey(),
+            key: kdbx.getCompositeKey(),
           ),
         );
       } catch (e) {
@@ -265,10 +267,7 @@ class SyncKdbxController with ChangeNotifier {
         if (biometric.enable) {
           try {
             _logger.info("update biometric");
-            await biometric.updateCredentials(
-              context,
-              await kdbx.getCompositeKey(),
-            );
+            await biometric.updateCredentials(context, kdbx.getCompositeKey());
           } catch (e) {
             _logger.warning("update biometric failed! remove biometric data");
             Store.settings.seEnableBiometric(false);
@@ -278,7 +277,8 @@ class SyncKdbxController with ChangeNotifier {
       }
 
       _logger.info(
-        "{masterKeyChanged=${_lastMergeLog?.masterKeyChanged}, "
+        "{masterKeyChanged=${_lastMergeLog?.masterKeyChanged},"
+        "isUpdateMasterKey=${_lastMergeLog?.isUpdateMasterKey},",
         "forceMerge=$forceMerge}",
       );
 

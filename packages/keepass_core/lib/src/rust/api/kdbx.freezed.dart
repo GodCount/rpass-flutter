@@ -438,12 +438,12 @@ return updateSyncEntry(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( EntryData field0)?  updateEntry,TResult Function( GroupData field0)?  updateGroup,TResult Function( String? databaseName,  String? databaseDescription,  PlatformInt64? maintenanceHistoryDays,  Color? color,  PlatformInt64? historyMaxItems,  PlatformInt64? historyMaxSize)?  updateMeta,TResult Function( Map<String, CustomDataValue?> field0)?  updateMetaCustomData,TResult Function( OuterCipherConfig? outerCipherConfig,  CompressionConfig? compressionConfig,  InnerCipherConfig? innerCipherConfig,  KdfConfig? kdfConfig)?  updateConfig,TResult Function( List<String> field0)?  move2Trash,TResult Function( List<String> field0)?  delete,TResult Function( List<String> field0)?  restore,TResult Function( List<String> from,  String to)?  move2Group,TResult Function( List<Map<String, String>> items,  String? to)?  importEntry,TResult Function( EntryData? field0)?  updateSyncEntry,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( EntryData field0)?  updateEntry,TResult Function( GroupData field0)?  updateGroup,TResult Function( UpdateMeta field0)?  updateMeta,TResult Function( Map<String, CustomDataValue?> field0)?  updateMetaCustomData,TResult Function( OuterCipherConfig? outerCipherConfig,  CompressionConfig? compressionConfig,  InnerCipherConfig? innerCipherConfig,  KdfConfig? kdfConfig)?  updateConfig,TResult Function( List<String> field0)?  move2Trash,TResult Function( List<String> field0)?  delete,TResult Function( List<String> field0)?  restore,TResult Function( List<String> from,  String to)?  move2Group,TResult Function( List<Map<String, String>> items,  String? to)?  importEntry,TResult Function( EntryData? field0)?  updateSyncEntry,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case KdbxAction_UpdateEntry() when updateEntry != null:
 return updateEntry(_that.field0);case KdbxAction_UpdateGroup() when updateGroup != null:
 return updateGroup(_that.field0);case KdbxAction_UpdateMeta() when updateMeta != null:
-return updateMeta(_that.databaseName,_that.databaseDescription,_that.maintenanceHistoryDays,_that.color,_that.historyMaxItems,_that.historyMaxSize);case KdbxAction_UpdateMetaCustomData() when updateMetaCustomData != null:
+return updateMeta(_that.field0);case KdbxAction_UpdateMetaCustomData() when updateMetaCustomData != null:
 return updateMetaCustomData(_that.field0);case KdbxAction_UpdateConfig() when updateConfig != null:
 return updateConfig(_that.outerCipherConfig,_that.compressionConfig,_that.innerCipherConfig,_that.kdfConfig);case KdbxAction_Move2Trash() when move2Trash != null:
 return move2Trash(_that.field0);case KdbxAction_Delete() when delete != null:
@@ -469,12 +469,12 @@ return updateSyncEntry(_that.field0);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( EntryData field0)  updateEntry,required TResult Function( GroupData field0)  updateGroup,required TResult Function( String? databaseName,  String? databaseDescription,  PlatformInt64? maintenanceHistoryDays,  Color? color,  PlatformInt64? historyMaxItems,  PlatformInt64? historyMaxSize)  updateMeta,required TResult Function( Map<String, CustomDataValue?> field0)  updateMetaCustomData,required TResult Function( OuterCipherConfig? outerCipherConfig,  CompressionConfig? compressionConfig,  InnerCipherConfig? innerCipherConfig,  KdfConfig? kdfConfig)  updateConfig,required TResult Function( List<String> field0)  move2Trash,required TResult Function( List<String> field0)  delete,required TResult Function( List<String> field0)  restore,required TResult Function( List<String> from,  String to)  move2Group,required TResult Function( List<Map<String, String>> items,  String? to)  importEntry,required TResult Function( EntryData? field0)  updateSyncEntry,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( EntryData field0)  updateEntry,required TResult Function( GroupData field0)  updateGroup,required TResult Function( UpdateMeta field0)  updateMeta,required TResult Function( Map<String, CustomDataValue?> field0)  updateMetaCustomData,required TResult Function( OuterCipherConfig? outerCipherConfig,  CompressionConfig? compressionConfig,  InnerCipherConfig? innerCipherConfig,  KdfConfig? kdfConfig)  updateConfig,required TResult Function( List<String> field0)  move2Trash,required TResult Function( List<String> field0)  delete,required TResult Function( List<String> field0)  restore,required TResult Function( List<String> from,  String to)  move2Group,required TResult Function( List<Map<String, String>> items,  String? to)  importEntry,required TResult Function( EntryData? field0)  updateSyncEntry,}) {final _that = this;
 switch (_that) {
 case KdbxAction_UpdateEntry():
 return updateEntry(_that.field0);case KdbxAction_UpdateGroup():
 return updateGroup(_that.field0);case KdbxAction_UpdateMeta():
-return updateMeta(_that.databaseName,_that.databaseDescription,_that.maintenanceHistoryDays,_that.color,_that.historyMaxItems,_that.historyMaxSize);case KdbxAction_UpdateMetaCustomData():
+return updateMeta(_that.field0);case KdbxAction_UpdateMetaCustomData():
 return updateMetaCustomData(_that.field0);case KdbxAction_UpdateConfig():
 return updateConfig(_that.outerCipherConfig,_that.compressionConfig,_that.innerCipherConfig,_that.kdfConfig);case KdbxAction_Move2Trash():
 return move2Trash(_that.field0);case KdbxAction_Delete():
@@ -496,12 +496,12 @@ return updateSyncEntry(_that.field0);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( EntryData field0)?  updateEntry,TResult? Function( GroupData field0)?  updateGroup,TResult? Function( String? databaseName,  String? databaseDescription,  PlatformInt64? maintenanceHistoryDays,  Color? color,  PlatformInt64? historyMaxItems,  PlatformInt64? historyMaxSize)?  updateMeta,TResult? Function( Map<String, CustomDataValue?> field0)?  updateMetaCustomData,TResult? Function( OuterCipherConfig? outerCipherConfig,  CompressionConfig? compressionConfig,  InnerCipherConfig? innerCipherConfig,  KdfConfig? kdfConfig)?  updateConfig,TResult? Function( List<String> field0)?  move2Trash,TResult? Function( List<String> field0)?  delete,TResult? Function( List<String> field0)?  restore,TResult? Function( List<String> from,  String to)?  move2Group,TResult? Function( List<Map<String, String>> items,  String? to)?  importEntry,TResult? Function( EntryData? field0)?  updateSyncEntry,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( EntryData field0)?  updateEntry,TResult? Function( GroupData field0)?  updateGroup,TResult? Function( UpdateMeta field0)?  updateMeta,TResult? Function( Map<String, CustomDataValue?> field0)?  updateMetaCustomData,TResult? Function( OuterCipherConfig? outerCipherConfig,  CompressionConfig? compressionConfig,  InnerCipherConfig? innerCipherConfig,  KdfConfig? kdfConfig)?  updateConfig,TResult? Function( List<String> field0)?  move2Trash,TResult? Function( List<String> field0)?  delete,TResult? Function( List<String> field0)?  restore,TResult? Function( List<String> from,  String to)?  move2Group,TResult? Function( List<Map<String, String>> items,  String? to)?  importEntry,TResult? Function( EntryData? field0)?  updateSyncEntry,}) {final _that = this;
 switch (_that) {
 case KdbxAction_UpdateEntry() when updateEntry != null:
 return updateEntry(_that.field0);case KdbxAction_UpdateGroup() when updateGroup != null:
 return updateGroup(_that.field0);case KdbxAction_UpdateMeta() when updateMeta != null:
-return updateMeta(_that.databaseName,_that.databaseDescription,_that.maintenanceHistoryDays,_that.color,_that.historyMaxItems,_that.historyMaxSize);case KdbxAction_UpdateMetaCustomData() when updateMetaCustomData != null:
+return updateMeta(_that.field0);case KdbxAction_UpdateMetaCustomData() when updateMetaCustomData != null:
 return updateMetaCustomData(_that.field0);case KdbxAction_UpdateConfig() when updateConfig != null:
 return updateConfig(_that.outerCipherConfig,_that.compressionConfig,_that.innerCipherConfig,_that.kdfConfig);case KdbxAction_Move2Trash() when move2Trash != null:
 return move2Trash(_that.field0);case KdbxAction_Delete() when delete != null:
@@ -653,15 +653,10 @@ as GroupData,
 
 
 class KdbxAction_UpdateMeta extends KdbxAction {
-  const KdbxAction_UpdateMeta({this.databaseName, this.databaseDescription, this.maintenanceHistoryDays, this.color, this.historyMaxItems, this.historyMaxSize}): super._();
+  const KdbxAction_UpdateMeta(this.field0): super._();
   
 
- final  String? databaseName;
- final  String? databaseDescription;
- final  PlatformInt64? maintenanceHistoryDays;
- final  Color? color;
- final  PlatformInt64? historyMaxItems;
- final  PlatformInt64? historyMaxSize;
+ final  UpdateMeta field0;
 
 /// Create a copy of KdbxAction
 /// with the given fields replaced by the non-null parameter values.
@@ -673,16 +668,16 @@ $KdbxAction_UpdateMetaCopyWith<KdbxAction_UpdateMeta> get copyWith => _$KdbxActi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxAction_UpdateMeta&&(identical(other.databaseName, databaseName) || other.databaseName == databaseName)&&(identical(other.databaseDescription, databaseDescription) || other.databaseDescription == databaseDescription)&&(identical(other.maintenanceHistoryDays, maintenanceHistoryDays) || other.maintenanceHistoryDays == maintenanceHistoryDays)&&(identical(other.color, color) || other.color == color)&&(identical(other.historyMaxItems, historyMaxItems) || other.historyMaxItems == historyMaxItems)&&(identical(other.historyMaxSize, historyMaxSize) || other.historyMaxSize == historyMaxSize));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxAction_UpdateMeta&&(identical(other.field0, field0) || other.field0 == field0));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,databaseName,databaseDescription,maintenanceHistoryDays,color,historyMaxItems,historyMaxSize);
+int get hashCode => Object.hash(runtimeType,field0);
 
 @override
 String toString() {
-  return 'KdbxAction.updateMeta(databaseName: $databaseName, databaseDescription: $databaseDescription, maintenanceHistoryDays: $maintenanceHistoryDays, color: $color, historyMaxItems: $historyMaxItems, historyMaxSize: $historyMaxSize)';
+  return 'KdbxAction.updateMeta(field0: $field0)';
 }
 
 
@@ -693,7 +688,7 @@ abstract mixin class $KdbxAction_UpdateMetaCopyWith<$Res> implements $KdbxAction
   factory $KdbxAction_UpdateMetaCopyWith(KdbxAction_UpdateMeta value, $Res Function(KdbxAction_UpdateMeta) _then) = _$KdbxAction_UpdateMetaCopyWithImpl;
 @useResult
 $Res call({
- String? databaseName, String? databaseDescription, PlatformInt64? maintenanceHistoryDays, Color? color, PlatformInt64? historyMaxItems, PlatformInt64? historyMaxSize
+ UpdateMeta field0
 });
 
 
@@ -710,15 +705,10 @@ class _$KdbxAction_UpdateMetaCopyWithImpl<$Res>
 
 /// Create a copy of KdbxAction
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? databaseName = freezed,Object? databaseDescription = freezed,Object? maintenanceHistoryDays = freezed,Object? color = freezed,Object? historyMaxItems = freezed,Object? historyMaxSize = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
   return _then(KdbxAction_UpdateMeta(
-databaseName: freezed == databaseName ? _self.databaseName : databaseName // ignore: cast_nullable_to_non_nullable
-as String?,databaseDescription: freezed == databaseDescription ? _self.databaseDescription : databaseDescription // ignore: cast_nullable_to_non_nullable
-as String?,maintenanceHistoryDays: freezed == maintenanceHistoryDays ? _self.maintenanceHistoryDays : maintenanceHistoryDays // ignore: cast_nullable_to_non_nullable
-as PlatformInt64?,color: freezed == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
-as Color?,historyMaxItems: freezed == historyMaxItems ? _self.historyMaxItems : historyMaxItems // ignore: cast_nullable_to_non_nullable
-as PlatformInt64?,historyMaxSize: freezed == historyMaxSize ? _self.historyMaxSize : historyMaxSize // ignore: cast_nullable_to_non_nullable
-as PlatformInt64?,
+null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as UpdateMeta,
   ));
 }
 
@@ -1305,6 +1295,1518 @@ class _$KdbxAction_UpdateSyncEntryCopyWithImpl<$Res>
   return _then(KdbxAction_UpdateSyncEntry(
 freezed == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
 as EntryData?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+mixin _$KdbxError {
+
+ String get message; String get backtrace;
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxErrorCopyWith<KdbxError> get copyWith => _$KdbxErrorCopyWithImpl<KdbxError>(this as KdbxError, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxErrorCopyWith<$Res>  {
+  factory $KdbxErrorCopyWith(KdbxError value, $Res Function(KdbxError) _then) = _$KdbxErrorCopyWithImpl;
+@useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxErrorCopyWithImpl<$Res>
+    implements $KdbxErrorCopyWith<$Res> {
+  _$KdbxErrorCopyWithImpl(this._self, this._then);
+
+  final KdbxError _self;
+  final $Res Function(KdbxError) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(_self.copyWith(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [KdbxError].
+extension KdbxErrorPatterns on KdbxError {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( KdbxError_ParseUuid value)?  parseUuid,TResult Function( KdbxError_NotFound value)?  notFound,TResult Function( KdbxError_CredentialsEmpty value)?  credentialsEmpty,TResult Function( KdbxError_Io value)?  io,TResult Function( KdbxError_IncorrectCredentials value)?  incorrectCredentials,TResult Function( KdbxError_XML value)?  xml,TResult Function( KdbxError_InvalidKeyFile value)?  invalidKeyFile,TResult Function( KdbxError_Unknown value)?  unknown,TResult Function( KdbxError_UnexpectedEof value)?  unexpectedEof,TResult Function( KdbxError_InvalidKDBXIdentifier value)?  invalidKdbxIdentifier,TResult Function( KdbxError_InvalidKDBXVersion value)?  invalidKdbxVersion,TResult Function( KdbxError_Cryptography value)?  cryptography,TResult Function( KdbxError_DatabaseFormat value)?  databaseFormat,TResult Function( KdbxError_GenerateRandom value)?  generateRandom,TResult Function( KdbxError_DuplicateUuid value)?  duplicateUuid,TResult Function( KdbxError_MoveGroup value)?  moveGroup,TResult Function( KdbxError_Merge value)?  merge,TResult Function( KdbxError_CannotDeleteRoot value)?  cannotDeleteRoot,required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case KdbxError_ParseUuid() when parseUuid != null:
+return parseUuid(_that);case KdbxError_NotFound() when notFound != null:
+return notFound(_that);case KdbxError_CredentialsEmpty() when credentialsEmpty != null:
+return credentialsEmpty(_that);case KdbxError_Io() when io != null:
+return io(_that);case KdbxError_IncorrectCredentials() when incorrectCredentials != null:
+return incorrectCredentials(_that);case KdbxError_XML() when xml != null:
+return xml(_that);case KdbxError_InvalidKeyFile() when invalidKeyFile != null:
+return invalidKeyFile(_that);case KdbxError_Unknown() when unknown != null:
+return unknown(_that);case KdbxError_UnexpectedEof() when unexpectedEof != null:
+return unexpectedEof(_that);case KdbxError_InvalidKDBXIdentifier() when invalidKdbxIdentifier != null:
+return invalidKdbxIdentifier(_that);case KdbxError_InvalidKDBXVersion() when invalidKdbxVersion != null:
+return invalidKdbxVersion(_that);case KdbxError_Cryptography() when cryptography != null:
+return cryptography(_that);case KdbxError_DatabaseFormat() when databaseFormat != null:
+return databaseFormat(_that);case KdbxError_GenerateRandom() when generateRandom != null:
+return generateRandom(_that);case KdbxError_DuplicateUuid() when duplicateUuid != null:
+return duplicateUuid(_that);case KdbxError_MoveGroup() when moveGroup != null:
+return moveGroup(_that);case KdbxError_Merge() when merge != null:
+return merge(_that);case KdbxError_CannotDeleteRoot() when cannotDeleteRoot != null:
+return cannotDeleteRoot(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( KdbxError_ParseUuid value)  parseUuid,required TResult Function( KdbxError_NotFound value)  notFound,required TResult Function( KdbxError_CredentialsEmpty value)  credentialsEmpty,required TResult Function( KdbxError_Io value)  io,required TResult Function( KdbxError_IncorrectCredentials value)  incorrectCredentials,required TResult Function( KdbxError_XML value)  xml,required TResult Function( KdbxError_InvalidKeyFile value)  invalidKeyFile,required TResult Function( KdbxError_Unknown value)  unknown,required TResult Function( KdbxError_UnexpectedEof value)  unexpectedEof,required TResult Function( KdbxError_InvalidKDBXIdentifier value)  invalidKdbxIdentifier,required TResult Function( KdbxError_InvalidKDBXVersion value)  invalidKdbxVersion,required TResult Function( KdbxError_Cryptography value)  cryptography,required TResult Function( KdbxError_DatabaseFormat value)  databaseFormat,required TResult Function( KdbxError_GenerateRandom value)  generateRandom,required TResult Function( KdbxError_DuplicateUuid value)  duplicateUuid,required TResult Function( KdbxError_MoveGroup value)  moveGroup,required TResult Function( KdbxError_Merge value)  merge,required TResult Function( KdbxError_CannotDeleteRoot value)  cannotDeleteRoot,}){
+final _that = this;
+switch (_that) {
+case KdbxError_ParseUuid():
+return parseUuid(_that);case KdbxError_NotFound():
+return notFound(_that);case KdbxError_CredentialsEmpty():
+return credentialsEmpty(_that);case KdbxError_Io():
+return io(_that);case KdbxError_IncorrectCredentials():
+return incorrectCredentials(_that);case KdbxError_XML():
+return xml(_that);case KdbxError_InvalidKeyFile():
+return invalidKeyFile(_that);case KdbxError_Unknown():
+return unknown(_that);case KdbxError_UnexpectedEof():
+return unexpectedEof(_that);case KdbxError_InvalidKDBXIdentifier():
+return invalidKdbxIdentifier(_that);case KdbxError_InvalidKDBXVersion():
+return invalidKdbxVersion(_that);case KdbxError_Cryptography():
+return cryptography(_that);case KdbxError_DatabaseFormat():
+return databaseFormat(_that);case KdbxError_GenerateRandom():
+return generateRandom(_that);case KdbxError_DuplicateUuid():
+return duplicateUuid(_that);case KdbxError_MoveGroup():
+return moveGroup(_that);case KdbxError_Merge():
+return merge(_that);case KdbxError_CannotDeleteRoot():
+return cannotDeleteRoot(_that);}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( KdbxError_ParseUuid value)?  parseUuid,TResult? Function( KdbxError_NotFound value)?  notFound,TResult? Function( KdbxError_CredentialsEmpty value)?  credentialsEmpty,TResult? Function( KdbxError_Io value)?  io,TResult? Function( KdbxError_IncorrectCredentials value)?  incorrectCredentials,TResult? Function( KdbxError_XML value)?  xml,TResult? Function( KdbxError_InvalidKeyFile value)?  invalidKeyFile,TResult? Function( KdbxError_Unknown value)?  unknown,TResult? Function( KdbxError_UnexpectedEof value)?  unexpectedEof,TResult? Function( KdbxError_InvalidKDBXIdentifier value)?  invalidKdbxIdentifier,TResult? Function( KdbxError_InvalidKDBXVersion value)?  invalidKdbxVersion,TResult? Function( KdbxError_Cryptography value)?  cryptography,TResult? Function( KdbxError_DatabaseFormat value)?  databaseFormat,TResult? Function( KdbxError_GenerateRandom value)?  generateRandom,TResult? Function( KdbxError_DuplicateUuid value)?  duplicateUuid,TResult? Function( KdbxError_MoveGroup value)?  moveGroup,TResult? Function( KdbxError_Merge value)?  merge,TResult? Function( KdbxError_CannotDeleteRoot value)?  cannotDeleteRoot,}){
+final _that = this;
+switch (_that) {
+case KdbxError_ParseUuid() when parseUuid != null:
+return parseUuid(_that);case KdbxError_NotFound() when notFound != null:
+return notFound(_that);case KdbxError_CredentialsEmpty() when credentialsEmpty != null:
+return credentialsEmpty(_that);case KdbxError_Io() when io != null:
+return io(_that);case KdbxError_IncorrectCredentials() when incorrectCredentials != null:
+return incorrectCredentials(_that);case KdbxError_XML() when xml != null:
+return xml(_that);case KdbxError_InvalidKeyFile() when invalidKeyFile != null:
+return invalidKeyFile(_that);case KdbxError_Unknown() when unknown != null:
+return unknown(_that);case KdbxError_UnexpectedEof() when unexpectedEof != null:
+return unexpectedEof(_that);case KdbxError_InvalidKDBXIdentifier() when invalidKdbxIdentifier != null:
+return invalidKdbxIdentifier(_that);case KdbxError_InvalidKDBXVersion() when invalidKdbxVersion != null:
+return invalidKdbxVersion(_that);case KdbxError_Cryptography() when cryptography != null:
+return cryptography(_that);case KdbxError_DatabaseFormat() when databaseFormat != null:
+return databaseFormat(_that);case KdbxError_GenerateRandom() when generateRandom != null:
+return generateRandom(_that);case KdbxError_DuplicateUuid() when duplicateUuid != null:
+return duplicateUuid(_that);case KdbxError_MoveGroup() when moveGroup != null:
+return moveGroup(_that);case KdbxError_Merge() when merge != null:
+return merge(_that);case KdbxError_CannotDeleteRoot() when cannotDeleteRoot != null:
+return cannotDeleteRoot(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String message,  String backtrace)?  parseUuid,TResult Function( String message,  String backtrace)?  notFound,TResult Function( String message,  String backtrace)?  credentialsEmpty,TResult Function( String message,  String backtrace)?  io,TResult Function( String message,  String backtrace)?  incorrectCredentials,TResult Function( String message,  String backtrace)?  xml,TResult Function( String message,  String backtrace)?  invalidKeyFile,TResult Function( String message,  String backtrace)?  unknown,TResult Function( String message,  String backtrace)?  unexpectedEof,TResult Function( String message,  String backtrace)?  invalidKdbxIdentifier,TResult Function( String message,  String backtrace)?  invalidKdbxVersion,TResult Function( String message,  String backtrace)?  cryptography,TResult Function( String message,  String backtrace)?  databaseFormat,TResult Function( String message,  String backtrace)?  generateRandom,TResult Function( String message,  String backtrace)?  duplicateUuid,TResult Function( String message,  String backtrace)?  moveGroup,TResult Function( String message,  String backtrace)?  merge,TResult Function( String message,  String backtrace)?  cannotDeleteRoot,required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case KdbxError_ParseUuid() when parseUuid != null:
+return parseUuid(_that.message,_that.backtrace);case KdbxError_NotFound() when notFound != null:
+return notFound(_that.message,_that.backtrace);case KdbxError_CredentialsEmpty() when credentialsEmpty != null:
+return credentialsEmpty(_that.message,_that.backtrace);case KdbxError_Io() when io != null:
+return io(_that.message,_that.backtrace);case KdbxError_IncorrectCredentials() when incorrectCredentials != null:
+return incorrectCredentials(_that.message,_that.backtrace);case KdbxError_XML() when xml != null:
+return xml(_that.message,_that.backtrace);case KdbxError_InvalidKeyFile() when invalidKeyFile != null:
+return invalidKeyFile(_that.message,_that.backtrace);case KdbxError_Unknown() when unknown != null:
+return unknown(_that.message,_that.backtrace);case KdbxError_UnexpectedEof() when unexpectedEof != null:
+return unexpectedEof(_that.message,_that.backtrace);case KdbxError_InvalidKDBXIdentifier() when invalidKdbxIdentifier != null:
+return invalidKdbxIdentifier(_that.message,_that.backtrace);case KdbxError_InvalidKDBXVersion() when invalidKdbxVersion != null:
+return invalidKdbxVersion(_that.message,_that.backtrace);case KdbxError_Cryptography() when cryptography != null:
+return cryptography(_that.message,_that.backtrace);case KdbxError_DatabaseFormat() when databaseFormat != null:
+return databaseFormat(_that.message,_that.backtrace);case KdbxError_GenerateRandom() when generateRandom != null:
+return generateRandom(_that.message,_that.backtrace);case KdbxError_DuplicateUuid() when duplicateUuid != null:
+return duplicateUuid(_that.message,_that.backtrace);case KdbxError_MoveGroup() when moveGroup != null:
+return moveGroup(_that.message,_that.backtrace);case KdbxError_Merge() when merge != null:
+return merge(_that.message,_that.backtrace);case KdbxError_CannotDeleteRoot() when cannotDeleteRoot != null:
+return cannotDeleteRoot(_that.message,_that.backtrace);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String message,  String backtrace)  parseUuid,required TResult Function( String message,  String backtrace)  notFound,required TResult Function( String message,  String backtrace)  credentialsEmpty,required TResult Function( String message,  String backtrace)  io,required TResult Function( String message,  String backtrace)  incorrectCredentials,required TResult Function( String message,  String backtrace)  xml,required TResult Function( String message,  String backtrace)  invalidKeyFile,required TResult Function( String message,  String backtrace)  unknown,required TResult Function( String message,  String backtrace)  unexpectedEof,required TResult Function( String message,  String backtrace)  invalidKdbxIdentifier,required TResult Function( String message,  String backtrace)  invalidKdbxVersion,required TResult Function( String message,  String backtrace)  cryptography,required TResult Function( String message,  String backtrace)  databaseFormat,required TResult Function( String message,  String backtrace)  generateRandom,required TResult Function( String message,  String backtrace)  duplicateUuid,required TResult Function( String message,  String backtrace)  moveGroup,required TResult Function( String message,  String backtrace)  merge,required TResult Function( String message,  String backtrace)  cannotDeleteRoot,}) {final _that = this;
+switch (_that) {
+case KdbxError_ParseUuid():
+return parseUuid(_that.message,_that.backtrace);case KdbxError_NotFound():
+return notFound(_that.message,_that.backtrace);case KdbxError_CredentialsEmpty():
+return credentialsEmpty(_that.message,_that.backtrace);case KdbxError_Io():
+return io(_that.message,_that.backtrace);case KdbxError_IncorrectCredentials():
+return incorrectCredentials(_that.message,_that.backtrace);case KdbxError_XML():
+return xml(_that.message,_that.backtrace);case KdbxError_InvalidKeyFile():
+return invalidKeyFile(_that.message,_that.backtrace);case KdbxError_Unknown():
+return unknown(_that.message,_that.backtrace);case KdbxError_UnexpectedEof():
+return unexpectedEof(_that.message,_that.backtrace);case KdbxError_InvalidKDBXIdentifier():
+return invalidKdbxIdentifier(_that.message,_that.backtrace);case KdbxError_InvalidKDBXVersion():
+return invalidKdbxVersion(_that.message,_that.backtrace);case KdbxError_Cryptography():
+return cryptography(_that.message,_that.backtrace);case KdbxError_DatabaseFormat():
+return databaseFormat(_that.message,_that.backtrace);case KdbxError_GenerateRandom():
+return generateRandom(_that.message,_that.backtrace);case KdbxError_DuplicateUuid():
+return duplicateUuid(_that.message,_that.backtrace);case KdbxError_MoveGroup():
+return moveGroup(_that.message,_that.backtrace);case KdbxError_Merge():
+return merge(_that.message,_that.backtrace);case KdbxError_CannotDeleteRoot():
+return cannotDeleteRoot(_that.message,_that.backtrace);}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String message,  String backtrace)?  parseUuid,TResult? Function( String message,  String backtrace)?  notFound,TResult? Function( String message,  String backtrace)?  credentialsEmpty,TResult? Function( String message,  String backtrace)?  io,TResult? Function( String message,  String backtrace)?  incorrectCredentials,TResult? Function( String message,  String backtrace)?  xml,TResult? Function( String message,  String backtrace)?  invalidKeyFile,TResult? Function( String message,  String backtrace)?  unknown,TResult? Function( String message,  String backtrace)?  unexpectedEof,TResult? Function( String message,  String backtrace)?  invalidKdbxIdentifier,TResult? Function( String message,  String backtrace)?  invalidKdbxVersion,TResult? Function( String message,  String backtrace)?  cryptography,TResult? Function( String message,  String backtrace)?  databaseFormat,TResult? Function( String message,  String backtrace)?  generateRandom,TResult? Function( String message,  String backtrace)?  duplicateUuid,TResult? Function( String message,  String backtrace)?  moveGroup,TResult? Function( String message,  String backtrace)?  merge,TResult? Function( String message,  String backtrace)?  cannotDeleteRoot,}) {final _that = this;
+switch (_that) {
+case KdbxError_ParseUuid() when parseUuid != null:
+return parseUuid(_that.message,_that.backtrace);case KdbxError_NotFound() when notFound != null:
+return notFound(_that.message,_that.backtrace);case KdbxError_CredentialsEmpty() when credentialsEmpty != null:
+return credentialsEmpty(_that.message,_that.backtrace);case KdbxError_Io() when io != null:
+return io(_that.message,_that.backtrace);case KdbxError_IncorrectCredentials() when incorrectCredentials != null:
+return incorrectCredentials(_that.message,_that.backtrace);case KdbxError_XML() when xml != null:
+return xml(_that.message,_that.backtrace);case KdbxError_InvalidKeyFile() when invalidKeyFile != null:
+return invalidKeyFile(_that.message,_that.backtrace);case KdbxError_Unknown() when unknown != null:
+return unknown(_that.message,_that.backtrace);case KdbxError_UnexpectedEof() when unexpectedEof != null:
+return unexpectedEof(_that.message,_that.backtrace);case KdbxError_InvalidKDBXIdentifier() when invalidKdbxIdentifier != null:
+return invalidKdbxIdentifier(_that.message,_that.backtrace);case KdbxError_InvalidKDBXVersion() when invalidKdbxVersion != null:
+return invalidKdbxVersion(_that.message,_that.backtrace);case KdbxError_Cryptography() when cryptography != null:
+return cryptography(_that.message,_that.backtrace);case KdbxError_DatabaseFormat() when databaseFormat != null:
+return databaseFormat(_that.message,_that.backtrace);case KdbxError_GenerateRandom() when generateRandom != null:
+return generateRandom(_that.message,_that.backtrace);case KdbxError_DuplicateUuid() when duplicateUuid != null:
+return duplicateUuid(_that.message,_that.backtrace);case KdbxError_MoveGroup() when moveGroup != null:
+return moveGroup(_that.message,_that.backtrace);case KdbxError_Merge() when merge != null:
+return merge(_that.message,_that.backtrace);case KdbxError_CannotDeleteRoot() when cannotDeleteRoot != null:
+return cannotDeleteRoot(_that.message,_that.backtrace);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class KdbxError_ParseUuid extends KdbxError implements FrbBacktracedException {
+  const KdbxError_ParseUuid({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_ParseUuidCopyWith<KdbxError_ParseUuid> get copyWith => _$KdbxError_ParseUuidCopyWithImpl<KdbxError_ParseUuid>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_ParseUuid&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.parseUuid(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_ParseUuidCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_ParseUuidCopyWith(KdbxError_ParseUuid value, $Res Function(KdbxError_ParseUuid) _then) = _$KdbxError_ParseUuidCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_ParseUuidCopyWithImpl<$Res>
+    implements $KdbxError_ParseUuidCopyWith<$Res> {
+  _$KdbxError_ParseUuidCopyWithImpl(this._self, this._then);
+
+  final KdbxError_ParseUuid _self;
+  final $Res Function(KdbxError_ParseUuid) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_ParseUuid(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KdbxError_NotFound extends KdbxError implements FrbBacktracedException {
+  const KdbxError_NotFound({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_NotFoundCopyWith<KdbxError_NotFound> get copyWith => _$KdbxError_NotFoundCopyWithImpl<KdbxError_NotFound>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_NotFound&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.notFound(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_NotFoundCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_NotFoundCopyWith(KdbxError_NotFound value, $Res Function(KdbxError_NotFound) _then) = _$KdbxError_NotFoundCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_NotFoundCopyWithImpl<$Res>
+    implements $KdbxError_NotFoundCopyWith<$Res> {
+  _$KdbxError_NotFoundCopyWithImpl(this._self, this._then);
+
+  final KdbxError_NotFound _self;
+  final $Res Function(KdbxError_NotFound) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_NotFound(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KdbxError_CredentialsEmpty extends KdbxError implements FrbBacktracedException {
+  const KdbxError_CredentialsEmpty({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_CredentialsEmptyCopyWith<KdbxError_CredentialsEmpty> get copyWith => _$KdbxError_CredentialsEmptyCopyWithImpl<KdbxError_CredentialsEmpty>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_CredentialsEmpty&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.credentialsEmpty(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_CredentialsEmptyCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_CredentialsEmptyCopyWith(KdbxError_CredentialsEmpty value, $Res Function(KdbxError_CredentialsEmpty) _then) = _$KdbxError_CredentialsEmptyCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_CredentialsEmptyCopyWithImpl<$Res>
+    implements $KdbxError_CredentialsEmptyCopyWith<$Res> {
+  _$KdbxError_CredentialsEmptyCopyWithImpl(this._self, this._then);
+
+  final KdbxError_CredentialsEmpty _self;
+  final $Res Function(KdbxError_CredentialsEmpty) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_CredentialsEmpty(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KdbxError_Io extends KdbxError implements FrbBacktracedException {
+  const KdbxError_Io({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_IoCopyWith<KdbxError_Io> get copyWith => _$KdbxError_IoCopyWithImpl<KdbxError_Io>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_Io&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.io(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_IoCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_IoCopyWith(KdbxError_Io value, $Res Function(KdbxError_Io) _then) = _$KdbxError_IoCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_IoCopyWithImpl<$Res>
+    implements $KdbxError_IoCopyWith<$Res> {
+  _$KdbxError_IoCopyWithImpl(this._self, this._then);
+
+  final KdbxError_Io _self;
+  final $Res Function(KdbxError_Io) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_Io(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KdbxError_IncorrectCredentials extends KdbxError implements FrbBacktracedException {
+  const KdbxError_IncorrectCredentials({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_IncorrectCredentialsCopyWith<KdbxError_IncorrectCredentials> get copyWith => _$KdbxError_IncorrectCredentialsCopyWithImpl<KdbxError_IncorrectCredentials>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_IncorrectCredentials&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.incorrectCredentials(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_IncorrectCredentialsCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_IncorrectCredentialsCopyWith(KdbxError_IncorrectCredentials value, $Res Function(KdbxError_IncorrectCredentials) _then) = _$KdbxError_IncorrectCredentialsCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_IncorrectCredentialsCopyWithImpl<$Res>
+    implements $KdbxError_IncorrectCredentialsCopyWith<$Res> {
+  _$KdbxError_IncorrectCredentialsCopyWithImpl(this._self, this._then);
+
+  final KdbxError_IncorrectCredentials _self;
+  final $Res Function(KdbxError_IncorrectCredentials) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_IncorrectCredentials(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KdbxError_XML extends KdbxError implements FrbBacktracedException {
+  const KdbxError_XML({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_XMLCopyWith<KdbxError_XML> get copyWith => _$KdbxError_XMLCopyWithImpl<KdbxError_XML>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_XML&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.xml(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_XMLCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_XMLCopyWith(KdbxError_XML value, $Res Function(KdbxError_XML) _then) = _$KdbxError_XMLCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_XMLCopyWithImpl<$Res>
+    implements $KdbxError_XMLCopyWith<$Res> {
+  _$KdbxError_XMLCopyWithImpl(this._self, this._then);
+
+  final KdbxError_XML _self;
+  final $Res Function(KdbxError_XML) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_XML(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KdbxError_InvalidKeyFile extends KdbxError implements FrbBacktracedException {
+  const KdbxError_InvalidKeyFile({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_InvalidKeyFileCopyWith<KdbxError_InvalidKeyFile> get copyWith => _$KdbxError_InvalidKeyFileCopyWithImpl<KdbxError_InvalidKeyFile>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_InvalidKeyFile&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.invalidKeyFile(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_InvalidKeyFileCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_InvalidKeyFileCopyWith(KdbxError_InvalidKeyFile value, $Res Function(KdbxError_InvalidKeyFile) _then) = _$KdbxError_InvalidKeyFileCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_InvalidKeyFileCopyWithImpl<$Res>
+    implements $KdbxError_InvalidKeyFileCopyWith<$Res> {
+  _$KdbxError_InvalidKeyFileCopyWithImpl(this._self, this._then);
+
+  final KdbxError_InvalidKeyFile _self;
+  final $Res Function(KdbxError_InvalidKeyFile) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_InvalidKeyFile(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KdbxError_Unknown extends KdbxError implements FrbBacktracedException {
+  const KdbxError_Unknown({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_UnknownCopyWith<KdbxError_Unknown> get copyWith => _$KdbxError_UnknownCopyWithImpl<KdbxError_Unknown>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_Unknown&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.unknown(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_UnknownCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_UnknownCopyWith(KdbxError_Unknown value, $Res Function(KdbxError_Unknown) _then) = _$KdbxError_UnknownCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_UnknownCopyWithImpl<$Res>
+    implements $KdbxError_UnknownCopyWith<$Res> {
+  _$KdbxError_UnknownCopyWithImpl(this._self, this._then);
+
+  final KdbxError_Unknown _self;
+  final $Res Function(KdbxError_Unknown) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_Unknown(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KdbxError_UnexpectedEof extends KdbxError implements FrbBacktracedException {
+  const KdbxError_UnexpectedEof({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_UnexpectedEofCopyWith<KdbxError_UnexpectedEof> get copyWith => _$KdbxError_UnexpectedEofCopyWithImpl<KdbxError_UnexpectedEof>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_UnexpectedEof&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.unexpectedEof(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_UnexpectedEofCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_UnexpectedEofCopyWith(KdbxError_UnexpectedEof value, $Res Function(KdbxError_UnexpectedEof) _then) = _$KdbxError_UnexpectedEofCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_UnexpectedEofCopyWithImpl<$Res>
+    implements $KdbxError_UnexpectedEofCopyWith<$Res> {
+  _$KdbxError_UnexpectedEofCopyWithImpl(this._self, this._then);
+
+  final KdbxError_UnexpectedEof _self;
+  final $Res Function(KdbxError_UnexpectedEof) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_UnexpectedEof(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KdbxError_InvalidKDBXIdentifier extends KdbxError implements FrbBacktracedException {
+  const KdbxError_InvalidKDBXIdentifier({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_InvalidKDBXIdentifierCopyWith<KdbxError_InvalidKDBXIdentifier> get copyWith => _$KdbxError_InvalidKDBXIdentifierCopyWithImpl<KdbxError_InvalidKDBXIdentifier>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_InvalidKDBXIdentifier&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.invalidKdbxIdentifier(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_InvalidKDBXIdentifierCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_InvalidKDBXIdentifierCopyWith(KdbxError_InvalidKDBXIdentifier value, $Res Function(KdbxError_InvalidKDBXIdentifier) _then) = _$KdbxError_InvalidKDBXIdentifierCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_InvalidKDBXIdentifierCopyWithImpl<$Res>
+    implements $KdbxError_InvalidKDBXIdentifierCopyWith<$Res> {
+  _$KdbxError_InvalidKDBXIdentifierCopyWithImpl(this._self, this._then);
+
+  final KdbxError_InvalidKDBXIdentifier _self;
+  final $Res Function(KdbxError_InvalidKDBXIdentifier) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_InvalidKDBXIdentifier(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KdbxError_InvalidKDBXVersion extends KdbxError implements FrbBacktracedException {
+  const KdbxError_InvalidKDBXVersion({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_InvalidKDBXVersionCopyWith<KdbxError_InvalidKDBXVersion> get copyWith => _$KdbxError_InvalidKDBXVersionCopyWithImpl<KdbxError_InvalidKDBXVersion>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_InvalidKDBXVersion&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.invalidKdbxVersion(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_InvalidKDBXVersionCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_InvalidKDBXVersionCopyWith(KdbxError_InvalidKDBXVersion value, $Res Function(KdbxError_InvalidKDBXVersion) _then) = _$KdbxError_InvalidKDBXVersionCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_InvalidKDBXVersionCopyWithImpl<$Res>
+    implements $KdbxError_InvalidKDBXVersionCopyWith<$Res> {
+  _$KdbxError_InvalidKDBXVersionCopyWithImpl(this._self, this._then);
+
+  final KdbxError_InvalidKDBXVersion _self;
+  final $Res Function(KdbxError_InvalidKDBXVersion) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_InvalidKDBXVersion(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KdbxError_Cryptography extends KdbxError implements FrbBacktracedException {
+  const KdbxError_Cryptography({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_CryptographyCopyWith<KdbxError_Cryptography> get copyWith => _$KdbxError_CryptographyCopyWithImpl<KdbxError_Cryptography>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_Cryptography&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.cryptography(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_CryptographyCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_CryptographyCopyWith(KdbxError_Cryptography value, $Res Function(KdbxError_Cryptography) _then) = _$KdbxError_CryptographyCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_CryptographyCopyWithImpl<$Res>
+    implements $KdbxError_CryptographyCopyWith<$Res> {
+  _$KdbxError_CryptographyCopyWithImpl(this._self, this._then);
+
+  final KdbxError_Cryptography _self;
+  final $Res Function(KdbxError_Cryptography) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_Cryptography(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KdbxError_DatabaseFormat extends KdbxError implements FrbBacktracedException {
+  const KdbxError_DatabaseFormat({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_DatabaseFormatCopyWith<KdbxError_DatabaseFormat> get copyWith => _$KdbxError_DatabaseFormatCopyWithImpl<KdbxError_DatabaseFormat>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_DatabaseFormat&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.databaseFormat(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_DatabaseFormatCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_DatabaseFormatCopyWith(KdbxError_DatabaseFormat value, $Res Function(KdbxError_DatabaseFormat) _then) = _$KdbxError_DatabaseFormatCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_DatabaseFormatCopyWithImpl<$Res>
+    implements $KdbxError_DatabaseFormatCopyWith<$Res> {
+  _$KdbxError_DatabaseFormatCopyWithImpl(this._self, this._then);
+
+  final KdbxError_DatabaseFormat _self;
+  final $Res Function(KdbxError_DatabaseFormat) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_DatabaseFormat(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KdbxError_GenerateRandom extends KdbxError implements FrbBacktracedException {
+  const KdbxError_GenerateRandom({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_GenerateRandomCopyWith<KdbxError_GenerateRandom> get copyWith => _$KdbxError_GenerateRandomCopyWithImpl<KdbxError_GenerateRandom>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_GenerateRandom&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.generateRandom(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_GenerateRandomCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_GenerateRandomCopyWith(KdbxError_GenerateRandom value, $Res Function(KdbxError_GenerateRandom) _then) = _$KdbxError_GenerateRandomCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_GenerateRandomCopyWithImpl<$Res>
+    implements $KdbxError_GenerateRandomCopyWith<$Res> {
+  _$KdbxError_GenerateRandomCopyWithImpl(this._self, this._then);
+
+  final KdbxError_GenerateRandom _self;
+  final $Res Function(KdbxError_GenerateRandom) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_GenerateRandom(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KdbxError_DuplicateUuid extends KdbxError implements FrbBacktracedException {
+  const KdbxError_DuplicateUuid({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_DuplicateUuidCopyWith<KdbxError_DuplicateUuid> get copyWith => _$KdbxError_DuplicateUuidCopyWithImpl<KdbxError_DuplicateUuid>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_DuplicateUuid&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.duplicateUuid(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_DuplicateUuidCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_DuplicateUuidCopyWith(KdbxError_DuplicateUuid value, $Res Function(KdbxError_DuplicateUuid) _then) = _$KdbxError_DuplicateUuidCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_DuplicateUuidCopyWithImpl<$Res>
+    implements $KdbxError_DuplicateUuidCopyWith<$Res> {
+  _$KdbxError_DuplicateUuidCopyWithImpl(this._self, this._then);
+
+  final KdbxError_DuplicateUuid _self;
+  final $Res Function(KdbxError_DuplicateUuid) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_DuplicateUuid(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KdbxError_MoveGroup extends KdbxError implements FrbBacktracedException {
+  const KdbxError_MoveGroup({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_MoveGroupCopyWith<KdbxError_MoveGroup> get copyWith => _$KdbxError_MoveGroupCopyWithImpl<KdbxError_MoveGroup>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_MoveGroup&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.moveGroup(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_MoveGroupCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_MoveGroupCopyWith(KdbxError_MoveGroup value, $Res Function(KdbxError_MoveGroup) _then) = _$KdbxError_MoveGroupCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_MoveGroupCopyWithImpl<$Res>
+    implements $KdbxError_MoveGroupCopyWith<$Res> {
+  _$KdbxError_MoveGroupCopyWithImpl(this._self, this._then);
+
+  final KdbxError_MoveGroup _self;
+  final $Res Function(KdbxError_MoveGroup) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_MoveGroup(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KdbxError_Merge extends KdbxError implements FrbBacktracedException {
+  const KdbxError_Merge({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_MergeCopyWith<KdbxError_Merge> get copyWith => _$KdbxError_MergeCopyWithImpl<KdbxError_Merge>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_Merge&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.merge(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_MergeCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_MergeCopyWith(KdbxError_Merge value, $Res Function(KdbxError_Merge) _then) = _$KdbxError_MergeCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_MergeCopyWithImpl<$Res>
+    implements $KdbxError_MergeCopyWith<$Res> {
+  _$KdbxError_MergeCopyWithImpl(this._self, this._then);
+
+  final KdbxError_Merge _self;
+  final $Res Function(KdbxError_Merge) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_Merge(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KdbxError_CannotDeleteRoot extends KdbxError implements FrbBacktracedException {
+  const KdbxError_CannotDeleteRoot({required this.message, required this.backtrace}): super._();
+  
+
+@override final  String message;
+@override final  String backtrace;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxError_CannotDeleteRootCopyWith<KdbxError_CannotDeleteRoot> get copyWith => _$KdbxError_CannotDeleteRootCopyWithImpl<KdbxError_CannotDeleteRoot>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxError_CannotDeleteRoot&&(identical(other.message, message) || other.message == message)&&(identical(other.backtrace, backtrace) || other.backtrace == backtrace));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,backtrace);
+
+@override
+String toString() {
+  return 'KdbxError.cannotDeleteRoot(message: $message, backtrace: $backtrace)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KdbxError_CannotDeleteRootCopyWith<$Res> implements $KdbxErrorCopyWith<$Res> {
+  factory $KdbxError_CannotDeleteRootCopyWith(KdbxError_CannotDeleteRoot value, $Res Function(KdbxError_CannotDeleteRoot) _then) = _$KdbxError_CannotDeleteRootCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String backtrace
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxError_CannotDeleteRootCopyWithImpl<$Res>
+    implements $KdbxError_CannotDeleteRootCopyWith<$Res> {
+  _$KdbxError_CannotDeleteRootCopyWithImpl(this._self, this._then);
+
+  final KdbxError_CannotDeleteRoot _self;
+  final $Res Function(KdbxError_CannotDeleteRoot) _then;
+
+/// Create a copy of KdbxError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? backtrace = null,}) {
+  return _then(KdbxError_CannotDeleteRoot(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,backtrace: null == backtrace ? _self.backtrace : backtrace // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 

@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-use crate::{config::DatabaseVersion, db::Database, DatabaseKey};
+use crate::{DatabaseKey, config::{DatabaseVersion, InnerCipherConfig}, db::Database, format::xml_db::to_xml};
 
 impl Database {
     /// Saves the database to the given destination, using the provided key for encryption.
@@ -17,6 +17,13 @@ impl Database {
             DatabaseVersion::KDB3(_) => Err(DatabaseSaveError::UnsupportedVersion),
             DatabaseVersion::KDB4(_) => dump_kdbx4(self, &key, destination),
         }
+    }
+
+    /// database to plain xml
+    pub fn to_xml(&self) -> Result<Vec<u8>, DatabaseSaveError> {
+        let mut cipher = InnerCipherConfig::Plain.get_cipher(&vec![])?;
+        let (xml, ..) = to_xml(self, &mut *cipher)?;
+        Ok(xml)
     }
 }
 

@@ -93,12 +93,8 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
   @override
   void didUpdateWidget(covariant ManageGroupEntryPage oldWidget) {
     if (oldWidget.id != widget.id) {
-      _selecteds.clear();
-      if (_searchController.text.isNotEmpty) {
-        _searchController.text = "";
-      } else {
-        _search();
-      }
+      _searchController.text = "";
+      _search();
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -113,16 +109,22 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
   }
 
   void _search() async {
-    _totalEntry.clear();
-    _totalEntry.addAll(
-      await Store.kdbx.kdbx!.getEntrys(
-        sreach: _searchController.text,
-        groupId: widget.id,
-        ignoreGroupConfig: true,
-      ),
-    );
-    _selecteds.removeWhere(((item) => !_totalEntry.contains(item)));
-    setState(() {});
+    try {
+      _totalEntry.clear();
+      _totalEntry.addAll(
+        await Store.kdbx.kdbx!.getEntrys(
+          sreach: _searchController.text,
+          groupId: widget.id,
+          ignoreGroupConfig: true,
+        ),
+      );
+      _selecteds.removeWhere(((item) => !_totalEntry.contains(item)));
+      setState(() {});
+    } on KdbxError_NotFound {
+      context.router.pop();
+    } catch (e, s) {
+      showError(e, s);
+    }
   }
 
   void _onItemTap(EntryData kdbxEntry) {
@@ -141,7 +143,6 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
         KdbxAction.move2Trash(kdbxEntrys.map((item) => item.id).toList()),
       );
       kdbxEntrys.clear();
-      _search();
     }
   }
 
@@ -155,7 +156,6 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
         ),
       );
       kdbxEntrys.clear();
-      _search();
     }
   }
 

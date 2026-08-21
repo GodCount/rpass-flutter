@@ -12,13 +12,10 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 part 'kdbx.freezed.dart';
 
-// These functions are ignored because they are not marked as `pub`: `emit`, `enable_recyclebin`, `from`, `from`, `get`, `impl_action`, `summary`
+// These functions are ignored because they are not marked as `pub`: `credentials_empty`, `emit`, `enable_recyclebin`, `from`, `from`, `get`, `impl_action`, `io`, `merge`, `not_found`, `parse_uuid`, `summary`, `xml`
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `SearchInputParse`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `drop`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `into`, `into`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `drop`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `hash`, `into`, `into`
 // These functions are ignored (category: IgnoreBecauseOwnerTyShouldIgnore): `is_match`
-
-String greet({required String name}) =>
-    RustLib.instance.api.crateApiKdbxGreet(name: name);
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Credentials>>
 abstract class Credentials implements RustOpaqueInterface {
@@ -59,13 +56,11 @@ abstract class Kdbx implements RustOpaqueInterface {
     filepath: filepath,
   );
 
-  Future<Uint8List> exportXml();
-
   Future<Uint8List> getAttachment({required int id});
 
   Future<(EntryData, String)> getAutoTypeSequence({required String id});
 
-  Future<Uint8List> getCompositeKey();
+  Uint8List getCompositeKey();
 
   Future<KdbxConfig> getConfig();
 
@@ -92,6 +87,8 @@ abstract class Kdbx implements RustOpaqueInterface {
   Future<VariantDictionaryValue?> getPublicCustomData({required String key});
 
   Future<(List<GroupData>, List<EntryData>)> getRecycleItems();
+
+  Future<UpdateMeta> getUpdateMeta();
 
   Future<MergeLog> merge({required Kdbx kdbx});
 
@@ -124,6 +121,8 @@ abstract class Kdbx implements RustOpaqueInterface {
   Future<void> saveFile({String? filepath});
 
   Future<(FieldSummary, Meta, Map<String, GroupData>)> summary();
+
+  Future<Uint8List> toXml();
 
   Future<bool> verifyCredentials({required Credentials credentials});
 }
@@ -592,14 +591,8 @@ sealed class KdbxAction with _$KdbxAction {
       KdbxAction_UpdateEntry;
   const factory KdbxAction.updateGroup(GroupData field0) =
       KdbxAction_UpdateGroup;
-  const factory KdbxAction.updateMeta({
-    String? databaseName,
-    String? databaseDescription,
-    PlatformInt64? maintenanceHistoryDays,
-    Color? color,
-    PlatformInt64? historyMaxItems,
-    PlatformInt64? historyMaxSize,
-  }) = KdbxAction_UpdateMeta;
+  const factory KdbxAction.updateMeta(UpdateMeta field0) =
+      KdbxAction_UpdateMeta;
   const factory KdbxAction.updateMetaCustomData(
     Map<String, CustomDataValue?> field0,
   ) = KdbxAction_UpdateMetaCustomData;
@@ -654,6 +647,102 @@ class KdbxConfig {
           compressionConfig == other.compressionConfig &&
           innerCipherConfig == other.innerCipherConfig &&
           kdfConfig == other.kdfConfig;
+}
+
+@freezed
+sealed class KdbxError with _$KdbxError implements FrbException {
+  const KdbxError._();
+
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.parseUuid({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_ParseUuid;
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.notFound({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_NotFound;
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.credentialsEmpty({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_CredentialsEmpty;
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.io({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_Io;
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.incorrectCredentials({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_IncorrectCredentials;
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.xml({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_XML;
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.invalidKeyFile({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_InvalidKeyFile;
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.unknown({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_Unknown;
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.unexpectedEof({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_UnexpectedEof;
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.invalidKdbxIdentifier({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_InvalidKDBXIdentifier;
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.invalidKdbxVersion({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_InvalidKDBXVersion;
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.cryptography({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_Cryptography;
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.databaseFormat({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_DatabaseFormat;
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.generateRandom({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_GenerateRandom;
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.duplicateUuid({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_DuplicateUuid;
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.moveGroup({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_MoveGroup;
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.merge({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_Merge;
+  @Implements<FrbBacktracedException>()
+  const factory KdbxError.cannotDeleteRoot({
+    required String message,
+    required String backtrace,
+  }) = KdbxError_CannotDeleteRoot;
 }
 
 @freezed
@@ -817,7 +906,7 @@ class Meta {
   final DateTime? databaseDescriptionChanged;
   final String? defaultUsername;
   final DateTime? defaultUsernameChanged;
-  final BigInt? maintenanceHistoryDays;
+  final PlatformInt64? maintenanceHistoryDays;
   final Color? color;
   final DateTime? masterKeyChanged;
   final PlatformInt64? masterKeyChangeRec;
@@ -963,6 +1052,73 @@ class Times {
           locationChanged == other.locationChanged &&
           expires == other.expires &&
           usageCount == other.usageCount;
+}
+
+class UpdateMeta {
+  String? databaseName;
+  String? databaseDescription;
+  String? defaultUsername;
+  PlatformInt64? maintenanceHistoryDays;
+  Color? color;
+  PlatformInt64? masterKeyChangeRec;
+  PlatformInt64? masterKeyChangeForce;
+  MemoryProtection? memoryProtection;
+  String? entryTemplatesGroup;
+  String? lastSelectedGroup;
+  String? lastTopVisibleGroup;
+  PlatformInt64? historyMaxItems;
+  PlatformInt64? historyMaxSize;
+
+  UpdateMeta({
+    this.databaseName,
+    this.databaseDescription,
+    this.defaultUsername,
+    this.maintenanceHistoryDays,
+    this.color,
+    this.masterKeyChangeRec,
+    this.masterKeyChangeForce,
+    this.memoryProtection,
+    this.entryTemplatesGroup,
+    this.lastSelectedGroup,
+    this.lastTopVisibleGroup,
+    this.historyMaxItems,
+    this.historyMaxSize,
+  });
+
+  @override
+  int get hashCode =>
+      databaseName.hashCode ^
+      databaseDescription.hashCode ^
+      defaultUsername.hashCode ^
+      maintenanceHistoryDays.hashCode ^
+      color.hashCode ^
+      masterKeyChangeRec.hashCode ^
+      masterKeyChangeForce.hashCode ^
+      memoryProtection.hashCode ^
+      entryTemplatesGroup.hashCode ^
+      lastSelectedGroup.hashCode ^
+      lastTopVisibleGroup.hashCode ^
+      historyMaxItems.hashCode ^
+      historyMaxSize.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UpdateMeta &&
+          runtimeType == other.runtimeType &&
+          databaseName == other.databaseName &&
+          databaseDescription == other.databaseDescription &&
+          defaultUsername == other.defaultUsername &&
+          maintenanceHistoryDays == other.maintenanceHistoryDays &&
+          color == other.color &&
+          masterKeyChangeRec == other.masterKeyChangeRec &&
+          masterKeyChangeForce == other.masterKeyChangeForce &&
+          memoryProtection == other.memoryProtection &&
+          entryTemplatesGroup == other.entryTemplatesGroup &&
+          lastSelectedGroup == other.lastSelectedGroup &&
+          lastTopVisibleGroup == other.lastTopVisibleGroup &&
+          historyMaxItems == other.historyMaxItems &&
+          historyMaxSize == other.historyMaxSize;
 }
 
 @freezed

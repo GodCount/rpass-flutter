@@ -219,7 +219,7 @@ class _SettingsPageState extends State<SettingsPage>
                     final enableBiometric = !Store.settings.enableBiometric;
                     await biometric.updateCredentials(
                       context,
-                      enableBiometric ? await kdbx.getCompositeKey() : null,
+                      enableBiometric ? kdbx.getCompositeKey() : null,
                     );
                     Store.settings.seEnableBiometric(enableBiometric);
                     _logger.finest("biometric status is $enableBiometric");
@@ -231,7 +231,7 @@ class _SettingsPageState extends State<SettingsPage>
                       return;
                     }
                     _logger.severe("set biometric exception!", e, s);
-                    showError(e);
+                    showError(e, s);
                   } finally {
                     setState(() {});
                   }
