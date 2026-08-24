@@ -152,15 +152,14 @@ class _SettingsPageState extends State<SettingsPage>
                 context.router.platformNavigate(RecycleBinRoute());
               },
             ),
-            // TODO! 上游 kdbx.dart 还没实现
-            // ListTile(
-            //   shape: shape,
-            //   title: const Text("更多设置"),
-            //   trailing: const Icon(Icons.chevron_right_rounded),
-            //   onTap: () {
-            //      context.router.platformNavigate(KdbxSettingRoute());
-            //   },
-            // ),
+            ListTile(
+              shape: shape,
+              title: Text(t.more_settings),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () {
+                 context.router.platformNavigate(KdbxSettingRoute());
+              },
+            ),
           ]),
           _cardColumn([
             Padding(

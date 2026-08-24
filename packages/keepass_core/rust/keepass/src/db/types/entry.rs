@@ -718,6 +718,9 @@ impl EntryTrack<'_> {
     pub fn move_to(&mut self, group_id: GroupId) -> Result<(), DestinationGroupNotFoundError> {
         self.as_mut().move_to(group_id)?;
         self.times.location_changed = Some(Times::now());
+        // fix During the merge process, if `last_modification` is the same, a `have_entries_diverged` check will be performed,
+        // in which case the `parent` values ​​will be different.
+        self.times.last_modification = Some(Times::now());
         Ok(())
     }
 

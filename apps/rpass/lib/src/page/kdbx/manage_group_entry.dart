@@ -147,12 +147,12 @@ class _ManageGroupEntryPageState extends State<ManageGroupEntryPage>
   }
 
   void _move(List<EntryData> kdbxEntrys) async {
-    final id = await showGroupSelectorDialog(widget.id);
-    if (id != null) {
+    final groupData = await showGroupSelectorDialog(groupId: widget.id);
+    if (groupData != null) {
       await kdbxAction(
         KdbxAction.move2Group(
           from: kdbxEntrys.map((item) => item.id).toList(),
-          to: id,
+          to: groupData.id,
         ),
       );
       kdbxEntrys.clear();

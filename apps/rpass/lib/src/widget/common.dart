@@ -192,12 +192,22 @@ class InputDialogState extends State<InputDialog> {
 }
 
 class GroupSelectorDialog extends StatefulWidget {
-  const GroupSelectorDialog({super.key, this.value, required this.onResult});
+  const GroupSelectorDialog({
+    super.key,
+    this.value,
+    this.noRoot = false,
+    required this.onResult,
+  });
 
   final String? value;
-  final FormFieldSetter<String> onResult;
+  final bool noRoot;
+  final FormFieldSetter<GroupData> onResult;
 
-  static Future<String?> openDialog(BuildContext context, {String? value}) {
+  static Future<GroupData?> openDialog(
+    BuildContext context, {
+    String? value,
+    bool? noRoot,
+  }) {
     return showDialog(
       context: context,
       // fix 在 GroupSelectorDialog 里触发导航 context.router.push 会把页面插入到弹窗下发的问题
@@ -205,6 +215,7 @@ class GroupSelectorDialog extends StatefulWidget {
       builder: (context) {
         return GroupSelectorDialog(
           value: value,
+          noRoot: noRoot ?? false,
           onResult: (value) {
             context.router.pop(value);
           },
@@ -230,7 +241,7 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
           IconButton(
             onPressed: () async {
               final uuid = await addKdbxGroup();
-              if (uuid != null && uuid is String) {
+              if (uuid != null && uuid is GroupData) {
                 return widget.onResult(uuid);
               }
               setState(() {});
@@ -250,9 +261,10 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
         constraints: const BoxConstraints(maxWidth: 312),
         child: ListView(
           shrinkWrap: true,
-          children: kdbxProvider.groups
-              .map(
-                (item) => ListTile(
+          children: [
+            for (final item in kdbxProvider.groups)
+              if (!widget.noRoot || item.parent != null)
+                ListTile(
                   leading: KdbxIconWidget(
                     kdbxIcon: KdbxIconWidgetData(
                       icon: item.icon ?? KdbxIconType.Folder.toKdbxIcon(),
@@ -263,11 +275,10 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
                       ? const Icon(Icons.done)
                       : null,
                   onTap: () {
-                    widget.onResult(item.id == widget.value ? null : item.id);
+                    widget.onResult(item.id == widget.value ? null : item);
                   },
                 ),
-              )
-              .toList(),
+          ],
         ),
       ),
       actions: [

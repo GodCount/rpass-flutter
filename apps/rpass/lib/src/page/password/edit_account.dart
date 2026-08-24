@@ -149,9 +149,9 @@ class _EditAccountPageState extends State<EditAccountPage>
     }
   }
 
-  void _kdbxEntryGroupSaved(String? groupId) {
-    if (groupId != null && _kdbxEntry.parent != groupId) {
-      _kdbxEntry.parent = groupId;
+  void _kdbxEntryGroupSaved(GroupData? group) {
+    if (group != null && _kdbxEntry.parent != group.id) {
+      _kdbxEntry.parent = group.id;
     }
   }
 
@@ -285,8 +285,9 @@ class _EditAccountPageState extends State<EditAccountPage>
                 ],
               ),
             ),
-            KdbxEntryGroup(
-              initialValue: _groupData.id,
+            SelectGroupFormField(
+              label: t.group,
+              initialValue: _groupData,
               onSaved: _kdbxEntryGroupSaved,
             ),
             EntryField(
@@ -562,34 +563,6 @@ class EntryExpiresFieldSaved extends EntryFieldSaved<(bool, DateTime)> {
 
 typedef OnEntryFidleDeleted = void Function(String key);
 typedef OnEntryFieldSaved = void Function(EntryFieldSaved field);
-
-class KdbxEntryGroup extends FormField<String> {
-  KdbxEntryGroup({super.key, super.initialValue, super.onSaved})
-    : super(
-        builder: (field) {
-          return Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16),
-            child: GestureDetector(
-              onTap: () async {
-                final result = await field.showGroupSelectorDialog(field.value);
-
-                if (result != null) {
-                  field.didChange(result);
-                }
-              },
-              child: InputDecorator(
-                isEmpty: field.value == null,
-                decoration: InputDecoration(
-                  labelText: I18n.of(field.context)!.group,
-                  border: const OutlineInputBorder(),
-                ),
-                child: Text(Store.kdbx.getGroup(field.value!)?.name ?? ""),
-              ),
-            ),
-          );
-        },
-      );
-}
 
 class EntryField extends StatefulWidget {
   const EntryField({

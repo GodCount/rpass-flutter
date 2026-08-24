@@ -12,13 +12,6 @@ export 'auto_type.dart';
 
 const defaultAutoTypeSequence = "{UserName}{TAB}{Password}{ENTER}";
 
-class KdbxCustomDataKey {
-  static const GENERAL_GROUP_UUID = 'general_group_uuid';
-  static const EMAIL_GROUP_UUID = 'email_group_uuid';
-
-  static const SYNC_ACCPUNT_UUID = "sync_account_uuid";
-}
-
 class KdbxKeySpecial {
   static const TAGS = 'Tags';
   static const ATTACH = 'Attach';
@@ -175,9 +168,7 @@ extension FieldSummaryCommon on FieldSummary {
   }
 }
 
-
-extension KdbxUuidString on String {
-  // KdbxUuid get kdbxUuid => KdbxUuid(this);
+extension KdbxFiledI18n on String {
 
   String fromKdbxKeyToI18n(BuildContext context) {
     final t = I18n.of(context)!;

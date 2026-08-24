@@ -745,6 +745,9 @@ impl GroupTrack<'_> {
     pub fn move_to(&mut self, new_parent_id: GroupId) -> Result<(), MoveGroupError> {
         self.as_mut().move_to(new_parent_id)?;
         self.times.location_changed = Some(Times::now());
+        // fix During the merge process, if `last_modification` is the same, a `have_entries_diverged` check will be performed,
+        // in which case the `parent` values ​​will be different.
+        self.times.last_modification = Some(Times::now());
         Ok(())
     }
 

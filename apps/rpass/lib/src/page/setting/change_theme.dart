@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../i18n.dart';
 import '../../store/index.dart';
-import '../../theme/theme.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
 
@@ -96,50 +95,14 @@ class _ChangeThemePageState extends State<ChangeThemePage>
                 borderRadius: BorderRadius.circular(24),
               ),
             ),
-            onTap: _selectorSeedColor,
+            onTap: () async {
+              final color = await showSelectorSeedColor(
+                color: Store.settings.themeSeedColor,
+              );
+              if (color != null) setThemeSeedColor(color);
+            },
           ),
         ],
-      ),
-    );
-  }
-
-  void _selectorSeedColor() async {
-    await showDialog(
-      context: context,
-      builder: (context) {
-        final t = I18n.of(context)!;
-
-        return AlertDialog(
-          title: Text(t.seed_color),
-          content: Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              for (final color in availableColors)
-                _buildColor(color, () {
-                  setThemeSeedColor(color);
-                  context.router.pop();
-                }),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildColor(Color color, GestureTapCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(32),
-        ),
-        child: color == Store.settings.themeSeedColor
-            ? Center(child: Icon(Icons.check, color: Colors.white, size: 16))
-            : null,
       ),
     );
   }

@@ -12,7 +12,7 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 part 'kdbx.freezed.dart';
 
-// These functions are ignored because they are not marked as `pub`: `credentials_empty`, `emit`, `enable_recyclebin`, `from`, `from`, `get`, `impl_action`, `io`, `merge`, `not_found`, `parse_uuid`, `summary`, `xml`
+// These functions are ignored because they are not marked as `pub`: `credentials_empty`, `emit`, `enable_recyclebin`, `from`, `from`, `get_customm_time_changed`, `get`, `impl_action`, `io`, `merge_meta`, `merge`, `not_found`, `parse_uuid`, `set_customm_time_changed`, `summary`, `xml`
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `SearchInputParse`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `drop`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `hash`, `into`, `into`
 // These functions are ignored (category: IgnoreBecauseOwnerTyShouldIgnore): `is_match`
@@ -119,6 +119,8 @@ abstract class Kdbx implements RustOpaqueInterface {
   Future<Uint8List> save();
 
   Future<void> saveFile({String? filepath});
+
+  Future<void> setFilepath({String? filepath});
 
   Future<(FieldSummary, Meta, Map<String, GroupData>)> summary();
 

@@ -5,10 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:keepass_core/keepass_core.dart';
 import 'package:remote_fs/remote_fs.dart';
 
+import '../../i18n.dart';
+import '../../kdbx/kdbx.dart';
 import '../../remotes_fs/remote_fs.dart';
 import '../../store/index.dart';
 import '../../util/file.dart';
 import '../../util/route.dart';
+import '../../widget/extension_state.dart';
 import '../route.dart';
 import 'authorized_page.dart';
 
@@ -47,16 +50,38 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
   @override
   bool get enableRemoteImport => true;
 
-  Future<void> _setInitKdbx((Kdbx, String?) result) async {
+  Future<void> _setInitKdbx(
+    (Kdbx, String?) result, [
+    RemoteFileConfig? config,
+  ]) async {
+    final t = I18n.of(context)!;
     final kdbx = result.$1;
-
-    await kdbx.saveFile();
 
     if (Store.settings.enableRecordKeyFilePath) {
       await Store.settings.setKeyFilePath(result.$2);
     }
 
-    Store.kdbx.setKdbx(kdbx);
+    await Store.kdbx.setKdbx(kdbx);
+    await kdbx.setFilepath(filepath: Store.localInfo.localKdbxFile.path);
+
+    if (config != null &&
+        (await Store.kdbx.getSyncEntryData()) == null &&
+        await showConfirmDialog(
+          title: t.save,
+          message: t.save_sync_account_subtitle,
+        )) {
+      final entry = kdbx.newEntry()
+        ..fields[KdbxKeyCommon.TITLE] = FieldValue.plaintext(t.sync_config);
+
+      for (final item in config.toKdbx().entries) {
+        entry.fields[item.key] = item.value;
+      }
+
+      await kdbxAction(KdbxAction.updateSyncEntry(entry));
+    }
+
+    await kdbx.saveFile();
+
     context.router.replace(HomeRoute());
   }
 
@@ -115,8 +140,8 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
         SelectRemoteFileRoute(config: result, importKdbx: true),
       );
 
-      if (result2 != null && result2 is (Kdbx, String?)) {
-        await _setInitKdbx(result2);
+      if (result2 != null && result2 is (RemoteFileConfig, (Kdbx, String?))) {
+        await _setInitKdbx(result2.$2, result2.$1);
       }
     }
   }

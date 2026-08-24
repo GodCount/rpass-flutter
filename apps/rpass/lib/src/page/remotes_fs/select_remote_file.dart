@@ -158,7 +158,7 @@ class _SelectRemoteFileState extends State<SelectRemoteFilePage> {
         );
 
         if (result != null && result is (Kdbx, String?)) {
-          context.router.pop(result);
+          context.router.pop((await file.toConfig(), result));
         }
       } else {
         context.router.pop(await _selectedNode!.file.toConfig());

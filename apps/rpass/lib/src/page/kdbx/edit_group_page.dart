@@ -93,7 +93,7 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
             ManageGroupEntryRoute(id: _kdbxGroupData.id),
           );
         } else {
-          context.router.pop(_kdbxGroupData.id);
+          context.router.pop(_kdbxGroupData);
         }
       }
     }

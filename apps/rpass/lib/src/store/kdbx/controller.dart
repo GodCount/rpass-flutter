@@ -1,8 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:keepass_core/keepass_core.dart';
 import 'package:logging/logging.dart';
 import 'package:remote_fs/remote_fs.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../context/biometric.dart';
 import '../../kdbx/kdbx.dart';
@@ -66,6 +69,7 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
     _noRecyclebinGroups = _groups!.values
         .where((item) => !isInRecycleBin(item.id))
         .toList();
+    await _getSyncUuid();
   }
 
   Future<void> _getSyncUuid() async {
@@ -73,6 +77,10 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
       final customDataItem = await kdbx!.getCustomData(key: SYNC_ACCOUNT_UUID);
       if (customDataItem?.value is CustomDataValue_String) {
         _syncAccountUuid = customDataItem!.value!.field0 as String;
+      } else if (customDataItem?.value is CustomDataValue_Binary) {
+        _syncAccountUuid = Uuid.unparse(
+          customDataItem!.value!.field0 as Uint8List,
+        );
       }
     }
   }
@@ -87,7 +95,6 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
       kdbx.bindEventCallback(callback: _kdbxEventCallback);
 
       await _getSummary();
-      await _getSyncUuid();
     }
 
     emit((listener) {
@@ -142,7 +149,8 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
 
   void dispose() {
     _kdbx?.dispose();
-    _kdbx = _groups = _fieldSummary = _selectedKdbxEntry = null;
+    _kdbx = _groups = _fieldSummary = _selectedKdbxEntry = _syncAccountUuid =
+        null;
     removeAllListener();
   }
 }
@@ -278,7 +286,7 @@ class SyncKdbxController with ChangeNotifier {
 
       _logger.info(
         "{masterKeyChanged=${_lastMergeLog?.masterKeyChanged},"
-        "isUpdateMasterKey=${_lastMergeLog?.isUpdateMasterKey},",
+            "isUpdateMasterKey=${_lastMergeLog?.isUpdateMasterKey},",
         "forceMerge=$forceMerge}",
       );
 

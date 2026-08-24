@@ -4,7 +4,7 @@ use thiserror::Error;
 
 use std::convert::TryFrom;
 
-pub use crate::format::DatabaseVersion;
+pub use crate::format::{DatabaseVersion, KDBX4_CURRENT_MINOR_VERSION};
 pub use argon2::Version;
 
 #[cfg(feature = "save_kdbx4")]
@@ -15,7 +15,7 @@ use crate::{
         ciphers::{self},
         kdf, CryptographyError,
     },
-    format::{variant_dictionary::VariantDictionaryError, KDBX4_CURRENT_MINOR_VERSION},
+    format::variant_dictionary::VariantDictionaryError,
 };
 
 pub use crate::format::variant_dictionary::{VariantDictionary, VariantDictionaryValue};

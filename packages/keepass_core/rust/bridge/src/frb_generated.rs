@@ -41,7 +41,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0-beta.5";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1720923843;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 812145862;
 
 // Section: executor
 
@@ -2310,6 +2310,57 @@ fn wire__crate__api__kdbx__Kdbx_save_file_impl(
                     let api_that_guard = api_that_guard.unwrap();
                     let output_ok =
                         crate::api::kdbx::Kdbx::save_file(&*api_that_guard, api_filepath)?;
+                    Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__api__kdbx__Kdbx_set_filepath_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "Kdbx_set_filepath",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Kdbx>,
+            >>::sse_decode(&mut deserializer);
+            let api_filepath = <Option<String>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, true,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref_mut()),
+                            _ => unreachable!(),
+                        }
+                    }
+                    let mut api_that_guard = api_that_guard.unwrap();
+                    let output_ok =
+                        crate::api::kdbx::Kdbx::set_filepath(&mut *api_that_guard, api_filepath)?;
                     Ok(output_ok)
                 })())
             }
@@ -4784,14 +4835,15 @@ fn pde_ffi_dispatcher_primary_impl(
         50 => wire__crate__api__kdbx__Kdbx_open_bytes_impl(port, ptr, rust_vec_len, data_len),
         51 => wire__crate__api__kdbx__Kdbx_save_impl(port, ptr, rust_vec_len, data_len),
         52 => wire__crate__api__kdbx__Kdbx_save_file_impl(port, ptr, rust_vec_len, data_len),
-        53 => wire__crate__api__kdbx__Kdbx_summary_impl(port, ptr, rust_vec_len, data_len),
-        54 => wire__crate__api__kdbx__Kdbx_to_xml_impl(port, ptr, rust_vec_len, data_len),
-        55 => {
+        53 => wire__crate__api__kdbx__Kdbx_set_filepath_impl(port, ptr, rust_vec_len, data_len),
+        54 => wire__crate__api__kdbx__Kdbx_summary_impl(port, ptr, rust_vec_len, data_len),
+        55 => wire__crate__api__kdbx__Kdbx_to_xml_impl(port, ptr, rust_vec_len, data_len),
+        56 => {
             wire__crate__api__kdbx__Kdbx_verify_credentials_impl(port, ptr, rust_vec_len, data_len)
         }
-        58 => wire__crate__api__kdbx__field_summary_default_impl(port, ptr, rust_vec_len, data_len),
-        61 => wire__crate__api__frb_internal_init_logger_impl(port, ptr, rust_vec_len, data_len),
-        65 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
+        59 => wire__crate__api__kdbx__field_summary_default_impl(port, ptr, rust_vec_len, data_len),
+        62 => wire__crate__api__frb_internal_init_logger_impl(port, ptr, rust_vec_len, data_len),
+        66 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -4838,18 +4890,18 @@ fn pde_ffi_dispatcher_sync_impl(
         33 => wire__crate__api__kdbx__Kdbx_get_composite_key_impl(ptr, rust_vec_len, data_len),
         47 => wire__crate__api__kdbx__Kdbx_new_entry_impl(ptr, rust_vec_len, data_len),
         48 => wire__crate__api__kdbx__Kdbx_new_group_impl(ptr, rust_vec_len, data_len),
-        56 => wire__crate__api__kdbx__entry_data_clone_impl(ptr, rust_vec_len, data_len),
-        57 => wire__crate__api__kdbx__entry_data_new_impl(ptr, rust_vec_len, data_len),
-        59 => wire__crate__api__kdbx__field_value_new_impl(ptr, rust_vec_len, data_len),
-        60 => wire__crate__api__frb_internal_dispose_logger_impl(ptr, rust_vec_len, data_len),
-        62 => wire__crate__api__frb_internal_logging_max_level_impl(ptr, rust_vec_len, data_len),
-        63 => wire__crate__api__frb_internal_logging_setup_dart_logging_output_impl(
+        57 => wire__crate__api__kdbx__entry_data_clone_impl(ptr, rust_vec_len, data_len),
+        58 => wire__crate__api__kdbx__entry_data_new_impl(ptr, rust_vec_len, data_len),
+        60 => wire__crate__api__kdbx__field_value_new_impl(ptr, rust_vec_len, data_len),
+        61 => wire__crate__api__frb_internal_dispose_logger_impl(ptr, rust_vec_len, data_len),
+        63 => wire__crate__api__frb_internal_logging_max_level_impl(ptr, rust_vec_len, data_len),
+        64 => wire__crate__api__frb_internal_logging_setup_dart_logging_output_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        64 => wire__crate__api__kdbx__group_data_new_impl(ptr, rust_vec_len, data_len),
-        66 => wire__crate__api__enigo__test_key2key_impl(ptr, rust_vec_len, data_len),
+        65 => wire__crate__api__kdbx__group_data_new_impl(ptr, rust_vec_len, data_len),
+        67 => wire__crate__api__enigo__test_key2key_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }

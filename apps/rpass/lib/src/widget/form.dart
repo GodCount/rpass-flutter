@@ -535,3 +535,80 @@ class _DropdownMenuFormField2State extends FormFieldState<String> {
     }
   }
 }
+
+class ColorFormField extends FormField<Color> {
+  ColorFormField({super.key, super.initialValue, super.onSaved})
+    : super(
+        builder: (field) {
+          return IconButton(
+            onPressed: () async {
+              final color = await field.showSelectorSeedColor(
+                color: field.value,
+                empty: true,
+              );
+              field.didChange(color);
+            },
+            icon: field.value != null
+                ? Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: field.value,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  )
+                : Icon(Icons.color_lens_rounded),
+          );
+        },
+      );
+}
+
+class SelectGroupFormField extends FormField<GroupData> {
+  SelectGroupFormField({
+    super.key,
+    String? label,
+    super.initialValue,
+    super.onSaved,
+    bool isDelete = false,
+    bool? noRoot,
+  }) : super(
+         builder: (field) {
+           return Padding(
+             padding: const EdgeInsets.only(left: 16, right: 16),
+             child: GestureDetector(
+               onTap: () async {
+                 final result = await field.showGroupSelectorDialog(
+                   groupData: field.value,
+                   noRoot: noRoot,
+                 );
+
+                 if (result != null) {
+                   field.didChange(result);
+                 }
+               },
+               child: InputDecorator(
+                 isEmpty: field.value == null,
+                 decoration: InputDecoration(
+                   labelText: label,
+                   border: const OutlineInputBorder(),
+                   suffixIcon: isDelete
+                       ? Padding(
+                           padding: const EdgeInsets.all(4.0),
+                           child: IconButton(
+                             onPressed: field.value != null
+                                 ? () {
+                                     field.didChange(null);
+                                   }
+                                 : null,
+                             icon: Icon(Icons.delete),
+                           ),
+                         )
+                       : null,
+                 ),
+                 child: Text(field.value?.name ?? ""),
+               ),
+             ),
+           );
+         },
+       );
+}

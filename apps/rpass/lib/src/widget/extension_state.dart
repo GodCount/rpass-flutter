@@ -16,6 +16,7 @@ import '../kdbx/kdbx.dart';
 import '../page/kdbx/edit_group_page.dart';
 import '../page/route.dart';
 import '../store/index.dart';
+import '../theme/theme.dart';
 import '../util/common.dart';
 import '../util/file.dart';
 import '../util/route.dart';
@@ -119,8 +120,16 @@ extension StatefulDialog on State {
     return result is bool && result ? true : false;
   }
 
-  Future<String?> showGroupSelectorDialog(String? kdbxGroup) {
-    return GroupSelectorDialog.openDialog(context, value: kdbxGroup);
+  Future<GroupData?> showGroupSelectorDialog({
+    String? groupId,
+    GroupData? groupData,
+    bool? noRoot,
+  }) {
+    return GroupSelectorDialog.openDialog(
+      context,
+      value: groupData?.id ?? groupId,
+      noRoot: noRoot,
+    );
   }
 
   void showSearchHelpDialog() {
@@ -187,6 +196,59 @@ extension StatefulDialog on State {
         );
       },
     );
+  }
+
+  Future<Color?> showSelectorSeedColor({Color? color, bool? empty}) async {
+    final currentColor = color;
+    final result = await showDialog(
+      context: context,
+      builder: (context) {
+        final t = I18n.of(context)!;
+
+        return AlertDialog(
+          title: Text(t.seed_color),
+          content: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              for (final color in [
+                ...availableColors,
+                if (empty == true) Colors.transparent,
+              ])
+                GestureDetector(
+                  onTap: () => context.router.pop(
+                    color != Colors.transparent ? color : null,
+                  ),
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: BorderRadius.circular(32),
+                      border: color == Colors.transparent
+                          ? Border.all(color: Colors.black45)
+                          : null,
+                    ),
+                    child:
+                        color == currentColor ||
+                            (currentColor == null &&
+                                color == Colors.transparent)
+                        ? Center(
+                            child: Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          )
+                        : null,
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+    return result is Color ? result : null;
   }
 }
 
