@@ -163,20 +163,21 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                 ),
 
                 _RangeSelectionFormField(
+                  canDisable: true,
                   label: "历史记录维护天数",
-                  initialValue: _updateMeta.maintenanceHistoryDays,
+                  initialValue: _updateMeta.maintenanceHistoryDays ?? -1,
                   onSaved: (value) => _updateMeta.maintenanceHistoryDays =
-                      value == 0 ? null : value,
+                      value != null && value > 0 ? value : null,
                   formatText: (value) {
-                    if ((value ?? 0) == 0) {
-                      return "永不维护";
+                    if (value == -1) {
+                      return t.none;
                     }
                     return t.days(value!);
                   },
                   onCalculate: (value, type) {
                     return switch (type) {
                       _CalculateType.add => min((value ?? 0) + 1, 999),
-                      _CalculateType.reduce => max((value ?? 2) - 1, 0),
+                      _CalculateType.reduce => max((value ?? 2) - 1, 1),
                     };
                   },
                 ),
@@ -188,7 +189,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                   onSaved: (value) => _updateMeta.historyMaxItems = value,
                   formatText: (value) {
                     if (value == -1) {
-                      return "${_updateMeta.historyMaxItems ?? 20}";
+                      return t.none;
                     }
                     return "$value";
                   },
@@ -207,9 +208,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                   onSaved: (value) => _updateMeta.historyMaxSize = value,
                   formatText: (value) {
                     if (value == -1) {
-                      return (_updateMeta.historyMaxSize ?? 0).toStorageUnit(
-                        .MB,
-                      );
+                      return t.none;
                     }
                     return (value ?? 0).toStorageUnit(.MB);
                   },
@@ -232,7 +231,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                     children: [
                       const Padding(
                         padding: EdgeInsets.only(right: 6),
-                        child: Icon(Icons.edit_document),
+                        child: Icon(Icons.security),
                       ),
                       Text(
                         "安全配置",
@@ -240,6 +239,42 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                       ),
                     ],
                   ),
+                ),
+                _RangeSelectionFormField(
+                  canDisable: true,
+                  label: "建议修改主密码天数",
+                  initialValue: _updateMeta.masterKeyChangeRec ?? 15,
+                  onSaved: (value) => _updateMeta.masterKeyChangeRec = value,
+                  formatText: (value) {
+                    if (value == -1) {
+                      return t.none;
+                    }
+                    return t.days(value!);
+                  },
+                  onCalculate: (value, type) {
+                    return switch (type) {
+                      _CalculateType.add => min((value ?? 0) + 1, 999),
+                      _CalculateType.reduce => max((value ?? 2) - 1, 1),
+                    };
+                  },
+                ),
+                _RangeSelectionFormField(
+                  canDisable: true,
+                  label: "强制修改主密码天数",
+                  initialValue: _updateMeta.masterKeyChangeRec ?? 30,
+                  onSaved: (value) => _updateMeta.masterKeyChangeRec = value,
+                  formatText: (value) {
+                    if (value == -1) {
+                      return t.none;
+                    }
+                    return t.days(value!);
+                  },
+                  onCalculate: (value, type) {
+                    return switch (type) {
+                      _CalculateType.add => min((value ?? 0) + 1, 999),
+                      _CalculateType.reduce => max((value ?? 2) - 1, 1),
+                    };
+                  },
                 ),
               ]),
             ],
@@ -285,16 +320,16 @@ typedef _RangeSelectionCalculate =
 class _RangeSelectionFormField extends StatefulWidget {
   const _RangeSelectionFormField({
     this.label,
-    this.formatText,
-    this.onCalculate,
+    required this.formatText,
+    required this.onCalculate,
     this.canDisable = false,
     this.initialValue,
     this.onSaved,
   });
 
   final String? label;
-  final _RangeSelectionFormatText? formatText;
-  final _RangeSelectionCalculate? onCalculate;
+  final _RangeSelectionFormatText formatText;
+  final _RangeSelectionCalculate onCalculate;
   final bool canDisable;
   final int? initialValue;
   final void Function(int?)? onSaved;
@@ -306,6 +341,7 @@ class _RangeSelectionFormField extends StatefulWidget {
 
 class _RangeSelectionFormFieldState extends State<_RangeSelectionFormField> {
   Timer? _timer;
+  late int? _prevValue = widget.initialValue;
 
   @override
   void dispose() {
@@ -325,35 +361,34 @@ class _RangeSelectionFormFieldState extends State<_RangeSelectionFormField> {
 
   @override
   Widget build(BuildContext context) {
-    // 将原参数从 widget 取出
-    final label = widget.label;
-    final formatText = widget.formatText;
-    final onCalculate = widget.onCalculate;
-    final canDisable = widget.canDisable;
-    final initialValue = widget.initialValue;
-    final onSaved = widget.onSaved;
-
-    // 使用 FormField 管理值状态
     return FormField<int>(
-      initialValue: initialValue,
-      onSaved: onSaved,
+      initialValue: widget.initialValue,
+      onSaved: widget.onSaved,
       builder: (field) {
-        // 是否禁用（值 == -1 表示禁用）
-        final disable = canDisable && field.value == -1;
+        final onCalculate = widget.onCalculate;
+        final formatText = widget.formatText;
+        final disable = widget.canDisable && field.value == -1;
+
+        final text = formatText(field.value);
+
+        void didChange(int? value) {
+          _prevValue = value;
+          field.didChange(value);
+        }
 
         return Padding(
-          padding: const EdgeInsets.only(left: 16, right: 16),
+          padding: const .only(left: 16, right: 16),
           child: InputDecorator(
-            isEmpty: field.value == null,
+            isEmpty: text.isEmpty,
             decoration: InputDecoration(
-              labelText: label,
+              labelText: widget.label,
               border: const OutlineInputBorder(),
-              prefixIcon: canDisable
+              prefixIcon: widget.canDisable
                   ? Checkbox(
                       value: field.value != -1,
                       onChanged: (value) {
                         if (value == true) {
-                          field.didChange(initialValue);
+                          field.didChange(_prevValue ?? onCalculate(0, .add));
                         } else {
                           field.didChange(-1);
                         }
@@ -361,74 +396,76 @@ class _RangeSelectionFormFieldState extends State<_RangeSelectionFormField> {
                     )
                   : null,
               suffixIcon: Padding(
-                padding: const EdgeInsets.only(right: 7),
+                padding: const .only(right: 7),
                 child: SizedBox(
                   width: 28,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      InkResponse(
-                        customBorder: const CircleBorder(),
-                        onTapDown: (_) {
-                          if (onCalculate != null && !disable) {
-                            _startRepeating(() {
-                              field.didChange(
-                                onCalculate(field.value, _CalculateType.add),
-                              );
-                            });
-                          }
-                        },
-                        onTapUp: (_) => _stopRepeating(),
-                        onTapCancel: _stopRepeating,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 2),
-                          child: Icon(
-                            Icons.expand_less,
-                            size: 18,
-                            color: disable
-                                ? Colors.grey[400]
-                                : Colors.grey[700],
-                          ),
-                        ),
-                      ),
-
-                      InkResponse(
-                        customBorder: const CircleBorder(),
-                        onTapDown: (_) {
-                          if (onCalculate != null && !disable) {
-                            _startRepeating(() {
-                              field.didChange(
-                                onCalculate(field.value, _CalculateType.reduce),
-                              );
-                            });
-                          }
-                        },
-                        onTapUp: (_) => _stopRepeating(),
-                        onTapCancel: _stopRepeating,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 2),
-                          child: Icon(
-                            Icons.expand_more,
-                            size: 18,
-                            color: disable
-                                ? Colors.grey[400]
-                                : Colors.grey[700],
-                          ),
-                        ),
-                      ),
+                      !disable
+                          ? InkWell(
+                              customBorder: const CircleBorder(),
+                              onTapDown: (_) {
+                                _startRepeating(() {
+                                  didChange(
+                                    onCalculate(field.value, .add),
+                                  );
+                                });
+                              },
+                              onTapUp: (_) => _stopRepeating(),
+                              onTapCancel: _stopRepeating,
+                              child: Padding(
+                                padding: const .symmetric(vertical: 2),
+                                child: Icon(
+                                  Icons.expand_less,
+                                  size: 18,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            )
+                          : Padding(
+                              padding: const .symmetric(vertical: 2),
+                              child: Icon(
+                                Icons.expand_less,
+                                size: 18,
+                                color: Colors.grey[400],
+                              ),
+                            ),
+                      !disable
+                          ? InkWell(
+                              customBorder: const CircleBorder(),
+                              onTapDown: (_) {
+                                _startRepeating(() {
+                                  didChange(
+                                    onCalculate(field.value, .reduce),
+                                  );
+                                });
+                              },
+                              onTapUp: (_) => _stopRepeating(),
+                              onTapCancel: _stopRepeating,
+                              child: Padding(
+                                padding: const .symmetric(vertical: 2),
+                                child: Icon(
+                                  Icons.expand_more,
+                                  size: 18,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            )
+                          : Padding(
+                              padding: const .symmetric(vertical: 2),
+                              child: Icon(
+                                Icons.expand_more,
+                                size: 18,
+                                color: Colors.grey[400],
+                              ),
+                            ),
                     ],
                   ),
                 ),
               ),
             ),
-            child: Opacity(
-              opacity: disable ? 0.8 : 1,
-              child: Text(
-                formatText != null
-                    ? formatText(field.value)
-                    : "${field.value ?? ''}",
-              ),
-            ),
+            child: Opacity(opacity: disable ? 0.8 : 1, child: Text(text)),
           ),
         );
       },

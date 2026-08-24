@@ -117,14 +117,15 @@ const AUTOFILL_FIELD_EMAIL: &str = "email";
 const AUTOFILL_FIELD_PASSWORD: &str = "password";
 const AUTOFILL_FIELD_OTP: &str = "otp";
 
-const CUSTOM_DATA_SYNC_UUID: &str = "sync_account_uuid";
-const CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED: &str = "maintenance_history_days_changed";
-const CUSTOM_COLOR_CHANGED: &str = "color_changed";
-const CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED: &str = "master_key_change_rec_changed";
-const CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED: &str = "master_key_change_force";
-const CUSTOM_MEMORY_PROTECTION_CHANGED: &str = "memory_protection_changed";
-const CUSTOM_HISTORY_MAX_ITEMS_CHANGED: &str = "history_max_items_changed";
-const CUSTOM_HISTORY_MAX_SIZE_CHANGED: &str = "history_max_size_changed";
+const CUSTOM_DATA_SYNC_UUID: &str = "sync_account_uuid"; // 向后兼容，保持小写
+const CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED: &str = "MAINTENANCE_HISTORY_DAYS_CHANGED";
+const CUSTOM_COLOR_CHANGED: &str = "COLOR_CHANGED";
+const CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED: &str = "MASTER_KEY_CHANGE_REC_CHANGED";
+const CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED: &str = "MASTER_KEY_CHANGE_FORCE";
+const CUSTOM_MEMORY_PROTECTION_CHANGED: &str = "MEMORY_PROTECTION_CHANGED";
+const CUSTOM_HISTORY_MAX_ITEMS_CHANGED: &str = "HISTORY_MAX_ITEMS_CHANGED";
+const CUSTOM_HISTORY_MAX_SIZE_CHANGED: &str = "HISTORY_MAX_SIZE_CHANGED";
+const CUSTOM_DATABASE_CONFIG_CHANGED: &str = "DATABASE_CONFIG_CHANGED";
 
 #[derive(Debug, Clone)]
 pub enum KdbxEvent {
@@ -984,20 +985,27 @@ impl Kdbx {
                 inner_cipher_config,
                 kdf_config,
             } => {
-                if let Some(config) = outer_cipher_config {
-                    db.config.outer_cipher_config = config;
-                }
+                if outer_cipher_config.is_some()
+                    || compression_config.is_some()
+                    || inner_cipher_config.is_some()
+                    || kdf_config.is_some()
+                {
+                    if let Some(config) = outer_cipher_config {
+                        db.config.outer_cipher_config = config;
+                    }
 
-                if let Some(config) = compression_config {
-                    db.config.compression_config = config;
-                }
+                    if let Some(config) = compression_config {
+                        db.config.compression_config = config;
+                    }
 
-                if let Some(config) = inner_cipher_config {
-                    db.config.inner_cipher_config = config;
-                }
+                    if let Some(config) = inner_cipher_config {
+                        db.config.inner_cipher_config = config;
+                    }
 
-                if let Some(config) = kdf_config {
-                    db.config.kdf_config = config.into();
+                    if let Some(config) = kdf_config {
+                        db.config.kdf_config = config.into();
+                    }
+                    set_customm_time_changed(db, CUSTOM_DATABASE_CONFIG_CHANGED, Times::now());
                 }
             }
             KdbxAction::Move2Trash(items) => {
@@ -1466,6 +1474,30 @@ impl Kdbx {
             dest_db.meta.history_max_size = source_db.meta.history_max_size.clone();
         }
 
+        let dest_database_config_changed = get_customm_time_changed(
+            dest_db,
+            CUSTOM_DATABASE_CONFIG_CHANGED,
+            dest_settings_changed.clone(),
+        );
+        let source_database_config_changed = get_customm_time_changed(
+            source_db,
+            CUSTOM_DATABASE_CONFIG_CHANGED,
+            source_settings_changed.clone(),
+        );
+
+        if source_database_config_changed > dest_database_config_changed {
+            set_customm_time_changed(
+                dest_db,
+                CUSTOM_DATABASE_CONFIG_CHANGED,
+                source_database_config_changed,
+            );
+            dest_db.config.outer_cipher_config = source_db.config.outer_cipher_config.clone();
+            dest_db.config.compression_config = source_db.config.compression_config.clone();
+            dest_db.config.inner_cipher_config = source_db.config.inner_cipher_config.clone();
+            dest_db.config.kdf_config = source_db.config.kdf_config.clone();
+            // public_custom_data 暂不考虑
+        }
+
         let dest_custom_data = dest_db
             .meta
             .custom_data
@@ -1504,6 +1536,10 @@ impl Kdbx {
                     .custom_data
                     .insert(key.clone(), source_value.clone());
             }
+        }
+
+        if source_settings_changed > dest_settings_changed {
+            dest_db.meta.settings_changed = Some(source_settings_changed);
         }
 
         Ok(())

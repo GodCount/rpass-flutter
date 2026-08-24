@@ -15,7 +15,7 @@ chrono = { version = "0.4.23", default-features = false, features = [
     "std",
 ] }
 enigo = { version="0.6.1", features = ["wayland"] }
-flutter_rust_bridge = { version = "=2.13.0-beta.5", features = ["chrono", "log"] }
+flutter_rust_bridge = { version = "=2.13.0-beta.6", features = ["chrono", "log"] }
 futures = "0.3"
 keepass = { path = "../keepass", features = [
     "save_kdbx4",

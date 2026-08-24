@@ -44,6 +44,7 @@ final List<String> childRouteNames = [
   SyncAccountRoute.name,
   OtherSettingsRoute.name,
   ShortcutsSettingsRoute.name,
+  KdbxSettingRoute.name
 ];
 
 class SettingsPage extends StatefulWidget {
@@ -156,6 +157,7 @@ class _SettingsPageState extends State<SettingsPage>
               shape: shape,
               title: Text(t.more_settings),
               trailing: const Icon(Icons.chevron_right_rounded),
+              selected: childRouteName == KdbxSettingRoute.name,
               onTap: () {
                  context.router.platformNavigate(KdbxSettingRoute());
               },
