@@ -889,7 +889,7 @@ class _LookAccountPageState extends State<LookAccountPage>
       floatingActionButton: !_inRecycleBin && widget.historyIndex == null
           ? FloatingActionButton(
               heroTag: const ValueKey("look_account_float"),
-              onPressed: () async {
+              onPressed: singleTrigger(() async {
                 if (_inRecycleBin) {
                   if (await kdbxAction(KdbxAction.restore([_kdbxEntry.id]))) {
                     context.router.pop();
@@ -902,7 +902,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                     setState(() {});
                   }
                 }
-              },
+              }),
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(56 / 2)),
               ),

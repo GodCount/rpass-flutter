@@ -562,9 +562,15 @@ impl Kdbx {
     }
 
     pub fn action(&self, action: KdbxAction) -> Result<(), KdbxError> {
+        self.actions(vec![action])
+    }
+
+    pub fn actions(&self, actions: Vec<KdbxAction>) -> Result<(), KdbxError> {
         let mut db = self.database.write().unwrap();
 
-        Self::impl_action(&mut db, action)?;
+        for action in actions {
+            Self::impl_action(&mut db, action)?;
+        }
 
         drop(db);
 
@@ -2222,10 +2228,15 @@ impl Credentials {
     }
 }
 
+#[frb]
 pub struct KdbxConfig {
+    #[frb(non_final)]
     pub outer_cipher_config: OuterCipherConfig,
+    #[frb(non_final)]
     pub compression_config: CompressionConfig,
+    #[frb(non_final)]
     pub inner_cipher_config: InnerCipherConfig,
+    #[frb(non_final)]
     pub kdf_config: KdfConfig,
 }
 
@@ -2741,7 +2752,7 @@ pub struct AutofillDataset {
 
 #[frb(rust2dart(dart_type = "Color", dart_code = "Color({})"))]
 pub fn encode_color_type(color: Color) -> u32 {
-    ((color.r as u32) << 16) | ((color.g as u32) << 8) | (color.b as u32)
+    ((0xFF << 24) | (color.r as u32) << 16) | ((color.g as u32) << 8) | (color.b as u32)
 }
 
 #[frb(dart2rust(dart_type = "Color", dart_code = "{}.toARGB32()"))]

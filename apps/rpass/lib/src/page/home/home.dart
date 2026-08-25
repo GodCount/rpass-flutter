@@ -57,11 +57,10 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
+
     Store.settings.addListener(_settingsListener);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Store.kdbx.syncController.initConfig();
-      _settingsListener();
-    });
+    Store.kdbx.syncController.initConfig();
+    _settingsListener();
   }
 
   void _settingsListener() {
@@ -212,19 +211,24 @@ class _DesktopHomePageState extends State<_DesktopHomePage>
                                 ).iconTheme.color,
                                 color:
                                     !Store.kdbx.syncController.isSyncing &&
-                                        Store.kdbx.syncController.lastError != null
+                                        Store.kdbx.syncController.lastError !=
+                                            null
                                     ? Theme.of(context).colorScheme.error
                                     : null,
                                 onPressed:
                                     !Store.kdbx.syncController.isSyncing &&
-                                        Store.kdbx.syncController.lastError != null
+                                        Store.kdbx.syncController.lastError !=
+                                            null
                                     ? () {
-                                        showError(Store.kdbx.syncController.lastError!);
+                                        showError(
+                                          Store.kdbx.syncController.lastError!,
+                                        );
                                       }
                                     : null,
                                 icon:
                                     !Store.kdbx.syncController.isSyncing &&
-                                        Store.kdbx.syncController.lastError != null
+                                        Store.kdbx.syncController.lastError !=
+                                            null
                                     ? const Icon(Icons.sync_problem)
                                     : const Icon(Icons.sync),
                               ),

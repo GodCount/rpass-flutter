@@ -70,6 +70,10 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
         .where((item) => !isInRecycleBin(item.id))
         .toList();
     await _getSyncUuid();
+
+    if (Store.settings.useKdbxSeedColor && _meta?.color != null) {
+      Store.settings.notify();
+    }
   }
 
   Future<void> _getSyncUuid() async {

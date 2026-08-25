@@ -11,42 +11,58 @@ class SettingsController with ChangeNotifier {
   late final ShortcutsStore shortcutsStore;
 
   late ThemeMode _themeMode;
-  late Color _themeSeedColor;
-
-  Locale? _locale;
-  late bool _enableBiometric;
-  Duration? _lockDelay;
-  late bool _enableRecordKeyFilePath;
-  String? _keyFilePath;
-  late bool _enableRemoteSync;
-  Duration? _remoteSyncCycle;
-  DateTime? _lastSyncTime;
-  late bool _manualSelectFillItem;
-  late List<String> _autoFillAppIdBlacklist;
-  late List<String> _autoFillDomainBlacklist;
-  late bool _startFocusSreach;
-  FaviconSource? _faviconSource;
-  late StoredSecurityContext _securityContext;
-  late List<String> _trustFingerprints;
-
   ThemeMode get themeMode => _themeMode;
+
+  late Color _themeSeedColor;
   Color get themeSeedColor => _themeSeedColor;
 
+  Locale? _locale;
   Locale? get locale => _locale;
+
+  late bool _enableBiometric;
   bool get enableBiometric => _enableBiometric;
+
+  Duration? _lockDelay;
   Duration? get lockDelay => _lockDelay;
+
+  late bool _enableRecordKeyFilePath;
   bool get enableRecordKeyFilePath => _enableRecordKeyFilePath;
+
+  String? _keyFilePath;
   String? get keyFilePath => _keyFilePath;
+
+  late bool _enableRemoteSync;
   bool get enableRemoteSync => _enableRemoteSync;
+
+  Duration? _remoteSyncCycle;
   Duration? get remoteSyncCycle => _remoteSyncCycle;
+
+  DateTime? _lastSyncTime;
   DateTime? get lastSyncTime => _lastSyncTime;
+
+  late bool _manualSelectFillItem;
   bool get manualSelectFillItem => _manualSelectFillItem;
+
+  late List<String> _autoFillAppIdBlacklist;
   List<String> get autoFillAppIdBlacklist => _autoFillAppIdBlacklist;
+
+  late List<String> _autoFillDomainBlacklist;
   List<String> get autoFillDomainBlacklist => _autoFillDomainBlacklist;
+
+  late bool _startFocusSreach;
   bool get startFocusSreach => _startFocusSreach;
+
+  FaviconSource? _faviconSource;
   FaviconSource? get faviconSource => _faviconSource;
+
+  late StoredSecurityContext _securityContext;
   StoredSecurityContext get securityContext => _securityContext;
+
+  late List<String> _trustFingerprints;
   List<String> get trustFingerprints => _trustFingerprints;
+
+  late bool _useKdbxSeedColor;
+  bool get useKdbxSeedColor => _useKdbxSeedColor;
 
   Future<void> setThemeMode(ThemeMode? mode) async {
     if (mode == null) return;
@@ -218,6 +234,20 @@ class SettingsController with ChangeNotifier {
     await _settingsService.setAutoFillDomainBlacklist(value);
   }
 
+  Future<void> setUseKdbxSeedColor(bool enable) async {
+    if (enable == _useKdbxSeedColor) return;
+
+    _useKdbxSeedColor = enable;
+
+    notifyListeners();
+
+    await _settingsService.setUseKdbxSeedColor(enable);
+  }
+
+  void notify() {
+    notifyListeners();
+  }
+
   Future<void> init() async {
     shortcutsStore = ShortcutsStore(
       settingsService: _settingsService,
@@ -246,6 +276,7 @@ class SettingsController with ChangeNotifier {
     _faviconSource = await _settingsService.getFaviconSource();
     _securityContext = await _settingsService.getStoredSecurityContext();
     _trustFingerprints = await _settingsService.getTrustFingerprints();
+    _useKdbxSeedColor = await _settingsService.getUseKdbxSeedColor();
 
     await shortcutsStore.init();
 

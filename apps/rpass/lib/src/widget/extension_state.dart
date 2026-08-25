@@ -462,18 +462,41 @@ extension StatefulBottomSheet on State {
   }
 }
 
+typedef SingleTriggerFunc<T> = T Function();
+
 extension StatefulKdbx on State {
   Future<bool> kdbxAction(KdbxAction action) async {
+    return kdbxActions([action]);
+  }
+
+  Future<bool> kdbxActions(List<KdbxAction> actions) async {
     final kdbx = Store.kdbx.kdbx;
     if (kdbx != null) {
       try {
-        await kdbx.action(action: action);
+        await kdbx.actions(actions: actions);
         return true;
       } catch (e, s) {
         showError(e, s);
       }
     }
     return false;
+  }
+
+  SingleTriggerFunc<void> singleTrigger<T>(
+    SingleTriggerFunc<FutureOr<T>> callback,
+  ) {
+    bool trigger = false;
+    return () async {
+      if (trigger) return;
+      try {
+        trigger = true;
+        final completer = Completer();
+        completer.complete(callback());
+        return await completer.future;
+      } finally {
+        trigger = false;
+      }
+    };
   }
 
   void autoFill(String id, [String? key]) async {

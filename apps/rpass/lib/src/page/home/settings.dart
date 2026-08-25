@@ -44,7 +44,7 @@ final List<String> childRouteNames = [
   SyncAccountRoute.name,
   OtherSettingsRoute.name,
   ShortcutsSettingsRoute.name,
-  KdbxSettingRoute.name
+  KdbxSettingRoute.name,
 ];
 
 class SettingsPage extends StatefulWidget {
@@ -135,41 +135,6 @@ class _SettingsPageState extends State<SettingsPage>
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(right: 6),
-                    child: Icon(Icons.view_in_ar_rounded),
-                  ),
-                  Text(
-                    t.pass_lib,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              shape: shape,
-              title: Text(t.recycle_bin),
-              trailing: const Icon(Icons.recycling_rounded),
-              selected: childRouteName == RecycleBinRoute.name,
-              onTap: () {
-                context.router.platformNavigate(RecycleBinRoute());
-              },
-            ),
-            ListTile(
-              shape: shape,
-              title: Text(t.more_settings),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              selected: childRouteName == KdbxSettingRoute.name,
-              onTap: () {
-                 context.router.platformNavigate(KdbxSettingRoute());
-              },
-            ),
-          ]),
-          _cardColumn([
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(right: 6),
                     child: Icon(Icons.translate),
                   ),
                   Text(
@@ -191,6 +156,41 @@ class _SettingsPageState extends State<SettingsPage>
               },
             ),
           ]),
+          _cardColumn([
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(right: 6),
+                    child: Icon(Icons.view_in_ar_rounded),
+                  ),
+                  Text(
+                    t.pass_lib,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              title: Text(t.recycle_bin),
+              trailing: const Icon(Icons.recycling_rounded),
+              selected: childRouteName == RecycleBinRoute.name,
+              onTap: () {
+                context.router.platformNavigate(RecycleBinRoute());
+              },
+            ),
+            ListTile(
+              shape: shape,
+              title: Text(t.more_settings),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              selected: childRouteName == KdbxSettingRoute.name,
+              onTap: () {
+                context.router.platformNavigate(KdbxSettingRoute());
+              },
+            ),
+          ]),
+
           _cardColumn([
             Padding(
               padding: const EdgeInsets.all(12),

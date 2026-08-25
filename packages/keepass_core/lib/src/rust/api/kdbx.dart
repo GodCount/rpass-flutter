@@ -37,6 +37,8 @@ abstract class Credentials implements RustOpaqueInterface {
 abstract class Kdbx implements RustOpaqueInterface {
   Future<void> action({required KdbxAction action});
 
+  Future<void> actions({required List<KdbxAction> actions});
+
   Future<AutofillDataset> autofillSearch({
     required AutofillMetadata metadata,
     String? entryId,
@@ -621,12 +623,12 @@ sealed class KdbxAction with _$KdbxAction {
 }
 
 class KdbxConfig {
-  final OuterCipherConfig outerCipherConfig;
-  final CompressionConfig compressionConfig;
-  final InnerCipherConfig innerCipherConfig;
-  final KdfConfig kdfConfig;
+  OuterCipherConfig outerCipherConfig;
+  CompressionConfig compressionConfig;
+  InnerCipherConfig innerCipherConfig;
+  KdfConfig kdfConfig;
 
-  const KdbxConfig({
+  KdbxConfig({
     required this.outerCipherConfig,
     required this.compressionConfig,
     required this.innerCipherConfig,

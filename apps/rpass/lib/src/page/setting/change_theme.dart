@@ -102,6 +102,19 @@ class _ChangeThemePageState extends State<ChangeThemePage>
               if (color != null) setThemeSeedColor(color);
             },
           ),
+
+          ListTile(
+            title: Text("优先使用数据库的主题色"),
+            trailing: Store.settings.useKdbxSeedColor
+                ? const Icon(Icons.check)
+                : null,
+            onTap: () {
+              Store.settings.setUseKdbxSeedColor(
+                !Store.settings.useKdbxSeedColor,
+              );
+              setState(() {});
+            },
+          ),
         ],
       ),
     );

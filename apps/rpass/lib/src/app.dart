@@ -9,7 +9,6 @@ import 'theme/theme.dart';
 import 'i18n.dart';
 import 'util/common.dart';
 
-
 // ignore: unused_element
 final _logger = Logger("mobile:app");
 
@@ -50,10 +49,15 @@ class RpassApp extends StatelessWidget {
       child: ListenableBuilder(
         listenable: Store.settings,
         builder: (context, child) {
+          final themeSeedColor =
+              Store.settings.useKdbxSeedColor && Store.kdbx.meta?.color != null
+              ? Store.kdbx.meta!.color!
+              : Store.settings.themeSeedColor;
+
           return MaterialApp.router(
             restorationScopeId: 'app',
-            theme: theme(Brightness.light, Store.settings.themeSeedColor),
-            darkTheme: theme(Brightness.dark, Store.settings.themeSeedColor),
+            theme: theme(Brightness.light, themeSeedColor),
+            darkTheme: theme(Brightness.dark, themeSeedColor),
             themeMode: Store.settings.themeMode,
             locale: Store.settings.locale,
             localizationsDelegates: I18n.localizationsDelegates,

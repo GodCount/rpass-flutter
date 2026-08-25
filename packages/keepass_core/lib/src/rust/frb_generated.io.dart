@@ -368,6 +368,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<GroupData> dco_decode_list_group_data(dynamic raw);
 
   @protected
+  List<KdbxAction> dco_decode_list_kdbx_action(dynamic raw);
+
+  @protected
   List<MergeEvent> dco_decode_list_merge_event(dynamic raw);
 
   @protected
@@ -924,6 +927,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<GroupData> sse_decode_list_group_data(SseDeserializer deserializer);
+
+  @protected
+  List<KdbxAction> sse_decode_list_kdbx_action(SseDeserializer deserializer);
 
   @protected
   List<MergeEvent> sse_decode_list_merge_event(SseDeserializer deserializer);
@@ -1622,6 +1628,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_list_group_data(
     List<GroupData> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_kdbx_action(
+    List<KdbxAction> self,
     SseSerializer serializer,
   );
 

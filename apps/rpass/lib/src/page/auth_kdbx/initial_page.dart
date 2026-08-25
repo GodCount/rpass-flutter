@@ -78,9 +78,9 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
       }
 
       await kdbxAction(KdbxAction.updateSyncEntry(entry));
+    } else {
+      await kdbx.saveFile();
     }
-
-    await kdbx.saveFile();
 
     context.router.replace(HomeRoute());
   }

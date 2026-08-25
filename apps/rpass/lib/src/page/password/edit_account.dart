@@ -103,6 +103,9 @@ class _EditAccountPageState extends State<EditAccountPage>
           widget.id != null
                 ? await kdbxController.kdbx!.getEntry(id: widget.id!)
                 : kdbxController.kdbx!.newEntry()
+            ..fields[KdbxKeyCommon.USER_NAME] = FieldValue.plaintext(
+              kdbxController.meta?.databaseName ?? "",
+            )
             ..fields[KdbxKeyCommon.PASSWORD] = FieldValue.protected(
               randomPassword(length: 10),
             );
@@ -128,7 +131,7 @@ class _EditAccountPageState extends State<EditAccountPage>
     }
   }
 
-  void _kdbxEntrySave() async {
+  Future<void> _kdbxEntrySave() async {
     if (_from.currentState!.validate()) {
       _from.currentState!.save();
       _kdbxDeleteSaved();
@@ -474,7 +477,7 @@ class _EditAccountPageState extends State<EditAccountPage>
       floatingActionButton: _isDirty
           ? FloatingActionButton(
               heroTag: const ValueKey("edit_account_float"),
-              onPressed: _kdbxEntrySave,
+              onPressed: singleTrigger(_kdbxEntrySave),
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(56 / 2)),
               ),

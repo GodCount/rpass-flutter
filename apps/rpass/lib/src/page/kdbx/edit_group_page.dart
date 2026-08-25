@@ -83,7 +83,7 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
     }
   }
 
-  void _kdbxGroupSave() async {
+  Future<void> _kdbxGroupSave() async {
     if (_from.currentState!.validate()) {
       _from.currentState!.save();
 
@@ -273,7 +273,7 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
       floatingActionButton: _isDirty
           ? FloatingActionButton(
               heroTag: const ValueKey("edit_group_float"),
-              onPressed: _kdbxGroupSave,
+              onPressed: singleTrigger(_kdbxGroupSave),
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(56 / 2)),
               ),

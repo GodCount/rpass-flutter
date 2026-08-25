@@ -110,7 +110,7 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
     context.router.pop();
   }
 
-  void _confirm() async {
+  Future<void> _confirm() async {
     try {
       await confirm();
     } on KdbxError_IncorrectCredentials {
@@ -277,7 +277,7 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
                                 onEditingComplete:
                                     authType == AuthorizedType.verify_owner ||
                                         authType == AuthorizedType.load
-                                    ? _confirm
+                                    ? singleTrigger(_confirm)
                                     : null,
                                 decoration: InputDecoration(
                                   labelText: isPassword
@@ -361,7 +361,7 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
                           width: 180,
                           padding: const EdgeInsets.only(top: 24),
                           child: ElevatedButton(
-                            onPressed: _confirm,
+                            onPressed: singleTrigger(_confirm),
                             child: Text(t.confirm),
                           ),
                         ),

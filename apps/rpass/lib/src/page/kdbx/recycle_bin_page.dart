@@ -91,8 +91,8 @@ class _RecycleBinPageState extends State<RecycleBinPage>
           leading: const Icon(Icons.restore_from_trash),
           title: Text(t.revert),
           onTap: () {
-            _restoreObjects([object]);
             context.router.pop();
+            _restoreObjects([object]);
           },
         ),
         ListTile(
@@ -109,7 +109,7 @@ class _RecycleBinPageState extends State<RecycleBinPage>
     );
   }
 
-  void _restoreObjects(List<Object> values) async {
+  Future<void> _restoreObjects(List<Object> values) async {
     if (values.isEmpty) return;
 
     await kdbxAction(
@@ -202,7 +202,9 @@ class _RecycleBinPageState extends State<RecycleBinPage>
             ? [
                 IconButton(
                   color: Theme.of(context).colorScheme.primary,
-                  onPressed: () => _restoreObjects(_selecteds),
+                  onPressed: singleTrigger(
+                    () async => _restoreObjects(_selecteds),
+                  ),
                   icon: const Icon(Icons.restore_from_trash),
                 ),
                 IconButton(

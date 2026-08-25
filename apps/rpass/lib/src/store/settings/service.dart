@@ -230,6 +230,14 @@ class SettingsService with SharedPreferencesService {
         : remove("trust_fingerprints");
   }
 
+  Future<bool> getUseKdbxSeedColor() async {
+    return (await getBool("use_kdbx_seed_color")) ?? false;
+  }
+
+  Future<bool> setUseKdbxSeedColor(bool enable) {
+    return setBool("use_kdbx_seed_color", enable);
+  }
+
   @override
   Future<bool> clear() => super.clear();
 }

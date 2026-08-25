@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:keepass_core/keepass_core.dart';
 
 import '../../i18n.dart';
@@ -41,11 +42,24 @@ class KdbxSettingPage extends StatefulWidget {
 
 class _KdbxSettingPageState extends State<KdbxSettingPage>
     with SecondLevelPageAutoBack<KdbxSettingPage> {
-  final GlobalKey<FormState> _from = GlobalKey();
+  GlobalKey<FormState>? _from;
   UpdateMeta _updateMeta = UpdateMeta();
-  // KdbxConfig? _kdbxConfig;
+  KdbxConfig _kdbxConfig = KdbxConfig(
+    outerCipherConfig: .aes256,
+    compressionConfig: .gZip,
+    innerCipherConfig: .chaCha20,
+    kdfConfig: .aes(rounds: 2),
+  );
 
   bool _isDirty = false;
+
+  bool _isKdfAes = true;
+
+  int _rounds = 2;
+  int _iterations = 2;
+  int _memory = 1048576;
+  int _parallelism = 1;
+  Argon2Version _argonVersion = .version13;
 
   @override
   void initState() {
@@ -56,12 +70,60 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
   Future<void> _getSettings() async {
     try {
       _updateMeta = await Store.kdbx.kdbx!.getUpdateMeta();
+      _kdbxConfig = await Store.kdbx.kdbx!.getConfig();
+
+      _isKdfAes = false;
+
+      switch (_kdbxConfig.kdfConfig) {
+        case KdfConfig_Aes(rounds: final rounds):
+          _isKdfAes = true;
+          _rounds = rounds;
+          break;
+        case KdfConfig_Argon2(
+          iterations: final iterations,
+          memory: final memory,
+          parallelism: final parallelism,
+          version: final version,
+        ):
+          _iterations = iterations;
+          _memory = memory;
+          _parallelism = parallelism;
+          _argonVersion = version;
+          break;
+        case KdfConfig_Argon2id(
+          iterations: final iterations,
+          memory: final memory,
+          parallelism: final parallelism,
+          version: final version,
+        ):
+          _iterations = iterations;
+          _memory = memory;
+          _parallelism = parallelism;
+          _argonVersion = version;
+          break;
+      }
+
+      _from = GlobalKey();
+      setState(() {});
     } catch (e, s) {
       showError(e, s);
     }
   }
 
-  void _save() async {}
+  Future<void> _save() async {
+    _from!.currentState!.save();
+    if (await kdbxActions([
+      .updateMeta(_updateMeta),
+      .updateConfig(
+        compressionConfig: _kdbxConfig.compressionConfig,
+        outerCipherConfig: _kdbxConfig.outerCipherConfig,
+        innerCipherConfig: _kdbxConfig.innerCipherConfig,
+        kdfConfig: _kdbxConfig.kdfConfig,
+      ),
+    ])) {
+      context.router.pop();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +205,8 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: TextFormField(
                     initialValue: _updateMeta.defaultUsername,
-                    onSaved: (value) => _updateMeta.defaultUsername = value,
+                    onSaved: (value) => _updateMeta.defaultUsername =
+                        value?.isNotEmpty == true ? value : null,
                     decoration: InputDecoration(
                       labelText: "默认用户名",
                       border: const OutlineInputBorder(),
@@ -164,6 +227,43 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
 
                 _RangeSelectionFormField(
                   canDisable: true,
+                  label: "建议修改主密码天数",
+                  initialValue: _updateMeta.masterKeyChangeRec ?? 15,
+                  onSaved: (value) => _updateMeta.masterKeyChangeRec = value,
+                  formatText: (value) {
+                    if (value == -1) {
+                      return t.none;
+                    }
+                    return t.days(value!);
+                  },
+                  onCalculate: (value, type) {
+                    return switch (type) {
+                      _CalculateType.add => min((value ?? 14) + 1, 999),
+                      _CalculateType.reduce => max((value ?? 15) - 1, 1),
+                    };
+                  },
+                ),
+                _RangeSelectionFormField(
+                  canDisable: true,
+                  label: "强制修改主密码天数",
+                  initialValue: _updateMeta.masterKeyChangeRec ?? 30,
+                  onSaved: (value) => _updateMeta.masterKeyChangeRec = value,
+                  formatText: (value) {
+                    if (value == -1) {
+                      return t.none;
+                    }
+                    return t.days(value!);
+                  },
+                  onCalculate: (value, type) {
+                    return switch (type) {
+                      _CalculateType.add => min((value ?? 29) + 1, 999),
+                      _CalculateType.reduce => max((value ?? 31) - 1, 1),
+                    };
+                  },
+                ),
+
+                _RangeSelectionFormField(
+                  canDisable: true,
                   label: "历史记录维护天数",
                   initialValue: _updateMeta.maintenanceHistoryDays ?? -1,
                   onSaved: (value) => _updateMeta.maintenanceHistoryDays =
@@ -176,8 +276,8 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                   },
                   onCalculate: (value, type) {
                     return switch (type) {
-                      _CalculateType.add => min((value ?? 0) + 1, 999),
-                      _CalculateType.reduce => max((value ?? 2) - 1, 1),
+                      _CalculateType.add => min((value ?? 29) + 1, 999),
+                      _CalculateType.reduce => max((value ?? 31) - 1, 1),
                     };
                   },
                 ),
@@ -195,8 +295,8 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                   },
                   onCalculate: (value, type) {
                     return switch (type) {
-                      _CalculateType.add => min((value ?? 0) + 1, 999),
-                      _CalculateType.reduce => max((value ?? 2) - 1, 1),
+                      _CalculateType.add => min((value ?? 19) + 1, 999),
+                      _CalculateType.reduce => max((value ?? 21) - 1, 1),
                     };
                   },
                 ),
@@ -216,11 +316,15 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                     final mb1 = 1048576;
                     return switch (type) {
                       _CalculateType.add => min((value ?? 0) + mb1, 104857600),
-                      _CalculateType.reduce => max((value ?? mb1) - mb1, mb1),
+                      _CalculateType.reduce => max(
+                        (value ?? mb1 * 2) - mb1,
+                        mb1,
+                      ),
                     };
                   },
                 ),
               ]),
+
               _cardColumn([
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -231,52 +335,256 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                     children: [
                       const Padding(
                         padding: EdgeInsets.only(right: 6),
-                        child: Icon(Icons.security),
+                        child: Icon(Icons.enhanced_encryption),
                       ),
                       Text(
-                        "安全配置",
+                        "加密配置",
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ],
                   ),
                 ),
-                _RangeSelectionFormField(
-                  canDisable: true,
-                  label: "建议修改主密码天数",
-                  initialValue: _updateMeta.masterKeyChangeRec ?? 15,
-                  onSaved: (value) => _updateMeta.masterKeyChangeRec = value,
-                  formatText: (value) {
-                    if (value == -1) {
-                      return t.none;
-                    }
-                    return t.days(value!);
-                  },
-                  onCalculate: (value, type) {
-                    return switch (type) {
-                      _CalculateType.add => min((value ?? 0) + 1, 999),
-                      _CalculateType.reduce => max((value ?? 2) - 1, 1),
-                    };
-                  },
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: DropdownButtonFormField<CompressionConfig>(
+                    initialValue: _kdbxConfig.compressionConfig,
+                    items: [
+                      DropdownMenuItem(value: .gZip, child: Text("GZip")),
+                      DropdownMenuItem(value: .none, child: Text("None")),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: "压缩",
+                      border: const OutlineInputBorder(),
+                    ),
+                    onChanged: (_) {},
+                    onSaved: (value) {
+                      _kdbxConfig.compressionConfig =
+                          value ?? _kdbxConfig.compressionConfig;
+                    },
+                  ),
                 ),
-                _RangeSelectionFormField(
-                  canDisable: true,
-                  label: "强制修改主密码天数",
-                  initialValue: _updateMeta.masterKeyChangeRec ?? 30,
-                  onSaved: (value) => _updateMeta.masterKeyChangeRec = value,
-                  formatText: (value) {
-                    if (value == -1) {
-                      return t.none;
-                    }
-                    return t.days(value!);
-                  },
-                  onCalculate: (value, type) {
-                    return switch (type) {
-                      _CalculateType.add => min((value ?? 0) + 1, 999),
-                      _CalculateType.reduce => max((value ?? 2) - 1, 1),
-                    };
-                  },
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: DropdownButtonFormField<OuterCipherConfig>(
+                    initialValue: _kdbxConfig.outerCipherConfig,
+                    items: [
+                      DropdownMenuItem(value: .aes256, child: Text("AES 256")),
+                      DropdownMenuItem(
+                        value: .chaCha20,
+                        child: Text("ChaCha20"),
+                      ),
+                      DropdownMenuItem(value: .twofish, child: Text("Twofish")),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: "加密算法",
+                      border: const OutlineInputBorder(),
+                    ),
+                    onChanged: (_) {},
+                    onSaved: (value) {
+                      _kdbxConfig.outerCipherConfig =
+                          value ?? _kdbxConfig.outerCipherConfig;
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: DropdownButtonFormField<InnerCipherConfig>(
+                    initialValue: _kdbxConfig.innerCipherConfig,
+                    items: [
+                      DropdownMenuItem(
+                        value: .chaCha20,
+                        child: Text("ChaCha20"),
+                      ),
+                      DropdownMenuItem(value: .salsa20, child: Text("Salsa20")),
+                      DropdownMenuItem(value: .plain, child: Text("Plain")),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: "内联加密算法",
+                      border: const OutlineInputBorder(),
+                    ),
+                    onChanged: (_) {},
+                    onSaved: (value) {
+                      _kdbxConfig.innerCipherConfig =
+                          value ?? _kdbxConfig.innerCipherConfig;
+                    },
+                  ),
                 ),
               ]),
+
+              _cardColumn([
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  child: Row(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(right: 6),
+                        child: Icon(Icons.enhanced_encryption),
+                      ),
+                      Text(
+                        "KDF配置",
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: DropdownButtonFormField<KdfConfig>(
+                    initialValue: _kdbxConfig.kdfConfig,
+                    items: [
+                      DropdownMenuItem(
+                        value: _kdbxConfig.kdfConfig is KdfConfig_Argon2
+                            ? _kdbxConfig.kdfConfig
+                            : KdfConfig_Argon2(
+                                iterations: _iterations,
+                                memory: _memory,
+                                parallelism: _parallelism,
+                                version: _argonVersion,
+                              ),
+                        child: Text("Argon2d"),
+                      ),
+                      DropdownMenuItem(
+                        value: _kdbxConfig.kdfConfig is KdfConfig_Argon2id
+                            ? _kdbxConfig.kdfConfig
+                            : KdfConfig_Argon2id(
+                                iterations: _iterations,
+                                memory: _memory,
+                                parallelism: _parallelism,
+                                version: _argonVersion,
+                              ),
+                        child: Text("Argon2id"),
+                      ),
+                      DropdownMenuItem(
+                        value: _kdbxConfig.kdfConfig is KdfConfig_Aes
+                            ? _kdbxConfig.kdfConfig
+                            : KdfConfig_Aes(rounds: _rounds),
+                        child: Text("AES-KDF"),
+                      ),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: "密钥导出函数",
+                      border: const OutlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      _isKdfAes = value is KdfConfig_Aes;
+                      setState(() {});
+                    },
+                    onSaved: (value) {
+                      _kdbxConfig.kdfConfig = switch (value!) {
+                        KdfConfig_Aes() => KdfConfig_Aes(rounds: _rounds),
+                        KdfConfig_Argon2() => KdfConfig_Argon2(
+                          iterations: _iterations,
+                          memory: _memory,
+                          parallelism: _parallelism,
+                          version: _argonVersion,
+                        ),
+                        KdfConfig_Argon2id() => KdfConfig_Argon2id(
+                          iterations: _iterations,
+                          memory: _memory,
+                          parallelism: _parallelism,
+                          version: _argonVersion,
+                        ),
+                      };
+                    },
+                  ),
+                ),
+
+                if (_isKdfAes)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: TextFormField(
+                      key: ValueKey("rounds"),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      initialValue: _rounds.toString(),
+                      onChanged: (value) {
+                        _rounds = max(int.tryParse(value) ?? 1, 1);
+                      },
+                      decoration: InputDecoration(
+                        labelText: "转换次数",
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                if (!_isKdfAes) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: TextFormField(
+                      key: ValueKey("iterations"),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      initialValue: _iterations.toString(),
+                      onChanged: (value) {
+                        _iterations = max(int.tryParse(value) ?? 1, 1);
+                      },
+                      decoration: InputDecoration(
+                        labelText: "转换次数",
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  _RangeSelectionFormField(
+                    label: "内存占用",
+                    initialValue: _memory,
+                    onChanged: (value) {
+                      _memory = value ?? _memory;
+                    },
+                    formatText: (value) {
+                      return (value ?? 1).toStorageUnit(.MB);
+                    },
+                    onCalculate: (value, type) {
+                      final mb1 = 1048576;
+                      return switch (type) {
+                        _CalculateType.add => min(
+                          (value ?? 0) + mb1,
+                          104857600,
+                        ),
+                        _CalculateType.reduce => max((value ?? mb1) - mb1, mb1),
+                      };
+                    },
+                  ),
+
+                  _RangeSelectionFormField(
+                    label: "并行计算",
+                    initialValue: _parallelism,
+                    onChanged: (value) {
+                      _parallelism = value ?? _parallelism;
+                    },
+                    formatText: (value) {
+                      return "$value";
+                    },
+                    onCalculate: (value, type) {
+                      return switch (type) {
+                        _CalculateType.add => min((value ?? 0) + 1, 16),
+                        _CalculateType.reduce => max((value ?? 2) - 1, 1),
+                      };
+                    },
+                  ),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: DropdownButtonFormField<Argon2Version>(
+                      initialValue: _argonVersion,
+                      items: [
+                        DropdownMenuItem(value: .version10, child: Text("10")),
+                        DropdownMenuItem(value: .version13, child: Text("13")),
+                      ],
+                      decoration: InputDecoration(
+                        labelText: "Argon2 版本",
+                        border: const OutlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        _argonVersion = value ?? _argonVersion;
+                      },
+                    ),
+                  ),
+                ],
+              ]),
+
+              SizedBox(height: 56),
             ],
           ),
         ),
@@ -285,7 +593,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
       floatingActionButton: _isDirty
           ? FloatingActionButton(
               heroTag: const ValueKey("kdbx_setting_float"),
-              onPressed: _save,
+              onPressed: singleTrigger(_save),
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(56 / 2)),
               ),
@@ -325,6 +633,7 @@ class _RangeSelectionFormField extends StatefulWidget {
     this.canDisable = false,
     this.initialValue,
     this.onSaved,
+    this.onChanged,
   });
 
   final String? label;
@@ -332,7 +641,8 @@ class _RangeSelectionFormField extends StatefulWidget {
   final _RangeSelectionCalculate onCalculate;
   final bool canDisable;
   final int? initialValue;
-  final void Function(int?)? onSaved;
+  final FormFieldSetter<int>? onSaved;
+  final FormFieldSetter<int>? onChanged;
 
   @override
   State<_RangeSelectionFormField> createState() =>
@@ -351,7 +661,7 @@ class _RangeSelectionFormFieldState extends State<_RangeSelectionFormField> {
 
   void _startRepeating(VoidCallback action) {
     action();
-    _timer = Timer.periodic(const Duration(milliseconds: 200), (_) => action());
+    _timer = Timer.periodic(const Duration(milliseconds: 100), (_) => action());
   }
 
   void _stopRepeating() {
@@ -374,6 +684,7 @@ class _RangeSelectionFormFieldState extends State<_RangeSelectionFormField> {
         void didChange(int? value) {
           _prevValue = value;
           field.didChange(value);
+          widget.onChanged?.call(value);
         }
 
         return Padding(
@@ -388,7 +699,11 @@ class _RangeSelectionFormFieldState extends State<_RangeSelectionFormField> {
                       value: field.value != -1,
                       onChanged: (value) {
                         if (value == true) {
-                          field.didChange(_prevValue ?? onCalculate(0, .add));
+                          field.didChange(
+                            _prevValue != null && _prevValue! > 0
+                                ? _prevValue
+                                : onCalculate(null, .add),
+                          );
                         } else {
                           field.didChange(-1);
                         }
@@ -407,9 +722,7 @@ class _RangeSelectionFormFieldState extends State<_RangeSelectionFormField> {
                               customBorder: const CircleBorder(),
                               onTapDown: (_) {
                                 _startRepeating(() {
-                                  didChange(
-                                    onCalculate(field.value, .add),
-                                  );
+                                  didChange(onCalculate(field.value, .add));
                                 });
                               },
                               onTapUp: (_) => _stopRepeating(),
@@ -436,9 +749,7 @@ class _RangeSelectionFormFieldState extends State<_RangeSelectionFormField> {
                               customBorder: const CircleBorder(),
                               onTapDown: (_) {
                                 _startRepeating(() {
-                                  didChange(
-                                    onCalculate(field.value, .reduce),
-                                  );
+                                  didChange(onCalculate(field.value, .reduce));
                                 });
                               },
                               onTapUp: (_) => _stopRepeating(),
