@@ -1,4 +1,4 @@
-use crate::db::Entry;
+use crate::{Database, db::Entry};
 
 /// An entry's history
 #[derive(Debug, Default, Eq, PartialEq, Clone)]
@@ -23,5 +23,9 @@ impl History {
     /// Get the history entries
     pub fn get_entries(&self) -> &Vec<Entry> {
         &self.entries
+    }
+
+    pub(crate) fn calculate_sizes<'a>(&self, db: &'a Database) -> Vec<usize> {
+        self.entries.iter().map(|item| item.calculate_size(db)).collect::<Vec<usize>>()
     }
 }

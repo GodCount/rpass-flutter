@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:keepass_core/keepass_core.dart' hide Axis;
 import 'package:logging/logging.dart';
 
 import '../../context/lan_fill_server.dart';
@@ -40,7 +41,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, KdbxProviderListener {
   final GlobalKey _globalKey = GlobalKey();
 
   final List<PageRouteInfo> _routes = [
@@ -50,6 +51,7 @@ class _HomePageState extends State<HomePage>
   ];
 
   bool _enableRemoteSync = false;
+  bool _hintMasterKeyChangeRec = true;
 
   @override
   bool get wantKeepAlive => true;
@@ -58,14 +60,65 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
 
-    Store.settings.addListener(_settingsListener);
+    Store.kdbx.addListener(this);
     Store.kdbx.syncController.initConfig();
-    _settingsListener();
+    Store.settings.addListener(_settingsListener);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _settingsListener();
+      onKdbxSaved();
+    });
+  }
+
+  @override
+  void onKdbxChanged(Kdbx? kdbx) {
+    _hintMasterKeyChangeRec = true;
+  }
+
+  @override
+  void onKdbxSaved() async {
+    final meta = Store.kdbx.meta;
+    final settings = Store.settings;
+
+    if (meta != null) {
+      if (settings.useKdbxSeedColor && meta.color != null) {
+        settings.notify();
+      }
+
+      final masterKeyChanged =
+          meta.masterKeyChanged ??
+          DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
+      final masterKeyChangeForce = meta.masterKeyChangeForce ?? 30;
+      final masterKeyChangeRec = meta.masterKeyChangeRec ?? 15;
+
+      final diffDays = DateTime.now().difference(masterKeyChanged).inDays;
+
+      if (masterKeyChangeForce != -1 && diffDays >= masterKeyChangeForce) {
+        await showConfirmDialog(
+          dismissible: false,
+          title: "数据库密码已过期！",
+          message: "更改密码/密钥文件之前，你将不能使用",
+          confirm: "更改密码",
+        );
+        context.router.push(ModifyPasswordRoute(dismissible: false));
+      } else if (masterKeyChangeRec != -1 &&
+          _hintMasterKeyChangeRec &&
+          diffDays >= masterKeyChangeRec) {
+        _hintMasterKeyChangeRec = false;
+        if (await showConfirmDialog(
+          title: "请更改数据库密码！",
+          message: "建议你更改数据库密码/密钥文件",
+          confirm: "更改密码",
+        )) {
+          context.router.push(ModifyPasswordRoute());
+        }
+      }
+    }
   }
 
   void _settingsListener() {
-    if (_enableRemoteSync != Store.settings.enableRemoteSync &&
-        Store.settings.enableRemoteSync) {
+    final enableRemoteSync = Store.settings.enableRemoteSync;
+    if (_enableRemoteSync != enableRemoteSync && enableRemoteSync) {
       final cycle = Store.settings.remoteSyncCycle;
       final time = Store.settings.lastSyncTime;
       if (cycle == null ||
@@ -74,12 +127,13 @@ class _HomePageState extends State<HomePage>
         Store.kdbx.syncController.sync(context);
       }
     }
-    _enableRemoteSync = Store.settings.enableRemoteSync;
+    _enableRemoteSync = enableRemoteSync;
   }
 
   @override
   void dispose() {
     Store.settings.removeListener(_settingsListener);
+    Store.kdbx.removeListener(this);
     super.dispose();
   }
 

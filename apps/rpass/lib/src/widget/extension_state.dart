@@ -89,11 +89,13 @@ extension StatefulDialog on State {
   Future<bool> showConfirmDialog({
     required String title,
     required String message,
+    bool dismissible = true,
     String? cancel,
     String? confirm,
   }) async {
     final result = await showDialog(
       context: context,
+      barrierDismissible: dismissible,
       builder: (context) {
         final t = I18n.of(context)!;
 
@@ -101,12 +103,13 @@ extension StatefulDialog on State {
           title: Text(title),
           content: Text(message),
           actions: [
-            TextButton(
-              onPressed: () {
-                context.router.pop();
-              },
-              child: Text(cancel ?? t.cancel),
-            ),
+            if (dismissible || cancel != null)
+              TextButton(
+                onPressed: () {
+                  context.router.pop();
+                },
+                child: Text(cancel ?? t.cancel),
+              ),
             TextButton(
               onPressed: () {
                 context.router.pop(true);

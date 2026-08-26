@@ -289,4 +289,22 @@ impl Database {
             .contains_key(&id)
             .then(move || GroupMut::new(self, id))
     }
+
+    /// Clean entry history, useless icons, and useless attachments
+    pub fn cleanup(&mut self) {
+        let history_max_items = self.meta.history_max_items.unwrap_or(-1);
+        let history_max_size = self.meta.history_max_size.unwrap_or(-1);
+
+        if history_max_items > -1 || history_max_size > -1 {
+            let ids: Vec<EntryId> = self.entries.keys().copied().collect();
+            for id in ids {
+                if history_max_items > -1 {
+                    let mut entry = EntryMut::new(self, id);
+                    if let Some(history) = entry.history.as_mut() {
+                        history.entries.truncate(history_max_items as usize);
+                    }
+                }
+            }
+        }
+    }
 }

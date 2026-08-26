@@ -6,7 +6,12 @@ use std::{collections::HashSet, fs::File};
 
 use flutter_rust_bridge::{frb, BaseAsyncRuntime, DartFnFuture};
 use keepass::config::{DatabaseVersion, KDBX4_CURRENT_MINOR_VERSION};
-use keepass::db::merge::MergeError;
+use keepass::db::merge::{
+    MergeError, CUSTOM_COLOR_CHANGED, CUSTOM_DATABASE_CONFIG_CHANGED,
+    CUSTOM_HISTORY_MAX_ITEMS_CHANGED, CUSTOM_HISTORY_MAX_SIZE_CHANGED,
+    CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED, CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
+    CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED, CUSTOM_MEMORY_PROTECTION_CHANGED,
+};
 use keepass::db::{
     AttachmentId, CannotDeleteRootError, CustomIconId, CustomIconNotFoundError,
     DatabaseFormatError, DatabaseOpenError, DatabaseSaveError, DestinationGroupNotFoundError,
@@ -118,14 +123,6 @@ const AUTOFILL_FIELD_PASSWORD: &str = "password";
 const AUTOFILL_FIELD_OTP: &str = "otp";
 
 const CUSTOM_DATA_SYNC_UUID: &str = "sync_account_uuid"; // 向后兼容，保持小写
-const CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED: &str = "MAINTENANCE_HISTORY_DAYS_CHANGED";
-const CUSTOM_COLOR_CHANGED: &str = "COLOR_CHANGED";
-const CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED: &str = "MASTER_KEY_CHANGE_REC_CHANGED";
-const CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED: &str = "MASTER_KEY_CHANGE_FORCE";
-const CUSTOM_MEMORY_PROTECTION_CHANGED: &str = "MEMORY_PROTECTION_CHANGED";
-const CUSTOM_HISTORY_MAX_ITEMS_CHANGED: &str = "HISTORY_MAX_ITEMS_CHANGED";
-const CUSTOM_HISTORY_MAX_SIZE_CHANGED: &str = "HISTORY_MAX_SIZE_CHANGED";
-const CUSTOM_DATABASE_CONFIG_CHANGED: &str = "DATABASE_CONFIG_CHANGED";
 
 #[derive(Debug, Clone)]
 pub enum KdbxEvent {
@@ -1011,6 +1008,7 @@ impl Kdbx {
                     if let Some(config) = kdf_config {
                         db.config.kdf_config = config.into();
                     }
+                    db.meta.settings_changed = Some(Times::now());
                     set_customm_time_changed(db, CUSTOM_DATABASE_CONFIG_CHANGED, Times::now());
                 }
             }
@@ -1200,11 +1198,7 @@ impl Kdbx {
             .clone()
             .unwrap_or(Times::epoch());
 
-        let mut merge_log = dest_db.merge(&source_db)?;
-
-        Self::merge_meta(&mut dest_db, &source_db, &mut merge_log)?;
-
-        let mut merge_log = MergeLog::from(merge_log);
+        let mut merge_log = MergeLog::from(dest_db.merge(&source_db)?);
 
         if source_master_key_changed > dest_master_key_changed {
             merge_log.master_key_changed = true;
@@ -1233,322 +1227,6 @@ impl Kdbx {
         self.save_file(None)?;
 
         Ok(merge_log)
-    }
-
-    fn merge_meta(
-        dest_db: &mut Database,
-        source_db: &Database,
-        log: &mut MergeLog2,
-    ) -> Result<(), MergeError> {
-        let dest_database_name_changed =
-            dest_db.meta.database_name_changed.unwrap_or(Times::epoch());
-        let source_database_name_changed = source_db
-            .meta
-            .database_name_changed
-            .unwrap_or(Times::epoch());
-
-        if source_database_name_changed > dest_database_name_changed {
-            dest_db.meta.database_name_changed = Some(source_database_name_changed);
-            dest_db.meta.database_name = source_db.meta.database_name.clone();
-        } else if source_database_name_changed == dest_database_name_changed
-            && source_db.meta.database_name != dest_db.meta.database_name
-        {
-            log.warnings.push(
-                "The database name change times are the same, but there’s already a deviation."
-                    .into(),
-            );
-        }
-
-        let dest_database_description_changed = dest_db
-            .meta
-            .database_description_changed
-            .unwrap_or(Times::epoch());
-        let source_database_description_changed = source_db
-            .meta
-            .database_description_changed
-            .unwrap_or(Times::epoch());
-
-        if source_database_description_changed > dest_database_description_changed {
-            dest_db.meta.database_description_changed = Some(source_database_description_changed);
-            dest_db.meta.database_description = source_db.meta.database_description.clone();
-        } else if source_database_description_changed == dest_database_description_changed
-            && source_db.meta.database_description != dest_db.meta.database_description
-        {
-            log.warnings.push(
-            "The database description change times are the same, but there’s already a deviation.".into(),
-        );
-        }
-
-        let dest_default_username_changed = dest_db
-            .meta
-            .default_username_changed
-            .unwrap_or(Times::epoch());
-        let source_default_username_changed = source_db
-            .meta
-            .default_username_changed
-            .unwrap_or(Times::epoch());
-
-        if source_default_username_changed > dest_default_username_changed {
-            dest_db.meta.default_username_changed = Some(source_default_username_changed);
-            dest_db.meta.default_username = source_db.meta.default_username.clone();
-        } else if source_default_username_changed == dest_default_username_changed
-            && source_db.meta.default_username != dest_db.meta.default_username
-        {
-            log.warnings.push(
-                "The default user name change times are the same, but there’s already a deviation."
-                    .into(),
-            );
-        }
-
-        let dest_recyclebin_changed = dest_db.meta.recyclebin_changed.unwrap_or(Times::epoch());
-        let source_recyclebin_changed = source_db.meta.recyclebin_changed.unwrap_or(Times::epoch());
-
-        if source_recyclebin_changed > dest_recyclebin_changed {
-            dest_db.meta.recyclebin_changed = Some(source_recyclebin_changed);
-            dest_db.meta.recyclebin_enabled = source_db.meta.recyclebin_enabled.clone();
-            dest_db.meta.recyclebin_uuid = source_db.meta.recyclebin_uuid.clone();
-        } else if source_recyclebin_changed == dest_recyclebin_changed
-            && (source_db.meta.recyclebin_enabled != dest_db.meta.recyclebin_enabled
-                || source_db.meta.recyclebin_uuid != dest_db.meta.recyclebin_uuid)
-        {
-            log.warnings.push(
-                "The recycle bin change times are the same, but there’s already a deviation."
-                    .into(),
-            );
-        }
-
-        let dest_entry_templates_group_changed = dest_db
-            .meta
-            .entry_templates_group_changed
-            .unwrap_or(Times::epoch());
-        let source_entry_templates_group_changed = source_db
-            .meta
-            .entry_templates_group_changed
-            .unwrap_or(Times::epoch());
-
-        if source_entry_templates_group_changed > dest_entry_templates_group_changed {
-            dest_db.meta.entry_templates_group_changed = Some(source_entry_templates_group_changed);
-            dest_db.meta.entry_templates_group = source_db.meta.entry_templates_group.clone();
-        } else if source_entry_templates_group_changed == dest_entry_templates_group_changed
-            && source_db.meta.entry_templates_group != dest_db.meta.entry_templates_group
-        {
-            log.warnings.push(
-            "The entry templates group change times are the same, but there’s already a deviation.".into(),
-        );
-        }
-
-        let dest_master_key_changed = dest_db.meta.master_key_changed.unwrap_or(Times::epoch());
-        let source_master_key_changed = source_db.meta.master_key_changed.unwrap_or(Times::epoch());
-
-        if source_master_key_changed > dest_master_key_changed {
-            dest_db.meta.master_key_changed = source_db.meta.master_key_changed.clone();
-        }
-
-        let dest_settings_changed = dest_db.meta.settings_changed.unwrap_or(Times::epoch());
-        let source_settings_changed = source_db.meta.settings_changed.unwrap_or(Times::epoch());
-
-        let dest_maintenance_history_days_changed = get_customm_time_changed(
-            dest_db,
-            CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
-            dest_settings_changed.clone(),
-        );
-        let source_maintenance_history_days_changed = get_customm_time_changed(
-            source_db,
-            CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
-            source_settings_changed.clone(),
-        );
-
-        if source_maintenance_history_days_changed > dest_maintenance_history_days_changed {
-            set_customm_time_changed(
-                dest_db,
-                CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
-                source_maintenance_history_days_changed,
-            );
-            dest_db.meta.maintenance_history_days = source_db.meta.maintenance_history_days.clone();
-        }
-
-        let dest_color_changed =
-            get_customm_time_changed(dest_db, CUSTOM_COLOR_CHANGED, dest_settings_changed.clone());
-        let source_color_changed = get_customm_time_changed(
-            source_db,
-            CUSTOM_COLOR_CHANGED,
-            source_settings_changed.clone(),
-        );
-
-        if source_color_changed > dest_color_changed {
-            set_customm_time_changed(dest_db, CUSTOM_COLOR_CHANGED, source_color_changed);
-            dest_db.meta.color = source_db.meta.color.clone();
-        }
-
-        let dest_master_key_change_rec_changed = get_customm_time_changed(
-            dest_db,
-            CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
-            dest_settings_changed.clone(),
-        );
-        let source_master_key_change_rec_changed = get_customm_time_changed(
-            source_db,
-            CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
-            source_settings_changed.clone(),
-        );
-
-        if source_master_key_change_rec_changed > dest_master_key_change_rec_changed {
-            set_customm_time_changed(
-                dest_db,
-                CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
-                source_master_key_change_rec_changed,
-            );
-            dest_db.meta.master_key_change_rec = source_db.meta.master_key_change_rec.clone();
-        }
-
-        let dest_master_key_change_force_changed = get_customm_time_changed(
-            dest_db,
-            CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
-            dest_settings_changed.clone(),
-        );
-        let source_master_key_change_force_changed = get_customm_time_changed(
-            source_db,
-            CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
-            source_settings_changed.clone(),
-        );
-
-        if source_master_key_change_force_changed > dest_master_key_change_force_changed {
-            set_customm_time_changed(
-                dest_db,
-                CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
-                source_master_key_change_force_changed,
-            );
-            dest_db.meta.master_key_change_force = source_db.meta.master_key_change_force.clone();
-        }
-
-        let dest_memory_protection_changed = get_customm_time_changed(
-            dest_db,
-            CUSTOM_MEMORY_PROTECTION_CHANGED,
-            dest_settings_changed.clone(),
-        );
-        let source_memory_protection_changed = get_customm_time_changed(
-            source_db,
-            CUSTOM_MEMORY_PROTECTION_CHANGED,
-            source_settings_changed.clone(),
-        );
-
-        if source_memory_protection_changed > dest_memory_protection_changed {
-            set_customm_time_changed(
-                dest_db,
-                CUSTOM_MEMORY_PROTECTION_CHANGED,
-                source_memory_protection_changed,
-            );
-            dest_db.meta.memory_protection = source_db.meta.memory_protection.clone();
-        }
-
-        let dest_history_max_items_changed = get_customm_time_changed(
-            dest_db,
-            CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
-            dest_settings_changed.clone(),
-        );
-        let source_history_max_items_changed = get_customm_time_changed(
-            source_db,
-            CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
-            source_settings_changed.clone(),
-        );
-
-        if source_history_max_items_changed > dest_history_max_items_changed {
-            set_customm_time_changed(
-                dest_db,
-                CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
-                source_history_max_items_changed,
-            );
-            dest_db.meta.history_max_items = source_db.meta.history_max_items.clone();
-        }
-
-        let dest_history_max_size_changed = get_customm_time_changed(
-            dest_db,
-            CUSTOM_HISTORY_MAX_SIZE_CHANGED,
-            dest_settings_changed.clone(),
-        );
-        let source_history_max_size_changed = get_customm_time_changed(
-            source_db,
-            CUSTOM_HISTORY_MAX_SIZE_CHANGED,
-            source_settings_changed.clone(),
-        );
-
-        if source_history_max_size_changed > dest_history_max_size_changed {
-            set_customm_time_changed(
-                dest_db,
-                CUSTOM_HISTORY_MAX_SIZE_CHANGED,
-                source_history_max_size_changed,
-            );
-            dest_db.meta.history_max_size = source_db.meta.history_max_size.clone();
-        }
-
-        let dest_database_config_changed = get_customm_time_changed(
-            dest_db,
-            CUSTOM_DATABASE_CONFIG_CHANGED,
-            dest_settings_changed.clone(),
-        );
-        let source_database_config_changed = get_customm_time_changed(
-            source_db,
-            CUSTOM_DATABASE_CONFIG_CHANGED,
-            source_settings_changed.clone(),
-        );
-
-        if source_database_config_changed > dest_database_config_changed {
-            set_customm_time_changed(
-                dest_db,
-                CUSTOM_DATABASE_CONFIG_CHANGED,
-                source_database_config_changed,
-            );
-            dest_db.config.outer_cipher_config = source_db.config.outer_cipher_config.clone();
-            dest_db.config.compression_config = source_db.config.compression_config.clone();
-            dest_db.config.inner_cipher_config = source_db.config.inner_cipher_config.clone();
-            dest_db.config.kdf_config = source_db.config.kdf_config.clone();
-            // public_custom_data 暂不考虑
-        }
-
-        let dest_custom_data = dest_db
-            .meta
-            .custom_data
-            .keys()
-            .cloned()
-            .collect::<HashSet<_>>();
-        let source_custom_data = source_db
-            .meta
-            .custom_data
-            .keys()
-            .cloned()
-            .collect::<HashSet<_>>();
-
-        for key in source_custom_data.difference(&dest_custom_data) {
-            let value = source_db.meta.custom_data.get(key).unwrap().clone();
-            dest_db.meta.custom_data.insert(key.clone(), value);
-        }
-
-        for key in dest_custom_data.intersection(&source_custom_data) {
-            let dest_value_time = dest_db
-                .meta
-                .custom_data
-                .get(key)
-                .unwrap()
-                .last_modification_time
-                .unwrap_or(Times::epoch());
-            let source_value = source_db.meta.custom_data.get(key).unwrap();
-
-            let source_value_time = source_value
-                .last_modification_time
-                .unwrap_or(Times::epoch());
-
-            if source_value_time > dest_value_time {
-                dest_db
-                    .meta
-                    .custom_data
-                    .insert(key.clone(), source_value.clone());
-            }
-        }
-
-        if source_settings_changed > dest_settings_changed {
-            dest_db.meta.settings_changed = Some(source_settings_changed);
-        }
-
-        Ok(())
     }
 
     pub fn summary(&self) -> Result<(FieldSummary, Meta, HashMap<String, GroupData>), KdbxError> {
@@ -1684,14 +1362,6 @@ impl Kdbx {
             data: datasets,
         })
     }
-}
-
-fn get_customm_time_changed(db: &Database, key: &str, default: NaiveDateTime) -> NaiveDateTime {
-    db.meta
-        .custom_data
-        .get(key)
-        .and_then(|item| item.last_modification_time.clone())
-        .unwrap_or(default)
 }
 
 fn set_customm_time_changed(db: &mut Database, key: &str, time: NaiveDateTime) {

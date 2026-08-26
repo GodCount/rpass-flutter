@@ -249,7 +249,7 @@ mod tests {
         );
         assert!(group.0.enable_auto_type.unwrap());
         assert!(!group.0.enable_searching.unwrap());
-        assert!(group.0.enable_searching.unwrap());
+        assert!(group.0.enable_display.unwrap());
         assert!(group.0.custom_data.is_some());
         assert_eq!(group.0.children.len(), 4);
     }

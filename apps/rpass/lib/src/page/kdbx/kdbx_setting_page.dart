@@ -246,8 +246,8 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                 _RangeSelectionFormField(
                   canDisable: true,
                   label: "强制修改主密码天数",
-                  initialValue: _updateMeta.masterKeyChangeRec ?? 30,
-                  onSaved: (value) => _updateMeta.masterKeyChangeRec = value,
+                  initialValue: _updateMeta.masterKeyChangeForce ?? 30,
+                  onSaved: (value) => _updateMeta.masterKeyChangeForce = value,
                   formatText: (value) {
                     if (value == -1) {
                       return t.none;
@@ -262,25 +262,27 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                   },
                 ),
 
-                _RangeSelectionFormField(
-                  canDisable: true,
-                  label: "历史记录维护天数",
-                  initialValue: _updateMeta.maintenanceHistoryDays ?? -1,
-                  onSaved: (value) => _updateMeta.maintenanceHistoryDays =
-                      value != null && value > 0 ? value : null,
-                  formatText: (value) {
-                    if (value == -1) {
-                      return t.none;
-                    }
-                    return t.days(value!);
-                  },
-                  onCalculate: (value, type) {
-                    return switch (type) {
-                      _CalculateType.add => min((value ?? 29) + 1, 999),
-                      _CalculateType.reduce => max((value ?? 31) - 1, 1),
-                    };
-                  },
-                ),
+
+                // TODO! 暂不考虑
+                // _RangeSelectionFormField(
+                //   canDisable: true,
+                //   label: "历史记录维护天数",
+                //   initialValue: _updateMeta.maintenanceHistoryDays ?? -1,
+                //   onSaved: (value) => _updateMeta.maintenanceHistoryDays =
+                //       value != null && value > 0 ? value : null,
+                //   formatText: (value) {
+                //     if (value == -1) {
+                //       return t.none;
+                //     }
+                //     return t.days(value!);
+                //   },
+                //   onCalculate: (value, type) {
+                //     return switch (type) {
+                //       _CalculateType.add => min((value ?? 29) + 1, 999),
+                //       _CalculateType.reduce => max((value ?? 31) - 1, 1),
+                //     };
+                //   },
+                // ),
 
                 _RangeSelectionFormField(
                   canDisable: true,

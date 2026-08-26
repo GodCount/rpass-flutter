@@ -22,3 +22,12 @@ pub enum CustomDataValue {
     /// Binary custom data value
     Binary(Vec<u8>),
 }
+
+impl CustomDataValue {
+    pub(crate) fn byte_size(&self) -> usize {
+        match self {
+            CustomDataValue::String(s) => s.len(),
+            CustomDataValue::Binary(b) => b.len(),
+        }
+    }
+}

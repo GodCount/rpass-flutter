@@ -10,9 +10,28 @@ use chrono::NaiveDateTime;
 use thiserror::Error;
 
 use crate::{
-    db::{CustomIconId, Entry, EntryId, Group, GroupId, GroupRef, History, MoveGroupError, Times},
+    db::{
+        CustomDataItem, CustomIconId, Entry, EntryId, Group, GroupId, GroupRef, History, MoveGroupError, Times,
+    },
     Database,
 };
+
+/// Customized, record maintenance_history_days_changed modification time
+pub const CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED: &str = "MAINTENANCE_HISTORY_DAYS_CHANGED";
+/// Customized, record color_changed modification time
+pub const CUSTOM_COLOR_CHANGED: &str = "COLOR_CHANGED";
+/// Customized, record master_key_change_rec_changed modification time
+pub const CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED: &str = "MASTER_KEY_CHANGE_REC_CHANGED";
+/// Customized, record master_key_change_force_changed modification time
+pub const CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED: &str = "MASTER_KEY_CHANGE_FORCE";
+/// Customized, record memory_protection_changed modification time
+pub const CUSTOM_MEMORY_PROTECTION_CHANGED: &str = "MEMORY_PROTECTION_CHANGED";
+/// Customized, record history_max_items_changed modification time
+pub const CUSTOM_HISTORY_MAX_ITEMS_CHANGED: &str = "HISTORY_MAX_ITEMS_CHANGED";
+/// Customized, record history_max_size_changed modification time
+pub const CUSTOM_HISTORY_MAX_SIZE_CHANGED: &str = "HISTORY_MAX_SIZE_CHANGED";
+/// Customized, record database_config_changed modification time
+pub const CUSTOM_DATABASE_CONFIG_CHANGED: &str = "DATABASE_CONFIG_CHANGED";
 
 /// The kind of change a merge applied to an object.
 #[derive(Debug, Clone)]
@@ -83,6 +102,7 @@ impl Database {
     /// This function will use the UUIDs to detect what entries and groups are the same.
     pub fn merge(&mut self, other: &Database) -> Result<MergeLog, MergeError> {
         let mut log = MergeLog::default();
+        merge_meta(self, other, &mut log)?;
         merge_icons(self, other, &mut log)?;
         merge_groups(self, other, &mut log)?;
 
@@ -193,7 +213,7 @@ fn merge_groups(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog
             dest_group.default_autotype_sequence = source.default_autotype_sequence.clone();
             dest_group.enable_autotype = source.enable_autotype;
             dest_group.enable_searching = source.enable_searching;
-            dest_group.enable_display  = source.enable_display;
+            dest_group.enable_display = source.enable_display;
             dest_group.last_top_visible_entry = source.last_top_visible_entry;
 
             log.events.push(MergeEvent {
@@ -351,7 +371,7 @@ fn merge_groups(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog
         dest.default_autotype_sequence = source.default_autotype_sequence.clone();
         dest.enable_autotype = source.enable_autotype;
         dest.enable_searching = source.enable_searching;
-        dest.enable_display  = source.enable_display;
+        dest.enable_display = source.enable_display;
         dest.last_top_visible_entry = source.last_top_visible_entry;
 
         log.events.push(MergeEvent {
@@ -786,6 +806,301 @@ fn merge_icons(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog)
     Ok(())
 }
 
+fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) -> Result<(), MergeError> {
+    let dest_database_name_changed = dest_db.meta.database_name_changed.unwrap_or(Times::epoch());
+    let source_database_name_changed = source_db.meta.database_name_changed.unwrap_or(Times::epoch());
+
+    if source_database_name_changed > dest_database_name_changed {
+        dest_db.meta.database_name_changed = Some(source_database_name_changed);
+        dest_db.meta.database_name = source_db.meta.database_name.clone();
+    } else if source_database_name_changed == dest_database_name_changed
+        && source_db.meta.database_name != dest_db.meta.database_name
+    {
+        log.warnings
+            .push("The database name change times are the same, but there’s already a deviation.".into());
+    }
+
+    let dest_database_description_changed = dest_db
+        .meta
+        .database_description_changed
+        .unwrap_or(Times::epoch());
+    let source_database_description_changed = source_db
+        .meta
+        .database_description_changed
+        .unwrap_or(Times::epoch());
+
+    if source_database_description_changed > dest_database_description_changed {
+        dest_db.meta.database_description_changed = Some(source_database_description_changed);
+        dest_db.meta.database_description = source_db.meta.database_description.clone();
+    } else if source_database_description_changed == dest_database_description_changed
+        && source_db.meta.database_description != dest_db.meta.database_description
+    {
+        log.warnings.push(
+            "The database description change times are the same, but there’s already a deviation.".into(),
+        );
+    }
+
+    let dest_default_username_changed = dest_db.meta.default_username_changed.unwrap_or(Times::epoch());
+    let source_default_username_changed = source_db.meta.default_username_changed.unwrap_or(Times::epoch());
+
+    if source_default_username_changed > dest_default_username_changed {
+        dest_db.meta.default_username_changed = Some(source_default_username_changed);
+        dest_db.meta.default_username = source_db.meta.default_username.clone();
+    } else if source_default_username_changed == dest_default_username_changed
+        && source_db.meta.default_username != dest_db.meta.default_username
+    {
+        log.warnings
+            .push("The default user name change times are the same, but there’s already a deviation.".into());
+    }
+
+    let dest_recyclebin_changed = dest_db.meta.recyclebin_changed.unwrap_or(Times::epoch());
+    let source_recyclebin_changed = source_db.meta.recyclebin_changed.unwrap_or(Times::epoch());
+
+    if source_recyclebin_changed > dest_recyclebin_changed {
+        dest_db.meta.recyclebin_changed = Some(source_recyclebin_changed);
+        dest_db.meta.recyclebin_enabled = source_db.meta.recyclebin_enabled.clone();
+        dest_db.meta.recyclebin_uuid = source_db.meta.recyclebin_uuid.clone();
+    } else if source_recyclebin_changed == dest_recyclebin_changed
+        && (source_db.meta.recyclebin_enabled != dest_db.meta.recyclebin_enabled
+            || source_db.meta.recyclebin_uuid != dest_db.meta.recyclebin_uuid)
+    {
+        log.warnings
+            .push("The recycle bin change times are the same, but there’s already a deviation.".into());
+    }
+
+    let dest_entry_templates_group_changed = dest_db
+        .meta
+        .entry_templates_group_changed
+        .unwrap_or(Times::epoch());
+    let source_entry_templates_group_changed = source_db
+        .meta
+        .entry_templates_group_changed
+        .unwrap_or(Times::epoch());
+
+    if source_entry_templates_group_changed > dest_entry_templates_group_changed {
+        dest_db.meta.entry_templates_group_changed = Some(source_entry_templates_group_changed);
+        dest_db.meta.entry_templates_group = source_db.meta.entry_templates_group.clone();
+    } else if source_entry_templates_group_changed == dest_entry_templates_group_changed
+        && source_db.meta.entry_templates_group != dest_db.meta.entry_templates_group
+    {
+        log.warnings.push(
+            "The entry templates group change times are the same, but there’s already a deviation.".into(),
+        );
+    }
+
+    let dest_master_key_changed = dest_db.meta.master_key_changed.unwrap_or(Times::epoch());
+    let source_master_key_changed = source_db.meta.master_key_changed.unwrap_or(Times::epoch());
+
+    if source_master_key_changed > dest_master_key_changed {
+        dest_db.meta.master_key_changed = source_db.meta.master_key_changed.clone();
+    }
+
+    let dest_settings_changed = dest_db.meta.settings_changed.unwrap_or(Times::epoch());
+    let source_settings_changed = source_db.meta.settings_changed.unwrap_or(Times::epoch());
+
+    let dest_maintenance_history_days_changed = get_customm_time_changed(
+        dest_db,
+        CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
+        dest_settings_changed.clone(),
+    );
+    let source_maintenance_history_days_changed = get_customm_time_changed(
+        source_db,
+        CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
+        source_settings_changed.clone(),
+    );
+
+    if source_maintenance_history_days_changed > dest_maintenance_history_days_changed {
+        set_customm_time_changed(
+            dest_db,
+            CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
+            source_maintenance_history_days_changed,
+        );
+        dest_db.meta.maintenance_history_days = source_db.meta.maintenance_history_days.clone();
+    }
+
+    let dest_color_changed =
+        get_customm_time_changed(dest_db, CUSTOM_COLOR_CHANGED, dest_settings_changed.clone());
+    let source_color_changed =
+        get_customm_time_changed(source_db, CUSTOM_COLOR_CHANGED, source_settings_changed.clone());
+
+    if source_color_changed > dest_color_changed {
+        set_customm_time_changed(dest_db, CUSTOM_COLOR_CHANGED, source_color_changed);
+        dest_db.meta.color = source_db.meta.color.clone();
+    }
+
+    let dest_master_key_change_rec_changed = get_customm_time_changed(
+        dest_db,
+        CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
+        dest_settings_changed.clone(),
+    );
+    let source_master_key_change_rec_changed = get_customm_time_changed(
+        source_db,
+        CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
+        source_settings_changed.clone(),
+    );
+
+    if source_master_key_change_rec_changed > dest_master_key_change_rec_changed {
+        set_customm_time_changed(
+            dest_db,
+            CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
+            source_master_key_change_rec_changed,
+        );
+        dest_db.meta.master_key_change_rec = source_db.meta.master_key_change_rec.clone();
+    }
+
+    let dest_master_key_change_force_changed = get_customm_time_changed(
+        dest_db,
+        CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
+        dest_settings_changed.clone(),
+    );
+    let source_master_key_change_force_changed = get_customm_time_changed(
+        source_db,
+        CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
+        source_settings_changed.clone(),
+    );
+
+    if source_master_key_change_force_changed > dest_master_key_change_force_changed {
+        set_customm_time_changed(
+            dest_db,
+            CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
+            source_master_key_change_force_changed,
+        );
+        dest_db.meta.master_key_change_force = source_db.meta.master_key_change_force.clone();
+    }
+
+    let dest_memory_protection_changed = get_customm_time_changed(
+        dest_db,
+        CUSTOM_MEMORY_PROTECTION_CHANGED,
+        dest_settings_changed.clone(),
+    );
+    let source_memory_protection_changed = get_customm_time_changed(
+        source_db,
+        CUSTOM_MEMORY_PROTECTION_CHANGED,
+        source_settings_changed.clone(),
+    );
+
+    if source_memory_protection_changed > dest_memory_protection_changed {
+        set_customm_time_changed(
+            dest_db,
+            CUSTOM_MEMORY_PROTECTION_CHANGED,
+            source_memory_protection_changed,
+        );
+        dest_db.meta.memory_protection = source_db.meta.memory_protection.clone();
+    }
+
+    let dest_history_max_items_changed = get_customm_time_changed(
+        dest_db,
+        CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
+        dest_settings_changed.clone(),
+    );
+    let source_history_max_items_changed = get_customm_time_changed(
+        source_db,
+        CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
+        source_settings_changed.clone(),
+    );
+
+    if source_history_max_items_changed > dest_history_max_items_changed {
+        set_customm_time_changed(
+            dest_db,
+            CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
+            source_history_max_items_changed,
+        );
+        dest_db.meta.history_max_items = source_db.meta.history_max_items.clone();
+    }
+
+    let dest_history_max_size_changed = get_customm_time_changed(
+        dest_db,
+        CUSTOM_HISTORY_MAX_SIZE_CHANGED,
+        dest_settings_changed.clone(),
+    );
+    let source_history_max_size_changed = get_customm_time_changed(
+        source_db,
+        CUSTOM_HISTORY_MAX_SIZE_CHANGED,
+        source_settings_changed.clone(),
+    );
+
+    if source_history_max_size_changed > dest_history_max_size_changed {
+        set_customm_time_changed(
+            dest_db,
+            CUSTOM_HISTORY_MAX_SIZE_CHANGED,
+            source_history_max_size_changed,
+        );
+        dest_db.meta.history_max_size = source_db.meta.history_max_size.clone();
+    }
+
+    let dest_database_config_changed = get_customm_time_changed(
+        dest_db,
+        CUSTOM_DATABASE_CONFIG_CHANGED,
+        dest_settings_changed.clone(),
+    );
+    let source_database_config_changed = get_customm_time_changed(
+        source_db,
+        CUSTOM_DATABASE_CONFIG_CHANGED,
+        source_settings_changed.clone(),
+    );
+
+    if source_database_config_changed > dest_database_config_changed {
+        set_customm_time_changed(
+            dest_db,
+            CUSTOM_DATABASE_CONFIG_CHANGED,
+            source_database_config_changed,
+        );
+        dest_db.config.outer_cipher_config = source_db.config.outer_cipher_config.clone();
+        dest_db.config.compression_config = source_db.config.compression_config.clone();
+        dest_db.config.inner_cipher_config = source_db.config.inner_cipher_config.clone();
+        dest_db.config.kdf_config = source_db.config.kdf_config.clone();
+    }
+
+    let dest_custom_data = dest_db.meta.custom_data.keys().cloned().collect::<HashSet<_>>();
+    let source_custom_data = source_db.meta.custom_data.keys().cloned().collect::<HashSet<_>>();
+
+    for key in source_custom_data.difference(&dest_custom_data) {
+        let value = source_db.meta.custom_data.get(key).unwrap().clone();
+        dest_db.meta.custom_data.insert(key.clone(), value);
+    }
+
+    for key in dest_custom_data.intersection(&source_custom_data) {
+        let dest_value_time = dest_db
+            .meta
+            .custom_data
+            .get(key)
+            .unwrap()
+            .last_modification_time
+            .unwrap_or(Times::epoch());
+        let source_value = source_db.meta.custom_data.get(key).unwrap();
+
+        let source_value_time = source_value.last_modification_time.unwrap_or(Times::epoch());
+
+        if source_value_time > dest_value_time {
+            dest_db.meta.custom_data.insert(key.clone(), source_value.clone());
+        }
+    }
+
+    if source_settings_changed > dest_settings_changed {
+        dest_db.meta.settings_changed = Some(source_settings_changed);
+    }
+
+    Ok(())
+}
+
+fn get_customm_time_changed(db: &Database, key: &str, default: NaiveDateTime) -> NaiveDateTime {
+    db.meta
+        .custom_data
+        .get(key)
+        .and_then(|item| item.last_modification_time.clone())
+        .unwrap_or(default)
+}
+
+fn set_customm_time_changed(db: &mut Database, key: &str, time: NaiveDateTime) {
+    db.meta.custom_data.insert(
+        key.to_string(),
+        CustomDataItem {
+            value: None,
+            last_modification_time: Some(time),
+        },
+    );
+}
+
 fn have_groups_diverged(a: &Group, b: &Group) -> bool {
     let new_times = Times::default();
 
@@ -824,7 +1139,11 @@ fn have_entries_diverged(a: &Entry, b: &Entry) -> bool {
 mod merge_tests {
     use uuid::uuid;
 
-    use crate::db::{fields, EntryId, GroupId, History, Times};
+    use crate::config::{
+        CompressionConfig, DatabaseConfig, DatabaseVersion, InnerCipherConfig, KdfConfig, OuterCipherConfig,
+    };
+    use crate::db::{fields, Color, EntryId, GroupId, History, MemoryProtection, Times};
+    use crate::db::{merge::*, CustomDataValue};
     use crate::Database;
 
     const ROOT_GROUP_ID: GroupId = GroupId::from_uuid(uuid!("00000000-0000-0000-0000-000000000001"));
@@ -2415,5 +2734,388 @@ mod merge_tests {
 
         let icon = destination_db.custom_icon(icon_id).unwrap();
         assert_eq!(icon.data, vec![5, 6, 7, 8]);
+    }
+
+    #[test]
+    fn test_meta_updated_in_source() {
+        let mut destination_db = create_test_database();
+        destination_db.meta.database_name = Some("meta".into());
+        destination_db.meta.database_name_changed = Some(Times::now());
+
+        destination_db.meta.history_max_items = Some(20);
+        set_customm_time_changed(
+            &mut destination_db,
+            CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
+            Times::now(),
+        );
+
+        destination_db.meta.history_max_size = Some(0);
+        set_customm_time_changed(&mut destination_db, CUSTOM_HISTORY_MAX_SIZE_CHANGED, Times::now());
+
+        destination_db.meta.custom_data.insert(
+            "test".into(),
+            CustomDataItem {
+                value: Some(CustomDataValue::String("aaa".into())),
+                last_modification_time: None,
+            },
+        );
+
+        let mut source_db = destination_db.clone();
+
+        sleep();
+
+        source_db.meta.custom_data.insert(
+            "test".into(),
+            CustomDataItem {
+                value: Some(CustomDataValue::String("bbb".into())),
+                last_modification_time: None,
+            },
+        );
+
+        source_db.meta.custom_data.insert(
+            "test2".into(),
+            CustomDataItem {
+                value: Some(CustomDataValue::String("aaa".into())),
+                last_modification_time: None,
+            },
+        );
+
+        source_db.meta.database_name = Some("meta2".into());
+        source_db.meta.database_name_changed = Some(Times::now());
+
+        source_db.meta.database_description = Some("description".into());
+        source_db.meta.database_description_changed = Some(Times::now());
+
+        source_db.meta.default_username = Some("default username".into());
+        source_db.meta.default_username_changed = Some(Times::now());
+
+        source_db.meta.maintenance_history_days = Some(33);
+        set_customm_time_changed(
+            &mut source_db,
+            CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
+            Times::now(),
+        );
+
+        source_db.meta.color = Some(Color::default());
+        set_customm_time_changed(&mut source_db, CUSTOM_COLOR_CHANGED, Times::now());
+
+        source_db.meta.master_key_change_rec = Some(22);
+        set_customm_time_changed(&mut source_db, CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED, Times::now());
+
+        source_db.meta.memory_protection = Some(MemoryProtection::default());
+        set_customm_time_changed(&mut source_db, CUSTOM_MEMORY_PROTECTION_CHANGED, Times::now());
+
+        source_db.meta.master_key_change_force = Some(11);
+        set_customm_time_changed(
+            &mut source_db,
+            CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
+            Times::now(),
+        );
+
+        source_db.meta.entry_templates_group = Some(GROUP1_ID.uuid());
+        source_db.meta.entry_templates_group_changed = Some(Times::now());
+
+        // Don't consider it yet
+        source_db.meta.last_selected_group = Some(GROUP2_ID.uuid());
+        source_db.meta.last_top_visible_group = Some(SUBGROUP1_ID.uuid());
+
+        source_db.meta.history_max_items = Some(-1);
+        set_customm_time_changed(&mut source_db, CUSTOM_HISTORY_MAX_ITEMS_CHANGED, Times::now());
+
+        source_db.meta.history_max_size = Some(-1);
+        set_customm_time_changed(&mut source_db, CUSTOM_HISTORY_MAX_SIZE_CHANGED, Times::now());
+
+        source_db.meta.settings_changed = Some(Times::now());
+
+        let merge_result = destination_db.merge(&source_db).unwrap();
+        assert_eq!(merge_result.warnings.len(), 0);
+        assert_eq!(merge_result.events.len(), 0);
+
+        assert_eq!(
+            destination_db
+                .meta
+                .custom_data
+                .get("test")
+                .unwrap()
+                .value
+                .clone()
+                .unwrap(),
+            CustomDataValue::String("aaa".into())
+        );
+        assert_eq!(
+            destination_db
+                .meta
+                .custom_data
+                .get("test2")
+                .unwrap()
+                .value
+                .clone()
+                .unwrap(),
+            CustomDataValue::String("aaa".into())
+        );
+
+        assert_eq!(destination_db.meta.database_name, Some("meta2".into()));
+        assert_eq!(
+            destination_db.meta.database_description,
+            Some("description".into())
+        );
+        assert_eq!(
+            destination_db.meta.default_username,
+            Some("default username".into())
+        );
+        assert_eq!(destination_db.meta.maintenance_history_days, Some(33));
+        assert_eq!(destination_db.meta.color, Some(Color::default()));
+        assert_eq!(destination_db.meta.master_key_change_rec, Some(22));
+        assert_eq!(
+            destination_db.meta.memory_protection,
+            Some(MemoryProtection::default())
+        );
+        assert_eq!(destination_db.meta.master_key_change_force, Some(11));
+
+        assert_eq!(destination_db.meta.entry_templates_group, Some(GROUP1_ID.uuid()));
+
+        // Currently ignored
+        assert_eq!(destination_db.meta.last_selected_group, None);
+        assert_eq!(destination_db.meta.last_top_visible_group, None);
+
+        assert_eq!(destination_db.meta.history_max_items, Some(-1));
+        assert_eq!(destination_db.meta.history_max_size, Some(-1));
+    }
+
+    #[test]
+    fn test_meta_updated_in_destination() {
+        let mut destination_db = create_test_database();
+        destination_db.meta.database_name = Some("meta".into());
+        destination_db.meta.database_name_changed = Some(Times::now());
+
+        destination_db.meta.history_max_items = Some(20);
+        set_customm_time_changed(
+            &mut destination_db,
+            CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
+            Times::now(),
+        );
+
+        destination_db.meta.history_max_size = Some(0);
+        set_customm_time_changed(&mut destination_db, CUSTOM_HISTORY_MAX_SIZE_CHANGED, Times::now());
+
+        destination_db.meta.custom_data.insert(
+            "test".into(),
+            CustomDataItem {
+                value: Some(CustomDataValue::String("aaa".into())),
+                last_modification_time: None,
+            },
+        );
+
+        let source_db = destination_db.clone();
+
+        sleep();
+
+        destination_db.meta.custom_data.insert(
+            "test".into(),
+            CustomDataItem {
+                value: Some(CustomDataValue::String("bbb".into())),
+                last_modification_time: None,
+            },
+        );
+
+        destination_db.meta.custom_data.insert(
+            "test2".into(),
+            CustomDataItem {
+                value: Some(CustomDataValue::String("aaa".into())),
+                last_modification_time: None,
+            },
+        );
+
+        destination_db.meta.database_name = Some("meta2".into());
+        destination_db.meta.database_name_changed = Some(Times::now());
+
+        destination_db.meta.database_description = Some("description".into());
+        destination_db.meta.database_description_changed = Some(Times::now());
+
+        destination_db.meta.default_username = Some("default username".into());
+        destination_db.meta.default_username_changed = Some(Times::now());
+
+        destination_db.meta.maintenance_history_days = Some(33);
+        set_customm_time_changed(
+            &mut destination_db,
+            CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
+            Times::now(),
+        );
+
+        destination_db.meta.color = Some(Color::default());
+        set_customm_time_changed(&mut destination_db, CUSTOM_COLOR_CHANGED, Times::now());
+
+        destination_db.meta.master_key_change_rec = Some(22);
+        set_customm_time_changed(
+            &mut destination_db,
+            CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
+            Times::now(),
+        );
+
+        destination_db.meta.memory_protection = Some(MemoryProtection::default());
+        set_customm_time_changed(
+            &mut destination_db,
+            CUSTOM_MEMORY_PROTECTION_CHANGED,
+            Times::now(),
+        );
+
+        destination_db.meta.master_key_change_force = Some(11);
+        set_customm_time_changed(
+            &mut destination_db,
+            CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
+            Times::now(),
+        );
+
+        destination_db.meta.entry_templates_group = Some(GROUP1_ID.uuid());
+        destination_db.meta.entry_templates_group_changed = Some(Times::now());
+
+        // Don't consider it yet
+        destination_db.meta.last_selected_group = Some(GROUP2_ID.uuid());
+        destination_db.meta.last_top_visible_group = Some(SUBGROUP1_ID.uuid());
+
+        destination_db.meta.history_max_items = Some(-1);
+        set_customm_time_changed(
+            &mut destination_db,
+            CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
+            Times::now(),
+        );
+
+        destination_db.meta.history_max_size = Some(-1);
+        set_customm_time_changed(&mut destination_db, CUSTOM_HISTORY_MAX_SIZE_CHANGED, Times::now());
+
+        destination_db.meta.settings_changed = Some(Times::now());
+
+        let merge_result = destination_db.merge(&source_db).unwrap();
+        assert_eq!(merge_result.warnings.len(), 0);
+        assert_eq!(merge_result.events.len(), 0);
+
+        assert_eq!(
+            destination_db
+                .meta
+                .custom_data
+                .get("test")
+                .unwrap()
+                .value
+                .clone()
+                .unwrap(),
+            CustomDataValue::String("bbb".into())
+        );
+        assert_eq!(
+            destination_db
+                .meta
+                .custom_data
+                .get("test2")
+                .unwrap()
+                .value
+                .clone()
+                .unwrap(),
+            CustomDataValue::String("aaa".into())
+        );
+
+        assert_eq!(destination_db.meta.database_name, Some("meta2".into()));
+        assert_eq!(
+            destination_db.meta.database_description,
+            Some("description".into())
+        );
+        assert_eq!(
+            destination_db.meta.default_username,
+            Some("default username".into())
+        );
+        assert_eq!(destination_db.meta.maintenance_history_days, Some(33));
+        assert_eq!(destination_db.meta.color, Some(Color::default()));
+        assert_eq!(destination_db.meta.master_key_change_rec, Some(22));
+        assert_eq!(
+            destination_db.meta.memory_protection,
+            Some(MemoryProtection::default())
+        );
+        assert_eq!(destination_db.meta.master_key_change_force, Some(11));
+
+        assert_eq!(destination_db.meta.entry_templates_group, Some(GROUP1_ID.uuid()));
+
+        // Currently ignored
+        assert_eq!(destination_db.meta.last_selected_group, Some(GROUP2_ID.uuid()));
+        assert_eq!(
+            destination_db.meta.last_top_visible_group,
+            Some(SUBGROUP1_ID.uuid())
+        );
+
+        assert_eq!(destination_db.meta.history_max_items, Some(-1));
+        assert_eq!(destination_db.meta.history_max_size, Some(-1));
+    }
+
+    #[test]
+    fn test_config_updated_in_source() {
+        let mut destination_db = create_test_database();
+        let mut source_db = destination_db.clone();
+        sleep();
+        let mut config = DatabaseConfig::default();
+
+        config.version = DatabaseVersion::KDB3(3);
+        config.compression_config = CompressionConfig::None;
+        config.outer_cipher_config = OuterCipherConfig::Twofish;
+        config.inner_cipher_config = InnerCipherConfig::Salsa20;
+        config.kdf_config = KdfConfig::Aes { rounds: 1 };
+
+        source_db.config = config;
+        source_db.meta.settings_changed = Some(Times::now());
+        set_customm_time_changed(&mut source_db, CUSTOM_DATABASE_CONFIG_CHANGED, Times::now());
+
+        let merge_result = destination_db.merge(&source_db).unwrap();
+        assert_eq!(merge_result.warnings.len(), 0);
+        assert_eq!(merge_result.events.len(), 0);
+
+        assert_ne!(destination_db.config.version, DatabaseVersion::KDB3(3));
+        assert_eq!(destination_db.config.compression_config, CompressionConfig::None);
+        assert_eq!(
+            destination_db.config.outer_cipher_config,
+            OuterCipherConfig::Twofish
+        );
+        assert_eq!(
+            destination_db.config.inner_cipher_config,
+            InnerCipherConfig::Salsa20
+        );
+        assert_eq!(destination_db.config.kdf_config, KdfConfig::Aes { rounds: 1 });
+    }
+
+    #[test]
+    fn test_config_updated_in_destination() {
+        let mut destination_db = create_test_database();
+
+        let mut config = DatabaseConfig::default();
+
+        config.compression_config = CompressionConfig::None;
+
+        destination_db.config = config;
+        destination_db.meta.settings_changed = Some(Times::now());
+        set_customm_time_changed(&mut destination_db, CUSTOM_DATABASE_CONFIG_CHANGED, Times::now());
+
+        let source_db = destination_db.clone();
+
+        sleep();
+        let mut config = DatabaseConfig::default();
+
+        config.compression_config = CompressionConfig::GZip;
+        config.outer_cipher_config = OuterCipherConfig::Twofish;
+        config.inner_cipher_config = InnerCipherConfig::Salsa20;
+        config.kdf_config = KdfConfig::Aes { rounds: 1 };
+
+        destination_db.config = config;
+        destination_db.meta.settings_changed = Some(Times::now());
+        set_customm_time_changed(&mut destination_db, CUSTOM_DATABASE_CONFIG_CHANGED, Times::now());
+
+        let merge_result = destination_db.merge(&source_db).unwrap();
+        assert_eq!(merge_result.warnings.len(), 0);
+        assert_eq!(merge_result.events.len(), 0);
+
+        assert_eq!(destination_db.config.compression_config, CompressionConfig::GZip);
+        assert_eq!(
+            destination_db.config.outer_cipher_config,
+            OuterCipherConfig::Twofish
+        );
+        assert_eq!(
+            destination_db.config.inner_cipher_config,
+            InnerCipherConfig::Salsa20
+        );
+        assert_eq!(destination_db.config.kdf_config, KdfConfig::Aes { rounds: 1 });
     }
 }

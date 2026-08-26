@@ -70,10 +70,6 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
         .where((item) => !isInRecycleBin(item.id))
         .toList();
     await _getSyncUuid();
-
-    if (Store.settings.useKdbxSeedColor && _meta?.color != null) {
-      Store.settings.notify();
-    }
   }
 
   Future<void> _getSyncUuid() async {
@@ -90,10 +86,11 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
   }
 
   Future<void> setKdbx(Kdbx? kdbx) async {
-    _kdbx?.bindEventCallback(callback: (_) => {});
     _kdbx?.dispose();
+    _kdbx = _groups = _noRecyclebinGroups = _fieldSummary = _selectedKdbxEntry =
+        _syncAccountUuid = null;
+
     _kdbx = kdbx;
-    _selectedKdbxEntry = null;
 
     if (kdbx != null) {
       kdbx.bindEventCallback(callback: _kdbxEventCallback);

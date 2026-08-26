@@ -16,8 +16,12 @@ class _ModifyPasswordArgs extends PageRouteArgs {
 }
 
 class ModifyPasswordRoute extends PageRouteInfo<_ModifyPasswordArgs> {
-  ModifyPasswordRoute({Key? key})
-    : super(name, args: _ModifyPasswordArgs(key: key));
+  ModifyPasswordRoute({Key? key, bool dismissible = true})
+    : super(
+        name,
+        args: _ModifyPasswordArgs(key: key),
+        rawQueryParams: {"dismissible": dismissible.toString()},
+      );
 
   static const name = "ModifyPasswordRoute";
 
@@ -27,13 +31,16 @@ class ModifyPasswordRoute extends PageRouteInfo<_ModifyPasswordArgs> {
       final args = data.argsAs<_ModifyPasswordArgs>(
         orElse: () => _ModifyPasswordArgs(),
       );
-      return ModifyPasswordPage(key: args.key);
+      final dismissible = data.queryParams.getBool("dismissible", true);
+      return ModifyPasswordPage(key: args.key, dismissible: dismissible);
     },
   );
 }
 
 class ModifyPasswordPage extends AuthorizedPage {
-  const ModifyPasswordPage({super.key});
+  const ModifyPasswordPage({super.key, this.dismissible = true});
+
+  final bool dismissible;
 
   @override
   AuthorizedPageState<ModifyPasswordPage> createState() =>
@@ -45,7 +52,7 @@ class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
   AuthorizedType get authType => AuthorizedType.modify_password;
 
   @override
-  bool get enableBack => true;
+  bool get enableBack => widget.dismissible;
 
   @override
   Future<void> confirm() async {
@@ -102,5 +109,10 @@ class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
 
       context.router.pop();
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(canPop: widget.dismissible, child: super.build(context));
   }
 }

@@ -175,6 +175,27 @@ impl Entry {
     pub fn get_url(&self) -> Option<&str> {
         self.get(fields::URL)
     }
+
+    /// Calculate the size of an entry
+    pub fn calculate_size<'a>(&self, db: &'a Database) -> usize {
+        let fields_size: usize = self.fields.values().map(|item| item.len()).sum();
+        let custom_size: usize = self
+            .custom_data
+            .values()
+            .filter_map(|item| item.value.as_ref())
+            .map(|item| item.byte_size())
+            .sum();
+        let attachments_size: usize = self
+            .attachments
+            .values()
+            .map(|id| db.attachments.get(id).map_or(0, |a| a.data.len()))
+            .sum();
+        let icon_size = match self.icon() {
+            Some(Icon::Custom(id)) => db.custom_icons.get(id).map_or(0, |i| i.data.len()),
+            _ => 0,
+        };
+        fields_size + custom_size + attachments_size + icon_size
+    }
 }
 
 impl std::fmt::Display for EntryId {
@@ -288,6 +309,11 @@ impl EntryRef<'_> {
         } else {
             None
         }
+    }
+
+    /// Calculate the size of an entry
+    pub fn calculate_size(&self) -> usize {
+        self.deref().calculate_size(self.database)
     }
 }
 
