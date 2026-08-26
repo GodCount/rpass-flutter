@@ -177,7 +177,7 @@ impl Entry {
     }
 
     /// Calculate the size of an entry
-    pub fn calculate_size<'a>(&self, db: &'a Database) -> usize {
+    pub fn calculate_size(&self, db: &Database) -> usize {
         let fields_size: usize = self.fields.values().map(|item| item.len()).sum();
         let custom_size: usize = self
             .custom_data
@@ -675,6 +675,35 @@ impl EntryMut<'_> {
             }
         }
     }
+
+    /// Clean entry history
+    pub fn cleanup(mut self) -> () {
+        let history_max_items = self.database.meta.history_max_items.unwrap_or(-1);
+        let history_max_size = self.database.meta.history_max_size.unwrap_or(-1);
+
+        if history_max_items > -1 {
+            if let Some(history) = self.history.as_mut() {
+                history.entries.truncate(history_max_items as usize);
+            }
+        }
+
+        if history_max_size > -1 {
+            let history_max_size = history_max_size as usize;
+
+            let len = self.history.as_ref().map(|item| {
+                item.calculate_sizes(self.database)
+                    .into_iter()
+                    .scan(0, |acc, x| Some(*acc + x))
+                    .take_while(|&s| s <= history_max_size)
+                    .count()
+            });
+
+
+            if let Some((len, history)) = len.zip(self.history.as_mut()) {
+                history.entries.truncate(len);
+            }
+        }
+    }
 }
 
 /// Error type for when a destination [GroupId] is provided that does not exist in the database
@@ -866,11 +895,12 @@ impl DerefMut for EntryTrack<'_> {
 impl Drop for EntryTrack<'_> {
     fn drop(&mut self) {
         // see if the entry is still there (it might have been removed)
-        if let Some(entry) = self.database.entries.get_mut(&self.id) {
+        if let Some(mut entry) = self.database.entry_mut(self.id) {
             let parent_id = entry.parent;
             let historical = std::mem::replace(&mut self.historical, Entry::new(parent_id));
 
             entry.history.get_or_insert_default().add_entry(historical);
+            entry.cleanup();
         }
     }
 }

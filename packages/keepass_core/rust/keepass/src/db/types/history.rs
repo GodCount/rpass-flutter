@@ -25,7 +25,7 @@ impl History {
         &self.entries
     }
 
-    pub(crate) fn calculate_sizes<'a>(&self, db: &'a Database) -> Vec<usize> {
+    pub(crate) fn calculate_sizes(&self, db: &Database) -> Vec<usize> {
         self.entries.iter().map(|item| item.calculate_size(db)).collect::<Vec<usize>>()
     }
 }

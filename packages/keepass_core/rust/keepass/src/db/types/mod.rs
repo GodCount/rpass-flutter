@@ -291,20 +291,26 @@ impl Database {
     }
 
     /// Clean entry history, useless icons, and useless attachments
-    pub fn cleanup(&mut self) {
+    pub fn cleanup(&mut self) -> () {
         let history_max_items = self.meta.history_max_items.unwrap_or(-1);
         let history_max_size = self.meta.history_max_size.unwrap_or(-1);
 
         if history_max_items > -1 || history_max_size > -1 {
-            let ids: Vec<EntryId> = self.entries.keys().copied().collect();
-            for id in ids {
-                if history_max_items > -1 {
-                    let mut entry = EntryMut::new(self, id);
-                    if let Some(history) = entry.history.as_mut() {
-                        history.entries.truncate(history_max_items as usize);
-                    }
-                }
-            }
+            self.foreach_entry_mut(|entry| {
+                entry.cleanup();
+            });
         }
+
+        self.foreach_custom_icon_mut(|icon| {
+            if icon.entries.is_empty() && icon.groups.is_empty() {
+                icon.remove();
+            }
+        });
+
+        self.foreach_attachment_mut(|attachment| {
+            if attachment.entries.is_empty() {
+                attachment.remove();
+            }
+        });
     }
 }

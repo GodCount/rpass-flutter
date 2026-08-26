@@ -105,6 +105,7 @@ impl Database {
         merge_meta(self, other, &mut log)?;
         merge_icons(self, other, &mut log)?;
         merge_groups(self, other, &mut log)?;
+        self.cleanup();
 
         Ok(log)
     }
