@@ -163,7 +163,10 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
           ),
           onTap: () {
             context.router.popAndPush(
-              LookAccountRoute(id: entry.id, historyIndex: index),
+              LookAccountRoute(
+                id: entry.id,
+                historyId: entry.times.lastModification!,
+              ),
             );
           },
         );

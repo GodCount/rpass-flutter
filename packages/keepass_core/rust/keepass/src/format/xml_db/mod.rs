@@ -166,26 +166,34 @@ impl KeePassFile {
         // fields that were already set on each entry and group during xml_to_db_handle.
         let entry_ids: Vec<crate::db::EntryId> = db.entries.keys().copied().collect();
         for entry_id in entry_ids {
-            // current version
-            if let Some(crate::db::Icon::Custom(icon_id)) =
-                db.entries.get(&entry_id).and_then(|e| e.icon.as_ref())
-            {
-                if let Some(icon) = db.custom_icons.get_mut(icon_id) {
-                    icon.entries.insert((entry_id, None));
-                }
-            }
-
-            // historical versions
             if let Some(entry) = db.entries.get(&entry_id) {
-                let history_len = entry.history.as_ref().map_or(0, |h| h.entries.len());
+                // current version
+                if let Some(crate::db::Icon::Custom(icon_id)) = entry.icon.as_ref() {
+                    if let Some(icon) = db.custom_icons.get_mut(icon_id) {
+                        icon.entries.insert((entry_id, None));
+                    }
+                }
 
-                for i in 0..history_len {
-                    #[allow(clippy::indexing_slicing)] // We just checked that the index is in bounds
-                    if let Some(crate::db::Icon::Custom(icon_id)) =
-                        entry.history.as_ref().and_then(|h| h.entries[i].icon.as_ref())
-                    {
-                        if let Some(icon) = db.custom_icons.get_mut(icon_id) {
-                            icon.entries.insert((entry_id, Some(i)));
+                for attach_id in entry.attachments.values() {
+                    if let Some(attachment) = db.attachments.get_mut(attach_id) {
+                        attachment.entries.insert((entry_id, None));
+                    }
+                }
+
+                if let Some(history) = entry.history.as_ref() {
+                    for item in history.get_entries() {
+                        if let Some(crate::db::Icon::Custom(icon_id)) = item.icon.as_ref() {
+                            if let Some(icon) = db.custom_icons.get_mut(icon_id) {
+                                // The final modification time should always exist, but unauthorized modifications may occur.
+                                // A loophole is buried here.
+                                icon.entries.insert((entry_id, item.times.last_modification.clone()));
+                            }
+                        }
+
+                        for attach_id in entry.attachments.values() {
+                            if let Some(attachment) = db.attachments.get_mut(attach_id) {
+                                attachment.entries.insert((entry_id, item.times.last_modification.clone()));
+                            }
                         }
                     }
                 }

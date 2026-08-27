@@ -1558,7 +1558,7 @@ fn wire__crate__api__kdbx__Kdbx_get_entry_impl(
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Kdbx>,
             >>::sse_decode(&mut deserializer);
             let api_id = <String>::sse_decode(&mut deserializer);
-            let api_history_index = <Option<i32>>::sse_decode(&mut deserializer);
+            let api_history_id = <Option<chrono::NaiveDateTime>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
@@ -1579,7 +1579,7 @@ fn wire__crate__api__kdbx__Kdbx_get_entry_impl(
                     let output_ok = crate::api::kdbx::Kdbx::get_entry(
                         &*api_that_guard,
                         api_id,
-                        api_history_index,
+                        api_history_id,
                     )?;
                     std::result::Result::Ok(output_ok)
                 })())
@@ -4410,17 +4410,6 @@ impl SseDecode for Option<crate::api::kdbx::EntryData> {
     }
 }
 
-impl SseDecode for Option<i32> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        if (<bool>::sse_decode(deserializer)) {
-            return Some(<i32>::sse_decode(deserializer));
-        } else {
-            return None;
-        }
-    }
-}
-
 impl SseDecode for Option<i64> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -7235,16 +7224,6 @@ impl SseEncode for Option<crate::api::kdbx::EntryData> {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
             <crate::api::kdbx::EntryData>::sse_encode(value, serializer);
-        }
-    }
-}
-
-impl SseEncode for Option<i32> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <bool>::sse_encode(self.is_some(), serializer);
-        if let Some(value) = self {
-            <i32>::sse_encode(value, serializer);
         }
     }
 }

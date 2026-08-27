@@ -34,11 +34,12 @@ class _LookAccountArgs extends PageRouteArgs {
 }
 
 class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
-  LookAccountRoute({Key? key, int? historyIndex, required String id})
+  LookAccountRoute({Key? key, DateTime? historyId, required String id})
     : super(
         name,
         args: _LookAccountArgs(key: key),
-        rawPathParams: {"uuid": id, "historyIndex": historyIndex},
+        rawPathParams: {"uuid": id},
+        rawQueryParams: {"historyId": historyId?.millisecondsSinceEpoch},
       );
 
   static const name = "LookAccountRoute";
@@ -50,7 +51,7 @@ class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
         orElse: () => _LookAccountArgs(),
       );
 
-      final historyIndex = data.inheritedPathParams.optInt("historyIndex");
+      final historyId = data.queryParams.optInt("historyId");
 
       final uuid = data.inheritedPathParams.optString("uuid");
 
@@ -61,16 +62,18 @@ class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
       return LookAccountPage(
         key: args.key,
         id: uuid,
-        historyIndex: historyIndex,
+        historyId: historyId != null
+            ? DateTime.fromMillisecondsSinceEpoch(historyId)
+            : null,
       );
     },
   );
 }
 
 class LookAccountPage extends StatefulWidget {
-  const LookAccountPage({super.key, this.historyIndex, required this.id});
+  const LookAccountPage({super.key, this.historyId, required this.id});
 
-  final int? historyIndex;
+  final DateTime? historyId;
   final String id;
 
   @override
@@ -112,7 +115,7 @@ class _LookAccountPageState extends State<LookAccountPage>
 
       _kdbxEntry = await kdbxProvider.kdbx!.getEntry(
         id: widget.id,
-        historyIndex: widget.historyIndex,
+        historyId: widget.historyId,
       );
 
       _groupData = kdbxProvider.getGroup(_kdbxEntry.parent);
@@ -246,7 +249,7 @@ class _LookAccountPageState extends State<LookAccountPage>
           ),
 
         ListTile(
-          enabled: !_inRecycleBin && widget.historyIndex == null,
+          enabled: !_inRecycleBin && widget.historyId == null,
           title: Text(t.history_record),
           leading: const Icon(Icons.history),
           onTap: onAutoPop(() => showEntryHistoryList(_kdbxEntry)),
@@ -264,7 +267,7 @@ class _LookAccountPageState extends State<LookAccountPage>
           }),
         ),
         ListTile(
-          enabled: !_inRecycleBin && widget.historyIndex == null,
+          enabled: !_inRecycleBin && widget.historyId == null,
           title: Text(t.delete),
           leading: const Icon(Icons.delete),
           onTap: onAutoPop(_deleteAccount),
@@ -886,7 +889,7 @@ class _LookAccountPageState extends State<LookAccountPage>
           const SizedBox(height: 42),
         ],
       ),
-      floatingActionButton: !_inRecycleBin && widget.historyIndex == null
+      floatingActionButton: !_inRecycleBin && widget.historyId == null
           ? FloatingActionButton(
               heroTag: const ValueKey("look_account_float"),
               onPressed: singleTrigger(() async {

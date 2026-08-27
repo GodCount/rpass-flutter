@@ -409,7 +409,7 @@ impl Kdbx {
     pub fn get_entry(
         &self,
         id: String,
-        history_index: Option<i32>,
+        history_id: Option<NaiveDateTime>,
     ) -> Result<EntryData, KdbxError> {
         let db = self.database.read().unwrap();
         let entry = db
@@ -418,12 +418,12 @@ impl Kdbx {
                 "Entry with ID {id} not found"
             )))?;
 
-        if let Some(index) = history_index {
-            if let Some(entry) = entry.historical(index as usize) {
+        if let Some(history_id) = history_id {
+            if let Some(entry) = entry.historical(history_id) {
                 return Ok(EntryData::from(&entry));
             }
             return Err(KdbxError::not_found(format!(
-                "History entry with index {index} not found for entry with ID {id}"
+                "History entry with history_id {history_id:?} not found for entry with ID {id}"
             )));
         }
 
@@ -462,8 +462,14 @@ impl Kdbx {
             )))?;
 
         if let Some(history) = &entry.history {
-            Ok((0..history.get_entries().len())
-                .map(|i| EntryData::from(&entry.historical(i).unwrap()))
+            Ok(history
+                .get_entries()
+                .iter()
+                .filter_map(|item| {
+                    item.times
+                        .last_modification
+                        .map(|ts| EntryData::from(&entry.historical(ts).unwrap()))
+                })
                 .collect())
         } else {
             Ok(vec![])

@@ -122,8 +122,8 @@ impl Group {
                     g.xml_to_db_handle(new_group, attachments, custom_icons, inner_decryptor)?;
                 }
                 GroupOrEntry::Entry(e) => {
-                    let new_entry = target.add_entry_with_id(EntryId::from_uuid(e.uuid.0))?;
-                    e.xml_to_db_handle(new_entry, attachments, custom_icons, inner_decryptor)?;
+                    let mut new_entry = target.add_entry_with_id(EntryId::from_uuid(e.uuid.0))?;
+                    e.xml_to_db_handle(&mut new_entry, attachments, custom_icons, inner_decryptor)?;
                 }
             }
         }
@@ -143,7 +143,7 @@ impl Group {
         }
 
         for e in source.entries() {
-            children.push(GroupOrEntry::Entry(Entry::db_to_xml(e, inner_cipher)?));
+            children.push(GroupOrEntry::Entry(Entry::db_to_xml(&*e, inner_cipher)?));
         }
 
         let custom_data: Option<crate::format::xml_db::meta::CustomData> = if source.custom_data.is_empty() {

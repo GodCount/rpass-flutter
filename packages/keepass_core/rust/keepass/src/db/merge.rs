@@ -574,7 +574,7 @@ fn merge_entries(dest_db: &mut Database, source_db: &Database, log: &mut MergeLo
 
         if source_last_modification > dest_last_modification {
             // add the previous dest entry to history if it has diverged
-            if let Some(last_history_entry) = merged_history.entries.first() {
+            if let Some(last_history_entry) = merged_history.get_entries().first() {
                 if have_entries_diverged(&dest_entry, last_history_entry) {
                     let mut dest_entry_for_history = dest_entry.deref().clone();
                     dest_entry_for_history.history = None;
@@ -613,8 +613,8 @@ fn merge_entries(dest_db: &mut Database, source_db: &Database, log: &mut MergeLo
 fn merge_history(dest: &History, source: &History, log: &mut MergeLog) -> Result<History, MergeError> {
     let mut entries: Vec<Entry> = Vec::new();
 
-    let mut entries_dest: Vec<Entry> = dest.entries.to_vec();
-    let mut entries_source: Vec<Entry> = source.entries.to_vec();
+    let mut entries_dest: Vec<Entry> = dest.get_entries().to_vec();
+    let mut entries_source: Vec<Entry> = source.get_entries().to_vec();
 
     for e in entries_dest.iter_mut() {
         if e.times.last_modification.is_none() {
@@ -688,7 +688,7 @@ fn merge_history(dest: &History, source: &History, log: &mut MergeLog) -> Result
         }
     }
 
-    Ok(History { entries })
+    Ok(History::from(entries))
 }
 
 /// Merge custom icons, returning the merged history
@@ -1207,7 +1207,7 @@ mod merge_tests {
 
     fn assert_history_ordered(history: &History) {
         let mut last_modification_time: Option<&chrono::NaiveDateTime> = None;
-        for entry in &history.entries {
+        for entry in history.get_entries() {
             if last_modification_time.is_none() {
                 last_modification_time = entry.times.last_modification.as_ref();
             }
@@ -2243,10 +2243,10 @@ mod merge_tests {
         // check that history is preserved
         let merged_history = destination_db.entry(ENTRY1_ID).unwrap().history.clone().unwrap();
         assert_history_ordered(&merged_history);
-        assert_eq!(merged_history.entries.len(), 1);
+        assert_eq!(merged_history.get_entries().len(), 1);
 
         // check that we can find the old version of the entry
-        let merged_entry = &merged_history.entries[0];
+        let merged_entry = &merged_history.get_entries()[0];
         assert_eq!(merged_entry.get(fields::TITLE), Some("entry1"));
 
         let entry_count_after = destination_db.entries.len();
@@ -2284,10 +2284,10 @@ mod merge_tests {
         // check that history is preserved
         let merged_history = destination_db.entry(ENTRY1_ID).unwrap().history.clone().unwrap();
         assert_history_ordered(&merged_history);
-        assert_eq!(merged_history.entries.len(), 1);
+        assert_eq!(merged_history.get_entries().len(), 1);
 
         // check that we can find the old version of the entry
-        let merged_entry = &merged_history.entries[0];
+        let merged_entry = &merged_history.get_entries()[0];
         assert_eq!(merged_entry.get(fields::TITLE), Some("entry1"));
 
         let entry_count_after = destination_db.entries.len();
@@ -2342,12 +2342,12 @@ mod merge_tests {
         // check that history is preserved and contains both older versions
         let merged_history = entry.history.clone().unwrap();
         assert_history_ordered(&merged_history);
-        assert_eq!(merged_history.entries.len(), 2);
+        assert_eq!(merged_history.get_entries().len(), 2);
         assert_eq!(
-            merged_history.entries[0].get(fields::TITLE),
+            merged_history.get_entries()[0].get(fields::TITLE),
             Some("entry1_updated_from_destination")
         );
-        assert_eq!(merged_history.entries[1].get(fields::TITLE), Some("entry1"));
+        assert_eq!(merged_history.get_entries()[1].get(fields::TITLE), Some("entry1"));
 
         // Merging again should not result in any additional change.
         let merge_result = destination_db.merge(&destination_db.clone()).unwrap();

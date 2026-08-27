@@ -3,8 +3,11 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
+use chrono::NaiveDateTime;
+use thiserror::Error;
+
 use crate::{
-    db::{EntryId, EntryMut, EntryRef, Value},
+    db::{EntryId, EntryRef, Value},
     Database,
 };
 
@@ -48,9 +51,9 @@ impl std::fmt::Display for AttachmentId {
 pub struct Attachment {
     pub(crate) id: AttachmentId,
 
-    /// The entries that reference this attachment, along with the history index of the entry
+    /// The entries that reference this attachment, along with the history last modification of the entry
     /// version that references it (if applicable).
-    pub(crate) entries: HashSet<(EntryId, Option<usize>)>,
+    pub(crate) entries: HashSet<(EntryId, Option<NaiveDateTime>)>,
 
     /// The binary data of the attachment.
     pub data: Value<Vec<u8>>,
@@ -99,12 +102,12 @@ impl AttachmentRef<'_> {
     /// attachment. If `include_historical` is true, also returns old versions of entries that
     /// reference this attachment, even if they have been modified to no longer reference it.
     pub fn entries(&self, include_historical: bool) -> impl Iterator<Item = EntryRef<'_>> {
-        self.entries.iter().filter_map(move |&(id, history_index)| {
-            if !include_historical && history_index.is_some() {
+        self.entries.iter().filter_map(move |&(id, history_id)| {
+            if !include_historical && history_id.is_some() {
                 return None;
             }
 
-            Some(EntryRef::new_historical(self.database, id, history_index))
+            Some(EntryRef::new_historical(self.database, id, history_id))
         })
     }
 }
@@ -152,46 +155,13 @@ impl AttachmentMut<'_> {
         self.database
     }
 
-    /// Get an iterator over the entries that reference this attachment, with mutable access.
-    ///
-    /// If `include_historical` is false, only returns entries that currently reference this
-    /// attachment. If `include_historical` is true, also returns old versions of entries that
-    /// reference this attachment, even if they have been modified to no longer reference it.
-    pub fn foreach_entry_mut<F>(&mut self, mut f: F, include_historical: bool)
-    where
-        F: FnMut(EntryMut<'_>),
-    {
-        let entries: Vec<(EntryId, Option<usize>)> = self.entries.iter().copied().collect();
-        for (id, history_index) in entries {
-            if !include_historical && history_index.is_some() {
-                continue;
-            }
-
-            f(EntryMut::new_historical(self.database, id, history_index));
-        }
-    }
-
     /// Remove this attachment from the database, and all references to it
-    pub fn remove(mut self) {
-        let id = self.id;
-
-        self.foreach_entry_mut(
-            |mut entry| {
-                let mut attachments_to_remove = Vec::new();
-                for (name, attachment_id) in &entry.attachments {
-                    if *attachment_id == id {
-                        attachments_to_remove.push(name.clone());
-                    }
-                }
-
-                for name in attachments_to_remove {
-                    entry.attachments.remove(&name);
-                }
-            },
-            true,
-        );
-
-        self.database.attachments.remove(&self.id);
+    pub fn remove(&mut self) -> Result<Option<Attachment>, AttachmentNotAllowRemoveError> {
+        if self.entries.is_empty() {
+            Ok(self.database.attachments.remove(&self.id))
+        } else {
+            Err(AttachmentNotAllowRemoveError(self.id))
+        }
     }
 }
 
@@ -218,3 +188,8 @@ impl DerefMut for AttachmentMut<'_> {
             .expect("AttachmentMut points to non-existent attachment")
     }
 }
+
+/// This error type occurs when deleting an attachment that still has references.
+#[derive(Error, Debug)]
+#[error("The attachment {0} cannot be deleted because there are still entries referencing it.")]
+pub struct AttachmentNotAllowRemoveError(pub(crate) AttachmentId);

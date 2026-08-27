@@ -8,7 +8,7 @@ use thiserror::Error;
 use uuid::Uuid;
 
 use crate::{
-    db::{EntryId, EntryMut, EntryRef, GroupId, GroupMut, GroupRef},
+    db::{EntryId, EntryRef, GroupId, GroupRef},
     Database,
 };
 
@@ -56,7 +56,7 @@ impl CustomIconId {
 pub struct CustomIcon {
     pub(crate) id: CustomIconId,
 
-    pub(crate) entries: HashSet<(EntryId, Option<usize>)>,
+    pub(crate) entries: HashSet<(EntryId, Option<NaiveDateTime>)>,
     pub(crate) groups: HashSet<GroupId>,
 
     /// Filename for the icon
@@ -112,12 +112,12 @@ impl CustomIconRef<'_> {
     /// icon. If `include_historical` is true, also returns old versions of entries that
     /// reference this icon, even if they have been modified to no longer reference it.
     pub fn entries(&self, include_historical: bool) -> impl Iterator<Item = EntryRef<'_>> {
-        self.entries.iter().filter_map(move |&(id, history_index)| {
-            if !include_historical && history_index.is_some() {
+        self.entries.iter().filter_map(move |&(id, history_id)| {
+            if !include_historical && history_id.is_some() {
                 return None;
             }
 
-            Some(EntryRef::new_historical(self.database, id, history_index))
+            Some(EntryRef::new_historical(self.database, id, history_id))
         })
     }
 
@@ -172,57 +172,13 @@ impl CustomIconMut<'_> {
         self.database
     }
 
-    /// Apply a closure to each entry that references this custom icon.
-    ///
-    /// The closure is passed a mutable reference to each entry. If `include_historical` is false,
-    /// only applies the closure to entries that currently reference this icon.
-    /// If `include_historical` is true, also applies the closure to old versions of entries that
-    /// reference this icon, even if they have been modified to no longer reference it.
-    pub fn foreach_entry_mut<F>(&mut self, mut f: F, include_historical: bool)
-    where
-        F: FnMut(EntryMut<'_>),
-    {
-        let entries: Vec<(EntryId, Option<usize>)> = self.entries.iter().copied().collect();
-        for (id, history_index) in entries {
-            if !include_historical && history_index.is_some() {
-                continue;
-            }
-
-            f(EntryMut::new_historical(self.database, id, history_index));
-        }
-    }
-
-    /// Apply a closure to each group that references this custom icon.
-    pub fn foreach_group_mut<F>(&mut self, mut f: F)
-    where
-        F: FnMut(GroupMut<'_>),
-    {
-        let groups: Vec<GroupId> = self.groups.iter().copied().collect();
-        for id in groups {
-            f(GroupMut::new(self.database, id));
-        }
-    }
-
     /// Remove this custom icon from the database, and all references to it
-    pub fn remove(mut self) {
-        let id = self.id;
-
-        self.foreach_entry_mut(
-            |mut entry| {
-                if entry.icon == Some(Icon::Custom(id)) {
-                    entry.icon = None;
-                }
-            },
-            true,
-        );
-
-        self.foreach_group_mut(|mut group| {
-            if group.icon == Some(Icon::Custom(id)) {
-                group.icon = None;
-            }
-        });
-
-        self.database.custom_icons.remove(&id);
+    pub fn remove(&mut self) -> Result<Option<CustomIcon>, CustomIconNotAllowRemoveError> {
+        if self.entries.is_empty() && self.groups.is_empty() {
+            Ok(self.database.custom_icons.remove(&self.id))
+        } else {
+            Err(CustomIconNotAllowRemoveError(self.id))
+        }
     }
 }
 
@@ -252,3 +208,8 @@ impl DerefMut for CustomIconMut<'_> {
 #[derive(Error, Debug)]
 #[error("Custom icon {0} not found")]
 pub struct CustomIconNotFoundError(pub(crate) CustomIconId);
+
+/// This error type occurs when deleting an custom icon that still has references.
+#[derive(Error, Debug)]
+#[error("The custom icon {0} cannot be deleted because there are still entries referencing it.")]
+pub struct CustomIconNotAllowRemoveError(pub(crate) CustomIconId);

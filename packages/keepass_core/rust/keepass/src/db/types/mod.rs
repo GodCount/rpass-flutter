@@ -301,15 +301,15 @@ impl Database {
             });
         }
 
-        self.foreach_custom_icon_mut(|icon| {
+        self.foreach_custom_icon_mut(|mut icon| {
             if icon.entries.is_empty() && icon.groups.is_empty() {
-                icon.remove();
+                icon.remove().unwrap();
             }
         });
 
-        self.foreach_attachment_mut(|attachment| {
+        self.foreach_attachment_mut(|mut attachment| {
             if attachment.entries.is_empty() {
-                attachment.remove();
+                attachment.remove().unwrap();
             }
         });
     }

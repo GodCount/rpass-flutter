@@ -3,6 +3,7 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
+use chrono::NaiveDateTime;
 use thiserror::Error;
 use uuid::Uuid;
 
@@ -208,7 +209,7 @@ impl std::fmt::Display for EntryId {
 pub struct EntryRef<'a> {
     database: &'a Database,
     id: EntryId,
-    history_index: Option<usize>,
+    history_id: Option<NaiveDateTime>,
 }
 
 impl EntryRef<'_> {
@@ -216,19 +217,19 @@ impl EntryRef<'_> {
         EntryRef {
             database,
             id,
-            history_index: None,
+            history_id: None,
         }
     }
 
     pub(crate) fn new_historical(
         database: &Database,
         id: EntryId,
-        history_index: Option<usize>,
+        history_id: Option<NaiveDateTime>,
     ) -> EntryRef<'_> {
         EntryRef {
             database,
             id,
-            history_index,
+            history_id,
         }
     }
 
@@ -245,17 +246,13 @@ impl EntryRef<'_> {
     }
 
     /// Gets an [EntryRef] to a historical version of the [Entry], if it exists
-    pub fn historical(&self, index: usize) -> Option<EntryRef<'_>> {
-        if let Some(h) = &self.history {
-            if index < h.entries.len() {
-                Some(EntryRef {
-                    database: self.database,
-                    id: self.id,
-                    history_index: Some(index),
-                })
-            } else {
-                None
-            }
+    pub fn historical(&self, history_id: NaiveDateTime) -> Option<EntryRef<'_>> {
+        if self.history.as_ref()?.get_entry(history_id).is_some() {
+            Some(EntryRef {
+                database: self.database,
+                id: self.id,
+                history_id: Some(history_id),
+            })
         } else {
             None
         }
@@ -325,10 +322,10 @@ impl Deref for EntryRef<'_> {
         // UNWRAP safety: EntryRef can only be constructed with a valid EntryId
         let entry = self.database.entries.get(&self.id).expect("Entry not found");
 
-        if let Some(n) = self.history_index {
+        if let Some(id) = self.history_id {
             // UNWRAP safety: history existance checked on EntryRef creation
             #[allow(clippy::unwrap_used, clippy::indexing_slicing)]
-            &entry.history.as_ref().unwrap().entries[n]
+            &entry.history.as_ref().unwrap().get_entry(id).unwrap()
         } else {
             entry
         }
@@ -339,41 +336,11 @@ impl Deref for EntryRef<'_> {
 pub struct EntryMut<'a> {
     database: &'a mut Database,
     id: EntryId,
-    history_index: Option<usize>,
 }
 
 impl EntryMut<'_> {
     pub(crate) fn new(database: &mut Database, id: EntryId) -> EntryMut<'_> {
-        EntryMut {
-            database,
-            id,
-            history_index: None,
-        }
-    }
-
-    pub(crate) fn new_historical(
-        database: &mut Database,
-        id: EntryId,
-        history_index: Option<usize>,
-    ) -> EntryMut<'_> {
-        EntryMut {
-            database,
-            id,
-            history_index,
-        }
-    }
-
-    /// Gets an [EntryMut] to a historical version of the [Entry], if it exists
-    pub(crate) fn historical(&mut self, index: usize) -> Option<EntryMut<'_>> {
-        if index < self.history.as_ref()?.entries.len() {
-            Some(EntryMut {
-                database: self.database,
-                id: self.id,
-                history_index: Some(index),
-            })
-        } else {
-            None
-        }
+        EntryMut { database, id }
     }
 
     /// Get an immutable reference to the entry.
@@ -381,7 +348,7 @@ impl EntryMut<'_> {
         EntryRef {
             database: self.database,
             id: self.id,
-            history_index: self.history_index,
+            history_id: None,
         }
     }
 
@@ -461,7 +428,7 @@ impl EntryMut<'_> {
     pub fn add_attachment(&mut self, name: impl Into<String>, data: Value<Vec<u8>>) -> AttachmentMut<'_> {
         let id = AttachmentId::next_free(self.database);
 
-        let entries: HashSet<(EntryId, Option<usize>)> = vec![(self.id, None)].into_iter().collect();
+        let entries: HashSet<(EntryId, Option<NaiveDateTime>)> = vec![(self.id, None)].into_iter().collect();
 
         self.database
             .attachments
@@ -476,31 +443,14 @@ impl EntryMut<'_> {
     }
 
     /// Remove an attachment by name from this entry.
-    ///
-    /// If it was the last reference to the attachment, remove it from the database.
     pub fn remove_attachment_by_name(&mut self, name: &str) {
-        let id = self.id;
-
-        // remove the attachment reference from this entry
         if let Some(attachment_id) = self.attachments.remove(name) {
-            if let Some(mut attachment) = self.database.attachment_mut(attachment_id) {
-                attachment.entries.retain(|&(entry_id, _)| entry_id != id);
-
-                // if this was the last entry referencing the attachment, remove it from the database
-                if attachment.entries.is_empty() {
-                    attachment.remove();
-                }
-            }
+            self.remove_attachment(attachment_id);
         }
     }
 
     /// Remove an attachment by id from this entry.
-    ///
-    /// If it was the last reference to the attachment, remove it from the database.
     pub fn remove_attachment_by_id(&mut self, attachment_id: AttachmentId) {
-        let id = self.id;
-
-        // remove the attachment reference from this entry
         let mut names_to_remove = Vec::new();
         for (name, &att_id) in &self.attachments {
             if att_id == attachment_id {
@@ -512,27 +462,25 @@ impl EntryMut<'_> {
             self.attachments.remove(&name);
         }
 
-        if let Some(mut attachment) = self.database.attachment_mut(attachment_id) {
-            attachment.entries.retain(|&(entry_id, _)| entry_id != id);
+        self.remove_attachment(attachment_id);
+    }
 
-            // if this was the last entry referencing the attachment, remove it from the database
-            if attachment.entries.is_empty() {
-                attachment.remove();
-            }
+    /// Remove attachment references from the database for the current entry.
+    fn remove_attachment(&mut self, attachment_id: AttachmentId) {
+        if let Some(mut attachment) = self.database.attachment_mut(attachment_id) {
+            let id = self.id;
+            attachment.entries.retain(|&(entry_id, _)| entry_id != id);
         }
     }
 
     /// Remove the icon from this entry, if it exists.
     pub fn set_icon_none(&mut self) {
-        let id = self.id;
-        let history_index = self.history_index;
-
         if let Some(Icon::Custom(custom_icon_id)) = self.icon {
             // if this entry had a custom icon, remove this entry from the icon's reference list
             if let Some(mut custom_icon) = self.database.custom_icon_mut(custom_icon_id) {
-                custom_icon.entries.retain(|&(entry_id, entry_history_index)| {
-                    !(entry_id == id && entry_history_index == history_index)
-                });
+                let id = self.id;
+
+                custom_icon.entries.retain(|&(entry_id, _)| entry_id != id);
             }
         }
 
@@ -550,14 +498,13 @@ impl EntryMut<'_> {
         self.set_icon_none();
 
         let id = self.id;
-        let history_index = self.history_index;
 
         let mut custom_icon = self
             .database
             .custom_icon_mut(custom_icon_id)
             .ok_or(CustomIconNotFoundError(custom_icon_id))?;
 
-        custom_icon.entries.insert((id, history_index));
+        custom_icon.entries.insert((id, None));
 
         self.icon = Some(Icon::Custom(custom_icon_id));
 
@@ -572,13 +519,12 @@ impl EntryMut<'_> {
         let custom_icon_id = CustomIconId::new();
 
         let id = self.id;
-        let history_index = self.history_index;
 
         self.database.custom_icons.insert(
             custom_icon_id,
             CustomIcon {
                 id: custom_icon_id,
-                entries: vec![(id, history_index)].into_iter().collect(),
+                entries: vec![(id, None)].into_iter().collect(),
                 groups: HashSet::new(),
                 name: None,
                 last_modification_time: Some(Times::now()),
@@ -634,16 +580,15 @@ impl EntryMut<'_> {
     pub fn remove(mut self) {
         let id = self.id;
 
-        // remove this entry's back-reference from its custom icon (if any)
-        self.set_icon_none();
+        // remove references to this entry from constom icon
+        self.database.foreach_custom_icon_mut(|mut icon| {
+            icon.entries.retain(|&(entry_id, _)| entry_id != id);
 
-        // also remove back-references for any historical versions that have a custom icon
-        let history_len = self.history.as_ref().map_or(0, |h| h.entries.len());
-        for i in 0..history_len {
-            if let Some(mut hist_entry) = self.historical(i) {
-                hist_entry.set_icon_none();
+            // if this was the last entry referencing the attachment, remove it from the database
+            if icon.entries.is_empty() && icon.groups.is_empty() {
+                icon.remove().unwrap();
             }
-        }
+        });
 
         // remove references to this entry from attachments
         self.foreach_attachment_mut(|mut attachment| {
@@ -651,7 +596,7 @@ impl EntryMut<'_> {
 
             // if this was the last entry referencing the attachment, remove it from the database
             if attachment.entries.is_empty() {
-                attachment.remove();
+                attachment.remove().unwrap();
             }
         });
 
@@ -678,12 +623,13 @@ impl EntryMut<'_> {
 
     /// Clean entry history
     pub fn cleanup(mut self) -> () {
+        // TODO: 清除附件和自定义图标引用
         let history_max_items = self.database.meta.history_max_items.unwrap_or(-1);
         let history_max_size = self.database.meta.history_max_size.unwrap_or(-1);
 
         if history_max_items > -1 {
             if let Some(history) = self.history.as_mut() {
-                history.entries.truncate(history_max_items as usize);
+                history.truncate(history_max_items as usize);
             }
         }
 
@@ -698,9 +644,8 @@ impl EntryMut<'_> {
                     .count()
             });
 
-
             if let Some((len, history)) = len.zip(self.history.as_mut()) {
-                history.entries.truncate(len);
+                history.truncate(len);
             }
         }
     }
@@ -719,13 +664,7 @@ impl Deref for EntryMut<'_> {
         // UNWRAP safety: EntryMut can only be constructed with a valid EntryId
         let entry = self.database.entries.get(&self.id).expect("Entry not found");
 
-        if let Some(n) = self.history_index {
-            // UNWRAP safety: history existence checked on EntryMut creation
-            #[allow(clippy::unwrap_used, clippy::indexing_slicing)]
-            &entry.history.as_ref().unwrap().entries[n]
-        } else {
-            entry
-        }
+        entry
     }
 }
 
@@ -735,13 +674,7 @@ impl DerefMut for EntryMut<'_> {
         // UNWRAP safety: EntryMut can only be constructed with a valid EntryId
         let entry = self.database.entries.get_mut(&self.id).expect("Entry not found");
 
-        if let Some(n) = self.history_index {
-            // UNWRAP safety: history existence checked on EntryMut creation
-            #[allow(clippy::unwrap_used, clippy::indexing_slicing)]
-            &mut entry.history.as_mut().unwrap().entries[n]
-        } else {
-            entry
-        }
+        entry
     }
 }
 
@@ -765,7 +698,6 @@ impl EntryTrack<'_> {
         EntryMut {
             database: self.database,
             id: self.id,
-            history_index: None,
         }
     }
 
@@ -856,13 +788,12 @@ impl EntryTrack<'_> {
         let custom_icon_id = CustomIconId::new();
 
         let id = self.id;
-        let history_index = self.as_mut().history_index;
 
         self.database.custom_icons.insert(
             custom_icon_id,
             CustomIcon {
                 id: custom_icon_id,
-                entries: vec![(id, history_index)].into_iter().collect(),
+                entries: vec![(id, None)].into_iter().collect(),
                 groups: HashSet::new(),
                 name: None,
                 last_modification_time: Some(Times::now()),
@@ -937,7 +868,13 @@ mod tests {
         assert_eq!(db.num_entries(), 1);
 
         assert_eq!(
-            db.entry(entry_id).unwrap().history.clone().unwrap().entries.len(),
+            db.entry(entry_id)
+                .unwrap()
+                .history
+                .clone()
+                .unwrap()
+                .get_entries()
+                .len(),
             0
         );
 
@@ -956,7 +893,13 @@ mod tests {
         assert_eq!(db.num_attachments(), 1);
         assert_eq!(db.num_entries(), 1);
         assert_eq!(
-            db.entry(entry_id).unwrap().history.clone().unwrap().entries.len(),
+            db.entry(entry_id)
+                .unwrap()
+                .history
+                .clone()
+                .unwrap()
+                .get_entries()
+                .len(),
             1
         );
 

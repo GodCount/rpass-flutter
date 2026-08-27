@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use crate::format::xml_db::tags::join_tags;
 use crate::{
     crypt::{ciphers::Cipher, CryptographyError},
-    db::{AttachmentId, Color, EntryId, EntryMut, GroupId},
+    db::{AttachmentId, Color, EntryId, GroupId},
     format::xml_db::{
         custom_serde::{cs_bool, cs_opt_bool, cs_opt_fromstr, cs_opt_string},
         meta::CustomData,
@@ -81,7 +81,7 @@ pub struct Entry {
 impl Entry {
     pub(crate) fn xml_to_db_handle(
         self,
-        mut target: crate::db::EntryMut<'_>,
+        target: &mut crate::db::Entry,
         attachments: &HashMap<crate::db::AttachmentId, crate::db::Attachment>,
         custom_icons: &HashMap<crate::db::CustomIconId, crate::db::CustomIcon>,
         inner_decryptor: &mut dyn Cipher,
@@ -126,21 +126,20 @@ impl Entry {
         target.autotype = self.auto_type.map(|at| at.into());
 
         if let Some(h) = self.history {
-            target.history = Some(crate::db::History { entries: Vec::new() });
+            let mut history = crate::db::History::new();
 
-            for (i, e) in h.entries.into_iter().enumerate() {
+            for e in h.entries {
                 let id = EntryId::from_uuid(e.uuid.0);
 
                 let mut he = crate::db::Entry::with_id(id, target.parent);
                 he.history = None; // history entries cannot have their own history
 
-                if let Some(h) = target.history.as_mut() {
-                    h.entries.push(he);
-                }
+                e.xml_to_db_handle(&mut he, attachments, custom_icons, inner_decryptor)?;
 
-                let historical = EntryMut::new_historical(target.database_mut(), id, Some(i));
-                e.xml_to_db_handle(historical, attachments, custom_icons, inner_decryptor)?;
+                history.add_entry(he);
             }
+
+            target.history = Some(history);
         }
 
         if let Some(cd) = self.custom_data {
@@ -156,17 +155,17 @@ impl Entry {
 
     #[cfg(feature = "save_kdbx4")]
     pub(crate) fn db_to_xml(
-        db: crate::db::EntryRef<'_>,
+        entry: &crate::db::Entry,
         inner_encryptor: &mut dyn Cipher,
     ) -> Result<Self, CryptographyError> {
-        let (icon_id, custom_icon_uuid) = match db.icon {
+        let (icon_id, custom_icon_uuid) = match entry.icon {
             Some(crate::db::Icon::Custom(cid)) => (None, Some(UUID(cid.uuid()))),
             Some(crate::db::Icon::BuiltIn(i)) => (Some(i), None),
             _ => (None, None),
         };
 
-        let mut string_fields = Vec::with_capacity(db.fields.len());
-        for (k, v) in &db.fields {
+        let mut string_fields = Vec::with_capacity(entry.fields.len());
+        for (k, v) in &entry.fields {
             let value = if v.is_protected() {
                 let encrypted = inner_encryptor.encrypt(v.get().as_bytes())?;
                 let encoded = base64_engine::STANDARD.encode(&encrypted);
@@ -188,8 +187,8 @@ impl Entry {
             });
         }
 
-        let mut binary_fields = Vec::with_capacity(db.attachments.len());
-        for (key, attachment) in &db.attachments {
+        let mut binary_fields = Vec::with_capacity(entry.attachments.len());
+        for (key, attachment) in &entry.attachments {
             binary_fields.push(BinaryField {
                 key: key.clone(),
                 value: BinaryValue {
@@ -198,9 +197,11 @@ impl Entry {
             });
         }
 
-        let history = if let Some(h) = db.history.as_ref() {
-            let entries = (0..h.entries.len())
-                .filter_map(|i| Some(Entry::db_to_xml(db.historical(i)?, inner_encryptor)))
+        let history = if let Some(h) = entry.history.as_ref() {
+            let entries = h
+                .get_entries()
+                .iter()
+                .filter_map(|item| Some(Entry::db_to_xml(item, inner_encryptor)))
                 .collect::<Result<Vec<_>, CryptographyError>>()?;
 
             Some(History { entries })
@@ -208,28 +209,28 @@ impl Entry {
             None
         };
 
-        let custom_data: Option<CustomData> = if db.custom_data.is_empty() {
+        let custom_data: Option<CustomData> = if entry.custom_data.is_empty() {
             None
         } else {
-            Some(db.custom_data.clone().into())
+            Some(entry.custom_data.clone().into())
         };
 
         Ok(Entry {
-            uuid: UUID(db.id().uuid()),
+            uuid: UUID(entry.id().uuid()),
             icon_id,
             custom_icon_uuid,
-            foreground_color: db.foreground_color.clone(),
-            background_color: db.background_color.clone(),
-            override_url: db.override_url.clone(),
-            tags: join_tags(&db.tags),
-            times: Some(db.times.clone().into()),
+            foreground_color: entry.foreground_color.clone(),
+            background_color: entry.background_color.clone(),
+            override_url: entry.override_url.clone(),
+            tags: join_tags(&entry.tags),
+            times: Some(entry.times.clone().into()),
             string_fields,
             binary_fields,
-            auto_type: db.autotype.as_ref().map(|at| at.clone().into()),
+            auto_type: entry.autotype.as_ref().map(|at| at.clone().into()),
             history,
             custom_data,
-            quality_check: Some(db.quality_check),
-            previous_parent_group: db.previous_parent_group.map(|g| UUID(g.uuid())),
+            quality_check: Some(entry.quality_check),
+            previous_parent_group: entry.previous_parent_group.map(|g| UUID(g.uuid())),
         })
     }
 }

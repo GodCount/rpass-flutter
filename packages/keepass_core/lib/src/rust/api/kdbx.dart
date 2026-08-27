@@ -68,7 +68,7 @@ abstract class Kdbx implements RustOpaqueInterface {
 
   Future<CustomDataItem?> getCustomData({required String key, String? id});
 
-  Future<EntryData> getEntry({required String id, int? historyIndex});
+  Future<EntryData> getEntry({required String id, DateTime? historyId});
 
   Future<List<EntryData>> getEntryHistorys({required String id});
 
