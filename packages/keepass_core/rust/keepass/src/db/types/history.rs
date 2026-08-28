@@ -45,8 +45,12 @@ impl History {
     }
 
     /// Truncate history entries length
-    pub(crate) fn truncate(&mut self, len: usize) {
-        self.entries.truncate(len);
+    pub(crate) fn truncate(&mut self, len: usize) -> Vec<Entry> {
+        if len < self.entries.len() {
+            self.entries.drain(len..).collect()
+        } else {
+            vec![]
+        }
     }
 
     pub(crate) fn calculate_sizes(&self, db: &Database) -> Vec<usize> {

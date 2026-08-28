@@ -158,11 +158,11 @@ impl KeePassFile {
         db.attachments = attachments;
         db.custom_icons = custom_icons;
 
-        // Re-populate CustomIcon back-reference sets.
+        // Re-populate CustomIcon and Attachment back-reference sets.
         //
         // The XML parser creates CustomIcon values with empty `entries` and `groups` sets
         // because icon data and entry/group data live in separate parts of the XML file.
-        // We perform a single pass here to reconstruct all back-references from the icon
+        // We perform a single pass here to reconstruct all back-references from the icon and attachment
         // fields that were already set on each entry and group during xml_to_db_handle.
         let entry_ids: Vec<crate::db::EntryId> = db.entries.keys().copied().collect();
         for entry_id in entry_ids {
@@ -186,13 +186,16 @@ impl KeePassFile {
                             if let Some(icon) = db.custom_icons.get_mut(icon_id) {
                                 // The final modification time should always exist, but unauthorized modifications may occur.
                                 // A loophole is buried here.
-                                icon.entries.insert((entry_id, item.times.last_modification.clone()));
+                                icon.entries
+                                    .insert((entry_id, item.times.last_modification.clone()));
                             }
                         }
 
                         for attach_id in entry.attachments.values() {
                             if let Some(attachment) = db.attachments.get_mut(attach_id) {
-                                attachment.entries.insert((entry_id, item.times.last_modification.clone()));
+                                attachment
+                                    .entries
+                                    .insert((entry_id, item.times.last_modification.clone()));
                             }
                         }
                     }
@@ -314,7 +317,9 @@ pub struct DeletedObject {
 #[cfg(test)]
 mod tests {
 
-    use super::*;
+    use crate::db::AttachmentId;
+
+use super::*;
 
     #[derive(Serialize, Deserialize)]
     struct Test<T>(T);
@@ -383,5 +388,35 @@ mod tests {
         let kdbx = KeePassFile::db_to_xml(&db, &mut *cipher).unwrap();
         let xml = quick_xml::se::to_string_with_root("DeletedObjects", &kdbx.root.deleted_objects).unwrap();
         assert!(xml.contains("<DeletionTime>io8Y4g4AAAA=</DeletionTime>"));
+    }
+
+    #[test]
+    fn test_xml_to_db_attachments_back_reference() {
+        let xml = r#"<KeePassFile>
+            <Meta></Meta>
+            <Root>
+               <Group>
+                 <UUID>tP/vJ/3uSHyomfPZ4dXVlg==</UUID><Name></Name>
+                 <Entry>
+                   <UUID>i8NatFz/SdeEcUBl+NnWnQ==</UUID>
+                     <Binary>
+                       <Key>doc.txt</Key>
+                       <Value Ref="0"/>
+                     </Binary>
+                 </Entry>
+               </Group>
+            </Root>
+        </KeePassFile>"#;
+
+        let mut cipher = crate::config::InnerCipherConfig::Plain.get_cipher(&[]).unwrap();
+        let db = parse_xml(
+            xml.as_bytes(),
+            &[Value::Unprotected(vec![1, 0, 0, 8, 6])],
+            &mut *cipher,
+        )
+        .unwrap();
+
+        assert_eq!(db.num_attachments(), 1);
+        assert_eq!(db.attachment(AttachmentId::new(0)).unwrap().entries.len(), 1);
     }
 }

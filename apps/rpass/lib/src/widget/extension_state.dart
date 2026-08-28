@@ -260,6 +260,7 @@ extension StatefulBottomSheet on State {
     String? title,
     List<Widget>? actions,
     required List<Widget> children,
+    Widget? emptyPlaceholder,
   }) {
     showBottomSheetView(
       context: context,
@@ -277,7 +278,14 @@ extension StatefulBottomSheet on State {
               actionsPadding: const EdgeInsets.only(right: 16),
               actions: actions,
             ),
-            ListView(shrinkWrap: true, children: children),
+            if (emptyPlaceholder != null)
+              Expanded(
+                child: children.isNotEmpty
+                    ? ListView(shrinkWrap: true, children: children)
+                    : emptyPlaceholder,
+              ),
+            if (emptyPlaceholder == null)
+              ListView(shrinkWrap: true, children: children),
           ],
         );
       },

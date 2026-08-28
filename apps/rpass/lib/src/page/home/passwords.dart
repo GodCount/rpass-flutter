@@ -103,6 +103,45 @@ class _PasswordsPageState extends State<PasswordsPage>
     }
   }
 
+  void _entryTemplates(ValueChanged<(String?, String?)> onCallback) async {
+    final templatesGroup = Store.kdbx.meta?.entryTemplatesGroup;
+    if (templatesGroup == null) return;
+
+    try {
+      final templates = await Store.kdbx.kdbx!.getEntrys(
+        groupId: templatesGroup,
+      );
+
+      showBottomSheetList(
+        title: "模版",
+        actions: [
+          IconButton(
+            tooltip: "添加模版",
+            onPressed: () {
+              context.router.pop();
+              onCallback((null, templatesGroup));
+            },
+            icon: const Icon(Icons.add),
+          ),
+        ],
+        children: templates.map((item) {
+          return ListTile(
+            title: Text(item.getLabel()),
+            onTap: () {
+              context.router.pop();
+              onCallback((item.id, Store.kdbx.rootGroup().id));
+            },
+          );
+        }).toList(),
+        emptyPlaceholder: Center(
+          child: Opacity(opacity: .5, child: Text("模版组是空的")),
+        ),
+      );
+    } catch (e, s) {
+      showError(e, s);
+    }
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -136,6 +175,9 @@ class _PasswordsPageState extends State<PasswordsPage>
 
     final mainColor = Theme.of(context).colorScheme.primaryContainer;
 
+    String? templateId;
+    String? defaultGroupId;
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -168,7 +210,11 @@ class _PasswordsPageState extends State<PasswordsPage>
         closedColor: mainColor,
         middleColor: mainColor,
         openBuilder: (BuildContext context, VoidCallback _) {
-          return const EditAccountPage();
+          return EditAccountPage(
+            id: templateId,
+            defaultGroupId: defaultGroupId,
+            clone: true,
+          );
         },
         closedElevation: 6.0,
         closedShape: const RoundedRectangleBorder(
@@ -178,7 +224,17 @@ class _PasswordsPageState extends State<PasswordsPage>
           return SizedBox(
             width: 56,
             height: 56,
-            child: InkWell(onTap: openContainer, child: const Icon(Icons.add)),
+            child: InkWell(
+              onTap: openContainer,
+              onLongPress: () {
+                _entryTemplates((value) {
+                  templateId = value.$1;
+                  defaultGroupId = value.$2;
+                  openContainer();
+                });
+              },
+              child: const Icon(Icons.add),
+            ),
           );
         },
       ),
@@ -249,6 +305,17 @@ class _PasswordsPageState extends State<PasswordsPage>
           IconButton(
             onPressed: () {
               context.router.platformNavigate(EditAccountRoute());
+            },
+            onLongPress: () {
+              _entryTemplates((value) {
+                context.router.platformNavigate(
+                  EditAccountRoute(
+                    id: value.$1,
+                    defaultGroupId: value.$2,
+                    clone: true,
+                  ),
+                );
+              });
             },
             icon: const Icon(Icons.add),
           ),

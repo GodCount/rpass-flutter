@@ -64,6 +64,11 @@ impl Attachment {
     pub fn id(&self) -> AttachmentId {
         self.id
     }
+
+    /// Get entries
+    pub fn get_entries(&self) -> &HashSet<(EntryId, Option<NaiveDateTime>)> {
+        &self.entries
+    }
 }
 
 impl Deref for Attachment {

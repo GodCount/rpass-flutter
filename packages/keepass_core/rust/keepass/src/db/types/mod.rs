@@ -296,7 +296,7 @@ impl Database {
         let history_max_size = self.meta.history_max_size.unwrap_or(-1);
 
         if history_max_items > -1 || history_max_size > -1 {
-            self.foreach_entry_mut(|entry| {
+            self.foreach_entry_mut(|mut entry| {
                 entry.cleanup();
             });
         }

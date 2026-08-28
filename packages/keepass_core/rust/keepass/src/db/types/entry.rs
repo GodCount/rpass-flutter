@@ -468,8 +468,8 @@ impl EntryMut<'_> {
     /// Remove attachment references from the database for the current entry.
     fn remove_attachment(&mut self, attachment_id: AttachmentId) {
         if let Some(mut attachment) = self.database.attachment_mut(attachment_id) {
-            let id = self.id;
-            attachment.entries.retain(|&(entry_id, _)| entry_id != id);
+            let id = (self.id, None);
+            attachment.entries.retain(|&item| item != id);
         }
     }
 
@@ -478,9 +478,9 @@ impl EntryMut<'_> {
         if let Some(Icon::Custom(custom_icon_id)) = self.icon {
             // if this entry had a custom icon, remove this entry from the icon's reference list
             if let Some(mut custom_icon) = self.database.custom_icon_mut(custom_icon_id) {
-                let id = self.id;
+                let id = (self.id, None);
 
-                custom_icon.entries.retain(|&(entry_id, _)| entry_id != id);
+                custom_icon.entries.retain(|&item| item != id);
             }
         }
 
@@ -582,6 +582,7 @@ impl EntryMut<'_> {
 
         // remove references to this entry from constom icon
         self.database.foreach_custom_icon_mut(|mut icon| {
+            // Delete entries, history can be ignored
             icon.entries.retain(|&(entry_id, _)| entry_id != id);
 
             // if this was the last entry referencing the attachment, remove it from the database
@@ -592,6 +593,7 @@ impl EntryMut<'_> {
 
         // remove references to this entry from attachments
         self.foreach_attachment_mut(|mut attachment| {
+            // Delete entries, history can be ignored
             attachment.entries.retain(|&(entry_id, _)| entry_id != id);
 
             // if this was the last entry referencing the attachment, remove it from the database
@@ -622,30 +624,55 @@ impl EntryMut<'_> {
     }
 
     /// Clean entry history
-    pub fn cleanup(mut self) -> () {
-        // TODO: 清除附件和自定义图标引用
+    pub fn cleanup(&mut self) -> () {
         let history_max_items = self.database.meta.history_max_items.unwrap_or(-1);
         let history_max_size = self.database.meta.history_max_size.unwrap_or(-1);
 
+        let mut removed: Vec<Entry> = Vec::new();
+
         if history_max_items > -1 {
             if let Some(history) = self.history.as_mut() {
-                history.truncate(history_max_items as usize);
+                removed.extend(history.truncate(history_max_items as usize));
             }
         }
 
         if history_max_size > -1 {
             let history_max_size = history_max_size as usize;
 
-            let len = self.history.as_ref().map(|item| {
-                item.calculate_sizes(self.database)
-                    .into_iter()
-                    .scan(0, |acc, x| Some(*acc + x))
-                    .take_while(|&s| s <= history_max_size)
-                    .count()
+            let len = self.history.as_ref().and_then(|item| {
+                let sizes = item.calculate_sizes(self.database);
+                let len = sizes.len();
+                let mut acc = 0;
+
+                for i in 0..len {
+                    acc += sizes[i];
+
+                    if acc > history_max_size {
+                        return Some(i);
+                    }
+                }
+
+                None
             });
 
             if let Some((len, history)) = len.zip(self.history.as_mut()) {
-                history.truncate(len);
+                removed.extend(history.truncate(len));
+            }
+        }
+
+        // Clear backreferences for attachments and icons
+        for item in removed {
+            let entry_id = (item.id, item.times.last_modification);
+            if let Some(Icon::Custom(id)) = item.icon {
+                if let Some(mut icon) = self.database.custom_icon_mut(id) {
+                    icon.entries.retain(|item| item != &entry_id);
+                }
+            }
+
+            for attach_id in item.attachments.into_values() {
+                if let Some(mut attach) = self.database.attachment_mut(attach_id) {
+                    attach.entries.retain(|item| item != &entry_id);
+                }
             }
         }
     }
@@ -830,7 +857,24 @@ impl Drop for EntryTrack<'_> {
             let parent_id = entry.parent;
             let historical = std::mem::replace(&mut self.historical, Entry::new(parent_id));
 
+            // This is a new history, set its backreference
+            if let Some(Icon::Custom(id)) = historical.icon {
+                if let Some(mut icon) = entry.database.custom_icon_mut(id) {
+                    icon.entries
+                        .insert((historical.id, historical.times.last_modification));
+                }
+            }
+
+            for attach_id in historical.attachments.values() {
+                if let Some(mut attach) = entry.database.attachment_mut(*attach_id) {
+                    attach
+                        .entries
+                        .insert((historical.id, historical.times.last_modification));
+                }
+            }
+
             entry.history.get_or_insert_default().add_entry(historical);
+
             entry.cleanup();
         }
     }

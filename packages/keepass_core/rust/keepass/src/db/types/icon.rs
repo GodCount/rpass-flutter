@@ -74,6 +74,16 @@ impl CustomIcon {
     pub fn id(&self) -> CustomIconId {
         self.id
     }
+
+    /// Get entries
+    pub fn get_entries(&self) -> &HashSet<(EntryId, Option<NaiveDateTime>)> {
+        &self.entries
+    }
+
+    /// Get group
+    pub fn get_groups(&self) -> &HashSet<GroupId> {
+        &self.groups
+    }
 }
 
 impl Deref for CustomIcon {

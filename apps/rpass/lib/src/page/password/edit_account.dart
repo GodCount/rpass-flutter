@@ -32,11 +32,15 @@ class _EditAccountArgs extends PageRouteArgs {
 }
 
 class EditAccountRoute extends PageRouteInfo<_EditAccountArgs> {
-  EditAccountRoute({Key? key, String? id, bool? clone})
+  EditAccountRoute({Key? key, String? id, bool? clone, String? defaultGroupId})
     : super(
         name,
         args: _EditAccountArgs(key: key),
-        rawPathParams: {"uuid": id, "clone": clone.toString()},
+        rawPathParams: {"uuid": id},
+        rawQueryParams: {
+          "clone": clone.toString(),
+          "defaultGroupId": defaultGroupId,
+        },
       );
 
   static const name = "EditAccountRoute";
@@ -49,18 +53,30 @@ class EditAccountRoute extends PageRouteInfo<_EditAccountArgs> {
       );
 
       final uuid = data.inheritedPathParams.optString("uuid");
-      final clone = data.inheritedPathParams.optBool("clone");
+      final clone = data.queryParams.optBool("clone");
+      final defaultGroupId = data.queryParams.optString("defaultGroupId");
 
-      return EditAccountPage(key: args.key, id: uuid, clone: clone ?? false);
+      return EditAccountPage(
+        key: args.key,
+        id: uuid,
+        clone: clone ?? false,
+        defaultGroupId: defaultGroupId,
+      );
     },
   );
 }
 
 class EditAccountPage extends StatefulWidget {
-  const EditAccountPage({super.key, this.id, this.clone = false});
+  const EditAccountPage({
+    super.key,
+    this.id,
+    this.clone = false,
+    this.defaultGroupId,
+  });
 
   final String? id;
   final bool clone;
+  final String? defaultGroupId;
 
   @override
   State<EditAccountPage> createState() => _EditAccountPageState();
@@ -89,7 +105,10 @@ class _EditAccountPageState extends State<EditAccountPage>
   @override
   void didUpdateWidget(covariant EditAccountPage oldWidget) {
     /// 触发整个 form 表进行重建
-    if (widget.id != oldWidget.id) {
+    if (widget.id != oldWidget.id ||
+        (widget.id != null && widget.clone != oldWidget.clone) ||
+        (widget.id == null &&
+            widget.defaultGroupId != oldWidget.defaultGroupId)) {
       _getKdbxEntry();
     }
     super.didUpdateWidget(oldWidget);
@@ -115,8 +134,10 @@ class _EditAccountPageState extends State<EditAccountPage>
       }
 
       _groupData =
-          kdbxController.getGroup(_kdbxEntry.parent) ??
+          kdbxController.getGroup(widget.defaultGroupId ?? _kdbxEntry.parent) ??
           kdbxController.rootGroup();
+
+      _kdbxEntry.parent = _groupData.id;
 
       _entryFields = _kdbxEntry.customEntries.map((item) => item.key).toSet();
       _urlsFields = _kdbxEntry.moreUrlsKeys.toSet();
