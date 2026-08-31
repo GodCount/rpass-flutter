@@ -8,6 +8,7 @@ use crate::{
 
 use byteorder::{ByteOrder, LittleEndian};
 use thiserror::Error;
+use zeroize::Zeroize;
 
 use std::{collections::HashMap, convert::TryFrom};
 
@@ -420,7 +421,7 @@ pub(crate) fn parse_kdb(data: &[u8], db_key: &DatabaseKey) -> Result<Database, D
 
     // Decrypt payload
     #[allow(clippy::expect_used)] // master key is fixed-length, should never fail
-    let payload_padded = outer_cipher_config
+    let mut payload_padded = outer_cipher_config
         .get_cipher(&master_key, header.encryption_iv.as_ref())
         .expect("Database key correctly derived")
         .decrypt(payload_encrypted)?;
@@ -455,6 +456,9 @@ pub(crate) fn parse_kdb(data: &[u8], db_key: &DatabaseKey) -> Result<Database, D
 
     let gid_map = parse_groups(&mut db, header.num_groups, &mut pos)?;
     parse_entries(&mut db, gid_map, header.num_entries, &mut pos)?;
+
+    // Set plaintext data to zero
+    payload_padded.zeroize();
 
     Ok(db)
 }

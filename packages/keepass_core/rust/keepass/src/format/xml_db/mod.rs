@@ -60,9 +60,7 @@ pub fn to_xml(
     inner_encryptor: &mut dyn Cipher,
 ) -> Result<(Vec<u8>, Vec<crate::db::Value<Vec<u8>>>), DatabaseSaveError> {
     let kdbx = KeePassFile::db_to_xml(db, inner_encryptor)?;
-    let xml = quick_xml::se::to_string_with_root("KeePassFile", &kdbx)?
-        .as_bytes()
-        .to_vec();
+    let xml = quick_xml::se::to_string_with_root("KeePassFile", &kdbx)?.into_bytes();
 
     let mut attachments: Vec<(usize, Value<Vec<u8>>)> = db
         .attachments
@@ -319,7 +317,7 @@ mod tests {
 
     use crate::db::AttachmentId;
 
-use super::*;
+    use super::*;
 
     #[derive(Serialize, Deserialize)]
     struct Test<T>(T);

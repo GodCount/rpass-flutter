@@ -1,6 +1,7 @@
 use std::io::Write;
 
 use byteorder::{LittleEndian, WriteBytesExt};
+use zeroize::Zeroize;
 
 use crate::{
     crypt,
@@ -108,6 +109,8 @@ pub fn dump_kdbx4(
         .compression_config
         .get_compression()
         .compress(&payload)?;
+
+    payload.zeroize();
 
     let payload_encrypted = db
         .config

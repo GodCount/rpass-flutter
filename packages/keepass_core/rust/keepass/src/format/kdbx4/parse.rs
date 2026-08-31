@@ -4,6 +4,7 @@ use std::convert::{TryFrom, TryInto};
 
 use byteorder::{ByteOrder, LittleEndian};
 use thiserror::Error;
+use zeroize::Zeroize;
 
 use crate::{
     config::{CompressionConfig, DatabaseConfig, InnerCipherConfig, KdfConfig, OuterCipherConfig},
@@ -27,10 +28,13 @@ use super::KDBX4InnerHeader;
 
 /// Open, decrypt and parse a KeePass database from a source and key elements
 pub(crate) fn parse_kdbx4(data: &[u8], db_key: &DatabaseKey) -> Result<Database, DatabaseOpenError> {
-    let (config, header_attachments, mut inner_decryptor, xml) = decrypt_kdbx4(data, db_key)?;
+    let (config, header_attachments, mut inner_decryptor, mut xml) = decrypt_kdbx4(data, db_key)?;
 
     let mut db = crate::format::xml_db::parse_xml(&xml, &header_attachments, &mut *inner_decryptor)
         .map_err(|e| DatabaseOpenError::Format(DatabaseFormatError::Kdbx4(Kdbx4OpenError::Xml(e))))?;
+
+    // Set plaintext data to zero
+    xml.zeroize();
 
     db.config = config;
 
@@ -115,7 +119,7 @@ pub(crate) fn decrypt_kdbx4(
         .get_cipher(&master_key, &outer_header.outer_iv)?
         .decrypt(&payload_encrypted)?;
 
-    let payload = outer_header
+    let mut payload = outer_header
         .compression_config
         .get_compression()
         .decompress(&payload_compressed)?;
@@ -127,7 +131,8 @@ pub(crate) fn decrypt_kdbx4(
     // after inner header is one XML document
     let xml = payload
         .get(body_start..)
-        .ok_or(DatabaseOpenError::UnexpectedEof)?;
+        .ok_or(DatabaseOpenError::UnexpectedEof)?
+        .to_vec();
 
     // initialize the inner decryptor
     let inner_decryptor = inner_header
@@ -143,7 +148,9 @@ pub(crate) fn decrypt_kdbx4(
         public_custom_data: outer_header.public_custom_data,
     };
 
-    Ok((config, header_attachments, inner_decryptor, xml.to_vec()))
+    payload.zeroize();
+
+    Ok((config, header_attachments, inner_decryptor, xml))
 }
 
 fn parse_outer_header(data: &[u8]) -> Result<(KDBX4OuterHeader, usize), Kdbx4OuterHeaderError> {

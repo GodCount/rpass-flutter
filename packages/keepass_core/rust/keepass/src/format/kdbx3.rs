@@ -8,6 +8,7 @@ use crate::{
 
 use byteorder::{ByteOrder, LittleEndian};
 use thiserror::Error;
+use zeroize::Zeroize;
 
 use std::convert::TryFrom;
 
@@ -184,11 +185,14 @@ pub enum Kdbx3OuterHeaderError {
 
 /// Open, decrypt and parse a KeePass database from a source and a password
 pub(crate) fn parse_kdbx3(data: &[u8], db_key: &DatabaseKey) -> Result<Database, DatabaseOpenError> {
-    let (config, mut inner_decryptor, xml) = decrypt_kdbx3(data, db_key)?;
+    let (config, mut inner_decryptor, mut xml) = decrypt_kdbx3(data, db_key)?;
 
     // Parse XML data blocks
     let mut db = crate::format::xml_db::parse_xml(&xml, &[], &mut *inner_decryptor)
         .map_err(|e| DatabaseOpenError::Format(DatabaseFormatError::Kdbx3(Kdbx3OpenError::Xml(e))))?;
+
+    // Set plaintext data to zero
+    xml.zeroize();
 
     db.config = config;
 
@@ -299,6 +303,8 @@ pub(crate) fn decrypt_kdbx3(
     }
 
     let xml = compression.decompress(&buf)?;
+
+    buf.zeroize();
 
     Ok((config, inner_decryptor, xml))
 }
