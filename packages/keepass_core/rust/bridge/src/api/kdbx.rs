@@ -157,7 +157,12 @@ impl Kdbx {
         root.name = "Default".into();
         root.times.last_modification = Some(Times::now());
 
+        database.meta.master_key_change_rec = Some(15);
+        database.meta.master_key_change_force = Some(30);
+
         Self::enable_recyclebin(&mut database);
+
+        database.meta.master_key_changed = Some(Times::now());
 
         Self {
             emit: None,

@@ -161,7 +161,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                         child: Icon(Icons.edit_document),
                       ),
                       Text(
-                        "基本配置",
+                        t.basic_config,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ],
@@ -173,7 +173,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                     initialValue: _updateMeta.databaseName,
                     onSaved: (value) => _updateMeta.databaseName = value,
                     decoration: InputDecoration(
-                      labelText: "数据库名称",
+                      labelText: t.kdbx_name,
                       border: const OutlineInputBorder(),
                       prefixIcon: Padding(
                         padding: const EdgeInsets.all(4.0),
@@ -208,7 +208,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                     onSaved: (value) => _updateMeta.defaultUsername =
                         value?.isNotEmpty == true ? value : null,
                     decoration: InputDecoration(
-                      labelText: "默认用户名",
+                      labelText: t.default_user_name,
                       border: const OutlineInputBorder(),
                     ),
                   ),
@@ -217,7 +217,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                 SelectGroupFormField(
                   noRoot: true,
                   isDelete: true,
-                  label: "模版组",
+                  label: t.template_group,
                   initialValue: _updateMeta.entryTemplatesGroup != null
                       ? Store.kdbx.getGroup(_updateMeta.entryTemplatesGroup!)
                       : null,
@@ -227,8 +227,8 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
 
                 _RangeSelectionFormField(
                   canDisable: true,
-                  label: "建议修改主密码天数",
-                  initialValue: _updateMeta.masterKeyChangeRec ?? 15,
+                  label: t.recommend_change_password_days,
+                  initialValue: _updateMeta.masterKeyChangeRec ?? -1,
                   onSaved: (value) => _updateMeta.masterKeyChangeRec = value,
                   formatText: (value) {
                     if (value == -1) {
@@ -245,8 +245,8 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                 ),
                 _RangeSelectionFormField(
                   canDisable: true,
-                  label: "强制修改主密码天数",
-                  initialValue: _updateMeta.masterKeyChangeForce ?? 30,
+                  label: t.force_change_password_days,
+                  initialValue: _updateMeta.masterKeyChangeForce ?? -1,
                   onSaved: (value) => _updateMeta.masterKeyChangeForce = value,
                   formatText: (value) {
                     if (value == -1) {
@@ -266,7 +266,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                 // TODO! 暂不考虑
                 // _RangeSelectionFormField(
                 //   canDisable: true,
-                //   label: "历史记录维护天数",
+                //   label: t.history_maintain_days,
                 //   initialValue: _updateMeta.maintenanceHistoryDays ?? -1,
                 //   onSaved: (value) => _updateMeta.maintenanceHistoryDays =
                 //       value != null && value > 0 ? value : null,
@@ -286,7 +286,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
 
                 _RangeSelectionFormField(
                   canDisable: true,
-                  label: "限制条目的历史记录数",
+                  label: t.history_max_items,
                   initialValue: _updateMeta.historyMaxItems ?? 20,
                   onSaved: (value) => _updateMeta.historyMaxItems = value,
                   formatText: (value) {
@@ -305,7 +305,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
 
                 _RangeSelectionFormField(
                   canDisable: true,
-                  label: "限制每个条目的历史记录总大小",
+                  label: t.history_max_size,
                   initialValue: _updateMeta.historyMaxSize ?? 10485760,
                   onSaved: (value) => _updateMeta.historyMaxSize = value,
                   formatText: (value) {
@@ -340,7 +340,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                         child: Icon(Icons.enhanced_encryption),
                       ),
                       Text(
-                        "加密配置",
+                        t.encrypt_config,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ],
@@ -355,7 +355,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                       DropdownMenuItem(value: .none, child: Text("None")),
                     ],
                     decoration: InputDecoration(
-                      labelText: "压缩",
+                      labelText: t.compression,
                       border: const OutlineInputBorder(),
                     ),
                     onChanged: (_) {},
@@ -378,7 +378,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                       DropdownMenuItem(value: .twofish, child: Text("Twofish")),
                     ],
                     decoration: InputDecoration(
-                      labelText: "加密算法",
+                      labelText: t.cipher,
                       border: const OutlineInputBorder(),
                     ),
                     onChanged: (_) {},
@@ -401,7 +401,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                       DropdownMenuItem(value: .plain, child: Text("Plain")),
                     ],
                     decoration: InputDecoration(
-                      labelText: "内联加密算法",
+                      labelText: t.inner_cipher,
                       border: const OutlineInputBorder(),
                     ),
                     onChanged: (_) {},
@@ -426,7 +426,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                         child: Icon(Icons.enhanced_encryption),
                       ),
                       Text(
-                        "KDF配置",
+                        t.kdf_config,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ],
@@ -467,7 +467,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                       ),
                     ],
                     decoration: InputDecoration(
-                      labelText: "密钥导出函数",
+                      labelText: t.kdf,
                       border: const OutlineInputBorder(),
                     ),
                     onChanged: (value) {
@@ -506,7 +506,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                         _rounds = max(int.tryParse(value) ?? 1, 1);
                       },
                       decoration: InputDecoration(
-                        labelText: "转换次数",
+                        labelText: t.transform_rounds,
                         border: const OutlineInputBorder(),
                       ),
                     ),
@@ -523,13 +523,13 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                         _iterations = max(int.tryParse(value) ?? 1, 1);
                       },
                       decoration: InputDecoration(
-                        labelText: "转换次数",
+                        labelText: t.transform_rounds,
                         border: const OutlineInputBorder(),
                       ),
                     ),
                   ),
                   _RangeSelectionFormField(
-                    label: "内存占用",
+                    label: t.memory_usage,
                     initialValue: _memory,
                     onChanged: (value) {
                       _memory = value ?? _memory;
@@ -550,7 +550,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                   ),
 
                   _RangeSelectionFormField(
-                    label: "并行计算",
+                    label: t.parallelism,
                     initialValue: _parallelism,
                     onChanged: (value) {
                       _parallelism = value ?? _parallelism;
@@ -575,7 +575,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                         DropdownMenuItem(value: .version13, child: Text("13")),
                       ],
                       decoration: InputDecoration(
-                        labelText: "Argon2 版本",
+                        labelText: t.argon2_version,
                         border: const OutlineInputBorder(),
                       ),
                       onChanged: (value) {

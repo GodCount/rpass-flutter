@@ -104,6 +104,7 @@ class _PasswordsPageState extends State<PasswordsPage>
   }
 
   void _entryTemplates(ValueChanged<(String?, String?)> onCallback) async {
+    final t = I18n.of(context)!;
     final templatesGroup = Store.kdbx.meta?.entryTemplatesGroup;
     if (templatesGroup == null) return;
 
@@ -113,10 +114,10 @@ class _PasswordsPageState extends State<PasswordsPage>
       );
 
       showBottomSheetList(
-        title: "模版",
+        title: t.template,
         actions: [
           IconButton(
-            tooltip: "添加模版",
+            tooltip: t.add_template,
             onPressed: () {
               context.router.pop();
               onCallback((null, templatesGroup));
@@ -134,7 +135,7 @@ class _PasswordsPageState extends State<PasswordsPage>
           );
         }).toList(),
         emptyPlaceholder: Center(
-          child: Opacity(opacity: .5, child: Text("模版组是空的")),
+          child: Opacity(opacity: .5, child: Text(t.template_group_empty)),
         ),
       );
     } catch (e, s) {

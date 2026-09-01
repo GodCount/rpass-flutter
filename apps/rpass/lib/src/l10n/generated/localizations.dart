@@ -1417,6 +1417,168 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'验证类型'**
   String get auth_type;
+
+  /// No description provided for @kdbx_password_expired.
+  ///
+  /// In zh, this message translates to:
+  /// **'数据库密码已过期！'**
+  String get kdbx_password_expired;
+
+  /// No description provided for @kdbx_password_expired_subtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'更改密码/密钥文件之前，你将不能使用'**
+  String get kdbx_password_expired_subtitle;
+
+  /// No description provided for @kdbx_password_recommend_change.
+  ///
+  /// In zh, this message translates to:
+  /// **'请更改数据库密码！'**
+  String get kdbx_password_recommend_change;
+
+  /// No description provided for @kdbx_password_recommend_change_subtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'建议你更改数据库密码/密钥文件'**
+  String get kdbx_password_recommend_change_subtitle;
+
+  /// No description provided for @template.
+  ///
+  /// In zh, this message translates to:
+  /// **'模版'**
+  String get template;
+
+  /// No description provided for @add_template.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加模版'**
+  String get add_template;
+
+  /// No description provided for @template_group_empty.
+  ///
+  /// In zh, this message translates to:
+  /// **'模版组是空的'**
+  String get template_group_empty;
+
+  /// No description provided for @basic_config.
+  ///
+  /// In zh, this message translates to:
+  /// **'基本配置'**
+  String get basic_config;
+
+  /// No description provided for @kdbx_name.
+  ///
+  /// In zh, this message translates to:
+  /// **'数据库名称'**
+  String get kdbx_name;
+
+  /// No description provided for @default_user_name.
+  ///
+  /// In zh, this message translates to:
+  /// **'默认用户名'**
+  String get default_user_name;
+
+  /// No description provided for @template_group.
+  ///
+  /// In zh, this message translates to:
+  /// **'模版组'**
+  String get template_group;
+
+  /// No description provided for @recommend_change_password_days.
+  ///
+  /// In zh, this message translates to:
+  /// **'建议修改主密码天数'**
+  String get recommend_change_password_days;
+
+  /// No description provided for @force_change_password_days.
+  ///
+  /// In zh, this message translates to:
+  /// **'强制修改主密码天数'**
+  String get force_change_password_days;
+
+  /// No description provided for @history_maintain_days.
+  ///
+  /// In zh, this message translates to:
+  /// **'历史记录维护天数'**
+  String get history_maintain_days;
+
+  /// No description provided for @history_max_items.
+  ///
+  /// In zh, this message translates to:
+  /// **'限制条目的历史记录数'**
+  String get history_max_items;
+
+  /// No description provided for @history_max_size.
+  ///
+  /// In zh, this message translates to:
+  /// **'限制每个条目的历史记录总大小'**
+  String get history_max_size;
+
+  /// No description provided for @encrypt_config.
+  ///
+  /// In zh, this message translates to:
+  /// **'加密配置'**
+  String get encrypt_config;
+
+  /// No description provided for @compression.
+  ///
+  /// In zh, this message translates to:
+  /// **'压缩'**
+  String get compression;
+
+  /// No description provided for @cipher.
+  ///
+  /// In zh, this message translates to:
+  /// **'加密算法'**
+  String get cipher;
+
+  /// No description provided for @inner_cipher.
+  ///
+  /// In zh, this message translates to:
+  /// **'内联加密算法'**
+  String get inner_cipher;
+
+  /// No description provided for @kdf_config.
+  ///
+  /// In zh, this message translates to:
+  /// **'KDF配置'**
+  String get kdf_config;
+
+  /// No description provided for @kdf.
+  ///
+  /// In zh, this message translates to:
+  /// **'密钥导出函数'**
+  String get kdf;
+
+  /// No description provided for @transform_rounds.
+  ///
+  /// In zh, this message translates to:
+  /// **'转换次数'**
+  String get transform_rounds;
+
+  /// No description provided for @memory_usage.
+  ///
+  /// In zh, this message translates to:
+  /// **'内存占用'**
+  String get memory_usage;
+
+  /// No description provided for @parallelism.
+  ///
+  /// In zh, this message translates to:
+  /// **'并行计算'**
+  String get parallelism;
+
+  /// No description provided for @argon2_version.
+  ///
+  /// In zh, this message translates to:
+  /// **'Argon2 版本'**
+  String get argon2_version;
+
+  /// No description provided for @prefer_kdbx_seed_color.
+  ///
+  /// In zh, this message translates to:
+  /// **'优先使用数据库的主题色'**
+  String get prefer_kdbx_seed_color;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

@@ -104,7 +104,7 @@ class _ChangeThemePageState extends State<ChangeThemePage>
           ),
 
           ListTile(
-            title: Text("优先使用数据库的主题色"),
+            title: Text(t.prefer_kdbx_seed_color),
             trailing: Store.settings.useKdbxSeedColor
                 ? const Icon(Icons.check)
                 : null,

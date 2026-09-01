@@ -696,7 +696,7 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               ...customFields.map(
                 (item) => ListTile(
-                  shape: shape,
+                  shape: item.key == customFields.last.key ? shape : null,
                   title: Padding(
                     padding: const EdgeInsets.only(left: 6),
                     child: Text(item.key),

@@ -696,4 +696,85 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get auth_type => '验证类型';
+
+  @override
+  String get kdbx_password_expired => '数据库密码已过期！';
+
+  @override
+  String get kdbx_password_expired_subtitle => '更改密码/密钥文件之前，你将不能使用';
+
+  @override
+  String get kdbx_password_recommend_change => '请更改数据库密码！';
+
+  @override
+  String get kdbx_password_recommend_change_subtitle => '建议你更改数据库密码/密钥文件';
+
+  @override
+  String get template => '模版';
+
+  @override
+  String get add_template => '添加模版';
+
+  @override
+  String get template_group_empty => '模版组是空的';
+
+  @override
+  String get basic_config => '基本配置';
+
+  @override
+  String get kdbx_name => '数据库名称';
+
+  @override
+  String get default_user_name => '默认用户名';
+
+  @override
+  String get template_group => '模版组';
+
+  @override
+  String get recommend_change_password_days => '建议修改主密码天数';
+
+  @override
+  String get force_change_password_days => '强制修改主密码天数';
+
+  @override
+  String get history_maintain_days => '历史记录维护天数';
+
+  @override
+  String get history_max_items => '限制条目的历史记录数';
+
+  @override
+  String get history_max_size => '限制每个条目的历史记录总大小';
+
+  @override
+  String get encrypt_config => '加密配置';
+
+  @override
+  String get compression => '压缩';
+
+  @override
+  String get cipher => '加密算法';
+
+  @override
+  String get inner_cipher => '内联加密算法';
+
+  @override
+  String get kdf_config => 'KDF配置';
+
+  @override
+  String get kdf => '密钥导出函数';
+
+  @override
+  String get transform_rounds => '转换次数';
+
+  @override
+  String get memory_usage => '内存占用';
+
+  @override
+  String get parallelism => '并行计算';
+
+  @override
+  String get argon2_version => 'Argon2 版本';
+
+  @override
+  String get prefer_kdbx_seed_color => '优先使用数据库的主题色';
 }

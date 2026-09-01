@@ -77,6 +77,7 @@ class _HomePageState extends State<HomePage>
 
   @override
   void onKdbxSaved() async {
+    final t = I18n.of(context)!;
     final meta = Store.kdbx.meta;
     final settings = Store.settings;
 
@@ -96,9 +97,9 @@ class _HomePageState extends State<HomePage>
       if (masterKeyChangeForce != -1 && diffDays >= masterKeyChangeForce) {
         await showConfirmDialog(
           dismissible: false,
-          title: "数据库密码已过期！",
-          message: "更改密码/密钥文件之前，你将不能使用",
-          confirm: "更改密码",
+          title: t.kdbx_password_expired,
+          message: t.kdbx_password_expired_subtitle,
+          confirm: t.modify_password,
         );
         context.router.push(ModifyPasswordRoute(dismissible: false));
       } else if (masterKeyChangeRec != -1 &&
@@ -106,9 +107,9 @@ class _HomePageState extends State<HomePage>
           diffDays >= masterKeyChangeRec) {
         _hintMasterKeyChangeRec = false;
         if (await showConfirmDialog(
-          title: "请更改数据库密码！",
-          message: "建议你更改数据库密码/密钥文件",
-          confirm: "更改密码",
+          title: t.kdbx_password_recommend_change,
+          message: t.kdbx_password_recommend_change_subtitle,
+          confirm: t.modify_password,
         )) {
           context.router.push(ModifyPasswordRoute());
         }

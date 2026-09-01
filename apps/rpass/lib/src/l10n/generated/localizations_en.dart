@@ -718,4 +718,91 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get auth_type => 'Auth Type';
+
+  @override
+  String get kdbx_password_expired => 'The database password has expired!';
+
+  @override
+  String get kdbx_password_expired_subtitle =>
+      'You cannot use it until you change the password / key file';
+
+  @override
+  String get kdbx_password_recommend_change =>
+      'Please change the database password!';
+
+  @override
+  String get kdbx_password_recommend_change_subtitle =>
+      'It is recommended to change the database password / key file';
+
+  @override
+  String get template => 'Template';
+
+  @override
+  String get add_template => 'Add Template';
+
+  @override
+  String get template_group_empty => 'The template group is empty';
+
+  @override
+  String get basic_config => 'Basic Config';
+
+  @override
+  String get kdbx_name => 'Database Name';
+
+  @override
+  String get default_user_name => 'Default Username';
+
+  @override
+  String get template_group => 'Template Group';
+
+  @override
+  String get recommend_change_password_days =>
+      'Days to recommend changing master password';
+
+  @override
+  String get force_change_password_days =>
+      'Days to force changing master password';
+
+  @override
+  String get history_maintain_days => 'Days to maintain history records';
+
+  @override
+  String get history_max_items =>
+      'Limit the number of history records per entry';
+
+  @override
+  String get history_max_size => 'Limit the total history size per entry';
+
+  @override
+  String get encrypt_config => 'Encryption Config';
+
+  @override
+  String get compression => 'Compression';
+
+  @override
+  String get cipher => 'Cipher';
+
+  @override
+  String get inner_cipher => 'Inner Cipher';
+
+  @override
+  String get kdf_config => 'KDF Config';
+
+  @override
+  String get kdf => 'Key Derivation Function';
+
+  @override
+  String get transform_rounds => 'Transform Rounds';
+
+  @override
+  String get memory_usage => 'Memory Usage';
+
+  @override
+  String get parallelism => 'Parallelism';
+
+  @override
+  String get argon2_version => 'Argon2 Version';
+
+  @override
+  String get prefer_kdbx_seed_color => 'Prefer the database seed color';
 }
