@@ -1,9 +1,10 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashSet,
     ops::{Deref, DerefMut},
 };
 
 use chrono::NaiveDateTime;
+use indexmap::IndexMap;
 use thiserror::Error;
 use uuid::Uuid;
 
@@ -59,7 +60,7 @@ pub struct Entry {
     /// the key-value fields of this entry, such as username and password.
     ///
     /// Common field names are available in [crate::db::fields].
-    pub fields: HashMap<String, Value<String>>,
+    pub fields: IndexMap<String, Value<String>>,
 
     /// AutoType settings for this entry
     pub autotype: Option<AutoType>,
@@ -71,7 +72,7 @@ pub struct Entry {
     pub times: Times,
 
     /// custom data items associated with this entry
-    pub custom_data: HashMap<String, CustomDataItem>,
+    pub custom_data: IndexMap<String, CustomDataItem>,
 
     pub(crate) icon: Option<Icon>,
 
@@ -88,7 +89,7 @@ pub struct Entry {
     pub quality_check: bool,
 
     /// attachments associated with this entry, mapped by attachment name to attachment ID
-    pub attachments: HashMap<String, AttachmentId>,
+    pub attachments: IndexMap<String, AttachmentId>,
 
     /// Identifier of the group that the Entry was previously contained in
     pub previous_parent_group: Option<GroupId>,
@@ -106,17 +107,17 @@ impl Entry {
         Entry {
             id,
             parent,
-            fields: HashMap::new(),
+            fields: IndexMap::new(),
             autotype: None,
             tags: Vec::new(),
             times: Times::new(),
-            custom_data: HashMap::new(),
+            custom_data: IndexMap::new(),
             icon: None,
             foreground_color: None,
             background_color: None,
             override_url: None,
             quality_check: true,
-            attachments: HashMap::new(),
+            attachments: IndexMap::new(),
             history: Some(History::default()),
             previous_parent_group: None,
         }
@@ -444,7 +445,7 @@ impl EntryMut<'_> {
 
     /// Remove an attachment by name from this entry.
     pub fn remove_attachment_by_name(&mut self, name: &str) {
-        if let Some(attachment_id) = self.attachments.remove(name) {
+        if let Some(attachment_id) = self.attachments.shift_remove(name) {
             self.remove_attachment(attachment_id);
         }
     }
@@ -459,7 +460,7 @@ impl EntryMut<'_> {
         }
 
         for name in names_to_remove {
-            self.attachments.remove(&name);
+            self.attachments.shift_remove(&name);
         }
 
         self.remove_attachment(attachment_id);

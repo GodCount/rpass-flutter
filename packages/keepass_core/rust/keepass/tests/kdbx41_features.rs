@@ -249,7 +249,6 @@ fn group_enable_flags_round_trip() {
     assert_eq!(root.enable_autotype, Some(false));
     assert_eq!(root.enable_searching, Some(true));
     assert_eq!(root.enable_display, Some(true));
-
 }
 
 #[test]

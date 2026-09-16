@@ -1,6 +1,5 @@
-use std::collections::HashMap;
-
 use chrono::NaiveDateTime;
+use indexmap::IndexMap;
 use uuid::Uuid;
 
 use crate::db::{Color, CustomDataItem};
@@ -79,7 +78,7 @@ pub struct Meta {
     pub settings_changed: Option<NaiveDateTime>,
 
     /// Additional custom data fields
-    pub custom_data: HashMap<String, CustomDataItem>,
+    pub custom_data: IndexMap<String, CustomDataItem>,
 }
 
 /// Database memory protection settings

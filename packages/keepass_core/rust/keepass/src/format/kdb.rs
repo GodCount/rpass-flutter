@@ -7,10 +7,11 @@ use crate::{
 };
 
 use byteorder::{ByteOrder, LittleEndian};
+use indexmap::IndexMap;
 use thiserror::Error;
 use zeroize::Zeroize;
 
-use std::{collections::HashMap, convert::TryFrom};
+use std::convert::TryFrom;
 
 #[derive(Debug)]
 struct KDBHeader {
@@ -75,8 +76,8 @@ fn parse_groups(
     db: &mut Database,
     header_num_groups: u32,
     data: &mut &[u8],
-) -> Result<HashMap<u32, GroupId>, DatabaseOpenError> {
-    let mut gid_map: HashMap<u32, GroupId> = HashMap::new();
+) -> Result<IndexMap<u32, GroupId>, DatabaseOpenError> {
+    let mut gid_map: IndexMap<u32, GroupId> = IndexMap::new();
     gid_map.insert(0, db.root);
 
     // current branch of the group tree being parsed
@@ -228,17 +229,17 @@ fn expected_entry_field_size(ftype: u16) -> Option<u32> {
 
 fn parse_entries(
     db: &mut Database,
-    gid_map: HashMap<u32, GroupId>,
+    gid_map: IndexMap<u32, GroupId>,
     header_num_entries: u32,
     data: &mut &[u8],
 ) -> Result<(), DatabaseOpenError> {
     let mut parsing_gid: Option<u32> = None;
-    let mut parsing_fields: HashMap<String, Value<String>> = HashMap::new();
+    let mut parsing_fields: IndexMap<String, Value<String>> = IndexMap::new();
 
     let mut parsing_binary_desc: Option<String> = None;
     let mut parsing_binary_data: Option<Vec<u8>> = None;
 
-    let mut entry_attachments: HashMap<String, Vec<u8>> = HashMap::new();
+    let mut entry_attachments: IndexMap<String, Vec<u8>> = IndexMap::new();
 
     let mut num_entries = 0;
     while num_entries < header_num_entries {
@@ -357,7 +358,7 @@ fn parse_entries(
                 let mut entry = group.add_entry();
                 entry.fields = parsing_fields.clone();
 
-                for (desc, data) in entry_attachments.drain() {
+                for (desc, data) in entry_attachments.drain(..) {
                     entry.add_attachment(desc, Value::protected(data));
                 }
 

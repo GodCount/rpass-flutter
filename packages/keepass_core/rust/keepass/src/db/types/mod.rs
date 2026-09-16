@@ -23,6 +23,7 @@ pub use group::{
 };
 pub use history::History;
 pub use icon::{CustomIcon, CustomIconId, CustomIconMut, CustomIconNotFoundError, CustomIconRef, Icon};
+use indexmap::IndexMap;
 pub use meta::{MemoryProtection, Meta};
 pub use times::Times;
 pub use value::Value;
@@ -45,11 +46,11 @@ pub struct Database {
     /// Root node of the KeePass database
     pub(crate) root: GroupId,
 
-    /// All attachments in the database, stored in a flat HashMap
-    pub(crate) attachments: HashMap<AttachmentId, Attachment>,
+    /// All attachments in the database, stored in a flat IndexMap
+    pub(crate) attachments: IndexMap<AttachmentId, Attachment>,
 
-    /// All custom icons in the database, stored in a flat HashMap
-    pub(crate) custom_icons: HashMap<CustomIconId, CustomIcon>,
+    /// All custom icons in the database, stored in a flat IndexMap
+    pub(crate) custom_icons: IndexMap<CustomIconId, CustomIcon>,
 
     /// All entries in the database, stored in a flat HashMap
     pub(crate) entries: HashMap<EntryId, Entry>,
@@ -58,7 +59,7 @@ pub struct Database {
     pub(crate) groups: HashMap<GroupId, Group>,
 
     /// References to previously-deleted objects and their deletion times.
-    pub deleted_objects: HashMap<Uuid, Option<NaiveDateTime>>,
+    pub deleted_objects: IndexMap<Uuid, Option<NaiveDateTime>>,
 }
 
 impl Database {
@@ -88,11 +89,11 @@ impl Database {
             config: DatabaseConfig::default(),
             meta: Meta::default(),
             root: root_id,
-            attachments: HashMap::new(),
-            custom_icons: HashMap::new(),
+            attachments: IndexMap::new(),
+            custom_icons: IndexMap::new(),
             entries: HashMap::new(),
             groups,
-            deleted_objects: HashMap::new(),
+            deleted_objects: IndexMap::new(),
         }
     }
 
@@ -106,11 +107,11 @@ impl Database {
             config,
             meta: Meta::default(),
             root: root_id,
-            attachments: HashMap::new(),
-            custom_icons: HashMap::new(),
+            attachments: IndexMap::new(),
+            custom_icons: IndexMap::new(),
             entries: HashMap::new(),
             groups,
-            deleted_objects: HashMap::new(),
+            deleted_objects: IndexMap::new(),
         }
     }
 

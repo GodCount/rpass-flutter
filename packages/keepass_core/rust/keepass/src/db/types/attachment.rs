@@ -163,7 +163,7 @@ impl AttachmentMut<'_> {
     /// Remove this attachment from the database, and all references to it
     pub fn remove(&mut self) -> Result<Option<Attachment>, AttachmentNotAllowRemoveError> {
         if self.entries.is_empty() {
-            Ok(self.database.attachments.remove(&self.id))
+            Ok(self.database.attachments.shift_remove(&self.id))
         } else {
             Err(AttachmentNotAllowRemoveError(self.id))
         }

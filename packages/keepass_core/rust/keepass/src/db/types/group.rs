@@ -1,9 +1,9 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashSet,
     ops::{Deref, DerefMut},
 };
 
-use indexmap::IndexSet;
+use indexmap::{IndexMap, IndexSet};
 use thiserror::Error;
 use uuid::Uuid;
 
@@ -85,7 +85,7 @@ pub struct Group {
     pub times: Times,
 
     /// Custom Data
-    pub custom_data: HashMap<String, CustomDataItem>,
+    pub custom_data: IndexMap<String, CustomDataItem>,
 
     /// Whether the group is expanded in the user interface
     pub is_expanded: bool,
@@ -131,7 +131,7 @@ impl Group {
             groups: IndexSet::new(),
             entries: IndexSet::new(),
             times: Times::new(),
-            custom_data: HashMap::new(),
+            custom_data: IndexMap::new(),
             is_expanded: true,
             default_autotype_sequence: None,
             enable_autotype: None,
@@ -153,7 +153,7 @@ impl Group {
             groups: IndexSet::new(),
             entries: IndexSet::new(),
             times: Times::new(),
-            custom_data: HashMap::new(),
+            custom_data: IndexMap::new(),
             is_expanded: true,
             default_autotype_sequence: None,
             enable_autotype: None,

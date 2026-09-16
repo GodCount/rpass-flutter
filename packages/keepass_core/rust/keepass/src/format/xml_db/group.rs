@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "save_kdbx4")]
@@ -84,8 +83,8 @@ impl Group {
     pub(crate) fn xml_to_db_handle(
         self,
         mut target: crate::db::GroupMut<'_>,
-        attachments: &HashMap<crate::db::AttachmentId, crate::db::Attachment>,
-        custom_icons: &HashMap<crate::db::CustomIconId, crate::db::CustomIcon>,
+        attachments: &IndexMap<crate::db::AttachmentId, crate::db::Attachment>,
+        custom_icons: &IndexMap<crate::db::CustomIconId, crate::db::CustomIcon>,
         inner_decryptor: &mut dyn Cipher,
     ) -> Result<(), UnprotectError> {
         target.name = self.name;

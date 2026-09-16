@@ -185,7 +185,7 @@ impl CustomIconMut<'_> {
     /// Remove this custom icon from the database, and all references to it
     pub fn remove(&mut self) -> Result<Option<CustomIcon>, CustomIconNotAllowRemoveError> {
         if self.entries.is_empty() && self.groups.is_empty() {
-            Ok(self.database.custom_icons.remove(&self.id))
+            Ok(self.database.custom_icons.shift_remove(&self.id))
         } else {
             Err(CustomIconNotAllowRemoveError(self.id))
         }

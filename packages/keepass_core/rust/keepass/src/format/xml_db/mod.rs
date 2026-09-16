@@ -13,10 +13,11 @@ pub mod tags;
 pub mod times;
 pub mod timestamp;
 
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize, Serializer};
 
 use base64::{engine::general_purpose as base64_engine, Engine as _};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use thiserror::Error;
 use uuid::Uuid;
 
@@ -91,7 +92,7 @@ impl KeePassFile {
     ) -> Result<crate::db::Database, UnprotectError> {
         let mut db = crate::db::Database::new_with_root_id(GroupId::from_uuid(self.root.group.uuid.0));
 
-        let mut attachments = HashMap::new();
+        let mut attachments = IndexMap::new();
 
         // convert header attachments (KDBX4-style) to database attachments
         for (i, header_attachment) in header_attachments.iter().enumerate() {

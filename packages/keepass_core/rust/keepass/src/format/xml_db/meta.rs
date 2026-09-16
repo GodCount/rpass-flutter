@@ -1,5 +1,6 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
 use base64::{engine::general_purpose as base64_engine, Engine as _};
@@ -290,8 +291,8 @@ impl CustomData {
     }
 }
 
-impl From<HashMap<String, crate::db::CustomDataItem>> for CustomData {
-    fn from(db: HashMap<String, crate::db::CustomDataItem>) -> Self {
+impl From<IndexMap<String, crate::db::CustomDataItem>> for CustomData {
+    fn from(db: IndexMap<String, crate::db::CustomDataItem>) -> Self {
         let items = db
             .into_iter()
             .map(|(key, item)| {
@@ -315,7 +316,7 @@ impl From<HashMap<String, crate::db::CustomDataItem>> for CustomData {
     }
 }
 
-impl From<CustomData> for HashMap<String, crate::db::CustomDataItem> {
+impl From<CustomData> for IndexMap<String, crate::db::CustomDataItem> {
     fn from(cd: CustomData) -> Self {
         cd.items
             .into_iter()

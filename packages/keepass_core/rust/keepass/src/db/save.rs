@@ -1,6 +1,11 @@
 use thiserror::Error;
 
-use crate::{DatabaseKey, config::{DatabaseVersion, InnerCipherConfig}, db::Database, format::xml_db::to_xml};
+use crate::{
+    config::{DatabaseVersion, InnerCipherConfig},
+    db::Database,
+    format::xml_db::to_xml,
+    DatabaseKey,
+};
 
 impl Database {
     /// Saves the database to the given destination, using the provided key for encryption.

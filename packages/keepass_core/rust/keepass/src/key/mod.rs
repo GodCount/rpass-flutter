@@ -22,7 +22,6 @@ mod yubikey;
 #[cfg(feature = "challenge_response")]
 pub use yubikey::{ChallengeResponseKey, ChallengeResponseKeyError};
 
-
 /// A KeePass keyfile
 #[derive(Debug, PartialEq, Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
 pub struct KeyFile {
@@ -357,7 +356,7 @@ pub enum DatabaseKeyError {
 #[cfg(test)]
 mod key_tests {
 
-    use super::{KeyFile, DatabaseKey, DatabaseKeyError};
+    use super::{DatabaseKey, DatabaseKeyError, KeyFile};
 
     #[test]
     fn test_key() -> Result<(), DatabaseKeyError> {
@@ -440,7 +439,6 @@ mod key_tests {
     fn keyfile_random() {
         let keyfile1 = KeyFile::random().unwrap();
         let keyfile2 = KeyFile::random().unwrap();
-
 
         assert_ne!(keyfile1.key, keyfile2.key);
     }

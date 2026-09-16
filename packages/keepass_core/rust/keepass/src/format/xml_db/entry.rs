@@ -1,6 +1,5 @@
-use std::collections::HashMap;
-
 use base64::{engine::general_purpose as base64_engine, Engine as _};
+use indexmap::IndexMap;
 use thiserror::Error;
 
 use serde::{Deserialize, Serialize};
@@ -82,8 +81,8 @@ impl Entry {
     pub(crate) fn xml_to_db_handle(
         self,
         target: &mut crate::db::Entry,
-        attachments: &HashMap<crate::db::AttachmentId, crate::db::Attachment>,
-        custom_icons: &HashMap<crate::db::CustomIconId, crate::db::CustomIcon>,
+        attachments: &IndexMap<crate::db::AttachmentId, crate::db::Attachment>,
+        custom_icons: &IndexMap<crate::db::CustomIconId, crate::db::CustomIcon>,
         inner_decryptor: &mut dyn Cipher,
     ) -> Result<(), UnprotectError> {
         target.icon = if let Some(ci) = self.custom_icon_uuid.and_then(|ci| {
