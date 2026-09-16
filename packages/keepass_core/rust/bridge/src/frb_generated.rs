@@ -41,7 +41,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0-beta.6";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -310763855;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1249226956;
 
 // Section: executor
 
@@ -2568,6 +2568,40 @@ fn wire__crate__api__kdbx__Kdbx_verify_credentials_impl(
         },
     )
 }
+fn wire__crate__api__kdbx__attachment_get_file_type_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "attachment_get_file_type",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_data = <Vec<u8>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, ()>((move || {
+                    let output_ok =
+                        Ok::<_, ()>(crate::api::kdbx::Attachment::get_file_type(&api_data))?;
+                    std::result::Result::Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
 fn wire__crate__api__kdbx__entry_data_clone_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -3262,11 +3296,13 @@ impl SseDecode for crate::api::kdbx::Attachment {
         let mut var_name = <String>::sse_decode(deserializer);
         let mut var_size = <i32>::sse_decode(deserializer);
         let mut var_data = <Option<Vec<u8>>>::sse_decode(deserializer);
+        let mut var_fileType = <Option<crate::api::kdbx::FileType>>::sse_decode(deserializer);
         return crate::api::kdbx::Attachment {
             id: var_id,
             name: var_name,
             size: var_size,
             data: var_data,
+            file_type: var_fileType,
         };
     }
 }
@@ -3515,6 +3551,20 @@ impl SseDecode for crate::api::kdbx::FieldValue {
         return crate::api::kdbx::FieldValue {
             value: var_value,
             salt: var_salt,
+        };
+    }
+}
+
+impl SseDecode for crate::api::kdbx::FileType {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_matcher = <crate::api::kdbx::MatcherType>::sse_decode(deserializer);
+        let mut var_mime = <String>::sse_decode(deserializer);
+        let mut var_ext = <String>::sse_decode(deserializer);
+        return crate::api::kdbx::FileType {
+            matcher: var_matcher,
+            mime: var_mime,
+            ext: var_ext,
         };
     }
 }
@@ -4163,6 +4213,26 @@ impl SseDecode for Vec<(String, String)> {
     }
 }
 
+impl SseDecode for crate::api::kdbx::MatcherType {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::kdbx::MatcherType::App,
+            1 => crate::api::kdbx::MatcherType::Archive,
+            2 => crate::api::kdbx::MatcherType::Audio,
+            3 => crate::api::kdbx::MatcherType::Book,
+            4 => crate::api::kdbx::MatcherType::Doc,
+            5 => crate::api::kdbx::MatcherType::Font,
+            6 => crate::api::kdbx::MatcherType::Image,
+            7 => crate::api::kdbx::MatcherType::Text,
+            8 => crate::api::kdbx::MatcherType::Video,
+            9 => crate::api::kdbx::MatcherType::Custom,
+            _ => unreachable!("Invalid variant for MatcherType: {}", inner),
+        };
+    }
+}
+
 impl SseDecode for crate::api::kdbx::MemoryProtection {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -4404,6 +4474,17 @@ impl SseDecode for Option<crate::api::kdbx::EntryData> {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         if (<bool>::sse_decode(deserializer)) {
             return Some(<crate::api::kdbx::EntryData>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<crate::api::kdbx::FileType> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::api::kdbx::FileType>::sse_decode(deserializer));
         } else {
             return None;
         }
@@ -4890,9 +4971,12 @@ fn pde_ffi_dispatcher_primary_impl(
         57 => {
             wire__crate__api__kdbx__Kdbx_verify_credentials_impl(port, ptr, rust_vec_len, data_len)
         }
-        60 => wire__crate__api__kdbx__field_summary_default_impl(port, ptr, rust_vec_len, data_len),
-        63 => wire__crate__api__frb_internal_init_logger_impl(port, ptr, rust_vec_len, data_len),
-        67 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
+        58 => {
+            wire__crate__api__kdbx__attachment_get_file_type_impl(port, ptr, rust_vec_len, data_len)
+        }
+        61 => wire__crate__api__kdbx__field_summary_default_impl(port, ptr, rust_vec_len, data_len),
+        64 => wire__crate__api__frb_internal_init_logger_impl(port, ptr, rust_vec_len, data_len),
+        68 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -4939,18 +5023,18 @@ fn pde_ffi_dispatcher_sync_impl(
         34 => wire__crate__api__kdbx__Kdbx_get_composite_key_impl(ptr, rust_vec_len, data_len),
         48 => wire__crate__api__kdbx__Kdbx_new_entry_impl(ptr, rust_vec_len, data_len),
         49 => wire__crate__api__kdbx__Kdbx_new_group_impl(ptr, rust_vec_len, data_len),
-        58 => wire__crate__api__kdbx__entry_data_clone_impl(ptr, rust_vec_len, data_len),
-        59 => wire__crate__api__kdbx__entry_data_new_impl(ptr, rust_vec_len, data_len),
-        61 => wire__crate__api__kdbx__field_value_new_impl(ptr, rust_vec_len, data_len),
-        62 => wire__crate__api__frb_internal_dispose_logger_impl(ptr, rust_vec_len, data_len),
-        64 => wire__crate__api__frb_internal_logging_max_level_impl(ptr, rust_vec_len, data_len),
-        65 => wire__crate__api__frb_internal_logging_setup_dart_logging_output_impl(
+        59 => wire__crate__api__kdbx__entry_data_clone_impl(ptr, rust_vec_len, data_len),
+        60 => wire__crate__api__kdbx__entry_data_new_impl(ptr, rust_vec_len, data_len),
+        62 => wire__crate__api__kdbx__field_value_new_impl(ptr, rust_vec_len, data_len),
+        63 => wire__crate__api__frb_internal_dispose_logger_impl(ptr, rust_vec_len, data_len),
+        65 => wire__crate__api__frb_internal_logging_max_level_impl(ptr, rust_vec_len, data_len),
+        66 => wire__crate__api__frb_internal_logging_setup_dart_logging_output_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        66 => wire__crate__api__kdbx__group_data_new_impl(ptr, rust_vec_len, data_len),
-        68 => wire__crate__api__enigo__test_key2key_impl(ptr, rust_vec_len, data_len),
+        67 => wire__crate__api__kdbx__group_data_new_impl(ptr, rust_vec_len, data_len),
+        69 => wire__crate__api__enigo__test_key2key_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -5070,6 +5154,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::kdbx::Attachment {
             self.name.into_into_dart().into_dart(),
             self.size.into_into_dart().into_dart(),
             self.data.into_into_dart().into_dart(),
+            self.file_type.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -5403,6 +5488,23 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::kdbx::FieldValue>
     for crate::api::kdbx::FieldValue
 {
     fn into_into_dart(self) -> crate::api::kdbx::FieldValue {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::kdbx::FileType {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.matcher.into_into_dart().into_dart(),
+            self.mime.into_into_dart().into_dart(),
+            self.ext.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::kdbx::FileType {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::kdbx::FileType> for crate::api::kdbx::FileType {
+    fn into_into_dart(self) -> crate::api::kdbx::FileType {
         self
     }
 }
@@ -5797,6 +5899,35 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::kdbx::KdfConfig>
 {
     fn into_into_dart(self) -> crate::api::kdbx::KdfConfig {
         self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::kdbx::MatcherType> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self.0 {
+            crate::api::kdbx::MatcherType::App => 0.into_dart(),
+            crate::api::kdbx::MatcherType::Archive => 1.into_dart(),
+            crate::api::kdbx::MatcherType::Audio => 2.into_dart(),
+            crate::api::kdbx::MatcherType::Book => 3.into_dart(),
+            crate::api::kdbx::MatcherType::Doc => 4.into_dart(),
+            crate::api::kdbx::MatcherType::Font => 5.into_dart(),
+            crate::api::kdbx::MatcherType::Image => 6.into_dart(),
+            crate::api::kdbx::MatcherType::Text => 7.into_dart(),
+            crate::api::kdbx::MatcherType::Video => 8.into_dart(),
+            crate::api::kdbx::MatcherType::Custom => 9.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::kdbx::MatcherType>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::kdbx::MatcherType>>
+    for crate::api::kdbx::MatcherType
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::kdbx::MatcherType> {
+        self.into()
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -6321,6 +6452,7 @@ impl SseEncode for crate::api::kdbx::Attachment {
         <String>::sse_encode(self.name, serializer);
         <i32>::sse_encode(self.size, serializer);
         <Option<Vec<u8>>>::sse_encode(self.data, serializer);
+        <Option<crate::api::kdbx::FileType>>::sse_encode(self.file_type, serializer);
     }
 }
 
@@ -6527,6 +6659,15 @@ impl SseEncode for crate::api::kdbx::FieldValue {
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <Vec<u8>>::sse_encode(self.value, serializer);
         <Option<Vec<u8>>>::sse_encode(self.salt, serializer);
+    }
+}
+
+impl SseEncode for crate::api::kdbx::FileType {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <crate::api::kdbx::MatcherType>::sse_encode(self.matcher, serializer);
+        <String>::sse_encode(self.mime, serializer);
+        <String>::sse_encode(self.ext, serializer);
     }
 }
 
@@ -7035,6 +7176,30 @@ impl SseEncode for Vec<(String, String)> {
     }
 }
 
+impl SseEncode for crate::api::kdbx::MatcherType {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::kdbx::MatcherType::App => 0,
+                crate::api::kdbx::MatcherType::Archive => 1,
+                crate::api::kdbx::MatcherType::Audio => 2,
+                crate::api::kdbx::MatcherType::Book => 3,
+                crate::api::kdbx::MatcherType::Doc => 4,
+                crate::api::kdbx::MatcherType::Font => 5,
+                crate::api::kdbx::MatcherType::Image => 6,
+                crate::api::kdbx::MatcherType::Text => 7,
+                crate::api::kdbx::MatcherType::Video => 8,
+                crate::api::kdbx::MatcherType::Custom => 9,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
 impl SseEncode for crate::api::kdbx::MemoryProtection {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -7224,6 +7389,16 @@ impl SseEncode for Option<crate::api::kdbx::EntryData> {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
             <crate::api::kdbx::EntryData>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::api::kdbx::FileType> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::kdbx::FileType>::sse_encode(value, serializer);
         }
     }
 }

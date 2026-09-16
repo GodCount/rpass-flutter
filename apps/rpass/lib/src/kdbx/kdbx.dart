@@ -169,7 +169,6 @@ extension FieldSummaryCommon on FieldSummary {
 }
 
 extension KdbxFiledI18n on String {
-
   String fromKdbxKeyToI18n(BuildContext context) {
     final t = I18n.of(context)!;
     switch (this) {
@@ -211,4 +210,8 @@ extension KdbxFiledI18n on String {
         return this;
     }
   }
+}
+
+extension FileTypeExt on FileType {
+  bool get supportPreview => matcher == .image || matcher == .text;
 }

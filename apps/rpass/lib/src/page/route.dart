@@ -22,6 +22,8 @@ export 'password/look_account.dart' show LookAccountRoute;
 export 'password/edit_auto_type.dart' show EditAutoTypeRoute;
 export 'password/select_auto_fill_app.dart' show SelectAutoFillAppRoute;
 
+export 'preview/image_preview.dart' show ImagePreviewRoute;
+
 export 'scanner/qr_code_scanner.dart' show QrCodeScannerRoute;
 
 export 'setting/export_account.dart' show ExportAccountRoute;

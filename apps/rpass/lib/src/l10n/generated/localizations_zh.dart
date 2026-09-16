@@ -777,4 +777,7 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get prefer_kdbx_seed_color => '优先使用数据库的主题色';
+
+  @override
+  String get preview => '预览';
 }

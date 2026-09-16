@@ -37,6 +37,9 @@ pub use keepass::{
         DataTransferObfuscation, MemoryProtection, Times,
     },
 };
+
+pub use infer::MatcherType;
+
 use log::{info, warn};
 use utils_proc_macro::frb_string_constant;
 use zeroize::Zeroize;
@@ -1506,11 +1509,17 @@ impl From<&EntryRef<'_>> for EntryData {
             attachments: value
                 .attachments
                 .iter()
-                .map(|(name, id)| Attachment {
-                    id: id.id() as i32,
-                    name: name.clone(),
-                    size: value.database().attachment(*id).unwrap().data.len() as i32,
-                    data: None,
+                .map(|(name, id)| {
+                    let attach = value.database().attachment(*id).unwrap();
+                    let data = attach.data.get();
+
+                    Attachment {
+                        id: id.id() as i32,
+                        name: name.clone(),
+                        size: data.len() as i32,
+                        data: None,
+                        file_type: Attachment::get_file_type(data),
+                    }
                 })
                 .collect(),
         }
@@ -2127,6 +2136,54 @@ pub struct Attachment {
     pub name: String,
     pub size: i32,
     pub data: Option<Vec<u8>>,
+    pub file_type: Option<FileType>,
+}
+
+impl Attachment {
+    pub fn get_file_type(data: &[u8]) -> Option<FileType> {
+        infer::get(data)
+            .map(|ty| ty.into())
+            .or_else(|| match content_inspector::inspect(data) {
+                content_inspector::ContentType::UTF_8 => Some(FileType {
+                    matcher: MatcherType::Text,
+                    mime: "text/pain".into(),
+                    ext: "txt".into(),
+                }),
+                _ => None,
+            })
+    }
+}
+
+#[frb(mirror(MatcherType))]
+pub enum _MatcherType {
+    App,
+    Archive,
+    Audio,
+    Book,
+    Doc,
+    Font,
+    Image,
+    Text,
+    Video,
+    Custom,
+}
+
+#[frb]
+#[derive(Debug, Clone)]
+pub struct FileType {
+    pub matcher: MatcherType,
+    pub mime: String,
+    pub ext: String,
+}
+
+impl From<infer::Type> for FileType {
+    fn from(value: infer::Type) -> Self {
+        FileType {
+            matcher: value.matcher_type(),
+            mime: value.mime_type().to_string(),
+            ext: value.extension().to_string(),
+        }
+    }
 }
 
 #[frb(mirror(VariantDictionaryValue))]
@@ -3168,6 +3225,7 @@ mod test {
             name: "note.txt".to_string(),
             size: 3,
             data: Some(vec![1, 2, 3]),
+            file_type: None,
         }];
         let id = entry.id.clone();
         kdbx.action(KdbxAction::UpdateEntry(entry)).unwrap();

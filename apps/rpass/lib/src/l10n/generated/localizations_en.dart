@@ -805,4 +805,7 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get prefer_kdbx_seed_color => 'Prefer the database seed color';
+
+  @override
+  String get preview => 'Preview';
 }

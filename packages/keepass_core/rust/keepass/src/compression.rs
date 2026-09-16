@@ -1,5 +1,5 @@
 #[cfg(feature = "save_kdbx4")]
-use zenflate::{CompressionError, CompressionLevel, Compressor};
+use zenflate::{CompressionLevel, Compressor};
 use zenflate::{DecompressionError, Decompressor, Unstoppable};
 
 pub trait Compression {

@@ -22,9 +22,7 @@ class AuthGuard extends AutoRouteGuard {
     final kdbx = Store.kdbx.kdbx;
     if (kdbx == null && !skipAuthGuard.contains(resolver.routeName)) {
       resolver.redirectUntil(
-        Store.localInfo.localKdbxFileExists
-            ? LoadKdbxRoute()
-            : InitialRoute(),
+        Store.localInfo.localKdbxFileExists ? LoadKdbxRoute() : InitialRoute(),
         replace: true,
       );
     } else {
@@ -95,6 +93,12 @@ RootStackRouter _createMobileAutoRoute() {
             page: SelectAutoFillAppRoute.page,
           ),
           AutoRoute(path: "other_settings", page: OtherSettingsRoute.page),
+
+          CustomRoute(
+            path: "image_preview",
+            page: ImagePreviewRoute.page,
+            transitionsBuilder: TransitionsBuilders.fadeIn,
+          ),
         ],
       ),
     ],
@@ -201,6 +205,11 @@ RootStackRouter _createDesktopAutoRoute() {
           AutoRoute(
             path: "select_auto_fill_app",
             page: SelectAutoFillAppRoute.page,
+          ),
+          CustomRoute(
+            path: "image_preview",
+            page: ImagePreviewRoute.page,
+            transitionsBuilder: TransitionsBuilders.fadeIn,
           ),
         ],
       ),

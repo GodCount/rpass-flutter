@@ -10,17 +10,32 @@ import '../../util/common.dart';
 import '../../util/route.dart';
 
 class _EditNotesArgs extends PageRouteArgs {
-  _EditNotesArgs({super.key, required this.text, this.readOnly = false});
+  _EditNotesArgs({
+    super.key,
+    required this.text,
+    this.readOnly = false,
+    this.title,
+  });
   final String text;
   final bool readOnly;
+  final String? title;
 }
 
 class EditNotesRoute extends PageRouteInfo<_EditNotesArgs> {
-  EditNotesRoute({Key? key, required String text, bool readOnly = false})
-    : super(
-        name,
-        args: _EditNotesArgs(key: key, text: text, readOnly: readOnly),
-      );
+  EditNotesRoute({
+    Key? key,
+    required String text,
+    bool readOnly = false,
+    String? title,
+  }) : super(
+         name,
+         args: _EditNotesArgs(
+           key: key,
+           text: text,
+           readOnly: readOnly,
+           title: title,
+         ),
+       );
 
   static const name = "EditNotesRoute";
 
@@ -32,6 +47,7 @@ class EditNotesRoute extends PageRouteInfo<_EditNotesArgs> {
       );
       return EditNotesPage(
         key: args.key,
+        title: args.title,
         text: args.text,
         readOnly: args.readOnly,
       );
@@ -40,10 +56,16 @@ class EditNotesRoute extends PageRouteInfo<_EditNotesArgs> {
 }
 
 class EditNotesPage extends StatefulWidget {
-  const EditNotesPage({super.key, required this.text, this.readOnly = false});
+  const EditNotesPage({
+    super.key,
+    required this.text,
+    this.readOnly = false,
+    this.title,
+  });
 
   final String text;
   final bool readOnly;
+  final String? title;
 
   @override
   State<EditNotesPage> createState() => _EditNotesPageState();
@@ -116,7 +138,9 @@ class _EditNotesPageState extends State<EditNotesPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.readOnly ? t.look_notes : t.edit_notes),
+        title: Text(
+          widget.title ?? (widget.readOnly ? t.look_notes : t.edit_notes),
+        ),
       ),
       body: Container(
         height: double.infinity,

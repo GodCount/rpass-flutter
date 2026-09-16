@@ -86,7 +86,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0-beta.6';
 
   @override
-  int get rustContentHash => -310763855;
+  int get rustContentHash => 1249226956;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -306,6 +306,10 @@ abstract class RustLibApi extends BaseApi {
   Future<bool> crateApiKdbxKdbxVerifyCredentials({
     required Kdbx that,
     required Credentials credentials,
+  });
+
+  Future<FileType?> crateApiKdbxAttachmentGetFileType({
+    required List<int> data,
   });
 
   EntryData crateApiKdbxEntryDataClone({required EntryData that});
@@ -2213,13 +2217,46 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<FileType?> crateApiKdbxAttachmentGetFileType({
+    required List<int> data,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_prim_u_8_loose(data, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 58,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_box_autoadd_file_type,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiKdbxAttachmentGetFileTypeConstMeta,
+        argValues: [data],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKdbxAttachmentGetFileTypeConstMeta =>
+      const TaskConstMeta(
+        debugName: "attachment_get_file_type",
+        argNames: ["data"],
+      );
+
+  @override
   EntryData crateApiKdbxEntryDataClone({required EntryData that}) {
     return handler.executeSync(
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_box_autoadd_entry_data(that, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 58)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 59)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_entry_data,
@@ -2242,7 +2279,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(parent, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 59)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 60)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_entry_data,
@@ -2267,7 +2304,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 60,
+            funcId: 61,
             port: port_,
           );
         },
@@ -2296,7 +2333,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(value, serializer);
           sse_encode_opt_box_autoadd_bool(protected, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 61)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 62)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_field_value,
@@ -2320,7 +2357,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 62)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 63)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -2354,7 +2391,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 63,
+              funcId: 64,
               port: port_,
             );
           },
@@ -2383,7 +2420,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 64)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 65)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -2408,7 +2445,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 65)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 66)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_bool,
@@ -2435,7 +2472,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(parent, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 66)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 67)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_group_data,
@@ -2460,7 +2497,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 67,
+            funcId: 68,
             port: port_,
           );
         },
@@ -2490,7 +2527,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             key,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 68)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 69)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2844,13 +2881,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Attachment dco_decode_attachment(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 4)
-      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    if (arr.length != 5)
+      throw Exception('unexpected arr length: expect 5 but see ${arr.length}');
     return Attachment(
       id: dco_decode_i_32(arr[0]),
       name: dco_decode_String(arr[1]),
       size: dco_decode_i_32(arr[2]),
       data: dco_decode_opt_list_prim_u_8_strict(arr[3]),
+      fileType: dco_decode_opt_box_autoadd_file_type(arr[4]),
     );
   }
 
@@ -2967,6 +3005,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   EntryData dco_decode_box_autoadd_entry_data(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_entry_data(raw);
+  }
+
+  @protected
+  FileType dco_decode_box_autoadd_file_type(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_file_type(raw);
   }
 
   @protected
@@ -3172,6 +3216,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     return FieldValue.raw(
       value: dco_decode_list_prim_u_8_strict(arr[0]),
       salt: dco_decode_opt_list_prim_u_8_strict(arr[1]),
+    );
+  }
+
+  @protected
+  FileType dco_decode_file_type(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 3)
+      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    return FileType(
+      matcher: dco_decode_matcher_type(arr[0]),
+      mime: dco_decode_String(arr[1]),
+      ext: dco_decode_String(arr[2]),
     );
   }
 
@@ -3609,6 +3666,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  MatcherType dco_decode_matcher_type(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return MatcherType.values[raw as int];
+  }
+
+  @protected
   MemoryProtection dco_decode_memory_protection(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
@@ -3778,6 +3841,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   EntryData? dco_decode_opt_box_autoadd_entry_data(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_box_autoadd_entry_data(raw);
+  }
+
+  @protected
+  FileType? dco_decode_opt_box_autoadd_file_type(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_file_type(raw);
   }
 
   @protected
@@ -4415,11 +4484,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_name = sse_decode_String(deserializer);
     var var_size = sse_decode_i_32(deserializer);
     var var_data = sse_decode_opt_list_prim_u_8_strict(deserializer);
+    var var_fileType = sse_decode_opt_box_autoadd_file_type(deserializer);
     return Attachment(
       id: var_id,
       name: var_name,
       size: var_size,
       data: var_data,
+      fileType: var_fileType,
     );
   }
 
@@ -4551,6 +4622,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   EntryData sse_decode_box_autoadd_entry_data(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_entry_data(deserializer));
+  }
+
+  @protected
+  FileType sse_decode_box_autoadd_file_type(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_file_type(deserializer));
   }
 
   @protected
@@ -4789,6 +4866,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_value = sse_decode_list_prim_u_8_strict(deserializer);
     var var_salt = sse_decode_opt_list_prim_u_8_strict(deserializer);
     return FieldValue.raw(value: var_value, salt: var_salt);
+  }
+
+  @protected
+  FileType sse_decode_file_type(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_matcher = sse_decode_matcher_type(deserializer);
+    var var_mime = sse_decode_String(deserializer);
+    var var_ext = sse_decode_String(deserializer);
+    return FileType(matcher: var_matcher, mime: var_mime, ext: var_ext);
   }
 
   @protected
@@ -5376,6 +5462,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  MatcherType sse_decode_matcher_type(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_i_32(deserializer);
+    return MatcherType.values[inner];
+  }
+
+  @protected
   MemoryProtection sse_decode_memory_protection(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_protectTitle = sse_decode_bool(deserializer);
@@ -5625,6 +5718,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
     if (sse_decode_bool(deserializer)) {
       return (sse_decode_box_autoadd_entry_data(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  FileType? sse_decode_opt_box_autoadd_file_type(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_file_type(deserializer));
     } else {
       return null;
     }
@@ -6430,6 +6534,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_String(self.name, serializer);
     sse_encode_i_32(self.size, serializer);
     sse_encode_opt_list_prim_u_8_strict(self.data, serializer);
+    sse_encode_opt_box_autoadd_file_type(self.fileType, serializer);
   }
 
   @protected
@@ -6558,6 +6663,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_entry_data(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_file_type(
+    FileType self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_file_type(self, serializer);
   }
 
   @protected
@@ -6798,6 +6912,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_list_prim_u_8_strict(self.value, serializer);
     sse_encode_opt_list_prim_u_8_strict(self.salt, serializer);
+  }
+
+  @protected
+  void sse_encode_file_type(FileType self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_matcher_type(self.matcher, serializer);
+    sse_encode_String(self.mime, serializer);
+    sse_encode_String(self.ext, serializer);
   }
 
   @protected
@@ -7323,6 +7445,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_matcher_type(MatcherType self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
   void sse_encode_memory_protection(
     MemoryProtection self,
     SseSerializer serializer,
@@ -7547,6 +7675,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_bool(self != null, serializer);
     if (self != null) {
       sse_encode_box_autoadd_entry_data(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_file_type(
+    FileType? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_file_type(self, serializer);
     }
   }
 

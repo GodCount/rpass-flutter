@@ -1579,6 +1579,12 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'优先使用数据库的主题色'**
   String get prefer_kdbx_seed_color;
+
+  /// No description provided for @preview.
+  ///
+  /// In zh, this message translates to:
+  /// **'预览'**
+  String get preview;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:keepass_core/keepass_core.dart';
+import 'package:keepass_core/keepass_core.dart' hide FileType;
 import 'package:logging/logging.dart';
 
 import '../../i18n.dart';

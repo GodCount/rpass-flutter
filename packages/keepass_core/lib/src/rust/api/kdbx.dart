@@ -14,7 +14,7 @@ part 'kdbx.freezed.dart';
 
 // These functions are ignored because they are not marked as `pub`: `credentials_empty`, `emit`, `enable_recyclebin`, `from`, `from`, `get`, `impl_action`, `io`, `merge`, `not_found`, `parse_uuid`, `set_customm_time_changed`, `summary`, `xml`
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `SearchInputParse`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `drop`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `hash`, `into`, `into`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `drop`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `hash`, `into`, `into`
 // These functions are ignored (category: IgnoreBecauseOwnerTyShouldIgnore): `is_match`
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Credentials>>
@@ -138,17 +138,26 @@ class Attachment {
   final String name;
   final int size;
   final Uint8List? data;
+  final FileType? fileType;
 
   const Attachment({
     required this.id,
     required this.name,
     required this.size,
     this.data,
+    this.fileType,
   });
+
+  static Future<FileType?> getFileType({required List<int> data}) =>
+      RustLib.instance.api.crateApiKdbxAttachmentGetFileType(data: data);
 
   @override
   int get hashCode =>
-      id.hashCode ^ name.hashCode ^ size.hashCode ^ data.hashCode;
+      id.hashCode ^
+      name.hashCode ^
+      size.hashCode ^
+      data.hashCode ^
+      fileType.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -158,7 +167,8 @@ class Attachment {
           id == other.id &&
           name == other.name &&
           size == other.size &&
-          data == other.data;
+          data == other.data &&
+          fileType == other.fileType;
 }
 
 class AutoType {
@@ -503,6 +513,30 @@ class FieldValue {
           salt == other.salt;
 }
 
+class FileType {
+  final MatcherType matcher;
+  final String mime;
+  final String ext;
+
+  const FileType({
+    required this.matcher,
+    required this.mime,
+    required this.ext,
+  });
+
+  @override
+  int get hashCode => matcher.hashCode ^ mime.hashCode ^ ext.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FileType &&
+          runtimeType == other.runtimeType &&
+          matcher == other.matcher &&
+          mime == other.mime &&
+          ext == other.ext;
+}
+
 class GroupData {
   final String id;
   String? parent;
@@ -805,6 +839,19 @@ sealed class KdfConfig with _$KdfConfig {
     required int parallelism,
     required Argon2Version version,
   }) = KdfConfig_Argon2id;
+}
+
+enum MatcherType {
+  app,
+  archive,
+  audio,
+  book,
+  doc,
+  font,
+  image,
+  text,
+  video,
+  custom,
 }
 
 class MemoryProtection {

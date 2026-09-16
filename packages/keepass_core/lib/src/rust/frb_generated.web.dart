@@ -231,6 +231,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   EntryData dco_decode_box_autoadd_entry_data(dynamic raw);
 
   @protected
+  FileType dco_decode_box_autoadd_file_type(dynamic raw);
+
+  @protected
   GroupData dco_decode_box_autoadd_group_data(dynamic raw);
 
   @protected
@@ -303,6 +306,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FieldValue dco_decode_field_value(dynamic raw);
+
+  @protected
+  FileType dco_decode_file_type(dynamic raw);
 
   @protected
   FrbLogRecord dco_decode_frb_log_record(dynamic raw);
@@ -404,6 +410,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<(String, String)> dco_decode_list_record_string_string(dynamic raw);
 
   @protected
+  MatcherType dco_decode_matcher_type(dynamic raw);
+
+  @protected
   MemoryProtection dco_decode_memory_protection(dynamic raw);
 
   @protected
@@ -450,6 +459,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   EntryData? dco_decode_opt_box_autoadd_entry_data(dynamic raw);
+
+  @protected
+  FileType? dco_decode_opt_box_autoadd_file_type(dynamic raw);
 
   @protected
   PlatformInt64? dco_decode_opt_box_autoadd_i_64(dynamic raw);
@@ -772,6 +784,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   EntryData sse_decode_box_autoadd_entry_data(SseDeserializer deserializer);
 
   @protected
+  FileType sse_decode_box_autoadd_file_type(SseDeserializer deserializer);
+
+  @protected
   GroupData sse_decode_box_autoadd_group_data(SseDeserializer deserializer);
 
   @protected
@@ -852,6 +867,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FieldValue sse_decode_field_value(SseDeserializer deserializer);
+
+  @protected
+  FileType sse_decode_file_type(SseDeserializer deserializer);
 
   @protected
   FrbLogRecord sse_decode_frb_log_record(SseDeserializer deserializer);
@@ -965,6 +983,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  MatcherType sse_decode_matcher_type(SseDeserializer deserializer);
+
+  @protected
   MemoryProtection sse_decode_memory_protection(SseDeserializer deserializer);
 
   @protected
@@ -1021,6 +1042,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   EntryData? sse_decode_opt_box_autoadd_entry_data(
     SseDeserializer deserializer,
   );
+
+  @protected
+  FileType? sse_decode_opt_box_autoadd_file_type(SseDeserializer deserializer);
 
   @protected
   PlatformInt64? sse_decode_opt_box_autoadd_i_64(SseDeserializer deserializer);
@@ -1418,6 +1442,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_file_type(
+    FileType self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_group_data(
     GroupData self,
     SseSerializer serializer,
@@ -1536,6 +1566,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_field_value(FieldValue self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_file_type(FileType self, SseSerializer serializer);
 
   @protected
   void sse_encode_frb_log_record(FrbLogRecord self, SseSerializer serializer);
@@ -1676,6 +1709,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_matcher_type(MatcherType self, SseSerializer serializer);
+
+  @protected
   void sse_encode_memory_protection(
     MemoryProtection self,
     SseSerializer serializer,
@@ -1748,6 +1784,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_opt_box_autoadd_entry_data(
     EntryData? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_file_type(
+    FileType? self,
     SseSerializer serializer,
   );
 

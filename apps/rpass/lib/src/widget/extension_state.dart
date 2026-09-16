@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
@@ -14,6 +15,7 @@ import '../i18n.dart';
 import '../kdbx/auto_fill.dart';
 import '../kdbx/kdbx.dart';
 import '../page/kdbx/edit_group_page.dart';
+import '../page/preview/image_preview.dart';
 import '../page/route.dart';
 import '../store/index.dart';
 import '../theme/theme.dart';
@@ -292,16 +294,84 @@ extension StatefulBottomSheet on State {
     );
   }
 
-  void showBinaryAction(ChipListItem<Attachment> binary) {
+  void showBinaryAction(
+    ChipListItem<Attachment> binary,
+    List<Attachment> attachments,
+  ) {
     final t = I18n.of(context)!;
     final lanFill = LanFillInherited.of(context);
     final kdbxProvider = Store.kdbx;
 
     final title = binary.value.name;
+    final fileType = binary.value.fileType;
 
     showBottomSheetList(
       title: title,
       children: [
+        ListTile(
+          enabled: fileType != null && fileType.supportPreview,
+          leading: const Icon(Icons.preview_outlined),
+          title: Text(t.preview),
+          onTap: () async {
+            context.router.pop();
+            try {
+              switch (fileType!.matcher) {
+                case MatcherType.image:
+                  {
+                    final images = attachments
+                        .where(
+                          (item) =>
+                              item.fileType != null &&
+                              item.fileType!.matcher == .image,
+                        )
+                        .toList();
+
+                    final index = images.indexWhere(
+                      (item) => item.id == binary.value.id,
+                    );
+
+                    final items = images
+                        .map(
+                          (item) => GalleryItem(
+                            title: item.name,
+                            imageProvider: LazyMemoryImage(
+                              item.id,
+                              () async =>
+                                  Store.kdbx.kdbx!.getAttachment(id: item.id),
+                            ),
+                          ),
+                        )
+                        .toList();
+
+                    context.pushRoute(
+                      ImagePreviewRoute(initialIndex: index, items: items),
+                    );
+                  }
+                  break;
+                case MatcherType.text:
+                  context.pushRoute(
+                    EditNotesRoute(
+                      title: binary.value.name,
+                      text: utf8.decode(
+                        binary.value.data ??
+                            await kdbxProvider.kdbx!.getAttachment(
+                              id: binary.value.id,
+                            ),
+                      ),
+                      readOnly: true,
+                    ),
+                  );
+                  break;
+                default:
+                  throw UnimplementedError(
+                    "${fileType.matcher.name} type not support privew.",
+                  );
+              }
+            } catch (e, s) {
+              showError(e, s);
+            }
+          },
+        ),
         ListTile(
           leading: const Icon(Icons.save),
           title: Text(t.save),

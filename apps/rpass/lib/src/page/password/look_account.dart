@@ -789,7 +789,7 @@ class _LookAccountPageState extends State<LookAccountPage>
                   ChipList(
                     maxHeight: 150,
                     onChipTap: (binary) {
-                      showBinaryAction(binary);
+                      showBinaryAction(binary, _kdbxEntry.attachments);
                     },
                     items: [
                       for (final item in _kdbxEntry.attachments)

@@ -366,5 +366,6 @@
     "memory_usage": "内存占用",
     "parallelism": "并行计算",
     "argon2_version": "Argon2 版本",
-    "prefer_kdbx_seed_color": "优先使用数据库的主题色"
+    "prefer_kdbx_seed_color": "优先使用数据库的主题色",
+    "preview": "预览"
 }

@@ -829,6 +829,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.1"
+  photo_zoom:
+    dependency: transitive
+    description:
+      name: photo_zoom
+      sha256: "87931b0c4a14e8841dae636c52a12dc1fa83baa7d3ee6e391b940d17907358cb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.3"
   platform:
     dependency: transitive
     description:

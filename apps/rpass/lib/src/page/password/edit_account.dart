@@ -1032,7 +1032,7 @@ class _EntryFieldState extends State<EntryField> {
             _binaryKeys = list.map((item) => item.value.name).toList();
           },
           onChipTap: (item) {
-            showBinaryAction(item);
+            showBinaryAction(item, [item.value]);
             return false;
           },
           onAddChipTap: (list) async {
