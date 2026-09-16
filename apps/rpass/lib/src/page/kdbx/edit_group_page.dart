@@ -74,6 +74,7 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
     if (widget.id != null && widget.id != _kdbxGroupData.id) {
       try {
         _kdbxGroupData = await kdbxController.kdbx!.getGroup(id: widget.id!);
+        _from = GlobalKey();
         setState(() {});
       } on KdbxError_NotFound {
         context.router.pop();
@@ -107,8 +108,8 @@ class _EditGroupPagePageState extends State<EditGroupPagePage>
         _getKdbxGroupData();
       } else {
         _kdbxGroupData = Store.kdbx.kdbx!.newGroup();
+        _from = GlobalKey();
       }
-      _from = GlobalKey();
     }
     super.didUpdateWidget(oldWidget);
   }
