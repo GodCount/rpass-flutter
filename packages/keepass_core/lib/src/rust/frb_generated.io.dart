@@ -32,10 +32,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_KdbxPtr => wire
       ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKdbxPtr;
 
-  CrossPlatformFinalizerArg
-  get rust_arc_decrement_strong_count_ButtonPtr => wire
-      ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_ButtonPtr;
-
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw);
 
@@ -58,12 +54,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  Button
-  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-    dynamic raw,
-  );
-
-  @protected
   Enigo
   dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
     dynamic raw,
@@ -72,12 +62,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   Kdbx
   dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKdbx(
-    dynamic raw,
-  );
-
-  @protected
-  Button
-  dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
     dynamic raw,
   );
 
@@ -164,12 +148,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  Button
-  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-    dynamic raw,
-  );
-
-  @protected
   Set<String> dco_decode_Set_String_None(dynamic raw);
 
   @protected
@@ -235,9 +213,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   GroupData dco_decode_box_autoadd_group_data(dynamic raw);
 
   @protected
-  PlatformInt64 dco_decode_box_autoadd_i_64(dynamic raw);
-
-  @protected
   InnerCipherConfig dco_decode_box_autoadd_inner_cipher_config(dynamic raw);
 
   @protected
@@ -262,9 +237,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   OuterCipherConfig dco_decode_box_autoadd_outer_cipher_config(dynamic raw);
 
   @protected
-  Settings dco_decode_box_autoadd_settings(dynamic raw);
-
-  @protected
   int dco_decode_box_autoadd_u_32(dynamic raw);
 
   @protected
@@ -277,6 +249,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   VariantDictionaryValue dco_decode_box_autoadd_variant_dictionary_value(
     dynamic raw,
   );
+
+  @protected
+  Button dco_decode_button(dynamic raw);
 
   @protected
   CompressionConfig dco_decode_compression_config(dynamic raw);
@@ -462,9 +437,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FileType? dco_decode_opt_box_autoadd_file_type(dynamic raw);
 
   @protected
-  PlatformInt64? dco_decode_opt_box_autoadd_i_64(dynamic raw);
-
-  @protected
   InnerCipherConfig? dco_decode_opt_box_autoadd_inner_cipher_config(
     dynamic raw,
   );
@@ -542,9 +514,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   (String, String) dco_decode_record_string_string(dynamic raw);
 
   @protected
-  Settings dco_decode_settings(dynamic raw);
-
-  @protected
   Times dco_decode_times(dynamic raw);
 
   @protected
@@ -593,12 +562,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  Button
-  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-    SseDeserializer deserializer,
-  );
-
-  @protected
   Enigo
   sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
     SseDeserializer deserializer,
@@ -607,12 +570,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   Kdbx
   sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKdbx(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  Button
-  sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
     SseDeserializer deserializer,
   );
 
@@ -705,12 +662,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  Button
-  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-    SseDeserializer deserializer,
-  );
-
-  @protected
   Set<String> sse_decode_Set_String_None(SseDeserializer deserializer);
 
   @protected
@@ -788,9 +739,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   GroupData sse_decode_box_autoadd_group_data(SseDeserializer deserializer);
 
   @protected
-  PlatformInt64 sse_decode_box_autoadd_i_64(SseDeserializer deserializer);
-
-  @protected
   InnerCipherConfig sse_decode_box_autoadd_inner_cipher_config(
     SseDeserializer deserializer,
   );
@@ -821,9 +769,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  Settings sse_decode_box_autoadd_settings(SseDeserializer deserializer);
-
-  @protected
   int sse_decode_box_autoadd_u_32(SseDeserializer deserializer);
 
   @protected
@@ -836,6 +781,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   VariantDictionaryValue sse_decode_box_autoadd_variant_dictionary_value(
     SseDeserializer deserializer,
   );
+
+  @protected
+  Button sse_decode_button(SseDeserializer deserializer);
 
   @protected
   CompressionConfig sse_decode_compression_config(SseDeserializer deserializer);
@@ -1045,9 +993,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FileType? sse_decode_opt_box_autoadd_file_type(SseDeserializer deserializer);
 
   @protected
-  PlatformInt64? sse_decode_opt_box_autoadd_i_64(SseDeserializer deserializer);
-
-  @protected
   InnerCipherConfig? sse_decode_opt_box_autoadd_inner_cipher_config(
     SseDeserializer deserializer,
   );
@@ -1149,9 +1094,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  Settings sse_decode_settings(SseDeserializer deserializer);
-
-  @protected
   Times sse_decode_times(SseDeserializer deserializer);
 
   @protected
@@ -1209,13 +1151,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void
-  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-    Button self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void
   sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEnigo(
     Enigo self,
     SseSerializer serializer,
@@ -1225,13 +1160,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void
   sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKdbx(
     Kdbx self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void
-  sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-    Button self,
     SseSerializer serializer,
   );
 
@@ -1343,13 +1271,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void
-  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-    Button self,
-    SseSerializer serializer,
-  );
-
-  @protected
   void sse_encode_Set_String_None(Set<String> self, SseSerializer serializer);
 
   @protected
@@ -1452,12 +1373,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_box_autoadd_i_64(
-    PlatformInt64 self,
-    SseSerializer serializer,
-  );
-
-  @protected
   void sse_encode_box_autoadd_inner_cipher_config(
     InnerCipherConfig self,
     SseSerializer serializer,
@@ -1506,9 +1421,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_box_autoadd_settings(Settings self, SseSerializer serializer);
-
-  @protected
   void sse_encode_box_autoadd_u_32(int self, SseSerializer serializer);
 
   @protected
@@ -1525,6 +1437,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     VariantDictionaryValue self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_button(Button self, SseSerializer serializer);
 
   @protected
   void sse_encode_compression_config(
@@ -1792,12 +1707,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_opt_box_autoadd_i_64(
-    PlatformInt64? self,
-    SseSerializer serializer,
-  );
-
-  @protected
   void sse_encode_opt_box_autoadd_inner_cipher_config(
     InnerCipherConfig? self,
     SseSerializer serializer,
@@ -1919,9 +1828,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     (String, String) self,
     SseSerializer serializer,
   );
-
-  @protected
-  void sse_encode_settings(Settings self, SseSerializer serializer);
 
   @protected
   void sse_encode_times(Times self, SseSerializer serializer);
@@ -2068,39 +1974,5 @@ class RustLibWire implements BaseWire {
       );
   late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKdbx =
       _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKdbxPtr
-          .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
-
-  void
-  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-    ffi.Pointer<ffi.Void> ptr,
-  ) {
-    return _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-      ptr,
-    );
-  }
-
-  late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_ButtonPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-        'frbgen_keepass_core_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button',
-      );
-  late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button =
-      _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_ButtonPtr
-          .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
-
-  void
-  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-    ffi.Pointer<ffi.Void> ptr,
-  ) {
-    return _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-      ptr,
-    );
-  }
-
-  late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_ButtonPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-        'frbgen_keepass_core_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button',
-      );
-  late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button =
-      _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_ButtonPtr
           .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 }

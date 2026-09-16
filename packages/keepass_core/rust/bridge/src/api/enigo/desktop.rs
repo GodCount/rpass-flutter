@@ -1,22 +1,8 @@
-pub use enigo::{Key, Settings};
-use enigo::{Keyboard, Mouse};
-use flutter_rust_bridge::*;
+use flutter_rust_bridge::frb;
+
+pub use enigo::Key;
+use enigo::{Keyboard, Mouse, Settings};
 use std::sync::Mutex;
-
-pub use enigo::{Axis, Coordinate, Direction};
-
-#[frb(mirror(Settings))]
-pub struct _Settings {
-    pub linux_delay: u32,
-    pub x11_display: Option<String>,
-    pub wayland_display: Option<String>,
-    pub windows_dw_extra_info: Option<usize>,
-    pub event_source_user_data: Option<i64>,
-    pub release_keys_when_dropped: bool,
-    pub open_prompt_to_get_permissions: bool,
-    pub independent_of_keyboard_state: bool,
-    pub windows_subject_to_mouse_speed_and_acceleration_level: bool,
-}
 
 #[cfg(target_os = "macos")]
 #[frb(ignore)]
@@ -48,6 +34,7 @@ mod permission {
         unsafe { AXIsProcessTrustedWithOptions(options) }
     }
 }
+
 #[cfg(any(target_os = "windows", target_os = "linux"))]
 #[frb(ignore)]
 mod permission {
@@ -56,180 +43,118 @@ mod permission {
     }
 }
 
-#[frb(opaque)]
-pub struct Enigo {
+#[frb(ignore)]
+pub(super) struct EnigoImpl {
     enigo: Mutex<enigo::Enigo>,
 }
 
-impl Enigo {
-    #[frb(sync)]
-    pub fn new(settings: &Settings) -> anyhow::Result<Self> {
-        Ok(Self {
-            enigo: Mutex::new(enigo::Enigo::new(settings)?),
-        })
-    }
-
-    #[frb(sync)]
-    pub fn preset() -> anyhow::Result<Self> {
+impl EnigoImpl {
+    pub(super) fn preset() -> anyhow::Result<Self> {
         Ok(Self {
             enigo: Mutex::new(enigo::Enigo::new(&Settings::default()).unwrap()),
         })
     }
 
-    #[frb(sync)]
-    pub fn has_permission(open_prompt: bool) -> bool {
+    pub(super) fn has_permission(open_prompt: bool) -> bool {
         permission::has_permission(open_prompt)
     }
 
-    #[frb(sync)]
-    pub fn button(&mut self, button: _Button, direction: Direction) -> anyhow::Result<()> {
-        self.enigo.lock().unwrap().button(button.value, direction)?;
+    pub(super) fn button(
+        &mut self,
+        button: super::Button,
+        direction: super::Direction,
+    ) -> anyhow::Result<()> {
+        self.enigo
+            .lock()
+            .unwrap()
+            .button(button.into(), direction.into())?;
         Ok(())
     }
 
-    #[frb(sync)]
-    pub fn move_mouse(&mut self, x: i32, y: i32, coordinate: Coordinate) -> anyhow::Result<()> {
-        self.enigo.lock().unwrap().move_mouse(x, y, coordinate)?;
+    pub(super) fn move_mouse(
+        &mut self,
+        x: i32,
+        y: i32,
+        coordinate: super::Coordinate,
+    ) -> anyhow::Result<()> {
+        self.enigo
+            .lock()
+            .unwrap()
+            .move_mouse(x, y, coordinate.into())?;
         Ok(())
     }
 
-    #[frb(sync)]
-    pub fn scroll(&mut self, length: i32, axis: Axis) -> anyhow::Result<()> {
-        self.enigo.lock().unwrap().scroll(length, axis)?;
+    pub(super) fn scroll(&mut self, length: i32, axis: super::Axis) -> anyhow::Result<()> {
+        self.enigo.lock().unwrap().scroll(length, axis.into())?;
         Ok(())
     }
 
-    #[frb(sync)]
-    pub fn main_display(&self) -> anyhow::Result<(i32, i32)> {
+    pub(super) fn main_display(&self) -> anyhow::Result<(i32, i32)> {
         Ok(self.enigo.lock().unwrap().main_display()?)
     }
 
-    #[frb(sync)]
-    pub fn location(&self) -> anyhow::Result<(i32, i32)> {
+    pub(super) fn location(&self) -> anyhow::Result<(i32, i32)> {
         Ok(self.enigo.lock().unwrap().location()?)
     }
 
-    #[frb(sync)]
-    pub fn text(&mut self, text: &str) -> anyhow::Result<()> {
+    pub(super) fn text(&mut self, text: &str) -> anyhow::Result<()> {
         self.enigo.lock().unwrap().text(text)?;
         Ok(())
     }
 
-    #[frb(sync)]
-    pub fn key(&mut self, key: Key, direction: Direction) -> anyhow::Result<()> {
-        self.enigo.lock().unwrap().key(key, direction)?;
+    pub(super) fn key(&mut self, key: Key, direction: super::Direction) -> anyhow::Result<()> {
+        self.enigo.lock().unwrap().key(key, direction.into())?;
         Ok(())
     }
 
-    #[frb(sync)]
-    pub fn raw(&mut self, keycode: u16, direction: Direction) -> anyhow::Result<()> {
-        self.enigo.lock().unwrap().raw(keycode, direction)?;
+    pub(super) fn raw(&mut self, keycode: u16, direction: super::Direction) -> anyhow::Result<()> {
+        self.enigo.lock().unwrap().raw(keycode, direction.into())?;
         Ok(())
     }
 }
 
-#[frb(mirror(Direction))]
-pub enum _Direction {
-    Press,
-    Release,
-    Click,
-}
-
-#[frb(mirror(Coordinate))]
-pub enum _Coordinate {
-    Abs,
-    Rel,
-}
-
-#[frb(mirror(Axis))]
-pub enum _Axis {
-    Horizontal,
-    Vertical,
-}
-
-#[frb(name = "Button")]
-pub struct _Button {
-    #[frb(ignore)]
-    pub(crate) value: enigo::Button,
-}
-
-impl _Button {
-    #[frb(sync)]
-    pub fn new(value: &str) -> Self {
-        Self {
-            value: match value {
-                "left" => enigo::Button::Left,
-                "middle" => enigo::Button::Middle,
-                "right" => enigo::Button::Right,
-                "back" => enigo::Button::Back,
-                "forward" => enigo::Button::Forward,
-                "scroll_up" => enigo::Button::ScrollUp,
-                "scroll_down" => enigo::Button::ScrollDown,
-                "scroll_left" => enigo::Button::ScrollLeft,
-                "scroll_right" => enigo::Button::ScrollRight,
-                _ => panic!("Unspport!"),
-            },
+impl From<super::Button> for enigo::Button {
+    fn from(value: super::Button) -> Self {
+        match value {
+            super::Button::Left => enigo::Button::Left,
+            super::Button::Middle => enigo::Button::Middle,
+            super::Button::Right => enigo::Button::Right,
+            super::Button::Back => enigo::Button::Back,
+            super::Button::Forward => enigo::Button::Forward,
+            super::Button::ScrollUp => enigo::Button::ScrollUp,
+            super::Button::ScrollDown => enigo::Button::ScrollDown,
+            super::Button::ScrollLeft => enigo::Button::ScrollLeft,
+            super::Button::ScrollRight => enigo::Button::ScrollRight,
         }
     }
+}
 
-    #[frb(sync, getter)]
-    pub fn left() -> Self {
-        Self::new("left")
-    }
-    #[frb(sync, getter)]
-    pub fn middle() -> Self {
-        Self::new("middle")
-    }
-    #[frb(sync, getter)]
-    pub fn right() -> Self {
-        Self::new("right")
-    }
-    #[frb(sync, getter)]
-    pub fn back() -> Self {
-        Self::new("back")
-    }
-    #[frb(sync, getter)]
-    pub fn forward() -> Self {
-        Self::new("forward")
-    }
-    #[frb(sync, getter)]
-    pub fn scroll_up() -> Self {
-        Self::new("scroll_up")
-    }
-
-    #[frb(sync, getter)]
-    pub fn scroll_down() -> Self {
-        Self::new("scroll_down")
-    }
-    #[frb(sync, getter)]
-    pub fn scroll_left() -> Self {
-        Self::new("scroll_left")
-    }
-    #[frb(sync, getter)]
-    pub fn scroll_right() -> Self {
-        Self::new("scroll_right")
-    }
-
-    #[frb(sync)]
-    pub fn to_string(&mut self) -> String {
-        match self.value {
-            enigo::Button::Left => "left",
-            enigo::Button::Middle => "middle",
-            enigo::Button::Right => "right",
-            enigo::Button::Back => "back",
-            enigo::Button::Forward => "forward",
-            enigo::Button::ScrollUp => "scroll_up",
-            enigo::Button::ScrollDown => "scroll_down",
-            enigo::Button::ScrollLeft => "scroll_left",
-            enigo::Button::ScrollRight => "scroll_right",
+impl From<super::Coordinate> for enigo::Coordinate {
+    fn from(value: super::Coordinate) -> Self {
+        match value {
+            super::Coordinate::Abs => enigo::Coordinate::Abs,
+            super::Coordinate::Rel => enigo::Coordinate::Rel,
         }
-        .to_string()
     }
 }
 
-#[frb(sync)]
-pub fn test_key2key(key: Key) -> Key {
-    key
+impl From<super::Direction> for enigo::Direction {
+    fn from(value: super::Direction) -> Self {
+        match value {
+            super::Direction::Press => enigo::Direction::Press,
+            super::Direction::Release => enigo::Direction::Release,
+            super::Direction::Click => enigo::Direction::Click,
+        }
+    }
+}
+
+impl From<super::Axis> for enigo::Axis {
+    fn from(value: super::Axis) -> Self {
+        match value {
+            super::Axis::Horizontal => enigo::Axis::Horizontal,
+            super::Axis::Vertical => enigo::Axis::Vertical,
+        }
+    }
 }
 
 // key code corresponding table
@@ -548,11 +473,7 @@ fn modifier_alias_to_usb_hid(key: Key) -> Option<u32> {
 }
 
 /// Keys without a known usage encode to `0`, which is `PhysicalKeyboardKey.none` on the Dart side.
-#[frb(rust2dart(
-    dart_type = "PhysicalKeyboardKey",
-    dart_code = "PhysicalKeyboardKey({})"
-))]
-pub fn encode_physical_keyboard_key_type(raw: Key) -> u32 {
+pub(super) fn encode_physical_keyboard_key_type(raw: Key) -> u32 {
     if let Some(usb) = named_key_to_usb_hid(raw).or_else(|| modifier_alias_to_usb_hid(raw)) {
         return usb;
     }
@@ -566,8 +487,7 @@ pub fn encode_physical_keyboard_key_type(raw: Key) -> u32 {
 
 /// Usages that enigo can not express fall back to `Key::Other`, which keeps them stable across a
 /// round trip even though pressing them is platform dependent.
-#[frb(dart2rust(dart_type = "PhysicalKeyboardKey", dart_code = "{}.usbHidUsage"))]
-pub fn decode_physical_keyboard_key_type(raw: u32) -> Key {
+pub(super) fn decode_physical_keyboard_key_type(raw: u32) -> Key {
     usb_hid_to_named_key(raw)
         .or_else(|| usb_hid_to_char(raw).map(Key::Unicode))
         .or_else(|| usb_hid_to_substitute_key(raw))
@@ -575,7 +495,6 @@ pub fn decode_physical_keyboard_key_type(raw: u32) -> Key {
 }
 
 #[cfg(test)]
-#[frb(ignore)]
 mod tests {
     use super::*;
 

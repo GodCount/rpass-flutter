@@ -13,12 +13,12 @@ class EnigoExamplePage extends StatefulWidget {
 }
 
 class _EnigoExamplePageState extends State<EnigoExamplePage> {
-  static const _mouseButtons = <String>[
-    'left',
-    'middle',
-    'right',
-    'back',
-    'forward',
+  static const _mouseButtons = <enigo.Button>[
+    enigo.Button.left,
+    enigo.Button.middle,
+    enigo.Button.right,
+    enigo.Button.back,
+    enigo.Button.forward,
   ];
 
   final _textController = TextEditingController(text: 'hello from enigo');
@@ -32,7 +32,7 @@ class _EnigoExamplePageState extends State<EnigoExamplePage> {
   PhysicalKeyboardKey? _capturedKey;
   enigo.Coordinate _coordinate = enigo.Coordinate.abs;
   enigo.Axis _axis = enigo.Axis.vertical;
-  String _mouseButton = 'left';
+  enigo.Button _mouseButton = enigo.Button.left;
   int _delaySeconds = 3;
   int _countdown = 0;
   (int, int)? _display;
@@ -291,19 +291,13 @@ class _EnigoExamplePageState extends State<EnigoExamplePage> {
   /// `testKey2Key` 会把按键送进 Rust 再原样送回来，正好用来观察 `Key` 的编解码结果。
   Widget _capturedKeyDetails(PhysicalKeyboardKey captured) {
     PhysicalKeyboardKey? roundTripped;
-    String? error;
-    try {
-      roundTripped = enigo.testKey2Key(key: captured);
-    } catch (e) {
-      error = '$e';
-    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _keyValueRow('捕获按键', _describeKey(captured)),
-        _keyValueRow('经 Rust 往返', error ?? _describeKey(roundTripped!)),
-        if (error == null && roundTripped != captured)
+        _keyValueRow('经 Rust 往返', _describeKey(roundTripped!)),
+        if (roundTripped != captured)
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
@@ -405,7 +399,7 @@ class _EnigoExamplePageState extends State<EnigoExamplePage> {
         Row(
           children: [
             Expanded(
-              child: DropdownButtonFormField<String>(
+              child: DropdownButtonFormField<enigo.Button>(
                 initialValue: _mouseButton,
                 decoration: const InputDecoration(
                   labelText: '按键',
@@ -413,10 +407,10 @@ class _EnigoExamplePageState extends State<EnigoExamplePage> {
                 ),
                 items: [
                   for (final button in _mouseButtons)
-                    DropdownMenuItem(value: button, child: Text(button)),
+                    DropdownMenuItem(value: button, child: Text(button.name)),
                 ],
                 onChanged: (value) =>
-                    setState(() => _mouseButton = value ?? 'left'),
+                    setState(() => _mouseButton = value ?? enigo.Button.left),
               ),
             ),
             const SizedBox(width: 12),
@@ -426,7 +420,7 @@ class _EnigoExamplePageState extends State<EnigoExamplePage> {
                   : () => _dispatch(
                       '鼠标点击',
                       (instance) => instance.button(
-                        button: enigo.Button(value: _mouseButton),
+                        button: _mouseButton,
                         direction: enigo.Direction.click,
                       ),
                     ),

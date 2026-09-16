@@ -41,7 +41,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0-beta.6";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1249226956;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1783367481;
 
 // Section: executor
 
@@ -49,344 +49,6 @@ flutter_rust_bridge::frb_generated_default_handler!();
 
 // Section: wire_funcs
 
-fn wire__crate__api__enigo__Button_back_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "Button_back",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let output_ok = Ok::<_, ()>(crate::api::enigo::_Button::back())?;
-                std::result::Result::Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__enigo__Button_forward_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "Button_forward",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let output_ok = Ok::<_, ()>(crate::api::enigo::_Button::forward())?;
-                std::result::Result::Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__enigo__Button_left_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "Button_left",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let output_ok = Ok::<_, ()>(crate::api::enigo::_Button::left())?;
-                std::result::Result::Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__enigo__Button_middle_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "Button_middle",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let output_ok = Ok::<_, ()>(crate::api::enigo::_Button::middle())?;
-                std::result::Result::Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__enigo__Button_new_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "Button_new",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_value = <String>::sse_decode(&mut deserializer);
-            deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let output_ok = Ok::<_, ()>(crate::api::enigo::_Button::new(&api_value))?;
-                std::result::Result::Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__enigo__Button_right_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "Button_right",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let output_ok = Ok::<_, ()>(crate::api::enigo::_Button::right())?;
-                std::result::Result::Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__enigo__Button_scroll_down_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "Button_scroll_down",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let output_ok = Ok::<_, ()>(crate::api::enigo::_Button::scroll_down())?;
-                std::result::Result::Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__enigo__Button_scroll_left_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "Button_scroll_left",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let output_ok = Ok::<_, ()>(crate::api::enigo::_Button::scroll_left())?;
-                std::result::Result::Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__enigo__Button_scroll_right_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "Button_scroll_right",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let output_ok = Ok::<_, ()>(crate::api::enigo::_Button::scroll_right())?;
-                std::result::Result::Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__enigo__Button_scroll_up_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "Button_scroll_up",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let output_ok = Ok::<_, ()>(crate::api::enigo::_Button::scroll_up())?;
-                std::result::Result::Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__enigo__Button_to_string_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "Button_to_string",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_that = <RustOpaqueMoi<
-                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<_Button>,
-            >>::sse_decode(&mut deserializer);
-            deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let mut api_that_guard = None;
-                let decode_indices_ =
-                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
-                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                            &api_that, 0, true,
-                        ),
-                    ]);
-                for i in decode_indices_ {
-                    match i {
-                        0 => api_that_guard = Some(api_that.lockable_decode_sync_ref_mut()),
-                        _ => unreachable!(),
-                    }
-                }
-                let mut api_that_guard = api_that_guard.unwrap();
-                let output_ok =
-                    Ok::<_, ()>(crate::api::enigo::_Button::to_string(&mut *api_that_guard))?;
-                std::result::Result::Ok(output_ok)
-            })())
-        },
-    )
-}
 fn wire__crate__api__kdbx__Credentials_form_composite_key_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -550,7 +212,7 @@ fn wire__crate__api__enigo__Enigo_button_impl(
             let api_that = <RustOpaqueMoi<
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Enigo>,
             >>::sse_decode(&mut deserializer);
-            let api_button = <_Button>::sse_decode(&mut deserializer);
+            let api_button = <crate::api::enigo::Button>::sse_decode(&mut deserializer);
             let api_direction = <crate::api::enigo::Direction>::sse_decode(&mut deserializer);
             deserializer.end();
             transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
@@ -811,38 +473,6 @@ fn wire__crate__api__enigo__Enigo_move_mouse_impl(
                         api_y,
                         api_coordinate,
                     )?;
-                    std::result::Result::Ok(output_ok)
-                })(),
-            )
-        },
-    )
-}
-fn wire__crate__api__enigo__Enigo_new_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "Enigo_new",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_settings = <crate::api::enigo::Settings>::sse_decode(&mut deserializer);
-            deserializer.end();
-            transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                (move || {
-                    let output_ok = crate::api::enigo::Enigo::new(&api_settings)?;
                     std::result::Result::Ok(output_ok)
                 })(),
             )
@@ -2919,36 +2549,6 @@ fn wire__crate__api__init_app_impl(
         },
     )
 }
-fn wire__crate__api__enigo__test_key2key_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "test_key2key",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_key = <Key>::sse_decode(&mut deserializer);
-            deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let output_ok = Ok::<_, ()>(crate::api::enigo::test_key2key(api_key))?;
-                std::result::Result::Ok(output_ok)
-            })())
-        },
-    )
-}
 
 // Section: static_checks
 
@@ -2986,18 +2586,6 @@ const _: fn() = || {
         let _: bool = MemoryProtection.protect_password;
         let _: bool = MemoryProtection.protect_url;
         let _: bool = MemoryProtection.protect_notes;
-    }
-    {
-        let Settings = None::<crate::api::enigo::Settings>.unwrap();
-        let _: u32 = Settings.linux_delay;
-        let _: Option<String> = Settings.x11_display;
-        let _: Option<String> = Settings.wayland_display;
-        let _: Option<usize> = Settings.windows_dw_extra_info;
-        let _: Option<i64> = Settings.event_source_user_data;
-        let _: bool = Settings.release_keys_when_dropped;
-        let _: bool = Settings.open_prompt_to_get_permissions;
-        let _: bool = Settings.independent_of_keyboard_state;
-        let _: bool = Settings.windows_subject_to_mouse_speed_and_acceleration_level;
     }
     {
         let Times = None::<crate::api::kdbx::Times>.unwrap();
@@ -3080,9 +2668,6 @@ flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
 flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
     flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Kdbx>
 );
-flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
-    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<_Button>
-);
 
 // Section: dart2rust
 
@@ -3119,16 +2704,6 @@ impl SseDecode for Kdbx {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut inner = <RustOpaqueMoi<
             flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Kdbx>,
-        >>::sse_decode(deserializer);
-        return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
-    }
-}
-
-impl SseDecode for _Button {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <RustOpaqueMoi<
-            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<_Button>,
         >>::sse_decode(deserializer);
         return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
     }
@@ -3236,14 +2811,6 @@ impl SseDecode for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpa
 }
 
 impl SseDecode for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Kdbx>> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <usize>::sse_decode(deserializer);
-        return decode_rust_opaque_moi(inner);
-    }
-}
-
-impl SseDecode for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<_Button>> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut inner = <usize>::sse_decode(deserializer);
@@ -3388,6 +2955,25 @@ impl SseDecode for bool {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         deserializer.cursor.read_u8().unwrap() != 0
+    }
+}
+
+impl SseDecode for crate::api::enigo::Button {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::enigo::Button::Left,
+            1 => crate::api::enigo::Button::Middle,
+            2 => crate::api::enigo::Button::Right,
+            3 => crate::api::enigo::Button::Back,
+            4 => crate::api::enigo::Button::Forward,
+            5 => crate::api::enigo::Button::ScrollUp,
+            6 => crate::api::enigo::Button::ScrollDown,
+            7 => crate::api::enigo::Button::ScrollLeft,
+            8 => crate::api::enigo::Button::ScrollRight,
+            _ => unreachable!("Invalid variant for Button: {}", inner),
+        };
     }
 }
 
@@ -4491,17 +4077,6 @@ impl SseDecode for Option<crate::api::kdbx::FileType> {
     }
 }
 
-impl SseDecode for Option<i64> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        if (<bool>::sse_decode(deserializer)) {
-            return Some(<i64>::sse_decode(deserializer));
-        } else {
-            return None;
-        }
-    }
-}
-
 impl SseDecode for Option<crate::api::kdbx::InnerCipherConfig> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -4749,34 +4324,6 @@ impl SseDecode for (String, String) {
     }
 }
 
-impl SseDecode for crate::api::enigo::Settings {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut var_linuxDelay = <u32>::sse_decode(deserializer);
-        let mut var_x11Display = <Option<String>>::sse_decode(deserializer);
-        let mut var_waylandDisplay = <Option<String>>::sse_decode(deserializer);
-        let mut var_windowsDwExtraInfo = <Option<usize>>::sse_decode(deserializer);
-        let mut var_eventSourceUserData = <Option<i64>>::sse_decode(deserializer);
-        let mut var_releaseKeysWhenDropped = <bool>::sse_decode(deserializer);
-        let mut var_openPromptToGetPermissions = <bool>::sse_decode(deserializer);
-        let mut var_independentOfKeyboardState = <bool>::sse_decode(deserializer);
-        let mut var_windowsSubjectToMouseSpeedAndAccelerationLevel =
-            <bool>::sse_decode(deserializer);
-        return crate::api::enigo::Settings {
-            linux_delay: var_linuxDelay,
-            x11_display: var_x11Display,
-            wayland_display: var_waylandDisplay,
-            windows_dw_extra_info: var_windowsDwExtraInfo,
-            event_source_user_data: var_eventSourceUserData,
-            release_keys_when_dropped: var_releaseKeysWhenDropped,
-            open_prompt_to_get_permissions: var_openPromptToGetPermissions,
-            independent_of_keyboard_state: var_independentOfKeyboardState,
-            windows_subject_to_mouse_speed_and_acceleration_level:
-                var_windowsSubjectToMouseSpeedAndAccelerationLevel,
-        };
-    }
-}
-
 impl SseDecode for crate::api::kdbx::Times {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -4923,60 +4470,60 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        15 => wire__crate__api__kdbx__Credentials_random_key_file_impl(
+        4 => wire__crate__api__kdbx__Credentials_random_key_file_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        27 => wire__crate__api__kdbx__Kdbx_action_impl(port, ptr, rust_vec_len, data_len),
-        28 => wire__crate__api__kdbx__Kdbx_actions_impl(port, ptr, rust_vec_len, data_len),
-        29 => wire__crate__api__kdbx__Kdbx_autofill_search_impl(port, ptr, rust_vec_len, data_len),
-        32 => wire__crate__api__kdbx__Kdbx_get_attachment_impl(port, ptr, rust_vec_len, data_len),
-        33 => wire__crate__api__kdbx__Kdbx_get_auto_type_sequence_impl(
+        15 => wire__crate__api__kdbx__Kdbx_action_impl(port, ptr, rust_vec_len, data_len),
+        16 => wire__crate__api__kdbx__Kdbx_actions_impl(port, ptr, rust_vec_len, data_len),
+        17 => wire__crate__api__kdbx__Kdbx_autofill_search_impl(port, ptr, rust_vec_len, data_len),
+        20 => wire__crate__api__kdbx__Kdbx_get_attachment_impl(port, ptr, rust_vec_len, data_len),
+        21 => wire__crate__api__kdbx__Kdbx_get_auto_type_sequence_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        35 => wire__crate__api__kdbx__Kdbx_get_config_impl(port, ptr, rust_vec_len, data_len),
-        36 => wire__crate__api__kdbx__Kdbx_get_custom_data_impl(port, ptr, rust_vec_len, data_len),
-        37 => wire__crate__api__kdbx__Kdbx_get_entry_impl(port, ptr, rust_vec_len, data_len),
-        38 => {
+        23 => wire__crate__api__kdbx__Kdbx_get_config_impl(port, ptr, rust_vec_len, data_len),
+        24 => wire__crate__api__kdbx__Kdbx_get_custom_data_impl(port, ptr, rust_vec_len, data_len),
+        25 => wire__crate__api__kdbx__Kdbx_get_entry_impl(port, ptr, rust_vec_len, data_len),
+        26 => {
             wire__crate__api__kdbx__Kdbx_get_entry_historys_impl(port, ptr, rust_vec_len, data_len)
         }
-        39 => wire__crate__api__kdbx__Kdbx_get_entrys_impl(port, ptr, rust_vec_len, data_len),
-        40 => wire__crate__api__kdbx__Kdbx_get_group_impl(port, ptr, rust_vec_len, data_len),
-        41 => wire__crate__api__kdbx__Kdbx_get_groups_impl(port, ptr, rust_vec_len, data_len),
-        42 => wire__crate__api__kdbx__Kdbx_get_meta_impl(port, ptr, rust_vec_len, data_len),
-        43 => wire__crate__api__kdbx__Kdbx_get_public_custom_data_impl(
+        27 => wire__crate__api__kdbx__Kdbx_get_entrys_impl(port, ptr, rust_vec_len, data_len),
+        28 => wire__crate__api__kdbx__Kdbx_get_group_impl(port, ptr, rust_vec_len, data_len),
+        29 => wire__crate__api__kdbx__Kdbx_get_groups_impl(port, ptr, rust_vec_len, data_len),
+        30 => wire__crate__api__kdbx__Kdbx_get_meta_impl(port, ptr, rust_vec_len, data_len),
+        31 => wire__crate__api__kdbx__Kdbx_get_public_custom_data_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        44 => {
+        32 => {
             wire__crate__api__kdbx__Kdbx_get_recycle_items_impl(port, ptr, rust_vec_len, data_len)
         }
-        45 => wire__crate__api__kdbx__Kdbx_get_update_meta_impl(port, ptr, rust_vec_len, data_len),
-        46 => wire__crate__api__kdbx__Kdbx_merge_impl(port, ptr, rust_vec_len, data_len),
-        47 => wire__crate__api__kdbx__Kdbx_modify_password_impl(port, ptr, rust_vec_len, data_len),
-        50 => wire__crate__api__kdbx__Kdbx_open_impl(port, ptr, rust_vec_len, data_len),
-        51 => wire__crate__api__kdbx__Kdbx_open_bytes_impl(port, ptr, rust_vec_len, data_len),
-        52 => wire__crate__api__kdbx__Kdbx_save_impl(port, ptr, rust_vec_len, data_len),
-        53 => wire__crate__api__kdbx__Kdbx_save_file_impl(port, ptr, rust_vec_len, data_len),
-        54 => wire__crate__api__kdbx__Kdbx_set_filepath_impl(port, ptr, rust_vec_len, data_len),
-        55 => wire__crate__api__kdbx__Kdbx_summary_impl(port, ptr, rust_vec_len, data_len),
-        56 => wire__crate__api__kdbx__Kdbx_to_xml_impl(port, ptr, rust_vec_len, data_len),
-        57 => {
+        33 => wire__crate__api__kdbx__Kdbx_get_update_meta_impl(port, ptr, rust_vec_len, data_len),
+        34 => wire__crate__api__kdbx__Kdbx_merge_impl(port, ptr, rust_vec_len, data_len),
+        35 => wire__crate__api__kdbx__Kdbx_modify_password_impl(port, ptr, rust_vec_len, data_len),
+        38 => wire__crate__api__kdbx__Kdbx_open_impl(port, ptr, rust_vec_len, data_len),
+        39 => wire__crate__api__kdbx__Kdbx_open_bytes_impl(port, ptr, rust_vec_len, data_len),
+        40 => wire__crate__api__kdbx__Kdbx_save_impl(port, ptr, rust_vec_len, data_len),
+        41 => wire__crate__api__kdbx__Kdbx_save_file_impl(port, ptr, rust_vec_len, data_len),
+        42 => wire__crate__api__kdbx__Kdbx_set_filepath_impl(port, ptr, rust_vec_len, data_len),
+        43 => wire__crate__api__kdbx__Kdbx_summary_impl(port, ptr, rust_vec_len, data_len),
+        44 => wire__crate__api__kdbx__Kdbx_to_xml_impl(port, ptr, rust_vec_len, data_len),
+        45 => {
             wire__crate__api__kdbx__Kdbx_verify_credentials_impl(port, ptr, rust_vec_len, data_len)
         }
-        58 => {
+        46 => {
             wire__crate__api__kdbx__attachment_get_file_type_impl(port, ptr, rust_vec_len, data_len)
         }
-        61 => wire__crate__api__kdbx__field_summary_default_impl(port, ptr, rust_vec_len, data_len),
-        64 => wire__crate__api__frb_internal_init_logger_impl(port, ptr, rust_vec_len, data_len),
-        68 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
+        49 => wire__crate__api__kdbx__field_summary_default_impl(port, ptr, rust_vec_len, data_len),
+        52 => wire__crate__api__frb_internal_init_logger_impl(port, ptr, rust_vec_len, data_len),
+        56 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -4989,52 +4536,39 @@ fn pde_ffi_dispatcher_sync_impl(
 ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        1 => wire__crate__api__enigo__Button_back_impl(ptr, rust_vec_len, data_len),
-        2 => wire__crate__api__enigo__Button_forward_impl(ptr, rust_vec_len, data_len),
-        3 => wire__crate__api__enigo__Button_left_impl(ptr, rust_vec_len, data_len),
-        4 => wire__crate__api__enigo__Button_middle_impl(ptr, rust_vec_len, data_len),
-        5 => wire__crate__api__enigo__Button_new_impl(ptr, rust_vec_len, data_len),
-        6 => wire__crate__api__enigo__Button_right_impl(ptr, rust_vec_len, data_len),
-        7 => wire__crate__api__enigo__Button_scroll_down_impl(ptr, rust_vec_len, data_len),
-        8 => wire__crate__api__enigo__Button_scroll_left_impl(ptr, rust_vec_len, data_len),
-        9 => wire__crate__api__enigo__Button_scroll_right_impl(ptr, rust_vec_len, data_len),
-        10 => wire__crate__api__enigo__Button_scroll_up_impl(ptr, rust_vec_len, data_len),
-        11 => wire__crate__api__enigo__Button_to_string_impl(ptr, rust_vec_len, data_len),
-        12 => {
+        1 => {
             wire__crate__api__kdbx__Credentials_form_composite_key_impl(ptr, rust_vec_len, data_len)
         }
-        13 => wire__crate__api__kdbx__Credentials_from_impl(ptr, rust_vec_len, data_len),
-        14 => {
+        2 => wire__crate__api__kdbx__Credentials_from_impl(ptr, rust_vec_len, data_len),
+        3 => {
             wire__crate__api__kdbx__Credentials_get_composite_key_impl(ptr, rust_vec_len, data_len)
         }
-        16 => wire__crate__api__enigo__Enigo_button_impl(ptr, rust_vec_len, data_len),
-        17 => wire__crate__api__enigo__Enigo_has_permission_impl(ptr, rust_vec_len, data_len),
-        18 => wire__crate__api__enigo__Enigo_key_impl(ptr, rust_vec_len, data_len),
-        19 => wire__crate__api__enigo__Enigo_location_impl(ptr, rust_vec_len, data_len),
-        20 => wire__crate__api__enigo__Enigo_main_display_impl(ptr, rust_vec_len, data_len),
-        21 => wire__crate__api__enigo__Enigo_move_mouse_impl(ptr, rust_vec_len, data_len),
-        22 => wire__crate__api__enigo__Enigo_new_impl(ptr, rust_vec_len, data_len),
-        23 => wire__crate__api__enigo__Enigo_preset_impl(ptr, rust_vec_len, data_len),
-        24 => wire__crate__api__enigo__Enigo_raw_impl(ptr, rust_vec_len, data_len),
-        25 => wire__crate__api__enigo__Enigo_scroll_impl(ptr, rust_vec_len, data_len),
-        26 => wire__crate__api__enigo__Enigo_text_impl(ptr, rust_vec_len, data_len),
-        30 => wire__crate__api__kdbx__Kdbx_bind_event_callback_impl(ptr, rust_vec_len, data_len),
-        31 => wire__crate__api__kdbx__Kdbx_create_impl(ptr, rust_vec_len, data_len),
-        34 => wire__crate__api__kdbx__Kdbx_get_composite_key_impl(ptr, rust_vec_len, data_len),
-        48 => wire__crate__api__kdbx__Kdbx_new_entry_impl(ptr, rust_vec_len, data_len),
-        49 => wire__crate__api__kdbx__Kdbx_new_group_impl(ptr, rust_vec_len, data_len),
-        59 => wire__crate__api__kdbx__entry_data_clone_impl(ptr, rust_vec_len, data_len),
-        60 => wire__crate__api__kdbx__entry_data_new_impl(ptr, rust_vec_len, data_len),
-        62 => wire__crate__api__kdbx__field_value_new_impl(ptr, rust_vec_len, data_len),
-        63 => wire__crate__api__frb_internal_dispose_logger_impl(ptr, rust_vec_len, data_len),
-        65 => wire__crate__api__frb_internal_logging_max_level_impl(ptr, rust_vec_len, data_len),
-        66 => wire__crate__api__frb_internal_logging_setup_dart_logging_output_impl(
+        5 => wire__crate__api__enigo__Enigo_button_impl(ptr, rust_vec_len, data_len),
+        6 => wire__crate__api__enigo__Enigo_has_permission_impl(ptr, rust_vec_len, data_len),
+        7 => wire__crate__api__enigo__Enigo_key_impl(ptr, rust_vec_len, data_len),
+        8 => wire__crate__api__enigo__Enigo_location_impl(ptr, rust_vec_len, data_len),
+        9 => wire__crate__api__enigo__Enigo_main_display_impl(ptr, rust_vec_len, data_len),
+        10 => wire__crate__api__enigo__Enigo_move_mouse_impl(ptr, rust_vec_len, data_len),
+        11 => wire__crate__api__enigo__Enigo_preset_impl(ptr, rust_vec_len, data_len),
+        12 => wire__crate__api__enigo__Enigo_raw_impl(ptr, rust_vec_len, data_len),
+        13 => wire__crate__api__enigo__Enigo_scroll_impl(ptr, rust_vec_len, data_len),
+        14 => wire__crate__api__enigo__Enigo_text_impl(ptr, rust_vec_len, data_len),
+        18 => wire__crate__api__kdbx__Kdbx_bind_event_callback_impl(ptr, rust_vec_len, data_len),
+        19 => wire__crate__api__kdbx__Kdbx_create_impl(ptr, rust_vec_len, data_len),
+        22 => wire__crate__api__kdbx__Kdbx_get_composite_key_impl(ptr, rust_vec_len, data_len),
+        36 => wire__crate__api__kdbx__Kdbx_new_entry_impl(ptr, rust_vec_len, data_len),
+        37 => wire__crate__api__kdbx__Kdbx_new_group_impl(ptr, rust_vec_len, data_len),
+        47 => wire__crate__api__kdbx__entry_data_clone_impl(ptr, rust_vec_len, data_len),
+        48 => wire__crate__api__kdbx__entry_data_new_impl(ptr, rust_vec_len, data_len),
+        50 => wire__crate__api__kdbx__field_value_new_impl(ptr, rust_vec_len, data_len),
+        51 => wire__crate__api__frb_internal_dispose_logger_impl(ptr, rust_vec_len, data_len),
+        53 => wire__crate__api__frb_internal_logging_max_level_impl(ptr, rust_vec_len, data_len),
+        54 => wire__crate__api__frb_internal_logging_setup_dart_logging_output_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        67 => wire__crate__api__kdbx__group_data_new_impl(ptr, rust_vec_len, data_len),
-        69 => wire__crate__api__enigo__test_key2key_impl(ptr, rust_vec_len, data_len),
+        55 => wire__crate__api__kdbx__group_data_new_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -5082,21 +4616,6 @@ impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<
 
 impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<Kdbx>> for Kdbx {
     fn into_into_dart(self) -> FrbWrapper<Kdbx> {
-        self.into()
-    }
-}
-
-// Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for FrbWrapper<_Button> {
-    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self.0)
-            .into_dart()
-    }
-}
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<_Button> {}
-
-impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<_Button>> for _Button {
-    fn into_into_dart(self) -> FrbWrapper<_Button> {
         self.into()
     }
 }
@@ -5262,24 +4781,42 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::kdbx::AutofillMetadata>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::enigo::Axis> {
+impl flutter_rust_bridge::IntoDart for crate::api::enigo::Axis {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        match self.0 {
-            crate::api::enigo::Axis::Horizontal => 0.into_dart(),
-            crate::api::enigo::Axis::Vertical => 1.into_dart(),
+        match self {
+            Self::Horizontal => 0.into_dart(),
+            Self::Vertical => 1.into_dart(),
             _ => unreachable!(),
         }
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for FrbWrapper<crate::api::enigo::Axis>
-{
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::enigo::Axis {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::enigo::Axis> for crate::api::enigo::Axis {
+    fn into_into_dart(self) -> crate::api::enigo::Axis {
+        self
+    }
 }
-impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::enigo::Axis>>
-    for crate::api::enigo::Axis
-{
-    fn into_into_dart(self) -> FrbWrapper<crate::api::enigo::Axis> {
-        self.into()
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::enigo::Button {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Left => 0.into_dart(),
+            Self::Middle => 1.into_dart(),
+            Self::Right => 2.into_dart(),
+            Self::Back => 3.into_dart(),
+            Self::Forward => 4.into_dart(),
+            Self::ScrollUp => 5.into_dart(),
+            Self::ScrollDown => 6.into_dart(),
+            Self::ScrollLeft => 7.into_dart(),
+            Self::ScrollRight => 8.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::enigo::Button {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::enigo::Button> for crate::api::enigo::Button {
+    fn into_into_dart(self) -> crate::api::enigo::Button {
+        self
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -5304,24 +4841,21 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::kdbx::CompressionC
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::enigo::Coordinate> {
+impl flutter_rust_bridge::IntoDart for crate::api::enigo::Coordinate {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        match self.0 {
-            crate::api::enigo::Coordinate::Abs => 0.into_dart(),
-            crate::api::enigo::Coordinate::Rel => 1.into_dart(),
+        match self {
+            Self::Abs => 0.into_dart(),
+            Self::Rel => 1.into_dart(),
             _ => unreachable!(),
         }
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for FrbWrapper<crate::api::enigo::Coordinate>
-{
-}
-impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::enigo::Coordinate>>
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::enigo::Coordinate {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::enigo::Coordinate>
     for crate::api::enigo::Coordinate
 {
-    fn into_into_dart(self) -> FrbWrapper<crate::api::enigo::Coordinate> {
-        self.into()
+    fn into_into_dart(self) -> crate::api::enigo::Coordinate {
+        self
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -5394,25 +4928,22 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::kdbx::DataTransfer
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::enigo::Direction> {
+impl flutter_rust_bridge::IntoDart for crate::api::enigo::Direction {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        match self.0 {
-            crate::api::enigo::Direction::Press => 0.into_dart(),
-            crate::api::enigo::Direction::Release => 1.into_dart(),
-            crate::api::enigo::Direction::Click => 2.into_dart(),
+        match self {
+            Self::Press => 0.into_dart(),
+            Self::Release => 1.into_dart(),
+            Self::Click => 2.into_dart(),
             _ => unreachable!(),
         }
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for FrbWrapper<crate::api::enigo::Direction>
-{
-}
-impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::enigo::Direction>>
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::enigo::Direction {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::enigo::Direction>
     for crate::api::enigo::Direction
 {
-    fn into_into_dart(self) -> FrbWrapper<crate::api::enigo::Direction> {
-        self.into()
+    fn into_into_dart(self) -> crate::api::enigo::Direction {
+        self
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -6108,46 +5639,6 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::kdbx::OuterCipherC
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::enigo::Settings> {
-    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        [
-            self.0.linux_delay.into_into_dart().into_dart(),
-            self.0.x11_display.into_into_dart().into_dart(),
-            self.0.wayland_display.into_into_dart().into_dart(),
-            self.0.windows_dw_extra_info.into_into_dart().into_dart(),
-            self.0.event_source_user_data.into_into_dart().into_dart(),
-            self.0
-                .release_keys_when_dropped
-                .into_into_dart()
-                .into_dart(),
-            self.0
-                .open_prompt_to_get_permissions
-                .into_into_dart()
-                .into_dart(),
-            self.0
-                .independent_of_keyboard_state
-                .into_into_dart()
-                .into_dart(),
-            self.0
-                .windows_subject_to_mouse_speed_and_acceleration_level
-                .into_into_dart()
-                .into_dart(),
-        ]
-        .into_dart()
-    }
-}
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for FrbWrapper<crate::api::enigo::Settings>
-{
-}
-impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::enigo::Settings>>
-    for crate::api::enigo::Settings
-{
-    fn into_into_dart(self) -> FrbWrapper<crate::api::enigo::Settings> {
-        self.into()
-    }
-}
-// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::kdbx::Times> {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -6279,13 +5770,6 @@ impl SseEncode for Kdbx {
     }
 }
 
-impl SseEncode for _Button {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<_Button>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
-    }
-}
-
 impl SseEncode for chrono::NaiveDateTime {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -6389,15 +5873,6 @@ impl SseEncode for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpa
 }
 
 impl SseEncode for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Kdbx>> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        let (ptr, size) = self.sse_encode_raw();
-        <usize>::sse_encode(ptr, serializer);
-        <i32>::sse_encode(size, serializer);
-    }
-}
-
-impl SseEncode for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<_Button>> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         let (ptr, size) = self.sse_encode_raw();
@@ -6518,6 +5993,29 @@ impl SseEncode for bool {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         serializer.cursor.write_u8(self as _).unwrap();
+    }
+}
+
+impl SseEncode for crate::api::enigo::Button {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::enigo::Button::Left => 0,
+                crate::api::enigo::Button::Middle => 1,
+                crate::api::enigo::Button::Right => 2,
+                crate::api::enigo::Button::Back => 3,
+                crate::api::enigo::Button::Forward => 4,
+                crate::api::enigo::Button::ScrollUp => 5,
+                crate::api::enigo::Button::ScrollDown => 6,
+                crate::api::enigo::Button::ScrollLeft => 7,
+                crate::api::enigo::Button::ScrollRight => 8,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
     }
 }
 
@@ -7403,16 +6901,6 @@ impl SseEncode for Option<crate::api::kdbx::FileType> {
     }
 }
 
-impl SseEncode for Option<i64> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <bool>::sse_encode(self.is_some(), serializer);
-        if let Some(value) = self {
-            <i64>::sse_encode(value, serializer);
-        }
-    }
-}
-
 impl SseEncode for Option<crate::api::kdbx::InnerCipherConfig> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -7634,24 +7122,6 @@ impl SseEncode for (String, String) {
     }
 }
 
-impl SseEncode for crate::api::enigo::Settings {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <u32>::sse_encode(self.linux_delay, serializer);
-        <Option<String>>::sse_encode(self.x11_display, serializer);
-        <Option<String>>::sse_encode(self.wayland_display, serializer);
-        <Option<usize>>::sse_encode(self.windows_dw_extra_info, serializer);
-        <Option<i64>>::sse_encode(self.event_source_user_data, serializer);
-        <bool>::sse_encode(self.release_keys_when_dropped, serializer);
-        <bool>::sse_encode(self.open_prompt_to_get_permissions, serializer);
-        <bool>::sse_encode(self.independent_of_keyboard_state, serializer);
-        <bool>::sse_encode(
-            self.windows_subject_to_mouse_speed_and_acceleration_level,
-            serializer,
-        );
-    }
-}
-
 impl SseEncode for crate::api::kdbx::Times {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -7830,20 +7300,6 @@ mod io {
     ) {
         MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Kdbx>>::decrement_strong_count(ptr as _);
     }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_keepass_core_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<_Button>>::increment_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_keepass_core_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<_Button>>::decrement_strong_count(ptr as _);
-    }
 }
 #[cfg(not(target_family = "wasm"))]
 pub use io::*;
@@ -7911,20 +7367,6 @@ mod web {
         ptr: *const std::ffi::c_void,
     ) {
         MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Kdbx>>::decrement_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<_Button>>::increment_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInner_Button(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<_Button>>::decrement_strong_count(ptr as _);
     }
 }
 #[cfg(target_family = "wasm")]
