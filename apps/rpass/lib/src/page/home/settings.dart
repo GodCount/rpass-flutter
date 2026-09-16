@@ -358,6 +358,7 @@ class _SettingsPageState extends State<SettingsPage>
             if (kIsDesktop)
               ListTile(
                 title: Text(t.shortcuts),
+                enabled: Store.settings.shortcutsStore.isSupported,
                 selected: childRouteName == ShortcutsSettingsRoute.name,
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () {

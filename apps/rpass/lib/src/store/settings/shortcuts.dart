@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
@@ -58,6 +60,10 @@ class ShortcutsStore with SimpleObserverListener<ShortcutsHotHandler> {
   final defaultHotKeys = genDefaultHotKeys();
 
   final Map<String, HotKey> hotKeys = genDefaultHotKeys();
+
+  bool _isSupported = true;
+
+  bool get isSupported => _isSupported;
 
   ShortcutsOpenAppAlignment _shortcutsOpenAppAlignment =
       ShortcutsOpenAppAlignment.mouseScreenCenter;
@@ -162,6 +168,12 @@ class ShortcutsStore with SimpleObserverListener<ShortcutsHotHandler> {
 
   Future<void> init() async {
     if (kIsDesktop) {
+      // wayland 无法配置全局快捷键
+      if (Platform.isLinux && String.fromEnvironment("XDG_SESSION_TYPE") == "wayland") {
+        _isSupported = false;
+        return;
+      }
+
       _shortcutsOpenAppAlignment = await _settingsService
           .getShortcutsOpenAppAlignment();
 
