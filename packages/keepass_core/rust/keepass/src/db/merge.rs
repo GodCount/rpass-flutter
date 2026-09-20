@@ -747,7 +747,7 @@ fn merge_icons(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog)
                 }
             }
 
-            dest_db.custom_icons.remove(&id);
+            dest_db.custom_icons.shift_remove(&id);
             dest_db.deleted_objects.insert(id.uuid(), *deletion_time);
 
             log.events.push(MergeEvent {

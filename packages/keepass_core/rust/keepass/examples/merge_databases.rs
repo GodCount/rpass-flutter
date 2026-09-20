@@ -61,14 +61,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             MergeEventType::Deleted => "deleted",
             MergeEventType::LocationUpdated => "moved",
             MergeEventType::Updated => "updated",
-            _ => "changed",
         };
         let what = match target {
             MergeEventTarget::Entry(id) => format!("entry {id}"),
             MergeEventTarget::Group(id) => format!("group {id}"),
             MergeEventTarget::Icon(id) => format!("icon {id}"),
-            // `MergeEventTarget` is `#[non_exhaustive]`.
-            _ => "object".to_string(),
         };
         println!("  - {kind} {what}");
     }

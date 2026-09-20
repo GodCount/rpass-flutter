@@ -992,7 +992,7 @@ impl Kdbx {
                             },
                         );
                     } else if db.meta.custom_data.contains_key(&key) {
-                        db.meta.custom_data.remove(&key);
+                        db.meta.custom_data.shift_remove(&key);
                     }
                 }
             }
