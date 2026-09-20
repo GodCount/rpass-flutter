@@ -1,0 +1,58 @@
+name: Build Windows
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+env:
+  FLUTTER_VERSION: "3.38.10"
+
+jobs:
+  build_windows:
+    name: "Release for windows"
+    runs-on: "windows-latest"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Enable Git longpaths
+        run: git config --system core.longpaths true
+
+      - name: Decode Certificate
+        shell: pwsh
+        run: |
+          $certBytes = [Convert]::FromBase64String("${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}")
+          [IO.File]::WriteAllBytes("certificate.pfx", $certBytes)
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - uses: bluefireteam/melos-action@v3
+
+      - name: Build windows
+        run: |
+          cd apps/rpass
+          flutter build windows --release
+
+      - name: Sign Executables
+        shell: pwsh
+        run: |
+          $signtool = Resolve-Path "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Path
+          $files = Get-ChildItem -Path apps/rpass/build/windows/x64/runner/Release -Include *.exe,*.dll -Recurse
+          foreach ($file in $files) {
+            &"$signtool" sign /f certificate.pfx /p "${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}" /tr http://timestamp.digicert.com /fd sha256 /td sha256 $file.FullName
+          }
+
+      - name: Create Zip
+        run: |
+          Compress-Archive apps/rpass/build/windows/x64/runner/Release/* Rpass.zip
+
+      - name: Upload Zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows_outputs
+          path: Rpass.zip

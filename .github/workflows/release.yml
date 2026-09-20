@@ -1,178 +1,23 @@
-name: Release
+name: Release Draft
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - "v*"
 
-env:
-  FLUTTER_VERSION: "3.38.7"
+permissions:
+  contents: write
+  pull-requests: read
 
 jobs:
   build_android:
-    name: "Release for Android"
-    runs-on: ubuntu-latest
-    permissions: write-all
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Extract tag name
-        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-        shell: bash
-
-      - name: Echo build progress
-        run: echo "Rpass-${{ env.tag }}.apk build progress"
-        shell: bash
-
-      - name: Decode key.properties file
-        env:
-          ENCODED_STRING: ${{ secrets.ANDROID_KEY_PROPERTIES }}
-        run: echo $ENCODED_STRING | base64 -di > apps/rpass/android/key.properties
-
-      - name: Decode android-keystore.jks file
-        env:
-          ENCODED_STRING: ${{ secrets.ANDROID_KEY_STORE }}
-        run: mkdir secrets && echo $ENCODED_STRING | base64 -di > apps/rpass/android/android-keystore.jks
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "17"
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-
-      - uses: bluefireteam/melos-action@v3
-
-      - name: Build Android
-        run: |
-          cd apps/rpass
-          flutter build apk --release --split-per-abi --target-platform android-arm,android-arm64,android-x64
-
-      - name: Move and Rename Apk
-        run: |
-          base_path=apps/rpass/build/app/outputs/flutter-apk/
-          apk_name="Rpass-${{ env.tag }}"
-          mkdir -p build/dist/android
-          cp $base_path/app-arm64-v8a-release.apk build/dist/android/$apk_name-arm64-v8a.apk
-          cp $base_path/app-armeabi-v7a-release.apk build/dist/android/$apk_name-armeabi-v7a.apk
-          cp $base_path/app-x86_64-release.apk build/dist/android/$apk_name-x86_64.apk
-
-      - name: Upload Android
-        uses: actions/upload-artifact@v4
-        with:
-          name: android_outputs
-          path: build/dist/android/*
+    uses: ./.github/workflows/build_android.yml
+    secrets: inherit
 
   build_macos:
-    name: "Release for MacOS"
-    runs-on: macos-latest
-    permissions: write-all
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Extract tag name
-        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-
-      - name: Echo build progress
-        run: echo "Rpass-${{ env.tag }}.dmg build progress"
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-
-      - uses: bluefireteam/melos-action@v3
-
-      - name: Build MacOS
-        run: |
-          cd apps/rpass
-          flutter build macos --release
-
-      - name: Create DMG
-        run: |
-          mkdir -p build/dist/macos
-          cp -a apps/rpass/build/macos/Build/Products/Release/Rpass.app build/dist/macos
-          ln -s /Applications build/dist/macos/Applications
-          hdiutil create -format UDZO -srcfolder build/dist/macos -volname Rpass Rpass-${{ env.tag }}.dmg
-
-      - name: Upload Android
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos_outputs
-          path: Rpass-*.dmg
+    uses: ./.github/workflows/build_macos.yml
 
   build_windows:
-    name: "Release for windows"
-    runs-on: "windows-latest"
-    permissions: write-all
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Extract tag name
-        run: |
-          $tag = "${{ github.ref }}".Replace('refs/tags/', '')
-          echo "tag=$(echo $tag)" >> $env:GITHUB_ENV
-
-      - name: Echo build progress
-        run: echo "Rpass_windows_${env:tag}.zip build progress"
-
-      - name: Decode Certificate
-        shell: pwsh
-        run: |
-          $certBytes = [Convert]::FromBase64String("${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}")
-          [IO.File]::WriteAllBytes("certificate.pfx", $certBytes)
-
-      - name: Enable Git longpaths
-        run: git config --system core.longpaths true
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-
-      - uses: bluefireteam/melos-action@v3
-
-      - name: Build windows
-        run: |
-          cd apps/rpass
-          flutter build windows --release
-
-      - name: Sign Executables
-        shell: pwsh
-        run: |
-          $signtool = Resolve-Path "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Path
-          $files = Get-ChildItem -Path apps/rpass/build/windows/x64/runner/Release -Include *.exe,*.dll -Recurse
-          foreach ($file in $files) {
-            &"$signtool" sign /f certificate.pfx /p "${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}" /tr http://timestamp.digicert.com /fd sha256 /td sha256 $file.FullName
-          }
-
-      - name: Create Zip
-        run: |
-          Compress-Archive apps/rpass/build/windows/x64/runner/Release/* Rpass_windows_${env:tag}.zip
-
-      - name: Upload Android
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows_outputs
-          path: |
-            Rpass_windows_*.zip
+    uses: ./.github/workflows/build_windows.yml
+    secrets: inherit
 
   release:
     needs:
@@ -180,47 +25,59 @@ jobs:
       - build_macos
       - build_windows
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extract tag name
-        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-        shell: bash
+      - name: Get version from pubspec.yaml
+        id: get_version
+        run: |
+          VERSION=$(sed -n 's/^version: \([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p' apps/rpass/pubspec.yaml)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Resolved version: $VERSION"
 
-      - name: Get latest Notes
-        uses: yashanand1910/standard-release-notes@v1.4.0
-        id: get_release_notes
+      - name: Draft release
+        id: draft_release
+        uses: release-drafter/release-drafter@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          version: ${{ env.tag }}
+          tag: v${{ steps.get_version.outputs.version }}
+          name: v${{ steps.get_version.outputs.version }}
 
-      - name: Download Android
+      - name: Download APK
         uses: actions/download-artifact@v4
         with:
           name: android_outputs
-          path: dist
+          path: dist/apk
 
-      - name: Download MacOS
+      - name: Download macOS
         uses: actions/download-artifact@v4
         with:
           name: macos_outputs
-          path: dist
+          path: dist/macos
 
       - name: Download Windows
         uses: actions/download-artifact@v4
         with:
           name: windows_outputs
-          path: dist
+          path: dist/windows
 
-      - name: Draft release
+      - name: Rename assets
+        env:
+          VERSION: ${{ steps.get_version.outputs.version }}
+        run: |
+          mkdir -p dist/upload
+          cp dist/apk/app-armeabi-v7a-release.apk "dist/upload/Rpass-v${VERSION}-android-armeabi-v7a.apk"
+          cp dist/apk/app-arm64-v8a-release.apk "dist/upload/Rpass-v${VERSION}-android-arm64-v8a.apk"
+          cp dist/apk/app-x86_64-release.apk "dist/upload/Rpass-v${VERSION}-android-x86_64.apk"
+          cp dist/macos/Rpass.dmg "dist/upload/Rpass-v${VERSION}-macos.dmg"
+          cp dist/windows/Rpass.zip "dist/upload/Rpass-v${VERSION}-windows.zip"
+
+      - name: Upload release assets
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            dist/*.apk
-            dist/*.dmg
-            dist/*.zip
-          draft: false
-          generate_release_notes: true
+          tag_name: v${{ steps.get_version.outputs.version }}
+          draft: true
+          files: dist/upload/*
           fail_on_unmatched_files: true
-          body: ${{ steps.get_release_notes.outputs.release_notes }}
           token: ${{ secrets.GITHUB_TOKEN }}
