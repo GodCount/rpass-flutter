@@ -1,7 +1,7 @@
 //! Examples for creating and saving a KeePass database
 use keepass::{
-    db::{fields, Database},
     DatabaseKey,
+    db::{Database, fields},
 };
 use std::fs::File;
 

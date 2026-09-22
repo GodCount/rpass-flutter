@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, LittleEndian};
 use hex_literal::hex;
-use hybrid_array::{typenum::U64, Array as GenericArray};
+use hybrid_array::{Array as GenericArray, typenum::U64};
 use thiserror::Error;
 
 pub const HMAC_KEY_END: [u8; 1] = hex!("01");

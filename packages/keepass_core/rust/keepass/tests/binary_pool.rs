@@ -6,7 +6,7 @@ mod common;
 
 use common::combo_by_label;
 use keepass::db::{Database, Value};
-use rand::{rngs::StdRng, RngCore, SeedableRng};
+use rand::{RngCore, SeedableRng, rngs::StdRng};
 
 fn drive(label: &str, payloads: Vec<Vec<u8>>) {
     let combo = combo_by_label("aes256+none+inner-chacha20+argon2d");

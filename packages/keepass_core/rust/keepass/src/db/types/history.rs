@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
 
-use crate::{db::Entry, Database};
+use crate::{Database, db::Entry};
 
 /// An entry's history
 #[derive(Debug, Default, Eq, PartialEq, Clone)]

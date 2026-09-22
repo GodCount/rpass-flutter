@@ -5,7 +5,7 @@
 
 mod common;
 
-use common::{combo_by_label, fast_combo, DEMO_PASSWORD};
+use common::{DEMO_PASSWORD, combo_by_label, fast_combo};
 use keepass::error::{DatabaseKeyError, DatabaseOpenError, DatabaseVersionParseError};
 use keepass::{Database, DatabaseKey};
 

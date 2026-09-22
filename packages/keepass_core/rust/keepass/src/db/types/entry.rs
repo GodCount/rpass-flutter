@@ -9,13 +9,13 @@ use thiserror::Error;
 use uuid::Uuid;
 
 use crate::{
-    db::{
-        attachment::{AttachmentMut, AttachmentRef},
-        fields, Attachment, AttachmentId, AutoType, Color, CustomDataItem, CustomIcon, CustomIconId,
-        CustomIconMut, CustomIconNotFoundError, CustomIconRef, GroupId, GroupMut, GroupRef, History, Icon,
-        Times, Value,
-    },
     Database,
+    db::{
+        Attachment, AttachmentId, AutoType, Color, CustomDataItem, CustomIcon, CustomIconId, CustomIconMut,
+        CustomIconNotFoundError, CustomIconRef, GroupId, GroupMut, GroupRef, History, Icon, Times, Value,
+        attachment::{AttachmentMut, AttachmentRef},
+        fields,
+    },
 };
 
 /// Unique identifier for an [Entry]
@@ -326,7 +326,7 @@ impl Deref for EntryRef<'_> {
         if let Some(id) = self.history_id {
             // UNWRAP safety: history existance checked on EntryRef creation
             #[allow(clippy::unwrap_used, clippy::indexing_slicing)]
-            &entry.history.as_ref().unwrap().get_entry(id).unwrap()
+            entry.history.as_ref().unwrap().get_entry(id).unwrap()
         } else {
             entry
         }
@@ -588,6 +588,7 @@ impl EntryMut<'_> {
 
             // if this was the last entry referencing the attachment, remove it from the database
             if icon.entries.is_empty() && icon.groups.is_empty() {
+                #[allow(clippy::unwrap_used)]
                 icon.remove().unwrap();
             }
         });
@@ -599,6 +600,7 @@ impl EntryMut<'_> {
 
             // if this was the last entry referencing the attachment, remove it from the database
             if attachment.entries.is_empty() {
+                #[allow(clippy::unwrap_used)]
                 attachment.remove().unwrap();
             }
         });
@@ -616,25 +618,25 @@ impl EntryMut<'_> {
         // This field is a UI hint and should not hold a dangling EntryId.
         let group_ids: Vec<GroupId> = self.database.groups.keys().copied().collect();
         for group_id in group_ids {
-            if let Some(group) = self.database.groups.get_mut(&group_id) {
-                if group.last_top_visible_entry == Some(id) {
-                    group.last_top_visible_entry = None;
-                }
+            if let Some(group) = self.database.groups.get_mut(&group_id)
+                && group.last_top_visible_entry == Some(id)
+            {
+                group.last_top_visible_entry = None;
             }
         }
     }
 
     /// Clean entry history
-    pub fn cleanup(&mut self) -> () {
+    pub fn cleanup(&mut self) {
         let history_max_items = self.database.meta.history_max_items.unwrap_or(-1);
         let history_max_size = self.database.meta.history_max_size.unwrap_or(-1);
 
         let mut removed: Vec<Entry> = Vec::new();
 
-        if history_max_items > -1 {
-            if let Some(history) = self.history.as_mut() {
-                removed.extend(history.truncate(history_max_items as usize));
-            }
+        if history_max_items > -1
+            && let Some(history) = self.history.as_mut()
+        {
+            removed.extend(history.truncate(history_max_items as usize));
         }
 
         if history_max_size > -1 {
@@ -645,8 +647,8 @@ impl EntryMut<'_> {
                 let len = sizes.len();
                 let mut acc = 0;
 
-                for i in 0..len {
-                    acc += sizes[i];
+                for (i, item) in sizes.iter().enumerate().take(len) {
+                    acc += item;
 
                     if acc > history_max_size {
                         return Some(i);
@@ -664,10 +666,10 @@ impl EntryMut<'_> {
         // Clear backreferences for attachments and icons
         for item in removed {
             let entry_id = (item.id, item.times.last_modification);
-            if let Some(Icon::Custom(id)) = item.icon {
-                if let Some(mut icon) = self.database.custom_icon_mut(id) {
-                    icon.entries.retain(|item| item != &entry_id);
-                }
+            if let Some(Icon::Custom(id)) = item.icon
+                && let Some(mut icon) = self.database.custom_icon_mut(id)
+            {
+                icon.entries.retain(|item| item != &entry_id);
             }
 
             for attach_id in item.attachments.into_values() {
@@ -690,9 +692,8 @@ impl Deref for EntryMut<'_> {
     #[allow(clippy::expect_used, clippy::missing_panics_doc)] // entry existence is guaranteed
     fn deref(&self) -> &Self::Target {
         // UNWRAP safety: EntryMut can only be constructed with a valid EntryId
-        let entry = self.database.entries.get(&self.id).expect("Entry not found");
 
-        entry
+        (self.database.entries.get(&self.id).expect("Entry not found")) as _
     }
 }
 
@@ -700,9 +701,8 @@ impl DerefMut for EntryMut<'_> {
     #[allow(clippy::expect_used, clippy::missing_panics_doc)] // entry existence is guaranteed
     fn deref_mut(&mut self) -> &mut Self::Target {
         // UNWRAP safety: EntryMut can only be constructed with a valid EntryId
-        let entry = self.database.entries.get_mut(&self.id).expect("Entry not found");
 
-        entry
+        (self.database.entries.get_mut(&self.id).expect("Entry not found")) as _
     }
 }
 
@@ -859,11 +859,11 @@ impl Drop for EntryTrack<'_> {
             let historical = std::mem::replace(&mut self.historical, Entry::new(parent_id));
 
             // This is a new history, set its backreference
-            if let Some(Icon::Custom(id)) = historical.icon {
-                if let Some(mut icon) = entry.database.custom_icon_mut(id) {
-                    icon.entries
-                        .insert((historical.id, historical.times.last_modification));
-                }
+            if let Some(Icon::Custom(id)) = historical.icon
+                && let Some(mut icon) = entry.database.custom_icon_mut(id)
+            {
+                icon.entries
+                    .insert((historical.id, historical.times.last_modification));
             }
 
             for attach_id in historical.attachments.values() {
@@ -886,8 +886,8 @@ impl Drop for EntryTrack<'_> {
 mod tests {
 
     use crate::{
-        db::{fields, Value},
         Database,
+        db::{Value, fields},
     };
 
     #[test]
@@ -948,11 +948,12 @@ mod tests {
             1
         );
 
-        assert!(db
-            .entry(entry_id)
-            .unwrap()
-            .attachments
-            .contains_key("Attachment 1"));
+        assert!(
+            db.entry(entry_id)
+                .unwrap()
+                .attachments
+                .contains_key("Attachment 1")
+        );
 
         assert_eq!(
             db.entry(entry_id).unwrap().get(fields::TITLE).unwrap(),
@@ -960,11 +961,12 @@ mod tests {
         );
 
         // test moving to a non-existent group returns an error and does not modify the entry
-        assert!(db
-            .entry_mut(entry_id)
-            .unwrap()
-            .move_to(crate::db::GroupId::new())
-            .is_err());
+        assert!(
+            db.entry_mut(entry_id)
+                .unwrap()
+                .move_to(crate::db::GroupId::new())
+                .is_err()
+        );
 
         db.entry_mut(entry_id).unwrap().edit(|e| {
             let mut att = e.attachment_by_name_mut("Attachment 1").unwrap();

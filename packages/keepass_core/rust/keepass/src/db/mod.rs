@@ -68,7 +68,7 @@ pub use crate::db::{
 };
 
 #[cfg(feature = "totp")]
-pub use crate::db::otp::{TOTPAlgorithm, TOTPError, TOTP};
+pub use crate::db::otp::{TOTP, TOTPAlgorithm, TOTPError};
 
 pub use uuid::{Error, Uuid};
 
@@ -83,7 +83,7 @@ pub fn uuid_by_str(uuid: &str) -> Result<uuid::Uuid, uuid::Error> {
 mod database_tests {
     use std::fs::File;
 
-    use crate::{db::DatabaseOpenError, Database, DatabaseKey};
+    use crate::{Database, DatabaseKey, db::DatabaseOpenError};
 
     #[test]
     fn test_xml() -> Result<(), DatabaseOpenError> {
@@ -100,16 +100,20 @@ mod database_tests {
     #[test]
     fn test_open_invalid_version_header_size() {
         assert!(Database::parse(&[], DatabaseKey::new().with_password("testing")).is_err());
-        assert!(Database::parse(
-            &[0, 0, 0, 0, 0, 0, 0, 0],
-            DatabaseKey::new().with_password("testing")
-        )
-        .is_err());
-        assert!(Database::parse(
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            DatabaseKey::new().with_password("testing")
-        )
-        .is_err());
+        assert!(
+            Database::parse(
+                &[0, 0, 0, 0, 0, 0, 0, 0],
+                DatabaseKey::new().with_password("testing")
+            )
+            .is_err()
+        );
+        assert!(
+            Database::parse(
+                &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                DatabaseKey::new().with_password("testing")
+            )
+            .is_err()
+        );
     }
 
     #[cfg(feature = "save_kdbx4")]

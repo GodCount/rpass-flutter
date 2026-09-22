@@ -1,7 +1,7 @@
 use crate::{
     config::{CompressionConfig, DatabaseConfig, InnerCipherConfig, KdfConfig, OuterCipherConfig},
     crypt::calculate_sha256,
-    db::{fields, Database, DatabaseFormatError, DatabaseOpenError, GroupId, Value},
+    db::{Database, DatabaseFormatError, DatabaseOpenError, GroupId, Value, fields},
     format::DatabaseVersion,
     key::{DatabaseKey, DatabaseKeyError},
 };
@@ -13,6 +13,7 @@ use zeroize::Zeroize;
 
 use std::convert::TryFrom;
 
+use hybrid_array::Array as GenericArray;
 #[derive(Debug)]
 struct KDBHeader {
     // https://gist.github.com/lgg/e6ccc6e212d18dd2ecd8a8c116fb1e45
@@ -107,16 +108,16 @@ fn parse_groups(
             .get(6..6 + field_size as usize)
             .ok_or(DatabaseOpenError::UnexpectedEof)?;
 
-        if let Some(expected_field_size) = expected_group_field_size(field_type) {
-            if expected_field_size != field_size {
-                return Err(DatabaseOpenError::Format(DatabaseFormatError::Kdb(
-                    KdbOpenError::InvalidFieldLength {
-                        field_type,
-                        field_size,
-                        expected_field_size,
-                    },
-                )));
-            }
+        if let Some(expected_field_size) = expected_group_field_size(field_type)
+            && expected_field_size != field_size
+        {
+            return Err(DatabaseOpenError::Format(DatabaseFormatError::Kdb(
+                KdbOpenError::InvalidFieldLength {
+                    field_type,
+                    field_size,
+                    expected_field_size,
+                },
+            )));
         }
 
         match field_type {
@@ -253,16 +254,16 @@ fn parse_entries(
             .get(6..6 + field_size as usize)
             .ok_or(DatabaseOpenError::UnexpectedEof)?;
 
-        if let Some(expected_field_size) = expected_entry_field_size(field_type) {
-            if expected_field_size != field_size {
-                return Err(DatabaseOpenError::Format(DatabaseFormatError::Kdb(
-                    KdbOpenError::InvalidFieldLength {
-                        field_type,
-                        field_size,
-                        expected_field_size,
-                    },
-                )));
-            }
+        if let Some(expected_field_size) = expected_entry_field_size(field_type)
+            && expected_field_size != field_size
+        {
+            return Err(DatabaseOpenError::Format(DatabaseFormatError::Kdb(
+                KdbOpenError::InvalidFieldLength {
+                    field_type,
+                    field_size,
+                    expected_field_size,
+                },
+            )));
         }
 
         match field_type {
@@ -397,7 +398,17 @@ pub(crate) fn parse_kdb(data: &[u8], db_key: &DatabaseKey) -> Result<Database, D
     let payload_encrypted = data.get(HEADER_SIZE..).ok_or(DatabaseOpenError::UnexpectedEof)?;
 
     // derive master key from composite key, transform_seed, transform_rounds and master_seed
-    let composite_key = db_key.get_composite_key()?;
+    let key_elements = db_key.get_key_elements()?;
+    let key_elements: Vec<&[u8]> = key_elements.iter().map(|v| &v[..]).collect();
+    let composite_key = if key_elements.len() == 1 {
+        #[allow(clippy::indexing_slicing, clippy::expect_used)] // key_elements is guaranteed to be 1 byte
+        let key_element: [u8; 32] = key_elements[0]
+            .try_into()
+            .expect("initializing from single element should always succeed");
+        GenericArray::from(key_element) // single pass of SHA256, already done before the call to parse()
+    } else {
+        calculate_sha256(&key_elements) // second pass of SHA256
+    };
 
     // KDF is always AES
     let kdf_config = KdfConfig::Aes {

@@ -419,8 +419,7 @@ class _AutoFillDomainBlacklistState extends State<_AutoFillDomainBlacklist> {
     final t = I18n.of(context)!;
     final kdbxProvider = Store.kdbx;
 
-    final autoFillDomainBlacklist =
-        Store.settings.autoFillDomainBlacklist;
+    final autoFillDomainBlacklist = Store.settings.autoFillDomainBlacklist;
 
     final result = await InputDialog.openDialog(
       context,
@@ -445,8 +444,7 @@ class _AutoFillDomainBlacklistState extends State<_AutoFillDomainBlacklist> {
   Widget build(BuildContext context) {
     final t = I18n.of(context)!;
 
-    final autoFillDomainBlacklist =
-        Store.settings.autoFillDomainBlacklist;
+    final autoFillDomainBlacklist = Store.settings.autoFillDomainBlacklist;
 
     return AlertDialog(
       title: Row(

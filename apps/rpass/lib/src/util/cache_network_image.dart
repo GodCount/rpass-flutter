@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+
+import 'package:dio/dio.dart';
 
 final _logger = Logger("util:cache_network_image");
 
@@ -20,44 +21,26 @@ abstract class BaseCacheManager<T> {
 }
 
 class FetchNetworkImage {
-  // Do not access this field directly; use [_httpClient] instead.
-  // We set `autoUncompress` to false to ensure that we can trust the value of
-  // the `Content-Length` HTTP header. We automatically uncompress the content
-  // in our call to [consolidateHttpClientResponseBytes].
   @protected
-  static final HttpClient sharedHttpClient = HttpClient()
-    ..autoUncompress = false;
+  static final Dio dio = Dio();
 
-  Future<Uint8List> fetch(
+  Future<Response<Uint8List>> fetch(
     String url, {
-    BytesReceivedCallback? onBytesReceived,
+    ProgressCallback? onReceiveProgress,
   }) async {
-    final Uri resolved = Uri.base.resolve(url);
-
-    final HttpClientRequest request = await sharedHttpClient.getUrl(resolved);
-
-    final HttpClientResponse response = await request.close();
-
-    if (response.statusCode != HttpStatus.ok) {
-      // The network may be only temporarily unavailable, or the file will be
-      // added on the server later. Avoid having future calls to resolve
-      // fail to check the network again.
-      await response.drain<List<int>>(<int>[]);
-      throw NetworkImageLoadException(
-        statusCode: response.statusCode,
-        uri: resolved,
-      );
-    }
-
-    final Uint8List bytes = await consolidateHttpClientResponseBytes(
-      response,
-      onBytesReceived: onBytesReceived,
+    final Response<Uint8List> response = await dio.fetch(
+      RequestOptions(
+        baseUrl: url,
+        responseType: .bytes,
+        onReceiveProgress: onReceiveProgress,
+      ),
     );
 
-    if (bytes.lengthInBytes == 0) {
-      throw Exception('FetchNetworkImage is an empty file: $resolved');
+    if (response.data == null || response.data!.isEmpty) {
+      throw Exception('FetchNetworkImage is an empty file: $url');
     }
-    return bytes;
+
+    return response;
   }
 }
 
@@ -168,9 +151,9 @@ class CacheNetworkImage extends ImageProvider<CacheNetworkImage> {
         );
       }
 
-      bytes ??= await _fetchNetworkImage.fetch(
+      bytes ??= (await _fetchNetworkImage.fetch(
         key.url,
-        onBytesReceived: (cumulative, total) {
+        onReceiveProgress: (cumulative, total) {
           chunkEvents.add(
             ImageChunkEvent(
               cumulativeBytesLoaded: cumulative,
@@ -178,7 +161,7 @@ class CacheNetworkImage extends ImageProvider<CacheNetworkImage> {
             ),
           );
         },
-      );
+      )).data!;
 
       Future<ui.Codec> warpDecode(ui.ImmutableBuffer buffer) async {
         try {

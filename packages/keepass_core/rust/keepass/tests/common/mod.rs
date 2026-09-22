@@ -4,14 +4,14 @@
 use std::io::Cursor;
 
 use keepass::{
+    DatabaseKey,
     config::{
         CompressionConfig, DatabaseConfig, DatabaseVersion, InnerCipherConfig, KdfConfig, OuterCipherConfig,
     },
     db::{CustomDataItem, CustomDataValue, Database, Value},
-    DatabaseKey,
 };
 
-use rand::{rngs::StdRng, RngCore, SeedableRng};
+use rand::{RngCore, SeedableRng, rngs::StdRng};
 
 use sha2::{Digest, Sha256};
 
@@ -59,8 +59,8 @@ impl KeyfileKind {
             KeyfileKind::Raw32(k) => k.to_vec(),
             KeyfileKind::Hex(k) => hex::encode(k).into_bytes(),
             KeyfileKind::XmlV1(k) => {
-                use base64::engine::general_purpose::STANDARD;
                 use base64::Engine as _;
+                use base64::engine::general_purpose::STANDARD;
                 let b64 = STANDARD.encode(k);
                 format!(
                     "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<KeyFile>\n  <Meta><Version>1.00</Version></Meta>\n  <Key><Data>{b64}</Data></Key>\n</KeyFile>\n"

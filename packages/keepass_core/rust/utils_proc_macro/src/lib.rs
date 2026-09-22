@@ -31,9 +31,7 @@ impl Parse for ConstantInput {
     }
 }
 
-
 /// 创建rust 字符串常量, 并生成一个 dart对象同时包含常量
-
 #[proc_macro]
 pub fn frb_string_constant(input: TokenStream) -> TokenStream {
     let ConstantInput { struct_name, pairs } = parse_macro_input!(input as ConstantInput);

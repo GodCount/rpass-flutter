@@ -72,16 +72,16 @@ class LanFillCilent {
       ..setTrustedCertificatesBytes(storedSecurity.certificateBytes);
 
     return HttpClient(context: context);
-      // ..badCertificateCallback =
-      //     (X509Certificate certificate, String host, int port) {
-      //       log(
-      //         "badCertificateCallback pem hash==> ${calculateHashOfCertificate(certificate.pem)}",
-      //       );
-      //       log(
-      //         "badCertificateCallback der hash==> ${der2sha256(certificate.der)}",
-      //       );
-      //       return false;
-      //     };
+    // ..badCertificateCallback =
+    //     (X509Certificate certificate, String host, int port) {
+    //       log(
+    //         "badCertificateCallback pem hash==> ${calculateHashOfCertificate(certificate.pem)}",
+    //       );
+    //       log(
+    //         "badCertificateCallback der hash==> ${der2sha256(certificate.der)}",
+    //       );
+    //       return false;
+    //     };
   }
 
   Future<void> start([StoredSecurityContext? storedSecurity]) async {

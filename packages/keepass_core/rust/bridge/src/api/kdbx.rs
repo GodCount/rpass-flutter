@@ -4,13 +4,13 @@ use std::io::Write;
 use std::sync::{Arc, RwLock};
 use std::{collections::HashSet, fs::File};
 
-use flutter_rust_bridge::{frb, BaseAsyncRuntime, DartFnFuture};
+use flutter_rust_bridge::{BaseAsyncRuntime, DartFnFuture, frb};
 use keepass::config::{DatabaseVersion, KDBX4_CURRENT_MINOR_VERSION};
 use keepass::db::merge::{
-    MergeError, CUSTOM_COLOR_CHANGED, CUSTOM_DATABASE_CONFIG_CHANGED,
-    CUSTOM_HISTORY_MAX_ITEMS_CHANGED, CUSTOM_HISTORY_MAX_SIZE_CHANGED,
-    CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED, CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
-    CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED, CUSTOM_MEMORY_PROTECTION_CHANGED,
+    CUSTOM_COLOR_CHANGED, CUSTOM_DATABASE_CONFIG_CHANGED, CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
+    CUSTOM_HISTORY_MAX_SIZE_CHANGED, CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
+    CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED, CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
+    CUSTOM_MEMORY_PROTECTION_CHANGED, MergeError,
 };
 use keepass::db::{
     AttachmentId, CannotDeleteRootError, CustomIconId, CustomIconNotFoundError,
@@ -20,9 +20,9 @@ use keepass::db::{
 };
 use keepass::error::{DatabaseKeyError, DatabaseVersionParseError, RandomError};
 use keepass::{
-    config::{DatabaseConfig, KdfConfig as KdfConfig2},
-    db::{uuid_by_str, EntryRef, Error as UuidError, Uuid},
     Database, DatabaseKey, KeyFile,
+    config::{DatabaseConfig, KdfConfig as KdfConfig2},
+    db::{EntryRef, Error as UuidError, Uuid, uuid_by_str},
 };
 
 use chrono::NaiveDateTime;
@@ -32,9 +32,9 @@ pub use keepass::{
         Version as Argon2Version,
     },
     db::{
-        merge::{MergeEventTarget as MergeEventTarget2, MergeEventType, MergeLog as MergeLog2},
         AutoType, AutoTypeAssociation, Color, CustomDataItem, CustomDataValue,
         DataTransferObfuscation, MemoryProtection, Times,
+        merge::{MergeEventTarget as MergeEventTarget2, MergeEventType, MergeLog as MergeLog2},
     },
 };
 
@@ -231,7 +231,7 @@ impl Kdbx {
             emit: None,
             database: RwLock::new(database),
             credentials,
-            filepath: filepath,
+            filepath,
         })
     }
 
@@ -253,7 +253,7 @@ impl Kdbx {
 
         let mut file = File::create(file_path)?;
 
-        file.write(&bytes)?;
+        let _ = file.write(&bytes)?;
         file.flush()?;
 
         self.emit(KdbxEvent::Saved);
@@ -499,7 +499,7 @@ impl Kdbx {
         let db = self.database.read().unwrap();
 
         if let Some(uuid) = id {
-            if let Some(uuid) = uuid_by_str(uuid.as_str()).ok() {
+            if let Ok(uuid) = uuid_by_str(uuid.as_str()) {
                 if let Some(entry) = db.entry(EntryId::from_uuid(uuid)) {
                     return entry.custom_data.get(&key).cloned();
                 } else if let Some(group) = db.group(GroupId::from_uuid(uuid)) {
@@ -602,7 +602,7 @@ impl Kdbx {
                     "Destination group with ID {group_uuid} not found"
                 )))?;
 
-                if let Some(mut entry) = db.entry_mut(uuid.clone()) {
+                if let Some(mut entry) = db.entry_mut(uuid) {
                     let mut entry = entry.track_changes();
 
                     if group_uuid != entry.parent_id() {
@@ -768,9 +768,12 @@ impl Kdbx {
                 };
 
                 if let Some(mut group) = db.group_mut(uuid) {
-                    if parent.is_some() && group.parent_id() != parent {
-                        group.move_to(parent.unwrap())?;
-                        group.times.location_changed = Some(Times::now());
+                    match parent {
+                        Some(new_parent_id) if group.parent_id() != parent => {
+                            group.move_to(new_parent_id)?;
+                            group.times.location_changed = Some(Times::now());
+                        }
+                        _ => (),
                     }
 
                     group.name = group_data.name;
@@ -1187,7 +1190,7 @@ impl Kdbx {
 
     #[frb(sync)]
     pub fn get_composite_key(&self) -> Result<Vec<u8>, KdbxError> {
-        Ok(self.credentials.get_composite_key()?)
+        self.credentials.get_composite_key()
     }
 
     pub fn merge(&mut self, kdbx: Kdbx) -> Result<MergeLog, KdbxError> {
@@ -1200,17 +1203,9 @@ impl Kdbx {
             ));
         }
 
-        let dest_master_key_changed = dest_db
-            .meta
-            .master_key_changed
-            .clone()
-            .unwrap_or(Times::epoch());
+        let dest_master_key_changed = dest_db.meta.master_key_changed.unwrap_or(Times::epoch());
 
-        let source_master_key_changed = source_db
-            .meta
-            .master_key_changed
-            .clone()
-            .unwrap_or(Times::epoch());
+        let source_master_key_changed = source_db.meta.master_key_changed.unwrap_or(Times::epoch());
 
         let mut merge_log = MergeLog::from(dest_db.merge(&source_db)?);
 
@@ -1313,10 +1308,9 @@ impl Kdbx {
             if metadata.field_types.contains(AUTOFILL_FIELD_OTP) {
                 dataset.insert(
                     AUTOFILL_FIELD_OTP.to_string(),
-                    if let Ok(otp) = item.get_otp() {
-                        otp.value_now().map(|item| item.code).ok()
-                    } else {
-                        None
+                    match item.get_otp() {
+                        Ok(otp) => otp.value_now().map(|item| item.code).ok(),
+                        _ => None,
                     },
                 );
             }
@@ -1340,7 +1334,7 @@ impl Kdbx {
         let domain = metadata
             .web_domain
             .as_ref()
-            .map(|item| simple_to_domain(&item));
+            .map(|item| simple_to_domain(item));
 
         for item in db.iter_all_entries() {
             // TODO! 是否跳过回收站
@@ -1494,18 +1488,12 @@ impl From<&EntryRef<'_>> for EntryData {
                 .iter()
                 .map(|(key, _)| (key.clone(), None))
                 .collect(),
-            icon: match value.icon() {
-                Some(icon) => Some(KdbxIcon::from(icon)),
-                _ => None,
-            },
+            icon: value.icon().map(KdbxIcon::from),
             foreground_color: value.foreground_color.clone(),
             background_color: value.background_color.clone(),
             override_url: value.override_url.clone(),
-            quality_check: value.quality_check.clone(),
-            previous_parent_group: match value.previous_parent_group {
-                Some(id) => Some(id.to_string()),
-                _ => None,
-            },
+            quality_check: value.quality_check,
+            previous_parent_group: value.previous_parent_group.map(|id| id.to_string()),
             attachments: value
                 .attachments
                 .iter()
@@ -1667,17 +1655,11 @@ impl From<&GroupRef<'_>> for GroupData {
     fn from(value: &GroupRef<'_>) -> Self {
         Self {
             id: value.id().to_string(),
-            parent: match value.parent() {
-                Some(group) => Some(group.id().to_string()),
-                _ => None,
-            },
+            parent: value.parent().map(|group| group.id().to_string()),
             name: value.name.clone(),
             notes: value.notes.clone(),
             tags: value.tags.clone(),
-            icon: match value.icon() {
-                Some(icon) => Some(KdbxIcon::from(icon)),
-                _ => None,
-            },
+            icon: value.icon().map(KdbxIcon::from),
             times: value.times.clone(),
             custom_data: value
                 .custom_data
@@ -1686,17 +1668,11 @@ impl From<&GroupRef<'_>> for GroupData {
                 .collect(),
             is_expanded: value.is_expanded,
             default_autotype_sequence: value.default_autotype_sequence.clone(),
-            enable_autotype: value.enable_autotype.clone(),
-            enable_searching: value.enable_searching.clone(),
-            enable_display: value.enable_display.clone(),
-            last_top_visible_entry: match value.last_top_visible_entry {
-                Some(id) => Some(id.to_string()),
-                _ => None,
-            },
-            previous_parent_group: match value.previous_parent_group {
-                Some(id) => Some(id.to_string()),
-                _ => None,
-            },
+            enable_autotype: value.enable_autotype,
+            enable_searching: value.enable_searching,
+            enable_display: value.enable_display,
+            last_top_visible_entry: value.last_top_visible_entry.map(|id| id.to_string()),
+            previous_parent_group: value.previous_parent_group.map(|id| id.to_string()),
             is_recycle_bin: value.database().meta.recyclebin_uuid == Some(value.id().uuid()),
         }
     }
@@ -1741,23 +1717,14 @@ impl From<&keepass::db::Meta> for UpdateMeta {
             default_username: value.default_username.clone(),
             maintenance_history_days: value.maintenance_history_days.map(|v| v as isize),
             color: value.color.clone(),
-            master_key_change_rec: value.master_key_change_rec.clone(),
-            master_key_change_force: value.master_key_change_force.clone(),
+            master_key_change_rec: value.master_key_change_rec,
+            master_key_change_force: value.master_key_change_force,
             memory_protection: value.memory_protection.clone(),
-            entry_templates_group: match value.entry_templates_group {
-                Some(id) => Some(id.to_string()),
-                _ => None,
-            },
-            last_selected_group: match value.last_selected_group {
-                Some(id) => Some(id.to_string()),
-                _ => None,
-            },
-            last_top_visible_group: match value.last_top_visible_group {
-                Some(id) => Some(id.to_string()),
-                _ => None,
-            },
-            history_max_items: value.history_max_items.clone(),
-            history_max_size: value.history_max_size.clone(),
+            entry_templates_group: value.entry_templates_group.map(|id| id.to_string()),
+            last_selected_group: value.last_selected_group.map(|id| id.to_string()),
+            last_top_visible_group: value.last_top_visible_group.map(|id| id.to_string()),
+            history_max_items: value.history_max_items,
+            history_max_size: value.history_max_size,
         }
     }
 }
@@ -1821,39 +1788,27 @@ impl From<&keepass::db::Meta> for Meta {
         Self {
             generator: value.generator.clone(),
             database_name: value.database_name.clone(),
-            database_name_changed: value.database_name_changed.clone(),
+            database_name_changed: value.database_name_changed,
             database_description: value.database_description.clone(),
-            database_description_changed: value.database_description_changed.clone(),
+            database_description_changed: value.database_description_changed,
             default_username: value.default_username.clone(),
-            default_username_changed: value.default_username_changed.clone(),
+            default_username_changed: value.default_username_changed,
             maintenance_history_days: value.maintenance_history_days.map(|v| v as isize),
             color: value.color.clone(),
-            master_key_changed: value.master_key_changed.clone(),
-            master_key_change_rec: value.master_key_change_rec.clone(),
-            master_key_change_force: value.master_key_change_force.clone(),
+            master_key_changed: value.master_key_changed,
+            master_key_change_rec: value.master_key_change_rec,
+            master_key_change_force: value.master_key_change_force,
             memory_protection: value.memory_protection.clone(),
-            recyclebin_enabled: value.recyclebin_enabled.clone(),
-            recyclebin_uuid: match value.recyclebin_uuid {
-                Some(id) => Some(id.to_string()),
-                _ => None,
-            },
-            recyclebin_changed: value.recyclebin_changed.clone(),
-            entry_templates_group: match value.entry_templates_group {
-                Some(id) => Some(id.to_string()),
-                _ => None,
-            },
-            entry_templates_group_changed: value.entry_templates_group_changed.clone(),
-            last_selected_group: match value.last_selected_group {
-                Some(id) => Some(id.to_string()),
-                _ => None,
-            },
-            last_top_visible_group: match value.last_top_visible_group {
-                Some(id) => Some(id.to_string()),
-                _ => None,
-            },
-            history_max_items: value.history_max_items.clone(),
-            history_max_size: value.history_max_size.clone(),
-            settings_changed: value.settings_changed.clone(),
+            recyclebin_enabled: value.recyclebin_enabled,
+            recyclebin_uuid: value.recyclebin_uuid.map(|id| id.to_string()),
+            recyclebin_changed: value.recyclebin_changed,
+            entry_templates_group: value.entry_templates_group.map(|id| id.to_string()),
+            entry_templates_group_changed: value.entry_templates_group_changed,
+            last_selected_group: value.last_selected_group.map(|id| id.to_string()),
+            last_top_visible_group: value.last_top_visible_group.map(|id| id.to_string()),
+            history_max_items: value.history_max_items,
+            history_max_size: value.history_max_size,
+            settings_changed: value.settings_changed,
             custom_data: value.custom_data.keys().cloned().collect(),
         }
     }
@@ -1930,14 +1885,14 @@ pub struct KdbxConfig {
     pub kdf_config: KdfConfig,
 }
 
-impl Into<DatabaseConfig> for KdbxConfig {
-    fn into(self) -> DatabaseConfig {
+impl From<KdbxConfig> for DatabaseConfig {
+    fn from(val: KdbxConfig) -> Self {
         let mut db_config: DatabaseConfig = DatabaseConfig::default();
 
-        db_config.outer_cipher_config = self.outer_cipher_config;
-        db_config.compression_config = self.compression_config;
-        db_config.inner_cipher_config = self.inner_cipher_config;
-        db_config.kdf_config = self.kdf_config.into();
+        db_config.outer_cipher_config = val.outer_cipher_config;
+        db_config.compression_config = val.compression_config;
+        db_config.inner_cipher_config = val.inner_cipher_config;
+        db_config.kdf_config = val.kdf_config.into();
         db_config
     }
 }
@@ -1997,9 +1952,9 @@ pub enum KdfConfig {
     },
 }
 
-impl Into<KdfConfig2> for KdfConfig {
-    fn into(self) -> KdfConfig2 {
-        match self {
+impl From<KdfConfig> for KdfConfig2 {
+    fn from(val: KdfConfig) -> Self {
+        match val {
             KdfConfig::Aes { rounds } => KdfConfig2::Aes { rounds },
             KdfConfig::Argon2 {
                 iterations,
@@ -2010,7 +1965,7 @@ impl Into<KdfConfig2> for KdfConfig {
                 iterations,
                 memory,
                 parallelism,
-                version: version,
+                version,
             },
             KdfConfig::Argon2id {
                 iterations,
@@ -2040,7 +1995,7 @@ impl From<&KdfConfig2> for KdfConfig {
                 iterations,
                 memory,
                 parallelism,
-                version: version,
+                version,
             },
             KdfConfig2::Argon2id {
                 iterations,
@@ -2215,7 +2170,7 @@ impl From<MergeLog2> for MergeLog {
                 .into_iter()
                 .map(|item| MergeEvent {
                     target: item.target.into(),
-                    event_type: item.event_type.into(),
+                    event_type: item.event_type,
                 })
                 .collect(),
         }
@@ -3006,7 +2961,7 @@ mod test {
                 g: 0x34,
                 b: 0x56
             }),
-            0x123456
+            0xff123456
         );
 
         let color = decode_color_type(0x123456);
@@ -3029,14 +2984,17 @@ mod test {
 
         let recycle_id = meta.recyclebin_uuid.expect("recycle bin was not created");
         let groups = kdbx.get_groups().unwrap();
-        assert!(groups
-            .values()
-            .any(|group| group.id == recycle_id && group.name == "Recycle Bin"));
+        assert!(
+            groups
+                .values()
+                .any(|group| group.id == recycle_id && group.name == "Recycle Bin")
+        );
 
-        assert!(kdbx
-            .get_entrys(None, None, None, None, None)
-            .unwrap()
-            .is_empty());
+        assert!(
+            kdbx.get_entrys(None, None, None, None, None)
+                .unwrap()
+                .is_empty()
+        );
 
         // 没有 filepath 时无法保存
         assert!(kdbx.save_file(None).is_err());
@@ -3049,9 +3007,10 @@ mod test {
 
         assert!(kdbx.get_entry("not-a-uuid".to_string(), None).is_err());
         assert!(kdbx.get_entry(unknown.clone(), None).is_err());
-        assert!(kdbx
-            .get_entrys(None, Some(unknown.clone()), None, None, None)
-            .is_err());
+        assert!(
+            kdbx.get_entrys(None, Some(unknown.clone()), None, None, None)
+                .is_err()
+        );
         assert!(kdbx.get_attachment(42).is_err());
         assert!(kdbx.get_custom_data("missing".to_string(), None).is_none());
         assert!(kdbx.get_public_custom_data("missing".to_string()).is_none());
@@ -3197,10 +3156,11 @@ mod test {
         let recycle_id = kdbx.get_meta().unwrap().recyclebin_uuid.unwrap();
         assert_eq!(kdbx.get_entry(id.clone(), None).unwrap().parent, recycle_id);
         // 回收站内的条目不会出现在普通列表中
-        assert!(kdbx
-            .get_entrys(None, None, None, None, None)
-            .unwrap()
-            .is_empty());
+        assert!(
+            kdbx.get_entrys(None, None, None, None, None)
+                .unwrap()
+                .is_empty()
+        );
 
         kdbx.action(KdbxAction::Restore(vec![id.clone()])).unwrap();
         assert_eq!(kdbx.get_entry(id.clone(), None).unwrap().parent, root);

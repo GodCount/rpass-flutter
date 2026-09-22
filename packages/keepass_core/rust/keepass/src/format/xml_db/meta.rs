@@ -3,16 +3,16 @@ use std::collections::HashSet;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
-use base64::{engine::general_purpose as base64_engine, Engine as _};
+use base64::{Engine as _, engine::general_purpose as base64_engine};
 
 use crate::{
     compression::Compression,
     db::Color,
     format::xml_db::{
+        UUID,
         custom_serde::{cs_base64, cs_opt_bool, cs_opt_fromstr, cs_opt_string},
         entry::UnprotectError,
         timestamp::Timestamp,
-        UUID,
     },
 };
 
@@ -572,7 +572,10 @@ mod tests {
         };
 
         let serialized = quick_xml::se::to_string(&mp).unwrap();
-        assert_eq!(serialized, "<MemoryProtection><ProtectTitle>True</ProtectTitle><ProtectUserName>False</ProtectUserName><ProtectPassword>True</ProtectPassword><ProtectURL>False</ProtectURL><ProtectNotes>True</ProtectNotes></MemoryProtection>");
+        assert_eq!(
+            serialized,
+            "<MemoryProtection><ProtectTitle>True</ProtectTitle><ProtectUserName>False</ProtectUserName><ProtectPassword>True</ProtectPassword><ProtectURL>False</ProtectURL><ProtectNotes>True</ProtectNotes></MemoryProtection>"
+        );
     }
 
     #[test]
@@ -612,7 +615,9 @@ mod tests {
         let icon: Icon = quick_xml::de::from_str(xml).unwrap();
         assert_eq!(
             icon.uuid.0.as_bytes(),
-            &[0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f]
+            &[
+                0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f
+            ]
         );
         assert_eq!(icon.data, vec![1, 2, 3, 4, 5]);
     }
@@ -744,7 +749,9 @@ mod tests {
         assert!(serialized.contains("<HistoryMaxSize>1048576</HistoryMaxSize>"));
         assert!(serialized.contains("<SettingsChanged>2023-10-05T12:34:56Z</SettingsChanged>"));
         assert!(serialized.contains("<Binaries>"));
-        assert!(serialized.contains(r#"<Binary ID="0" Compressed="False" Protected="False">AQIDBAU=</Binary>"#));
+        assert!(
+            serialized.contains(r#"<Binary ID="0" Compressed="False" Protected="False">AQIDBAU=</Binary>"#)
+        );
         assert!(serialized.contains(r#"<Binary ID="1" Compressed="True" Protected="True">ChQeKDI=</Binary>"#));
         assert!(serialized.contains("<CustomData>"));
     }
@@ -840,13 +847,17 @@ mod tests {
         assert_eq!(icons.icons.len(), 1);
         assert_eq!(
             icons.icons[0].uuid.0.as_bytes(),
-            &[0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f]
+            &[
+                0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f
+            ]
         );
         assert_eq!(icons.icons[0].data, vec![1, 2, 3, 4, 5]);
         assert!(meta.recycle_bin_enabled.unwrap());
         assert_eq!(
             meta.recycle_bin_uuid.unwrap().0.as_bytes(),
-            &[0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f]
+            &[
+                0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f
+            ]
         );
         assert_eq!(
             meta.recycle_bin_changed.unwrap().time,
@@ -854,7 +865,9 @@ mod tests {
         );
         assert_eq!(
             meta.entry_templates_group.unwrap().0.as_bytes(),
-            &[0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f]
+            &[
+                0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f
+            ]
         );
         assert_eq!(
             meta.entry_templates_group_changed.unwrap().time,
@@ -862,11 +875,15 @@ mod tests {
         );
         assert_eq!(
             meta.last_selected_group.unwrap().0.as_bytes(),
-            &[0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f]
+            &[
+                0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f
+            ]
         );
         assert_eq!(
             meta.last_top_visible_group.unwrap().0.as_bytes(),
-            &[0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f]
+            &[
+                0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f
+            ]
         );
         assert_eq!(meta.history_max_items.unwrap(), 10);
         assert_eq!(meta.history_max_size.unwrap(), 1048576);

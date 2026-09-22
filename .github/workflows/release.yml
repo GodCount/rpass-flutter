@@ -26,7 +26,7 @@ jobs:
       - build_windows
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Get version from pubspec.yaml
         id: get_version
@@ -45,19 +45,19 @@ jobs:
           name: v${{ steps.get_version.outputs.version }}
 
       - name: Download APK
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: android_outputs
           path: dist/apk
 
       - name: Download macOS
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: macos_outputs
           path: dist/macos
 
       - name: Download Windows
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: windows_outputs
           path: dist/windows
@@ -74,7 +74,7 @@ jobs:
           cp dist/windows/Rpass.zip "dist/upload/Rpass-v${VERSION}-windows.zip"
 
       - name: Upload release assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
           draft: true

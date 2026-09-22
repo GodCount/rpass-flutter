@@ -12,7 +12,10 @@ void main() {
     });
 
     test("B to MB", () {
-      expect(transformStorageUnit(1024 * 1024, StorageUnit.B, StorageUnit.MB), 1);
+      expect(
+        transformStorageUnit(1024 * 1024, StorageUnit.B, StorageUnit.MB),
+        1,
+      );
     });
 
     test("KB to B", () {
@@ -28,17 +31,11 @@ void main() {
     });
 
     test("decimal values", () {
-      expect(
-        transformStorageUnit(2048, StorageUnit.B, StorageUnit.KB),
-        2,
-      );
+      expect(transformStorageUnit(2048, StorageUnit.B, StorageUnit.KB), 2);
     });
 
     test("with double input", () {
-      expect(
-        transformStorageUnit(1536.0, StorageUnit.B, StorageUnit.KB),
-        1.5,
-      );
+      expect(transformStorageUnit(1536.0, StorageUnit.B, StorageUnit.KB), 1.5);
     });
 
     test("zero bytes", () {

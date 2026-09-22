@@ -11,15 +11,14 @@ use crate::{
     crypt::{self, ciphers::Cipher},
     db::{Database, DatabaseFormatError, DatabaseOpenError, Value},
     format::{
-        hmac_block_stream,
+        DatabaseVersion, hmac_block_stream,
         kdbx4::{
-            KDBX4OuterHeader, HEADER_COMMENT, HEADER_COMPRESSION_ID, HEADER_ENCRYPTION_IV, HEADER_END,
-            HEADER_KDF_PARAMS, HEADER_MASTER_SEED, HEADER_OUTER_ENCRYPTION_ID, HEADER_PUBLIC_CUSTOM_DATA,
+            HEADER_COMMENT, HEADER_COMPRESSION_ID, HEADER_ENCRYPTION_IV, HEADER_END, HEADER_KDF_PARAMS,
+            HEADER_MASTER_SEED, HEADER_OUTER_ENCRYPTION_ID, HEADER_PUBLIC_CUSTOM_DATA,
             INNER_HEADER_BINARY_ATTACHMENTS, INNER_HEADER_END, INNER_HEADER_RANDOM_STREAM_ID,
-            INNER_HEADER_RANDOM_STREAM_KEY,
+            INNER_HEADER_RANDOM_STREAM_KEY, KDBX4OuterHeader,
         },
         variant_dictionary::VariantDictionary,
-        DatabaseVersion,
     },
     key::{DatabaseKey, DatabaseKeyError},
 };

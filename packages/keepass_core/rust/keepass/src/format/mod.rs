@@ -82,7 +82,7 @@ impl DatabaseVersion {
                     version,
                     file_major_version: u32::from(file_major_version),
                     file_minor_version: u32::from(file_minor_version),
-                })
+                });
             }
         };
 

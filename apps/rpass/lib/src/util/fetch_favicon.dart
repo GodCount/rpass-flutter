@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -19,7 +20,7 @@ abstract class FaviconSourceApi {
   ///
   /// 如果站点返回默认图片,但状态码又是200就需要通过这个来判断
   ///
-  bool isDefault(Uint8List data);
+  bool isDefault(Response<Uint8List> response);
 
   @protected
   String _getSecondDomain() {
@@ -38,7 +39,7 @@ class SlefFaviconSourceApi extends FaviconSourceApi {
   }
 
   @override
-  bool isDefault(Uint8List data) {
+  bool isDefault(Response<Uint8List> response) {
     return false;
   }
 }
@@ -56,7 +57,7 @@ class GoogleFaviconSourceApi extends FaviconSourceApi {
   }
 
   @override
-  bool isDefault(Uint8List data) {
+  bool isDefault(Response<Uint8List> response) {
     return false;
   }
 }
@@ -70,7 +71,7 @@ class DuckduckgoFaviconSourceApi extends FaviconSourceApi {
   }
 
   @override
-  bool isDefault(Uint8List data) {
+  bool isDefault(Response<Uint8List> response) {
     return false;
   }
 }
@@ -88,8 +89,9 @@ class CravatarFaviconSourceApi extends FaviconSourceApi {
   }
 
   @override
-  bool isDefault(Uint8List data) {
-    return data.length == 492;
+  bool isDefault(Response<Uint8List> response) {
+    return response.headers.value("x-favicon-state") == "fallback" &&
+        response.headers.value("x-favicon-fallback") == "default";
   }
 }
 
@@ -112,9 +114,9 @@ class FetchFavicon extends FetchNetworkImage {
   }
 
   @override
-  Future<Uint8List> fetch(
+  Future<Response<Uint8List>> fetch(
     String url, {
-    BytesReceivedCallback? onBytesReceived,
+    ProgressCallback? onReceiveProgress,
   }) async {
     Object lastError = ArgumentError("not favicon url");
 
@@ -122,10 +124,14 @@ class FetchFavicon extends FetchNetworkImage {
 
     for (final item in source.getFaviconUrls()) {
       try {
-        final data = await super.fetch(item, onBytesReceived: onBytesReceived);
+        final response = await super.fetch(
+          item,
+          onReceiveProgress: onReceiveProgress,
+        );
 
-        if (source.isDefault(data)) throw Exception("is default favicon");
-        return data;
+        if (source.isDefault(response)) throw Exception("is default favicon");
+
+        return response;
       } catch (e) {
         debugPrint("fetch favicon ,$e");
         lastError = e;

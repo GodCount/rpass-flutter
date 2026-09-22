@@ -49,7 +49,11 @@ impl EnigoImpl {
         unimplemented!("Mobile terminal does not support simulated keyboard and mouse")
     }
 
-    pub(super) fn raw(&mut self, _keycode: u16, _direction: super::Direction) -> anyhow::Result<()> {
+    pub(super) fn raw(
+        &mut self,
+        _keycode: u16,
+        _direction: super::Direction,
+    ) -> anyhow::Result<()> {
         unimplemented!("Mobile terminal does not support simulated keyboard and mouse")
     }
 }

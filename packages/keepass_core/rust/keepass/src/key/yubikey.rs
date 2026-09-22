@@ -1,6 +1,6 @@
 use challenge_response::{
-    config::{Config, Mode, Slot},
     ChallengeResponse,
+    config::{Config, Mode, Slot},
 };
 use cipher::InvalidLength;
 use hex::FromHexError;

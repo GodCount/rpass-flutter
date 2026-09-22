@@ -5,8 +5,8 @@
 
 mod common;
 
-use common::{baseline_combo, round_trip_combos, Combo};
-use keepass::{db::Value, Database};
+use common::{Combo, baseline_combo, round_trip_combos};
+use keepass::{Database, db::Value};
 
 #[test]
 fn matrix_round_trip_minimal_database() {

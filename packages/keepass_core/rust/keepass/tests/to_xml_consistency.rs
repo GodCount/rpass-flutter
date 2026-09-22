@@ -12,7 +12,7 @@ mod common;
 
 use std::{fs::File, io::Read, path::Path};
 
-use common::{baseline_combo, DEMO_PASSWORD};
+use common::{DEMO_PASSWORD, baseline_combo};
 use keepass::{Database, DatabaseKey};
 
 struct Fixture {

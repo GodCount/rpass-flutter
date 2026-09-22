@@ -1,4 +1,4 @@
-use base64::{engine::general_purpose as base64_engine, Engine as _};
+use base64::{Engine as _, engine::general_purpose as base64_engine};
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize, Serializer};
 

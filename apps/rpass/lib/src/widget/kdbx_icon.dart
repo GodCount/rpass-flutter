@@ -52,8 +52,7 @@ class KdbxIconWidget extends StatelessWidget {
     if (kdbxIcon.icon is KdbxIcon_Custom) {
       final icon = kdbxIcon.icon as KdbxIcon_Custom;
       final data =
-          icon.field1 ??
-          Store.kdbx.fieldSummary?.customIcons[icon.field0];
+          icon.field1 ?? Store.kdbx.fieldSummary?.customIcons[icon.field0];
       if (data != null) {
         return Image.memory(data, width: size, height: size);
       }

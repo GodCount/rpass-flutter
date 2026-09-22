@@ -64,9 +64,9 @@ struct KDBX4InnerHeader {
 mod kdbx4_tests {
     use super::*;
 
-    use crate::db::{fields, Value};
-    use crate::format::kdbx4::dump::dump_kdbx4;
+    use crate::db::{Value, fields};
     use crate::format::DatabaseVersion;
+    use crate::format::kdbx4::dump::dump_kdbx4;
     use crate::{
         config::{CompressionConfig, DatabaseConfig, InnerCipherConfig, KdfConfig, OuterCipherConfig},
         db::Database,

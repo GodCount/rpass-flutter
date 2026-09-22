@@ -8,8 +8,8 @@ use thiserror::Error;
 use uuid::Uuid;
 
 use crate::{
-    db::{EntryId, EntryRef, GroupId, GroupRef},
     Database,
+    db::{EntryId, EntryRef, GroupId, GroupRef},
 };
 
 /// Icon specification for an [Entry][crate::db::Entry] or [Group][crate::db::Group].

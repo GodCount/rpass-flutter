@@ -1,8 +1,8 @@
 #[cfg(feature = "challenge_response")]
 use hybrid_array::typenum::U20;
 use hybrid_array::{
-    typenum::{U32, U64},
     Array as GenericArray,
+    typenum::{U32, U64},
 };
 
 use cipher::{InvalidLength, KeyInit};

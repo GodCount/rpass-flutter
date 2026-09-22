@@ -8,11 +8,11 @@ use thiserror::Error;
 use uuid::Uuid;
 
 use crate::{
+    Database,
     db::{
         CustomDataItem, CustomIcon, CustomIconId, CustomIconMut, CustomIconNotFoundError, CustomIconRef, Entry,
         EntryId, EntryMut, EntryRef, Icon, Times,
     },
-    Database,
 };
 
 /// Unique identifier for a [Group]
@@ -624,10 +624,10 @@ impl GroupMut<'_> {
         self.set_icon_none();
 
         // Remove from parent
-        if let Some(parent_id) = self.parent {
-            if let Some(mut parent) = self.database.group_mut(parent_id) {
-                parent.groups.shift_remove(&self.id);
-            }
+        if let Some(parent_id) = self.parent
+            && let Some(mut parent) = self.database.group_mut(parent_id)
+        {
+            parent.groups.shift_remove(&self.id);
         }
 
         // Delete entries
@@ -759,10 +759,10 @@ impl GroupTrack<'_> {
         }
 
         // Remove from parent
-        if let Some(parent_id) = self.parent {
-            if let Some(mut parent) = self.database.group_mut(parent_id) {
-                parent.groups.shift_remove(&self.id);
-            }
+        if let Some(parent_id) = self.parent
+            && let Some(mut parent) = self.database.group_mut(parent_id)
+        {
+            parent.groups.shift_remove(&self.id);
         }
 
         // Delete entries
@@ -823,8 +823,8 @@ pub struct CannotDeleteRootError;
 #[cfg(test)]
 #[allow(clippy::unwrap_used)]
 mod group_tests {
-    use crate::db::fields;
     use crate::Database;
+    use crate::db::fields;
 
     #[test]
     fn get() {
@@ -849,11 +849,12 @@ mod group_tests {
         let root = db.root();
 
         assert!(root.group(general_group_id).is_some());
-        assert!(db
-            .group(general_group_id)
-            .unwrap()
-            .entry(sample_entry_id)
-            .is_some());
+        assert!(
+            db.group(general_group_id)
+                .unwrap()
+                .entry(sample_entry_id)
+                .is_some()
+        );
 
         let grp = root.group_by_path(&["General"]).unwrap();
 
@@ -897,11 +898,12 @@ mod group_tests {
         assert!(root.group_by_name_mut("Invalid Group").is_none());
         assert!(root.group_by_path_mut(&[]).is_some());
 
-        assert!(db
-            .group_mut(general_group_id)
-            .unwrap()
-            .entry_mut(sample_entry_id)
-            .is_some());
+        assert!(
+            db.group_mut(general_group_id)
+                .unwrap()
+                .entry_mut(sample_entry_id)
+                .is_some()
+        );
     }
 
     #[test]

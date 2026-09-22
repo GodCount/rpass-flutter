@@ -1,7 +1,7 @@
 use base32;
 use std::time::{Duration, SystemTime, SystemTimeError, UNIX_EPOCH};
 use thiserror::Error;
-use totp_lite::{totp_custom, Sha1, Sha256, Sha512};
+use totp_lite::{Sha1, Sha256, Sha512, totp_custom};
 use url::Url;
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
@@ -205,7 +205,7 @@ impl Entry {
 
 #[cfg(test)]
 mod kdbx4_otp_tests {
-    use super::{TOTPAlgorithm, TOTPError, TOTP};
+    use super::{TOTP, TOTPAlgorithm, TOTPError};
     use crate::{db::Database, key::DatabaseKey};
     use std::{fs::File, path::Path};
 

@@ -292,7 +292,7 @@ impl Database {
     }
 
     /// Clean entry history, useless icons, and useless attachments
-    pub fn cleanup(&mut self) -> () {
+    pub fn cleanup(&mut self) {
         let history_max_items = self.meta.history_max_items.unwrap_or(-1);
         let history_max_size = self.meta.history_max_size.unwrap_or(-1);
 
@@ -304,13 +304,13 @@ impl Database {
 
         self.foreach_custom_icon_mut(|mut icon| {
             if icon.entries.is_empty() && icon.groups.is_empty() {
-                icon.remove().unwrap();
+                let _ = icon.remove().ok();
             }
         });
 
         self.foreach_attachment_mut(|mut attachment| {
             if attachment.entries.is_empty() {
-                attachment.remove().unwrap();
+                let _ = attachment.remove().ok();
             }
         });
     }

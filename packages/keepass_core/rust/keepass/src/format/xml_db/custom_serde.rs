@@ -2,7 +2,7 @@
 
 /// base64-encoded binary data
 pub mod cs_base64 {
-    use base64::{engine::general_purpose as base64_engine, Engine as _};
+    use base64::{Engine as _, engine::general_purpose as base64_engine};
     use serde::{Deserialize, Deserializer, Serializer};
 
     pub fn serialize<S>(data: &[u8], s: S) -> Result<S::Ok, S::Error>

@@ -2,7 +2,7 @@ use std::convert::TryInto;
 
 use aes::Aes256;
 use cipher::{BlockCipherEncrypt, KeyInit};
-use hybrid_array::{typenum::U32, Array as GenericArray};
+use hybrid_array::{Array as GenericArray, typenum::U32};
 use sha2::{Digest, Sha256};
 
 use super::CryptographyError;
@@ -94,8 +94,8 @@ impl Kdf for Argon2Kdf {
 
 #[cfg(test)]
 mod tests {
-    use argon2::{hash_raw, Config, ThreadMode, Variant, Version};
-    use hybrid_array::{typenum::U32, Array as GenericArray};
+    use argon2::{Config, ThreadMode, Variant, Version, hash_raw};
+    use hybrid_array::{Array as GenericArray, typenum::U32};
 
     use super::{Argon2Kdf, Kdf};
 

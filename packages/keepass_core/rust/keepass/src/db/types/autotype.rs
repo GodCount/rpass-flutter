@@ -32,16 +32,12 @@ pub struct AutoTypeAssociation {
 /// Obfuscation methods for auto-type data transfer.
 #[derive(Debug, Eq, PartialEq, Clone)]
 #[cfg_attr(feature = "serialization", derive(serde::Serialize))]
+#[derive(Default)]
 pub enum DataTransferObfuscation {
     /// No obfuscation. The auto-type sequence is sent as-is.
+    #[default]
     None,
 
     /// Obfuscate auto-type sequence using the clipboard
     UseClipboard,
-}
-
-impl Default for DataTransferObfuscation {
-    fn default() -> Self {
-        Self::None
-    }
 }

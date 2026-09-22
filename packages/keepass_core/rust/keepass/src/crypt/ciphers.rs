@@ -3,14 +3,14 @@ use std::convert::TryInto;
 use aes::Aes256;
 #[cfg(feature = "save_kdbx4")]
 use cipher::BlockModeEncrypt;
-use cipher::{block_padding::Pkcs7, BlockModeDecrypt};
+use cipher::{BlockModeDecrypt, block_padding::Pkcs7};
 use hybrid_array::Array as GenericArray;
 use salsa20::{
-    cipher::{KeyIvInit, StreamCipher},
     Salsa20,
+    cipher::{KeyIvInit, StreamCipher},
 };
 
-use crate::crypt::{calculate_sha256, CryptographyError};
+use crate::crypt::{CryptographyError, calculate_sha256};
 
 pub(crate) trait Cipher {
     #[cfg(feature = "save_kdbx4")]
