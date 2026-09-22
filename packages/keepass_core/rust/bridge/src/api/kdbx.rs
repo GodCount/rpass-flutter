@@ -176,14 +176,14 @@ impl Kdbx {
     }
 
     fn enable_recyclebin(db: &mut Database) {
-        if let Some(uuid) = db.meta.recyclebin_uuid {
-            if db.group(GroupId::from_uuid(uuid)).is_some() {
-                if db.meta.recyclebin_enabled != Some(true) {
-                    db.meta.recyclebin_enabled = Some(true);
-                    db.meta.recyclebin_changed = Some(Times::now());
-                }
-                return;
+        if let Some(uuid) = db.meta.recyclebin_uuid
+            && db.group(GroupId::from_uuid(uuid)).is_some()
+        {
+            if db.meta.recyclebin_enabled != Some(true) {
+                db.meta.recyclebin_enabled = Some(true);
+                db.meta.recyclebin_changed = Some(Times::now());
             }
+            return;
         }
 
         let uuid = {
@@ -369,8 +369,8 @@ impl Kdbx {
             let group = db.group(group_id).unwrap();
 
             // 如果存在, 就排除掉回收站的
-            if let Some(id) = recycle_id {
-                if group
+            if let Some(id) = recycle_id
+                && group
                     .find_parent(None, |group| {
                         if group.id().uuid() == id.uuid() {
                             Some(true)
@@ -379,9 +379,8 @@ impl Kdbx {
                         }
                     })
                     .is_some()
-                {
-                    continue;
-                }
+            {
+                continue;
             }
 
             if let Some(sreach_parse) = &sreach_parse {
@@ -2374,12 +2373,11 @@ impl SearchInputParse {
                     {
                         return true;
                     }
-                } else if let Some(val) = entry.get(key) {
-                    if (self.ignore_case && val.to_lowercase().contains(value))
-                        || val.contains(value)
-                    {
-                        return true;
-                    }
+                } else if let Some(val) = entry.get(key)
+                    && ((self.ignore_case && val.to_lowercase().contains(value))
+                        || val.contains(value))
+                {
+                    return true;
                 }
             } else {
                 for tag in &entry.tags {
@@ -2388,12 +2386,11 @@ impl SearchInputParse {
                     }
                 }
                 for key in &KDBX_KEY_ALL[0..9] {
-                    if let Some(val) = entry.get(key) {
-                        if (self.ignore_case && val.to_lowercase().contains(value))
-                            || val.contains(value)
-                        {
-                            return true;
-                        }
+                    if let Some(val) = entry.get(key)
+                        && ((self.ignore_case && val.to_lowercase().contains(value))
+                            || val.contains(value))
+                    {
+                        return true;
                     }
                 }
             }

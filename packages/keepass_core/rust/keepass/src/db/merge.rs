@@ -581,12 +581,12 @@ fn merge_entries(dest_db: &mut Database, source_db: &Database, log: &mut MergeLo
 
         if source_last_modification > dest_last_modification {
             // add the previous dest entry to history if it has diverged
-            if let Some(last_history_entry) = merged_history.get_entries().first() {
-                if have_entries_diverged(&dest_entry, last_history_entry) {
-                    let mut dest_entry_for_history = dest_entry.deref().clone();
-                    dest_entry_for_history.history = None;
-                    merged_history.add_entry(dest_entry_for_history);
-                }
+            if let Some(last_history_entry) = merged_history.get_entries().first()
+                && have_entries_diverged(&dest_entry, last_history_entry)
+            {
+                let mut dest_entry_for_history = dest_entry.deref().clone();
+                dest_entry_for_history.history = None;
+                merged_history.add_entry(dest_entry_for_history);
             }
 
             // The source entry is more recent than the destination entry. Replace dest with source.
