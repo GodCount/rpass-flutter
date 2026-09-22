@@ -287,7 +287,7 @@ class SyncKdbxController with ChangeNotifier {
 
       _logger.info(
         "{masterKeyChanged=${_lastMergeLog?.masterKeyChanged},"
-            "isUpdateMasterKey=${_lastMergeLog?.isUpdateMasterKey},",
+        "isUpdateMasterKey=${_lastMergeLog?.isUpdateMasterKey},"
         "forceMerge=$forceMerge}",
       );
 

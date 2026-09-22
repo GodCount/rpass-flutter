@@ -1,8 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:common_native_channel/common_native_channel.dart';
 import 'package:common_native_channel/src/common_native_channel_platform.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
   final CommonNativeChannelPlatform initialPlatform =
       CommonNativeChannelPlatform.instance;
 

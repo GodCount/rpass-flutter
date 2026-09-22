@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [master]
+
+env:
+  FLUTTER_VERSION: "3.38.10"
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - uses: bluefireteam/melos-action@v3
+
+      - name: Check dart format
+        run: melos format --ignore="*generated*" --ignore="keepass_core" --set-exit-if-changed -o none
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # enigo 编译依赖
+      - name: Setup system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbcommon-dev libwayland-dev libxkbcommon-x11-dev
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - uses: bluefireteam/melos-action@v3
+
+      - name: Analyze
+        run: melos analyze
+
+      - name: Test
+        run: melos test
+
+  rust:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # enigo 编译依赖
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbcommon-dev libwayland-dev libxkbcommon-x11-dev
+
+      - name: Setup Rust
+        run: rustup toolchain install --profile minimal
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install cargo-hack
+        run: cargo install cargo-hack
+
+      - name: Clippy (core)
+        working-directory: packages/keepass_core/rust
+        run: cargo clippy --lib
+
+      - name: Check Test (bridge)
+        working-directory: packages/keepass_core/rust/bridge
+        run: cargo check --tests
+
+      - name: Check Test (keepass)
+        working-directory: packages/keepass_core/rust/keepass
+        run: cargo hack check --feature-powerset --no-dev-deps
+
+      - name: Test (bridge)
+        working-directory: packages/keepass_core/rust/bridge
+        run: cargo test
+
+      - name: Test (keepass)
+        working-directory: packages/keepass_core/rust/keepass
+        run: cargo test --all-features

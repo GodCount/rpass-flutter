@@ -1,4 +1,4 @@
-use base64::{engine::general_purpose as base64_engine, Engine as _};
+use base64::{Engine as _, engine::general_purpose as base64_engine};
 use indexmap::IndexMap;
 use thiserror::Error;
 
@@ -7,14 +7,14 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "save_kdbx4")]
 use crate::format::xml_db::tags::join_tags;
 use crate::{
-    crypt::{ciphers::Cipher, CryptographyError},
+    crypt::{CryptographyError, ciphers::Cipher},
     db::{AttachmentId, Color, EntryId, GroupId},
     format::xml_db::{
+        UUID,
         custom_serde::{cs_bool, cs_opt_bool, cs_opt_fromstr, cs_opt_string},
         meta::CustomData,
         tags::split_tags,
         times::Times,
-        UUID,
     },
 };
 
@@ -200,7 +200,7 @@ impl Entry {
             let entries = h
                 .get_entries()
                 .iter()
-                .filter_map(|item| Some(Entry::db_to_xml(item, inner_encryptor)))
+                .map(|item| Entry::db_to_xml(item, inner_encryptor))
                 .collect::<Result<Vec<_>, CryptographyError>>()?;
 
             Some(History { entries })
@@ -571,7 +571,9 @@ mod tests {
         let deserialized: Test<Entry> = quick_xml::de::from_str(xml).unwrap();
         assert_eq!(
             deserialized.0.uuid.0.as_bytes(),
-            &[0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f]
+            &[
+                0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f
+            ]
         );
         assert_eq!(deserialized.0.icon_id.unwrap(), 1);
         assert_eq!(deserialized.0.foreground_color.unwrap().to_string(), "#FF0000");

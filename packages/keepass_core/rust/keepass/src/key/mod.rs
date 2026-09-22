@@ -1,10 +1,10 @@
 use std::{convert::TryInto, io::Read};
 
-use base64::{engine::general_purpose as base64_engine, Engine as _};
+use base64::{Engine as _, engine::general_purpose as base64_engine};
 use hex::FromHexError;
-use hybrid_array::{typenum::U32, Array as GenericArray};
+use hybrid_array::{Array as GenericArray, typenum::U32};
 use quick_xml::{
-    de::{from_str, Deserializer},
+    de::{Deserializer, from_str},
     se::to_string,
 };
 use serde::{Deserialize, Serialize};
@@ -49,14 +49,14 @@ impl KeyFile {
     /// Parse keyfile from string slice
     pub fn parse<T: AsRef<str>>(value: T) -> Result<Self, KeyFileError> {
         let keyfile: KeyFile = from_str(value.as_ref())?;
-        return Ok(keyfile);
+        Ok(keyfile)
     }
 
     /// Parse keyfile from bytes
     pub fn parse_bytes<T: AsRef<[u8]>>(value: T) -> Result<Self, KeyFileError> {
         let mut de = Deserializer::from_reader(value.as_ref());
         let keyfile: KeyFile = KeyFile::deserialize(&mut de)?;
-        return Ok(keyfile);
+        Ok(keyfile)
     }
 
     /// Create random keyfile
@@ -65,6 +65,7 @@ impl KeyFile {
 
         getrandom::fill(&mut bytes)?;
 
+        #[allow(clippy::indexing_slicing)]
         let hash = hex::encode_upper(&calculate_sha256(&[&bytes])[..4]);
 
         let data = hex::encode_upper(&bytes)
@@ -110,6 +111,7 @@ impl KeyFile {
 
                 if let Some(hash) = &self.key.hash {
                     let expect_hash = hash.clone();
+                    #[allow(clippy::indexing_slicing)]
                     let current_hash = hex::encode_upper(&calculate_sha256(&[&bytes])[..4]);
                     if current_hash != expect_hash {
                         return Err(KeyFileError::HashMismatch(expect_hash, current_hash));
@@ -164,10 +166,10 @@ pub fn parse_keyfile(data: &[u8]) -> Result<Vec<u8>, DatabaseKeyError> {
         return Ok(result);
     }
 
-    if data.len() == 64 {
-        if let Ok(result) = hex::decode(data) {
-            return Ok(result);
-        }
+    if data.len() == 64
+        && let Ok(result) = hex::decode(data)
+    {
+        return Ok(result);
     }
 
     if data.len() == 32 {
@@ -262,7 +264,7 @@ impl DatabaseKey {
         Default::default()
     }
 
-    fn get_key_elements(&self) -> Result<KeyElements, DatabaseKeyError> {
+    pub(crate) fn get_key_elements(&self) -> Result<KeyElements, DatabaseKeyError> {
         let mut out = Vec::new();
 
         if let Some(p) = &self.password {
@@ -292,10 +294,10 @@ impl DatabaseKey {
     /// Returns composite key
     pub fn get_composite_key(&self) -> Result<GenericArray<u8, U32>, DatabaseKeyError> {
         if let Some(key) = &self.composite_key {
-            return Ok(key
+            return key
                 .as_slice()
                 .try_into()
-                .map_err(|_| DatabaseKeyError::IncorrectKey)?);
+                .map_err(|_| DatabaseKeyError::IncorrectKey);
         }
 
         let key_elements = self.get_key_elements()?;
@@ -420,17 +422,19 @@ mod key_tests {
 
         assert_eq!(ke.len(), 1);
 
-        assert!(DatabaseKey {
-            password: None,
-            keyfile: None,
-            composite_key: None,
-            #[cfg(feature = "challenge_response")]
-            challenge_response_key: None,
-            #[cfg(feature = "challenge_response")]
-            challenge_response_result: None,
-        }
-        .get_key_elements()
-        .is_err());
+        assert!(
+            DatabaseKey {
+                password: None,
+                keyfile: None,
+                composite_key: None,
+                #[cfg(feature = "challenge_response")]
+                challenge_response_key: None,
+                #[cfg(feature = "challenge_response")]
+                challenge_response_result: None,
+            }
+            .get_key_elements()
+            .is_err()
+        );
 
         Ok(())
     }

@@ -16,11 +16,13 @@ pub mod timestamp;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize, Serializer};
 
-use base64::{engine::general_purpose as base64_engine, Engine as _};
+use base64::{Engine as _, engine::general_purpose as base64_engine};
 use std::collections::HashSet;
 use thiserror::Error;
 use uuid::Uuid;
 
+#[cfg(feature = "save_kdbx4")]
+use crate::{crypt::CryptographyError, db::DatabaseSaveError};
 use crate::{
     crypt::ciphers::Cipher,
     db::{GroupId, Value},
@@ -28,8 +30,6 @@ use crate::{
         custom_serde::cs_opt_string, entry::UnprotectError, group::Group, meta::Meta, timestamp::Timestamp,
     },
 };
-#[cfg(feature = "save_kdbx4")]
-use crate::{crypt::CryptographyError, db::DatabaseSaveError};
 
 pub fn parse_xml(
     data: &[u8],
@@ -167,10 +167,10 @@ impl KeePassFile {
         for entry_id in entry_ids {
             if let Some(entry) = db.entries.get(&entry_id) {
                 // current version
-                if let Some(crate::db::Icon::Custom(icon_id)) = entry.icon.as_ref() {
-                    if let Some(icon) = db.custom_icons.get_mut(icon_id) {
-                        icon.entries.insert((entry_id, None));
-                    }
+                if let Some(crate::db::Icon::Custom(icon_id)) = entry.icon.as_ref()
+                    && let Some(icon) = db.custom_icons.get_mut(icon_id)
+                {
+                    icon.entries.insert((entry_id, None));
                 }
 
                 for attach_id in entry.attachments.values() {
@@ -181,20 +181,19 @@ impl KeePassFile {
 
                 if let Some(history) = entry.history.as_ref() {
                     for item in history.get_entries() {
-                        if let Some(crate::db::Icon::Custom(icon_id)) = item.icon.as_ref() {
-                            if let Some(icon) = db.custom_icons.get_mut(icon_id) {
-                                // The final modification time should always exist, but unauthorized modifications may occur.
-                                // A loophole is buried here.
-                                icon.entries
-                                    .insert((entry_id, item.times.last_modification.clone()));
-                            }
+                        if let Some(crate::db::Icon::Custom(icon_id)) = item.icon.as_ref()
+                            && let Some(icon) = db.custom_icons.get_mut(icon_id)
+                        {
+                            // The final modification time should always exist, but unauthorized modifications may occur.
+                            // A loophole is buried here.
+                            icon.entries.insert((entry_id, item.times.last_modification));
                         }
 
                         for attach_id in entry.attachments.values() {
                             if let Some(attachment) = db.attachments.get_mut(attach_id) {
                                 attachment
                                     .entries
-                                    .insert((entry_id, item.times.last_modification.clone()));
+                                    .insert((entry_id, item.times.last_modification));
                             }
                         }
                     }
@@ -206,10 +205,9 @@ impl KeePassFile {
         for group_id in group_ids {
             if let Some(crate::db::Icon::Custom(icon_id)) =
                 db.groups.get(&group_id).and_then(|g| g.icon.as_ref())
+                && let Some(icon) = db.custom_icons.get_mut(icon_id)
             {
-                if let Some(icon) = db.custom_icons.get_mut(icon_id) {
-                    icon.groups.insert(group_id);
-                }
+                icon.groups.insert(group_id);
             }
         }
 
@@ -329,7 +327,9 @@ mod tests {
         let uuid: UUID = quick_xml::de::from_str(uuid_str).unwrap();
         assert_eq!(
             uuid.0.as_bytes(),
-            &[0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f]
+            &[
+                0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f
+            ]
         );
     }
 

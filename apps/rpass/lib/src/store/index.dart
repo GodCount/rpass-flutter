@@ -5,7 +5,6 @@ import 'settings/controller.dart';
 export 'kdbx/controller.dart' show KdbxProviderListener;
 
 sealed class Store {
-
   static final settings = SettingsController();
   static final localInfo = LocalInfoContrller();
   static final kdbx = KdbxController();
@@ -15,4 +14,3 @@ sealed class Store {
     await localInfo.init();
   }
 }
-

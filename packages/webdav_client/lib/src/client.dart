@@ -34,8 +34,7 @@ class Client {
   // methods--------------------------------
 
   /// Set the public request headers
-  void setHeaders(Map<String, dynamic> headers) =>
-      c.options.headers = headers;
+  void setHeaders(Map<String, dynamic> headers) => c.options.headers = headers;
 
   /// Set the connection server timeout time in milliseconds.
   void setConnectTimeout(int timeout) =>

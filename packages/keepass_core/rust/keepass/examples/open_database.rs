@@ -1,5 +1,5 @@
 //! Example for opening and traversing a KeePass database
-use keepass::{db::fields, error::DatabaseOpenError, Database, DatabaseKey};
+use keepass::{Database, DatabaseKey, db::fields, error::DatabaseOpenError};
 use std::fs::File;
 
 fn main() -> Result<(), DatabaseOpenError> {

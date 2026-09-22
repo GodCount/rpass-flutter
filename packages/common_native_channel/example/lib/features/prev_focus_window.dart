@@ -8,7 +8,8 @@ class PrevFocusWindowPage extends StatefulWidget {
   State<PrevFocusWindowPage> createState() => _PrevFocusWindowPageState();
 }
 
-class _PrevFocusWindowPageState extends State<PrevFocusWindowPage> with PrevFocusWindowListener {
+class _PrevFocusWindowPageState extends State<PrevFocusWindowPage>
+    with PrevFocusWindowListener {
   @override
   void initState() {
     super.initState();

@@ -7,7 +7,7 @@ mod common;
 
 use std::io::Cursor;
 
-use common::{baseline_combo, KeyfileKind};
+use common::{KeyfileKind, baseline_combo};
 use keepass::{Database, DatabaseKey};
 
 fn drive(kind: KeyfileKind, label: &str) {

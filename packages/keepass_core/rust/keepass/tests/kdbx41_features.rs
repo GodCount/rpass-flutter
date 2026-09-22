@@ -8,12 +8,12 @@
 
 use chrono::NaiveDate;
 use keepass::{
+    DatabaseKey,
     config::{DatabaseConfig, KdfConfig},
     db::{
-        fields, AutoType, AutoTypeAssociation, Color, CustomDataItem, CustomDataValue, CustomIconId,
-        DataTransferObfuscation, Database, EntryId, GroupId, Value,
+        AutoType, AutoTypeAssociation, Color, CustomDataItem, CustomDataValue, CustomIconId,
+        DataTransferObfuscation, Database, EntryId, GroupId, Value, fields,
     },
-    DatabaseKey,
 };
 
 const PASSWORD: &str = "demopass";

@@ -15,13 +15,16 @@ extension _WebDavKdbxEntryField on WebDavConfig {
 
   Map<String, FieldValue> toKdbx() {
     return {
-      RemoteFileKdbxEntryField.kdbxKeyType: FieldValue.plaintext(RemoteType.webdav.name),
+      RemoteFileKdbxEntryField.kdbxKeyType: FieldValue.plaintext(
+        RemoteType.webdav.name,
+      ),
       KdbxKeyCommon.URL: FieldValue.plaintext(url),
       KdbxKeyCommon.USER_NAME: FieldValue.plaintext(username),
       KdbxKeyCommon.PASSWORD: FieldValue.protected(password),
       kdbxKeyPath: FieldValue.plaintext(path),
       kdbxKeyType: FieldValue.plaintext(type.name),
-      if (authHeader != null) kdbxKeyAuthHeader: FieldValue.plaintext(authHeader!),
+      if (authHeader != null)
+        kdbxKeyAuthHeader: FieldValue.plaintext(authHeader!),
     };
   }
 

@@ -7,8 +7,8 @@ mod large_file_roundtrip_tests {
     use std::fs::File;
 
     use keepass::{
-        db::{fields, Database, GroupRef},
         DatabaseKey,
+        db::{Database, GroupRef, fields},
     };
 
     /// This can be tuned based on how "large" we expect databases to realistically be.

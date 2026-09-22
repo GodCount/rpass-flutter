@@ -12,8 +12,9 @@ use crate::crypt::ciphers::Cipher;
 use crate::{
     compression,
     crypt::{
+        CryptographyError,
         ciphers::{self},
-        kdf, CryptographyError,
+        kdf,
     },
     format::variant_dictionary::VariantDictionaryError,
 };

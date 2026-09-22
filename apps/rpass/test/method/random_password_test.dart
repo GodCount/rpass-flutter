@@ -10,14 +10,26 @@ void main() {
 
     test("include cahr", () {
       final password = randomPassword(length: 20).split("");
-      expect(password.any((char) => CharacterSet.lowerCaseLetters.contains(char)), isTrue);
+      expect(
+        password.any((char) => CharacterSet.lowerCaseLetters.contains(char)),
+        isTrue,
+      );
       expect(
         password.any((char) => CharacterSet.upperCaseLetters.contains(char)),
         isTrue,
       );
-      expect(password.any((char) => CharacterSet.numbers.contains(char)), isTrue);
-      expect(password.any((char) => CharacterSet.symbols.contains(char)), isTrue);
-      expect(password.any((char) => CharacterSet.brackets.contains(char)), isTrue);
+      expect(
+        password.any((char) => CharacterSet.numbers.contains(char)),
+        isTrue,
+      );
+      expect(
+        password.any((char) => CharacterSet.symbols.contains(char)),
+        isTrue,
+      );
+      expect(
+        password.any((char) => CharacterSet.brackets.contains(char)),
+        isTrue,
+      );
     });
 
     test("custom cahr", () {

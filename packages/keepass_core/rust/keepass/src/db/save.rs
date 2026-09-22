@@ -1,10 +1,10 @@
 use thiserror::Error;
 
 use crate::{
+    DatabaseKey,
     config::{DatabaseVersion, InnerCipherConfig},
     db::Database,
     format::xml_db::to_xml,
-    DatabaseKey,
 };
 
 impl Database {
@@ -26,7 +26,7 @@ impl Database {
 
     /// database to plain xml
     pub fn to_xml(&self) -> Result<Vec<u8>, DatabaseSaveError> {
-        let mut cipher = InnerCipherConfig::Plain.get_cipher(&vec![])?;
+        let mut cipher = InnerCipherConfig::Plain.get_cipher(&[])?;
         let (xml, ..) = to_xml(self, &mut *cipher)?;
         Ok(xml)
     }

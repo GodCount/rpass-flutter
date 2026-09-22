@@ -7,8 +7,8 @@ use chrono::NaiveDateTime;
 use thiserror::Error;
 
 use crate::{
-    db::{EntryId, EntryRef, Value},
     Database,
+    db::{EntryId, EntryRef, Value},
 };
 
 /// Identifier for an [Attachment]

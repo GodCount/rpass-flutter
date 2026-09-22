@@ -8,7 +8,7 @@
 //!
 //! This example should be extended to cover it once merged.
 use keepass::db::merge::{MergeError, MergeEvent, MergeEventTarget, MergeEventType, MergeLog};
-use keepass::db::{fields, Database};
+use keepass::db::{Database, fields};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Start from a shared database and take a second copy to diverge from it.

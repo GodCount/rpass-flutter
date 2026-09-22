@@ -105,9 +105,7 @@ class DigestAuth extends Auth {
     if (qop == 'auth' || qop?.isEmpty != false) {
       return md5Hash('${dParts.method}:${dParts.uri}');
     } else if (qop == 'auth-int' && entityBody?.isEmpty == false) {
-      return md5Hash(
-        '${dParts.method}:${dParts.uri}:${md5Hash(entityBody!)}',
-      );
+      return md5Hash('${dParts.method}:${dParts.uri}:${md5Hash(entityBody!)}');
     }
 
     return '';

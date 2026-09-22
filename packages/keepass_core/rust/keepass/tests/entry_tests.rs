@@ -3,8 +3,8 @@
 #[allow(missing_docs, clippy::expect_used, clippy::unwrap_used)]
 mod entry_tests {
     use keepass::{
-        db::{DatabaseOpenError, Value},
         Database, DatabaseKey,
+        db::{DatabaseOpenError, Value},
     };
     use std::{collections::HashSet, fs::File, path::Path};
     use uuid::uuid;

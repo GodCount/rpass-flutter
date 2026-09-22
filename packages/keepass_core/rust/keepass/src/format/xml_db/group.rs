@@ -9,11 +9,11 @@ use crate::{
     crypt::ciphers::Cipher,
     db::{EntryId, GroupId},
     format::xml_db::{
+        UUID,
         custom_serde::{cs_opt_bool, cs_opt_fromstr, cs_opt_string},
         entry::{Entry, UnprotectError},
         tags::split_tags,
         times::Times,
-        UUID,
     },
 };
 
@@ -142,7 +142,7 @@ impl Group {
         }
 
         for e in source.entries() {
-            children.push(GroupOrEntry::Entry(Entry::db_to_xml(&*e, inner_cipher)?));
+            children.push(GroupOrEntry::Entry(Entry::db_to_xml(&e, inner_cipher)?));
         }
 
         let custom_data: Option<crate::format::xml_db::meta::CustomData> = if source.custom_data.is_empty() {

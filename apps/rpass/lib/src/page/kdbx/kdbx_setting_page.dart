@@ -262,7 +262,6 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                   },
                 ),
 
-
                 // TODO! 暂不考虑
                 // _RangeSelectionFormField(
                 //   canDisable: true,
@@ -283,7 +282,6 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                 //     };
                 //   },
                 // ),
-
                 _RangeSelectionFormField(
                   canDisable: true,
                   label: t.history_max_items,

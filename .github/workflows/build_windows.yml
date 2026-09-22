@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Enable Git longpaths
         run: git config --system core.longpaths true
@@ -52,7 +52,7 @@ jobs:
           Compress-Archive apps/rpass/build/windows/x64/runner/Release/* Rpass.zip
 
       - name: Upload Zip
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: windows_outputs
           path: Rpass.zip

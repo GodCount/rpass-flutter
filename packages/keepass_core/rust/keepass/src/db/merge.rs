@@ -10,10 +10,10 @@ use chrono::NaiveDateTime;
 use thiserror::Error;
 
 use crate::{
+    Database,
     db::{
         CustomDataItem, CustomIconId, Entry, EntryId, Group, GroupId, GroupRef, History, MoveGroupError, Times,
     },
-    Database,
 };
 
 /// Customized, record maintenance_history_days_changed modification time
@@ -555,7 +555,7 @@ fn merge_entries(dest_db: &mut Database, source_db: &Database, log: &mut MergeLo
             continue;
         }
 
-        let source_history = source_entry.history.clone().unwrap_or_else(|| {
+        let mut source_history = source_entry.history.clone().unwrap_or_else(|| {
             log.warnings.push(format!("Source entry {} had no history.", id));
             History::default()
         });
@@ -566,6 +566,13 @@ fn merge_entries(dest_db: &mut Database, source_db: &Database, log: &mut MergeLo
             History::default()
         });
 
+        // 来源早于目标时, 把来源放入历史进行合并
+        if dest_last_modification > source_last_modification {
+            let mut source_entry_for_history = source_entry.deref().clone();
+            source_entry_for_history.history = None;
+            source_history.add_entry(source_entry_for_history);
+        }
+
         let mut merged_history = merge_history(&dest_history, &source_history, log)?;
         let merged_location_timestamp = dest_entry
             .times
@@ -574,12 +581,12 @@ fn merge_entries(dest_db: &mut Database, source_db: &Database, log: &mut MergeLo
 
         if source_last_modification > dest_last_modification {
             // add the previous dest entry to history if it has diverged
-            if let Some(last_history_entry) = merged_history.get_entries().first() {
-                if have_entries_diverged(&dest_entry, last_history_entry) {
-                    let mut dest_entry_for_history = dest_entry.deref().clone();
-                    dest_entry_for_history.history = None;
-                    merged_history.add_entry(dest_entry_for_history);
-                }
+            if let Some(last_history_entry) = merged_history.get_entries().first()
+                && have_entries_diverged(&dest_entry, last_history_entry)
+            {
+                let mut dest_entry_for_history = dest_entry.deref().clone();
+                dest_entry_for_history.history = None;
+                merged_history.add_entry(dest_entry_for_history);
             }
 
             // The source entry is more recent than the destination entry. Replace dest with source.
@@ -601,7 +608,6 @@ fn merge_entries(dest_db: &mut Database, source_db: &Database, log: &mut MergeLo
                 event_type: MergeEventType::Updated,
             });
         }
-
         dest_entry.history = Some(merged_history);
         dest_entry.times.location_changed = merged_location_timestamp;
     }
@@ -859,8 +865,8 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
 
     if source_recyclebin_changed > dest_recyclebin_changed {
         dest_db.meta.recyclebin_changed = Some(source_recyclebin_changed);
-        dest_db.meta.recyclebin_enabled = source_db.meta.recyclebin_enabled.clone();
-        dest_db.meta.recyclebin_uuid = source_db.meta.recyclebin_uuid.clone();
+        dest_db.meta.recyclebin_enabled = source_db.meta.recyclebin_enabled;
+        dest_db.meta.recyclebin_uuid = source_db.meta.recyclebin_uuid;
     } else if source_recyclebin_changed == dest_recyclebin_changed
         && (source_db.meta.recyclebin_enabled != dest_db.meta.recyclebin_enabled
             || source_db.meta.recyclebin_uuid != dest_db.meta.recyclebin_uuid)
@@ -880,7 +886,7 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
 
     if source_entry_templates_group_changed > dest_entry_templates_group_changed {
         dest_db.meta.entry_templates_group_changed = Some(source_entry_templates_group_changed);
-        dest_db.meta.entry_templates_group = source_db.meta.entry_templates_group.clone();
+        dest_db.meta.entry_templates_group = source_db.meta.entry_templates_group;
     } else if source_entry_templates_group_changed == dest_entry_templates_group_changed
         && source_db.meta.entry_templates_group != dest_db.meta.entry_templates_group
     {
@@ -893,7 +899,7 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
     let source_master_key_changed = source_db.meta.master_key_changed.unwrap_or(Times::epoch());
 
     if source_master_key_changed > dest_master_key_changed {
-        dest_db.meta.master_key_changed = source_db.meta.master_key_changed.clone();
+        dest_db.meta.master_key_changed = source_db.meta.master_key_changed;
     }
 
     let dest_settings_changed = dest_db.meta.settings_changed.unwrap_or(Times::epoch());
@@ -902,12 +908,12 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
     let dest_maintenance_history_days_changed = get_customm_time_changed(
         dest_db,
         CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
-        dest_settings_changed.clone(),
+        dest_settings_changed,
     );
     let source_maintenance_history_days_changed = get_customm_time_changed(
         source_db,
         CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
-        source_settings_changed.clone(),
+        source_settings_changed,
     );
 
     if source_maintenance_history_days_changed > dest_maintenance_history_days_changed {
@@ -916,13 +922,12 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
             CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
             source_maintenance_history_days_changed,
         );
-        dest_db.meta.maintenance_history_days = source_db.meta.maintenance_history_days.clone();
+        dest_db.meta.maintenance_history_days = source_db.meta.maintenance_history_days;
     }
 
-    let dest_color_changed =
-        get_customm_time_changed(dest_db, CUSTOM_COLOR_CHANGED, dest_settings_changed.clone());
+    let dest_color_changed = get_customm_time_changed(dest_db, CUSTOM_COLOR_CHANGED, dest_settings_changed);
     let source_color_changed =
-        get_customm_time_changed(source_db, CUSTOM_COLOR_CHANGED, source_settings_changed.clone());
+        get_customm_time_changed(source_db, CUSTOM_COLOR_CHANGED, source_settings_changed);
 
     if source_color_changed > dest_color_changed {
         set_customm_time_changed(dest_db, CUSTOM_COLOR_CHANGED, source_color_changed);
@@ -932,12 +937,12 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
     let dest_master_key_change_rec_changed = get_customm_time_changed(
         dest_db,
         CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
-        dest_settings_changed.clone(),
+        dest_settings_changed,
     );
     let source_master_key_change_rec_changed = get_customm_time_changed(
         source_db,
         CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
-        source_settings_changed.clone(),
+        source_settings_changed,
     );
 
     if source_master_key_change_rec_changed > dest_master_key_change_rec_changed {
@@ -946,18 +951,18 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
             CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
             source_master_key_change_rec_changed,
         );
-        dest_db.meta.master_key_change_rec = source_db.meta.master_key_change_rec.clone();
+        dest_db.meta.master_key_change_rec = source_db.meta.master_key_change_rec;
     }
 
     let dest_master_key_change_force_changed = get_customm_time_changed(
         dest_db,
         CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
-        dest_settings_changed.clone(),
+        dest_settings_changed,
     );
     let source_master_key_change_force_changed = get_customm_time_changed(
         source_db,
         CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
-        source_settings_changed.clone(),
+        source_settings_changed,
     );
 
     if source_master_key_change_force_changed > dest_master_key_change_force_changed {
@@ -966,18 +971,15 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
             CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
             source_master_key_change_force_changed,
         );
-        dest_db.meta.master_key_change_force = source_db.meta.master_key_change_force.clone();
+        dest_db.meta.master_key_change_force = source_db.meta.master_key_change_force;
     }
 
-    let dest_memory_protection_changed = get_customm_time_changed(
-        dest_db,
-        CUSTOM_MEMORY_PROTECTION_CHANGED,
-        dest_settings_changed.clone(),
-    );
+    let dest_memory_protection_changed =
+        get_customm_time_changed(dest_db, CUSTOM_MEMORY_PROTECTION_CHANGED, dest_settings_changed);
     let source_memory_protection_changed = get_customm_time_changed(
         source_db,
         CUSTOM_MEMORY_PROTECTION_CHANGED,
-        source_settings_changed.clone(),
+        source_settings_changed,
     );
 
     if source_memory_protection_changed > dest_memory_protection_changed {
@@ -989,15 +991,12 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
         dest_db.meta.memory_protection = source_db.meta.memory_protection.clone();
     }
 
-    let dest_history_max_items_changed = get_customm_time_changed(
-        dest_db,
-        CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
-        dest_settings_changed.clone(),
-    );
+    let dest_history_max_items_changed =
+        get_customm_time_changed(dest_db, CUSTOM_HISTORY_MAX_ITEMS_CHANGED, dest_settings_changed);
     let source_history_max_items_changed = get_customm_time_changed(
         source_db,
         CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
-        source_settings_changed.clone(),
+        source_settings_changed,
     );
 
     if source_history_max_items_changed > dest_history_max_items_changed {
@@ -1006,18 +1005,15 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
             CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
             source_history_max_items_changed,
         );
-        dest_db.meta.history_max_items = source_db.meta.history_max_items.clone();
+        dest_db.meta.history_max_items = source_db.meta.history_max_items;
     }
 
-    let dest_history_max_size_changed = get_customm_time_changed(
-        dest_db,
-        CUSTOM_HISTORY_MAX_SIZE_CHANGED,
-        dest_settings_changed.clone(),
-    );
+    let dest_history_max_size_changed =
+        get_customm_time_changed(dest_db, CUSTOM_HISTORY_MAX_SIZE_CHANGED, dest_settings_changed);
     let source_history_max_size_changed = get_customm_time_changed(
         source_db,
         CUSTOM_HISTORY_MAX_SIZE_CHANGED,
-        source_settings_changed.clone(),
+        source_settings_changed,
     );
 
     if source_history_max_size_changed > dest_history_max_size_changed {
@@ -1026,19 +1022,13 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
             CUSTOM_HISTORY_MAX_SIZE_CHANGED,
             source_history_max_size_changed,
         );
-        dest_db.meta.history_max_size = source_db.meta.history_max_size.clone();
+        dest_db.meta.history_max_size = source_db.meta.history_max_size;
     }
 
-    let dest_database_config_changed = get_customm_time_changed(
-        dest_db,
-        CUSTOM_DATABASE_CONFIG_CHANGED,
-        dest_settings_changed.clone(),
-    );
-    let source_database_config_changed = get_customm_time_changed(
-        source_db,
-        CUSTOM_DATABASE_CONFIG_CHANGED,
-        source_settings_changed.clone(),
-    );
+    let dest_database_config_changed =
+        get_customm_time_changed(dest_db, CUSTOM_DATABASE_CONFIG_CHANGED, dest_settings_changed);
+    let source_database_config_changed =
+        get_customm_time_changed(source_db, CUSTOM_DATABASE_CONFIG_CHANGED, source_settings_changed);
 
     if source_database_config_changed > dest_database_config_changed {
         set_customm_time_changed(
@@ -1056,11 +1046,13 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
     let source_custom_data = source_db.meta.custom_data.keys().cloned().collect::<HashSet<_>>();
 
     for key in source_custom_data.difference(&dest_custom_data) {
+        #[allow(clippy::unwrap_used)]
         let value = source_db.meta.custom_data.get(key).unwrap().clone();
         dest_db.meta.custom_data.insert(key.clone(), value);
     }
 
     for key in dest_custom_data.intersection(&source_custom_data) {
+        #[allow(clippy::unwrap_used)]
         let dest_value_time = dest_db
             .meta
             .custom_data
@@ -1068,6 +1060,8 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
             .unwrap()
             .last_modification_time
             .unwrap_or(Times::epoch());
+
+        #[allow(clippy::unwrap_used)]
         let source_value = source_db.meta.custom_data.get(key).unwrap();
 
         let source_value_time = source_value.last_modification_time.unwrap_or(Times::epoch());
@@ -1088,7 +1082,7 @@ fn get_customm_time_changed(db: &Database, key: &str, default: NaiveDateTime) ->
     db.meta
         .custom_data
         .get(key)
-        .and_then(|item| item.last_modification_time.clone())
+        .and_then(|item| item.last_modification_time)
         .unwrap_or(default)
 }
 
@@ -1140,12 +1134,12 @@ fn have_entries_diverged(a: &Entry, b: &Entry) -> bool {
 mod merge_tests {
     use uuid::uuid;
 
+    use crate::Database;
     use crate::config::{
         CompressionConfig, DatabaseConfig, DatabaseVersion, InnerCipherConfig, KdfConfig, OuterCipherConfig,
     };
-    use crate::db::{fields, Color, EntryId, GroupId, History, MemoryProtection, Times};
-    use crate::db::{merge::*, CustomDataValue};
-    use crate::Database;
+    use crate::db::{Color, EntryId, GroupId, History, MemoryProtection, Times, fields};
+    use crate::db::{CustomDataValue, merge::*};
 
     const ROOT_GROUP_ID: GroupId = GroupId::from_uuid(uuid!("00000000-0000-0000-0000-000000000001"));
     const GROUP1_ID: GroupId = GroupId::from_uuid(uuid!("00000000-0000-0000-0000-000000000002"));
@@ -1479,9 +1473,11 @@ mod merge_tests {
         assert_eq!(group_count_after, group_count_before);
 
         assert!(destination_db.entry(deleted_entry_id).is_none());
-        assert!(destination_db
-            .deleted_objects
-            .contains_key(&deleted_entry_id.uuid()));
+        assert!(
+            destination_db
+                .deleted_objects
+                .contains_key(&deleted_entry_id.uuid())
+        );
     }
 
     /// Test that a group that is marked as deleted in the source database is deleted from destination
@@ -1520,9 +1516,11 @@ mod merge_tests {
         assert_eq!(group_count_after, group_count_before - 1);
 
         assert!(destination_db.group(deleted_group_id).is_none());
-        assert!(destination_db
-            .deleted_objects
-            .contains_key(&deleted_group_id.uuid()));
+        assert!(
+            destination_db
+                .deleted_objects
+                .contains_key(&deleted_group_id.uuid())
+        );
     }
 
     /// Test that an entry that is marked as deleted in the source database but modified in
@@ -1567,9 +1565,11 @@ mod merge_tests {
         assert_eq!(group_count_after, group_count_before);
 
         assert!(destination_db.entry(deleted_entry_id).is_some());
-        assert!(!destination_db
-            .deleted_objects
-            .contains_key(&deleted_entry_id.uuid()));
+        assert!(
+            !destination_db
+                .deleted_objects
+                .contains_key(&deleted_entry_id.uuid())
+        );
     }
 
     /// Test that a group subtree that is marked as deleted in the source database is deleted from
@@ -1632,15 +1632,21 @@ mod merge_tests {
         assert!(destination_db.group(deleted_subgroup_id).is_none());
         assert!(destination_db.group(deleted_group_id).is_none());
 
-        assert!(destination_db
-            .deleted_objects
-            .contains_key(&deleted_entry_id.uuid()));
-        assert!(destination_db
-            .deleted_objects
-            .contains_key(&deleted_subgroup_id.uuid()));
-        assert!(destination_db
-            .deleted_objects
-            .contains_key(&deleted_group_id.uuid()));
+        assert!(
+            destination_db
+                .deleted_objects
+                .contains_key(&deleted_entry_id.uuid())
+        );
+        assert!(
+            destination_db
+                .deleted_objects
+                .contains_key(&deleted_subgroup_id.uuid())
+        );
+        assert!(
+            destination_db
+                .deleted_objects
+                .contains_key(&deleted_group_id.uuid())
+        );
     }
 
     /// Test that a tree that was deleted in source, but contains a group that is newer in
@@ -1716,15 +1722,21 @@ mod merge_tests {
         assert!(destination_db.group(deleted_subgroup_id).is_none());
         assert!(destination_db.group(deleted_group_id).is_some());
 
-        assert!(destination_db
-            .deleted_objects
-            .contains_key(&deleted_entry_id.uuid()));
-        assert!(destination_db
-            .deleted_objects
-            .contains_key(&deleted_subgroup_id.uuid()));
-        assert!(!destination_db
-            .deleted_objects
-            .contains_key(&deleted_group_id.uuid()));
+        assert!(
+            destination_db
+                .deleted_objects
+                .contains_key(&deleted_entry_id.uuid())
+        );
+        assert!(
+            destination_db
+                .deleted_objects
+                .contains_key(&deleted_subgroup_id.uuid())
+        );
+        assert!(
+            !destination_db
+                .deleted_objects
+                .contains_key(&deleted_group_id.uuid())
+        );
     }
 
     /// Test that a group that is marked as deleted in the source database but modified in
@@ -1773,9 +1785,11 @@ mod merge_tests {
 
         assert!(destination_db.group(deleted_group_id).is_some());
 
-        assert!(!destination_db
-            .deleted_objects
-            .contains_key(&deleted_group_id.uuid()));
+        assert!(
+            !destination_db
+                .deleted_objects
+                .contains_key(&deleted_group_id.uuid())
+        );
     }
 
     /// Test that a group that is marked as deleted in the source database but has new entries
@@ -1828,9 +1842,11 @@ mod merge_tests {
         assert!(destination_db.group(deleted_group_id).is_some());
         assert!(destination_db.entry(new_entry_id).is_some());
 
-        assert!(!destination_db
-            .deleted_objects
-            .contains_key(&deleted_group_id.uuid()));
+        assert!(
+            !destination_db
+                .deleted_objects
+                .contains_key(&deleted_group_id.uuid())
+        );
         assert!(!destination_db.deleted_objects.contains_key(&new_entry_id.uuid()));
     }
 
@@ -1959,7 +1975,7 @@ mod merge_tests {
         // perform the merge - this should relocate the entry in destination_db
         let merge_result = destination_db.merge(&source_db).unwrap();
         assert_eq!(merge_result.warnings.len(), 0);
-        assert_eq!(merge_result.events.len(), 1);
+        assert_eq!(merge_result.events.len(), 2);
 
         let entry_count_after = destination_db.entries.len();
         let group_count_after = destination_db.groups.len();
@@ -2041,8 +2057,7 @@ mod merge_tests {
         assert_eq!(entry.times.last_modification, Some(entry_modified_timestamp));
     }
 
-    /// Test that if an entry is moved in source and modified in destination, the entry stays
-    /// in the new location and gets the modifications.
+    /// 测试条目在源中修改, 并在目标中移动, 合并后来源中的条目应该放进目标中的历史
     #[test]
     fn test_entry_relocation_in_destination_and_update() {
         let mut destination_db = create_test_database();
@@ -2057,6 +2072,8 @@ mod merge_tests {
         source_db.entry_mut(ENTRY2_ID).unwrap().edit_tracking(|e| {
             e.set_unprotected(fields::TITLE, "entry2_modified_in_source");
         });
+
+        sleep();
 
         let entry_modified_timestamp = source_db
             .entry(ENTRY2_ID)
@@ -2080,11 +2097,22 @@ mod merge_tests {
             .location_changed
             .unwrap();
 
-        // perform the merge - this should keep the location from destination and the content from
-        // source
         let merge_result = destination_db.merge(&source_db).unwrap();
+
         assert_eq!(merge_result.warnings.len(), 0);
-        assert_eq!(merge_result.events.len(), 1);
+        assert_eq!(merge_result.events.len(), 0);
+
+        assert_eq!(
+            destination_db
+                .entry(ENTRY2_ID)
+                .unwrap()
+                .history
+                .as_ref()
+                .unwrap()
+                .get_entries()
+                .len(),
+            2
+        );
 
         let entry_count_after = destination_db.entries.len();
         let group_count_after = destination_db.groups.len();
@@ -2098,9 +2126,13 @@ mod merge_tests {
         assert_eq!(entry.parent().id(), GROUP2_ID);
         assert_eq!(entry.times.location_changed, Some(location_changed_timestamp));
 
-        // check that content from source is kept
-        assert_eq!(entry.get(fields::TITLE), Some("entry2_modified_in_source"));
-        assert_eq!(entry.times.last_modification, Some(entry_modified_timestamp));
+        assert_eq!(
+            entry
+                .historical(entry_modified_timestamp)
+                .unwrap()
+                .get(fields::TITLE),
+            Some("entry2_modified_in_source")
+        );
     }
 
     /// Test that an entry can be relocated into a newly created group
@@ -2204,7 +2236,7 @@ mod merge_tests {
         // perform the merge - this should relocate the group in destination_db
         let merge_result = destination_db.merge(&source_db).unwrap();
         assert_eq!(merge_result.warnings.len(), 0);
-        assert_eq!(merge_result.events.len(), 1);
+        assert_eq!(merge_result.events.len(), 2);
 
         let entry_count_after = destination_db.entries.len();
         let group_count_after = destination_db.groups.len();
@@ -2523,12 +2555,7 @@ mod merge_tests {
             g.name = "subgroup1_updated_name".to_string();
         });
 
-        let modification_timestamp = source_db
-            .group(SUBGROUP1_ID)
-            .unwrap()
-            .times
-            .last_modification
-            .unwrap();
+        sleep();
 
         // relocate group in destination
         destination_db
@@ -2545,11 +2572,17 @@ mod merge_tests {
             .location_changed
             .unwrap();
 
-        // perform the merge - this should update the group name from source and keep the new
-        // location from destination
+        let modification_timestamp = destination_db
+            .group(SUBGROUP1_ID)
+            .unwrap()
+            .times
+            .last_modification
+            .unwrap();
+
+        // 不进行任何合并, 因为移动操作也会更新 last_modification, 目标的 last_modification 是最新的
         let merge_result = destination_db.merge(&source_db).unwrap();
         assert_eq!(merge_result.warnings.len(), 0);
-        assert_eq!(merge_result.events.len(), 1);
+        assert_eq!(merge_result.events.len(), 0);
 
         let entry_count_after = destination_db.entries.len();
         let group_count_after = destination_db.groups.len();
@@ -2558,7 +2591,7 @@ mod merge_tests {
 
         assert!(destination_db.group(SUBGROUP1_ID).is_some());
         let group = destination_db.group(SUBGROUP1_ID).unwrap();
-        assert_eq!(group.name, "subgroup1_updated_name");
+        assert_eq!(group.name, "subgroup1");
         assert_eq!(group.parent().unwrap().id(), GROUP2_ID);
         assert_eq!(group.times.last_modification, Some(modification_timestamp));
         assert_eq!(group.times.location_changed, Some(location_changed_timestamp));
@@ -2646,7 +2679,8 @@ mod merge_tests {
         source_db.entry_mut(ENTRY1_ID).unwrap().times.location_changed = None;
 
         let merge_result = destination_db.merge(&source_db).unwrap();
-        assert_eq!(merge_result.warnings.len(), 3);
+        dbg!(&merge_result.warnings);
+        assert_eq!(merge_result.warnings.len(), 4);
         assert_eq!(merge_result.events.len(), 0);
     }
 

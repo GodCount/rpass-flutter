@@ -3,7 +3,7 @@
 #![allow(missing_docs)]
 #![cfg(target_arch = "wasm32")]
 
-use keepass::{db::Database, DatabaseKey};
+use keepass::{DatabaseKey, db::Database};
 use wasm_bindgen_test::wasm_bindgen_test;
 
 /// Ensure that opening an Argon2-encrypted KDBX4 database does not panic

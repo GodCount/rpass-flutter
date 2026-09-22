@@ -10,7 +10,7 @@ pub(crate) fn random_bytes(len: usize) -> Vec<u8> {
 }
 
 /// 值和盐进行异或
-pub(crate) fn transform_xor(value: &Vec<u8>, salt: &Vec<u8>) -> Vec<u8> {
+pub(crate) fn transform_xor(value: &[u8], salt: &[u8]) -> Vec<u8> {
     let salt_len = salt.len();
     (0..value.len())
         .map(|i| value[i] ^ salt[i % salt_len])

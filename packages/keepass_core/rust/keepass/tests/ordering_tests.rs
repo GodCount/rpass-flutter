@@ -3,8 +3,8 @@
 
 mod common;
 
-use crate::common::{save_then_open, DEMO_PASSWORD};
-use keepass::{db::fields, Database, DatabaseKey};
+use crate::common::{DEMO_PASSWORD, save_then_open};
+use keepass::{Database, DatabaseKey, db::fields};
 
 #[test]
 fn group_and_entry_order_should_survive_round_trip() {

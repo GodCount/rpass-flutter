@@ -8,13 +8,13 @@ pub use crate::{
         DuplicateEntryIdError, DuplicateGroupIdError, MoveGroupError, ParseColorError,
     },
     format::{
+        DatabaseVersionParseError,
         hmac_block_stream::BlockStreamError,
         kdb::KdbOpenError,
         kdbx3::{Kdbx3OpenError, Kdbx3OuterHeaderError},
         kdbx4::{Kdbx4InnerHeaderError, Kdbx4OpenError, Kdbx4OuterHeaderError},
         variant_dictionary::VariantDictionaryError,
         xml_db::ParseXmlError,
-        DatabaseVersionParseError,
     },
     key::{DatabaseKeyError, KeyFileError},
 };

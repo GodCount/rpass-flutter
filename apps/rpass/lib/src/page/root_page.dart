@@ -106,8 +106,7 @@ class _RootRpassAppState extends State<RootRpassApp>
   }
 
   Future<void> _openWindow() async {
-    final alignment =
-        Store.settings.shortcutsStore.shortcutsOpenAppAlignment;
+    final alignment = Store.settings.shortcutsStore.shortcutsOpenAppAlignment;
 
     switch (alignment) {
       case ShortcutsOpenAppAlignment.mouse:

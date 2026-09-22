@@ -8,9 +8,9 @@
 )]
 mod file_read_tests {
     use keepass::{
+        DatabaseKey,
         config::DatabaseVersion,
         db::{CustomDataValue, Database, DatabaseOpenError, GroupRef},
-        DatabaseKey,
     };
 
     use uuid::uuid;
@@ -18,18 +18,10 @@ mod file_read_tests {
     use std::{fs::File, path::Path};
 
     fn explore(parent: GroupRef<'_>) -> (usize, usize) {
-        let mut total_entries = 0;
+        let mut total_entries = parent.entries().count();
         let mut total_groups = 1;
-        for entry in parent.entries() {
-            let title = entry.get_title().unwrap_or("(no title)");
-            let user = entry.get_username().unwrap_or("(no user)");
-            let pass = entry.get_password().unwrap_or("(no password)");
-            println!("Entry '{0}': '{1}' : '{2}'", title, user, pass);
-            total_entries += 1;
-        }
 
         for group in parent.groups() {
-            println!("Saw group '{0}'", group.name);
             let (ee, eg) = explore(group);
 
             total_entries += ee;
@@ -47,7 +39,6 @@ mod file_read_tests {
             DatabaseKey::new().with_password("demopass"),
         )?;
 
-        println!("{:?} DB Opened", db);
         assert_eq!(db.config.version, DatabaseVersion::KDB3(1));
         assert_eq!(db.root().name, "sample");
         assert_eq!(db.root().groups().count(), 3);
@@ -56,8 +47,6 @@ mod file_read_tests {
         let (total_entries, total_groups) = explore(db.root());
         assert_eq!(total_groups, 5);
         assert_eq!(total_entries, 6);
-
-        println!("{:?}", db);
 
         Ok(())
     }
@@ -71,7 +60,6 @@ mod file_read_tests {
             DatabaseKey::new().with_keyfile(&mut File::open(kf_path)?)?,
         )?;
 
-        println!("{:?} DB Opened", db);
         assert_eq!(db.config.version, DatabaseVersion::KDB3(1));
         assert_eq!(db.root().name, "Root");
         assert_eq!(db.root().groups().count(), 0);
@@ -80,8 +68,6 @@ mod file_read_tests {
         let (total_entries, total_groups) = explore(db.root());
         assert_eq!(total_groups, 1);
         assert_eq!(total_entries, 1);
-
-        println!("{:?}", db);
 
         Ok(())
     }
@@ -95,7 +81,6 @@ mod file_read_tests {
             DatabaseKey::new().with_keyfile(&mut File::open(kf_path)?)?,
         )?;
 
-        println!("{:?} DB Opened", db);
         assert_eq!(db.config.version, DatabaseVersion::KDB3(1));
         assert_eq!(db.root().name, "Root");
         assert_eq!(db.root().groups().count(), 2);
@@ -104,8 +89,6 @@ mod file_read_tests {
         let (total_entries, total_groups) = explore(db.root());
         assert_eq!(total_groups, 5);
         assert_eq!(total_entries, 6);
-
-        println!("{:?}", db);
 
         Ok(())
     }
@@ -119,7 +102,6 @@ mod file_read_tests {
             DatabaseKey::new().with_password("demopass"),
         )?;
 
-        println!("{:?} DB Opened", db);
         assert_eq!(db.config.version, DatabaseVersion::KDB4(0));
         assert_eq!(db.root().name, "Root");
         assert_eq!(db.root().groups().count(), 0);
@@ -137,7 +119,6 @@ mod file_read_tests {
             DatabaseKey::new().with_password("demopass"),
         )?;
 
-        println!("{:?} DB Opened", db);
         assert_eq!(db.config.version, DatabaseVersion::KDB4(0));
         assert_eq!(db.root().name, "Root");
         assert_eq!(db.root().groups().count(), 0);
@@ -154,7 +135,6 @@ mod file_read_tests {
             DatabaseKey::new().with_password("demopass"),
         )?;
 
-        println!("{:?} DB Opened", db);
         assert_eq!(db.config.version, DatabaseVersion::KDB4(1));
         assert_eq!(db.root().name, "Root");
         assert_eq!(db.root().groups().count(), 0);
@@ -172,7 +152,6 @@ mod file_read_tests {
             DatabaseKey::new().with_password("demopass"),
         )?;
 
-        println!("{:?} DB Opened", db);
         assert_eq!(db.config.version, DatabaseVersion::KDB4(0));
         assert_eq!(db.root().name, "Root");
         assert_eq!(db.root().groups().count(), 0);
@@ -190,7 +169,6 @@ mod file_read_tests {
             DatabaseKey::new().with_password("demopass"),
         )?;
 
-        println!("{:?} DB Opened", db);
         assert_eq!(db.config.version, DatabaseVersion::KDB4(0));
         assert_eq!(db.root().name, "Root");
         assert_eq!(db.root().groups().count(), 0);
@@ -208,7 +186,6 @@ mod file_read_tests {
             DatabaseKey::new().with_password("demopass"),
         )?;
 
-        println!("{:?} DB Opened", db);
         assert_eq!(db.config.version, DatabaseVersion::KDB4(0));
         assert_eq!(db.root().name, "Root");
         assert_eq!(db.root().groups().count(), 0);
@@ -226,7 +203,6 @@ mod file_read_tests {
             DatabaseKey::new().with_password("demopass"),
         )?;
 
-        println!("{:?} DB Opened", db);
         assert_eq!(db.config.version, DatabaseVersion::KDB4(0));
         assert_eq!(db.root().name, "Root");
         assert_eq!(db.root().groups().count(), 0);
@@ -245,7 +221,6 @@ mod file_read_tests {
             DatabaseKey::new().with_keyfile(&mut File::open(kf_path)?)?,
         )?;
 
-        println!("{:?} DB Opened", db);
         assert_eq!(db.config.version, DatabaseVersion::KDB4(0));
         assert_eq!(db.root().name, "Root");
         assert_eq!(db.root().groups().count(), 0);
@@ -266,7 +241,6 @@ mod file_read_tests {
                 .with_keyfile(&mut File::open(kf_path)?)?,
         )?;
 
-        println!("{:?} DB Opened", db);
         assert_eq!(db.config.version, DatabaseVersion::KDB4(0));
         assert_eq!(db.root().name, "Root");
         assert_eq!(db.root().groups().count(), 0);
@@ -288,7 +262,6 @@ mod file_read_tests {
                 .with_keyfile(&mut File::open(kf_path)?)?,
         )?;
 
-        println!("{:?} DB Opened", db);
         assert_eq!(db.config.version, DatabaseVersion::KDB4(0));
         assert_eq!(db.root().name, "testdb02");
         assert_eq!(db.root().groups().count(), 6);
@@ -324,7 +297,6 @@ mod file_read_tests {
         let path = Path::new("tests/resources/test_db_kdb_with_password.kdb");
         let db = Database::open(&mut File::open(path)?, DatabaseKey::new().with_password("foobar"))?;
 
-        println!("{:?} DB Opened", db);
         assert_eq!(db.config.version, DatabaseVersion::KDB(2));
         assert_eq!(db.root().name, "Root");
         assert_eq!(db.root().groups().count(), 3);
@@ -332,8 +304,6 @@ mod file_read_tests {
         let (total_entries, total_groups) = explore(db.root());
         assert_eq!(total_groups, 12);
         assert_eq!(total_entries, 5);
-
-        println!("{:?}", db);
 
         Ok(())
     }
@@ -346,7 +316,6 @@ mod file_read_tests {
             DatabaseKey::new().with_password("demopass"),
         )?;
 
-        println!("{:?} DB Opened", db);
         assert_eq!(db.config.version, DatabaseVersion::KDB3(1));
         assert_eq!(db.root().groups().count(), 0);
         assert_eq!(db.root().entries().count(), 1);
@@ -355,7 +324,6 @@ mod file_read_tests {
         assert_eq!(total_groups, 1);
         assert_eq!(total_entries, 1);
 
-        println!("{:?}", db);
         Ok(())
     }
 
@@ -367,8 +335,6 @@ mod file_read_tests {
             &mut File::open(path)?,
             DatabaseKey::new().with_password("demopass"),
         )?;
-
-        println!("{:?} DB Opened", db);
 
         assert_eq!(db.root().name, "Root");
         assert_eq!(
@@ -431,17 +397,16 @@ mod file_read_tests {
             DatabaseKey::new().with_password("demopass"),
         )?;
 
-        println!("{:?} DB Opened", db);
-
         assert_eq!(db.config.version, DatabaseVersion::KDB4(1));
 
-        assert!(db
-            .meta
-            .custom_data
-            .get("KeePassRPC.Config")
-            .unwrap()
-            .last_modification_time
-            .is_some());
+        assert!(
+            db.meta
+                .custom_data
+                .get("KeePassRPC.Config")
+                .unwrap()
+                .last_modification_time
+                .is_some()
+        );
 
         assert_eq!(db.root().name, "Database");
         assert_eq!(db.root().groups().count(), 2);
@@ -512,13 +477,10 @@ mod file_read_tests {
             let res = Database::parse(current_slice, DatabaseKey::new().with_password("demopass"));
             match res {
                 Ok(db) => {
-                    println!(" - DB Opened");
-
                     assert_eq!(db.root().name, "Root");
                     assert_eq!(db.root().entries().count(), 1);
                 }
                 Err(_) => {
-                    println!(" - failed with error");
                     continue;
                     // we don't care about error, it's normal, we just check for panic
                 }

@@ -1,15 +1,15 @@
 use thiserror::Error;
 
 use crate::{
+    DatabaseKey,
     config::DatabaseVersion,
     db::Database,
     format::{
+        DatabaseVersionParseError,
         kdb::parse_kdb,
         kdbx3::{decrypt_kdbx3, parse_kdbx3},
         kdbx4::{decrypt_kdbx4, parse_kdbx4},
-        DatabaseVersionParseError,
     },
-    DatabaseKey,
 };
 
 impl Database {

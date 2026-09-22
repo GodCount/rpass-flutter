@@ -31,6 +31,7 @@ impl Compression for GZipCompression {
         let mut compressor = Compressor::new(CompressionLevel::balanced());
 
         // Can unwrap and the error will not occur
+        #[allow(clippy::unwrap_used)]
         let len = compressor
             .gzip_compress(in_buffer, &mut res, Unstoppable)
             .unwrap();
@@ -47,11 +48,23 @@ impl Compression for GZipCompression {
         // preallocating the decompressed buffer.
         let isize = {
             let isize_start = in_buffer.len() - 4;
+            assert!(isize_start > 0);
+            #[allow(clippy::indexing_slicing)]
             let isize_bytes = &in_buffer[isize_start..];
-            let mut ret: u32 = isize_bytes[0] as u32;
-            ret |= (isize_bytes[1] as u32) << 8;
-            ret |= (isize_bytes[2] as u32) << 16;
-            ret |= (isize_bytes[3] as u32) << 24;
+            #[allow(clippy::indexing_slicing)]
+            let mut ret: u32 = isize_bytes[0].into();
+            ret |= u32::from(
+                #[allow(clippy::indexing_slicing)]
+                isize_bytes[1],
+            ) << 8;
+            ret |= u32::from(
+                #[allow(clippy::indexing_slicing)]
+                isize_bytes[2],
+            ) << 16;
+            ret |= u32::from(
+                #[allow(clippy::indexing_slicing)]
+                isize_bytes[3],
+            ) << 24;
             ret as usize
         };
 

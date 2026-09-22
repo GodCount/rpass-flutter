@@ -39,7 +39,7 @@ void main() async {
 
     test('list', () async {
       final list = await webdav.list();
-      expect(list, isA<List<RemoteFile>>());
+      expect(list, isA<List<RemoteFileStat>>());
     });
 
     test('mkdir', () async {

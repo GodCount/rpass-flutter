@@ -28,7 +28,6 @@ abstract class RemoteFileConfig {
   Future<RemoteFile> open();
 
   Map<String, String?> toJson();
-
 }
 
 abstract interface class RemoteFile {

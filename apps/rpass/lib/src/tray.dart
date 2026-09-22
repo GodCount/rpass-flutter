@@ -65,6 +65,7 @@ class _DesktopSystemTray extends _SystemTray with TrayListener {
 
   @override
   void onTrayIconRightMouseDown() {
+    // ignore: deprecated_member_use
     trayManager.popUpContextMenu(bringAppToFront: true);
   }
 }
