@@ -30,6 +30,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+
+      # enigo 编译依赖
+      - name: Setup system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbcommon-dev libwayland-dev libxkbcommon-x11-dev
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -49,6 +56,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+
+      # enigo 编译依赖
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbcommon-dev libwayland-dev libxkbcommon-x11-dev
+
       - name: Setup Rust
         run: rustup toolchain install --profile minimal
       - name: Cache
