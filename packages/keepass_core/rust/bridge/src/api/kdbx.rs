@@ -45,7 +45,7 @@ use utils_proc_macro::frb_string_constant;
 use zeroize::Zeroize;
 
 use crate::api::kdbx::KdbxAction::UpdateSyncEntry;
-use crate::api::utils::{contains_domain, random_bytes, simple_to_domain, transform_xor};
+use crate::api::utils::{atomic_write, contains_domain, random_bytes, simple_to_domain, transform_xor};
 use crate::frb_generated::FLUTTER_RUST_BRIDGE_HANDLER;
 
 frb_string_constant! {
@@ -251,10 +251,7 @@ impl Kdbx {
 
         let bytes = self.save()?;
 
-        let mut file = File::create(file_path)?;
-
-        let _ = file.write(&bytes)?;
-        file.flush()?;
+        atomic_write(file_path, &bytes)?;
 
         self.emit(KdbxEvent::Saved);
 
