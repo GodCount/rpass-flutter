@@ -11,7 +11,7 @@ use keepass::{
     db::{CustomDataItem, CustomDataValue, Database, Value},
 };
 
-use rand::{RngCore, SeedableRng, rngs::StdRng};
+use rand::{Rng, SeedableRng, rngs::StdRng};
 
 use sha2::{Digest, Sha256};
 
