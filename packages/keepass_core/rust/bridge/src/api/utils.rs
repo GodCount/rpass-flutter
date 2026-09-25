@@ -62,7 +62,7 @@ struct DropCleanUp(PathBuf);
 
 impl Drop for DropCleanUp {
     fn drop(&mut self) {
-        let _ = fs::remove_file(&self.0).ok();
+        let _ = fs::remove_file(&self.0);
     }
 }
 

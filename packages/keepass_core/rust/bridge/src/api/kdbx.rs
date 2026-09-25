@@ -1,6 +1,5 @@
 use std::char;
 use std::collections::HashMap;
-use std::io::Write;
 use std::sync::{Arc, RwLock};
 use std::{collections::HashSet, fs::File};
 
