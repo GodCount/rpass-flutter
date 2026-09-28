@@ -769,31 +769,12 @@ class _EntryFieldState extends State<EntryField> {
     final t = I18n.of(context)!;
 
     switch (widget.kdbxKey) {
-      case KdbxKeyCommon.URL:
-      case KdbxKeyURLS.URL1:
-      case KdbxKeyURLS.URL2:
-      case KdbxKeyURLS.URL3:
-      case KdbxKeyURLS.URL4:
-      case KdbxKeyURLS.URL5:
-        return (value) =>
-            value != null &&
-                value.isNotEmpty &&
-                !CommonRegExp.domain.hasMatch(value)
-            ? t.format_error(CommonRegExp.domain.pattern)
-            : null;
-      case KdbxKeyCommon.EMAIL:
-        return (value) =>
-            value != null &&
-                value.isNotEmpty &&
-                !CommonRegExp.email.hasMatch(value)
-            ? t.format_error(CommonRegExp.email.pattern)
-            : null;
       case KdbxKeyCommon.OTP:
         return (value) =>
             value != null &&
                 value.isNotEmpty &&
                 AuthOneTimePassword.tryParse(value) == null
-            ? t.format_error(t.otp_format_error)
+            ? t.otp_format_error
             : null;
       default:
         return null;
@@ -884,25 +865,19 @@ class _EntryFieldState extends State<EntryField> {
       case KdbxKeyCommon.URL:
       case KdbxKeyCommon.USER_NAME:
       case KdbxKeyCommon.EMAIL:
-        return ShakeFormField<String>(
-          validator: _entryFieldValidator(),
-          builder: (context, validator) {
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                return DropdownMenuFormField2(
-                  width: constraints.biggest.width,
-                  initialValue: initialValue,
-                  dropdownMenuEntries: _dropdownMenuEntries,
-                  label: widget.kdbxKey.fromKdbxKeyToI18n(context),
-                  onSaved: _kdbxTextFieldSaved,
-                  onSelected: _onChanged,
-                  expandedInsets: const EdgeInsets.all(0),
-                  validator: validator,
-                  menuHeight: 150,
-                  enableFilter: true,
-                  requestFocusOnTap: true,
-                );
-              },
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return DropdownMenuFormField2(
+              width: constraints.biggest.width,
+              initialValue: initialValue,
+              dropdownMenuEntries: _dropdownMenuEntries,
+              label: widget.kdbxKey.fromKdbxKeyToI18n(context),
+              onSaved: _kdbxTextFieldSaved,
+              onSelected: _onChanged,
+              expandedInsets: const EdgeInsets.all(0),
+              menuHeight: 150,
+              enableFilter: true,
+              requestFocusOnTap: true,
             );
           },
         );
@@ -924,24 +899,29 @@ class _EntryFieldState extends State<EntryField> {
           onChanged: _onChanged,
         );
       case KdbxKeyCommon.OTP:
-        return EntryTextFormField(
-          initialValue: initialValue,
-          label: widget.kdbxKey.fromKdbxKeyToI18n(context),
-          trailingIcon: isMobile ? const Icon(Icons.qr_code_scanner) : null,
-          onTrailingTap: isMobile
-              ? () async {
-                  final optUrl = await context.router.push(
-                    QrCodeScannerRoute(),
-                  );
-                  if (optUrl != null && optUrl is String) {
-                    return optUrl;
-                  }
-                  return null;
-                }
-              : null,
-          onSaved: _kdbxTextFieldSaved,
-          onChanged: _onChanged,
+        return ShakeFormField<String>(
           validator: _entryFieldValidator(),
+          builder: (context, validator) {
+            return EntryTextFormField(
+              initialValue: initialValue,
+              label: widget.kdbxKey.fromKdbxKeyToI18n(context),
+              trailingIcon: isMobile ? const Icon(Icons.qr_code_scanner) : null,
+              onTrailingTap: isMobile
+                  ? () async {
+                      final optUrl = await context.router.push(
+                        QrCodeScannerRoute(),
+                      );
+                      if (optUrl != null && optUrl is String) {
+                        return optUrl;
+                      }
+                      return null;
+                    }
+                  : null,
+              onSaved: _kdbxTextFieldSaved,
+              onChanged: _onChanged,
+              validator: validator,
+            );
+          },
         );
       case KdbxKeyCommon.NOTES:
         return EntryNotesFormField(
@@ -1105,18 +1085,12 @@ class _EntryFieldState extends State<EntryField> {
       case KdbxKeyURLS.URL3:
       case KdbxKeyURLS.URL4:
       case KdbxKeyURLS.URL5:
-        return ShakeFormField<String>(
-          validator: _entryFieldValidator(),
-          builder: (context, validator) {
-            return EntryTextFormField(
-              initialValue: initialValue,
-              label: widget.kdbxKey.fromKdbxKeyToI18n(context),
-              validator: validator,
-              onSaved: _kdbxTextFieldSaved,
-              onChanged: _onChanged,
-              contextMenuBuilder: _contextMenuBuilder,
-            );
-          },
+        return EntryTextFormField(
+          initialValue: initialValue,
+          label: widget.kdbxKey.fromKdbxKeyToI18n(context),
+          onSaved: _kdbxTextFieldSaved,
+          onChanged: _onChanged,
+          contextMenuBuilder: _contextMenuBuilder,
         );
       default:
         return EntryTextFormField(
