@@ -102,7 +102,6 @@ String jsonToCsv(
   );
 }
 
-
 /// Simple string to enum
 extension StringToEnum<T extends Enum> on Iterable<T> {
   T toEnum(String name, [T? defaultValue]) {
