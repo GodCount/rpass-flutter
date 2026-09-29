@@ -1585,6 +1585,18 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'预览'**
   String get preview;
+
+  /// No description provided for @loading.
+  ///
+  /// In zh, this message translates to:
+  /// **'加载中...'**
+  String get loading;
+
+  /// No description provided for @saveing.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存中...'**
+  String get saveing;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

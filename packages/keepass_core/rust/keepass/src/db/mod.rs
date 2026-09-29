@@ -133,7 +133,7 @@ mod database_tests {
 
         let mut buffer = Vec::new();
 
-        db.save(&mut buffer, DatabaseKey::new().with_password("testing"))
+        db.save(&mut buffer, DatabaseKey::new().with_password("testing"), None)
             .unwrap();
 
         let db_loaded = Database::open(

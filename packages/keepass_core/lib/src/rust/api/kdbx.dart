@@ -14,7 +14,7 @@ part 'kdbx.freezed.dart';
 
 // These functions are ignored because they are not marked as `pub`: `credentials_empty`, `emit`, `enable_recyclebin`, `from`, `from`, `get`, `impl_action`, `io`, `merge`, `not_found`, `parse_uuid`, `set_customm_time_changed`, `summary`, `xml`
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `SearchInputParse`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `drop`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `hash`, `into`, `into`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `drop`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `hash`
 // These functions are ignored (category: IgnoreBecauseOwnerTyShouldIgnore): `is_match`
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Credentials>>
@@ -44,18 +44,16 @@ abstract class Kdbx implements RustOpaqueInterface {
     String? entryId,
   });
 
-  void bindEventCallback({
-    required FutureOr<void> Function(KdbxEvent) callback,
-  });
-
   static Kdbx create({
     required Credentials credentials,
     KdbxConfig? config,
     String? filepath,
+    RustStreamSink<KdbxEvent>? sink,
   }) => RustLib.instance.api.crateApiKdbxKdbxCreate(
     credentials: credentials,
     config: config,
     filepath: filepath,
+    sink: sink,
   );
 
   Future<Uint8List> getAttachment({required int id});
@@ -103,19 +101,23 @@ abstract class Kdbx implements RustOpaqueInterface {
   static Future<Kdbx> open({
     required Credentials credentials,
     required String filepath,
+    RustStreamSink<KdbxEvent>? sink,
   }) => RustLib.instance.api.crateApiKdbxKdbxOpen(
     credentials: credentials,
     filepath: filepath,
+    sink: sink,
   );
 
   static Future<Kdbx> openBytes({
     required Credentials credentials,
     required List<int> bytes,
     String? filepath,
+    RustStreamSink<KdbxEvent>? sink,
   }) => RustLib.instance.api.crateApiKdbxKdbxOpenBytes(
     credentials: credentials,
     bytes: bytes,
     filepath: filepath,
+    sink: sink,
   );
 
   Future<Uint8List> save();
@@ -129,6 +131,55 @@ abstract class Kdbx implements RustOpaqueInterface {
   Future<Uint8List> toXml();
 
   Future<bool> verifyCredentials({required Credentials credentials});
+
+  Stream<KdbxEvent>? stream;
+
+  static Kdbx createAndSink({
+    required Credentials credentials,
+    KdbxConfig? config,
+    String? filepath,
+  }) {
+    final sink = RustStreamSink<KdbxEvent>();
+    final kdbx = create(
+      credentials: credentials,
+      config: config,
+      filepath: filepath,
+      sink: sink,
+    );
+    kdbx.stream = sink.stream;
+    return kdbx;
+  }
+
+  static Future<Kdbx> openBytesAndSink({
+    required Credentials credentials,
+    required List<int> bytes,
+    String? filepath,
+  }) async {
+    final sink = RustStreamSink<KdbxEvent>();
+    final kdbx = await openBytes(
+      credentials: credentials,
+      bytes: bytes,
+      filepath: filepath,
+      sink: sink,
+    );
+    kdbx.stream = sink.stream;
+    return kdbx;
+  }
+
+  static Future<Kdbx> openAndSink({
+    required Credentials credentials,
+    required String filepath,
+    RustStreamSink<KdbxEvent>? sink,
+  }) async {
+    final sink = RustStreamSink<KdbxEvent>();
+    final kdbx = await open(
+      credentials: credentials,
+      filepath: filepath,
+      sink: sink,
+    );
+    kdbx.stream = sink.stream;
+    return kdbx;
+  }
 }
 
 enum Argon2Version { version10, version13 }
@@ -787,8 +838,8 @@ sealed class KdbxError with _$KdbxError implements FrbException {
 sealed class KdbxEvent with _$KdbxEvent {
   const KdbxEvent._();
 
-  const factory KdbxEvent.saved() = KdbxEvent_Saved;
-  const factory KdbxEvent.none(String field0) = KdbxEvent_None;
+  const factory KdbxEvent.saveProgress(SaveProgress field0) =
+      KdbxEvent_SaveProgress;
 }
 
 @freezed
@@ -1061,6 +1112,8 @@ class Meta {
 }
 
 enum OuterCipherConfig { aes256, twofish, chaCha20 }
+
+enum SaveProgress { serialize, compress, encrypt, writeFile }
 
 class Times {
   final DateTime? creation;

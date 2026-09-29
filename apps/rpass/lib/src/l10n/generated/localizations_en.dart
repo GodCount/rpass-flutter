@@ -808,4 +808,10 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get preview => 'Preview';
+
+  @override
+  String get loading => 'Loading...';
+
+  @override
+  String get saveing => 'Saveing...';
 }

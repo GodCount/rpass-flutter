@@ -756,6 +756,10 @@ class _OtpDownCountState extends State<OtpDownCount>
 }
 
 class DialogCloseController {
+  bool _closed = false;
+
+  bool get closed => _closed;
+
   BuildContext? _context;
 
   set context(BuildContext? value) {
@@ -763,6 +767,7 @@ class DialogCloseController {
   }
 
   void close<T extends Object?>([T? result]) {
+    _closed = true;
     if (_context != null && _context!.mounted) {
       final route = ModalRoute.of(_context!);
       if (route != null) {
@@ -773,6 +778,7 @@ class DialogCloseController {
   }
 
   void dispose() {
+    _closed = true;
     _context = null;
   }
 }

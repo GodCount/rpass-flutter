@@ -1,5 +1,8 @@
 library;
 
+export 'package:flutter_rust_bridge/flutter_rust_bridge.dart'
+    show RustStreamSink;
+
 import 'src/rust/api/enigo.dart';
 import 'src/rust/frb_generated.dart' show RustLib;
 

@@ -70,7 +70,7 @@ class _LoadExternalKdbxPageState
         throw Exception("Lack of key file.");
       }
 
-      Kdbx kdbx = await Kdbx.openBytes(
+      Kdbx kdbx = await Kdbx.openBytesAndSink(
         bytes: widget.kdbxFile,
         credentials: Credentials.from(
           password: isPassword ? password : null,

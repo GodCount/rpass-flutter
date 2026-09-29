@@ -9,18 +9,23 @@ use crate::{
 
 impl Database {
     /// Saves the database to the given destination, using the provided key for encryption.
-    pub fn save(
+    pub fn save<F: Fn(u8)>(
         &self,
         destination: &mut dyn std::io::Write,
         key: DatabaseKey,
+        step: Option<F>,
     ) -> Result<(), DatabaseSaveError> {
         use crate::format::kdbx4::dump_kdbx4;
+
+        if let Some(step) = step.as_ref() {
+            step(0);
+        }
 
         match self.config.version {
             DatabaseVersion::KDB(_) => Err(DatabaseSaveError::UnsupportedVersion),
             DatabaseVersion::KDB2(_) => Err(DatabaseSaveError::UnsupportedVersion),
             DatabaseVersion::KDB3(_) => Err(DatabaseSaveError::UnsupportedVersion),
-            DatabaseVersion::KDB4(_) => dump_kdbx4(self, &key, destination),
+            DatabaseVersion::KDB4(_) => dump_kdbx4(self, &key, destination, step),
         }
     }
 

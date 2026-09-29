@@ -10,6 +10,7 @@ import '../../native/channel.dart';
 import '../../store/index.dart';
 import '../../util/route.dart';
 import '../../widget/common.dart';
+import '../../widget/extension_state.dart';
 import '../route.dart';
 import 'authorized_page.dart';
 
@@ -63,28 +64,33 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
         throw Exception("Lack of key file.");
       }
 
-      final credentials = Credentials.from(
-        password: isPassword ? password : null,
-        keyfile: keyFile?.$2,
+      await runWithLoadingDialog(
+        (() async {
+          final credentials = Credentials.from(
+            password: isPassword ? password : null,
+            keyfile: keyFile?.$2,
+          );
+
+          kdbxFile =
+              kdbxFile ?? await Store.localInfo.localKdbxFile.readAsBytes();
+
+          Kdbx kdbx = await Kdbx.openBytesAndSink(
+            bytes: kdbxFile!,
+            credentials: credentials,
+            filepath: Store.localInfo.localKdbxFile.path,
+          );
+
+          if (Store.settings.enableRecordKeyFilePath) {
+            await Store.settings.setKeyFilePath(keyFile?.$1);
+          }
+
+          Store.kdbx.setKdbx(kdbx);
+
+          await _responseAutoFill(kdbx);
+
+          context.router.replace(HomeRoute());
+        })(),
       );
-
-      kdbxFile = kdbxFile ?? await Store.localInfo.localKdbxFile.readAsBytes();
-
-      Kdbx kdbx = await Kdbx.openBytes(
-        bytes: kdbxFile!,
-        credentials: credentials,
-        filepath: Store.localInfo.localKdbxFile.path,
-      );
-
-      if (Store.settings.enableRecordKeyFilePath) {
-        await Store.settings.setKeyFilePath(keyFile?.$1);
-      }
-
-      Store.kdbx.setKdbx(kdbx);
-
-      await _responseAutoFill(kdbx);
-
-      context.router.replace(HomeRoute());
     }
   }
 
@@ -126,7 +132,7 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
     kdbxFile = kdbxFile ?? await Store.localInfo.localKdbxFile.readAsBytes();
 
     final hash = await biometric.getCredentials(context);
-    final kdbx = await Kdbx.openBytes(
+    final kdbx = await Kdbx.openBytesAndSink(
       bytes: kdbxFile!,
       credentials: Credentials.formCompositeKey(key: hash),
       filepath: Store.localInfo.localKdbxFile.path,

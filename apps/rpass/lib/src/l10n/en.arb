@@ -367,5 +367,7 @@
     "parallelism": "Parallelism",
     "argon2_version": "Argon2 Version",
     "prefer_kdbx_seed_color": "Prefer the database seed color",
-    "preview": "Preview"
+    "preview": "Preview",
+    "loading": "Loading...",
+    "saveing": "Saveing..."
 }

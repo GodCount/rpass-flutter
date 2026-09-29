@@ -23,10 +23,11 @@ use crate::{
 use super::HEADER_PUBLIC_CUSTOM_DATA;
 
 /// Dump a KeePass database using the key elements
-pub fn dump_kdbx4(
+pub fn dump_kdbx4<F: Fn(u8)>(
     db: &Database,
     db_key: &DatabaseKey,
     writer: &mut dyn Write,
+    step: Option<F>,
 ) -> Result<(), DatabaseSaveError> {
     if !matches!(db.config.version, DatabaseVersion::KDB4(1)) {
         return Err(DatabaseSaveError::UnsupportedVersion);
@@ -93,6 +94,10 @@ pub fn dump_kdbx4(
     // convert database to XML and header attachments
     let (xml, attachments) = crate::format::xml_db::to_xml(db, &mut *inner_cipher)?;
 
+    if let Some(step) = step.as_ref() {
+        step(1);
+    }
+
     // dump inner header into buffer
     let mut payload = Vec::new();
     KDBX4InnerHeader {
@@ -108,6 +113,10 @@ pub fn dump_kdbx4(
         .compression_config
         .get_compression()
         .compress(&payload)?;
+
+    if let Some(step) = step.as_ref() {
+        step(2);
+    }
 
     payload.zeroize();
 

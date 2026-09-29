@@ -1,9 +1,10 @@
 use std::char;
 use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
+use std::io::Read;
+use std::sync::RwLock;
 use std::{collections::HashSet, fs::File};
 
-use flutter_rust_bridge::{BaseAsyncRuntime, DartFnFuture, frb};
+use flutter_rust_bridge::frb;
 use keepass::config::{DatabaseVersion, KDBX4_CURRENT_MINOR_VERSION};
 use keepass::db::merge::{
     CUSTOM_COLOR_CHANGED, CUSTOM_DATABASE_CONFIG_CHANGED, CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
@@ -44,8 +45,10 @@ use utils_proc_macro::frb_string_constant;
 use zeroize::Zeroize;
 
 use crate::api::kdbx::KdbxAction::UpdateSyncEntry;
-use crate::api::utils::{atomic_write, contains_domain, random_bytes, simple_to_domain, transform_xor};
-use crate::frb_generated::FLUTTER_RUST_BRIDGE_HANDLER;
+use crate::api::utils::{
+    atomic_write, contains_domain, random_bytes, simple_to_domain, transform_xor,
+};
+use crate::frb_generated::StreamSink;
 
 frb_string_constant! {
     KdbxKey {
@@ -128,13 +131,84 @@ const CUSTOM_DATA_SYNC_UUID: &str = "sync_account_uuid"; // 向后兼容，保�
 
 #[derive(Debug, Clone)]
 pub enum KdbxEvent {
-    Saved,
-    None(String),
+    SaveProgress(SaveProgress),
 }
 
-#[frb(opaque)]
+#[derive(Debug, Clone)]
+pub enum SaveProgress {
+    Serialize,
+    Compress,
+    Encrypt,
+    WriteFile,
+}
+
+impl From<u8> for SaveProgress {
+    fn from(value: u8) -> Self {
+        match value {
+            0 => SaveProgress::Serialize,
+            1 => SaveProgress::Compress,
+            2 => SaveProgress::Encrypt,
+            3 => SaveProgress::WriteFile,
+            _ => SaveProgress::WriteFile,
+        }
+    }
+}
+
+#[frb(
+    opaque,
+    dart_code = r#"
+  Stream<KdbxEvent>? stream;
+
+  static Kdbx createAndSink({
+    required Credentials credentials,
+    KdbxConfig? config,
+    String? filepath,
+  }) {
+    final sink = RustStreamSink<KdbxEvent>();
+    final kdbx = create(
+      credentials: credentials,
+      config: config,
+      filepath: filepath,
+      sink: sink,
+    );
+    kdbx.stream = sink.stream;
+    return kdbx;
+  }
+
+  static Future<Kdbx> openBytesAndSink({
+    required Credentials credentials,
+    required List<int> bytes,
+    String? filepath,
+  }) async {
+    final sink = RustStreamSink<KdbxEvent>();
+    final kdbx = await openBytes(
+      credentials: credentials,
+      bytes: bytes,
+      filepath: filepath,
+      sink: sink,
+    );
+    kdbx.stream = sink.stream;
+    return kdbx;
+  }
+
+  static Future<Kdbx> openAndSink({
+    required Credentials credentials,
+    required String filepath,
+    RustStreamSink<KdbxEvent>? sink,
+  }) async {
+    final sink = RustStreamSink<KdbxEvent>();
+    final kdbx = await open(
+      credentials: credentials,
+      filepath: filepath,
+      sink: sink,
+    );
+    kdbx.stream = sink.stream;
+    return kdbx;
+  }
+"#
+)]
 pub struct Kdbx {
-    emit: Option<Arc<dyn Fn(KdbxEvent) -> DartFnFuture<()> + Send + Sync + 'static>>,
+    sink: Option<StreamSink<KdbxEvent>>,
     database: RwLock<Database>,
     credentials: Credentials,
     filepath: Option<String>,
@@ -146,6 +220,7 @@ impl Kdbx {
         credentials: Credentials,
         config: Option<KdbxConfig>,
         filepath: Option<String>,
+        sink: Option<StreamSink<KdbxEvent>>,
     ) -> Self {
         let mut database = if let Some(config) = config {
             Database::with_config(config.into())
@@ -167,7 +242,7 @@ impl Kdbx {
         database.meta.master_key_changed = Some(Times::now());
 
         Self {
-            emit: None,
+            sink,
             database: RwLock::new(database),
             credentials,
             filepath,
@@ -202,32 +277,31 @@ impl Kdbx {
         db.meta.recyclebin_changed = Some(Times::now());
     }
 
-    pub fn open(credentials: Credentials, filepath: String) -> Result<Self, KdbxError> {
+    pub fn open(
+        credentials: Credentials,
+        filepath: String,
+        sink: Option<StreamSink<KdbxEvent>>,
+    ) -> Result<Self, KdbxError> {
         let mut file = File::open(&filepath)?;
 
-        let mut database = Database::open(&mut file, credentials.key.clone())?;
+        let mut bytes = Vec::new();
+        file.read_to_end(&mut bytes)?;
 
-        database.config.version = DatabaseVersion::KDB4(KDBX4_CURRENT_MINOR_VERSION);
-
-        Ok(Self {
-            emit: None,
-            database: RwLock::new(database),
-            credentials,
-            filepath: Some(filepath),
-        })
+        Self::open_bytes(credentials, bytes, Some(filepath), sink)
     }
 
     pub fn open_bytes(
         credentials: Credentials,
         bytes: Vec<u8>,
         filepath: Option<String>,
+        sink: Option<StreamSink<KdbxEvent>>,
     ) -> Result<Self, KdbxError> {
         let mut database = Database::parse(&bytes, credentials.key.clone())?;
 
         database.config.version = DatabaseVersion::KDB4(KDBX4_CURRENT_MINOR_VERSION);
 
         Ok(Self {
-            emit: None,
+            sink,
             database: RwLock::new(database),
             credentials,
             filepath,
@@ -252,7 +326,7 @@ impl Kdbx {
 
         atomic_write(file_path, &bytes)?;
 
-        self.emit(KdbxEvent::Saved);
+        self.emit(KdbxEvent::SaveProgress(SaveProgress::WriteFile));
 
         Ok(())
     }
@@ -262,7 +336,13 @@ impl Kdbx {
 
         let mut buf = Vec::new();
 
-        db.save(&mut buf, self.credentials.key.clone())?;
+        db.save(
+            &mut buf,
+            self.credentials.key.clone(),
+            Some(|step| {
+                self.emit(KdbxEvent::SaveProgress(SaveProgress::from(step)));
+            }),
+        )?;
 
         Ok(buf)
     }
@@ -273,20 +353,9 @@ impl Kdbx {
         Ok(db.to_xml()?)
     }
 
-    #[frb(sync)]
-    pub fn bind_event_callback(
-        &mut self,
-        callback: impl Fn(KdbxEvent) -> DartFnFuture<()> + Send + Sync + 'static,
-    ) {
-        self.emit = Some(Arc::new(callback));
-    }
-
     fn emit(&self, event: KdbxEvent) {
-        if let Some(emit) = &self.emit {
-            let emit_clone = emit.clone();
-            FLUTTER_RUST_BRIDGE_HANDLER
-                .async_runtime()
-                .spawn(async move { emit_clone(event).await });
+        if let Some(sink) = &self.sink {
+            let _ = sink.add(event);
         }
     }
 
@@ -2843,6 +2912,7 @@ mod test {
             credentials("password"),
             Some(test_config()),
             Some(file.path()),
+            None,
         )
     }
 
@@ -2969,7 +3039,7 @@ mod test {
 
     #[test]
     fn create_initializes_meta_and_recycle_bin() {
-        let kdbx = Kdbx::create(credentials("password"), Some(test_config()), None);
+        let kdbx = Kdbx::create(credentials("password"), Some(test_config()), None, None);
 
         let meta = kdbx.get_meta().unwrap();
         assert_eq!(meta.generator.as_deref(), Some("frb_keepass"));
@@ -2995,7 +3065,7 @@ mod test {
 
     #[test]
     fn lookups_with_unknown_ids_fail() {
-        let kdbx = Kdbx::create(credentials("password"), Some(test_config()), None);
+        let kdbx = Kdbx::create(credentials("password"), Some(test_config()), None, None);
         let unknown = Uuid::new_v4().to_string();
 
         assert!(kdbx.get_entry("not-a-uuid".to_string(), None).is_err());
@@ -3026,7 +3096,7 @@ mod test {
             kdbx.action(KdbxAction::UpdateMeta(update_meta)).unwrap();
         }
 
-        let opened = Kdbx::open(credentials("password"), file.path()).unwrap();
+        let opened = Kdbx::open(credentials("password"), file.path(), None).unwrap();
 
         assert_eq!(
             opened.get_meta().unwrap().database_name.as_deref(),
@@ -3042,7 +3112,7 @@ mod test {
         assert_eq!(field(&entries[0], KEY_TITLE), "Alice");
         assert_eq!(field(&entries[0], KEY_PASSWORD), "s3cr3t");
 
-        assert!(Kdbx::open(credentials("wrong"), file.path()).is_err());
+        assert!(Kdbx::open(credentials("wrong"), file.path(), None).is_err());
     }
 
     #[test]
@@ -3244,7 +3314,7 @@ mod test {
             kdbx.modify_password(credentials("new-password")).unwrap();
         }
 
-        assert!(Kdbx::open(credentials("password"), file.path()).is_err());
+        assert!(Kdbx::open(credentials("password"), file.path(), None).is_err());
     }
 
     #[test]

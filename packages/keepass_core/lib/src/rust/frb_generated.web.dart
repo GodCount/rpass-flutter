@@ -104,13 +104,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  FutureOr<void> Function(KdbxEvent)
-  dco_decode_DartFn_Inputs_kdbx_event_Output_unit_AnyhowException(dynamic raw);
-
-  @protected
-  Object dco_decode_DartOpaque(dynamic raw);
-
-  @protected
   Map<String, String> dco_decode_Map_String_String_None(dynamic raw);
 
   @protected
@@ -156,6 +149,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   RustStreamSink<FrbLogRecord> dco_decode_StreamSink_frb_log_record_Sse(
     dynamic raw,
   );
+
+  @protected
+  RustStreamSink<KdbxEvent> dco_decode_StreamSink_kdbx_event_Sse(dynamic raw);
 
   @protected
   String dco_decode_String(dynamic raw);
@@ -412,6 +408,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  RustStreamSink<KdbxEvent>? dco_decode_opt_StreamSink_kdbx_event_Sse(
+    dynamic raw,
+  );
+
+  @protected
   String? dco_decode_opt_String(dynamic raw);
 
   @protected
@@ -516,6 +517,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   (String, String) dco_decode_record_string_string(dynamic raw);
 
   @protected
+  SaveProgress dco_decode_save_progress(dynamic raw);
+
+  @protected
   Times dco_decode_times(dynamic raw);
 
   @protected
@@ -612,9 +616,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  Object sse_decode_DartOpaque(SseDeserializer deserializer);
-
-  @protected
   Map<String, String> sse_decode_Map_String_String_None(
     SseDeserializer deserializer,
   );
@@ -668,6 +669,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RustStreamSink<FrbLogRecord> sse_decode_StreamSink_frb_log_record_Sse(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  RustStreamSink<KdbxEvent> sse_decode_StreamSink_kdbx_event_Sse(
     SseDeserializer deserializer,
   );
 
@@ -958,6 +964,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  RustStreamSink<KdbxEvent>? sse_decode_opt_StreamSink_kdbx_event_Sse(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   String? sse_decode_opt_String(SseDeserializer deserializer);
 
   @protected
@@ -1096,6 +1107,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  SaveProgress sse_decode_save_progress(SseDeserializer deserializer);
+
+  @protected
   Times sse_decode_times(SseDeserializer deserializer);
 
   @protected
@@ -1207,15 +1221,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_DartFn_Inputs_kdbx_event_Output_unit_AnyhowException(
-    FutureOr<void> Function(KdbxEvent) self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void sse_encode_DartOpaque(Object self, SseSerializer serializer);
-
-  @protected
   void sse_encode_Map_String_String_None(
     Map<String, String> self,
     SseSerializer serializer,
@@ -1278,6 +1283,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_StreamSink_frb_log_record_Sse(
     RustStreamSink<FrbLogRecord> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_StreamSink_kdbx_event_Sse(
+    RustStreamSink<KdbxEvent> self,
     SseSerializer serializer,
   );
 
@@ -1661,6 +1672,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_StreamSink_kdbx_event_Sse(
+    RustStreamSink<KdbxEvent>? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_String(String? self, SseSerializer serializer);
 
   @protected
@@ -1830,6 +1847,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     (String, String) self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_save_progress(SaveProgress self, SseSerializer serializer);
 
   @protected
   void sse_encode_times(Times self, SseSerializer serializer);

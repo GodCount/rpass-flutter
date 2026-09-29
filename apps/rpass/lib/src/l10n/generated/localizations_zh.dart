@@ -780,4 +780,10 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get preview => '预览';
+
+  @override
+  String get loading => '加载中...';
+
+  @override
+  String get saveing => '保存中...';
 }

@@ -30,7 +30,7 @@ fn load_and_resave_xml() -> String {
     let db = Database::open(&mut f, DatabaseKey::new().with_password(FIXTURE_PASSWORD)).expect("parse fixture");
 
     let mut buf = Vec::new();
-    db.save(&mut buf, DatabaseKey::new().with_password(FIXTURE_PASSWORD))
+    db.save(&mut buf, DatabaseKey::new().with_password(FIXTURE_PASSWORD), None)
         .expect("save fixture");
 
     let xml = Database::get_xml(

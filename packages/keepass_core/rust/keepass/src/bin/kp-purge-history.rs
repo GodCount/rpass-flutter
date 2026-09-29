@@ -51,7 +51,7 @@ fn main() -> Result<()> {
         entry.history = None;
     });
 
-    db.save(&mut File::options().write(true).open(&args.in_kdbx)?, key)?;
+    db.save(&mut File::options().write(true).open(&args.in_kdbx)?, key, None)?;
 
     Ok(())
 }

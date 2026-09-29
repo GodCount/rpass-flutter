@@ -30,7 +30,7 @@
 use crate::api::enigo::*;
 use crate::api::kdbx::*;
 use flutter_rust_bridge::for_generated::byteorder::{NativeEndian, ReadBytesExt, WriteBytesExt};
-use flutter_rust_bridge::for_generated::{Lifetimeable, Lockable, transform_result_dco};
+use flutter_rust_bridge::for_generated::{transform_result_dco, Lifetimeable, Lockable};
 use flutter_rust_bridge::{Handler, IntoIntoDart};
 
 // Section: boilerplate
@@ -41,7 +41,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0-beta.6";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1783367481;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 959755568;
 
 // Section: executor
 
@@ -823,57 +823,6 @@ fn wire__crate__api__kdbx__Kdbx_autofill_search_impl(
         },
     )
 }
-fn wire__crate__api__kdbx__Kdbx_bind_event_callback_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "Kdbx_bind_event_callback",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_that = <RustOpaqueMoi<
-                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Kdbx>,
-            >>::sse_decode(&mut deserializer);
-            let api_callback = decode_DartFn_Inputs_kdbx_event_Output_unit_AnyhowException(
-                <flutter_rust_bridge::DartOpaque>::sse_decode(&mut deserializer),
-            );
-            deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let mut api_that_guard = None;
-                let decode_indices_ =
-                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
-                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                            &api_that, 0, true,
-                        ),
-                    ]);
-                for i in decode_indices_ {
-                    match i {
-                        0 => api_that_guard = Some(api_that.lockable_decode_sync_ref_mut()),
-                        _ => unreachable!(),
-                    }
-                }
-                let mut api_that_guard = api_that_guard.unwrap();
-                let output_ok = Ok::<_, ()>({
-                    crate::api::kdbx::Kdbx::bind_event_callback(&mut *api_that_guard, api_callback);
-                })?;
-                std::result::Result::Ok(output_ok)
-            })())
-        },
-    )
-}
 fn wire__crate__api__kdbx__Kdbx_create_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -898,12 +847,19 @@ fn wire__crate__api__kdbx__Kdbx_create_impl(
             let api_credentials = <Credentials>::sse_decode(&mut deserializer);
             let api_config = <Option<crate::api::kdbx::KdbxConfig>>::sse_decode(&mut deserializer);
             let api_filepath = <Option<String>>::sse_decode(&mut deserializer);
+            let api_sink = <Option<
+                StreamSink<
+                    crate::api::kdbx::KdbxEvent,
+                    flutter_rust_bridge::for_generated::SseCodec,
+                >,
+            >>::sse_decode(&mut deserializer);
             deserializer.end();
             transform_result_sse::<_, ()>((move || {
                 let output_ok = Ok::<_, ()>(crate::api::kdbx::Kdbx::create(
                     api_credentials,
                     api_config,
                     api_filepath,
+                    api_sink,
                 ))?;
                 std::result::Result::Ok(output_ok)
             })())
@@ -1847,10 +1803,17 @@ fn wire__crate__api__kdbx__Kdbx_open_impl(
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_credentials = <Credentials>::sse_decode(&mut deserializer);
             let api_filepath = <String>::sse_decode(&mut deserializer);
+            let api_sink = <Option<
+                StreamSink<
+                    crate::api::kdbx::KdbxEvent,
+                    flutter_rust_bridge::for_generated::SseCodec,
+                >,
+            >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
-                    let output_ok = crate::api::kdbx::Kdbx::open(api_credentials, api_filepath)?;
+                    let output_ok =
+                        crate::api::kdbx::Kdbx::open(api_credentials, api_filepath, api_sink)?;
                     std::result::Result::Ok(output_ok)
                 })())
             }
@@ -1882,6 +1845,12 @@ fn wire__crate__api__kdbx__Kdbx_open_bytes_impl(
             let api_credentials = <Credentials>::sse_decode(&mut deserializer);
             let api_bytes = <Vec<u8>>::sse_decode(&mut deserializer);
             let api_filepath = <Option<String>>::sse_decode(&mut deserializer);
+            let api_sink = <Option<
+                StreamSink<
+                    crate::api::kdbx::KdbxEvent,
+                    flutter_rust_bridge::for_generated::SseCodec,
+                >,
+            >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
@@ -1889,6 +1858,7 @@ fn wire__crate__api__kdbx__Kdbx_open_bytes_impl(
                         api_credentials,
                         api_bytes,
                         api_filepath,
+                        api_sink,
                     )?;
                     std::result::Result::Ok(output_ok)
                 })())
@@ -2624,41 +2594,6 @@ const _: fn() = || {
 
 // Section: related_funcs
 
-fn decode_DartFn_Inputs_kdbx_event_Output_unit_AnyhowException(
-    dart_opaque: flutter_rust_bridge::DartOpaque,
-) -> impl Fn(crate::api::kdbx::KdbxEvent) -> flutter_rust_bridge::DartFnFuture<()> {
-    use flutter_rust_bridge::IntoDart;
-
-    async fn body(
-        dart_opaque: flutter_rust_bridge::DartOpaque,
-        arg0: crate::api::kdbx::KdbxEvent,
-    ) -> () {
-        let args = vec![arg0.into_into_dart().into_dart()];
-        let message = FLUTTER_RUST_BRIDGE_HANDLER
-            .dart_fn_invoke(dart_opaque, args)
-            .await;
-
-        let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-        let action = deserializer.cursor.read_u8().unwrap();
-        let ans = match action {
-            0 => std::result::Result::Ok(<()>::sse_decode(&mut deserializer)),
-            1 => std::result::Result::Err(
-                <flutter_rust_bridge::for_generated::anyhow::Error>::sse_decode(&mut deserializer),
-            ),
-            _ => unreachable!(),
-        };
-        deserializer.end();
-        let ans = ans.expect("Dart throws exception but Rust side assume it is not failable");
-        ans
-    }
-
-    move |arg0: crate::api::kdbx::KdbxEvent| {
-        flutter_rust_bridge::for_generated::convert_into_dart_fn_future(body(
-            dart_opaque.clone(),
-            arg0,
-        ))
-    }
-}
 flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
     flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Credentials>
 );
@@ -2732,14 +2667,6 @@ impl SseDecode for Key {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut inner = <u32>::sse_decode(deserializer);
         return crate::api::enigo::decode_physical_keyboard_key_type(inner);
-    }
-}
-
-impl SseDecode for flutter_rust_bridge::DartOpaque {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <usize>::sse_decode(deserializer);
-        return unsafe { flutter_rust_bridge::for_generated::sse_decode_dart_opaque(inner) };
     }
 }
 
@@ -2828,6 +2755,16 @@ impl SseDecode for std::collections::HashSet<String> {
 
 impl SseDecode
     for StreamSink<crate::api::FrbLogRecord, flutter_rust_bridge::for_generated::SseCodec>
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <String>::sse_decode(deserializer);
+        return StreamSink::deserialize(inner);
+    }
+}
+
+impl SseDecode
+    for StreamSink<crate::api::kdbx::KdbxEvent, flutter_rust_bridge::for_generated::SseCodec>
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -3514,11 +3451,8 @@ impl SseDecode for crate::api::kdbx::KdbxEvent {
         let mut tag_ = <i32>::sse_decode(deserializer);
         match tag_ {
             0 => {
-                return crate::api::kdbx::KdbxEvent::Saved;
-            }
-            1 => {
-                let mut var_field0 = <String>::sse_decode(deserializer);
-                return crate::api::kdbx::KdbxEvent::None(var_field0);
+                let mut var_field0 = <crate::api::kdbx::SaveProgress>::sse_decode(deserializer);
+                return crate::api::kdbx::KdbxEvent::SaveProgress(var_field0);
             }
             _ => {
                 unimplemented!("");
@@ -3974,6 +3908,24 @@ impl SseDecode for Option<Color> {
     }
 }
 
+impl SseDecode
+    for Option<
+        StreamSink<crate::api::kdbx::KdbxEvent, flutter_rust_bridge::for_generated::SseCodec>,
+    >
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<StreamSink<
+                crate::api::kdbx::KdbxEvent,
+                flutter_rust_bridge::for_generated::SseCodec,
+            >>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for Option<String> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -4324,6 +4276,20 @@ impl SseDecode for (String, String) {
     }
 }
 
+impl SseDecode for crate::api::kdbx::SaveProgress {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::kdbx::SaveProgress::Serialize,
+            1 => crate::api::kdbx::SaveProgress::Compress,
+            2 => crate::api::kdbx::SaveProgress::Encrypt,
+            3 => crate::api::kdbx::SaveProgress::WriteFile,
+            _ => unreachable!("Invalid variant for SaveProgress: {}", inner),
+        };
+    }
+}
+
 impl SseDecode for crate::api::kdbx::Times {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -4479,51 +4445,51 @@ fn pde_ffi_dispatcher_primary_impl(
         15 => wire__crate__api__kdbx__Kdbx_action_impl(port, ptr, rust_vec_len, data_len),
         16 => wire__crate__api__kdbx__Kdbx_actions_impl(port, ptr, rust_vec_len, data_len),
         17 => wire__crate__api__kdbx__Kdbx_autofill_search_impl(port, ptr, rust_vec_len, data_len),
-        20 => wire__crate__api__kdbx__Kdbx_get_attachment_impl(port, ptr, rust_vec_len, data_len),
-        21 => wire__crate__api__kdbx__Kdbx_get_auto_type_sequence_impl(
+        19 => wire__crate__api__kdbx__Kdbx_get_attachment_impl(port, ptr, rust_vec_len, data_len),
+        20 => wire__crate__api__kdbx__Kdbx_get_auto_type_sequence_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        23 => wire__crate__api__kdbx__Kdbx_get_config_impl(port, ptr, rust_vec_len, data_len),
-        24 => wire__crate__api__kdbx__Kdbx_get_custom_data_impl(port, ptr, rust_vec_len, data_len),
-        25 => wire__crate__api__kdbx__Kdbx_get_entry_impl(port, ptr, rust_vec_len, data_len),
-        26 => {
+        22 => wire__crate__api__kdbx__Kdbx_get_config_impl(port, ptr, rust_vec_len, data_len),
+        23 => wire__crate__api__kdbx__Kdbx_get_custom_data_impl(port, ptr, rust_vec_len, data_len),
+        24 => wire__crate__api__kdbx__Kdbx_get_entry_impl(port, ptr, rust_vec_len, data_len),
+        25 => {
             wire__crate__api__kdbx__Kdbx_get_entry_historys_impl(port, ptr, rust_vec_len, data_len)
         }
-        27 => wire__crate__api__kdbx__Kdbx_get_entrys_impl(port, ptr, rust_vec_len, data_len),
-        28 => wire__crate__api__kdbx__Kdbx_get_group_impl(port, ptr, rust_vec_len, data_len),
-        29 => wire__crate__api__kdbx__Kdbx_get_groups_impl(port, ptr, rust_vec_len, data_len),
-        30 => wire__crate__api__kdbx__Kdbx_get_meta_impl(port, ptr, rust_vec_len, data_len),
-        31 => wire__crate__api__kdbx__Kdbx_get_public_custom_data_impl(
+        26 => wire__crate__api__kdbx__Kdbx_get_entrys_impl(port, ptr, rust_vec_len, data_len),
+        27 => wire__crate__api__kdbx__Kdbx_get_group_impl(port, ptr, rust_vec_len, data_len),
+        28 => wire__crate__api__kdbx__Kdbx_get_groups_impl(port, ptr, rust_vec_len, data_len),
+        29 => wire__crate__api__kdbx__Kdbx_get_meta_impl(port, ptr, rust_vec_len, data_len),
+        30 => wire__crate__api__kdbx__Kdbx_get_public_custom_data_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        32 => {
+        31 => {
             wire__crate__api__kdbx__Kdbx_get_recycle_items_impl(port, ptr, rust_vec_len, data_len)
         }
-        33 => wire__crate__api__kdbx__Kdbx_get_update_meta_impl(port, ptr, rust_vec_len, data_len),
-        34 => wire__crate__api__kdbx__Kdbx_merge_impl(port, ptr, rust_vec_len, data_len),
-        35 => wire__crate__api__kdbx__Kdbx_modify_password_impl(port, ptr, rust_vec_len, data_len),
-        38 => wire__crate__api__kdbx__Kdbx_open_impl(port, ptr, rust_vec_len, data_len),
-        39 => wire__crate__api__kdbx__Kdbx_open_bytes_impl(port, ptr, rust_vec_len, data_len),
-        40 => wire__crate__api__kdbx__Kdbx_save_impl(port, ptr, rust_vec_len, data_len),
-        41 => wire__crate__api__kdbx__Kdbx_save_file_impl(port, ptr, rust_vec_len, data_len),
-        42 => wire__crate__api__kdbx__Kdbx_set_filepath_impl(port, ptr, rust_vec_len, data_len),
-        43 => wire__crate__api__kdbx__Kdbx_summary_impl(port, ptr, rust_vec_len, data_len),
-        44 => wire__crate__api__kdbx__Kdbx_to_xml_impl(port, ptr, rust_vec_len, data_len),
-        45 => {
+        32 => wire__crate__api__kdbx__Kdbx_get_update_meta_impl(port, ptr, rust_vec_len, data_len),
+        33 => wire__crate__api__kdbx__Kdbx_merge_impl(port, ptr, rust_vec_len, data_len),
+        34 => wire__crate__api__kdbx__Kdbx_modify_password_impl(port, ptr, rust_vec_len, data_len),
+        37 => wire__crate__api__kdbx__Kdbx_open_impl(port, ptr, rust_vec_len, data_len),
+        38 => wire__crate__api__kdbx__Kdbx_open_bytes_impl(port, ptr, rust_vec_len, data_len),
+        39 => wire__crate__api__kdbx__Kdbx_save_impl(port, ptr, rust_vec_len, data_len),
+        40 => wire__crate__api__kdbx__Kdbx_save_file_impl(port, ptr, rust_vec_len, data_len),
+        41 => wire__crate__api__kdbx__Kdbx_set_filepath_impl(port, ptr, rust_vec_len, data_len),
+        42 => wire__crate__api__kdbx__Kdbx_summary_impl(port, ptr, rust_vec_len, data_len),
+        43 => wire__crate__api__kdbx__Kdbx_to_xml_impl(port, ptr, rust_vec_len, data_len),
+        44 => {
             wire__crate__api__kdbx__Kdbx_verify_credentials_impl(port, ptr, rust_vec_len, data_len)
         }
-        46 => {
+        45 => {
             wire__crate__api__kdbx__attachment_get_file_type_impl(port, ptr, rust_vec_len, data_len)
         }
-        49 => wire__crate__api__kdbx__field_summary_default_impl(port, ptr, rust_vec_len, data_len),
-        52 => wire__crate__api__frb_internal_init_logger_impl(port, ptr, rust_vec_len, data_len),
-        56 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
+        48 => wire__crate__api__kdbx__field_summary_default_impl(port, ptr, rust_vec_len, data_len),
+        51 => wire__crate__api__frb_internal_init_logger_impl(port, ptr, rust_vec_len, data_len),
+        55 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -4553,22 +4519,21 @@ fn pde_ffi_dispatcher_sync_impl(
         12 => wire__crate__api__enigo__Enigo_raw_impl(ptr, rust_vec_len, data_len),
         13 => wire__crate__api__enigo__Enigo_scroll_impl(ptr, rust_vec_len, data_len),
         14 => wire__crate__api__enigo__Enigo_text_impl(ptr, rust_vec_len, data_len),
-        18 => wire__crate__api__kdbx__Kdbx_bind_event_callback_impl(ptr, rust_vec_len, data_len),
-        19 => wire__crate__api__kdbx__Kdbx_create_impl(ptr, rust_vec_len, data_len),
-        22 => wire__crate__api__kdbx__Kdbx_get_composite_key_impl(ptr, rust_vec_len, data_len),
-        36 => wire__crate__api__kdbx__Kdbx_new_entry_impl(ptr, rust_vec_len, data_len),
-        37 => wire__crate__api__kdbx__Kdbx_new_group_impl(ptr, rust_vec_len, data_len),
-        47 => wire__crate__api__kdbx__entry_data_clone_impl(ptr, rust_vec_len, data_len),
-        48 => wire__crate__api__kdbx__entry_data_new_impl(ptr, rust_vec_len, data_len),
-        50 => wire__crate__api__kdbx__field_value_new_impl(ptr, rust_vec_len, data_len),
-        51 => wire__crate__api__frb_internal_dispose_logger_impl(ptr, rust_vec_len, data_len),
-        53 => wire__crate__api__frb_internal_logging_max_level_impl(ptr, rust_vec_len, data_len),
-        54 => wire__crate__api__frb_internal_logging_setup_dart_logging_output_impl(
+        18 => wire__crate__api__kdbx__Kdbx_create_impl(ptr, rust_vec_len, data_len),
+        21 => wire__crate__api__kdbx__Kdbx_get_composite_key_impl(ptr, rust_vec_len, data_len),
+        35 => wire__crate__api__kdbx__Kdbx_new_entry_impl(ptr, rust_vec_len, data_len),
+        36 => wire__crate__api__kdbx__Kdbx_new_group_impl(ptr, rust_vec_len, data_len),
+        46 => wire__crate__api__kdbx__entry_data_clone_impl(ptr, rust_vec_len, data_len),
+        47 => wire__crate__api__kdbx__entry_data_new_impl(ptr, rust_vec_len, data_len),
+        49 => wire__crate__api__kdbx__field_value_new_impl(ptr, rust_vec_len, data_len),
+        50 => wire__crate__api__frb_internal_dispose_logger_impl(ptr, rust_vec_len, data_len),
+        52 => wire__crate__api__frb_internal_logging_max_level_impl(ptr, rust_vec_len, data_len),
+        53 => wire__crate__api__frb_internal_logging_setup_dart_logging_output_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        55 => wire__crate__api__kdbx__group_data_new_impl(ptr, rust_vec_len, data_len),
+        54 => wire__crate__api__kdbx__group_data_new_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -5330,9 +5295,8 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::kdbx::KdbxError>
 impl flutter_rust_bridge::IntoDart for crate::api::kdbx::KdbxEvent {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
-            crate::api::kdbx::KdbxEvent::Saved => [0.into_dart()].into_dart(),
-            crate::api::kdbx::KdbxEvent::None(field0) => {
-                [1.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            crate::api::kdbx::KdbxEvent::SaveProgress(field0) => {
+                [0.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
             _ => {
                 unimplemented!("");
@@ -5639,6 +5603,29 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::kdbx::OuterCipherC
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::kdbx::SaveProgress {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Serialize => 0.into_dart(),
+            Self::Compress => 1.into_dart(),
+            Self::Encrypt => 2.into_dart(),
+            Self::WriteFile => 3.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::kdbx::SaveProgress
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::kdbx::SaveProgress>
+    for crate::api::kdbx::SaveProgress
+{
+    fn into_into_dart(self) -> crate::api::kdbx::SaveProgress {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::kdbx::Times> {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -5794,13 +5781,6 @@ impl SseEncode for Key {
     }
 }
 
-impl SseEncode for flutter_rust_bridge::DartOpaque {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <usize>::sse_encode(self.encode(), serializer);
-    }
-}
-
 impl SseEncode for std::collections::HashMap<String, String> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -5890,6 +5870,15 @@ impl SseEncode for std::collections::HashSet<String> {
 
 impl SseEncode
     for StreamSink<crate::api::FrbLogRecord, flutter_rust_bridge::for_generated::SseCodec>
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        unimplemented!("")
+    }
+}
+
+impl SseEncode
+    for StreamSink<crate::api::kdbx::KdbxEvent, flutter_rust_bridge::for_generated::SseCodec>
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -6436,12 +6425,9 @@ impl SseEncode for crate::api::kdbx::KdbxEvent {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         match self {
-            crate::api::kdbx::KdbxEvent::Saved => {
+            crate::api::kdbx::KdbxEvent::SaveProgress(field0) => {
                 <i32>::sse_encode(0, serializer);
-            }
-            crate::api::kdbx::KdbxEvent::None(field0) => {
-                <i32>::sse_encode(1, serializer);
-                <String>::sse_encode(field0, serializer);
+                <crate::api::kdbx::SaveProgress>::sse_encode(field0, serializer);
             }
             _ => {
                 unimplemented!("");
@@ -6811,6 +6797,20 @@ impl SseEncode for Option<Color> {
     }
 }
 
+impl SseEncode
+    for Option<
+        StreamSink<crate::api::kdbx::KdbxEvent, flutter_rust_bridge::for_generated::SseCodec>,
+    >
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <StreamSink<crate::api::kdbx::KdbxEvent,flutter_rust_bridge::for_generated::SseCodec>>::sse_encode(value, serializer);
+        }
+    }
+}
+
 impl SseEncode for Option<String> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -7122,6 +7122,24 @@ impl SseEncode for (String, String) {
     }
 }
 
+impl SseEncode for crate::api::kdbx::SaveProgress {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::kdbx::SaveProgress::Serialize => 0,
+                crate::api::kdbx::SaveProgress::Compress => 1,
+                crate::api::kdbx::SaveProgress::Encrypt => 2,
+                crate::api::kdbx::SaveProgress::WriteFile => 3,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
 impl SseEncode for crate::api::kdbx::Times {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -7252,7 +7270,7 @@ mod io {
     use flutter_rust_bridge::for_generated::byteorder::{
         NativeEndian, ReadBytesExt, WriteBytesExt,
     };
-    use flutter_rust_bridge::for_generated::{Lifetimeable, Lockable, transform_result_dco};
+    use flutter_rust_bridge::for_generated::{transform_result_dco, Lifetimeable, Lockable};
     use flutter_rust_bridge::{Handler, IntoIntoDart};
 
     // Section: boilerplate
@@ -7320,7 +7338,7 @@ mod web {
     };
     use flutter_rust_bridge::for_generated::wasm_bindgen;
     use flutter_rust_bridge::for_generated::wasm_bindgen::prelude::*;
-    use flutter_rust_bridge::for_generated::{Lifetimeable, Lockable, transform_result_dco};
+    use flutter_rust_bridge::for_generated::{transform_result_dco, Lifetimeable, Lockable};
     use flutter_rust_bridge::{Handler, IntoIntoDart};
 
     // Section: boilerplate
