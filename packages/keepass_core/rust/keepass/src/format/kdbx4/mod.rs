@@ -100,7 +100,7 @@ mod kdbx4_tests {
         let mut encrypted_db = Vec::new();
         dump_kdbx4(&db, &db_key, &mut encrypted_db).unwrap();
 
-        let decrypted_db = parse_kdbx4(&encrypted_db, &db_key).unwrap();
+        let decrypted_db = parse_kdbx4(&encrypted_db, &db_key, None).unwrap();
 
         assert_eq!(decrypted_db.num_entries(), 3);
     }
@@ -127,9 +127,9 @@ mod kdbx4_tests {
         let db_key = DatabaseKey::new().with_password(&password);
 
         let mut encrypted_db = Vec::new();
-        dump_kdbx4(&db, &db_key, &mut encrypted_db).unwrap();
+        dump_kdbx4(&db, &db_key, &mut encrypted_db, None).unwrap();
 
-        let decrypted_db = parse_kdbx4(&encrypted_db, &db_key).unwrap();
+        let decrypted_db = parse_kdbx4(&encrypted_db, &db_key, None).unwrap();
 
         assert_eq!(decrypted_db.num_entries(), 3);
 
@@ -206,9 +206,9 @@ mod kdbx4_tests {
         let db_key = DatabaseKey::new().with_password("test");
 
         let mut encrypted_db = Vec::new();
-        dump_kdbx4(&db, &db_key, &mut encrypted_db).unwrap();
+        dump_kdbx4(&db, &db_key, &mut encrypted_db, None).unwrap();
 
-        let decrypted_db = parse_kdbx4(&encrypted_db, &db_key).unwrap();
+        let decrypted_db = parse_kdbx4(&encrypted_db, &db_key, None).unwrap();
 
         assert_eq!(decrypted_db.num_entries(), 1);
 
@@ -273,9 +273,9 @@ mod kdbx4_tests {
         let db_key = DatabaseKey::new().with_password("test");
 
         let mut encrypted_db = Vec::new();
-        dump_kdbx4(&db, &db_key, &mut encrypted_db).unwrap();
+        dump_kdbx4(&db, &db_key, &mut encrypted_db, None).unwrap();
 
-        let decrypted_db = parse_kdbx4(&encrypted_db, &db_key).unwrap();
+        let decrypted_db = parse_kdbx4(&encrypted_db, &db_key, None).unwrap();
 
         dbg!(&db, &decrypted_db);
 

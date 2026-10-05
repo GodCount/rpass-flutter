@@ -4,6 +4,7 @@ export 'package:flutter_rust_bridge/flutter_rust_bridge.dart'
     show RustStreamSink;
 
 import 'src/rust/api/enigo.dart';
+import 'src/rust/api/kdbx.dart';
 import 'src/rust/frb_generated.dart' show RustLib;
 
 export 'src/rust/api/enigo.dart';
@@ -18,4 +19,8 @@ Enigo? _enigo;
 Enigo get enigo {
   _enigo ??= Enigo.preset();
   return _enigo!;
+}
+
+extension KdbxRustStreamSink on Kdbx {
+  Stream<KdbxEvent>? get stream => Kdbx.streams[this];
 }

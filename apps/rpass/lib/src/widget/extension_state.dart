@@ -555,14 +555,9 @@ extension StatefulKdbx on State {
     if (kdbx != null) {
       try {
         await runWithLoadingDialog(
-          kdbx.actions(actions: actions),
-          message: Store.kdbx.progressStream.map(
-            (event) => switch (event) {
-              SaveProgress.serialize => "系列化...",
-              SaveProgress.compress => "压缩中...",
-              SaveProgress.encrypt => "加密中...",
-              SaveProgress.writeFile => "保存中...",
-            },
+          () => kdbx.actions(actions: actions),
+          message: Store.kdbx.progressStream.stream.map(
+            (event) => event.toI18n(context),
           ),
         );
         return true;
@@ -591,14 +586,14 @@ extension StatefulKdbx on State {
   }
 
   Future<T> runWithLoadingDialog<T>(
-    Future<T> future, {
+    AsyncValueGetter<T> future, {
     Stream<String>? message,
     Duration delay = Duration.zero,
   }) async {
     final controller = DialogCloseController();
     try {
       _showLoading(controller: controller, message: message, delay: delay);
-      return await future;
+      return await future();
     } finally {
       controller.close();
     }

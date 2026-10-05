@@ -170,7 +170,7 @@ class ShortcutsStore with SimpleObserverListener<ShortcutsHotHandler> {
     if (kIsDesktop) {
       // wayland 无法配置全局快捷键
       if (Platform.isLinux &&
-          String.fromEnvironment("XDG_SESSION_TYPE") == "wayland") {
+          Platform.environment["XDG_SESSION_TYPE"] == "wayland") {
         _isSupported = false;
         return;
       }

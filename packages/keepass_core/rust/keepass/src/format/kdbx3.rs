@@ -184,8 +184,16 @@ pub enum Kdbx3OuterHeaderError {
 }
 
 /// Open, decrypt and parse a KeePass database from a source and a password
-pub(crate) fn parse_kdbx3(data: &[u8], db_key: &DatabaseKey) -> Result<Database, DatabaseOpenError> {
-    let (config, mut inner_decryptor, mut xml) = decrypt_kdbx3(data, db_key)?;
+pub(crate) fn parse_kdbx3(
+    data: &[u8],
+    db_key: &DatabaseKey,
+    step: Option<&dyn Fn(&str)>,
+) -> Result<Database, DatabaseOpenError> {
+    let _ = step.map(|emit| emit("compute_key"));
+
+    let (config, mut inner_decryptor, mut xml) = decrypt_kdbx3(data, db_key, step)?;
+
+    let _ = step.map(|emit| emit("deserialize"));
 
     // Parse XML data blocks
     let mut db = crate::format::xml_db::parse_xml(&xml, &[], &mut *inner_decryptor)
@@ -204,6 +212,7 @@ pub(crate) fn parse_kdbx3(data: &[u8], db_key: &DatabaseKey) -> Result<Database,
 pub(crate) fn decrypt_kdbx3(
     data: &[u8],
     db_key: &DatabaseKey,
+    step: Option<&dyn Fn(&str)>,
 ) -> Result<(DatabaseConfig, Box<dyn Cipher>, Vec<u8>), DatabaseOpenError> {
     let version = DatabaseVersion::parse(data)?;
     let header = parse_outer_header(data)
@@ -237,6 +246,8 @@ pub(crate) fn decrypt_kdbx3(
         .transform_key(&composite_key)?;
 
     let master_key = calculate_sha256(&[header.master_seed.as_ref(), &transformed_key]);
+
+    let _ = step.map(|emit| emit("decrypt"));
 
     // Decrypt payload
     let payload = config
@@ -301,6 +312,8 @@ pub(crate) fn decrypt_kdbx3(
         pos += 40 + block_size;
         block_index += 1;
     }
+
+    let _ = step.map(|emit| emit("decompress"));
 
     let xml = compression.decompress(&buf)?;
 

@@ -52,17 +52,14 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
   String? _syncAccountUuid;
   String? get syncAccountUuid => _syncAccountUuid;
 
-  final StreamController<SaveProgress> _progressStream =
-      StreamController.broadcast();
-
-  Stream<SaveProgress> get progressStream => _progressStream.stream;
+  final BehaviorSubject<KdbxProgress> progressStream = BehaviorSubject();
 
   StreamSubscription<KdbxEvent>? _streamSubscription;
 
   void _kdbxEventCallback(KdbxEvent event) async {
     switch (event) {
-      case KdbxEvent_SaveProgress(field0: final field0):
-        _progressStream.add(field0);
+      case KdbxEvent_Progress(field0: final field0):
+        progressStream.add(field0);
         if (field0 == .writeFile) {
           await _getSummary();
           emit((listener) => listener.onKdbxSaved());
@@ -100,6 +97,7 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
       _streamSubscription!.cancel();
       _streamSubscription = null;
     }
+    progressStream.clean();
     _kdbx?.dispose();
     _kdbx = _groups = _noRecyclebinGroups = _fieldSummary = _selectedKdbxEntry =
         _syncAccountUuid = null;
@@ -168,7 +166,7 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
 
   void dispose() {
     _celanKdbx();
-    _progressStream.close();
+    progressStream.close();
     removeAllListener();
   }
 }
@@ -266,6 +264,7 @@ class SyncKdbxController with ChangeNotifier {
           credentials: Credentials.formCompositeKey(
             key: kdbx.getCompositeKey(),
           ),
+          callback: () {},
         );
       } catch (e) {
         _logger.warning("local credentials Unable open remote kdbx.", e);

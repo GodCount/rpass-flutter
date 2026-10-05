@@ -129,6 +129,7 @@ void kdbxTests() {
     final reopened = await Kdbx.open(
       credentials: _credentials(),
       filepath: pathFor('roundtrip'),
+      callback: () {},
     );
     final entries = await reopened.getEntrys();
 
@@ -146,6 +147,7 @@ void kdbxTests() {
       Kdbx.open(
         credentials: _credentials('not-the-password'),
         filepath: pathFor('wrong-password'),
+        callback: () {},
       ),
       throwsA(anything),
     );
@@ -264,6 +266,7 @@ void kdbxTests() {
     final reopened = await Kdbx.open(
       credentials: _credentials(),
       filepath: pathFor('meta'),
+      callback: () {},
     );
     final meta = await reopened.getMeta();
 
@@ -319,6 +322,7 @@ void kdbxTests() {
     final reopened = await Kdbx.open(
       credentials: _credentials(),
       filepath: pathFor('attachment'),
+      callback: () {},
     );
     final entry = await reopened.getEntry(id: entryId);
 
@@ -339,13 +343,18 @@ void kdbxTests() {
     await db.modifyPassword(credentials: _credentials('new-password'));
 
     await expectLater(
-      Kdbx.open(credentials: _credentials(), filepath: pathFor('rekey')),
+      Kdbx.open(
+        credentials: _credentials(),
+        filepath: pathFor('rekey'),
+        callback: () {},
+      ),
       throwsA(anything),
     );
 
     final reopened = await Kdbx.open(
       credentials: _credentials('new-password'),
       filepath: pathFor('rekey'),
+      callback: () {},
     );
     expect((await reopened.getEntrys()).map(_title), ['Keep']);
   });
@@ -358,10 +367,12 @@ void kdbxTests() {
     final target = await Kdbx.open(
       credentials: _credentials(),
       filepath: pathFor('origin'),
+      callback: () {},
     );
     final source = await Kdbx.open(
       credentials: _credentials(),
       filepath: pathFor('replica'),
+      callback: () {},
     );
 
     await target.action(
@@ -393,6 +404,7 @@ void kdbxTests() {
     final reopened = await Kdbx.open(
       credentials: _credentials(),
       filepath: pathFor('kdf'),
+      callback: () {},
     );
     final config = await reopened.getConfig();
 

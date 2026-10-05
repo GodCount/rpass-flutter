@@ -1597,6 +1597,60 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'保存中...'**
   String get saveing;
+
+  /// No description provided for @reading.
+  ///
+  /// In zh, this message translates to:
+  /// **'读取中...'**
+  String get reading;
+
+  /// No description provided for @calculating_key.
+  ///
+  /// In zh, this message translates to:
+  /// **'计算密钥...'**
+  String get calculating_key;
+
+  /// No description provided for @decrypting.
+  ///
+  /// In zh, this message translates to:
+  /// **'解密中...'**
+  String get decrypting;
+
+  /// No description provided for @decompressing.
+  ///
+  /// In zh, this message translates to:
+  /// **'解压中...'**
+  String get decompressing;
+
+  /// No description provided for @analyzing.
+  ///
+  /// In zh, this message translates to:
+  /// **'解析中...'**
+  String get analyzing;
+
+  /// No description provided for @serializing.
+  ///
+  /// In zh, this message translates to:
+  /// **'序列化中...'**
+  String get serializing;
+
+  /// No description provided for @compressing.
+  ///
+  /// In zh, this message translates to:
+  /// **'压缩中...'**
+  String get compressing;
+
+  /// No description provided for @encrypting.
+  ///
+  /// In zh, this message translates to:
+  /// **'加密中...'**
+  String get encrypting;
+
+  /// No description provided for @writing.
+  ///
+  /// In zh, this message translates to:
+  /// **'写入中...'**
+  String get writing;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

@@ -26,8 +26,16 @@ use crate::{
 use super::KDBX4InnerHeader;
 
 /// Open, decrypt and parse a KeePass database from a source and key elements
-pub(crate) fn parse_kdbx4(data: &[u8], db_key: &DatabaseKey) -> Result<Database, DatabaseOpenError> {
-    let (config, header_attachments, mut inner_decryptor, mut xml) = decrypt_kdbx4(data, db_key)?;
+pub(crate) fn parse_kdbx4(
+    data: &[u8],
+    db_key: &DatabaseKey,
+    step: Option<&dyn Fn(&str)>,
+) -> Result<Database, DatabaseOpenError> {
+    let _ = step.map(|emit| emit("compute_key"));
+
+    let (config, header_attachments, mut inner_decryptor, mut xml) = decrypt_kdbx4(data, db_key, step)?;
+
+    let _ = step.map(|emit| emit("deserialize"));
 
     let mut db = crate::format::xml_db::parse_xml(&xml, &header_attachments, &mut *inner_decryptor)
         .map_err(|e| DatabaseOpenError::Format(DatabaseFormatError::Kdbx4(Kdbx4OpenError::Xml(e))))?;
@@ -45,6 +53,7 @@ pub(crate) fn parse_kdbx4(data: &[u8], db_key: &DatabaseKey) -> Result<Database,
 pub(crate) fn decrypt_kdbx4(
     data: &[u8],
     db_key: &DatabaseKey,
+    step: Option<&dyn Fn(&str)>,
 ) -> Result<(DatabaseConfig, Vec<Value<Vec<u8>>>, Box<dyn Cipher>, Vec<u8>), DatabaseOpenError> {
     let version = DatabaseVersion::parse(data)?;
 
@@ -108,6 +117,8 @@ pub(crate) fn decrypt_kdbx4(
         return Err(DatabaseKeyError::IncorrectKey.into());
     }
 
+    let _ = step.map(|emit| emit("decrypt"));
+
     // read encrypted payload from hmac-verified block stream
     let payload_encrypted = hmac_block_stream::read_hmac_block_stream(hmac_block_stream, &hmac_key)
         .map_err(|e| DatabaseOpenError::Format(DatabaseFormatError::Kdbx4(Kdbx4OpenError::BlockStream(e))))?;
@@ -117,6 +128,8 @@ pub(crate) fn decrypt_kdbx4(
         .outer_cipher_config
         .get_cipher(&master_key, &outer_header.outer_iv)?
         .decrypt(&payload_encrypted)?;
+
+    let _ = step.map(|emit| emit("decompress"));
 
     let mut payload = outer_header
         .compression_config

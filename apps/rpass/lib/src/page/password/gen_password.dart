@@ -63,7 +63,8 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
 
   @override
   void initState() {
-    super.initState();
+    _updateTargetMatches();
+    _updatePassword();
 
     _controller.addListener(() {
       if (_controller.text != _password) {
@@ -73,8 +74,7 @@ class _GenPasswordPageState extends State<GenPasswordPage> {
       }
     });
 
-    _updateTargetMatches();
-    _updatePassword();
+    super.initState();
   }
 
   void _updateTargetMatches() {

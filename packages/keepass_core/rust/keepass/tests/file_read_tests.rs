@@ -474,7 +474,7 @@ mod file_read_tests {
         for one_len in 0..=file_len {
             print!("Trying length: {}", one_len);
             let current_slice = &file_as_vec[..one_len];
-            let res = Database::parse(current_slice, DatabaseKey::new().with_password("demopass"));
+            let res = Database::parse(current_slice, DatabaseKey::new().with_password("demopass"), None);
             match res {
                 Ok(db) => {
                     assert_eq!(db.root().name, "Root");

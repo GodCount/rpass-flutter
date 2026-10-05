@@ -390,7 +390,13 @@ fn parse_entries(
     Ok(())
 }
 
-pub(crate) fn parse_kdb(data: &[u8], db_key: &DatabaseKey) -> Result<Database, DatabaseOpenError> {
+pub(crate) fn parse_kdb(
+    data: &[u8],
+    db_key: &DatabaseKey,
+    step: Option<&dyn Fn(&str)>,
+) -> Result<Database, DatabaseOpenError> {
+    let _ = step.map(|emit| emit("compute_key"));
+
     let header = KDBHeader::try_from(data)?;
     let version = DatabaseVersion::KDB(header.subversion as u16);
 
@@ -431,6 +437,8 @@ pub(crate) fn parse_kdb(data: &[u8], db_key: &DatabaseKey) -> Result<Database, D
         )));
     };
 
+    let _ = step.map(|emit| emit("decrypt"));
+
     // Decrypt payload
     #[allow(clippy::expect_used)] // master key is fixed-length, should never fail
     let mut payload_padded = outer_cipher_config
@@ -451,6 +459,8 @@ pub(crate) fn parse_kdb(data: &[u8], db_key: &DatabaseKey) -> Result<Database, D
     if header.contents_hash != hash.as_slice() {
         return Err(DatabaseOpenError::Key(DatabaseKeyError::IncorrectKey));
     }
+
+    let _ = step.map(|emit| emit("deserialize"));
 
     let config = DatabaseConfig {
         version,

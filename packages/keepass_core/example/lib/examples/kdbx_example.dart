@@ -82,6 +82,7 @@ class _KdbxExamplePageState extends State<KdbxExamplePage> {
     final db = await kdbx.Kdbx.open(
       credentials: _credentials,
       filepath: _pathController.text.trim(),
+      callback: () {},
     );
     _db = db;
     _selectedGroupId = null;
