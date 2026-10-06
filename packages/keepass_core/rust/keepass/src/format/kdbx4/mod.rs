@@ -98,7 +98,7 @@ mod kdbx4_tests {
             ));
 
         let mut encrypted_db = Vec::new();
-        dump_kdbx4(&db, &db_key, &mut encrypted_db).unwrap();
+        dump_kdbx4(&db, &db_key, &mut encrypted_db, None).unwrap();
 
         let decrypted_db = parse_kdbx4(&encrypted_db, &db_key, None).unwrap();
 
