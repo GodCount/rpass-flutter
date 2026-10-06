@@ -2816,30 +2816,61 @@ as String,
 /// @nodoc
 mixin _$KdbxEvent {
 
-
+ KdbxProgress get field0;
+/// Create a copy of KdbxEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KdbxEventCopyWith<KdbxEvent> get copyWith => _$KdbxEventCopyWithImpl<KdbxEvent>(this as KdbxEvent, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxEvent);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxEvent&&(identical(other.field0, field0) || other.field0 == field0));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,field0);
 
 @override
 String toString() {
-  return 'KdbxEvent()';
+  return 'KdbxEvent(field0: $field0)';
 }
 
 
 }
 
 /// @nodoc
-class $KdbxEventCopyWith<$Res>  {
-$KdbxEventCopyWith(KdbxEvent _, $Res Function(KdbxEvent) __);
+abstract mixin class $KdbxEventCopyWith<$Res>  {
+  factory $KdbxEventCopyWith(KdbxEvent value, $Res Function(KdbxEvent) _then) = _$KdbxEventCopyWithImpl;
+@useResult
+$Res call({
+ KdbxProgress field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$KdbxEventCopyWithImpl<$Res>
+    implements $KdbxEventCopyWith<$Res> {
+  _$KdbxEventCopyWithImpl(this._self, this._then);
+
+  final KdbxEvent _self;
+  final $Res Function(KdbxEvent) _then;
+
+/// Create a copy of KdbxEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? field0 = null,}) {
+  return _then(_self.copyWith(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as KdbxProgress,
+  ));
+}
+
 }
 
 
@@ -2857,12 +2888,11 @@ extension KdbxEventPatterns on KdbxEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( KdbxEvent_Saved value)?  saved,TResult Function( KdbxEvent_None value)?  none,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( KdbxEvent_Progress value)?  progress,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case KdbxEvent_Saved() when saved != null:
-return saved(_that);case KdbxEvent_None() when none != null:
-return none(_that);case _:
+case KdbxEvent_Progress() when progress != null:
+return progress(_that);case _:
   return orElse();
 
 }
@@ -2880,12 +2910,11 @@ return none(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( KdbxEvent_Saved value)  saved,required TResult Function( KdbxEvent_None value)  none,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( KdbxEvent_Progress value)  progress,}){
 final _that = this;
 switch (_that) {
-case KdbxEvent_Saved():
-return saved(_that);case KdbxEvent_None():
-return none(_that);}
+case KdbxEvent_Progress():
+return progress(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -2899,12 +2928,11 @@ return none(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( KdbxEvent_Saved value)?  saved,TResult? Function( KdbxEvent_None value)?  none,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( KdbxEvent_Progress value)?  progress,}){
 final _that = this;
 switch (_that) {
-case KdbxEvent_Saved() when saved != null:
-return saved(_that);case KdbxEvent_None() when none != null:
-return none(_that);case _:
+case KdbxEvent_Progress() when progress != null:
+return progress(_that);case _:
   return null;
 
 }
@@ -2921,11 +2949,10 @@ return none(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  saved,TResult Function( String field0)?  none,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( KdbxProgress field0)?  progress,required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case KdbxEvent_Saved() when saved != null:
-return saved();case KdbxEvent_None() when none != null:
-return none(_that.field0);case _:
+case KdbxEvent_Progress() when progress != null:
+return progress(_that.field0);case _:
   return orElse();
 
 }
@@ -2943,11 +2970,10 @@ return none(_that.field0);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  saved,required TResult Function( String field0)  none,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( KdbxProgress field0)  progress,}) {final _that = this;
 switch (_that) {
-case KdbxEvent_Saved():
-return saved();case KdbxEvent_None():
-return none(_that.field0);}
+case KdbxEvent_Progress():
+return progress(_that.field0);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -2961,11 +2987,10 @@ return none(_that.field0);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  saved,TResult? Function( String field0)?  none,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( KdbxProgress field0)?  progress,}) {final _that = this;
 switch (_that) {
-case KdbxEvent_Saved() when saved != null:
-return saved();case KdbxEvent_None() when none != null:
-return none(_that.field0);case _:
+case KdbxEvent_Progress() when progress != null:
+return progress(_that.field0);case _:
   return null;
 
 }
@@ -2976,55 +3001,23 @@ return none(_that.field0);case _:
 /// @nodoc
 
 
-class KdbxEvent_Saved extends KdbxEvent {
-  const KdbxEvent_Saved(): super._();
+class KdbxEvent_Progress extends KdbxEvent {
+  const KdbxEvent_Progress(this.field0): super._();
   
 
-
-
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxEvent_Saved);
-}
-
-
-@override
-int get hashCode => runtimeType.hashCode;
-
-@override
-String toString() {
-  return 'KdbxEvent.saved()';
-}
-
-
-}
-
-
-
-
-/// @nodoc
-
-
-class KdbxEvent_None extends KdbxEvent {
-  const KdbxEvent_None(this.field0): super._();
-  
-
- final  String field0;
+@override final  KdbxProgress field0;
 
 /// Create a copy of KdbxEvent
 /// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
+@override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$KdbxEvent_NoneCopyWith<KdbxEvent_None> get copyWith => _$KdbxEvent_NoneCopyWithImpl<KdbxEvent_None>(this, _$identity);
+$KdbxEvent_ProgressCopyWith<KdbxEvent_Progress> get copyWith => _$KdbxEvent_ProgressCopyWithImpl<KdbxEvent_Progress>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxEvent_None&&(identical(other.field0, field0) || other.field0 == field0));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KdbxEvent_Progress&&(identical(other.field0, field0) || other.field0 == field0));
 }
 
 
@@ -3033,18 +3026,18 @@ int get hashCode => Object.hash(runtimeType,field0);
 
 @override
 String toString() {
-  return 'KdbxEvent.none(field0: $field0)';
+  return 'KdbxEvent.progress(field0: $field0)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $KdbxEvent_NoneCopyWith<$Res> implements $KdbxEventCopyWith<$Res> {
-  factory $KdbxEvent_NoneCopyWith(KdbxEvent_None value, $Res Function(KdbxEvent_None) _then) = _$KdbxEvent_NoneCopyWithImpl;
-@useResult
+abstract mixin class $KdbxEvent_ProgressCopyWith<$Res> implements $KdbxEventCopyWith<$Res> {
+  factory $KdbxEvent_ProgressCopyWith(KdbxEvent_Progress value, $Res Function(KdbxEvent_Progress) _then) = _$KdbxEvent_ProgressCopyWithImpl;
+@override @useResult
 $Res call({
- String field0
+ KdbxProgress field0
 });
 
 
@@ -3052,19 +3045,19 @@ $Res call({
 
 }
 /// @nodoc
-class _$KdbxEvent_NoneCopyWithImpl<$Res>
-    implements $KdbxEvent_NoneCopyWith<$Res> {
-  _$KdbxEvent_NoneCopyWithImpl(this._self, this._then);
+class _$KdbxEvent_ProgressCopyWithImpl<$Res>
+    implements $KdbxEvent_ProgressCopyWith<$Res> {
+  _$KdbxEvent_ProgressCopyWithImpl(this._self, this._then);
 
-  final KdbxEvent_None _self;
-  final $Res Function(KdbxEvent_None) _then;
+  final KdbxEvent_Progress _self;
+  final $Res Function(KdbxEvent_Progress) _then;
 
 /// Create a copy of KdbxEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
-  return _then(KdbxEvent_None(
+@override @pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(KdbxEvent_Progress(
 null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
-as String,
+as KdbxProgress,
   ));
 }
 

@@ -333,13 +333,14 @@ impl Combo {
 #[cfg(feature = "save_kdbx4")]
 pub fn save_to_vec(db: &Database, key: DatabaseKey) -> Vec<u8> {
     let mut buf = Vec::new();
-    db.save(&mut buf, key).expect("save_to_vec: save failed");
+    db.save(&mut buf, key, None).expect("save_to_vec: save failed");
     buf
 }
 
 #[cfg(feature = "save_kdbx4")]
 pub fn save_then_open(db: &Database, key: DatabaseKey) -> Database {
     let mut buf = Vec::new();
-    db.save(&mut buf, key.clone()).expect("Unable to save database");
+    db.save(&mut buf, key.clone(), None)
+        .expect("Unable to save database");
     Database::open(&mut buf.as_slice(), key).expect("Unable to open database")
 }

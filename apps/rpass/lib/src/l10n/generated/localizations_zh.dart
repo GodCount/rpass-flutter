@@ -780,4 +780,37 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get preview => '预览';
+
+  @override
+  String get loading => '加载中...';
+
+  @override
+  String get saveing => '保存中...';
+
+  @override
+  String get reading => '读取中...';
+
+  @override
+  String get calculating_key => '计算密钥...';
+
+  @override
+  String get decrypting => '解密中...';
+
+  @override
+  String get decompressing => '解压中...';
+
+  @override
+  String get analyzing => '解析中...';
+
+  @override
+  String get serializing => '序列化中...';
+
+  @override
+  String get compressing => '压缩中...';
+
+  @override
+  String get encrypting => '加密中...';
+
+  @override
+  String get writing => '写入中...';
 }

@@ -50,7 +50,7 @@ fn main() -> Result<()> {
 
     let mut out_file = File::create(args.out_kdbx)?;
 
-    db.save(&mut out_file, key_without_yubikey)?;
+    db.save(&mut out_file, key_without_yubikey, None)?;
 
     println!("Yubikey was removed from the database key.");
 

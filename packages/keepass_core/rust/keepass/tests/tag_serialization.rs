@@ -41,7 +41,7 @@ fn build_db_with_tagged_entry_and_group(entry_tags: Vec<String>, group_tags: Vec
 
 fn save_and_get_xml(db: &Database) -> (Vec<u8>, String) {
     let mut buf = Vec::new();
-    db.save(&mut buf, key()).expect("save db");
+    db.save(&mut buf, key(), None).expect("save db");
 
     let xml = Database::get_xml(&mut std::io::Cursor::new(&buf), key()).expect("decrypt re-save");
     let xml = String::from_utf8(xml).expect("xml is utf-8");

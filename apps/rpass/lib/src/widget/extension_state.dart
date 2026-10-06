@@ -554,7 +554,12 @@ extension StatefulKdbx on State {
     final kdbx = Store.kdbx.kdbx;
     if (kdbx != null) {
       try {
-        await kdbx.actions(actions: actions);
+        await runWithLoadingDialog(
+          () => kdbx.actions(actions: actions),
+          message: Store.kdbx.progressStream.stream.map(
+            (event) => event.toI18n(context),
+          ),
+        );
         return true;
       } catch (e, s) {
         showError(e, s);
@@ -578,6 +583,60 @@ extension StatefulKdbx on State {
         trigger = false;
       }
     };
+  }
+
+  Future<T> runWithLoadingDialog<T>(
+    AsyncValueGetter<T> future, {
+    Stream<String>? message,
+    Duration delay = Duration.zero,
+  }) async {
+    final controller = DialogCloseController();
+    try {
+      _showLoading(controller: controller, message: message, delay: delay);
+      return await future();
+    } finally {
+      controller.close();
+    }
+  }
+
+  Future<void> _showLoading({
+    required DialogCloseController controller,
+    Stream<String>? message,
+    Duration delay = Duration.zero,
+  }) async {
+    await Future.delayed(delay);
+    if (controller.closed) return;
+
+    final stream = message ?? Stream.value(I18n.of(context)!.loading);
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      requestFocus: true,
+      fullscreenDialog: true,
+      builder: (context) {
+        controller.context = context;
+
+        return AlertDialog(
+          contentPadding: EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: Row(
+            spacing: 12,
+            children: [
+              CircularProgressIndicator(),
+              StreamBuilder(
+                stream: stream,
+                builder: (context, snapshot) {
+                  return Text(snapshot.data ?? I18n.of(context)!.loading);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void autoFill(String id, [String? key]) async {

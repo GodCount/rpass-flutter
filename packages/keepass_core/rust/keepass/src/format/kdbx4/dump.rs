@@ -27,6 +27,7 @@ pub fn dump_kdbx4(
     db: &Database,
     db_key: &DatabaseKey,
     writer: &mut dyn Write,
+    step: Option<&dyn Fn(&str)>,
 ) -> Result<(), DatabaseSaveError> {
     if !matches!(db.config.version, DatabaseVersion::KDB4(1)) {
         return Err(DatabaseSaveError::UnsupportedVersion);
@@ -84,6 +85,8 @@ pub fn dump_kdbx4(
 
     writer.write_all(&header_hmac)?;
 
+    let _ = step.map(|emit| emit("serialize"));
+
     // Initialize inner encryptor from inner header params
     let mut inner_cipher = db
         .config
@@ -92,6 +95,8 @@ pub fn dump_kdbx4(
 
     // convert database to XML and header attachments
     let (xml, attachments) = crate::format::xml_db::to_xml(db, &mut *inner_cipher)?;
+
+    let _ = step.map(|emit| emit("compress"));
 
     // dump inner header into buffer
     let mut payload = Vec::new();
@@ -108,6 +113,8 @@ pub fn dump_kdbx4(
         .compression_config
         .get_compression()
         .compress(&payload)?;
+
+    let _ = step.map(|emit| emit("encrypt"));
 
     payload.zeroize();
 

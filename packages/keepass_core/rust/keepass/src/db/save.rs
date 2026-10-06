@@ -13,14 +13,17 @@ impl Database {
         &self,
         destination: &mut dyn std::io::Write,
         key: DatabaseKey,
+        step: Option<&dyn Fn(&str)>,
     ) -> Result<(), DatabaseSaveError> {
         use crate::format::kdbx4::dump_kdbx4;
+
+        let _ = step.map(|emit| emit("compute_key"));
 
         match self.config.version {
             DatabaseVersion::KDB(_) => Err(DatabaseSaveError::UnsupportedVersion),
             DatabaseVersion::KDB2(_) => Err(DatabaseSaveError::UnsupportedVersion),
             DatabaseVersion::KDB3(_) => Err(DatabaseSaveError::UnsupportedVersion),
-            DatabaseVersion::KDB4(_) => dump_kdbx4(self, &key, destination),
+            DatabaseVersion::KDB4(_) => dump_kdbx4(self, &key, destination, step),
         }
     }
 

@@ -1,6 +1,7 @@
 use std::char;
 use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
+use std::io::Read;
+use std::sync::RwLock;
 use std::{collections::HashSet, fs::File};
 
 use flutter_rust_bridge::{BaseAsyncRuntime, DartFnFuture, frb};
@@ -44,8 +45,10 @@ use utils_proc_macro::frb_string_constant;
 use zeroize::Zeroize;
 
 use crate::api::kdbx::KdbxAction::UpdateSyncEntry;
-use crate::api::utils::{atomic_write, contains_domain, random_bytes, simple_to_domain, transform_xor};
-use crate::frb_generated::FLUTTER_RUST_BRIDGE_HANDLER;
+use crate::api::utils::{
+    atomic_write, contains_domain, random_bytes, simple_to_domain, transform_xor,
+};
+use crate::frb_generated::{FLUTTER_RUST_BRIDGE_HANDLER, StreamSink};
 
 frb_string_constant! {
     KdbxKey {
@@ -128,24 +131,122 @@ const CUSTOM_DATA_SYNC_UUID: &str = "sync_account_uuid"; // 向后兼容，保�
 
 #[derive(Debug, Clone)]
 pub enum KdbxEvent {
-    Saved,
-    None(String),
+    Progress(KdbxProgress),
 }
 
-#[frb(opaque)]
+#[derive(Debug, Clone)]
+pub enum KdbxProgress {
+    ReadFile,
+    Decrypt,
+    Decompress,
+    Deserialize,
+
+    ComputeKey,
+
+    Serialize,
+    Compress,
+    Encrypt,
+    WriteFile,
+}
+
+impl From<&str> for KdbxProgress {
+    fn from(value: &str) -> Self {
+        match value {
+            "read_file" => KdbxProgress::ReadFile,
+            "decrypt" => KdbxProgress::Decrypt,
+            "decompress" => KdbxProgress::Decompress,
+            "deserialize" => KdbxProgress::Deserialize,
+
+            "compute_key" => KdbxProgress::ComputeKey,
+
+            "serialize" => KdbxProgress::Serialize,
+            "compress" => KdbxProgress::Compress,
+            "encrypt" => KdbxProgress::Encrypt,
+            "write_file" => KdbxProgress::WriteFile,
+
+            _ => KdbxProgress::ComputeKey,
+        }
+    }
+}
+
+#[frb(
+    opaque,
+    dart_code = r#"
+  static final streams = Expando<Stream<KdbxEvent>>();
+
+  static Kdbx createAndSink({
+    required Credentials credentials,
+    KdbxConfig? config,
+    String? filepath,
+  }) {
+    final sink = RustStreamSink<KdbxEvent>();
+    final kdbx = Kdbx.create(
+      credentials: credentials,
+      config: config,
+      filepath: filepath,
+      sink: sink,
+    );
+    streams[kdbx] = sink.stream;
+    return kdbx;
+  }
+
+  static Future<Kdbx> openAndSink({
+    required Credentials credentials,
+    required String filepath,
+    ValueChanged<Stream<KdbxEvent>>? onStream,
+  }) async {
+    final sink = RustStreamSink<KdbxEvent>();
+    Stream<KdbxEvent>? stream;
+    final kdbx = await Kdbx.open(
+      credentials: credentials,
+      filepath: filepath,
+      sink: sink,
+      callback: () {
+        stream = sink.stream.asBroadcastStream();
+        onStream?.call(stream!);
+      },
+    );
+    streams[kdbx] = stream ?? sink.stream.asBroadcastStream();
+    return kdbx;
+  }
+
+  static Future<Kdbx> openBytesAndSink({
+    required Credentials credentials,
+    required List<int> bytes,
+    String? filepath,
+    ValueChanged<Stream<KdbxEvent>>? onStream,
+  }) async {
+    final sink = RustStreamSink<KdbxEvent>();
+    Stream<KdbxEvent>? stream;
+    final kdbx = await Kdbx.openBytes(
+      credentials: credentials,
+      bytes: bytes,
+      filepath: filepath,
+      sink: sink,
+      callback: () {
+        stream = sink.stream.asBroadcastStream();
+        onStream?.call(stream!);
+      },
+    );
+    streams[kdbx] = stream ?? sink.stream.asBroadcastStream();
+    return kdbx;
+  }
+"#
+)]
 pub struct Kdbx {
-    emit: Option<Arc<dyn Fn(KdbxEvent) -> DartFnFuture<()> + Send + Sync + 'static>>,
+    sink: Option<StreamSink<KdbxEvent>>,
     database: RwLock<Database>,
     credentials: Credentials,
     filepath: Option<String>,
 }
 
 impl Kdbx {
-    #[frb[sync]]
+    #[frb(sync)]
     pub fn create(
         credentials: Credentials,
         config: Option<KdbxConfig>,
         filepath: Option<String>,
+        sink: Option<StreamSink<KdbxEvent>>,
     ) -> Self {
         let mut database = if let Some(config) = config {
             Database::with_config(config.into())
@@ -167,7 +268,7 @@ impl Kdbx {
         database.meta.master_key_changed = Some(Times::now());
 
         Self {
-            emit: None,
+            sink,
             database: RwLock::new(database),
             credentials,
             filepath,
@@ -202,32 +303,50 @@ impl Kdbx {
         db.meta.recyclebin_changed = Some(Times::now());
     }
 
-    pub fn open(credentials: Credentials, filepath: String) -> Result<Self, KdbxError> {
+    pub fn open(
+        credentials: Credentials,
+        filepath: String,
+        callback: impl Fn() -> DartFnFuture<()> + Send + 'static,
+        sink: Option<StreamSink<KdbxEvent>>,
+    ) -> Result<Self, KdbxError> {
+        let _ = sink
+            .as_ref()
+            .map(|sink| sink.add(KdbxEvent::Progress(KdbxProgress::ReadFile)));
+
         let mut file = File::open(&filepath)?;
 
-        let mut database = Database::open(&mut file, credentials.key.clone())?;
+        let mut bytes = Vec::new();
+        file.read_to_end(&mut bytes)?;
 
-        database.config.version = DatabaseVersion::KDB4(KDBX4_CURRENT_MINOR_VERSION);
-
-        Ok(Self {
-            emit: None,
-            database: RwLock::new(database),
-            credentials,
-            filepath: Some(filepath),
-        })
+        Self::open_bytes(credentials, bytes, Some(filepath), callback, sink)
     }
 
     pub fn open_bytes(
         credentials: Credentials,
         bytes: Vec<u8>,
         filepath: Option<String>,
+        callback: impl Fn() -> DartFnFuture<()> + Send + 'static,
+        sink: Option<StreamSink<KdbxEvent>>,
     ) -> Result<Self, KdbxError> {
-        let mut database = Database::parse(&bytes, credentials.key.clone())?;
+        FLUTTER_RUST_BRIDGE_HANDLER
+            .async_runtime()
+            .spawn(async move { callback().await });
+
+        let sink2 = sink.clone();
+        let mut database = Database::parse(
+            &bytes,
+            credentials.key.clone(),
+            Some(&move |step| {
+                if let Some(sink) = &sink2 {
+                    let _ = sink.add(KdbxEvent::Progress(KdbxProgress::from(step)));
+                }
+            }),
+        )?;
 
         database.config.version = DatabaseVersion::KDB4(KDBX4_CURRENT_MINOR_VERSION);
 
         Ok(Self {
-            emit: None,
+            sink,
             database: RwLock::new(database),
             credentials,
             filepath,
@@ -252,7 +371,7 @@ impl Kdbx {
 
         atomic_write(file_path, &bytes)?;
 
-        self.emit(KdbxEvent::Saved);
+        self.emit(KdbxEvent::Progress(KdbxProgress::WriteFile));
 
         Ok(())
     }
@@ -262,7 +381,13 @@ impl Kdbx {
 
         let mut buf = Vec::new();
 
-        db.save(&mut buf, self.credentials.key.clone())?;
+        db.save(
+            &mut buf,
+            self.credentials.key.clone(),
+            Some(&|step| {
+                self.emit(KdbxEvent::Progress(KdbxProgress::from(step)));
+            }),
+        )?;
 
         Ok(buf)
     }
@@ -273,20 +398,9 @@ impl Kdbx {
         Ok(db.to_xml()?)
     }
 
-    #[frb(sync)]
-    pub fn bind_event_callback(
-        &mut self,
-        callback: impl Fn(KdbxEvent) -> DartFnFuture<()> + Send + Sync + 'static,
-    ) {
-        self.emit = Some(Arc::new(callback));
-    }
-
     fn emit(&self, event: KdbxEvent) {
-        if let Some(emit) = &self.emit {
-            let emit_clone = emit.clone();
-            FLUTTER_RUST_BRIDGE_HANDLER
-                .async_runtime()
-                .spawn(async move { emit_clone(event).await });
+        if let Some(sink) = &self.sink {
+            let _ = sink.add(event);
         }
     }
 
@@ -1444,7 +1558,7 @@ impl EntryData {
         new_entry
     }
 
-    #[frb[sync]]
+    #[frb(sync)]
     pub fn new(parent: String) -> Self {
         Self {
             id: EntryId::new().to_string(),
@@ -1623,7 +1737,7 @@ pub struct GroupData {
 }
 
 impl GroupData {
-    #[frb[sync]]
+    #[frb(sync)]
     pub fn new(parent: String) -> Self {
         Self {
             id: GroupId::new().to_string(),
@@ -2843,6 +2957,7 @@ mod test {
             credentials("password"),
             Some(test_config()),
             Some(file.path()),
+            None,
         )
     }
 
@@ -2969,7 +3084,7 @@ mod test {
 
     #[test]
     fn create_initializes_meta_and_recycle_bin() {
-        let kdbx = Kdbx::create(credentials("password"), Some(test_config()), None);
+        let kdbx = Kdbx::create(credentials("password"), Some(test_config()), None, None);
 
         let meta = kdbx.get_meta().unwrap();
         assert_eq!(meta.generator.as_deref(), Some("frb_keepass"));
@@ -2995,7 +3110,7 @@ mod test {
 
     #[test]
     fn lookups_with_unknown_ids_fail() {
-        let kdbx = Kdbx::create(credentials("password"), Some(test_config()), None);
+        let kdbx = Kdbx::create(credentials("password"), Some(test_config()), None, None);
         let unknown = Uuid::new_v4().to_string();
 
         assert!(kdbx.get_entry("not-a-uuid".to_string(), None).is_err());
@@ -3026,7 +3141,13 @@ mod test {
             kdbx.action(KdbxAction::UpdateMeta(update_meta)).unwrap();
         }
 
-        let opened = Kdbx::open(credentials("password"), file.path()).unwrap();
+        let opened = Kdbx::open(
+            credentials("password"),
+            file.path(),
+            || Box::pin(async {}) as DartFnFuture<()>,
+            None,
+        )
+        .unwrap();
 
         assert_eq!(
             opened.get_meta().unwrap().database_name.as_deref(),
@@ -3042,7 +3163,15 @@ mod test {
         assert_eq!(field(&entries[0], KEY_TITLE), "Alice");
         assert_eq!(field(&entries[0], KEY_PASSWORD), "s3cr3t");
 
-        assert!(Kdbx::open(credentials("wrong"), file.path()).is_err());
+        assert!(
+            Kdbx::open(
+                credentials("wrong"),
+                file.path(),
+                || Box::pin(async {}) as DartFnFuture<()>,
+                None
+            )
+            .is_err()
+        );
     }
 
     #[test]
@@ -3244,7 +3373,15 @@ mod test {
             kdbx.modify_password(credentials("new-password")).unwrap();
         }
 
-        assert!(Kdbx::open(credentials("password"), file.path()).is_err());
+        assert!(
+            Kdbx::open(
+                credentials("password"),
+                file.path(),
+                || Box::pin(async {}) as DartFnFuture<()>,
+                None
+            )
+            .is_err()
+        );
     }
 
     #[test]

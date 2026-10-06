@@ -808,4 +808,37 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get preview => 'Preview';
+
+  @override
+  String get loading => 'Loading...';
+
+  @override
+  String get saveing => 'Saveing...';
+
+  @override
+  String get reading => 'Reading...';
+
+  @override
+  String get calculating_key => 'Calculating key...';
+
+  @override
+  String get decrypting => 'Decrypting...';
+
+  @override
+  String get decompressing => 'Decompressing...';
+
+  @override
+  String get analyzing => 'Analyzing...';
+
+  @override
+  String get serializing => 'Serializing...';
+
+  @override
+  String get compressing => 'Compressing...';
+
+  @override
+  String get encrypting => 'Encrypting...';
+
+  @override
+  String get writing => 'Writing...';
 }

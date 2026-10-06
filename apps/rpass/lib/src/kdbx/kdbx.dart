@@ -212,6 +212,25 @@ extension KdbxFiledI18n on String {
   }
 }
 
+extension KdbxProgressI18n on KdbxProgress {
+  String toI18n(BuildContext context) {
+    final t = I18n.of(context)!;
+
+    return switch (this) {
+      .readFile => t.reading,
+      .computeKey => t.calculating_key,
+      .decrypt => t.decrypting,
+      .decompress => t.decompressing,
+      .deserialize => t.analyzing,
+
+      .serialize => t.serializing,
+      .compress => t.compressing,
+      .encrypt => t.encrypting,
+      .writeFile => t.writing,
+    };
+  }
+}
+
 extension FileTypeExt on FileType {
   bool get supportPreview => matcher == .image || matcher == .text;
 }

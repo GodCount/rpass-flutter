@@ -45,7 +45,7 @@ fn main() -> Result<()> {
     let db = Database::open(&mut source, key.clone())?;
 
     let mut out_file = File::create(args.out_kdbx)?;
-    db.save(&mut out_file, key)?;
+    db.save(&mut out_file, key, None)?;
 
     Ok(())
 }

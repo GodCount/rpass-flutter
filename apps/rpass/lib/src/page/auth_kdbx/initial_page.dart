@@ -79,7 +79,7 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
 
       await kdbxAction(KdbxAction.updateSyncEntry(entry));
     } else {
-      await kdbx.saveFile();
+      await kdbxActions([]);
     }
 
     context.router.replace(HomeRoute());
@@ -100,7 +100,7 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
         keyfile: keyFile?.$2,
       );
 
-      final kdbx = Kdbx.create(
+      final kdbx = Kdbx.createAndSink(
         credentials: credentials,
         filepath: Store.localInfo.localKdbxFile.path,
       );

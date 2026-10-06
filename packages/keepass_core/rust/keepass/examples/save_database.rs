@@ -65,6 +65,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     db.save(
         &mut File::create("demo.kdbx")?,
         DatabaseKey::new().with_password("demopass"),
+        None,
     )?;
 
     Ok(())

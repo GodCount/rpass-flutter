@@ -367,5 +367,16 @@
     "parallelism": "并行计算",
     "argon2_version": "Argon2 版本",
     "prefer_kdbx_seed_color": "优先使用数据库的主题色",
-    "preview": "预览"
+    "preview": "预览",
+    "loading": "加载中...",
+    "saveing": "保存中...",
+    "reading": "读取中...",
+    "calculating_key": "计算密钥...",
+    "decrypting": "解密中...",
+    "decompressing": "解压中...",
+    "analyzing": "解析中...",
+    "serializing": "序列化中...",
+    "compressing": "压缩中...",
+    "encrypting": "加密中...",
+    "writing": "写入中..."
 }

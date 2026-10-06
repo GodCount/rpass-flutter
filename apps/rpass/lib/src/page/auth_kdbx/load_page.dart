@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:auto_route/auto_route.dart';
@@ -6,10 +7,13 @@ import 'package:keepass_core/keepass_core.dart';
 
 import '../../context/biometric.dart';
 import '../../i18n.dart';
+import '../../kdbx/kdbx.dart';
 import '../../native/channel.dart';
 import '../../store/index.dart';
+import '../../util/common.dart';
 import '../../util/route.dart';
 import '../../widget/common.dart';
+import '../../widget/extension_state.dart';
 import '../route.dart';
 import 'authorized_page.dart';
 
@@ -63,28 +67,50 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
         throw Exception("Lack of key file.");
       }
 
-      final credentials = Credentials.from(
-        password: isPassword ? password : null,
-        keyfile: keyFile?.$2,
-      );
+      final BehaviorSubject<KdbxProgress> progressStream = BehaviorSubject();
+      StreamSubscription<KdbxEvent>? sub;
 
-      kdbxFile = kdbxFile ?? await Store.localInfo.localKdbxFile.readAsBytes();
+      await runWithLoadingDialog(
+        () async {
+          final credentials = Credentials.from(
+            password: isPassword ? password : null,
+            keyfile: keyFile?.$2,
+          );
 
-      Kdbx kdbx = await Kdbx.openBytes(
-        bytes: kdbxFile!,
-        credentials: credentials,
-        filepath: Store.localInfo.localKdbxFile.path,
-      );
+          kdbxFile =
+              kdbxFile ?? await Store.localInfo.localKdbxFile.readAsBytes();
 
-      if (Store.settings.enableRecordKeyFilePath) {
-        await Store.settings.setKeyFilePath(keyFile?.$1);
-      }
+          Kdbx kdbx = await Kdbx.openBytesAndSink(
+            bytes: kdbxFile!,
+            credentials: credentials,
+            filepath: Store.localInfo.localKdbxFile.path,
+            onStream: (value) {
+              sub = value.listen((event) {
+                if (event is KdbxEvent_Progress) {
+                  progressStream.add(event.field0);
+                }
+              });
+            },
+          );
 
-      Store.kdbx.setKdbx(kdbx);
+          if (Store.settings.enableRecordKeyFilePath) {
+            await Store.settings.setKeyFilePath(keyFile?.$1);
+          }
 
-      await _responseAutoFill(kdbx);
+          Store.kdbx.setKdbx(kdbx);
 
-      context.router.replace(HomeRoute());
+          await _responseAutoFill(kdbx);
+
+          context.router.replace(HomeRoute());
+        },
+        message: progressStream.stream.map((event) => event.toI18n(context)),
+      ).whenComplete(() {
+        if (sub != null) {
+          sub!.cancel().whenComplete(progressStream.close);
+        } else {
+          progressStream.close();
+        }
+      });
     }
   }
 
@@ -123,20 +149,43 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
 
     if (!biometric.enable) return;
 
-    kdbxFile = kdbxFile ?? await Store.localInfo.localKdbxFile.readAsBytes();
+    final BehaviorSubject<KdbxProgress> progressStream = BehaviorSubject();
+    StreamSubscription<KdbxEvent>? sub;
 
-    final hash = await biometric.getCredentials(context);
-    final kdbx = await Kdbx.openBytes(
-      bytes: kdbxFile!,
-      credentials: Credentials.formCompositeKey(key: hash),
-      filepath: Store.localInfo.localKdbxFile.path,
-    );
+    await runWithLoadingDialog(
+      () async {
+        kdbxFile =
+            kdbxFile ?? await Store.localInfo.localKdbxFile.readAsBytes();
 
-    Store.kdbx.setKdbx(kdbx);
+        final hash = await biometric.getCredentials(context);
 
-    await _responseAutoFill(kdbx);
+        final kdbx = await Kdbx.openBytesAndSink(
+          bytes: kdbxFile!,
+          credentials: Credentials.formCompositeKey(key: hash),
+          filepath: Store.localInfo.localKdbxFile.path,
+          onStream: (value) {
+            sub = value.listen((event) {
+              if (event is KdbxEvent_Progress) {
+                progressStream.add(event.field0);
+              }
+            });
+          },
+        );
 
-    context.router.replace(HomeRoute());
+        Store.kdbx.setKdbx(kdbx);
+
+        await _responseAutoFill(kdbx);
+
+        context.router.replace(HomeRoute());
+      },
+      message: progressStream.stream.map((event) => event.toI18n(context)),
+    ).whenComplete(() {
+      if (sub != null) {
+        sub!.cancel().whenComplete(progressStream.close);
+      } else {
+        progressStream.close();
+      }
+    });
   }
 
   @override

@@ -99,18 +99,20 @@ mod database_tests {
 
     #[test]
     fn test_open_invalid_version_header_size() {
-        assert!(Database::parse(&[], DatabaseKey::new().with_password("testing")).is_err());
+        assert!(Database::parse(&[], DatabaseKey::new().with_password("testing"), None).is_err());
         assert!(
             Database::parse(
                 &[0, 0, 0, 0, 0, 0, 0, 0],
-                DatabaseKey::new().with_password("testing")
+                DatabaseKey::new().with_password("testing"),
+                None
             )
             .is_err()
         );
         assert!(
             Database::parse(
                 &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                DatabaseKey::new().with_password("testing")
+                DatabaseKey::new().with_password("testing"),
+                None
             )
             .is_err()
         );
@@ -133,7 +135,7 @@ mod database_tests {
 
         let mut buffer = Vec::new();
 
-        db.save(&mut buffer, DatabaseKey::new().with_password("testing"))
+        db.save(&mut buffer, DatabaseKey::new().with_password("testing"), None)
             .unwrap();
 
         let db_loaded = Database::open(

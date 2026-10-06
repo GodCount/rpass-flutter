@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:keepass_core/keepass_core.dart';
 
+import '../../util/common.dart';
 import '../../util/route.dart';
+import '../../widget/extension_state.dart';
 import 'authorized_page.dart';
 
 class _LoadExternalKdbxArgs extends PageRouteArgs {
@@ -69,15 +72,32 @@ class _LoadExternalKdbxPageState
       if (!isPassword && keyFile == null) {
         throw Exception("Lack of key file.");
       }
+      final BehaviorSubject<KdbxProgress> progressStream = BehaviorSubject();
+      StreamSubscription<KdbxEvent>? sub;
 
-      Kdbx kdbx = await Kdbx.openBytes(
-        bytes: widget.kdbxFile,
-        credentials: Credentials.from(
-          password: isPassword ? password : null,
-          keyfile: keyFile?.$2,
-        ),
-      );
-      context.router.pop((kdbx, keyFile?.$1));
+      await runWithLoadingDialog(() async {
+        Kdbx kdbx = await Kdbx.openBytesAndSink(
+          bytes: widget.kdbxFile,
+          credentials: Credentials.from(
+            password: isPassword ? password : null,
+            keyfile: keyFile?.$2,
+          ),
+          onStream: (value) {
+            sub = value.listen((event) {
+              if (event is KdbxEvent_Progress) {
+                progressStream.add(event.field0);
+              }
+            });
+          },
+        );
+        context.router.pop((kdbx, keyFile?.$1));
+      }).whenComplete(() {
+        if (sub != null) {
+          sub!.cancel().whenComplete(progressStream.close);
+        } else {
+          progressStream.close();
+        }
+      });
     }
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:auto_route/auto_route.dart';
@@ -51,13 +52,19 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
   String? _syncAccountUuid;
   String? get syncAccountUuid => _syncAccountUuid;
 
+  final BehaviorSubject<KdbxProgress> progressStream = BehaviorSubject();
+
+  StreamSubscription<KdbxEvent>? _streamSubscription;
+
   void _kdbxEventCallback(KdbxEvent event) async {
     switch (event) {
-      case KdbxEvent_Saved():
-        await _getSummary();
-        emit((listener) => listener.onKdbxSaved());
-      case KdbxEvent_None():
-        throw UnimplementedError();
+      case KdbxEvent_Progress(field0: final field0):
+        progressStream.add(field0);
+        if (field0 == .writeFile) {
+          await _getSummary();
+          emit((listener) => listener.onKdbxSaved());
+        }
+        break;
     }
   }
 
@@ -85,16 +92,25 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
     }
   }
 
-  Future<void> setKdbx(Kdbx? kdbx) async {
+  void _celanKdbx() {
+    if (_streamSubscription != null) {
+      _streamSubscription!.cancel();
+      _streamSubscription = null;
+    }
+    progressStream.clean();
     _kdbx?.dispose();
     _kdbx = _groups = _noRecyclebinGroups = _fieldSummary = _selectedKdbxEntry =
         _syncAccountUuid = null;
+  }
+
+  Future<void> setKdbx(Kdbx? kdbx) async {
+    _celanKdbx();
 
     _kdbx = kdbx;
 
     if (kdbx != null) {
-      kdbx.bindEventCallback(callback: _kdbxEventCallback);
-
+      assert(kdbx.stream != null);
+      _streamSubscription = kdbx.stream!.listen(_kdbxEventCallback);
       await _getSummary();
     }
 
@@ -149,9 +165,8 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
   }
 
   void dispose() {
-    _kdbx?.dispose();
-    _kdbx = _groups = _fieldSummary = _selectedKdbxEntry = _syncAccountUuid =
-        null;
+    _celanKdbx();
+    progressStream.close();
     removeAllListener();
   }
 }
@@ -249,6 +264,7 @@ class SyncKdbxController with ChangeNotifier {
           credentials: Credentials.formCompositeKey(
             key: kdbx.getCompositeKey(),
           ),
+          callback: () {},
         );
       } catch (e) {
         _logger.warning("local credentials Unable open remote kdbx.", e);

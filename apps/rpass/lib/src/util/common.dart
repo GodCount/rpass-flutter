@@ -299,3 +299,41 @@ class SimpleTimestampTimer implements Timer {
   @override
   int get tick => timer.tick;
 }
+
+class BehaviorSubject<T> {
+  final _controller = StreamController<T>.broadcast();
+
+  T? _lastValue;
+  bool _hasValue = false;
+
+  Stream<T> get stream async* {
+    if (_hasValue) {
+      yield _lastValue as T;
+    }
+    yield* _controller.stream;
+  }
+
+  T? get value => _lastValue;
+
+  bool get hasValue => _hasValue;
+
+  void add(T data) {
+    _lastValue = data;
+    _hasValue = true;
+    if (!_controller.isClosed) {
+      _controller.add(data);
+    }
+  }
+
+  void addError(Object error, [StackTrace? stackTrace]) {
+    if (!_controller.isClosed) {
+      _controller.addError(error, stackTrace);
+    }
+  }
+
+  void clean() {
+    _lastValue = null;
+  }
+
+  Future<void> close() => _controller.close();
+}

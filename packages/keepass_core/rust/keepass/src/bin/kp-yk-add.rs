@@ -57,7 +57,7 @@ fn main() -> Result<()> {
 
     let mut out_file = File::create(args.out_kdbx)?;
 
-    db.save(&mut out_file, new_key)?;
+    db.save(&mut out_file, new_key, None)?;
 
     println!("Yubikey was added to the database key.");
 
