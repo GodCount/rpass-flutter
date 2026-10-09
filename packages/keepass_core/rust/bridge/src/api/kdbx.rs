@@ -25,7 +25,7 @@ use keepass::{
     db::{EntryRef, Error as UuidError, Uuid, uuid_by_str},
 };
 
-use chrono::NaiveDateTime;
+use chrono::{Duration, NaiveDateTime};
 pub use keepass::{
     config::{
         CompressionConfig, InnerCipherConfig, OuterCipherConfig, VariantDictionaryValue,
@@ -2059,6 +2059,14 @@ pub enum KdfConfig {
         parallelism: u32,
         version: Argon2Version,
     },
+}
+
+impl KdfConfig {
+    #[frb(type_64bit_int)]
+    pub fn benchmark(self, duration: Duration) -> u64 {
+        let kdf = KdfConfig2::from(self);
+        kdf.benchmark(duration)
+    }
 }
 
 impl From<KdfConfig> for KdfConfig2 {

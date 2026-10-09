@@ -86,7 +86,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.14.0-beta.2';
 
   @override
-  int get rustContentHash => 959755568;
+  int get rustContentHash => 602464289;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -312,6 +312,11 @@ abstract class RustLibApi extends BaseApi {
   GroupData crateApiKdbxGroupDataNew({required String parent});
 
   Future<void> crateApiInitApp();
+
+  Future<int> crateApiKdbxKdfConfigBenchmark({
+    required KdfConfig that,
+    required Duration duration,
+  });
 
   RustArcIncrementStrongCountFnType
   get rust_arc_increment_strong_count_Credentials;
@@ -2177,6 +2182,41 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiInitAppConstMeta =>
       const TaskConstMeta(debugName: "init_app", argNames: []);
 
+  @override
+  Future<int> crateApiKdbxKdfConfigBenchmark({
+    required KdfConfig that,
+    required Duration duration,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_kdf_config(that, serializer);
+          sse_encode_Chrono_Duration(duration, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 56,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_CastedPrimitive_u_64,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiKdbxKdfConfigBenchmarkConstMeta,
+        argValues: [that, duration],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKdbxKdfConfigBenchmarkConstMeta =>
+      const TaskConstMeta(
+        debugName: "kdf_config_benchmark",
+        argNames: ["that", "duration"],
+      );
+
   Future<void> Function(dynamic)
   encode_DartFn_Inputs__Output_unit_AnyhowException(
     FutureOr<void> Function() raw,
@@ -2318,6 +2358,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     throw UnimplementedError(
       'Not implemented in this codec, please use the other one',
     );
+  }
+
+  @protected
+  Duration dco_decode_Chrono_Duration(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dcoDecodeDuration(dco_decode_i_64(raw).toInt());
   }
 
   @protected
@@ -3864,6 +3910,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var inner = sse_decode_u_64(deserializer);
     return inner.toInt();
+  }
+
+  @protected
+  Duration sse_decode_Chrono_Duration(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_i_64(deserializer);
+    return Duration(microseconds: inner.toInt());
   }
 
   @protected
@@ -5807,6 +5860,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_CastedPrimitive_u_64(int self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_u_64(sseEncodeCastedPrimitiveU64(self), serializer);
+  }
+
+  @protected
+  void sse_encode_Chrono_Duration(Duration self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_64(PlatformInt64Util.from(self.inMicroseconds), serializer);
   }
 
   @protected
