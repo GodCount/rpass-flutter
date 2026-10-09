@@ -398,6 +398,7 @@ impl KdfConfig {
 
     /// Benchmarks the KDF to find parameters that yield a derivation time close to `duration`.
     #[cfg(feature = "save_kdbx4")]
+    #[allow(clippy::expect_used, clippy::missing_panics_doc)]
     pub fn benchmark(&self, duration: chrono::Duration) -> u64 {
         let key = GenericArray::<u8, U32>::from([b'k'; 32]);
         let seed = [b's'; 32];
