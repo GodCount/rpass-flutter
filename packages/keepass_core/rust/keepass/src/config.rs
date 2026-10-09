@@ -1,8 +1,8 @@
 //! Configuration options for how to compress and encrypt databases
 use hex_literal::hex;
-use thiserror::Error;
-
+use hybrid_array::{Array as GenericArray, typenum::U32};
 use std::convert::TryFrom;
+use thiserror::Error;
 
 pub use crate::format::{DatabaseVersion, KDBX4_CURRENT_MINOR_VERSION};
 pub use argon2::Version;
@@ -65,7 +65,7 @@ impl Default for DatabaseConfig {
             inner_cipher_config: InnerCipherConfig::ChaCha20,
             kdf_config: KdfConfig::Argon2 {
                 iterations: 50,
-                memory: 1024 * 1024,
+                memory: 1 << 10 << 16, // 64MB
                 parallelism: 4,
                 version: argon2::Version::Version13,
             },
@@ -394,6 +394,76 @@ impl KdfConfig {
         }
 
         vd
+    }
+
+    /// Benchmarks the KDF to find parameters that yield a derivation time close to `duration`.
+    #[cfg(feature = "save_kdbx4")]
+    pub fn benchmark(&self, duration: chrono::Duration) -> u64 {
+        let key = GenericArray::<u8, U32>::from([b'k'; 32]);
+        let seed = [b's'; 32];
+
+        match *self {
+            Self::Aes { .. } => {
+                let count = 3;
+                let rounds = 1000000;
+                let kdf = KdfConfig::Aes {
+                    rounds: rounds as u64,
+                };
+
+                let timer = std::time::Instant::now();
+
+                for _ in 0..count {
+                    let _ = kdf
+                        .get_kdf_seeded(&seed)
+                        .transform_key(&key)
+                        .expect("Key and Seed are always the correct length");
+                }
+
+                (rounds * count * duration.num_milliseconds() / timer.elapsed().as_millis() as i64) as u64
+            }
+            Self::Argon2 {
+                memory,
+                parallelism,
+                version,
+                ..
+            } => {
+                let iterations = 50;
+                let kdf = KdfConfig::Argon2 {
+                    iterations: iterations as u64,
+                    memory,
+                    parallelism,
+                    version,
+                };
+                let timer = std::time::Instant::now();
+                let _ = kdf
+                    .get_kdf_seeded(&seed)
+                    .transform_key(&key)
+                    .expect("Key and Seed are always the correct length");
+
+                (iterations * duration.num_milliseconds() / timer.elapsed().as_millis() as i64) as u64
+            }
+            Self::Argon2id {
+                memory,
+                parallelism,
+                version,
+                ..
+            } => {
+                let iterations = 50;
+                let kdf = KdfConfig::Argon2id {
+                    iterations: iterations as u64,
+                    memory,
+                    parallelism,
+                    version,
+                };
+                let timer = std::time::Instant::now();
+                let _ = kdf
+                    .get_kdf_seeded(&seed)
+                    .transform_key(&key)
+                    .expect("Key and Seed are always the correct length");
+
+                (iterations * duration.num_milliseconds() / timer.elapsed().as_millis() as i64) as u64
+            }
+        }
     }
 }
 

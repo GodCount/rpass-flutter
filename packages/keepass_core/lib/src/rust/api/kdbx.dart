@@ -916,6 +916,9 @@ sealed class KdfConfig with _$KdfConfig {
     required int parallelism,
     required Argon2Version version,
   }) = KdfConfig_Argon2id;
+
+  Future<int> benchmark({required Duration duration}) => RustLib.instance.api
+      .crateApiKdbxKdfConfigBenchmark(that: this, duration: duration);
 }
 
 enum MatcherType {

@@ -813,4 +813,9 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get writing => '写入中...';
+
+  @override
+  String baseline_second_delay(int sec) {
+    return '基准 $sec秒 延迟';
+  }
 }

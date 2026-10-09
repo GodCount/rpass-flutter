@@ -378,5 +378,14 @@
     "serializing": "序列化中...",
     "compressing": "压缩中...",
     "encrypting": "加密中...",
-    "writing": "写入中..."
+    "writing": "写入中...",
+    "baseline_second_delay": "基准 {sec}秒 延迟",
+    "@baseline_second_delay": {
+        "description": "秒",
+        "placeholders": {
+            "sec": {
+                "type": "int"
+            }
+        }
+    }
 }

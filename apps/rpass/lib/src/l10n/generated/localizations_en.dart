@@ -841,4 +841,9 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get writing => 'Writing...';
+
+  @override
+  String baseline_second_delay(int sec) {
+    return 'Baseline $sec seconds delay';
+  }
 }

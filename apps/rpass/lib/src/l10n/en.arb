@@ -378,5 +378,14 @@
     "serializing": "Serializing...",
     "compressing": "Compressing...",
     "encrypting": "Encrypting...",
-    "writing": "Writing..."
+    "writing": "Writing...",
+    "baseline_second_delay": "Baseline {sec} seconds delay",
+    "@baseline_second_delay": {
+        "description": "seconds",
+        "placeholders": {
+            "sec": {
+                "type": "int"
+            }
+        }
+    }
 }

@@ -40,6 +40,18 @@ class KdbxSettingPage extends StatefulWidget {
   State<KdbxSettingPage> createState() => _KdbxSettingPageState();
 }
 
+enum _KdfType { aes, argon2, argon2Id }
+
+extension _Kdf on KdfConfig {
+  _KdfType getType() {
+    return switch (this) {
+      KdfConfig_Aes() => .aes,
+      KdfConfig_Argon2() => .argon2,
+      KdfConfig_Argon2id() => .argon2Id,
+    };
+  }
+}
+
 class _KdbxSettingPageState extends State<KdbxSettingPage>
     with SecondLevelPageAutoBack<KdbxSettingPage> {
   GlobalKey<FormState>? _from;
@@ -48,18 +60,25 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
     outerCipherConfig: .aes256,
     compressionConfig: .gZip,
     innerCipherConfig: .chaCha20,
-    kdfConfig: .aes(rounds: 2),
+    kdfConfig: .aes(rounds: 1000000),
   );
 
   bool _isDirty = false;
 
-  bool _isKdfAes = true;
+  _KdfType _kdfType = .aes;
 
-  int _rounds = 2;
-  int _iterations = 2;
-  int _memory = 1048576;
-  int _parallelism = 1;
+  int _rounds = 1000000;
+  int _iterations = 50;
+  int _memory = 1 << 10 << 16; // 64MB
+  int _parallelism = 4;
   Argon2Version _argonVersion = .version13;
+
+  late final _roundsController = TextEditingController(
+    text: _rounds.toString(),
+  );
+  late final _iterationsController = TextEditingController(
+    text: _iterations.toString(),
+  );
 
   @override
   void initState() {
@@ -72,12 +91,12 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
       _updateMeta = await Store.kdbx.kdbx!.getUpdateMeta();
       _kdbxConfig = await Store.kdbx.kdbx!.getConfig();
 
-      _isKdfAes = false;
+      _kdfType = _kdbxConfig.kdfConfig.getType();
 
       switch (_kdbxConfig.kdfConfig) {
         case KdfConfig_Aes(rounds: final rounds):
-          _isKdfAes = true;
           _rounds = rounds;
+          _roundsController.text = rounds.toString();
           break;
         case KdfConfig_Argon2(
           iterations: final iterations,
@@ -89,6 +108,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
           _memory = memory;
           _parallelism = parallelism;
           _argonVersion = version;
+          _iterationsController.text = iterations.toString();
           break;
         case KdfConfig_Argon2id(
           iterations: final iterations,
@@ -100,6 +120,7 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
           _memory = memory;
           _parallelism = parallelism;
           _argonVersion = version;
+          _iterationsController.text = iterations.toString();
           break;
       }
 
@@ -427,6 +448,34 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                         t.kdf_config,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
+                      Spacer(),
+                      IconButton(
+                        onPressed: () async {
+                          final rounds = await switch (_kdfType) {
+                            .aes => KdfConfig.aes(rounds: _rounds),
+                            .argon2 => KdfConfig.argon2(
+                              iterations: _iterations,
+                              memory: _memory,
+                              parallelism: _parallelism,
+                              version: _argonVersion,
+                            ),
+                            .argon2Id => KdfConfig.argon2Id(
+                              iterations: _iterations,
+                              memory: _memory,
+                              parallelism: _parallelism,
+                              version: _argonVersion,
+                            ),
+                          }.benchmark(duration: Duration(seconds: 1));
+
+                          if (_kdfType == .aes) {
+                            _roundsController.text = rounds.toString();
+                          } else {
+                            _iterationsController.text = rounds.toString();
+                          }
+                        },
+                        tooltip: t.baseline_second_delay(1),
+                        icon: Icon(Icons.speed_rounded),
+                      ),
                     ],
                   ),
                 ),
@@ -469,20 +518,31 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                       border: const OutlineInputBorder(),
                     ),
                     onChanged: (value) {
-                      _isKdfAes = value is KdfConfig_Aes;
+                      _kdfType = value!.getType();
                       setState(() {});
                     },
                     onSaved: (value) {
                       _kdbxConfig.kdfConfig = switch (value!) {
-                        KdfConfig_Aes() => KdfConfig_Aes(rounds: _rounds),
+                        KdfConfig_Aes() => KdfConfig_Aes(
+                          rounds: max(
+                            int.tryParse(_roundsController.text) ?? 1,
+                            1,
+                          ),
+                        ),
                         KdfConfig_Argon2() => KdfConfig_Argon2(
-                          iterations: _iterations,
+                          iterations: max(
+                            int.tryParse(_iterationsController.text) ?? 1,
+                            1,
+                          ),
                           memory: _memory,
                           parallelism: _parallelism,
                           version: _argonVersion,
                         ),
                         KdfConfig_Argon2id() => KdfConfig_Argon2id(
-                          iterations: _iterations,
+                          iterations: max(
+                            int.tryParse(_iterationsController.text) ?? 1,
+                            1,
+                          ),
                           memory: _memory,
                           parallelism: _parallelism,
                           version: _argonVersion,
@@ -492,34 +552,28 @@ class _KdbxSettingPageState extends State<KdbxSettingPage>
                   ),
                 ),
 
-                if (_isKdfAes)
+                if (_kdfType == .aes)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: TextFormField(
                       key: ValueKey("rounds"),
+                      controller: _roundsController,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      initialValue: _rounds.toString(),
-                      onChanged: (value) {
-                        _rounds = max(int.tryParse(value) ?? 1, 1);
-                      },
                       decoration: InputDecoration(
                         labelText: t.transform_rounds,
                         border: const OutlineInputBorder(),
                       ),
                     ),
                   ),
-                if (!_isKdfAes) ...[
+                if (_kdfType != .aes) ...[
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: TextFormField(
                       key: ValueKey("iterations"),
+                      controller: _iterationsController,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      initialValue: _iterations.toString(),
-                      onChanged: (value) {
-                        _iterations = max(int.tryParse(value) ?? 1, 1);
-                      },
                       decoration: InputDecoration(
                         labelText: t.transform_rounds,
                         border: const OutlineInputBorder(),
@@ -675,9 +729,21 @@ class _RangeSelectionFormFieldState extends State<_RangeSelectionFormField> {
       initialValue: widget.initialValue,
       onSaved: widget.onSaved,
       builder: (field) {
+        final Brightness brightness = Theme.brightnessOf(context);
+
         final onCalculate = widget.onCalculate;
         final formatText = widget.formatText;
         final disable = widget.canDisable && field.value == -1;
+
+        final iconColor = disable
+            ? switch (brightness) {
+                Brightness.light => Colors.grey.shade400,
+                Brightness.dark => Colors.white10,
+              }
+            : switch (brightness) {
+                Brightness.light => Colors.grey.shade700,
+                Brightness.dark => Colors.white70,
+              };
 
         final text = formatText(field.value);
 
@@ -732,7 +798,7 @@ class _RangeSelectionFormFieldState extends State<_RangeSelectionFormField> {
                                 child: Icon(
                                   Icons.expand_less,
                                   size: 18,
-                                  color: Colors.grey[700],
+                                  color: iconColor,
                                 ),
                               ),
                             )
@@ -741,7 +807,7 @@ class _RangeSelectionFormFieldState extends State<_RangeSelectionFormField> {
                               child: Icon(
                                 Icons.expand_less,
                                 size: 18,
-                                color: Colors.grey[400],
+                                color: iconColor,
                               ),
                             ),
                       !disable
@@ -759,7 +825,7 @@ class _RangeSelectionFormFieldState extends State<_RangeSelectionFormField> {
                                 child: Icon(
                                   Icons.expand_more,
                                   size: 18,
-                                  color: Colors.grey[700],
+                                  color: iconColor,
                                 ),
                               ),
                             )
@@ -768,7 +834,7 @@ class _RangeSelectionFormFieldState extends State<_RangeSelectionFormField> {
                               child: Icon(
                                 Icons.expand_more,
                                 size: 18,
-                                color: Colors.grey[400],
+                                color: iconColor,
                               ),
                             ),
                     ],
