@@ -79,7 +79,6 @@ final defaultKdbxKeys = [
 ];
 
 extension KdbxEntryCommon on EntryData {
-
   Iterable<(String, FieldValue)> get customEntries =>
       fields.where((item) => isCustomKey(item.$1));
 
