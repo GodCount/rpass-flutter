@@ -122,11 +122,13 @@ class _EditAccountPageState extends State<EditAccountPage>
           widget.id != null
                 ? await kdbxController.kdbx!.getEntry(id: widget.id!)
                 : kdbxController.kdbx!.newEntry()
-            ..fields[KdbxKeyCommon.USER_NAME] = FieldValue.plaintext(
-              kdbxController.meta?.databaseName ?? "",
+            ..setField(
+              KdbxKeyCommon.USER_NAME,
+              FieldValue.plaintext(kdbxController.meta?.databaseName ?? ""),
             )
-            ..fields[KdbxKeyCommon.PASSWORD] = FieldValue.protected(
-              randomPassword(length: 10),
+            ..setField(
+              KdbxKeyCommon.PASSWORD,
+              FieldValue.protected(randomPassword(length: 10)),
             );
 
       if (widget.id != null && widget.clone) {
@@ -139,7 +141,7 @@ class _EditAccountPageState extends State<EditAccountPage>
 
       _kdbxEntry.parent = _groupData.id;
 
-      _entryFields = _kdbxEntry.customEntries.map((item) => item.key).toSet();
+      _entryFields = _kdbxEntry.customEntries.map((item) => item.$1).toSet();
       _urlsFields = _kdbxEntry.moreUrlsKeys.toSet();
       _deleteFields = {};
       _from = GlobalKey();
@@ -169,7 +171,7 @@ class _EditAccountPageState extends State<EditAccountPage>
 
   void _kdbxDeleteSaved() {
     for (final item in _deleteFields) {
-      _kdbxEntry.fields.remove(item);
+      _kdbxEntry.removeField(item);
     }
   }
 
@@ -195,29 +197,29 @@ class _EditAccountPageState extends State<EditAccountPage>
       _kdbxEntry.autotype!.defaultSequence = field.value;
     } else if (field is EntryAutoFillAppFieldSaved) {
       if (field.value != null) {
-        _kdbxEntry.fields[field.key] = FieldValue.plaintext(field.value!);
+        _kdbxEntry.setField(field.key, FieldValue.plaintext(field.value!));
       } else {
-        _kdbxEntry.fields.remove(field.key);
+        _kdbxEntry.removeField(field.key);
       }
     } else if (field is EntryTagsFieldSaved) {
       _kdbxEntry.tags
         ..clear()
         ..addAll(field.value);
     } else if (field is EntryTextFieldSaved) {
-      final oldValue = _kdbxEntry.fields[field.key];
+      final oldValue = _kdbxEntry.getField(field.key);
 
       if (field.renameKdbxKey != null) {
-        _kdbxEntry.fields.remove(field.key);
+        _kdbxEntry.removeField(field.key);
       }
 
       final value = field.value ?? oldValue;
 
       if (value != null) {
-        _kdbxEntry.fields[field.renameKdbxKey ?? field.key] = value;
+        _kdbxEntry.setField(field.renameKdbxKey ?? field.key, value);
       }
     } else if (field is EntryTitleFieldSaved) {
       _kdbxEntry.icon = field.icon;
-      _kdbxEntry.fields[field.key] = field.value;
+      _kdbxEntry.setField(field.key, field.value);
     } else if (field is EntryExpiresFieldSaved) {
       _kdbxEntry.times.expires = field.value.$1;
       _kdbxEntry.times.expiry = field.value.$2.toUtc();
@@ -229,7 +231,7 @@ class _EditAccountPageState extends State<EditAccountPage>
   void _entryUrlDelete(String key) {
     setState(() {
       _urlsFields.remove(key);
-      if (_kdbxEntry.fields.keys.any((item) => item == key)) {
+      if (_kdbxEntry.fields.any((item) => item.$1 == key)) {
         _isDirty = true;
         _deleteFields.add(key);
       }
@@ -251,7 +253,7 @@ class _EditAccountPageState extends State<EditAccountPage>
   void _entryFieldDelete(String key) {
     setState(() {
       _entryFields.remove(key);
-      if (_kdbxEntry.fields.keys.any((item) => item == key)) {
+      if (_kdbxEntry.fields.any((item) => item.$1 == key)) {
         _isDirty = true;
         _deleteFields.add(key);
       }
@@ -633,7 +635,7 @@ class _EntryFieldState extends State<EntryField> {
 
   @override
   void initState() {
-    _value = widget.kdbxEntry.fields[widget.kdbxKey]?.get();
+    _value = widget.kdbxEntry.getField(widget.kdbxKey)?.get();
     parseOtp(_value);
     super.initState();
   }
@@ -651,7 +653,7 @@ class _EntryFieldState extends State<EntryField> {
     final kdbxController = Store.kdbx;
     final limitItmes = {
       ...defaultKdbxKeys,
-      ...widget.kdbxEntry.fields.keys,
+      ...widget.kdbxEntry.fields.map((item) => item.$1),
     }.toList();
 
     limitItmes.remove(widget.kdbxKey);
@@ -841,7 +843,7 @@ class _EntryFieldState extends State<EntryField> {
   Widget _buildFormFieldFactory() {
     final kdbxProvider = Store.kdbx;
 
-    final initialValue = widget.kdbxEntry.fields[widget.kdbxKey]?.get();
+    final initialValue = widget.kdbxEntry.getField(widget.kdbxKey)?.get();
 
     switch (widget.kdbxKey) {
       case KdbxKeyCommon.TITLE:
@@ -934,7 +936,7 @@ class _EntryFieldState extends State<EntryField> {
         return EntryAutoTypeFormField(
           label: widget.kdbxKey.fromKdbxKeyToI18n(context),
           customFields: widget.kdbxEntry.customEntries
-              .map((item) => item.key)
+              .map((item) => item.$1)
               .toList(),
           moreUrlsFields: widget.kdbxEntry.moreUrlsKeys,
           autoTypeSequence:

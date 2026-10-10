@@ -2771,22 +2771,6 @@ impl SseDecode for std::collections::HashMap<String, String> {
     }
 }
 
-impl SseDecode for std::collections::HashMap<String, crate::api::kdbx::FieldValue> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <Vec<(String, crate::api::kdbx::FieldValue)>>::sse_decode(deserializer);
-        return inner.into_iter().collect();
-    }
-}
-
-impl SseDecode for std::collections::HashMap<String, crate::api::kdbx::GroupData> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <Vec<(String, crate::api::kdbx::GroupData)>>::sse_decode(deserializer);
-        return inner.into_iter().collect();
-    }
-}
-
 impl SseDecode for std::collections::HashMap<String, Vec<u8>> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -3095,9 +3079,7 @@ impl SseDecode for crate::api::kdbx::EntryData {
         let mut var_id = <String>::sse_decode(deserializer);
         let mut var_parent = <String>::sse_decode(deserializer);
         let mut var_fields =
-            <std::collections::HashMap<String, crate::api::kdbx::FieldValue>>::sse_decode(
-                deserializer,
-            );
+            <Vec<(String, crate::api::kdbx::FieldValue)>>::sse_decode(deserializer);
         let mut var_autotype = <Option<crate::api::kdbx::AutoType>>::sse_decode(deserializer);
         let mut var_tags = <Vec<String>>::sse_decode(deserializer);
         let mut var_times = <crate::api::kdbx::Times>::sse_decode(deserializer);
@@ -3781,20 +3763,6 @@ impl SseDecode for Vec<(String, crate::api::kdbx::FieldValue)> {
     }
 }
 
-impl SseDecode for Vec<(String, crate::api::kdbx::GroupData)> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut len_ = <i32>::sse_decode(deserializer);
-        let mut ans_ = Vec::with_capacity(len_ as usize);
-        for idx_ in 0..len_ {
-            ans_.push(<(String, crate::api::kdbx::GroupData)>::sse_decode(
-                deserializer,
-            ));
-        }
-        return ans_;
-    }
-}
-
 impl SseDecode for Vec<(String, Vec<u8>)> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -4296,17 +4264,14 @@ impl SseDecode
     for (
         crate::api::kdbx::FieldSummary,
         crate::api::kdbx::Meta,
-        std::collections::HashMap<String, crate::api::kdbx::GroupData>,
+        Vec<crate::api::kdbx::GroupData>,
     )
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_field0 = <crate::api::kdbx::FieldSummary>::sse_decode(deserializer);
         let mut var_field1 = <crate::api::kdbx::Meta>::sse_decode(deserializer);
-        let mut var_field2 =
-            <std::collections::HashMap<String, crate::api::kdbx::GroupData>>::sse_decode(
-                deserializer,
-            );
+        let mut var_field2 = <Vec<crate::api::kdbx::GroupData>>::sse_decode(deserializer);
         return (var_field0, var_field1, var_field2);
     }
 }
@@ -4339,15 +4304,6 @@ impl SseDecode for (String, crate::api::kdbx::FieldValue) {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_field0 = <String>::sse_decode(deserializer);
         let mut var_field1 = <crate::api::kdbx::FieldValue>::sse_decode(deserializer);
-        return (var_field0, var_field1);
-    }
-}
-
-impl SseDecode for (String, crate::api::kdbx::GroupData) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut var_field0 = <String>::sse_decode(deserializer);
-        let mut var_field1 = <crate::api::kdbx::GroupData>::sse_decode(deserializer);
         return (var_field0, var_field1);
     }
 }
@@ -5910,26 +5866,6 @@ impl SseEncode for std::collections::HashMap<String, String> {
     }
 }
 
-impl SseEncode for std::collections::HashMap<String, crate::api::kdbx::FieldValue> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <Vec<(String, crate::api::kdbx::FieldValue)>>::sse_encode(
-            self.into_iter().collect(),
-            serializer,
-        );
-    }
-}
-
-impl SseEncode for std::collections::HashMap<String, crate::api::kdbx::GroupData> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <Vec<(String, crate::api::kdbx::GroupData)>>::sse_encode(
-            self.into_iter().collect(),
-            serializer,
-        );
-    }
-}
-
 impl SseEncode for std::collections::HashMap<String, Vec<u8>> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -6227,10 +6163,7 @@ impl SseEncode for crate::api::kdbx::EntryData {
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.id, serializer);
         <String>::sse_encode(self.parent, serializer);
-        <std::collections::HashMap<String, crate::api::kdbx::FieldValue>>::sse_encode(
-            self.fields,
-            serializer,
-        );
+        <Vec<(String, crate::api::kdbx::FieldValue)>>::sse_encode(self.fields, serializer);
         <Option<crate::api::kdbx::AutoType>>::sse_encode(self.autotype, serializer);
         <Vec<String>>::sse_encode(self.tags, serializer);
         <crate::api::kdbx::Times>::sse_encode(self.times, serializer);
@@ -6755,16 +6688,6 @@ impl SseEncode for Vec<(String, crate::api::kdbx::FieldValue)> {
     }
 }
 
-impl SseEncode for Vec<(String, crate::api::kdbx::GroupData)> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <i32>::sse_encode(self.len() as _, serializer);
-        for item in self {
-            <(String, crate::api::kdbx::GroupData)>::sse_encode(item, serializer);
-        }
-    }
-}
-
 impl SseEncode for Vec<(String, Vec<u8>)> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -7185,16 +7108,14 @@ impl SseEncode
     for (
         crate::api::kdbx::FieldSummary,
         crate::api::kdbx::Meta,
-        std::collections::HashMap<String, crate::api::kdbx::GroupData>,
+        Vec<crate::api::kdbx::GroupData>,
     )
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <crate::api::kdbx::FieldSummary>::sse_encode(self.0, serializer);
         <crate::api::kdbx::Meta>::sse_encode(self.1, serializer);
-        <std::collections::HashMap<String, crate::api::kdbx::GroupData>>::sse_encode(
-            self.2, serializer,
-        );
+        <Vec<crate::api::kdbx::GroupData>>::sse_encode(self.2, serializer);
     }
 }
 
@@ -7224,14 +7145,6 @@ impl SseEncode for (String, crate::api::kdbx::FieldValue) {
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.0, serializer);
         <crate::api::kdbx::FieldValue>::sse_encode(self.1, serializer);
-    }
-}
-
-impl SseEncode for (String, crate::api::kdbx::GroupData) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <String>::sse_encode(self.0, serializer);
-        <crate::api::kdbx::GroupData>::sse_encode(self.1, serializer);
     }
 }
 

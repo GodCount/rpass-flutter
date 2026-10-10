@@ -80,7 +80,7 @@ abstract class Kdbx implements RustOpaqueInterface {
 
   Future<GroupData> getGroup({required String id});
 
-  Future<Map<String, GroupData>> getGroups();
+  Future<List<GroupData>> getGroups();
 
   Future<Meta> getMeta();
 
@@ -130,7 +130,7 @@ abstract class Kdbx implements RustOpaqueInterface {
 
   Future<void> setFilepath({String? filepath});
 
-  Future<(FieldSummary, Meta, Map<String, GroupData>)> summary();
+  Future<(FieldSummary, Meta, List<GroupData>)> summary();
 
   Future<Uint8List> toXml();
 
@@ -396,7 +396,7 @@ enum DataTransferObfuscation { none, useClipboard }
 class EntryData {
   final String id;
   String parent;
-  final Map<String, FieldValue> fields;
+  final List<(String, FieldValue)> fields;
   AutoType? autotype;
   final List<String> tags;
   final Times times;
@@ -431,6 +431,31 @@ class EntryData {
 
   factory EntryData({required String parent}) =>
       RustLib.instance.api.crateApiKdbxEntryDataNew(parent: parent);
+
+  FieldValue? getField(String key) {
+    for (final (k, v) in fields) {
+      if (key == k) {
+        return v;
+      }
+    }
+    return null;
+  }
+
+  void setField(String key, FieldValue value) {
+    final index = fields.indexWhere((item) => item.$1 == key);
+    if (index > -1) {
+      fields[index] = (key, value);
+    } else {
+      fields.add((key, value));
+    }
+  }
+
+  void removeField(String key) {
+    final index = fields.indexWhere((item) => item.$1 == key);
+    if (index > -1) {
+      fields.removeAt(index);
+    }
+  }
 
   @override
   int get hashCode =>

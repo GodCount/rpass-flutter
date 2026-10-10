@@ -520,6 +520,23 @@ impl Kdbx {
             }
         }
 
+        let zero = Times::epoch();
+
+        result.sort_by(|a, b| {
+            b.times
+                .last_modification
+                .as_ref()
+                .or(b.times.creation.as_ref())
+                .unwrap_or(&zero)
+                .cmp(
+                    a.times
+                        .last_modification
+                        .as_ref()
+                        .or(a.times.creation.as_ref())
+                        .unwrap_or(&zero),
+                )
+        });
+
         Ok(result)
     }
 
@@ -630,13 +647,25 @@ impl Kdbx {
             .and_then(|var| var.get(&key).cloned())
     }
 
-    pub fn get_groups(&self) -> Result<HashMap<String, GroupData>, KdbxError> {
+    pub fn get_groups(&self) -> Result<Vec<GroupData>, KdbxError> {
         let db = self.database.read().unwrap();
-        Ok(db
-            .iter_all_groups()
-            .map(|it| GroupData::from(&it))
-            .map(|item| (item.id.clone(), item))
-            .collect())
+
+        let mut results = Vec::new();
+
+        let root = db.root();
+
+        results.push(GroupData::from(&root));
+
+        fn expand<'a>(groups: impl Iterator<Item = GroupRef<'a>>, results: &mut Vec<GroupData>) {
+            for item in groups {
+                results.push(GroupData::from(&item));
+                expand(item.groups(), results);
+            }
+        }
+
+        expand(root.groups(), &mut results);
+
+        Ok(results)
     }
 
     pub fn get_group(&self, id: String) -> Result<GroupData, KdbxError> {
@@ -1347,16 +1376,13 @@ impl Kdbx {
         Ok(merge_log)
     }
 
-    pub fn summary(&self) -> Result<(FieldSummary, Meta, HashMap<String, GroupData>), KdbxError> {
+    pub fn summary(&self) -> Result<(FieldSummary, Meta, Vec<GroupData>), KdbxError> {
         let db = self.database.read().unwrap();
 
         Ok((
             FieldSummary::from(&db),
             Meta::from(&db.meta),
-            db.iter_all_groups()
-                .map(|it| GroupData::from(&it))
-                .map(|item| (item.id.clone(), item))
-                .collect(),
+            self.get_groups()?,
         ))
     }
 
@@ -1523,13 +1549,38 @@ pub enum KdbxAction {
     UpdateSyncEntry(Option<EntryData>),
 }
 
-#[frb]
+#[frb(dart_code=r#"
+  FieldValue? getField(String key) {
+    for (final (k, v) in fields) {
+      if (key == k) {
+        return v;
+      }
+    }
+    return null;
+  }
+
+  void setField(String key, FieldValue value) {
+    final index = fields.indexWhere((item) => item.$1 == key);
+    if (index > -1) {
+      fields[index] = (key, value);
+    } else {
+      fields.add((key, value));
+    }
+  }
+
+  void removeField(String key) {
+    final index = fields.indexWhere((item) => item.$1 == key);
+    if (index > -1) {
+      fields.removeAt(index);
+    }
+  }
+"#)]
 #[derive(Clone)]
 pub struct EntryData {
     pub id: String,
     #[frb(non_final)]
     pub parent: String,
-    pub fields: HashMap<String, FieldValue>, // todo: 内存加密
+    pub fields: Vec<(String, FieldValue)>,
     #[frb(non_final)]
     pub autotype: Option<AutoType>,
     pub tags: Vec<String>,
@@ -1563,7 +1614,7 @@ impl EntryData {
         Self {
             id: EntryId::new().to_string(),
             parent,
-            fields: HashMap::new(),
+            fields: Vec::new(),
             autotype: None,
             tags: Vec::new(),
             times: Times::new(),
@@ -2973,7 +3024,7 @@ mod test {
         EntryData {
             id: EntryId::new().to_string(),
             parent: parent.to_string(),
-            fields: HashMap::from([
+            fields: vec![
                 (
                     KEY_TITLE.to_string(),
                     FieldValue::new(title.to_string(), None),
@@ -2982,7 +3033,7 @@ mod test {
                     KEY_PASSWORD.to_string(),
                     FieldValue::new("s3cr3t".to_string(), Some(true)),
                 ),
-            ]),
+            ],
             autotype: None,
             tags: vec![],
             times: Times::new(),
@@ -3021,7 +3072,6 @@ mod test {
     fn root_id(kdbx: &Kdbx) -> String {
         kdbx.get_groups()
             .unwrap()
-            .into_values()
             .into_iter()
             .find(|group| group.parent.is_none())
             .expect("database without root group")
@@ -3031,8 +3081,10 @@ mod test {
     fn field(entry: &EntryData, key: &str) -> String {
         entry
             .fields
-            .get(key)
+            .iter()
+            .find(|(k, _)| k == key)
             .unwrap()
+            .1
             .clone()
             .get()
             .get()
@@ -3102,7 +3154,7 @@ mod test {
         let groups = kdbx.get_groups().unwrap();
         assert!(
             groups
-                .values()
+                .iter()
                 .any(|group| group.id == recycle_id && group.name == "Recycle Bin")
         );
 
@@ -3219,7 +3271,7 @@ mod test {
 
         let groups = kdbx.get_groups().unwrap();
         let created = groups
-            .values()
+            .iter()
             .find(|group| group.id == group_id)
             .expect("group was not created");
         assert_eq!(created.name, "Work");
@@ -3338,22 +3390,22 @@ mod test {
         let root = root_id(&kdbx);
 
         let mut entry = new_entry(&root, "Alice");
-        entry.fields.insert(
+        entry.fields.push((
             KEY_URL.to_string(),
             FieldValue::new("https://example.com".to_string(), None),
-        );
-        entry.fields.insert(
+        ));
+        entry.fields.push((
             KEY_USER_NAME.to_string(),
             FieldValue::new("alice".to_string(), None),
-        );
-        entry.fields.insert(
+        ));
+        entry.fields.push((
             KEY_EMAIL.to_string(),
             FieldValue::new("alice@example.com".to_string(), None),
-        );
-        entry.fields.insert(
+        ));
+        entry.fields.push((
             "MyField".to_string(),
             FieldValue::new("whatever".to_string(), None),
-        );
+        ));
         entry.tags = vec!["work".to_string()];
 
         kdbx.action(KdbxAction::UpdateEntry(entry)).unwrap();
