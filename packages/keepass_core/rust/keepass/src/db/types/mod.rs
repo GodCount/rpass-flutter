@@ -301,17 +301,5 @@ impl Database {
                 entry.cleanup();
             });
         }
-
-        self.foreach_custom_icon_mut(|mut icon| {
-            if icon.entries.is_empty() && icon.groups.is_empty() {
-                let _ = icon.remove().ok();
-            }
-        });
-
-        self.foreach_attachment_mut(|mut attachment| {
-            if attachment.entries.is_empty() {
-                let _ = attachment.remove().ok();
-            }
-        });
     }
 }

@@ -470,7 +470,7 @@ impl EntryMut<'_> {
     fn remove_attachment(&mut self, attachment_id: AttachmentId) {
         if let Some(mut attachment) = self.database.attachment_mut(attachment_id) {
             let id = (self.id, None);
-            attachment.entries.retain(|&item| item != id);
+            attachment.remove_reference_clean(|&item| item != id);
         }
     }
 
@@ -479,9 +479,7 @@ impl EntryMut<'_> {
         if let Some(Icon::Custom(custom_icon_id)) = self.icon {
             // if this entry had a custom icon, remove this entry from the icon's reference list
             if let Some(mut custom_icon) = self.database.custom_icon_mut(custom_icon_id) {
-                let id = (self.id, None);
-
-                custom_icon.entries.retain(|&item| item != id);
+                custom_icon.remove_reference_clean(Some((self.id, None)), None);
             }
         }
 
@@ -577,8 +575,7 @@ impl EntryMut<'_> {
     }
 
     /// Remove this entry from the database, including all its attachments.
-    #[allow(clippy::expect_used, clippy::missing_panics_doc)] // the entry and parent should always be found
-    pub fn remove(mut self) {
+    pub fn remove(self) {
         let id = self.id;
 
         // remove references to this entry from constom icon
@@ -586,23 +583,12 @@ impl EntryMut<'_> {
             // Delete entries, history can be ignored
             icon.entries.retain(|&(entry_id, _)| entry_id != id);
 
-            // if this was the last entry referencing the attachment, remove it from the database
-            if icon.entries.is_empty() && icon.groups.is_empty() {
-                #[allow(clippy::unwrap_used)]
-                icon.remove().unwrap();
-            }
+            icon.remove_reference_clean(None, None);
         });
 
         // remove references to this entry from attachments
-        self.foreach_attachment_mut(|mut attachment| {
-            // Delete entries, history can be ignored
-            attachment.entries.retain(|&(entry_id, _)| entry_id != id);
-
-            // if this was the last entry referencing the attachment, remove it from the database
-            if attachment.entries.is_empty() {
-                #[allow(clippy::unwrap_used)]
-                attachment.remove().unwrap();
-            }
+        self.database.foreach_attachment_mut(|mut attachment| {
+            attachment.remove_reference_clean(|&(entry_id, _)| entry_id != id);
         });
 
         let entry = self.database.entries.remove(&self.id).expect("Entry not found");
@@ -669,12 +655,12 @@ impl EntryMut<'_> {
             if let Some(Icon::Custom(id)) = item.icon
                 && let Some(mut icon) = self.database.custom_icon_mut(id)
             {
-                icon.entries.retain(|item| item != &entry_id);
+                icon.remove_reference_clean(Some(entry_id), None);
             }
 
             for attach_id in item.attachments.into_values() {
                 if let Some(mut attach) = self.database.attachment_mut(attach_id) {
-                    attach.entries.retain(|item| item != &entry_id);
+                    attach.remove_reference_clean(|item| item != &entry_id);
                 }
             }
         }

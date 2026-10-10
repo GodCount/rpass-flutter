@@ -160,12 +160,16 @@ impl AttachmentMut<'_> {
         self.database
     }
 
-    /// Remove this attachment from the database, and all references to it
-    pub fn remove(&mut self) -> Result<Option<Attachment>, AttachmentNotAllowRemoveError> {
+    /// Delete the reference, or delete it if it does not exist
+    /// f is retain
+    pub fn remove_reference_clean<F>(&mut self, f: F)
+    where
+        F: FnMut(&(EntryId, Option<NaiveDateTime>)) -> bool,
+    {
+        self.entries.retain(f);
+
         if self.entries.is_empty() {
-            Ok(self.database.attachments.shift_remove(&self.id))
-        } else {
-            Err(AttachmentNotAllowRemoveError(self.id))
+            self.database.attachments.shift_remove(&self.id);
         }
     }
 }
@@ -193,8 +197,3 @@ impl DerefMut for AttachmentMut<'_> {
             .expect("AttachmentMut points to non-existent attachment")
     }
 }
-
-/// This error type occurs when deleting an attachment that still has references.
-#[derive(Error, Debug)]
-#[error("The attachment {0} cannot be deleted because there are still entries referencing it.")]
-pub struct AttachmentNotAllowRemoveError(pub(crate) AttachmentId);

@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::{
     Database,
-    db::{EntryId, EntryRef, GroupId, GroupRef},
+    db::{EntryId, EntryRef, GroupId, GroupRef, group},
 };
 
 /// Icon specification for an [Entry][crate::db::Entry] or [Group][crate::db::Group].
@@ -182,12 +182,22 @@ impl CustomIconMut<'_> {
         self.database
     }
 
-    /// Remove this custom icon from the database, and all references to it
-    pub fn remove(&mut self) -> Result<Option<CustomIcon>, CustomIconNotAllowRemoveError> {
+    /// Delete the reference, or delete it if it does not exist
+    pub fn remove_reference_clean(
+        &mut self,
+        entry_id: Option<(EntryId, Option<NaiveDateTime>)>,
+        group_id: Option<GroupId>,
+    ) {
+        if let Some(id) = entry_id {
+            self.entries.retain(|&item| item != id);
+        }
+
+        if let Some(id) = group_id {
+            self.groups.retain(|&item| item != id);
+        }
+
         if self.entries.is_empty() && self.groups.is_empty() {
-            Ok(self.database.custom_icons.shift_remove(&self.id))
-        } else {
-            Err(CustomIconNotAllowRemoveError(self.id))
+            self.database.custom_icons.shift_remove(&self.id);
         }
     }
 }
@@ -218,8 +228,3 @@ impl DerefMut for CustomIconMut<'_> {
 #[derive(Error, Debug)]
 #[error("Custom icon {0} not found")]
 pub struct CustomIconNotFoundError(pub(crate) CustomIconId);
-
-/// This error type occurs when deleting an custom icon that still has references.
-#[derive(Error, Debug)]
-#[error("The custom icon {0} cannot be deleted because there are still entries referencing it.")]
-pub struct CustomIconNotAllowRemoveError(pub(crate) CustomIconId);
