@@ -39,9 +39,14 @@ class GroupsPage extends StatefulWidget {
 }
 
 class _GroupsPageState extends State<GroupsPage>
-    with AutomaticKeepAliveClientMixin, KdbxProviderListener {
+    with
+        AutomaticKeepAliveClientMixin,
+        KdbxProviderListener,
+        NavigationHistoryObserver {
   @override
   bool get wantKeepAlive => true;
+
+  String? _selectUuid;
 
   @override
   Future<void> onKdbxSaved() async {
@@ -53,6 +58,20 @@ class _GroupsPageState extends State<GroupsPage>
     Store.kdbx.addListener(this);
     onKdbxSaved();
     super.initState();
+  }
+
+  @override
+  void didNavigationHistory() {
+    if (context.topRoute.name == ManageGroupEntryRoute.name ||
+        context.topRoute.name == EditGroupPageRoute.name) {
+      final uuid = context.topRoute.inheritedPathParams.optString("uuid");
+
+      if (uuid != _selectUuid) {
+        setState(() {
+          _selectUuid = uuid;
+        });
+      }
+    }
   }
 
   @override
@@ -88,7 +107,10 @@ class _GroupsPageState extends State<GroupsPage>
       ),
       body: ListView.builder(
         itemBuilder: (context, i) {
-          return _GroupsItem(kdbxGroup: groups[i]);
+          return _GroupsItem(
+            kdbxGroup: groups[i],
+            selected: groups[i].id == _selectUuid,
+          );
         },
         itemCount: groups.length,
       ),
@@ -106,9 +128,10 @@ class _GroupsPageState extends State<GroupsPage>
 }
 
 class _GroupsItem extends StatefulWidget {
-  const _GroupsItem({required this.kdbxGroup});
+  const _GroupsItem({required this.kdbxGroup, required this.selected});
 
   final GroupData kdbxGroup;
+  final bool selected;
 
   @override
   State<_GroupsItem> createState() => _GroupsItemState();
@@ -116,28 +139,7 @@ class _GroupsItem extends StatefulWidget {
 
 class _GroupsItemState extends State<_GroupsItem>
     with NavigationHistoryObserver<_GroupsItem> {
-  bool _selected = false;
   bool _showMenu = false;
-
-  @override
-  void didNavigationHistory() {
-    if (context.topRoute.name == ManageGroupEntryRoute.name ||
-        context.topRoute.name == EditGroupPageRoute.name) {
-      final selected =
-          context.topRoute.inheritedPathParams.optString("uuid") ==
-          widget.kdbxGroup.id;
-
-      if (selected != _selected) {
-        setState(() {
-          _selected = selected;
-        });
-      }
-    } else if (_selected) {
-      setState(() {
-        _selected = false;
-      });
-    }
-  }
 
   void _kdbxGroupDelete(GroupData kdbxGroup) async {
     final t = I18n.of(context)!;
@@ -145,6 +147,16 @@ class _GroupsItemState extends State<_GroupsItem>
     if (await showConfirmDialog(title: t.delete, message: t.is_move_recycle)) {
       await kdbxAction(KdbxAction.move2Trash([kdbxGroup.id]));
     }
+  }
+
+  @override
+  void didUpdateWidget(covariant _GroupsItem oldWidget) {
+    if (oldWidget.selected != widget.selected ||
+        oldWidget.kdbxGroup.id != widget.kdbxGroup.id) {
+      setState(() {});
+    }
+
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -208,7 +220,7 @@ class _GroupsItemState extends State<_GroupsItem>
         );
       },
       child: ListTile(
-        selected: _selected || _showMenu,
+        selected: widget.selected || _showMenu,
         isThreeLine: true,
         leading: KdbxIconWidget(
           kdbxIcon: KdbxIconWidgetData(
