@@ -588,7 +588,7 @@ extension StatefulKdbx on State {
   Future<T> runWithLoadingDialog<T>(
     AsyncValueGetter<T> future, {
     Stream<String>? message,
-    Duration delay = Duration.zero,
+    Duration delay = const Duration(milliseconds: 150),
   }) async {
     final controller = DialogCloseController();
     try {
