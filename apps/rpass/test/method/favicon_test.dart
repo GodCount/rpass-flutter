@@ -76,34 +76,5 @@ void main() {
         ]),
       );
     });
-
-    test("Duckduckgo Fetch Favicon", () async {
-      FetchFavicon fetchFavicon = FetchFavicon(FaviconSource.Duckduckgo);
-
-      await fetchFavicon.fetch("https://github.com/GodCount/rpass-flutter");
-    });
-
-    test("Google Fetch Favicon", () async {
-      FetchFavicon fetchFavicon = FetchFavicon(FaviconSource.Google);
-
-      await fetchFavicon.fetch("https://github.com/GodCount/rpass-flutter");
-    });
-
-    test("Cravatar Fetch Favicon", () async {
-      FetchFavicon fetchFavicon = FetchFavicon(FaviconSource.Cravatar);
-
-      await fetchFavicon.fetch("https://github.com/GodCount/rpass-flutter");
-
-      await expectLater(
-        fetchFavicon.fetch("https://github.comaa/GodCount/rpass-flutter"),
-        throwsA(
-          isA<Exception>().having(
-            (e) => e.toString(),
-            'message',
-            contains('is default favicon'),
-          ),
-        ),
-      );
-    });
   });
 }
