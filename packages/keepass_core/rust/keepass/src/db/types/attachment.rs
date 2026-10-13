@@ -4,7 +4,6 @@ use std::{
 };
 
 use chrono::NaiveDateTime;
-use thiserror::Error;
 
 use crate::{
     Database,

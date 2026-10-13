@@ -88,8 +88,6 @@ fn binary_pool_byte_patterns() {
     );
 }
 
-
-
 /// Removing an attachment leaves a gap in the attachment IDs; the file refers
 /// to attachments by position, so every later attachment must still read back
 /// as its own data — in entries and in their history.
@@ -119,7 +117,8 @@ fn attachments_after_a_removed_one_keep_their_data() {
     });
 
     // The first attachment goes: ID 0 is free, 1..3 remain.
-    db.entry_mut(first).unwrap().remove_attachment_by_name("file.bin");
+    db.entry_mut(first).unwrap().remove();
+
     assert_eq!(db.num_attachments(), 3);
 
     let bytes = common::save_to_vec(&db, combo.get_key());
@@ -128,7 +127,7 @@ fn attachments_after_a_removed_one_keep_their_data() {
     let data = |entry: &keepass::db::EntryRef<'_>, name: &str| {
         entry.attachment_by_name(name).map(|a| a.data.get().clone())
     };
-    assert_eq!(data(&parsed.entry(first).unwrap(), "file.bin"), None);
+    assert!(parsed.entry(first).is_none());
     assert_eq!(
         data(&parsed.entry(second).unwrap(), "file.bin"),
         Some(b"two".to_vec())

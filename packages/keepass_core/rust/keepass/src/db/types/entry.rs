@@ -470,7 +470,8 @@ impl EntryMut<'_> {
     fn remove_attachment(&mut self, attachment_id: AttachmentId) {
         if let Some(mut attachment) = self.database.attachment_mut(attachment_id) {
             let id = (self.id, None);
-            attachment.remove_reference_clean(|&item| item != id);
+            // 只清除引用, 不删除实际数据 清理操作只在[remove]或者drop把引用处理好后执行[cleanup]
+            attachment.entries.retain(|&item| item != id);
         }
     }
 
@@ -479,7 +480,9 @@ impl EntryMut<'_> {
         if let Some(Icon::Custom(custom_icon_id)) = self.icon {
             // if this entry had a custom icon, remove this entry from the icon's reference list
             if let Some(mut custom_icon) = self.database.custom_icon_mut(custom_icon_id) {
-                custom_icon.remove_reference_clean(Some((self.id, None)), None);
+                let id = (self.id, None);
+                // 只清除引用, 不删除实际数据 清理操作只在[remove]或者drop把引用处理好后执行[cleanup]
+                custom_icon.entries.retain(|&item| item != id);
             }
         }
 

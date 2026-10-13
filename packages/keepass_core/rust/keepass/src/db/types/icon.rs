@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::{
     Database,
-    db::{EntryId, EntryRef, GroupId, GroupRef, group},
+    db::{EntryId, EntryRef, GroupId, GroupRef},
 };
 
 /// Icon specification for an [Entry][crate::db::Entry] or [Group][crate::db::Group].

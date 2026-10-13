@@ -63,15 +63,7 @@ pub fn to_xml(
     let kdbx = KeePassFile::db_to_xml(db, inner_encryptor)?;
     let xml = quick_xml::se::to_string_with_root("KeePassFile", &kdbx)?.into_bytes();
 
-    let mut attachments: Vec<(usize, Value<Vec<u8>>)> = db
-        .attachments
-        .iter()
-        .map(|(id, attachment)| (id.id(), attachment.data.clone()))
-        .collect();
-
-    attachments.sort_by_key(|(id, _)| *id);
-
-    let attachments = attachments.into_iter().map(|(_, data)| data).collect();
+    let attachments = db.attachments.values().map(|item| item.data.clone()).collect();
 
     Ok((xml, attachments))
 }
@@ -219,7 +211,7 @@ impl KeePassFile {
     fn db_to_xml(db: &crate::db::Database, inner_cipher: &mut dyn Cipher) -> Result<Self, CryptographyError> {
         use crate::format::xml_db::meta::Icon;
 
-        let group = Group::db_to_xml(db.root(), inner_cipher)?;
+        let group = Group::db_to_xml(db.root(), &db.attachments, inner_cipher)?;
 
         let mut meta: Meta = db.meta.clone().into();
         meta.custom_icons.get_or_insert_default().icons =
