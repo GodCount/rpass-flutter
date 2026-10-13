@@ -578,6 +578,7 @@ impl EntryMut<'_> {
     }
 
     /// Remove this entry from the database, including all its attachments.
+    #[allow(clippy::expect_used, clippy::missing_panics_doc)] // the entry and parent should always be found
     pub fn remove(self) {
         let id = self.id;
 
