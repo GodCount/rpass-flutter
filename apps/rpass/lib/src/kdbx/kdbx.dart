@@ -79,11 +79,11 @@ final defaultKdbxKeys = [
 ];
 
 extension KdbxEntryCommon on EntryData {
-  Iterable<MapEntry<String, FieldValue>> get customEntries =>
-      fields.entries.where((item) => isCustomKey(item.key));
+  Iterable<(String, FieldValue)> get customEntries =>
+      fields.where((item) => isCustomKey(item.$1));
 
   List<String> get moreUrlsKeys {
-    final keys = fields.keys.toList();
+    final keys = fields.map((item) => item.$1).toList();
     return KdbxKeyURLS.all.where((item) => keys.contains(item)).toList();
   }
 
@@ -98,11 +98,11 @@ extension KdbxEntryCommon on EntryData {
   }
 
   String getNonNullString(String key) {
-    return fields[key]?.get() ?? '';
+    return getField(key)?.get() ?? '';
   }
 
   String? getActualString(String key) {
-    return key == KdbxKeyCommon.OTP ? getOTPCode() : fields[key]?.get();
+    return key == KdbxKeyCommon.OTP ? getOTPCode() : getField(key)?.get();
   }
 
   String getLabel() {
@@ -122,7 +122,7 @@ extension KdbxEntryCommon on EntryData {
   }
 
   String? getOTPCode() {
-    final url = fields[KdbxKeyCommon.OTP]?.get();
+    final url = getField(KdbxKeyCommon.OTP)?.get();
     return url != null
         ? AuthOneTimePassword.tryParse(url)?.code().toString()
         : null;

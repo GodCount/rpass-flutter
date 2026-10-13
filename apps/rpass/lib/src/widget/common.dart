@@ -764,6 +764,9 @@ class DialogCloseController {
 
   set context(BuildContext? value) {
     _context = value;
+    if (_closed) {
+      close();
+    }
   }
 
   void close<T extends Object?>([T? result]) {

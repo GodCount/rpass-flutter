@@ -37,12 +37,12 @@ EntryData _newEntry({
   return EntryData.raw(
     id: id ?? _uuid(),
     parent: parent,
-    fields: {
-      KdbxKey.KEY_TITLE: FieldValue(value: title),
-      KdbxKey.KEY_USER_NAME: FieldValue(value: username),
-      KdbxKey.KEY_PASSWORD: FieldValue(value: password, protected: true),
-      KdbxKey.KEY_URL: FieldValue(value: url),
-    },
+    fields: [
+      (KdbxKey.KEY_TITLE, FieldValue(value: title)),
+      (KdbxKey.KEY_USER_NAME, FieldValue(value: username)),
+      (KdbxKey.KEY_PASSWORD, FieldValue(value: password, protected: true)),
+      (KdbxKey.KEY_URL, FieldValue(value: url)),
+    ],
     tags: const [],
     times: Times(),
     customData: const {},
@@ -64,7 +64,7 @@ GroupData _newGroup({required String parent, required String name}) {
   );
 }
 
-String _field(EntryData entry, String key) => entry.fields[key]?.get() ?? '';
+String _field(EntryData entry, String key) => entry.getField(key)?.get() ?? '';
 
 String _title(EntryData entry) => _field(entry, KdbxKey.KEY_TITLE);
 
@@ -90,7 +90,7 @@ void kdbxTests() {
     );
     await db.saveFile();
     final groups = await db.getGroups();
-    return (db, groups.values.firstWhere((group) => group.parent == null).id);
+    return (db, groups.firstWhere((group) => group.parent == null).id);
   }
 
   test('a new database has a root group and a recycle bin', () async {
@@ -103,10 +103,7 @@ void kdbxTests() {
     expect(meta.recyclebinEnabled, isTrue);
     expect(meta.recyclebinUuid, isNotNull);
     expect(groups, hasLength(2));
-    expect(
-      groups.values.where((group) => group.parent == rootId),
-      hasLength(1),
-    );
+    expect(groups.where((group) => group.parent == rootId), hasLength(1));
     expect(File(pathFor('fresh')).existsSync(), isTrue);
   });
 

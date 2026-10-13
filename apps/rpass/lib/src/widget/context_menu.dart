@@ -100,9 +100,9 @@ mixin class _KdbxKeyContextMenuItem {
         items: kdbxEntry.customEntries
             .map(
               (item) => MenuItem(
-                label: item.key.fromKdbxKeyToI18n(context),
-                enabled: kdbxEntry.getNonNullString(item.key).isNotEmpty,
-                value: buildValue(item.key),
+                label: item.$1.fromKdbxKeyToI18n(context),
+                enabled: kdbxEntry.getNonNullString(item.$1).isNotEmpty,
+                value: buildValue(item.$1),
               ),
             )
             .toList(),

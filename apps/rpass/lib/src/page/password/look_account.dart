@@ -157,7 +157,9 @@ class _LookAccountPageState extends State<LookAccountPage>
   @override
   void didUpdateWidget(covariant LookAccountPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _getEntryData();
+    if (oldWidget.id != widget.id || oldWidget.historyId != widget.historyId) {
+      _getEntryData();
+    }
   }
 
   @override
@@ -696,26 +698,25 @@ class _LookAccountPageState extends State<LookAccountPage>
               ),
               ...customFields.map(
                 (item) => ListTile(
-                  shape: item.key == customFields.last.key ? shape : null,
+                  shape: item.$1 == customFields.last.$1 ? shape : null,
                   title: Padding(
                     padding: const EdgeInsets.only(left: 6),
-                    child: Text(item.key),
+                    child: Text(item.$1),
                   ),
                   subtitle: Padding(
                     padding: const EdgeInsets.only(left: 12),
                     child: hintEmptyText(
-                      _kdbxEntry.getNonNullString(item.key).isEmpty,
+                      _kdbxEntry.getNonNullString(item.$1).isEmpty,
                       Text(
-                        _kdbxEntry.getNonNullString(item.key),
+                        _kdbxEntry.getNonNullString(item.$1),
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                     ),
                   ),
-                  onTap: createOnTileClick(item.key),
-                  onLongPress: _kdbxEntry.getNonNullString(item.key).isNotEmpty
-                      ? () => writeClipboard(
-                          _kdbxEntry.getNonNullString(item.key),
-                        )
+                  onTap: createOnTileClick(item.$1),
+                  onLongPress: _kdbxEntry.getNonNullString(item.$1).isNotEmpty
+                      ? () =>
+                            writeClipboard(_kdbxEntry.getNonNullString(item.$1))
                       : null,
                 ),
               ),

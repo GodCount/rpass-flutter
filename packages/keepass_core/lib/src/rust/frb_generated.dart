@@ -218,9 +218,7 @@ abstract class RustLibApi extends BaseApi {
     required String id,
   });
 
-  Future<Map<String, GroupData>> crateApiKdbxKdbxGetGroups({
-    required Kdbx that,
-  });
+  Future<List<GroupData>> crateApiKdbxKdbxGetGroups({required Kdbx that});
 
   Future<Meta> crateApiKdbxKdbxGetMeta({required Kdbx that});
 
@@ -273,7 +271,7 @@ abstract class RustLibApi extends BaseApi {
     String? filepath,
   });
 
-  Future<(FieldSummary, Meta, Map<String, GroupData>)> crateApiKdbxKdbxSummary({
+  Future<(FieldSummary, Meta, List<GroupData>)> crateApiKdbxKdbxSummary({
     required Kdbx that,
   });
 
@@ -1276,9 +1274,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
-  Future<Map<String, GroupData>> crateApiKdbxKdbxGetGroups({
-    required Kdbx that,
-  }) {
+  Future<List<GroupData>> crateApiKdbxKdbxGetGroups({required Kdbx that}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -1295,7 +1291,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
         },
         codec: SseCodec(
-          decodeSuccessData: sse_decode_Map_String_group_data_None,
+          decodeSuccessData: sse_decode_list_group_data,
           decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxGetGroupsConstMeta,
@@ -1778,7 +1774,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<(FieldSummary, Meta, Map<String, GroupData>)> crateApiKdbxKdbxSummary({
+  Future<(FieldSummary, Meta, List<GroupData>)> crateApiKdbxKdbxSummary({
     required Kdbx that,
   }) {
     return handler.executeNormal(
@@ -1798,7 +1794,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData:
-              sse_decode_record_field_summary_meta_map_string_group_data_none,
+              sse_decode_record_field_summary_meta_list_group_data,
           decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxSummaryConstMeta,
@@ -2414,26 +2410,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  Map<String, FieldValue> dco_decode_Map_String_field_value_None(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return Map.fromEntries(
-      dco_decode_list_record_string_field_value(
-        raw,
-      ).map((e) => MapEntry(e.$1, e.$2)),
-    );
-  }
-
-  @protected
-  Map<String, GroupData> dco_decode_Map_String_group_data_None(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return Map.fromEntries(
-      dco_decode_list_record_string_group_data(
-        raw,
-      ).map((e) => MapEntry(e.$1, e.$2)),
-    );
-  }
-
-  @protected
   Map<String, Uint8List> dco_decode_Map_String_list_prim_u_8_strict_None(
     dynamic raw,
   ) {
@@ -2808,7 +2784,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     return EntryData.raw(
       id: dco_decode_String(arr[0]),
       parent: dco_decode_String(arr[1]),
-      fields: dco_decode_Map_String_field_value_None(arr[2]),
+      fields: dco_decode_list_record_string_field_value(arr[2]),
       autotype: dco_decode_opt_box_autoadd_auto_type(arr[3]),
       tags: dco_decode_list_String(arr[4]),
       times: dco_decode_times(arr[5]),
@@ -3269,14 +3245,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  List<(String, GroupData)> dco_decode_list_record_string_group_data(
-    dynamic raw,
-  ) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return dcoDecodeList(raw).map(dco_decode_record_string_group_data).toList();
-  }
-
-  @protected
   List<(String, Uint8List)> dco_decode_list_record_string_list_prim_u_8_strict(
     dynamic raw,
   ) {
@@ -3593,8 +3561,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  (FieldSummary, Meta, Map<String, GroupData>)
-  dco_decode_record_field_summary_meta_map_string_group_data_none(dynamic raw) {
+  (FieldSummary, Meta, List<GroupData>)
+  dco_decode_record_field_summary_meta_list_group_data(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = dcoDecodeList(raw);
     if (arr.length != 3) {
@@ -3603,7 +3571,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     return (
       dco_decode_field_summary(arr[0]),
       dco_decode_meta(arr[1]),
-      dco_decode_Map_String_group_data_None(arr[2]),
+      dco_decode_list_group_data(arr[2]),
     );
   }
 
@@ -3639,16 +3607,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       throw Exception('Expected 2 elements, got ${arr.length}');
     }
     return (dco_decode_String(arr[0]), dco_decode_field_value(arr[1]));
-  }
-
-  @protected
-  (String, GroupData) dco_decode_record_string_group_data(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    final arr = dcoDecodeList(raw);
-    if (arr.length != 2) {
-      throw Exception('Expected 2 elements, got ${arr.length}');
-    }
-    return (dco_decode_String(arr[0]), dco_decode_group_data(arr[1]));
   }
 
   @protected
@@ -3959,24 +3917,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var inner = sse_decode_list_record_string_string(deserializer);
-    return Map.fromEntries(inner.map((e) => MapEntry(e.$1, e.$2)));
-  }
-
-  @protected
-  Map<String, FieldValue> sse_decode_Map_String_field_value_None(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var inner = sse_decode_list_record_string_field_value(deserializer);
-    return Map.fromEntries(inner.map((e) => MapEntry(e.$1, e.$2)));
-  }
-
-  @protected
-  Map<String, GroupData> sse_decode_Map_String_group_data_None(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var inner = sse_decode_list_record_string_group_data(deserializer);
     return Map.fromEntries(inner.map((e) => MapEntry(e.$1, e.$2)));
   }
 
@@ -4397,7 +4337,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_id = sse_decode_String(deserializer);
     var var_parent = sse_decode_String(deserializer);
-    var var_fields = sse_decode_Map_String_field_value_None(deserializer);
+    var var_fields = sse_decode_list_record_string_field_value(deserializer);
     var var_autotype = sse_decode_opt_box_autoadd_auto_type(deserializer);
     var var_tags = sse_decode_list_String(deserializer);
     var var_times = sse_decode_times(deserializer);
@@ -4995,20 +4935,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  List<(String, GroupData)> sse_decode_list_record_string_group_data(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-
-    var len_ = sse_decode_i_32(deserializer);
-    var ans_ = <(String, GroupData)>[];
-    for (var idx_ = 0; idx_ < len_; ++idx_) {
-      ans_.add(sse_decode_record_string_group_data(deserializer));
-    }
-    return ans_;
-  }
-
-  @protected
   List<(String, Uint8List)> sse_decode_list_record_string_list_prim_u_8_strict(
     SseDeserializer deserializer,
   ) {
@@ -5510,14 +5436,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  (FieldSummary, Meta, Map<String, GroupData>)
-  sse_decode_record_field_summary_meta_map_string_group_data_none(
+  (FieldSummary, Meta, List<GroupData>)
+  sse_decode_record_field_summary_meta_list_group_data(
     SseDeserializer deserializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_field0 = sse_decode_field_summary(deserializer);
     var var_field1 = sse_decode_meta(deserializer);
-    var var_field2 = sse_decode_Map_String_group_data_None(deserializer);
+    var var_field2 = sse_decode_list_group_data(deserializer);
     return (var_field0, var_field1, var_field2);
   }
 
@@ -5547,16 +5473,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_field0 = sse_decode_String(deserializer);
     var var_field1 = sse_decode_field_value(deserializer);
-    return (var_field0, var_field1);
-  }
-
-  @protected
-  (String, GroupData) sse_decode_record_string_group_data(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_field0 = sse_decode_String(deserializer);
-    var var_field1 = sse_decode_group_data(deserializer);
     return (var_field0, var_field1);
   }
 
@@ -5934,30 +5850,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_list_record_string_string(
-      self.entries.map((e) => (e.key, e.value)).toList(),
-      serializer,
-    );
-  }
-
-  @protected
-  void sse_encode_Map_String_field_value_None(
-    Map<String, FieldValue> self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_list_record_string_field_value(
-      self.entries.map((e) => (e.key, e.value)).toList(),
-      serializer,
-    );
-  }
-
-  @protected
-  void sse_encode_Map_String_group_data_None(
-    Map<String, GroupData> self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_list_record_string_group_data(
       self.entries.map((e) => (e.key, e.value)).toList(),
       serializer,
     );
@@ -6421,7 +6313,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.id, serializer);
     sse_encode_String(self.parent, serializer);
-    sse_encode_Map_String_field_value_None(self.fields, serializer);
+    sse_encode_list_record_string_field_value(self.fields, serializer);
     sse_encode_opt_box_autoadd_auto_type(self.autotype, serializer);
     sse_encode_list_String(self.tags, serializer);
     sse_encode_times(self.times, serializer);
@@ -6940,18 +6832,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_list_record_string_group_data(
-    List<(String, GroupData)> self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_i_32(self.length, serializer);
-    for (final item in self) {
-      sse_encode_record_string_group_data(item, serializer);
-    }
-  }
-
-  @protected
   void sse_encode_list_record_string_list_prim_u_8_strict(
     List<(String, Uint8List)> self,
     SseSerializer serializer,
@@ -7422,14 +7302,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_record_field_summary_meta_map_string_group_data_none(
-    (FieldSummary, Meta, Map<String, GroupData>) self,
+  void sse_encode_record_field_summary_meta_list_group_data(
+    (FieldSummary, Meta, List<GroupData>) self,
     SseSerializer serializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_field_summary(self.$1, serializer);
     sse_encode_meta(self.$2, serializer);
-    sse_encode_Map_String_group_data_None(self.$3, serializer);
+    sse_encode_list_group_data(self.$3, serializer);
   }
 
   @protected
@@ -7457,16 +7337,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.$1, serializer);
     sse_encode_field_value(self.$2, serializer);
-  }
-
-  @protected
-  void sse_encode_record_string_group_data(
-    (String, GroupData) self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_String(self.$1, serializer);
-    sse_encode_group_data(self.$2, serializer);
   }
 
   @protected
@@ -7794,7 +7664,7 @@ class KdbxImpl extends RustOpaque implements Kdbx {
   Future<GroupData> getGroup({required String id}) =>
       RustLib.instance.api.crateApiKdbxKdbxGetGroup(that: this, id: id);
 
-  Future<Map<String, GroupData>> getGroups() =>
+  Future<List<GroupData>> getGroups() =>
       RustLib.instance.api.crateApiKdbxKdbxGetGroups(that: this);
 
   Future<Meta> getMeta() =>
@@ -7835,7 +7705,7 @@ class KdbxImpl extends RustOpaque implements Kdbx {
   Future<void> setFilepath({String? filepath}) => RustLib.instance.api
       .crateApiKdbxKdbxSetFilepath(that: this, filepath: filepath);
 
-  Future<(FieldSummary, Meta, Map<String, GroupData>)> summary() =>
+  Future<(FieldSummary, Meta, List<GroupData>)> summary() =>
       RustLib.instance.api.crateApiKdbxKdbxSummary(that: this);
 
   Future<Uint8List> toXml() =>

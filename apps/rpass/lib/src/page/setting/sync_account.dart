@@ -126,11 +126,14 @@ class _SyncAccountPageState extends State<SyncAccountPage>
               message: t.save_sync_account_subtitle,
             )) {
           entry ??= kdbxProvider.kdbx!.newEntry()
-            ..fields[KdbxKeyCommon.TITLE] = FieldValue.plaintext(t.sync_config);
+            ..setField(
+              KdbxKeyCommon.TITLE,
+              FieldValue.plaintext(t.sync_config),
+            );
 
           for (final item
               in Store.kdbx.syncController.config!.toKdbx().entries) {
-            entry.fields[item.key] = item.value;
+            entry.setField(item.key, item.value);
           }
 
           await kdbxAction(KdbxAction.updateSyncEntry(entry));

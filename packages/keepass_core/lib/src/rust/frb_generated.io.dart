@@ -115,12 +115,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Map<String, String> dco_decode_Map_String_String_None(dynamic raw);
 
   @protected
-  Map<String, FieldValue> dco_decode_Map_String_field_value_None(dynamic raw);
-
-  @protected
-  Map<String, GroupData> dco_decode_Map_String_group_data_None(dynamic raw);
-
-  @protected
   Map<String, Uint8List> dco_decode_Map_String_list_prim_u_8_strict_None(
     dynamic raw,
   );
@@ -372,11 +366,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  List<(String, GroupData)> dco_decode_list_record_string_group_data(
-    dynamic raw,
-  );
-
-  @protected
   List<(String, Uint8List)> dco_decode_list_record_string_list_prim_u_8_strict(
     dynamic raw,
   );
@@ -496,8 +485,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   (EntryData, String) dco_decode_record_entry_data_string(dynamic raw);
 
   @protected
-  (FieldSummary, Meta, Map<String, GroupData>)
-  dco_decode_record_field_summary_meta_map_string_group_data_none(dynamic raw);
+  (FieldSummary, Meta, List<GroupData>)
+  dco_decode_record_field_summary_meta_list_group_data(dynamic raw);
 
   @protected
   (int, int) dco_decode_record_i_32_i_32(dynamic raw);
@@ -508,9 +497,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   (String, FieldValue) dco_decode_record_string_field_value(dynamic raw);
-
-  @protected
-  (String, GroupData) dco_decode_record_string_group_data(dynamic raw);
 
   @protected
   (String, Uint8List) dco_decode_record_string_list_prim_u_8_strict(
@@ -631,16 +617,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Map<String, String> sse_decode_Map_String_String_None(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  Map<String, FieldValue> sse_decode_Map_String_field_value_None(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  Map<String, GroupData> sse_decode_Map_String_group_data_None(
     SseDeserializer deserializer,
   );
 
@@ -928,11 +904,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  List<(String, GroupData)> sse_decode_list_record_string_group_data(
-    SseDeserializer deserializer,
-  );
-
-  @protected
   List<(String, Uint8List)> sse_decode_list_record_string_list_prim_u_8_strict(
     SseDeserializer deserializer,
   );
@@ -1078,8 +1049,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  (FieldSummary, Meta, Map<String, GroupData>)
-  sse_decode_record_field_summary_meta_map_string_group_data_none(
+  (FieldSummary, Meta, List<GroupData>)
+  sse_decode_record_field_summary_meta_list_group_data(
     SseDeserializer deserializer,
   );
 
@@ -1094,11 +1065,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   (String, FieldValue) sse_decode_record_string_field_value(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  (String, GroupData) sse_decode_record_string_group_data(
     SseDeserializer deserializer,
   );
 
@@ -1249,18 +1215,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_Map_String_String_None(
     Map<String, String> self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void sse_encode_Map_String_field_value_None(
-    Map<String, FieldValue> self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void sse_encode_Map_String_group_data_None(
-    Map<String, GroupData> self,
     SseSerializer serializer,
   );
 
@@ -1634,12 +1588,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_list_record_string_group_data(
-    List<(String, GroupData)> self,
-    SseSerializer serializer,
-  );
-
-  @protected
   void sse_encode_list_record_string_list_prim_u_8_strict(
     List<(String, Uint8List)> self,
     SseSerializer serializer,
@@ -1827,8 +1775,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_record_field_summary_meta_map_string_group_data_none(
-    (FieldSummary, Meta, Map<String, GroupData>) self,
+  void sse_encode_record_field_summary_meta_list_group_data(
+    (FieldSummary, Meta, List<GroupData>) self,
     SseSerializer serializer,
   );
 
@@ -1844,12 +1792,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_record_string_field_value(
     (String, FieldValue) self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void sse_encode_record_string_group_data(
-    (String, GroupData) self,
     SseSerializer serializer,
   );
 

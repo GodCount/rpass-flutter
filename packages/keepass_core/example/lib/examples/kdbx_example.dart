@@ -131,7 +131,7 @@ class _KdbxExamplePageState extends State<KdbxExamplePage> {
     if (!mounted) return;
     setState(() {
       _meta = meta;
-      _groups = groups.values.toList();
+      _groups = groups;
       _entries = entries;
       _totalEntryCount = summary.totalEntryCount;
     });
@@ -225,22 +225,22 @@ class _KdbxExamplePageState extends State<KdbxExamplePage> {
         await _reload();
       });
 
-  Map<String, kdbx.FieldValue> _fieldsOf(_EntryDraft draft) {
-    return {
-      kdbx.KdbxKey.KEY_TITLE: kdbx.FieldValue(value: draft.title),
-      kdbx.KdbxKey.KEY_USER_NAME: kdbx.FieldValue(value: draft.username),
-      kdbx.KdbxKey.KEY_PASSWORD: kdbx.FieldValue(
-        value: draft.password,
-        protected: true,
+  List<(String, kdbx.FieldValue)> _fieldsOf(_EntryDraft draft) {
+    return [
+      (kdbx.KdbxKey.KEY_TITLE, kdbx.FieldValue(value: draft.title)),
+      (kdbx.KdbxKey.KEY_USER_NAME, kdbx.FieldValue(value: draft.username)),
+      (
+        kdbx.KdbxKey.KEY_PASSWORD,
+        kdbx.FieldValue(value: draft.password, protected: true),
       ),
-      kdbx.KdbxKey.KEY_URL: kdbx.FieldValue(value: draft.url),
-      kdbx.KdbxKey.KEY_NOTES: kdbx.FieldValue(value: draft.notes),
-    };
+      (kdbx.KdbxKey.KEY_URL, kdbx.FieldValue(value: draft.url)),
+      (kdbx.KdbxKey.KEY_NOTES, kdbx.FieldValue(value: draft.notes)),
+    ];
   }
 
   String _field(kdbx.EntryData entry, String key) {
     try {
-      return entry.fields[key]?.get() ?? '';
+      return entry.getField(key)?.get() ?? '';
     } catch (_) {
       return '<解码失败>';
     }

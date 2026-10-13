@@ -72,8 +72,8 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
     final summary = await _kdbx!.summary();
     _fieldSummary = summary.$1;
     _meta = summary.$2;
-    _groups = summary.$3;
-    _noRecyclebinGroups = _groups!.values
+    _groups = {for (final item in summary.$3) item.id: item};
+    _noRecyclebinGroups = summary.$3
         .where((item) => !isInRecycleBin(item.id))
         .toList();
     await _getSyncUuid();

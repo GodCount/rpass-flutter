@@ -71,10 +71,10 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
           message: t.save_sync_account_subtitle,
         )) {
       final entry = kdbx.newEntry()
-        ..fields[KdbxKeyCommon.TITLE] = FieldValue.plaintext(t.sync_config);
+        ..setField(KdbxKeyCommon.TITLE, FieldValue.plaintext(t.sync_config));
 
       for (final item in config.toKdbx().entries) {
-        entry.fields[item.key] = item.value;
+        entry.setField(item.key, item.value);
       }
 
       await kdbxAction(KdbxAction.updateSyncEntry(entry));
