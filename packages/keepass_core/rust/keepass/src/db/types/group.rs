@@ -512,7 +512,7 @@ impl GroupMut<'_> {
         if let Some(Icon::Custom(custom_icon_id)) = self.icon {
             // if this group had a custom icon, remove this group from the icon's reference list
             if let Some(mut custom_icon) = self.database.custom_icon_mut(custom_icon_id) {
-                custom_icon.groups.retain(|&group_id| group_id != id);
+                custom_icon.remove_reference_clean(None, Some(id));
             }
         }
 
