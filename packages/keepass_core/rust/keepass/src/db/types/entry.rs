@@ -24,7 +24,7 @@ use crate::{
 pub struct EntryId(Uuid);
 
 impl EntryId {
-    /// create entry id
+    /// Generate a new random `EntryId`.
     pub fn new() -> Self {
         Self(Uuid::new_v4())
     }
@@ -257,6 +257,23 @@ impl EntryRef<'_> {
         } else {
             None
         }
+    }
+
+    /// Iterate over all entrie historical with immutable access.
+    #[allow(clippy::expect_used, clippy::missing_panics_doc)]
+    pub fn iter_all_historical(&self) -> impl Iterator<Item = EntryRef<'_>> + '_ {
+        self.history.iter().flat_map(move |item| {
+            item.get_entries().iter().map(move |entry| EntryRef {
+                database: self.database,
+                id: self.id,
+                history_id: Some(
+                    entry
+                        .times
+                        .last_modification
+                        .expect("The last modification time must exist"),
+                ),
+            })
+        })
     }
 
     /// Get a reference to the underlying database
@@ -875,10 +892,16 @@ impl Drop for EntryTrack<'_> {
 #[allow(clippy::unwrap_used)]
 mod tests {
 
+    use super::EntryId;
     use crate::{
         Database,
         db::{Value, fields},
     };
+
+    #[test]
+    fn entry_id_new_generates_distinct_ids() {
+        assert_ne!(EntryId::new(), EntryId::new());
+    }
 
     #[test]
     fn test_entry() {
