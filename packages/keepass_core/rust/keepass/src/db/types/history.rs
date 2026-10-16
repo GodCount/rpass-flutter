@@ -58,6 +58,7 @@ impl History {
         None
     }
 
+   #[allow(dead_code)]
     pub(crate) fn get_entry_index(&self, index: usize) -> Option<&Entry> {
         self.entries.get(index).map(|(_, item)| item)
     }

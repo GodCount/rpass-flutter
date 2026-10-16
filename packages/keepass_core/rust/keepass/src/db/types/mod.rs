@@ -181,6 +181,7 @@ impl Database {
         }
     }
 
+    #[allow(dead_code)]
     fn find_attachment_mut_by_data(&mut self, data: &Value<Vec<u8>>) -> Option<AttachmentMut<'_>> {
         let data_ref = data.get();
 

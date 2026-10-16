@@ -489,14 +489,14 @@ impl EntryMut<'_> {
 
     /// Remove an attachment by name from this entry.
     pub fn remove_attachment_by_name(&mut self, name: &str) {
-        if let Some(attachment_id) = self.attachments.shift_remove(name) {
-            if let Some(mut attachment) = self.database.attachment_mut(attachment_id) {
-                let id = (self.id, None);
-                // 只删除一条记录, 因为会存在不同名称但引用了同个附件
-                if let Some(index) = attachment.entries.iter().position(|item| item == &id) {
-                    // 只清除引用, 不删除实际数据 清理操作只在[remove]或者drop把引用处理好后执行[cleanup]
-                    attachment.entries.remove(index);
-                }
+        if let Some(attachment_id) = self.attachments.shift_remove(name)
+            && let Some(mut attachment) = self.database.attachment_mut(attachment_id)
+        {
+            let id = (self.id, None);
+            // 只删除一条记录, 因为会存在不同名称但引用了同个附件
+            if let Some(index) = attachment.entries.iter().position(|item| item == &id) {
+                // 只清除引用, 不删除实际数据 清理操作只在[remove]或者drop把引用处理好后执行[cleanup]
+                attachment.entries.remove(index);
             }
         }
     }

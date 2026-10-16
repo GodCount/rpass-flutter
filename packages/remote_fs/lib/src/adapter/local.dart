@@ -9,9 +9,7 @@ class LocalConfig extends RemoteFileConfig {
   final String path;
 
   factory LocalConfig.fromJson(Map<String, String?> config) {
-    return LocalConfig(
-      path: config["path"] ?? Directory.current.path,
-    );
+    return LocalConfig(path: config["path"] ?? Directory.current.path);
   }
 
   @override

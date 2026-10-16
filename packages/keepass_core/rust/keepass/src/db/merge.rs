@@ -591,13 +591,13 @@ fn merge_entries(dest_db: &mut Database, source_db: &Database, log: &mut MergeLo
 
         // 来源是最新时, 并且列表顶部是来源则删除, 来源合并到目标条目
         if source_last_modification > dest_last_modification {
-            #[allow(clippy::unwrap_used)]
+            #[allow(clippy::indexing_slicing)]
             if merged_history[0].0 {
                 merged_history.remove(0);
             }
         } else if dest_last_modification > source_last_modification {
             // 目标条目是最新时,并且列表顶部是目标则删除,目标条目没有变化
-            #[allow(clippy::unwrap_used)]
+            #[allow(clippy::indexing_slicing)]
             if !merged_history[0].0 {
                 merged_history.remove(0);
             }
