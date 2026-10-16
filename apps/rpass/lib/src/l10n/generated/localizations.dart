@@ -1657,6 +1657,12 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'基准 {sec}秒 延迟'**
   String baseline_second_delay(int sec);
+
+  /// No description provided for @file_path.
+  ///
+  /// In zh, this message translates to:
+  /// **'文件路径'**
+  String get file_path;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

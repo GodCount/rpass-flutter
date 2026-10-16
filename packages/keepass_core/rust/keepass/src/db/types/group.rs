@@ -41,6 +41,12 @@ impl GroupId {
     }
 }
 
+impl Default for GroupId {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl From<Uuid> for GroupId {
     fn from(uuid: Uuid) -> Self {
         Self::from_uuid(uuid)

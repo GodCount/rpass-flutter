@@ -281,6 +281,7 @@ class SyncKdbxController with ChangeNotifier {
       }
 
       _lastMergeLog = await kdbx.merge(kdbx: remoteKdbx);
+      print(_lastMergeLog);
 
       Store.settings.setLastSyncTime(DateTime.now());
 

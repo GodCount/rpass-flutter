@@ -110,7 +110,6 @@ fn attachments_after_a_removed_one_keep_their_data() {
             add("third", b"three"),
         )
     };
-    let h_id = db.entry(third).unwrap().times.last_modification.unwrap();
     // The third entry also keeps an older version with an attachment of its own.
     db.entry_mut(third).unwrap().edit_tracking(|e| {
         e.add_attachment("new.bin", Value::Unprotected(b"four".to_vec()));
@@ -135,6 +134,6 @@ fn attachments_after_a_removed_one_keep_their_data() {
     let third = parsed.entry(third).unwrap();
     assert_eq!(data(&third, "file.bin"), Some(b"three".to_vec()));
     assert_eq!(data(&third, "new.bin"), Some(b"four".to_vec()));
-    let old = third.historical(h_id).expect("the older version");
+    let old = third.historical(0).expect("the older version");
     assert_eq!(data(&old, "file.bin"), Some(b"three".to_vec()));
 }

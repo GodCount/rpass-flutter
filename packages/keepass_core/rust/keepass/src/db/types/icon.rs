@@ -56,7 +56,7 @@ impl CustomIconId {
 pub struct CustomIcon {
     pub(crate) id: CustomIconId,
 
-    pub(crate) entries: HashSet<(EntryId, Option<NaiveDateTime>)>,
+    pub(crate) entries: HashSet<(EntryId, Option<u32>)>,
     pub(crate) groups: HashSet<GroupId>,
 
     /// Filename for the icon
@@ -76,7 +76,7 @@ impl CustomIcon {
     }
 
     /// Get entries
-    pub fn get_entries(&self) -> &HashSet<(EntryId, Option<NaiveDateTime>)> {
+    pub fn get_entries(&self) -> &HashSet<(EntryId, Option<u32>)> {
         &self.entries
     }
 
@@ -185,7 +185,7 @@ impl CustomIconMut<'_> {
     /// Delete the reference, or delete it if it does not exist
     pub fn remove_reference_clean(
         &mut self,
-        entry_id: Option<(EntryId, Option<NaiveDateTime>)>,
+        entry_id: Option<(EntryId, Option<u32>)>,
         group_id: Option<GroupId>,
     ) {
         if let Some(id) = entry_id {

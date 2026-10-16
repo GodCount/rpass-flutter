@@ -119,6 +119,7 @@ class _AuthRemoteFsState extends State<AuthRemoteFsPage> {
                 children: [
                   Text(switch (widget.type) {
                     .webdav => "WebDav",
+                    .local => "Local",
                   }, style: Theme.of(context).textTheme.headlineSmall),
                   Flexible(
                     child: SingleChildScrollView(

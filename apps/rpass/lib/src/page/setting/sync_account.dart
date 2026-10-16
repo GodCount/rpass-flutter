@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:keepass_core/keepass_core.dart';
 import 'package:remote_fs/remote_fs.dart';
@@ -85,6 +86,39 @@ class _SyncAccountPageState extends State<SyncAccountPage>
               : null,
           onTap: autoSavePop(const Duration(days: 30)),
         ),
+      ],
+    );
+  }
+
+  void _selectRemoteType() {
+    final t = I18n.of(context)!;
+
+    GestureTapCallback? autoSavePop(RemoteType type) {
+      return () {
+        _setRemoteSyncCilent(type);
+        context.router.pop();
+        setState(() {});
+      };
+    }
+
+    showBottomSheetList(
+      title: t.sync_config,
+      children: [
+        ListTile(
+          title: Text("WebDAV"),
+          trailing: Store.kdbx.syncController.config is WebDavConfig
+              ? const Icon(Icons.check)
+              : null,
+          onTap: autoSavePop(.webdav),
+        ),
+        if (kDebugMode)
+          ListTile(
+            title: Text("Local"),
+            trailing: Store.kdbx.syncController.config is LocalConfig
+                ? const Icon(Icons.check)
+                : null,
+            onTap: autoSavePop(.local),
+          ),
       ],
     );
   }
@@ -193,14 +227,19 @@ class _SyncAccountPageState extends State<SyncAccountPage>
                   ),
                 ),
               ),
+
               ListTile(
-                title: const Text("WebDAV"),
+                title: Text(switch (Store.kdbx.syncController.config) {
+                  WebDavConfig() => "WebDAV",
+                  LocalConfig() => "Local",
+                  _ => t.none,
+                }),
                 subtitle: Text(t.sync_note_subtitle),
                 enabled:
                     !Store.kdbx.syncController.isSyncing &&
                     Store.settings.enableRemoteSync,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                onTap: () => _setRemoteSyncCilent(.webdav),
+                onTap: _selectRemoteType,
                 trailing: InfiniteRotateWidget(
                   enabled: Store.kdbx.syncController.isSyncing,
                   child: IconButton(

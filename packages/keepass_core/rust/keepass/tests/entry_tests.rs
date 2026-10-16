@@ -131,7 +131,6 @@ mod entry_tests {
         let (entry_id, icon_id) = {
             let mut root = db.root_mut();
             let mut entry = root.add_entry();
-            let mut entry = entry.track_changes();
             let id = entry.id();
             let icon = entry.set_icon_custom_new(vec![1, 0, 0, 8, 6]);
             (id, icon.id())
@@ -139,19 +138,15 @@ mod entry_tests {
         let icon = db.custom_icon(icon_id).unwrap();
         assert_eq!(icon.get_entries(), &HashSet::from([(entry_id, None)]));
 
-        let last_modification = {
+        {
+            std::thread::sleep(std::time::Duration::from_secs(1));
             let mut entry = db.entry_mut(entry_id).unwrap();
             let mut entry = entry.track_changes();
-            let time = entry.times.last_modification;
             entry.set_icon_none();
-            time
         };
 
         let icon = db.custom_icon(icon_id).unwrap();
-        assert_eq!(
-            icon.get_entries(),
-            &HashSet::from([(entry_id, Some(last_modification.unwrap()))])
-        );
+        assert_eq!(icon.get_entries(), &HashSet::from([(entry_id, Some(0))]));
     }
 
     #[test]
@@ -160,28 +155,23 @@ mod entry_tests {
         let (entry_id, attach_id) = {
             let mut root = db.root_mut();
             let mut entry = root.add_entry();
-            let mut entry = entry.track_changes();
             let id = entry.id();
             let attach = entry.add_attachment("aa", Value::unprotected(vec![1, 0, 0, 8, 6]));
             (id, attach.id())
         };
         let attach = db.attachment_mut(attach_id).unwrap();
-        assert_eq!(attach.get_entries(), &HashSet::from([(entry_id, None)]));
+        assert_eq!(attach.get_entries(), &vec![(entry_id, None)]);
 
-        let last_modification = {
+        {
+            std::thread::sleep(std::time::Duration::from_secs(1));
             let mut entry = db.entry_mut(entry_id).unwrap();
             let mut entry = entry.track_changes();
-            let time = entry.times.last_modification;
             entry.edit(|entry| {
                 entry.as_mut().remove_attachment_by_name("aa");
             });
-            time
         };
 
         let attach = db.attachment_mut(attach_id).unwrap();
-        assert_eq!(
-            attach.get_entries(),
-            &HashSet::from([(entry_id, Some(last_modification.unwrap()))])
-        );
+        assert_eq!(attach.get_entries(), &vec![(entry_id, Some(0))]);
     }
 }

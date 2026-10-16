@@ -540,11 +540,7 @@ impl Kdbx {
         Ok(result)
     }
 
-    pub fn get_entry(
-        &self,
-        id: String,
-        history_id: Option<NaiveDateTime>,
-    ) -> Result<EntryData, KdbxError> {
+    pub fn get_entry(&self, id: String, history_id: Option<u32>) -> Result<EntryData, KdbxError> {
         let db = self.database.read().unwrap();
         let entry = db
             .entry(EntryId::from_uuid(uuid_by_str(id.as_str())?))
@@ -587,7 +583,7 @@ impl Kdbx {
         Ok((EntryData::from(&entry), sequence))
     }
 
-    pub fn get_entry_historys(&self, id: String) -> Result<Vec<EntryData>, KdbxError> {
+    pub fn get_entry_historys(&self, id: String) -> Result<Vec<(u32, EntryData)>, KdbxError> {
         let db = self.database.read().unwrap();
         let entry = db
             .entry(EntryId::from_uuid(uuid_by_str(id.as_str())?))
@@ -599,11 +595,7 @@ impl Kdbx {
             Ok(history
                 .get_entries()
                 .iter()
-                .filter_map(|item| {
-                    item.times
-                        .last_modification
-                        .map(|ts| EntryData::from(&entry.historical(ts).unwrap()))
-                })
+                .filter_map(|(id, _)| Some((*id, EntryData::from(&entry.historical(*id).unwrap()))))
                 .collect())
         } else {
             Ok(vec![])
@@ -799,29 +791,35 @@ impl Kdbx {
                     entry.override_url = entry_data.override_url;
                     entry.quality_check = entry_data.quality_check;
 
-                    let new_ids: HashSet<_> =
-                        entry_data.attachments.iter().map(|item| item.id).collect();
+                    {
+                        let mut entry_mut = entry.as_mut();
 
-                    let remove_ids: Vec<AttachmentId> = entry
-                        .attachments
-                        .values()
-                        .cloned()
-                        .filter(|&item| !new_ids.contains(&(item.id() as i32)))
-                        .collect();
+                        let new_names: HashSet<_> = entry_data
+                            .attachments
+                            .iter()
+                            .map(|item| &item.name)
+                            .collect();
 
-                    for item in remove_ids {
-                        entry.as_mut().remove_attachment_by_id(item);
-                    }
+                        let remove_names: Vec<_> = entry_mut
+                            .attachments
+                            .keys()
+                            .cloned()
+                            .filter(|item| !new_names.contains(item))
+                            .collect();
 
-                    for item in entry_data.attachments {
-                        if let Some(data) = item.data {
-                            if let Some(mut attach) = entry
-                                .as_mut()
-                                .attachment_mut(AttachmentId::new(item.id as usize))
-                            {
-                                attach.data = Value::unprotected(data);
-                            } else {
-                                entry.add_attachment(item.name, Value::unprotected(data));
+                        for item in remove_names {
+                            entry_mut.remove_attachment_by_name(&item);
+                        }
+
+                        for item in entry_data.attachments {
+                            if let Some(data) = item.data {
+                                if let Some(mut attach) =
+                                    entry_mut.attachment_mut(AttachmentId::new(item.id as usize))
+                                {
+                                    attach.data = Value::unprotected(data);
+                                } else {
+                                    entry_mut.add_attachment(item.name, Value::unprotected(data));
+                                }
                             }
                         }
                     }
@@ -1290,7 +1288,9 @@ impl Kdbx {
                         db,
                         KdbxAction::UpdateMetaCustomData(HashMap::from([(
                             CUSTOM_DATA_SYNC_UUID.to_string(),
-                            Some(CustomDataValue::Binary(entry.id.clone().into_bytes())), // 使用二进制向下兼容 自动系列化为base64
+                            Some(CustomDataValue::Binary(
+                                uuid_by_str(&entry.id)?.as_bytes().to_vec(),
+                            )), // 使用二进制向下兼容 自动系列化为base64
                         )])),
                     )?;
                     Self::impl_action(db, KdbxAction::UpdateEntry(entry))?;
@@ -1549,7 +1549,7 @@ pub enum KdbxAction {
     UpdateSyncEntry(Option<EntryData>),
 }
 
-#[frb(dart_code=r#"
+#[frb(dart_code = r#"
   FieldValue? getField(String key) {
     for (final (k, v) in fields) {
       if (key == k) {

@@ -383,6 +383,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<(String, String)> dco_decode_list_record_string_string(dynamic raw);
 
   @protected
+  List<(int, EntryData)> dco_decode_list_record_u_32_entry_data(dynamic raw);
+
+  @protected
   MatcherType dco_decode_matcher_type(dynamic raw);
 
   @protected
@@ -514,6 +517,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   (String, String) dco_decode_record_string_string(dynamic raw);
+
+  @protected
+  (int, EntryData) dco_decode_record_u_32_entry_data(dynamic raw);
 
   @protected
   Times dco_decode_times(dynamic raw);
@@ -927,6 +933,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  List<(int, EntryData)> sse_decode_list_record_u_32_entry_data(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   MatcherType sse_decode_matcher_type(SseDeserializer deserializer);
 
   @protected
@@ -1088,6 +1099,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   (String, String) sse_decode_record_string_string(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  (int, EntryData) sse_decode_record_u_32_entry_data(
     SseDeserializer deserializer,
   );
 
@@ -1614,6 +1630,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_record_u_32_entry_data(
+    List<(int, EntryData)> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_matcher_type(MatcherType self, SseSerializer serializer);
 
   @protected
@@ -1818,6 +1840,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_record_string_string(
     (String, String) self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_record_u_32_entry_data(
+    (int, EntryData) self,
     SseSerializer serializer,
   );
 

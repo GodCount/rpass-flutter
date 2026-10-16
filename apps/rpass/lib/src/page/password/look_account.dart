@@ -34,12 +34,12 @@ class _LookAccountArgs extends PageRouteArgs {
 }
 
 class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
-  LookAccountRoute({Key? key, DateTime? historyId, required String id})
+  LookAccountRoute({Key? key, int? historyId, required String id})
     : super(
         name,
         args: _LookAccountArgs(key: key),
         rawPathParams: {"uuid": id},
-        rawQueryParams: {"historyId": historyId?.millisecondsSinceEpoch},
+        rawQueryParams: {"historyId": historyId},
       );
 
   static const name = "LookAccountRoute";
@@ -59,13 +59,7 @@ class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
         throw Exception("uuid is null");
       }
 
-      return LookAccountPage(
-        key: args.key,
-        id: uuid,
-        historyId: historyId != null
-            ? DateTime.fromMillisecondsSinceEpoch(historyId)
-            : null,
-      );
+      return LookAccountPage(key: args.key, id: uuid, historyId: historyId);
     },
   );
 }
@@ -73,7 +67,7 @@ class LookAccountRoute extends PageRouteInfo<_LookAccountArgs> {
 class LookAccountPage extends StatefulWidget {
   const LookAccountPage({super.key, this.historyId, required this.id});
 
-  final DateTime? historyId;
+  final int? historyId;
   final String id;
 
   @override

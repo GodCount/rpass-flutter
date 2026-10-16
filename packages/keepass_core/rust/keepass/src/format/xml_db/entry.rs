@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::format::xml_db::tags::join_tags;
 use crate::{
     crypt::{CryptographyError, ciphers::Cipher},
-    db::{Attachment, AttachmentId, Color, EntryId, GroupId},
+    db::{Color, EntryId, GroupId},
     format::xml_db::{
         UUID,
         custom_serde::{cs_bool, cs_opt_bool, cs_opt_fromstr, cs_opt_string},
@@ -116,7 +116,7 @@ impl Entry {
         }
 
         for field in self.binary_fields {
-            let id = AttachmentId::new(field.value.value_ref);
+            let id = crate::db::AttachmentId::new(field.value.value_ref);
             if attachments.contains_key(&id) {
                 target.attachments.insert(field.key.clone(), id);
             }
@@ -155,7 +155,7 @@ impl Entry {
     #[cfg(feature = "save_kdbx4")]
     pub(crate) fn db_to_xml(
         entry: &crate::db::Entry,
-        attachments: &IndexMap<AttachmentId, Attachment>,
+        attachments: &IndexMap<crate::db::AttachmentId, crate::db::Attachment>,
         inner_encryptor: &mut dyn Cipher,
     ) -> Result<Self, CryptographyError> {
         let (icon_id, custom_icon_uuid) = match entry.icon {
@@ -204,7 +204,7 @@ impl Entry {
             let entries = h
                 .get_entries()
                 .iter()
-                .map(|item| Entry::db_to_xml(item, attachments, inner_encryptor))
+                .map(|(_, item)| Entry::db_to_xml(item, attachments, inner_encryptor))
                 .collect::<Result<Vec<_>, CryptographyError>>()?;
 
             Some(History { entries })

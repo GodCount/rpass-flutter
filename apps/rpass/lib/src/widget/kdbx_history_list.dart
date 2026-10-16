@@ -83,7 +83,7 @@ class KdbxHistoryList extends StatefulWidget {
 class _KdbxHistoryListState extends State<KdbxHistoryList> {
   EntryData? _showMenu;
 
-  List<EntryData> _history = [];
+  List<(int, EntryData)> _history = [];
 
   @override
   void initState() {
@@ -143,12 +143,12 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
     );
   }
 
-  Widget _buildHistoryList(List<EntryData> history) {
+  Widget _buildHistoryList(List<(int, EntryData)> history) {
     return ListView.builder(
       shrinkWrap: true,
       itemCount: history.length,
       itemBuilder: (context, index) {
-        final entry = history[index];
+        final (id, entry) = history[index];
 
         final child = ListTile(
           selected: _showMenu == entry,
@@ -163,10 +163,7 @@ class _KdbxHistoryListState extends State<KdbxHistoryList> {
           ),
           onTap: () {
             context.router.popAndPush(
-              LookAccountRoute(
-                id: entry.id,
-                historyId: entry.times.lastModification!,
-              ),
+              LookAccountRoute(id: entry.id, historyId: id),
             );
           },
         );

@@ -181,6 +181,42 @@ impl Database {
         }
     }
 
+    fn find_attachment_mut_by_data(&mut self, data: &Value<Vec<u8>>) -> Option<AttachmentMut<'_>> {
+        let data_ref = data.get();
+
+        self.attachments
+            .iter()
+            .find(move |(_, item)| item.get().eq(data_ref))
+            .map(|(id, _)| *id)
+            .map(move |id| AttachmentMut::new(self, id))
+    }
+
+    #[cfg(feature = "_merge")]
+    pub(crate) fn add_attachment(
+        &mut self,
+        data: &Value<Vec<u8>>,
+        entries: Vec<(EntryId, Option<u32>)>,
+    ) -> AttachmentId {
+        let attach = self.find_attachment_mut_by_data(data);
+
+        if let Some(mut attach) = attach {
+            attach.entries.extend(entries);
+            attach.id()
+        } else {
+            let id = AttachmentId::next_free(self);
+
+            self.attachments.insert(
+                id,
+                Attachment {
+                    id,
+                    entries,
+                    data: data.clone(),
+                },
+            );
+            id
+        }
+    }
+
     /// Iterate over all entries with immutable access.
     pub fn iter_all_entries(&self) -> impl Iterator<Item = EntryRef<'_>> + '_ {
         self.entries.keys().map(move |id| EntryRef::new(self, *id))
