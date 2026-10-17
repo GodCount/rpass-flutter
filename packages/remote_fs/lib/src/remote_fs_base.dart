@@ -79,6 +79,8 @@ abstract interface class RemoteFile {
     switch (config["type"]) {
       case "webdav":
         return WebDavConfig.fromJson(config).open();
+      case "local":
+        return LocalConfig.fromJson(config).open();
     }
     throw UnsupportedError("Adapter type ${config["type"]}");
   }

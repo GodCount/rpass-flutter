@@ -846,4 +846,7 @@ class MyLocalizationsEn extends MyLocalizations {
   String baseline_second_delay(int sec) {
     return 'Baseline $sec seconds delay';
   }
+
+  @override
+  String get file_path => 'File Path';
 }

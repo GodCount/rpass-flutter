@@ -6,7 +6,7 @@ import '../i18n.dart';
 import '../kdbx/kdbx.dart';
 import 'auth_field.dart';
 
-enum RemoteType { webdav }
+enum RemoteType { webdav, local }
 
 extension _WebDavKdbxEntryField on WebDavConfig {
   static final kdbxKeyType = "webdav_type";
@@ -40,12 +40,30 @@ extension _WebDavKdbxEntryField on WebDavConfig {
   }
 }
 
+extension _LocalKdbxEntryField on LocalConfig {
+  static final kdbxKeyPath = "local_path";
+
+  Map<String, FieldValue> toKdbx() {
+    return {
+      RemoteFileKdbxEntryField.kdbxKeyType: FieldValue.plaintext(
+        RemoteType.local.name,
+      ),
+      kdbxKeyPath: FieldValue.plaintext(path),
+    };
+  }
+
+  static LocalConfig fromKdbx(EntryData entry) {
+    return LocalConfig.fromJson({"path": entry.getActualString(kdbxKeyPath)});
+  }
+}
+
 extension RemoteFileKdbxEntryField on RemoteFileConfig {
   static final kdbxKeyType = "remote_type";
 
   Map<String, FieldValue> toKdbx() {
     return switch (this) {
       WebDavConfig config => config.toKdbx(),
+      LocalConfig config => config.toKdbx(),
       _ => throw UnsupportedError("type is $runtimeType"),
     };
   }
@@ -54,6 +72,7 @@ extension RemoteFileKdbxEntryField on RemoteFileConfig {
     final remoteType = entry.getActualString(kdbxKeyType);
     return switch (remoteType) {
       "webdav" => _WebDavKdbxEntryField.fromKdbx(entry),
+      "local" => _LocalKdbxEntryField.fromKdbx(entry),
       _ => null,
     };
   }
@@ -67,6 +86,7 @@ extension BuilderConfig on RemoteType {
     }
     return switch (this) {
       .webdav => WebDavConfig.fromJson(map),
+      .local => LocalConfig.fromJson(map),
     };
   }
 
@@ -103,6 +123,13 @@ extension BuilderConfig on RemoteType {
           key: "authHeader",
           value: config["authHeader"] ?? "",
           description: "Digest Auth Header",
+        ),
+      },
+      .local => {
+        "path": TextAuthField(
+          key: "path",
+          description: t.file_path,
+          value: config["path"] ?? "",
         ),
       },
     };

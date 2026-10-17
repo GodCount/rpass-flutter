@@ -196,10 +196,10 @@ abstract class RustLibApi extends BaseApi {
   Future<EntryData> crateApiKdbxKdbxGetEntry({
     required Kdbx that,
     required String id,
-    DateTime? historyId,
+    int? historyId,
   });
 
-  Future<List<EntryData>> crateApiKdbxKdbxGetEntryHistorys({
+  Future<List<(int, EntryData)>> crateApiKdbxKdbxGetEntryHistorys({
     required Kdbx that,
     required String id,
   });
@@ -1101,7 +1101,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Future<EntryData> crateApiKdbxKdbxGetEntry({
     required Kdbx that,
     required String id,
-    DateTime? historyId,
+    int? historyId,
   }) {
     return handler.executeNormal(
       NormalTask(
@@ -1112,10 +1112,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_String(id, serializer);
-          sse_encode_opt_box_autoadd_Chrono_NaiveDateTime(
-            historyId,
-            serializer,
-          );
+          sse_encode_opt_box_autoadd_u_32(historyId, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -1140,7 +1137,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
-  Future<List<EntryData>> crateApiKdbxKdbxGetEntryHistorys({
+  Future<List<(int, EntryData)>> crateApiKdbxKdbxGetEntryHistorys({
     required Kdbx that,
     required String id,
   }) {
@@ -1161,7 +1158,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
         },
         codec: SseCodec(
-          decodeSuccessData: sse_decode_list_entry_data,
+          decodeSuccessData: sse_decode_list_record_u_32_entry_data,
           decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxKdbxGetEntryHistorysConstMeta,
@@ -3278,6 +3275,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<(int, EntryData)> dco_decode_list_record_u_32_entry_data(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dcoDecodeList(raw).map(dco_decode_record_u_32_entry_data).toList();
+  }
+
+  @protected
   MatcherType dco_decode_matcher_type(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return MatcherType.values[dcoDecodePrimitiveInt(raw)];
@@ -3653,6 +3656,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       throw Exception('Expected 2 elements, got ${arr.length}');
     }
     return (dco_decode_String(arr[0]), dco_decode_String(arr[1]));
+  }
+
+  @protected
+  (int, EntryData) dco_decode_record_u_32_entry_data(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = dcoDecodeList(raw);
+    if (arr.length != 2) {
+      throw Exception('Expected 2 elements, got ${arr.length}');
+    }
+    return (dco_decode_u_32(arr[0]), dco_decode_entry_data(arr[1]));
   }
 
   @protected
@@ -4996,6 +5009,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<(int, EntryData)> sse_decode_list_record_u_32_entry_data(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <(int, EntryData)>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_record_u_32_entry_data(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
   MatcherType sse_decode_matcher_type(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var inner = sse_decode_i_32(deserializer);
@@ -5514,6 +5541,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_field0 = sse_decode_String(deserializer);
     var var_field1 = sse_decode_String(deserializer);
+    return (var_field0, var_field1);
+  }
+
+  @protected
+  (int, EntryData) sse_decode_record_u_32_entry_data(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_field0 = sse_decode_u_32(deserializer);
+    var var_field1 = sse_decode_entry_data(deserializer);
     return (var_field0, var_field1);
   }
 
@@ -6883,6 +6920,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_list_record_u_32_entry_data(
+    List<(int, EntryData)> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_record_u_32_entry_data(item, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_matcher_type(MatcherType self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.index, serializer);
@@ -7380,6 +7429,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_record_u_32_entry_data(
+    (int, EntryData) self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_u_32(self.$1, serializer);
+    sse_encode_entry_data(self.$2, serializer);
+  }
+
+  @protected
   void sse_encode_times(Times self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_opt_box_autoadd_Chrono_NaiveDateTime(self.creation, serializer);
@@ -7636,14 +7695,12 @@ class KdbxImpl extends RustOpaque implements Kdbx {
         id: id,
       );
 
-  Future<EntryData> getEntry({required String id, DateTime? historyId}) =>
-      RustLib.instance.api.crateApiKdbxKdbxGetEntry(
-        that: this,
-        id: id,
-        historyId: historyId,
-      );
+  Future<EntryData> getEntry({required String id, int? historyId}) => RustLib
+      .instance
+      .api
+      .crateApiKdbxKdbxGetEntry(that: this, id: id, historyId: historyId);
 
-  Future<List<EntryData>> getEntryHistorys({required String id}) =>
+  Future<List<(int, EntryData)>> getEntryHistorys({required String id}) =>
       RustLib.instance.api.crateApiKdbxKdbxGetEntryHistorys(that: this, id: id);
 
   Future<List<EntryData>> getEntrys({

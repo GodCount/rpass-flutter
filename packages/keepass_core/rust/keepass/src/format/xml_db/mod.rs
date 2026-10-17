@@ -17,7 +17,6 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize, Serializer};
 
 use base64::{Engine as _, engine::general_purpose as base64_engine};
-use std::collections::HashSet;
 use thiserror::Error;
 use uuid::Uuid;
 
@@ -90,7 +89,7 @@ impl KeePassFile {
         for (i, header_attachment) in header_attachments.iter().enumerate() {
             let attachment = crate::db::Attachment {
                 id: crate::db::AttachmentId::new(i),
-                entries: HashSet::new(),
+                entries: Vec::new(),
                 data: header_attachment.clone(),
             };
             attachments.insert(attachment.id, attachment);
@@ -108,7 +107,7 @@ impl KeePassFile {
                     id,
                     crate::db::Attachment {
                         id,
-                        entries: HashSet::new(),
+                        entries: Vec::new(),
                         data,
                     },
                 );
@@ -169,25 +168,23 @@ impl KeePassFile {
 
                 for attach_id in entry.attachments.values() {
                     if let Some(attachment) = db.attachments.get_mut(attach_id) {
-                        attachment.entries.insert((entry_id, None));
+                        attachment.entries.push((entry_id, None));
                     }
                 }
 
                 if let Some(history) = entry.history.as_ref() {
-                    for item in history.get_entries() {
+                    for (history_id, item) in history.get_entries() {
                         if let Some(crate::db::Icon::Custom(icon_id)) = item.icon.as_ref()
                             && let Some(icon) = db.custom_icons.get_mut(icon_id)
                         {
                             // The final modification time should always exist, but unauthorized modifications may occur.
                             // A loophole is buried here.
-                            icon.entries.insert((entry_id, item.times.last_modification));
+                            icon.entries.insert((entry_id, Some(*history_id)));
                         }
 
                         for attach_id in entry.attachments.values() {
                             if let Some(attachment) = db.attachments.get_mut(attach_id) {
-                                attachment
-                                    .entries
-                                    .insert((entry_id, item.times.last_modification));
+                                attachment.entries.push((entry_id, Some(*history_id)));
                             }
                         }
                     }

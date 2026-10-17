@@ -3,7 +3,6 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
-use chrono::NaiveDateTime;
 use indexmap::IndexMap;
 use thiserror::Error;
 use uuid::Uuid;
@@ -41,6 +40,12 @@ impl EntryId {
     /// Get the Uuid contained inside
     pub fn uuid(&self) -> Uuid {
         self.0
+    }
+}
+
+impl Default for EntryId {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -210,7 +215,7 @@ impl std::fmt::Display for EntryId {
 pub struct EntryRef<'a> {
     database: &'a Database,
     id: EntryId,
-    history_id: Option<NaiveDateTime>,
+    history_id: Option<u32>,
 }
 
 impl EntryRef<'_> {
@@ -222,11 +227,7 @@ impl EntryRef<'_> {
         }
     }
 
-    pub(crate) fn new_historical(
-        database: &Database,
-        id: EntryId,
-        history_id: Option<NaiveDateTime>,
-    ) -> EntryRef<'_> {
+    pub(crate) fn new_historical(database: &Database, id: EntryId, history_id: Option<u32>) -> EntryRef<'_> {
         EntryRef {
             database,
             id,
@@ -247,7 +248,7 @@ impl EntryRef<'_> {
     }
 
     /// Gets an [EntryRef] to a historical version of the [Entry], if it exists
-    pub fn historical(&self, history_id: NaiveDateTime) -> Option<EntryRef<'_>> {
+    pub fn historical(&self, history_id: u32) -> Option<EntryRef<'_>> {
         if self.history.as_ref()?.get_entry(history_id).is_some() {
             Some(EntryRef {
                 database: self.database,
@@ -260,18 +261,12 @@ impl EntryRef<'_> {
     }
 
     /// Iterate over all entrie historical with immutable access.
-    #[allow(clippy::expect_used, clippy::missing_panics_doc)]
     pub fn iter_all_historical(&self) -> impl Iterator<Item = EntryRef<'_>> + '_ {
         self.history.iter().flat_map(move |item| {
             item.get_entries().iter().map(move |entry| EntryRef {
                 database: self.database,
                 id: self.id,
-                history_id: Some(
-                    entry
-                        .times
-                        .last_modification
-                        .expect("The last modification time must exist"),
-                ),
+                history_id: Some(entry.0),
             })
         })
     }
@@ -443,52 +438,66 @@ impl EntryMut<'_> {
     }
 
     /// Add an attachment to this entry with the given name and data.
+    #[allow(clippy::unwrap_used, clippy::missing_panics_doc)]
     pub fn add_attachment(&mut self, name: impl Into<String>, data: Value<Vec<u8>>) -> AttachmentMut<'_> {
-        let id = AttachmentId::next_free(self.database);
+        let name = name.into();
 
-        let entries: HashSet<(EntryId, Option<NaiveDateTime>)> = vec![(self.id, None)].into_iter().collect();
+        let data_ref = data.get();
+        let attach = self
+            .database
+            .iter_all_attachments()
+            .find(move |item| item.get().eq(data_ref))
+            .map(|item| item.id());
 
-        self.database
-            .attachments
-            .insert(id, Attachment { id, entries, data });
+        if let Some(id) = attach {
+            // 名称和ID都存在, 直接返回
+            if self.attachments.get(&name) == Some(&id) {
+                #[allow(clippy::unwrap_used)]
+                return self.database_mut().attachment_mut(id).unwrap();
+            }
 
-        if let Some(old_id) = self.attachments.insert(name.into(), id) {
-            // if there was an old attachment with this name, remove it
-            self.remove_attachment_by_id(old_id);
+            self.remove_attachment_by_name(&name);
+            self.attachments.insert(name, id);
+
+            let entry_id = self.id;
+
+            #[allow(clippy::unwrap_used)]
+            let mut attach = self.database_mut().attachment_mut(id).unwrap();
+
+            attach.entries.push((entry_id, None));
+
+            attach
+        } else {
+            let id = AttachmentId::next_free(self.database);
+
+            self.database.attachments.insert(
+                id,
+                Attachment {
+                    id,
+                    entries: vec![(self.id, None)].into_iter().collect(),
+                    data,
+                },
+            );
+
+            self.remove_attachment_by_name(&name);
+
+            self.attachments.insert(name, id);
+
+            AttachmentMut::new(self.database, id)
         }
-
-        AttachmentMut::new(self.database, id)
     }
 
     /// Remove an attachment by name from this entry.
     pub fn remove_attachment_by_name(&mut self, name: &str) {
-        if let Some(attachment_id) = self.attachments.shift_remove(name) {
-            self.remove_attachment(attachment_id);
-        }
-    }
-
-    /// Remove an attachment by id from this entry.
-    pub fn remove_attachment_by_id(&mut self, attachment_id: AttachmentId) {
-        let mut names_to_remove = Vec::new();
-        for (name, &att_id) in &self.attachments {
-            if att_id == attachment_id {
-                names_to_remove.push(name.clone());
-            }
-        }
-
-        for name in names_to_remove {
-            self.attachments.shift_remove(&name);
-        }
-
-        self.remove_attachment(attachment_id);
-    }
-
-    /// Remove attachment references from the database for the current entry.
-    fn remove_attachment(&mut self, attachment_id: AttachmentId) {
-        if let Some(mut attachment) = self.database.attachment_mut(attachment_id) {
+        if let Some(attachment_id) = self.attachments.shift_remove(name)
+            && let Some(mut attachment) = self.database.attachment_mut(attachment_id)
+        {
             let id = (self.id, None);
-            // 只清除引用, 不删除实际数据 清理操作只在[remove]或者drop把引用处理好后执行[cleanup]
-            attachment.entries.retain(|&item| item != id);
+            // 只删除一条记录, 因为会存在不同名称但引用了同个附件
+            if let Some(index) = attachment.entries.iter().position(|item| item == &id) {
+                // 只清除引用, 不删除实际数据 清理操作只在[remove]或者drop把引用处理好后执行[cleanup]
+                attachment.entries.remove(index);
+            }
         }
     }
 
@@ -609,6 +618,7 @@ impl EntryMut<'_> {
 
         // remove references to this entry from attachments
         self.database.foreach_attachment_mut(|mut attachment| {
+            // 可以移除条目的所有引用, 因为整个条目都要移除了
             attachment.remove_reference_clean(|&(entry_id, _)| entry_id != id);
         });
 
@@ -638,7 +648,7 @@ impl EntryMut<'_> {
         let history_max_items = self.database.meta.history_max_items.unwrap_or(-1);
         let history_max_size = self.database.meta.history_max_size.unwrap_or(-1);
 
-        let mut removed: Vec<Entry> = Vec::new();
+        let mut removed: Vec<(u32, Entry)> = Vec::new();
 
         if history_max_items > -1
             && let Some(history) = self.history.as_mut()
@@ -671,16 +681,17 @@ impl EntryMut<'_> {
         }
 
         // Clear backreferences for attachments and icons
-        for item in removed {
-            let entry_id = (item.id, item.times.last_modification);
-            if let Some(Icon::Custom(id)) = item.icon
+        for (id, entry) in removed {
+            let entry_id = (entry.id, Some(id));
+            if let Some(Icon::Custom(id)) = entry.icon
                 && let Some(mut icon) = self.database.custom_icon_mut(id)
             {
                 icon.remove_reference_clean(Some(entry_id), None);
             }
 
-            for attach_id in item.attachments.into_values() {
+            for attach_id in entry.attachments.into_values() {
                 if let Some(mut attach) = self.database.attachment_mut(attach_id) {
+                    // 可以移除历史条目的所有引用, 因为整个条目都要移除了
                     attach.remove_reference_clean(|item| item != &entry_id);
                 }
             }
@@ -865,19 +876,19 @@ impl Drop for EntryTrack<'_> {
             let parent_id = entry.parent;
             let historical = std::mem::replace(&mut self.historical, Entry::new(parent_id));
 
+            // The next_id is the ID of the historical entry
+            let history_id = entry.history.as_ref().map_or(0, |item| item.next_id());
+
             // This is a new history, set its backreference
             if let Some(Icon::Custom(id)) = historical.icon
                 && let Some(mut icon) = entry.database.custom_icon_mut(id)
             {
-                icon.entries
-                    .insert((historical.id, historical.times.last_modification));
+                icon.entries.insert((historical.id, Some(history_id)));
             }
 
             for attach_id in historical.attachments.values() {
                 if let Some(mut attach) = entry.database.attachment_mut(*attach_id) {
-                    attach
-                        .entries
-                        .insert((historical.id, historical.times.last_modification));
+                    attach.entries.push((historical.id, Some(history_id)));
                 }
             }
 
@@ -991,5 +1002,63 @@ mod tests {
 
         assert_eq!(db.num_entries(), 0);
         assert_eq!(db.num_attachments(), 0);
+    }
+
+    #[test]
+    fn test_entry_eq_attach() {
+        let mut db = Database::new();
+
+        let entry_id = db
+            .root_mut()
+            .add_entry()
+            .edit(|e| {
+                e.set_unprotected(fields::TITLE, "Entry 1");
+                e.add_attachment("file1.txt", Value::unprotected(b"1111"));
+                e.add_attachment("file2.txt", Value::unprotected(b"1111"));
+            })
+            .id();
+
+        assert_eq!(db.num_attachments(), 1);
+
+        let entry = db.entry(entry_id).unwrap();
+
+        assert_eq!(entry.attachments.len(), 2);
+
+        assert_eq!(entry.attachment_by_name("file1.txt").unwrap().get(), b"1111");
+        assert_eq!(entry.attachment_by_name("file2.txt").unwrap().get(), b"1111");
+    }
+
+    #[test]
+    fn test_attachments_different_names_eq_attach() {
+        let mut db = Database::new();
+
+        let entry_id = db
+            .root_mut()
+            .add_entry()
+            .edit(|e| {
+                e.set_unprotected(fields::TITLE, "Entry 1");
+                e.add_attachment("file1.txt", Value::unprotected(b"1111"));
+                e.add_attachment("file2.txt", Value::unprotected(b"1111"));
+            })
+            .id();
+
+        assert_eq!(db.num_attachments(), 1);
+        assert_eq!(db.attachments.get_index(0).unwrap().1.entries.len(), 2);
+
+        {
+            let mut entry = db.entry_mut(entry_id).unwrap();
+
+            entry.edit(|e| {
+                e.remove_attachment_by_name("file1.txt");
+            });
+        }
+
+        let entry = db.entry(entry_id).unwrap();
+
+        assert_eq!(entry.attachments.len(), 1);
+
+        let attach = entry.attachment_by_name("file2.txt").unwrap();
+
+        assert_eq!(attach.entries.len(), 1);
     }
 }

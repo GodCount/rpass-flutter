@@ -818,4 +818,7 @@ class MyLocalizationsZh extends MyLocalizations {
   String baseline_second_delay(int sec) {
     return '基准 $sec秒 延迟';
   }
+
+  @override
+  String get file_path => '文件路径';
 }

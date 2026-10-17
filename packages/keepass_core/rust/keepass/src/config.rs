@@ -1,5 +1,6 @@
 //! Configuration options for how to compress and encrypt databases
 use hex_literal::hex;
+#[cfg(feature = "save_kdbx4")]
 use hybrid_array::{Array as GenericArray, typenum::U32};
 use std::convert::TryFrom;
 use thiserror::Error;

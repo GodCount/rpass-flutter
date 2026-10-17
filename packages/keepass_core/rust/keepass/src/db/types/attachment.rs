@@ -1,9 +1,4 @@
-use std::{
-    collections::HashSet,
-    ops::{Deref, DerefMut},
-};
-
-use chrono::NaiveDateTime;
+use std::ops::{Deref, DerefMut};
 
 use crate::{
     Database,
@@ -50,9 +45,10 @@ impl std::fmt::Display for AttachmentId {
 pub struct Attachment {
     pub(crate) id: AttachmentId,
 
-    /// The entries that reference this attachment, along with the history last modification of the entry
+    /// The entries that reference this attachment, along with the history ID(auto increment) of the entry
     /// version that references it (if applicable).
-    pub(crate) entries: HashSet<(EntryId, Option<NaiveDateTime>)>,
+    /// 做了附件去重, 条目会有多个相同的附件引用
+    pub(crate) entries: Vec<(EntryId, Option<u32>)>,
 
     /// The binary data of the attachment.
     pub data: Value<Vec<u8>>,
@@ -65,7 +61,7 @@ impl Attachment {
     }
 
     /// Get entries
-    pub fn get_entries(&self) -> &HashSet<(EntryId, Option<NaiveDateTime>)> {
+    pub fn get_entries(&self) -> &Vec<(EntryId, Option<u32>)> {
         &self.entries
     }
 }
@@ -163,7 +159,7 @@ impl AttachmentMut<'_> {
     /// f is retain
     pub fn remove_reference_clean<F>(&mut self, f: F)
     where
-        F: FnMut(&(EntryId, Option<NaiveDateTime>)) -> bool,
+        F: FnMut(&(EntryId, Option<u32>)) -> bool,
     {
         self.entries.retain(f);
 
