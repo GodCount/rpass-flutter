@@ -3,6 +3,7 @@ use indexmap::IndexMap;
 use thiserror::Error;
 
 use serde::{Deserialize, Serialize};
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 #[cfg(feature = "save_kdbx4")]
 use crate::format::xml_db::tags::join_tags;
@@ -102,7 +103,7 @@ impl Entry {
         target.times = self.times.map(|t| t.into()).unwrap_or_default();
 
         for field in self.string_fields {
-            let fval = field.value.value.unwrap_or_default();
+            let fval = field.value.value.clone().unwrap_or_default();
             let value = if field.value.protected {
                 let fval = base64_engine::STANDARD.decode(fval)?;
                 let fval = inner_decryptor.decrypt(&fval)?;
@@ -112,7 +113,7 @@ impl Entry {
             } else {
                 crate::db::Value::unprotected(fval)
             };
-            target.fields.insert(field.key, value);
+            target.fields.insert(field.key.clone(), value);
         }
 
         for field in self.binary_fields {
@@ -259,14 +260,14 @@ pub enum UnprotectError {
     DuplicateGroupId(#[from] crate::db::DuplicateGroupIdError),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
 #[serde(rename_all = "PascalCase")]
 pub struct StringField {
     pub key: String,
     pub value: StringValue,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Zeroize, ZeroizeOnDrop)]
 pub struct StringValue {
     #[serde(default, rename = "@Protected", with = "cs_bool")]
     protected: bool,
@@ -433,7 +434,7 @@ mod tests {
 
         let deserialized: Test<StringField> = quick_xml::de::from_str(xml).unwrap();
         assert_eq!(deserialized.0.key, "Title");
-        assert_eq!(deserialized.0.value.value.unwrap(), "Example Title");
+        assert_eq!(deserialized.0.value.value.clone().unwrap(), "Example Title");
         assert!(!deserialized.0.value.protected);
 
         let xml_protected = r#"<String>
@@ -443,7 +444,7 @@ mod tests {
 
         let deserialized_protected: Test<StringField> = quick_xml::de::from_str(xml_protected).unwrap();
         assert_eq!(deserialized_protected.0.key, "Password");
-        assert_eq!(deserialized_protected.0.value.value.unwrap(), "cGFzc3dvcmQ=");
+        assert_eq!(deserialized_protected.0.value.value.clone().unwrap(), "cGFzc3dvcmQ=");
         assert!(deserialized_protected.0.value.protected);
     }
 
