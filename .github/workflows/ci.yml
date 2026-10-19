@@ -67,6 +67,8 @@ jobs:
         run: rustup toolchain install --profile minimal
       - name: Cache
         uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "packages/keepass_core/rust"
 
       - name: Install cargo-hack
         run: cargo install cargo-hack
