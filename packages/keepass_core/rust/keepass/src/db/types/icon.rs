@@ -237,10 +237,7 @@ pub struct CustomIconNotFoundError(pub(crate) CustomIconId);
 #[cfg(test)]
 #[allow(clippy::unwrap_used)]
 mod tests {
-    use crate::{
-        Database,
-        db::{Value, fields},
-    };
+    use crate::{Database, db::fields};
 
     #[test]
     fn rmeove_icon_update_deleted_objects() {
@@ -257,7 +254,13 @@ mod tests {
 
         assert_eq!(db.custom_icons.len(), 1);
 
-        let icon_id = db.entry(entry_id.clone()).unwrap().custom_icon().unwrap().id().uuid();
+        let icon_id = db
+            .entry(entry_id.clone())
+            .unwrap()
+            .custom_icon()
+            .unwrap()
+            .id()
+            .uuid();
 
         db.entry_mut(entry_id).unwrap().track_changes().remove();
 
