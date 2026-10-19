@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::{
     Database,
-    db::{EntryId, EntryRef, GroupId, GroupRef},
+    db::{EntryId, EntryRef, GroupId, GroupRef, Times},
 };
 
 /// Icon specification for an [Entry][crate::db::Entry] or [Group][crate::db::Group].
@@ -196,8 +196,13 @@ impl CustomIconMut<'_> {
             self.groups.retain(|&item| item != id);
         }
 
-        if self.entries.is_empty() && self.groups.is_empty() {
-            self.database.custom_icons.shift_remove(&self.id);
+        if self.entries.is_empty()
+            && self.groups.is_empty()
+            && let Some(icon) = self.database.custom_icons.shift_remove(&self.id)
+        {
+            self.database_mut()
+                .deleted_objects
+                .insert(icon.id.uuid(), Some(Times::now()));
         }
     }
 }
@@ -228,3 +233,38 @@ impl DerefMut for CustomIconMut<'_> {
 #[derive(Error, Debug)]
 #[error("Custom icon {0} not found")]
 pub struct CustomIconNotFoundError(pub(crate) CustomIconId);
+
+#[cfg(test)]
+#[allow(clippy::unwrap_used)]
+mod tests {
+    use crate::{
+        Database,
+        db::{Value, fields},
+    };
+
+    #[test]
+    fn rmeove_icon_update_deleted_objects() {
+        let mut db = Database::new();
+
+        let entry_id = db
+            .root_mut()
+            .add_entry()
+            .edit(|e| {
+                e.set_unprotected(fields::TITLE, "Entry 1");
+                e.set_icon_custom_new(b"1111".to_vec());
+            })
+            .id();
+
+        assert_eq!(db.custom_icons.len(), 1);
+
+        let icon_id = db.entry(entry_id.clone()).unwrap().custom_icon().unwrap().id().uuid();
+
+        db.entry_mut(entry_id).unwrap().track_changes().remove();
+
+        assert_eq!(db.custom_icons.len(), 0);
+
+        assert_eq!(db.deleted_objects.len(), 2);
+
+        assert!(db.deleted_objects.contains_key(&icon_id))
+    }
+}
