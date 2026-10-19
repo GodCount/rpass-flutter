@@ -622,7 +622,7 @@ fn merge_entries(dest_db: &mut Database, source_db: &Database, log: &mut MergeLo
             dest_entry.background_color = source_entry.background_color.clone();
             dest_entry.override_url = source_entry.override_url.clone();
             dest_entry.quality_check = source_entry.quality_check;
-            dest_entry.previous_parent_group = source_entry.previous_parent_group.clone();
+            dest_entry.previous_parent_group = source_entry.previous_parent_group;
 
             merge_attachments(&mut dest_entry, &source_entry, log);
 
