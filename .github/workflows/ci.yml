@@ -68,7 +68,7 @@ jobs:
       - name: Cache
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: "packages/keepass_core/rust"
+          workspaces: packages/keepass_core/rust
 
       - name: Install cargo-hack
         run: cargo install cargo-hack
