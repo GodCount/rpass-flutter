@@ -67,6 +67,24 @@ pub fn to_xml(
     Ok((xml, attachments))
 }
 
+#[cfg(feature = "save_kdbx4")]
+#[allow(clippy::type_complexity)]
+pub fn to_xml_with_indent(
+    db: &crate::db::Database,
+    inner_encryptor: &mut dyn Cipher,
+) -> Result<Vec<u8>, DatabaseSaveError> {
+    let kdbx = KeePassFile::db_to_xml(db, inner_encryptor)?;
+
+    let mut writer = String::new();
+    writer.push_str("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n");
+
+    let mut serializer = quick_xml::se::Serializer::with_root(&mut writer, Some("KeePassFile"))?;
+    serializer.indent(' ', 4);
+    kdbx.serialize(serializer)?;
+
+    Ok(writer.into_bytes())
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 struct KeePassFile {

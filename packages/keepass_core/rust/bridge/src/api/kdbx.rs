@@ -595,7 +595,7 @@ impl Kdbx {
             Ok(history
                 .get_entries()
                 .iter()
-                .filter_map(|(id, _)| Some((*id, EntryData::from(&entry.historical(*id).unwrap()))))
+                .map(|(id, _)| (*id, EntryData::from(&entry.historical(*id).unwrap())))
                 .collect())
         } else {
             Ok(vec![])
@@ -803,8 +803,8 @@ impl Kdbx {
                         let remove_names: Vec<_> = entry_mut
                             .attachments
                             .keys()
-                            .cloned()
                             .filter(|item| !new_names.contains(item))
+                            .cloned()
                             .collect();
 
                         for item in remove_names {
