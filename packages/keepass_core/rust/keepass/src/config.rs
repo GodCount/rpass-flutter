@@ -58,6 +58,25 @@ pub struct DatabaseConfig {
 
 /// Sensible default configuration for new databases
 impl Default for DatabaseConfig {
+    /// test fast config
+    #[cfg(test)]
+    fn default() -> Self {
+        Self {
+            version: DatabaseVersion::KDB4(KDBX4_CURRENT_MINOR_VERSION),
+            outer_cipher_config: OuterCipherConfig::AES256,
+            compression_config: CompressionConfig::GZip,
+            inner_cipher_config: InnerCipherConfig::ChaCha20,
+            kdf_config: KdfConfig::Argon2 {
+                iterations: 1,
+                memory: 64 * 1024,
+                parallelism: 1,
+                version: argon2::Version::Version13,
+            },
+            public_custom_data: None,
+        }
+    }
+
+    #[cfg(not(test))]
     fn default() -> Self {
         Self {
             version: DatabaseVersion::KDB4(KDBX4_CURRENT_MINOR_VERSION),

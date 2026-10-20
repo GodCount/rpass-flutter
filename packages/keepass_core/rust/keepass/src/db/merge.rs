@@ -1243,17 +1243,6 @@ mod merge_tests {
     const ENTRY1_ID: EntryId = EntryId::from_uuid(uuid!("00000000-0000-0000-0000-000000000006"));
     const ENTRY2_ID: EntryId = EntryId::from_uuid(uuid!("00000000-0000-0000-0000-000000000007"));
 
-    fn fast_kdbx41_config() -> DatabaseConfig {
-        let mut cfg = DatabaseConfig::default();
-        cfg.kdf_config = KdfConfig::Argon2 {
-            iterations: 1,
-            memory: 64 * 1024,
-            parallelism: 1,
-            version: argon2::Version::Version13,
-        };
-        cfg
-    }
-
     /// Build up an example database for testing
     ///
     /// The database structure is as follows:
@@ -1268,8 +1257,6 @@ mod merge_tests {
     ///
     fn create_test_database() -> Database {
         let mut db = Database::new_with_root_id(ROOT_GROUP_ID);
-
-        db.config = fast_kdbx41_config();
 
         // build up root -> group1 -> subgroup1 -> entry2
         db.root_mut()

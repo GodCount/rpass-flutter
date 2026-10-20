@@ -18,17 +18,6 @@ use keepass::{
 
 const PASSWORD: &str = "demopass";
 
-fn fast_kdbx41_config() -> DatabaseConfig {
-    let mut cfg = DatabaseConfig::default();
-    cfg.kdf_config = KdfConfig::Argon2 {
-        iterations: 1,
-        memory: 64 * 1024,
-        parallelism: 1,
-        version: argon2::Version::Version13,
-    };
-    cfg
-}
-
 fn save_then_open(db: &Database) -> Database {
     let mut buf = Vec::new();
     db.save(&mut buf, DatabaseKey::new().with_password(PASSWORD), None)
@@ -47,7 +36,7 @@ fn fixed_time() -> chrono::NaiveDateTime {
 /// Returns the database and the id of the entry carrying the rich fields,
 /// for tests that want to inspect a specific entry post-roundtrip.
 fn build_kdbx41_rich_database() -> (Database, EntryId) {
-    let mut db = Database::with_config(fast_kdbx41_config());
+    let mut db = Database::new();
 
     db.meta.database_name = Some("kdbx41-features".to_string());
     db.meta.custom_data.insert(
@@ -347,7 +336,7 @@ fn entry_quality_check_disabled_round_trips() {
 
 #[test]
 fn entry_previous_parent_group_round_trips() {
-    let mut db = Database::with_config(fast_kdbx41_config());
+    let mut db = Database::new();
 
     let (source_id, entry_id): (GroupId, EntryId) = {
         let mut root = db.root_mut();
@@ -378,7 +367,7 @@ fn entry_previous_parent_group_round_trips() {
 
 #[test]
 fn custom_icon_name_and_modification_time_round_trip() {
-    let mut db = Database::with_config(fast_kdbx41_config());
+    let mut db = Database::new();
 
     let icon_id: CustomIconId = {
         let mut root = db.root_mut();
