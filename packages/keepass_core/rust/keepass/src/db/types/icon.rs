@@ -196,6 +196,7 @@ impl CustomIconMut<'_> {
             self.groups.retain(|&item| item != id);
         }
 
+        // TODO! xc 的实现是不主动清理图标, 即使引用为空
         if self.entries.is_empty()
             && self.groups.is_empty()
             && let Some(icon) = self.database.custom_icons.shift_remove(&self.id)

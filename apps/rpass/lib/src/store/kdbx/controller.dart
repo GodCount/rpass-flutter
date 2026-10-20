@@ -286,7 +286,11 @@ class SyncKdbxController with ChangeNotifier {
 
       _logger.info("merge save in local.");
 
-      if (_lastMergeLog!.isUpdateMasterKey) {
+      final masterKeyChanged = _lastMergeLog!.events.any(
+        (item) => item.target.field0 is MetaField_MasterKeyChanged,
+      );
+
+      if (masterKeyChanged) {
         final biometric = Biometric.of(context);
 
         if (biometric.enable) {
@@ -302,14 +306,13 @@ class SyncKdbxController with ChangeNotifier {
       }
 
       _logger.info(
-        "{masterKeyChanged=${_lastMergeLog?.masterKeyChanged},"
-        "isUpdateMasterKey=${_lastMergeLog?.isUpdateMasterKey},"
+        "{masterKeyChanged=$masterKeyChanged,"
         "forceMerge=$forceMerge}",
       );
 
       // 在这种情况下需要更新远程文件
-      if (_lastMergeLog!.masterKeyChanged ||
-          _lastMergeLog!.events.isNotEmpty ||
+      if (_lastMergeLog!.events.isNotEmpty ||
+          _lastMergeLog!.destEvents.isNotEmpty ||
           forceMerge) {
         await remoteFile.write(await kdbx.save());
         _logger.info("sync data write to remote file, done.");

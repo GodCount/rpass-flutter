@@ -34,7 +34,9 @@ pub use keepass::{
     db::{
         AutoType, AutoTypeAssociation, Color, CustomDataItem, CustomDataValue,
         DataTransferObfuscation, MemoryProtection, Times,
-        merge::{MergeEventTarget as MergeEventTarget2, MergeEventType, MergeLog as MergeLog2},
+        merge::{
+            MergeEventTarget as MergeEventTarget2, MergeEventType, MergeLog as MergeLog2, MetaField,
+        },
     },
 };
 
@@ -1341,32 +1343,15 @@ impl Kdbx {
             ));
         }
 
-        let dest_master_key_changed = dest_db.meta.master_key_changed.unwrap_or(Times::epoch());
+        let merge_log = MergeLog::from(dest_db.merge(&source_db)?);
 
-        let source_master_key_changed = source_db.meta.master_key_changed.unwrap_or(Times::epoch());
-
-        let mut merge_log = MergeLog::from(dest_db.merge(&source_db)?);
-
-        if source_master_key_changed > dest_master_key_changed {
-            merge_log.master_key_changed = true;
-
-            let master_key_changed = match (
-                self.credentials.get_composite_key(),
-                kdbx.credentials.get_composite_key(),
-            ) {
-                (Ok(a), Ok(b)) => a != b,
-                _ => false,
-            };
-
-            if master_key_changed {
-                merge_log.is_update_master_key = true;
-                let _ = std::mem::replace(&mut self.credentials, kdbx.credentials.clone());
-            } else {
-                merge_log.warnings.push(
-                    "The master key change times are the same, but there’s already a deviation."
-                        .into(),
-                );
-            }
+        if merge_log.events.iter().any(|item| {
+            matches!(
+                item.target,
+                MergeEventTarget::Meta(MetaField::MasterKeyChanged)
+            )
+        }) {
+            let _ = std::mem::replace(&mut self.credentials, kdbx.credentials.clone());
         }
 
         drop(dest_db);
@@ -2321,20 +2306,25 @@ pub enum _VariantDictionaryValue {
 }
 
 pub struct MergeLog {
-    pub master_key_changed: bool,
-    pub is_update_master_key: bool,
     pub warnings: Vec<String>,
     pub events: Vec<MergeEvent>,
+    pub dest_events: Vec<MergeEvent>,
 }
 
 impl From<MergeLog2> for MergeLog {
     fn from(value: MergeLog2) -> Self {
         Self {
-            master_key_changed: false,
-            is_update_master_key: false,
             warnings: value.warnings,
             events: value
                 .events
+                .into_iter()
+                .map(|item| MergeEvent {
+                    target: item.target.into(),
+                    event_type: item.event_type,
+                })
+                .collect(),
+            dest_events: value
+                .dest_events
                 .into_iter()
                 .map(|item| MergeEvent {
                     target: item.target.into(),
@@ -2354,6 +2344,7 @@ pub enum MergeEventTarget {
     Entry(String),
     Group(String),
     Icon(String),
+    Meta(MetaField),
 }
 
 impl From<MergeEventTarget2> for MergeEventTarget {
@@ -2362,6 +2353,7 @@ impl From<MergeEventTarget2> for MergeEventTarget {
             MergeEventTarget2::Entry(id) => MergeEventTarget::Entry(id.to_string()),
             MergeEventTarget2::Group(id) => MergeEventTarget::Group(id.to_string()),
             MergeEventTarget2::Icon(id) => MergeEventTarget::Icon(id.to_string()),
+            MergeEventTarget2::Meta(field) => MergeEventTarget::Meta(field),
         }
     }
 }
@@ -2372,6 +2364,25 @@ pub enum _MergeEventType {
     Deleted,
     LocationUpdated,
     Updated,
+}
+
+#[frb(mirror(MetaField))]
+pub enum _MetaField {
+    DatabaseName,
+    DatabaseDescription,
+    DefaultUsername,
+    RecycleBin,
+    EntryTemplatesGroup,
+    MasterKeyChanged,
+    MaintenanceHistoryDays,
+    Color,
+    MasterKeyChangeRec,
+    MasterKeyChangeForce,
+    MemoryProtection,
+    HistoryMaxItems,
+    HistoryMaxSize,
+    Config,
+    CustomData(String),
 }
 
 #[frb]

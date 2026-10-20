@@ -2683,6 +2683,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  MetaField dco_decode_box_autoadd_meta_field(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_meta_field(raw);
+  }
+
+  @protected
   OuterCipherConfig dco_decode_box_autoadd_outer_cipher_config(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_outer_cipher_config(raw);
@@ -3324,6 +3330,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         return MergeEventTarget_Group(dco_decode_String(arr[1]));
       case 2:
         return MergeEventTarget_Icon(dco_decode_String(arr[1]));
+      case 3:
+        return MergeEventTarget_Meta(dco_decode_box_autoadd_meta_field(arr[1]));
       default:
         throw Exception("unreachable");
     }
@@ -3339,13 +3347,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   MergeLog dco_decode_merge_log(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = dcoDecodeList(raw);
-    if (arr.length != 4)
-      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    if (arr.length != 3)
+      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
     return MergeLog(
-      masterKeyChanged: dco_decode_bool(arr[0]),
-      isUpdateMasterKey: dco_decode_bool(arr[1]),
-      warnings: dco_decode_list_String(arr[2]),
-      events: dco_decode_list_merge_event(arr[3]),
+      warnings: dco_decode_list_String(arr[0]),
+      events: dco_decode_list_merge_event(arr[1]),
+      destEvents: dco_decode_list_merge_event(arr[2]),
     );
   }
 
@@ -3392,6 +3399,46 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       settingsChanged: dco_decode_opt_box_autoadd_Chrono_NaiveDateTime(arr[22]),
       customData: dco_decode_Set_String_None(arr[23]),
     );
+  }
+
+  @protected
+  MetaField dco_decode_meta_field(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = dcoDecodeList(raw);
+    switch (dcoDecodePrimitiveInt(arr[0])) {
+      case 0:
+        return MetaField_DatabaseName();
+      case 1:
+        return MetaField_DatabaseDescription();
+      case 2:
+        return MetaField_DefaultUsername();
+      case 3:
+        return MetaField_RecycleBin();
+      case 4:
+        return MetaField_EntryTemplatesGroup();
+      case 5:
+        return MetaField_MasterKeyChanged();
+      case 6:
+        return MetaField_MaintenanceHistoryDays();
+      case 7:
+        return MetaField_Color();
+      case 8:
+        return MetaField_MasterKeyChangeRec();
+      case 9:
+        return MetaField_MasterKeyChangeForce();
+      case 10:
+        return MetaField_MemoryProtection();
+      case 11:
+        return MetaField_HistoryMaxItems();
+      case 12:
+        return MetaField_HistoryMaxSize();
+      case 13:
+        return MetaField_Config();
+      case 14:
+        return MetaField_CustomData(dco_decode_String(arr[1]));
+      default:
+        throw Exception("unreachable");
+    }
   }
 
   @protected
@@ -4244,6 +4291,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  MetaField sse_decode_box_autoadd_meta_field(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_meta_field(deserializer));
+  }
+
+  @protected
   OuterCipherConfig sse_decode_box_autoadd_outer_cipher_config(
     SseDeserializer deserializer,
   ) {
@@ -5069,6 +5122,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case 2:
         var var_field0 = sse_decode_String(deserializer);
         return MergeEventTarget_Icon(var_field0);
+      case 3:
+        var var_field0 = sse_decode_box_autoadd_meta_field(deserializer);
+        return MergeEventTarget_Meta(var_field0);
       default:
         throw UnimplementedError('');
     }
@@ -5084,15 +5140,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   MergeLog sse_decode_merge_log(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_masterKeyChanged = sse_decode_bool(deserializer);
-    var var_isUpdateMasterKey = sse_decode_bool(deserializer);
     var var_warnings = sse_decode_list_String(deserializer);
     var var_events = sse_decode_list_merge_event(deserializer);
+    var var_destEvents = sse_decode_list_merge_event(deserializer);
     return MergeLog(
-      masterKeyChanged: var_masterKeyChanged,
-      isUpdateMasterKey: var_isUpdateMasterKey,
       warnings: var_warnings,
       events: var_events,
+      destEvents: var_destEvents,
     );
   }
 
@@ -5168,6 +5222,48 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       settingsChanged: var_settingsChanged,
       customData: var_customData,
     );
+  }
+
+  @protected
+  MetaField sse_decode_meta_field(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var tag_ = sse_decode_i_32(deserializer);
+    switch (tag_) {
+      case 0:
+        return MetaField_DatabaseName();
+      case 1:
+        return MetaField_DatabaseDescription();
+      case 2:
+        return MetaField_DefaultUsername();
+      case 3:
+        return MetaField_RecycleBin();
+      case 4:
+        return MetaField_EntryTemplatesGroup();
+      case 5:
+        return MetaField_MasterKeyChanged();
+      case 6:
+        return MetaField_MaintenanceHistoryDays();
+      case 7:
+        return MetaField_Color();
+      case 8:
+        return MetaField_MasterKeyChangeRec();
+      case 9:
+        return MetaField_MasterKeyChangeForce();
+      case 10:
+        return MetaField_MemoryProtection();
+      case 11:
+        return MetaField_HistoryMaxItems();
+      case 12:
+        return MetaField_HistoryMaxSize();
+      case 13:
+        return MetaField_Config();
+      case 14:
+        var var_field0 = sse_decode_String(deserializer);
+        return MetaField_CustomData(var_field0);
+      default:
+        throw UnimplementedError('');
+    }
   }
 
   @protected
@@ -6242,6 +6338,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_box_autoadd_meta_field(
+    MetaField self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_meta_field(self, serializer);
+  }
+
+  @protected
   void sse_encode_box_autoadd_outer_cipher_config(
     OuterCipherConfig self,
     SseSerializer serializer,
@@ -6973,6 +7078,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case MergeEventTarget_Icon(field0: final field0):
         sse_encode_i_32(2, serializer);
         sse_encode_String(field0, serializer);
+      case MergeEventTarget_Meta(field0: final field0):
+        sse_encode_i_32(3, serializer);
+        sse_encode_box_autoadd_meta_field(field0, serializer);
     }
   }
 
@@ -6988,10 +7096,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   void sse_encode_merge_log(MergeLog self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_bool(self.masterKeyChanged, serializer);
-    sse_encode_bool(self.isUpdateMasterKey, serializer);
     sse_encode_list_String(self.warnings, serializer);
     sse_encode_list_merge_event(self.events, serializer);
+    sse_encode_list_merge_event(self.destEvents, serializer);
   }
 
   @protected
@@ -7048,6 +7155,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       serializer,
     );
     sse_encode_Set_String_None(self.customData, serializer);
+  }
+
+  @protected
+  void sse_encode_meta_field(MetaField self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    switch (self) {
+      case MetaField_DatabaseName():
+        sse_encode_i_32(0, serializer);
+      case MetaField_DatabaseDescription():
+        sse_encode_i_32(1, serializer);
+      case MetaField_DefaultUsername():
+        sse_encode_i_32(2, serializer);
+      case MetaField_RecycleBin():
+        sse_encode_i_32(3, serializer);
+      case MetaField_EntryTemplatesGroup():
+        sse_encode_i_32(4, serializer);
+      case MetaField_MasterKeyChanged():
+        sse_encode_i_32(5, serializer);
+      case MetaField_MaintenanceHistoryDays():
+        sse_encode_i_32(6, serializer);
+      case MetaField_Color():
+        sse_encode_i_32(7, serializer);
+      case MetaField_MasterKeyChangeRec():
+        sse_encode_i_32(8, serializer);
+      case MetaField_MasterKeyChangeForce():
+        sse_encode_i_32(9, serializer);
+      case MetaField_MemoryProtection():
+        sse_encode_i_32(10, serializer);
+      case MetaField_HistoryMaxItems():
+        sse_encode_i_32(11, serializer);
+      case MetaField_HistoryMaxSize():
+        sse_encode_i_32(12, serializer);
+      case MetaField_Config():
+        sse_encode_i_32(13, serializer);
+      case MetaField_CustomData(field0: final field0):
+        sse_encode_i_32(14, serializer);
+        sse_encode_String(field0, serializer);
+    }
   }
 
   @protected

@@ -1019,39 +1019,33 @@ sealed class MergeEventTarget with _$MergeEventTarget {
   const factory MergeEventTarget.entry(String field0) = MergeEventTarget_Entry;
   const factory MergeEventTarget.group(String field0) = MergeEventTarget_Group;
   const factory MergeEventTarget.icon(String field0) = MergeEventTarget_Icon;
+  const factory MergeEventTarget.meta(MetaField field0) = MergeEventTarget_Meta;
 }
 
 enum MergeEventType { created, deleted, locationUpdated, updated }
 
 class MergeLog {
-  final bool masterKeyChanged;
-  final bool isUpdateMasterKey;
   final List<String> warnings;
   final List<MergeEvent> events;
+  final List<MergeEvent> destEvents;
 
   const MergeLog({
-    required this.masterKeyChanged,
-    required this.isUpdateMasterKey,
     required this.warnings,
     required this.events,
+    required this.destEvents,
   });
 
   @override
-  int get hashCode =>
-      masterKeyChanged.hashCode ^
-      isUpdateMasterKey.hashCode ^
-      warnings.hashCode ^
-      events.hashCode;
+  int get hashCode => warnings.hashCode ^ events.hashCode ^ destEvents.hashCode;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is MergeLog &&
           runtimeType == other.runtimeType &&
-          masterKeyChanged == other.masterKeyChanged &&
-          isUpdateMasterKey == other.isUpdateMasterKey &&
           warnings == other.warnings &&
-          events == other.events;
+          events == other.events &&
+          destEvents == other.destEvents;
 }
 
 class Meta {
@@ -1163,6 +1157,29 @@ class Meta {
           historyMaxSize == other.historyMaxSize &&
           settingsChanged == other.settingsChanged &&
           customData == other.customData;
+}
+
+@freezed
+sealed class MetaField with _$MetaField {
+  const MetaField._();
+
+  const factory MetaField.databaseName() = MetaField_DatabaseName;
+  const factory MetaField.databaseDescription() = MetaField_DatabaseDescription;
+  const factory MetaField.defaultUsername() = MetaField_DefaultUsername;
+  const factory MetaField.recycleBin() = MetaField_RecycleBin;
+  const factory MetaField.entryTemplatesGroup() = MetaField_EntryTemplatesGroup;
+  const factory MetaField.masterKeyChanged() = MetaField_MasterKeyChanged;
+  const factory MetaField.maintenanceHistoryDays() =
+      MetaField_MaintenanceHistoryDays;
+  const factory MetaField.color() = MetaField_Color;
+  const factory MetaField.masterKeyChangeRec() = MetaField_MasterKeyChangeRec;
+  const factory MetaField.masterKeyChangeForce() =
+      MetaField_MasterKeyChangeForce;
+  const factory MetaField.memoryProtection() = MetaField_MemoryProtection;
+  const factory MetaField.historyMaxItems() = MetaField_HistoryMaxItems;
+  const factory MetaField.historyMaxSize() = MetaField_HistoryMaxSize;
+  const factory MetaField.config() = MetaField_Config;
+  const factory MetaField.customData(String field0) = MetaField_CustomData;
 }
 
 enum OuterCipherConfig { aes256, twofish, chaCha20 }

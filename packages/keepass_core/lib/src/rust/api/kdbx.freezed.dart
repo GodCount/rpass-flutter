@@ -3737,23 +3737,18 @@ as Argon2Version,
 /// @nodoc
 mixin _$MergeEventTarget {
 
- String get field0;
-/// Create a copy of MergeEventTarget
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$MergeEventTargetCopyWith<MergeEventTarget> get copyWith => _$MergeEventTargetCopyWithImpl<MergeEventTarget>(this as MergeEventTarget, _$identity);
+ Object get field0;
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MergeEventTarget&&(identical(other.field0, field0) || other.field0 == field0));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MergeEventTarget&&const DeepCollectionEquality().equals(other.field0, field0));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,field0);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(field0));
 
 @override
 String toString() {
@@ -3764,34 +3759,8 @@ String toString() {
 }
 
 /// @nodoc
-abstract mixin class $MergeEventTargetCopyWith<$Res>  {
-  factory $MergeEventTargetCopyWith(MergeEventTarget value, $Res Function(MergeEventTarget) _then) = _$MergeEventTargetCopyWithImpl;
-@useResult
-$Res call({
- String field0
-});
-
-
-
-
-}
-/// @nodoc
-class _$MergeEventTargetCopyWithImpl<$Res>
-    implements $MergeEventTargetCopyWith<$Res> {
-  _$MergeEventTargetCopyWithImpl(this._self, this._then);
-
-  final MergeEventTarget _self;
-  final $Res Function(MergeEventTarget) _then;
-
-/// Create a copy of MergeEventTarget
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? field0 = null,}) {
-  return _then(_self.copyWith(
-field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
-}
-
+class $MergeEventTargetCopyWith<$Res>  {
+$MergeEventTargetCopyWith(MergeEventTarget _, $Res Function(MergeEventTarget) __);
 }
 
 
@@ -3809,13 +3778,14 @@ extension MergeEventTargetPatterns on MergeEventTarget {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( MergeEventTarget_Entry value)?  entry,TResult Function( MergeEventTarget_Group value)?  group,TResult Function( MergeEventTarget_Icon value)?  icon,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( MergeEventTarget_Entry value)?  entry,TResult Function( MergeEventTarget_Group value)?  group,TResult Function( MergeEventTarget_Icon value)?  icon,TResult Function( MergeEventTarget_Meta value)?  meta,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case MergeEventTarget_Entry() when entry != null:
 return entry(_that);case MergeEventTarget_Group() when group != null:
 return group(_that);case MergeEventTarget_Icon() when icon != null:
-return icon(_that);case _:
+return icon(_that);case MergeEventTarget_Meta() when meta != null:
+return meta(_that);case _:
   return orElse();
 
 }
@@ -3833,13 +3803,14 @@ return icon(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( MergeEventTarget_Entry value)  entry,required TResult Function( MergeEventTarget_Group value)  group,required TResult Function( MergeEventTarget_Icon value)  icon,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( MergeEventTarget_Entry value)  entry,required TResult Function( MergeEventTarget_Group value)  group,required TResult Function( MergeEventTarget_Icon value)  icon,required TResult Function( MergeEventTarget_Meta value)  meta,}){
 final _that = this;
 switch (_that) {
 case MergeEventTarget_Entry():
 return entry(_that);case MergeEventTarget_Group():
 return group(_that);case MergeEventTarget_Icon():
-return icon(_that);}
+return icon(_that);case MergeEventTarget_Meta():
+return meta(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -3853,13 +3824,14 @@ return icon(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( MergeEventTarget_Entry value)?  entry,TResult? Function( MergeEventTarget_Group value)?  group,TResult? Function( MergeEventTarget_Icon value)?  icon,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( MergeEventTarget_Entry value)?  entry,TResult? Function( MergeEventTarget_Group value)?  group,TResult? Function( MergeEventTarget_Icon value)?  icon,TResult? Function( MergeEventTarget_Meta value)?  meta,}){
 final _that = this;
 switch (_that) {
 case MergeEventTarget_Entry() when entry != null:
 return entry(_that);case MergeEventTarget_Group() when group != null:
 return group(_that);case MergeEventTarget_Icon() when icon != null:
-return icon(_that);case _:
+return icon(_that);case MergeEventTarget_Meta() when meta != null:
+return meta(_that);case _:
   return null;
 
 }
@@ -3876,12 +3848,13 @@ return icon(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String field0)?  entry,TResult Function( String field0)?  group,TResult Function( String field0)?  icon,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String field0)?  entry,TResult Function( String field0)?  group,TResult Function( String field0)?  icon,TResult Function( MetaField field0)?  meta,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case MergeEventTarget_Entry() when entry != null:
 return entry(_that.field0);case MergeEventTarget_Group() when group != null:
 return group(_that.field0);case MergeEventTarget_Icon() when icon != null:
-return icon(_that.field0);case _:
+return icon(_that.field0);case MergeEventTarget_Meta() when meta != null:
+return meta(_that.field0);case _:
   return orElse();
 
 }
@@ -3899,12 +3872,13 @@ return icon(_that.field0);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String field0)  entry,required TResult Function( String field0)  group,required TResult Function( String field0)  icon,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String field0)  entry,required TResult Function( String field0)  group,required TResult Function( String field0)  icon,required TResult Function( MetaField field0)  meta,}) {final _that = this;
 switch (_that) {
 case MergeEventTarget_Entry():
 return entry(_that.field0);case MergeEventTarget_Group():
 return group(_that.field0);case MergeEventTarget_Icon():
-return icon(_that.field0);}
+return icon(_that.field0);case MergeEventTarget_Meta():
+return meta(_that.field0);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -3918,12 +3892,13 @@ return icon(_that.field0);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String field0)?  entry,TResult? Function( String field0)?  group,TResult? Function( String field0)?  icon,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String field0)?  entry,TResult? Function( String field0)?  group,TResult? Function( String field0)?  icon,TResult? Function( MetaField field0)?  meta,}) {final _that = this;
 switch (_that) {
 case MergeEventTarget_Entry() when entry != null:
 return entry(_that.field0);case MergeEventTarget_Group() when group != null:
 return group(_that.field0);case MergeEventTarget_Icon() when icon != null:
-return icon(_that.field0);case _:
+return icon(_that.field0);case MergeEventTarget_Meta() when meta != null:
+return meta(_that.field0);case _:
   return null;
 
 }
@@ -3942,7 +3917,7 @@ class MergeEventTarget_Entry extends MergeEventTarget {
 
 /// Create a copy of MergeEventTarget
 /// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
+@JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 $MergeEventTarget_EntryCopyWith<MergeEventTarget_Entry> get copyWith => _$MergeEventTarget_EntryCopyWithImpl<MergeEventTarget_Entry>(this, _$identity);
 
@@ -3968,7 +3943,7 @@ String toString() {
 /// @nodoc
 abstract mixin class $MergeEventTarget_EntryCopyWith<$Res> implements $MergeEventTargetCopyWith<$Res> {
   factory $MergeEventTarget_EntryCopyWith(MergeEventTarget_Entry value, $Res Function(MergeEventTarget_Entry) _then) = _$MergeEventTarget_EntryCopyWithImpl;
-@override @useResult
+@useResult
 $Res call({
  String field0
 });
@@ -3987,7 +3962,7 @@ class _$MergeEventTarget_EntryCopyWithImpl<$Res>
 
 /// Create a copy of MergeEventTarget
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
   return _then(MergeEventTarget_Entry(
 null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
 as String,
@@ -4008,7 +3983,7 @@ class MergeEventTarget_Group extends MergeEventTarget {
 
 /// Create a copy of MergeEventTarget
 /// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
+@JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 $MergeEventTarget_GroupCopyWith<MergeEventTarget_Group> get copyWith => _$MergeEventTarget_GroupCopyWithImpl<MergeEventTarget_Group>(this, _$identity);
 
@@ -4034,7 +4009,7 @@ String toString() {
 /// @nodoc
 abstract mixin class $MergeEventTarget_GroupCopyWith<$Res> implements $MergeEventTargetCopyWith<$Res> {
   factory $MergeEventTarget_GroupCopyWith(MergeEventTarget_Group value, $Res Function(MergeEventTarget_Group) _then) = _$MergeEventTarget_GroupCopyWithImpl;
-@override @useResult
+@useResult
 $Res call({
  String field0
 });
@@ -4053,7 +4028,7 @@ class _$MergeEventTarget_GroupCopyWithImpl<$Res>
 
 /// Create a copy of MergeEventTarget
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
   return _then(MergeEventTarget_Group(
 null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
 as String,
@@ -4074,7 +4049,7 @@ class MergeEventTarget_Icon extends MergeEventTarget {
 
 /// Create a copy of MergeEventTarget
 /// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
+@JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 $MergeEventTarget_IconCopyWith<MergeEventTarget_Icon> get copyWith => _$MergeEventTarget_IconCopyWithImpl<MergeEventTarget_Icon>(this, _$identity);
 
@@ -4100,7 +4075,7 @@ String toString() {
 /// @nodoc
 abstract mixin class $MergeEventTarget_IconCopyWith<$Res> implements $MergeEventTargetCopyWith<$Res> {
   factory $MergeEventTarget_IconCopyWith(MergeEventTarget_Icon value, $Res Function(MergeEventTarget_Icon) _then) = _$MergeEventTarget_IconCopyWithImpl;
-@override @useResult
+@useResult
 $Res call({
  String field0
 });
@@ -4119,8 +4094,835 @@ class _$MergeEventTarget_IconCopyWithImpl<$Res>
 
 /// Create a copy of MergeEventTarget
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
   return _then(MergeEventTarget_Icon(
+null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class MergeEventTarget_Meta extends MergeEventTarget {
+  const MergeEventTarget_Meta(this.field0): super._();
+  
+
+@override final  MetaField field0;
+
+/// Create a copy of MergeEventTarget
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MergeEventTarget_MetaCopyWith<MergeEventTarget_Meta> get copyWith => _$MergeEventTarget_MetaCopyWithImpl<MergeEventTarget_Meta>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MergeEventTarget_Meta&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'MergeEventTarget.meta(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MergeEventTarget_MetaCopyWith<$Res> implements $MergeEventTargetCopyWith<$Res> {
+  factory $MergeEventTarget_MetaCopyWith(MergeEventTarget_Meta value, $Res Function(MergeEventTarget_Meta) _then) = _$MergeEventTarget_MetaCopyWithImpl;
+@useResult
+$Res call({
+ MetaField field0
+});
+
+
+$MetaFieldCopyWith<$Res> get field0;
+
+}
+/// @nodoc
+class _$MergeEventTarget_MetaCopyWithImpl<$Res>
+    implements $MergeEventTarget_MetaCopyWith<$Res> {
+  _$MergeEventTarget_MetaCopyWithImpl(this._self, this._then);
+
+  final MergeEventTarget_Meta _self;
+  final $Res Function(MergeEventTarget_Meta) _then;
+
+/// Create a copy of MergeEventTarget
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(MergeEventTarget_Meta(
+null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as MetaField,
+  ));
+}
+
+/// Create a copy of MergeEventTarget
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MetaFieldCopyWith<$Res> get field0 {
+  
+  return $MetaFieldCopyWith<$Res>(_self.field0, (value) {
+    return _then(_self.copyWith(field0: value));
+  });
+}
+}
+
+/// @nodoc
+mixin _$MetaField {
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MetaField);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'MetaField()';
+}
+
+
+}
+
+/// @nodoc
+class $MetaFieldCopyWith<$Res>  {
+$MetaFieldCopyWith(MetaField _, $Res Function(MetaField) __);
+}
+
+
+/// Adds pattern-matching-related methods to [MetaField].
+extension MetaFieldPatterns on MetaField {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( MetaField_DatabaseName value)?  databaseName,TResult Function( MetaField_DatabaseDescription value)?  databaseDescription,TResult Function( MetaField_DefaultUsername value)?  defaultUsername,TResult Function( MetaField_RecycleBin value)?  recycleBin,TResult Function( MetaField_EntryTemplatesGroup value)?  entryTemplatesGroup,TResult Function( MetaField_MasterKeyChanged value)?  masterKeyChanged,TResult Function( MetaField_MaintenanceHistoryDays value)?  maintenanceHistoryDays,TResult Function( MetaField_Color value)?  color,TResult Function( MetaField_MasterKeyChangeRec value)?  masterKeyChangeRec,TResult Function( MetaField_MasterKeyChangeForce value)?  masterKeyChangeForce,TResult Function( MetaField_MemoryProtection value)?  memoryProtection,TResult Function( MetaField_HistoryMaxItems value)?  historyMaxItems,TResult Function( MetaField_HistoryMaxSize value)?  historyMaxSize,TResult Function( MetaField_Config value)?  config,TResult Function( MetaField_CustomData value)?  customData,required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case MetaField_DatabaseName() when databaseName != null:
+return databaseName(_that);case MetaField_DatabaseDescription() when databaseDescription != null:
+return databaseDescription(_that);case MetaField_DefaultUsername() when defaultUsername != null:
+return defaultUsername(_that);case MetaField_RecycleBin() when recycleBin != null:
+return recycleBin(_that);case MetaField_EntryTemplatesGroup() when entryTemplatesGroup != null:
+return entryTemplatesGroup(_that);case MetaField_MasterKeyChanged() when masterKeyChanged != null:
+return masterKeyChanged(_that);case MetaField_MaintenanceHistoryDays() when maintenanceHistoryDays != null:
+return maintenanceHistoryDays(_that);case MetaField_Color() when color != null:
+return color(_that);case MetaField_MasterKeyChangeRec() when masterKeyChangeRec != null:
+return masterKeyChangeRec(_that);case MetaField_MasterKeyChangeForce() when masterKeyChangeForce != null:
+return masterKeyChangeForce(_that);case MetaField_MemoryProtection() when memoryProtection != null:
+return memoryProtection(_that);case MetaField_HistoryMaxItems() when historyMaxItems != null:
+return historyMaxItems(_that);case MetaField_HistoryMaxSize() when historyMaxSize != null:
+return historyMaxSize(_that);case MetaField_Config() when config != null:
+return config(_that);case MetaField_CustomData() when customData != null:
+return customData(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( MetaField_DatabaseName value)  databaseName,required TResult Function( MetaField_DatabaseDescription value)  databaseDescription,required TResult Function( MetaField_DefaultUsername value)  defaultUsername,required TResult Function( MetaField_RecycleBin value)  recycleBin,required TResult Function( MetaField_EntryTemplatesGroup value)  entryTemplatesGroup,required TResult Function( MetaField_MasterKeyChanged value)  masterKeyChanged,required TResult Function( MetaField_MaintenanceHistoryDays value)  maintenanceHistoryDays,required TResult Function( MetaField_Color value)  color,required TResult Function( MetaField_MasterKeyChangeRec value)  masterKeyChangeRec,required TResult Function( MetaField_MasterKeyChangeForce value)  masterKeyChangeForce,required TResult Function( MetaField_MemoryProtection value)  memoryProtection,required TResult Function( MetaField_HistoryMaxItems value)  historyMaxItems,required TResult Function( MetaField_HistoryMaxSize value)  historyMaxSize,required TResult Function( MetaField_Config value)  config,required TResult Function( MetaField_CustomData value)  customData,}){
+final _that = this;
+switch (_that) {
+case MetaField_DatabaseName():
+return databaseName(_that);case MetaField_DatabaseDescription():
+return databaseDescription(_that);case MetaField_DefaultUsername():
+return defaultUsername(_that);case MetaField_RecycleBin():
+return recycleBin(_that);case MetaField_EntryTemplatesGroup():
+return entryTemplatesGroup(_that);case MetaField_MasterKeyChanged():
+return masterKeyChanged(_that);case MetaField_MaintenanceHistoryDays():
+return maintenanceHistoryDays(_that);case MetaField_Color():
+return color(_that);case MetaField_MasterKeyChangeRec():
+return masterKeyChangeRec(_that);case MetaField_MasterKeyChangeForce():
+return masterKeyChangeForce(_that);case MetaField_MemoryProtection():
+return memoryProtection(_that);case MetaField_HistoryMaxItems():
+return historyMaxItems(_that);case MetaField_HistoryMaxSize():
+return historyMaxSize(_that);case MetaField_Config():
+return config(_that);case MetaField_CustomData():
+return customData(_that);}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( MetaField_DatabaseName value)?  databaseName,TResult? Function( MetaField_DatabaseDescription value)?  databaseDescription,TResult? Function( MetaField_DefaultUsername value)?  defaultUsername,TResult? Function( MetaField_RecycleBin value)?  recycleBin,TResult? Function( MetaField_EntryTemplatesGroup value)?  entryTemplatesGroup,TResult? Function( MetaField_MasterKeyChanged value)?  masterKeyChanged,TResult? Function( MetaField_MaintenanceHistoryDays value)?  maintenanceHistoryDays,TResult? Function( MetaField_Color value)?  color,TResult? Function( MetaField_MasterKeyChangeRec value)?  masterKeyChangeRec,TResult? Function( MetaField_MasterKeyChangeForce value)?  masterKeyChangeForce,TResult? Function( MetaField_MemoryProtection value)?  memoryProtection,TResult? Function( MetaField_HistoryMaxItems value)?  historyMaxItems,TResult? Function( MetaField_HistoryMaxSize value)?  historyMaxSize,TResult? Function( MetaField_Config value)?  config,TResult? Function( MetaField_CustomData value)?  customData,}){
+final _that = this;
+switch (_that) {
+case MetaField_DatabaseName() when databaseName != null:
+return databaseName(_that);case MetaField_DatabaseDescription() when databaseDescription != null:
+return databaseDescription(_that);case MetaField_DefaultUsername() when defaultUsername != null:
+return defaultUsername(_that);case MetaField_RecycleBin() when recycleBin != null:
+return recycleBin(_that);case MetaField_EntryTemplatesGroup() when entryTemplatesGroup != null:
+return entryTemplatesGroup(_that);case MetaField_MasterKeyChanged() when masterKeyChanged != null:
+return masterKeyChanged(_that);case MetaField_MaintenanceHistoryDays() when maintenanceHistoryDays != null:
+return maintenanceHistoryDays(_that);case MetaField_Color() when color != null:
+return color(_that);case MetaField_MasterKeyChangeRec() when masterKeyChangeRec != null:
+return masterKeyChangeRec(_that);case MetaField_MasterKeyChangeForce() when masterKeyChangeForce != null:
+return masterKeyChangeForce(_that);case MetaField_MemoryProtection() when memoryProtection != null:
+return memoryProtection(_that);case MetaField_HistoryMaxItems() when historyMaxItems != null:
+return historyMaxItems(_that);case MetaField_HistoryMaxSize() when historyMaxSize != null:
+return historyMaxSize(_that);case MetaField_Config() when config != null:
+return config(_that);case MetaField_CustomData() when customData != null:
+return customData(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  databaseName,TResult Function()?  databaseDescription,TResult Function()?  defaultUsername,TResult Function()?  recycleBin,TResult Function()?  entryTemplatesGroup,TResult Function()?  masterKeyChanged,TResult Function()?  maintenanceHistoryDays,TResult Function()?  color,TResult Function()?  masterKeyChangeRec,TResult Function()?  masterKeyChangeForce,TResult Function()?  memoryProtection,TResult Function()?  historyMaxItems,TResult Function()?  historyMaxSize,TResult Function()?  config,TResult Function( String field0)?  customData,required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case MetaField_DatabaseName() when databaseName != null:
+return databaseName();case MetaField_DatabaseDescription() when databaseDescription != null:
+return databaseDescription();case MetaField_DefaultUsername() when defaultUsername != null:
+return defaultUsername();case MetaField_RecycleBin() when recycleBin != null:
+return recycleBin();case MetaField_EntryTemplatesGroup() when entryTemplatesGroup != null:
+return entryTemplatesGroup();case MetaField_MasterKeyChanged() when masterKeyChanged != null:
+return masterKeyChanged();case MetaField_MaintenanceHistoryDays() when maintenanceHistoryDays != null:
+return maintenanceHistoryDays();case MetaField_Color() when color != null:
+return color();case MetaField_MasterKeyChangeRec() when masterKeyChangeRec != null:
+return masterKeyChangeRec();case MetaField_MasterKeyChangeForce() when masterKeyChangeForce != null:
+return masterKeyChangeForce();case MetaField_MemoryProtection() when memoryProtection != null:
+return memoryProtection();case MetaField_HistoryMaxItems() when historyMaxItems != null:
+return historyMaxItems();case MetaField_HistoryMaxSize() when historyMaxSize != null:
+return historyMaxSize();case MetaField_Config() when config != null:
+return config();case MetaField_CustomData() when customData != null:
+return customData(_that.field0);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  databaseName,required TResult Function()  databaseDescription,required TResult Function()  defaultUsername,required TResult Function()  recycleBin,required TResult Function()  entryTemplatesGroup,required TResult Function()  masterKeyChanged,required TResult Function()  maintenanceHistoryDays,required TResult Function()  color,required TResult Function()  masterKeyChangeRec,required TResult Function()  masterKeyChangeForce,required TResult Function()  memoryProtection,required TResult Function()  historyMaxItems,required TResult Function()  historyMaxSize,required TResult Function()  config,required TResult Function( String field0)  customData,}) {final _that = this;
+switch (_that) {
+case MetaField_DatabaseName():
+return databaseName();case MetaField_DatabaseDescription():
+return databaseDescription();case MetaField_DefaultUsername():
+return defaultUsername();case MetaField_RecycleBin():
+return recycleBin();case MetaField_EntryTemplatesGroup():
+return entryTemplatesGroup();case MetaField_MasterKeyChanged():
+return masterKeyChanged();case MetaField_MaintenanceHistoryDays():
+return maintenanceHistoryDays();case MetaField_Color():
+return color();case MetaField_MasterKeyChangeRec():
+return masterKeyChangeRec();case MetaField_MasterKeyChangeForce():
+return masterKeyChangeForce();case MetaField_MemoryProtection():
+return memoryProtection();case MetaField_HistoryMaxItems():
+return historyMaxItems();case MetaField_HistoryMaxSize():
+return historyMaxSize();case MetaField_Config():
+return config();case MetaField_CustomData():
+return customData(_that.field0);}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  databaseName,TResult? Function()?  databaseDescription,TResult? Function()?  defaultUsername,TResult? Function()?  recycleBin,TResult? Function()?  entryTemplatesGroup,TResult? Function()?  masterKeyChanged,TResult? Function()?  maintenanceHistoryDays,TResult? Function()?  color,TResult? Function()?  masterKeyChangeRec,TResult? Function()?  masterKeyChangeForce,TResult? Function()?  memoryProtection,TResult? Function()?  historyMaxItems,TResult? Function()?  historyMaxSize,TResult? Function()?  config,TResult? Function( String field0)?  customData,}) {final _that = this;
+switch (_that) {
+case MetaField_DatabaseName() when databaseName != null:
+return databaseName();case MetaField_DatabaseDescription() when databaseDescription != null:
+return databaseDescription();case MetaField_DefaultUsername() when defaultUsername != null:
+return defaultUsername();case MetaField_RecycleBin() when recycleBin != null:
+return recycleBin();case MetaField_EntryTemplatesGroup() when entryTemplatesGroup != null:
+return entryTemplatesGroup();case MetaField_MasterKeyChanged() when masterKeyChanged != null:
+return masterKeyChanged();case MetaField_MaintenanceHistoryDays() when maintenanceHistoryDays != null:
+return maintenanceHistoryDays();case MetaField_Color() when color != null:
+return color();case MetaField_MasterKeyChangeRec() when masterKeyChangeRec != null:
+return masterKeyChangeRec();case MetaField_MasterKeyChangeForce() when masterKeyChangeForce != null:
+return masterKeyChangeForce();case MetaField_MemoryProtection() when memoryProtection != null:
+return memoryProtection();case MetaField_HistoryMaxItems() when historyMaxItems != null:
+return historyMaxItems();case MetaField_HistoryMaxSize() when historyMaxSize != null:
+return historyMaxSize();case MetaField_Config() when config != null:
+return config();case MetaField_CustomData() when customData != null:
+return customData(_that.field0);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class MetaField_DatabaseName extends MetaField {
+  const MetaField_DatabaseName(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MetaField_DatabaseName);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'MetaField.databaseName()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class MetaField_DatabaseDescription extends MetaField {
+  const MetaField_DatabaseDescription(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MetaField_DatabaseDescription);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'MetaField.databaseDescription()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class MetaField_DefaultUsername extends MetaField {
+  const MetaField_DefaultUsername(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MetaField_DefaultUsername);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'MetaField.defaultUsername()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class MetaField_RecycleBin extends MetaField {
+  const MetaField_RecycleBin(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MetaField_RecycleBin);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'MetaField.recycleBin()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class MetaField_EntryTemplatesGroup extends MetaField {
+  const MetaField_EntryTemplatesGroup(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MetaField_EntryTemplatesGroup);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'MetaField.entryTemplatesGroup()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class MetaField_MasterKeyChanged extends MetaField {
+  const MetaField_MasterKeyChanged(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MetaField_MasterKeyChanged);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'MetaField.masterKeyChanged()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class MetaField_MaintenanceHistoryDays extends MetaField {
+  const MetaField_MaintenanceHistoryDays(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MetaField_MaintenanceHistoryDays);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'MetaField.maintenanceHistoryDays()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class MetaField_Color extends MetaField {
+  const MetaField_Color(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MetaField_Color);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'MetaField.color()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class MetaField_MasterKeyChangeRec extends MetaField {
+  const MetaField_MasterKeyChangeRec(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MetaField_MasterKeyChangeRec);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'MetaField.masterKeyChangeRec()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class MetaField_MasterKeyChangeForce extends MetaField {
+  const MetaField_MasterKeyChangeForce(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MetaField_MasterKeyChangeForce);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'MetaField.masterKeyChangeForce()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class MetaField_MemoryProtection extends MetaField {
+  const MetaField_MemoryProtection(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MetaField_MemoryProtection);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'MetaField.memoryProtection()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class MetaField_HistoryMaxItems extends MetaField {
+  const MetaField_HistoryMaxItems(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MetaField_HistoryMaxItems);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'MetaField.historyMaxItems()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class MetaField_HistoryMaxSize extends MetaField {
+  const MetaField_HistoryMaxSize(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MetaField_HistoryMaxSize);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'MetaField.historyMaxSize()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class MetaField_Config extends MetaField {
+  const MetaField_Config(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MetaField_Config);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'MetaField.config()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class MetaField_CustomData extends MetaField {
+  const MetaField_CustomData(this.field0): super._();
+  
+
+ final  String field0;
+
+/// Create a copy of MetaField
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MetaField_CustomDataCopyWith<MetaField_CustomData> get copyWith => _$MetaField_CustomDataCopyWithImpl<MetaField_CustomData>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MetaField_CustomData&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'MetaField.customData(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MetaField_CustomDataCopyWith<$Res> implements $MetaFieldCopyWith<$Res> {
+  factory $MetaField_CustomDataCopyWith(MetaField_CustomData value, $Res Function(MetaField_CustomData) _then) = _$MetaField_CustomDataCopyWithImpl;
+@useResult
+$Res call({
+ String field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$MetaField_CustomDataCopyWithImpl<$Res>
+    implements $MetaField_CustomDataCopyWith<$Res> {
+  _$MetaField_CustomDataCopyWithImpl(this._self, this._then);
+
+  final MetaField_CustomData _self;
+  final $Res Function(MetaField_CustomData) _then;
+
+/// Create a copy of MetaField
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(MetaField_CustomData(
 null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
 as String,
   ));
