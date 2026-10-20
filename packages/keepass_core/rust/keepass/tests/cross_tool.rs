@@ -166,7 +166,7 @@ fn keepassxc_cli_lists_our_vault() {
 
 /// A database with one entry that has a history item, saved with a fast KDF.
 fn database_with_history() -> (Database, EntryId) {
-    let mut db = Database::new();
+    let mut db = Database::fast_new();
     db.config.kdf_config = common::fast_aes_kdf();
 
     let id = db

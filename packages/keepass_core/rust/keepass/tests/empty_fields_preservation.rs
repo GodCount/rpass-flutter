@@ -51,7 +51,7 @@ fn empty_default_fields_should_not_be_added_after_round_trip() {
 }
 
 fn create_database_with_empty_fields() -> Database {
-    let mut db = Database::new();
+    let mut db = Database::fast_new();
     let mut root = db.root_mut();
     let mut entry = root.add_entry();
 
@@ -64,7 +64,7 @@ fn create_database_with_empty_fields() -> Database {
 }
 
 fn create_database_without_empty_fields() -> Database {
-    let mut db = Database::new();
+    let mut db = Database::fast_new();
     let mut root = db.root_mut();
     let mut entry = root.add_entry();
 

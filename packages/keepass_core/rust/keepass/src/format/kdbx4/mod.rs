@@ -77,7 +77,7 @@ mod kdbx4_tests {
     #[cfg(feature = "challenge_response")]
     #[test]
     fn test_with_challenge_response() {
-        let mut db = Database::new();
+        let mut db = Database::fast_new();
 
         db.root_mut().add_entry();
         db.root_mut().add_entry();
@@ -194,7 +194,7 @@ mod kdbx4_tests {
 
     #[test]
     pub fn test_attachments() {
-        let mut db = Database::new();
+        let mut db = Database::fast_new();
 
         db.root_mut().add_entry().edit(|e| {
             e.set_unprotected(fields::TITLE, "Demo entry");
@@ -249,7 +249,7 @@ mod kdbx4_tests {
 
     #[test]
     pub fn test_icons() {
-        let mut db = Database::new();
+        let mut db = Database::fast_new();
 
         db.root_mut().add_entry().edit(|e| {
             e.set_unprotected(fields::TITLE, "Entry without icon");

@@ -88,7 +88,7 @@ fn generate_group_titles() -> Vec<String> {
 }
 
 fn setup_database() -> Database {
-    let mut db = Database::new();
+    let mut db = Database::fast_new();
     let mut root = db.root_mut();
 
     let entry_titles = generate_entry_titles();

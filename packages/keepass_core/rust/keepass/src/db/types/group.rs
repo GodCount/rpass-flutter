@@ -834,7 +834,7 @@ mod group_tests {
 
     #[test]
     fn get() {
-        let mut db = Database::new();
+        let mut db = Database::fast_new();
 
         let general_group_id = db.root_mut().add_group().edit(|g| g.name = "General".into()).id();
 
@@ -875,7 +875,7 @@ mod group_tests {
 
     #[test]
     fn get_mut() {
-        let mut db = Database::new();
+        let mut db = Database::fast_new();
 
         let general_group_id = db.root_mut().add_group().edit(|g| g.name = "General".into()).id();
 
@@ -917,7 +917,7 @@ mod group_tests {
         use crate::db::EntryId;
         use uuid::uuid;
 
-        let mut db = Database::new();
+        let mut db = Database::fast_new();
         let pinned_uuid = uuid!("00000000-0000-0000-0000-0000000000aa");
         let pinned: EntryId = pinned_uuid.into();
 
@@ -940,7 +940,7 @@ mod group_tests {
         use crate::db::{DuplicateEntryIdError, EntryId};
         use uuid::uuid;
 
-        let mut db = Database::new();
+        let mut db = Database::fast_new();
         let pinned: EntryId = uuid!("00000000-0000-0000-0000-0000000000ab").into();
 
         db.root_mut().add_entry_with_id(pinned).unwrap();
@@ -956,7 +956,7 @@ mod group_tests {
         use crate::db::GroupId;
         use uuid::uuid;
 
-        let mut db = Database::new();
+        let mut db = Database::fast_new();
         let pinned_uuid = uuid!("00000000-0000-0000-0000-0000000000ba");
         let pinned: GroupId = pinned_uuid.into();
 
@@ -977,7 +977,7 @@ mod group_tests {
         use crate::db::{DuplicateGroupIdError, GroupId};
         use uuid::uuid;
 
-        let mut db = Database::new();
+        let mut db = Database::fast_new();
         let pinned: GroupId = uuid!("00000000-0000-0000-0000-0000000000bb").into();
 
         db.root_mut().add_group_with_id(pinned).unwrap();

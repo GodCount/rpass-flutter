@@ -71,6 +71,16 @@ impl Database {
         Self::new_with_root_id(GroupId::new())
     }
 
+    /// Create a new database with a single root group and no entries, groups, or attachments.
+    ///
+    /// The root group will be assigned a new random UUID.
+    /// Use fast configuration
+    pub fn fast_new() -> Self {
+        let mut db = Self::new_with_root_id(GroupId::new());
+        db.config = DatabaseConfig::fast_new();
+        db
+    }
+
     /// Create a new database with the given configuration and a single root group.
     ///
     /// The root group will be assigned a new random UUID.

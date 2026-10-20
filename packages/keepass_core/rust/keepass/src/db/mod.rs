@@ -122,7 +122,7 @@ mod database_tests {
     #[test]
     fn test_save() {
         use crate::format::variant_dictionary::VariantDictionary;
-        let mut db = Database::new();
+        let mut db = Database::fast_new();
 
         let mut public_custom_data = VariantDictionary::new();
         public_custom_data.set("example", 42);

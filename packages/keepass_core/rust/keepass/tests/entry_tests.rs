@@ -127,7 +127,7 @@ mod entry_tests {
 
     #[test]
     fn back_reference_custom_icon() {
-        let mut db = Database::new();
+        let mut db = Database::fast_new();
         let (entry_id, icon_id) = {
             let mut root = db.root_mut();
             let mut entry = root.add_entry();
@@ -151,7 +151,7 @@ mod entry_tests {
 
     #[test]
     fn back_reference_attachment() {
-        let mut db = Database::new();
+        let mut db = Database::fast_new();
         let (entry_id, attach_id) = {
             let mut root = db.root_mut();
             let mut entry = root.add_entry();

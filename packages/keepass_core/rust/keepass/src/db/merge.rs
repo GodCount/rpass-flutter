@@ -1258,6 +1258,8 @@ mod merge_tests {
     fn create_test_database() -> Database {
         let mut db = Database::new_with_root_id(ROOT_GROUP_ID);
 
+        db.config = DatabaseConfig::fast_new();
+
         // build up root -> group1 -> subgroup1 -> entry2
         db.root_mut()
             .add_group_with_id(GROUP1_ID)

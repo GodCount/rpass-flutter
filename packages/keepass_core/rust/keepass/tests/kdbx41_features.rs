@@ -9,7 +9,6 @@
 use chrono::NaiveDate;
 use keepass::{
     DatabaseKey,
-    config::{DatabaseConfig, KdfConfig},
     db::{
         AutoType, AutoTypeAssociation, Color, CustomDataItem, CustomDataValue, CustomIconId,
         DataTransferObfuscation, Database, EntryId, GroupId, Value, fields,
@@ -36,7 +35,7 @@ fn fixed_time() -> chrono::NaiveDateTime {
 /// Returns the database and the id of the entry carrying the rich fields,
 /// for tests that want to inspect a specific entry post-roundtrip.
 fn build_kdbx41_rich_database() -> (Database, EntryId) {
-    let mut db = Database::new();
+    let mut db = Database::fast_new();
 
     db.meta.database_name = Some("kdbx41-features".to_string());
     db.meta.custom_data.insert(
@@ -336,7 +335,7 @@ fn entry_quality_check_disabled_round_trips() {
 
 #[test]
 fn entry_previous_parent_group_round_trips() {
-    let mut db = Database::new();
+    let mut db = Database::fast_new();
 
     let (source_id, entry_id): (GroupId, EntryId) = {
         let mut root = db.root_mut();
@@ -367,7 +366,7 @@ fn entry_previous_parent_group_round_trips() {
 
 #[test]
 fn custom_icon_name_and_modification_time_round_trip() {
-    let mut db = Database::new();
+    let mut db = Database::fast_new();
 
     let icon_id: CustomIconId = {
         let mut root = db.root_mut();

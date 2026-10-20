@@ -56,12 +56,9 @@ pub struct DatabaseConfig {
     pub public_custom_data: Option<VariantDictionary>,
 }
 
-/// Sensible default configuration for new databases
-impl Default for DatabaseConfig {
-    /// test fast config
-    #[cfg(test)]
-    fn default() -> Self {
-        Self {
+impl DatabaseConfig {
+    pub(crate) fn fast_new() -> Self {
+        DatabaseConfig {
             version: DatabaseVersion::KDB4(KDBX4_CURRENT_MINOR_VERSION),
             outer_cipher_config: OuterCipherConfig::AES256,
             compression_config: CompressionConfig::GZip,
@@ -75,8 +72,10 @@ impl Default for DatabaseConfig {
             public_custom_data: None,
         }
     }
+}
 
-    #[cfg(not(test))]
+/// Sensible default configuration for new databases
+impl Default for DatabaseConfig {
     fn default() -> Self {
         Self {
             version: DatabaseVersion::KDB4(KDBX4_CURRENT_MINOR_VERSION),

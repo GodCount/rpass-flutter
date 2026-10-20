@@ -22,7 +22,7 @@ fn key() -> DatabaseKey {
 }
 
 fn build_db_with_tagged_entry_and_group(entry_tags: Vec<String>, group_tags: Vec<String>) -> Database {
-    let mut db = Database::new();
+    let mut db = Database::fast_new();
 
     {
         let mut root = db.root_mut();

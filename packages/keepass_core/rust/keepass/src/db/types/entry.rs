@@ -916,7 +916,7 @@ mod tests {
 
     #[test]
     fn test_entry() {
-        let mut db = Database::new();
+        let mut db = Database::fast_new();
 
         let entry_id = db
             .root_mut()
@@ -1006,7 +1006,7 @@ mod tests {
 
     #[test]
     fn test_entry_eq_attach() {
-        let mut db = Database::new();
+        let mut db = Database::fast_new();
 
         let entry_id = db
             .root_mut()
@@ -1030,7 +1030,7 @@ mod tests {
 
     #[test]
     fn test_attachments_different_names_eq_attach() {
-        let mut db = Database::new();
+        let mut db = Database::fast_new();
 
         let entry_id = db
             .root_mut()

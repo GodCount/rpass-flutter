@@ -241,7 +241,7 @@ mod tests {
 
     #[test]
     fn rmeove_icon_update_deleted_objects() {
-        let mut db = Database::new();
+        let mut db = Database::fast_new();
 
         let entry_id = db
             .root_mut()

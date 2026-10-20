@@ -22,7 +22,7 @@ mod large_file_roundtrip_tests {
     /// This tests guards against issues that might affect large databases.
     #[test]
     fn write_and_read_large_database() -> Result<(), Box<dyn std::error::Error>> {
-        let mut db = Database::new();
+        let mut db = Database::fast_new();
 
         db.meta.database_name = Some("Demo database".to_string());
 
