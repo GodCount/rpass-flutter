@@ -2336,6 +2336,7 @@ pub enum MergeEventTarget {
     Group(String),
     Icon(String),
     Meta(MetaField),
+    DeletedObject(String)
 }
 
 impl From<MergeEventTarget2> for MergeEventTarget {
@@ -2345,6 +2346,7 @@ impl From<MergeEventTarget2> for MergeEventTarget {
             MergeEventTarget2::Group(id) => MergeEventTarget::Group(id.to_string()),
             MergeEventTarget2::Icon(id) => MergeEventTarget::Icon(id.to_string()),
             MergeEventTarget2::Meta(field) => MergeEventTarget::Meta(field),
+            MergeEventTarget2::DeletedObject(id) => MergeEventTarget::DeletedObject(id.to_string()),
         }
     }
 }

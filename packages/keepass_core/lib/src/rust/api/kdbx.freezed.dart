@@ -3778,14 +3778,15 @@ extension MergeEventTargetPatterns on MergeEventTarget {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( MergeEventTarget_Entry value)?  entry,TResult Function( MergeEventTarget_Group value)?  group,TResult Function( MergeEventTarget_Icon value)?  icon,TResult Function( MergeEventTarget_Meta value)?  meta,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( MergeEventTarget_Entry value)?  entry,TResult Function( MergeEventTarget_Group value)?  group,TResult Function( MergeEventTarget_Icon value)?  icon,TResult Function( MergeEventTarget_Meta value)?  meta,TResult Function( MergeEventTarget_DeletedObject value)?  deletedObject,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case MergeEventTarget_Entry() when entry != null:
 return entry(_that);case MergeEventTarget_Group() when group != null:
 return group(_that);case MergeEventTarget_Icon() when icon != null:
 return icon(_that);case MergeEventTarget_Meta() when meta != null:
-return meta(_that);case _:
+return meta(_that);case MergeEventTarget_DeletedObject() when deletedObject != null:
+return deletedObject(_that);case _:
   return orElse();
 
 }
@@ -3803,14 +3804,15 @@ return meta(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( MergeEventTarget_Entry value)  entry,required TResult Function( MergeEventTarget_Group value)  group,required TResult Function( MergeEventTarget_Icon value)  icon,required TResult Function( MergeEventTarget_Meta value)  meta,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( MergeEventTarget_Entry value)  entry,required TResult Function( MergeEventTarget_Group value)  group,required TResult Function( MergeEventTarget_Icon value)  icon,required TResult Function( MergeEventTarget_Meta value)  meta,required TResult Function( MergeEventTarget_DeletedObject value)  deletedObject,}){
 final _that = this;
 switch (_that) {
 case MergeEventTarget_Entry():
 return entry(_that);case MergeEventTarget_Group():
 return group(_that);case MergeEventTarget_Icon():
 return icon(_that);case MergeEventTarget_Meta():
-return meta(_that);}
+return meta(_that);case MergeEventTarget_DeletedObject():
+return deletedObject(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -3824,14 +3826,15 @@ return meta(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( MergeEventTarget_Entry value)?  entry,TResult? Function( MergeEventTarget_Group value)?  group,TResult? Function( MergeEventTarget_Icon value)?  icon,TResult? Function( MergeEventTarget_Meta value)?  meta,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( MergeEventTarget_Entry value)?  entry,TResult? Function( MergeEventTarget_Group value)?  group,TResult? Function( MergeEventTarget_Icon value)?  icon,TResult? Function( MergeEventTarget_Meta value)?  meta,TResult? Function( MergeEventTarget_DeletedObject value)?  deletedObject,}){
 final _that = this;
 switch (_that) {
 case MergeEventTarget_Entry() when entry != null:
 return entry(_that);case MergeEventTarget_Group() when group != null:
 return group(_that);case MergeEventTarget_Icon() when icon != null:
 return icon(_that);case MergeEventTarget_Meta() when meta != null:
-return meta(_that);case _:
+return meta(_that);case MergeEventTarget_DeletedObject() when deletedObject != null:
+return deletedObject(_that);case _:
   return null;
 
 }
@@ -3848,13 +3851,14 @@ return meta(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String field0)?  entry,TResult Function( String field0)?  group,TResult Function( String field0)?  icon,TResult Function( MetaField field0)?  meta,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String field0)?  entry,TResult Function( String field0)?  group,TResult Function( String field0)?  icon,TResult Function( MetaField field0)?  meta,TResult Function( String field0)?  deletedObject,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case MergeEventTarget_Entry() when entry != null:
 return entry(_that.field0);case MergeEventTarget_Group() when group != null:
 return group(_that.field0);case MergeEventTarget_Icon() when icon != null:
 return icon(_that.field0);case MergeEventTarget_Meta() when meta != null:
-return meta(_that.field0);case _:
+return meta(_that.field0);case MergeEventTarget_DeletedObject() when deletedObject != null:
+return deletedObject(_that.field0);case _:
   return orElse();
 
 }
@@ -3872,13 +3876,14 @@ return meta(_that.field0);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String field0)  entry,required TResult Function( String field0)  group,required TResult Function( String field0)  icon,required TResult Function( MetaField field0)  meta,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String field0)  entry,required TResult Function( String field0)  group,required TResult Function( String field0)  icon,required TResult Function( MetaField field0)  meta,required TResult Function( String field0)  deletedObject,}) {final _that = this;
 switch (_that) {
 case MergeEventTarget_Entry():
 return entry(_that.field0);case MergeEventTarget_Group():
 return group(_that.field0);case MergeEventTarget_Icon():
 return icon(_that.field0);case MergeEventTarget_Meta():
-return meta(_that.field0);}
+return meta(_that.field0);case MergeEventTarget_DeletedObject():
+return deletedObject(_that.field0);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -3892,13 +3897,14 @@ return meta(_that.field0);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String field0)?  entry,TResult? Function( String field0)?  group,TResult? Function( String field0)?  icon,TResult? Function( MetaField field0)?  meta,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String field0)?  entry,TResult? Function( String field0)?  group,TResult? Function( String field0)?  icon,TResult? Function( MetaField field0)?  meta,TResult? Function( String field0)?  deletedObject,}) {final _that = this;
 switch (_that) {
 case MergeEventTarget_Entry() when entry != null:
 return entry(_that.field0);case MergeEventTarget_Group() when group != null:
 return group(_that.field0);case MergeEventTarget_Icon() when icon != null:
 return icon(_that.field0);case MergeEventTarget_Meta() when meta != null:
-return meta(_that.field0);case _:
+return meta(_that.field0);case MergeEventTarget_DeletedObject() when deletedObject != null:
+return deletedObject(_that.field0);case _:
   return null;
 
 }
@@ -4177,6 +4183,72 @@ $MetaFieldCopyWith<$Res> get field0 {
     return _then(_self.copyWith(field0: value));
   });
 }
+}
+
+/// @nodoc
+
+
+class MergeEventTarget_DeletedObject extends MergeEventTarget {
+  const MergeEventTarget_DeletedObject(this.field0): super._();
+  
+
+@override final  String field0;
+
+/// Create a copy of MergeEventTarget
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MergeEventTarget_DeletedObjectCopyWith<MergeEventTarget_DeletedObject> get copyWith => _$MergeEventTarget_DeletedObjectCopyWithImpl<MergeEventTarget_DeletedObject>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MergeEventTarget_DeletedObject&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'MergeEventTarget.deletedObject(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MergeEventTarget_DeletedObjectCopyWith<$Res> implements $MergeEventTargetCopyWith<$Res> {
+  factory $MergeEventTarget_DeletedObjectCopyWith(MergeEventTarget_DeletedObject value, $Res Function(MergeEventTarget_DeletedObject) _then) = _$MergeEventTarget_DeletedObjectCopyWithImpl;
+@useResult
+$Res call({
+ String field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$MergeEventTarget_DeletedObjectCopyWithImpl<$Res>
+    implements $MergeEventTarget_DeletedObjectCopyWith<$Res> {
+  _$MergeEventTarget_DeletedObjectCopyWithImpl(this._self, this._then);
+
+  final MergeEventTarget_DeletedObject _self;
+  final $Res Function(MergeEventTarget_DeletedObject) _then;
+
+/// Create a copy of MergeEventTarget
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(MergeEventTarget_DeletedObject(
+null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
 }
 
 /// @nodoc
