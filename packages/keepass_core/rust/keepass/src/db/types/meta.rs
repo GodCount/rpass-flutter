@@ -4,6 +4,23 @@ use uuid::Uuid;
 
 use crate::db::{Color, CustomDataItem};
 
+/// Customized, record maintenance_history_days_changed modification time
+pub const CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED: &str = "MAINTENANCE_HISTORY_DAYS_CHANGED";
+/// Customized, record color_changed modification time
+pub const CUSTOM_COLOR_CHANGED: &str = "COLOR_CHANGED";
+/// Customized, record master_key_change_rec_changed modification time
+pub const CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED: &str = "MASTER_KEY_CHANGE_REC_CHANGED";
+/// Customized, record master_key_change_force_changed modification time
+pub const CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED: &str = "MASTER_KEY_CHANGE_FORCE";
+/// Customized, record memory_protection_changed modification time
+pub const CUSTOM_MEMORY_PROTECTION_CHANGED: &str = "MEMORY_PROTECTION_CHANGED";
+/// Customized, record history_max_items_changed modification time
+pub const CUSTOM_HISTORY_MAX_ITEMS_CHANGED: &str = "HISTORY_MAX_ITEMS_CHANGED";
+/// Customized, record history_max_size_changed modification time
+pub const CUSTOM_HISTORY_MAX_SIZE_CHANGED: &str = "HISTORY_MAX_SIZE_CHANGED";
+/// Customized, record database_config_changed modification time
+pub const CUSTOM_DATABASE_CONFIG_CHANGED: &str = "DATABASE_CONFIG_CHANGED";
+
 /// Database metadata
 #[derive(Debug, Default, Eq, PartialEq, Clone)]
 #[cfg_attr(feature = "serialization", derive(serde::Serialize))]
@@ -79,6 +96,27 @@ pub struct Meta {
 
     /// Additional custom data fields
     pub custom_data: IndexMap<String, CustomDataItem>,
+}
+
+impl Meta {
+    /// get custom data time
+    pub fn get_custom_time_changed(&self, key: &str, default: NaiveDateTime) -> NaiveDateTime {
+        self.custom_data
+            .get(key)
+            .and_then(|item| item.last_modification_time)
+            .unwrap_or(default)
+    }
+
+    /// set custom data time
+    pub fn set_custom_time_changed(&mut self, key: &str, time: NaiveDateTime) {
+        self.custom_data.insert(
+            key.to_string(),
+            CustomDataItem {
+                value: None,
+                last_modification_time: Some(time),
+            },
+        );
+    }
 }
 
 /// Database memory protection settings

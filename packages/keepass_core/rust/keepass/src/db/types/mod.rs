@@ -24,7 +24,12 @@ pub use group::{
 pub use history::History;
 pub use icon::{CustomIcon, CustomIconId, CustomIconMut, CustomIconNotFoundError, CustomIconRef, Icon};
 use indexmap::IndexMap;
-pub use meta::{MemoryProtection, Meta};
+pub use meta::{
+    CUSTOM_COLOR_CHANGED, CUSTOM_DATABASE_CONFIG_CHANGED, CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
+    CUSTOM_HISTORY_MAX_SIZE_CHANGED, CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
+    CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED, CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
+    CUSTOM_MEMORY_PROTECTION_CHANGED, MemoryProtection, Meta,
+};
 pub use times::Times;
 pub use value::Value;
 

@@ -6,18 +6,17 @@ use std::{collections::HashSet, fs::File};
 
 use flutter_rust_bridge::{BaseAsyncRuntime, DartFnFuture, frb};
 use keepass::config::{DatabaseVersion, KDBX4_CURRENT_MINOR_VERSION};
-use keepass::db::merge::{
-    CUSTOM_COLOR_CHANGED, CUSTOM_DATABASE_CONFIG_CHANGED, CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
-    CUSTOM_HISTORY_MAX_SIZE_CHANGED, CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
-    CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED, CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
-    CUSTOM_MEMORY_PROTECTION_CHANGED, MergeError,
-};
+use keepass::db::merge::MergeError;
 use keepass::db::{
-    AttachmentId, CannotDeleteRootError, CustomIconId, CustomIconNotFoundError,
-    DatabaseFormatError, DatabaseOpenError, DatabaseSaveError, DestinationGroupNotFoundError,
-    DuplicateEntryIdError, DuplicateGroupIdError, EntryId, GroupId, GroupRef, MoveGroupError,
-    Value,
+    AttachmentId, CUSTOM_COLOR_CHANGED, CUSTOM_DATABASE_CONFIG_CHANGED,
+    CUSTOM_HISTORY_MAX_ITEMS_CHANGED, CUSTOM_HISTORY_MAX_SIZE_CHANGED,
+    CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED, CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
+    CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED, CUSTOM_MEMORY_PROTECTION_CHANGED, CannotDeleteRootError,
+    CustomIconId, CustomIconNotFoundError, DatabaseFormatError, DatabaseOpenError,
+    DatabaseSaveError, DestinationGroupNotFoundError, DuplicateEntryIdError, DuplicateGroupIdError,
+    EntryId, GroupId, GroupRef, MoveGroupError, Value,
 };
+
 use keepass::error::{DatabaseKeyError, DatabaseVersionParseError, RandomError};
 use keepass::{
     Database, DatabaseKey, KeyFile,
@@ -1053,8 +1052,7 @@ impl Kdbx {
                 let maintenance_history_days = meta.maintenance_history_days.map(|v| v as usize);
                 if db.meta.maintenance_history_days != maintenance_history_days {
                     db.meta.maintenance_history_days = maintenance_history_days;
-                    set_customm_time_changed(
-                        db,
+                    db.meta.set_custom_time_changed(
                         CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
                         Times::now(),
                     );
@@ -1062,13 +1060,13 @@ impl Kdbx {
 
                 if db.meta.color != meta.color {
                     db.meta.color = meta.color;
-                    set_customm_time_changed(db, CUSTOM_COLOR_CHANGED, Times::now());
+                    db.meta
+                        .set_custom_time_changed(CUSTOM_COLOR_CHANGED, Times::now());
                 }
 
                 if db.meta.master_key_change_rec != meta.master_key_change_rec {
                     db.meta.master_key_change_rec = meta.master_key_change_rec;
-                    set_customm_time_changed(
-                        db,
+                    db.meta.set_custom_time_changed(
                         CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
                         Times::now(),
                     );
@@ -1076,13 +1074,13 @@ impl Kdbx {
 
                 if db.meta.memory_protection != meta.memory_protection {
                     db.meta.memory_protection = meta.memory_protection;
-                    set_customm_time_changed(db, CUSTOM_MEMORY_PROTECTION_CHANGED, Times::now());
+                    db.meta
+                        .set_custom_time_changed(CUSTOM_MEMORY_PROTECTION_CHANGED, Times::now());
                 }
 
                 if db.meta.master_key_change_force != meta.master_key_change_force {
                     db.meta.master_key_change_force = meta.master_key_change_force;
-                    set_customm_time_changed(
-                        db,
+                    db.meta.set_custom_time_changed(
                         CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
                         Times::now(),
                     );
@@ -1112,12 +1110,14 @@ impl Kdbx {
 
                 if db.meta.history_max_items != meta.history_max_items {
                     db.meta.history_max_items = meta.history_max_items;
-                    set_customm_time_changed(db, CUSTOM_HISTORY_MAX_ITEMS_CHANGED, Times::now());
+                    db.meta
+                        .set_custom_time_changed(CUSTOM_HISTORY_MAX_ITEMS_CHANGED, Times::now());
                 }
 
                 if db.meta.history_max_size != meta.history_max_size {
                     db.meta.history_max_size = meta.history_max_size;
-                    set_customm_time_changed(db, CUSTOM_HISTORY_MAX_SIZE_CHANGED, Times::now());
+                    db.meta
+                        .set_custom_time_changed(CUSTOM_HISTORY_MAX_SIZE_CHANGED, Times::now());
                 }
 
                 db.meta.settings_changed = Some(Times::now());
@@ -1164,7 +1164,8 @@ impl Kdbx {
                         db.config.kdf_config = config.into();
                     }
                     db.meta.settings_changed = Some(Times::now());
-                    set_customm_time_changed(db, CUSTOM_DATABASE_CONFIG_CHANGED, Times::now());
+                    db.meta
+                        .set_custom_time_changed(CUSTOM_DATABASE_CONFIG_CHANGED, Times::now());
                 }
             }
             KdbxAction::Move2Trash(items) => {
@@ -1490,16 +1491,6 @@ impl Kdbx {
             data: datasets,
         })
     }
-}
-
-fn set_customm_time_changed(db: &mut Database, key: &str, time: NaiveDateTime) {
-    db.meta.custom_data.insert(
-        key.to_string(),
-        CustomDataItem {
-            value: None,
-            last_modification_time: Some(time),
-        },
-    );
 }
 
 impl Drop for Kdbx {

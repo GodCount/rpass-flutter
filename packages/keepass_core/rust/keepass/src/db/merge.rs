@@ -12,27 +12,16 @@ use thiserror::Error;
 use crate::{
     Database,
     db::{
-        AttachmentId, CustomDataItem, CustomIconId, Entry, EntryId, EntryMut, EntryRef, Group, GroupId,
-        GroupRef, History, MoveGroupError, Times,
+        AttachmentId, CustomIconId, Entry, EntryId, EntryMut, EntryRef, Group, GroupId, GroupRef, History,
+        MoveGroupError, Times,
+        meta::{
+            CUSTOM_COLOR_CHANGED, CUSTOM_DATABASE_CONFIG_CHANGED, CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
+            CUSTOM_HISTORY_MAX_SIZE_CHANGED, CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
+            CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED, CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
+            CUSTOM_MEMORY_PROTECTION_CHANGED,
+        },
     },
 };
-
-/// Customized, record maintenance_history_days_changed modification time
-pub const CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED: &str = "MAINTENANCE_HISTORY_DAYS_CHANGED";
-/// Customized, record color_changed modification time
-pub const CUSTOM_COLOR_CHANGED: &str = "COLOR_CHANGED";
-/// Customized, record master_key_change_rec_changed modification time
-pub const CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED: &str = "MASTER_KEY_CHANGE_REC_CHANGED";
-/// Customized, record master_key_change_force_changed modification time
-pub const CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED: &str = "MASTER_KEY_CHANGE_FORCE";
-/// Customized, record memory_protection_changed modification time
-pub const CUSTOM_MEMORY_PROTECTION_CHANGED: &str = "MEMORY_PROTECTION_CHANGED";
-/// Customized, record history_max_items_changed modification time
-pub const CUSTOM_HISTORY_MAX_ITEMS_CHANGED: &str = "HISTORY_MAX_ITEMS_CHANGED";
-/// Customized, record history_max_size_changed modification time
-pub const CUSTOM_HISTORY_MAX_SIZE_CHANGED: &str = "HISTORY_MAX_SIZE_CHANGED";
-/// Customized, record database_config_changed modification time
-pub const CUSTOM_DATABASE_CONFIG_CHANGED: &str = "DATABASE_CONFIG_CHANGED";
 
 /// The kind of change a merge applied to an object.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1166,20 +1155,15 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
     let dest_settings_changed = dest_db.meta.settings_changed.unwrap_or(Times::epoch());
     let source_settings_changed = source_db.meta.settings_changed.unwrap_or(Times::epoch());
 
-    let dest_maintenance_history_days_changed = get_customm_time_changed(
-        dest_db,
-        CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
-        dest_settings_changed,
-    );
-    let source_maintenance_history_days_changed = get_customm_time_changed(
-        source_db,
-        CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
-        source_settings_changed,
-    );
+    let dest_maintenance_history_days_changed = dest_db
+        .meta
+        .get_custom_time_changed(CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED, dest_settings_changed);
+    let source_maintenance_history_days_changed = source_db
+        .meta
+        .get_custom_time_changed(CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED, source_settings_changed);
 
     if source_maintenance_history_days_changed > dest_maintenance_history_days_changed {
-        set_customm_time_changed(
-            dest_db,
+        dest_db.meta.set_custom_time_changed(
             CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
             source_maintenance_history_days_changed,
         );
@@ -1196,12 +1180,17 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
         });
     }
 
-    let dest_color_changed = get_customm_time_changed(dest_db, CUSTOM_COLOR_CHANGED, dest_settings_changed);
-    let source_color_changed =
-        get_customm_time_changed(source_db, CUSTOM_COLOR_CHANGED, source_settings_changed);
+    let dest_color_changed = dest_db
+        .meta
+        .get_custom_time_changed(CUSTOM_COLOR_CHANGED, dest_settings_changed);
+    let source_color_changed = source_db
+        .meta
+        .get_custom_time_changed(CUSTOM_COLOR_CHANGED, source_settings_changed);
 
     if source_color_changed > dest_color_changed {
-        set_customm_time_changed(dest_db, CUSTOM_COLOR_CHANGED, source_color_changed);
+        dest_db
+            .meta
+            .set_custom_time_changed(CUSTOM_COLOR_CHANGED, source_color_changed);
         dest_db.meta.color = source_db.meta.color.clone();
         log.events.push(MergeEvent {
             target: MergeEventTarget::Meta(MetaField::Color),
@@ -1214,20 +1203,15 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
         });
     }
 
-    let dest_master_key_change_rec_changed = get_customm_time_changed(
-        dest_db,
-        CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
-        dest_settings_changed,
-    );
-    let source_master_key_change_rec_changed = get_customm_time_changed(
-        source_db,
-        CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
-        source_settings_changed,
-    );
+    let dest_master_key_change_rec_changed = dest_db
+        .meta
+        .get_custom_time_changed(CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED, dest_settings_changed);
+    let source_master_key_change_rec_changed = source_db
+        .meta
+        .get_custom_time_changed(CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED, source_settings_changed);
 
     if source_master_key_change_rec_changed > dest_master_key_change_rec_changed {
-        set_customm_time_changed(
-            dest_db,
+        dest_db.meta.set_custom_time_changed(
             CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
             source_master_key_change_rec_changed,
         );
@@ -1243,20 +1227,15 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
         });
     }
 
-    let dest_master_key_change_force_changed = get_customm_time_changed(
-        dest_db,
-        CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
-        dest_settings_changed,
-    );
-    let source_master_key_change_force_changed = get_customm_time_changed(
-        source_db,
-        CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
-        source_settings_changed,
-    );
+    let dest_master_key_change_force_changed = dest_db
+        .meta
+        .get_custom_time_changed(CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED, dest_settings_changed);
+    let source_master_key_change_force_changed = source_db
+        .meta
+        .get_custom_time_changed(CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED, source_settings_changed);
 
     if source_master_key_change_force_changed > dest_master_key_change_force_changed {
-        set_customm_time_changed(
-            dest_db,
+        dest_db.meta.set_custom_time_changed(
             CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
             source_master_key_change_force_changed,
         );
@@ -1272,20 +1251,17 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
         });
     }
 
-    let dest_memory_protection_changed =
-        get_customm_time_changed(dest_db, CUSTOM_MEMORY_PROTECTION_CHANGED, dest_settings_changed);
-    let source_memory_protection_changed = get_customm_time_changed(
-        source_db,
-        CUSTOM_MEMORY_PROTECTION_CHANGED,
-        source_settings_changed,
-    );
+    let dest_memory_protection_changed = dest_db
+        .meta
+        .get_custom_time_changed(CUSTOM_MEMORY_PROTECTION_CHANGED, dest_settings_changed);
+    let source_memory_protection_changed = source_db
+        .meta
+        .get_custom_time_changed(CUSTOM_MEMORY_PROTECTION_CHANGED, source_settings_changed);
 
     if source_memory_protection_changed > dest_memory_protection_changed {
-        set_customm_time_changed(
-            dest_db,
-            CUSTOM_MEMORY_PROTECTION_CHANGED,
-            source_memory_protection_changed,
-        );
+        dest_db
+            .meta
+            .set_custom_time_changed(CUSTOM_MEMORY_PROTECTION_CHANGED, source_memory_protection_changed);
         dest_db.meta.memory_protection = source_db.meta.memory_protection.clone();
         log.events.push(MergeEvent {
             target: MergeEventTarget::Meta(MetaField::MemoryProtection),
@@ -1298,20 +1274,17 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
         });
     }
 
-    let dest_history_max_items_changed =
-        get_customm_time_changed(dest_db, CUSTOM_HISTORY_MAX_ITEMS_CHANGED, dest_settings_changed);
-    let source_history_max_items_changed = get_customm_time_changed(
-        source_db,
-        CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
-        source_settings_changed,
-    );
+    let dest_history_max_items_changed = dest_db
+        .meta
+        .get_custom_time_changed(CUSTOM_HISTORY_MAX_ITEMS_CHANGED, dest_settings_changed);
+    let source_history_max_items_changed = source_db
+        .meta
+        .get_custom_time_changed(CUSTOM_HISTORY_MAX_ITEMS_CHANGED, source_settings_changed);
 
     if source_history_max_items_changed > dest_history_max_items_changed {
-        set_customm_time_changed(
-            dest_db,
-            CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
-            source_history_max_items_changed,
-        );
+        dest_db
+            .meta
+            .set_custom_time_changed(CUSTOM_HISTORY_MAX_ITEMS_CHANGED, source_history_max_items_changed);
         dest_db.meta.history_max_items = source_db.meta.history_max_items;
         log.events.push(MergeEvent {
             target: MergeEventTarget::Meta(MetaField::HistoryMaxItems),
@@ -1324,20 +1297,17 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
         });
     }
 
-    let dest_history_max_size_changed =
-        get_customm_time_changed(dest_db, CUSTOM_HISTORY_MAX_SIZE_CHANGED, dest_settings_changed);
-    let source_history_max_size_changed = get_customm_time_changed(
-        source_db,
-        CUSTOM_HISTORY_MAX_SIZE_CHANGED,
-        source_settings_changed,
-    );
+    let dest_history_max_size_changed = dest_db
+        .meta
+        .get_custom_time_changed(CUSTOM_HISTORY_MAX_SIZE_CHANGED, dest_settings_changed);
+    let source_history_max_size_changed = source_db
+        .meta
+        .get_custom_time_changed(CUSTOM_HISTORY_MAX_SIZE_CHANGED, source_settings_changed);
 
     if source_history_max_size_changed > dest_history_max_size_changed {
-        set_customm_time_changed(
-            dest_db,
-            CUSTOM_HISTORY_MAX_SIZE_CHANGED,
-            source_history_max_size_changed,
-        );
+        dest_db
+            .meta
+            .set_custom_time_changed(CUSTOM_HISTORY_MAX_SIZE_CHANGED, source_history_max_size_changed);
         dest_db.meta.history_max_size = source_db.meta.history_max_size;
         dest_db.meta.history_max_items = source_db.meta.history_max_items;
         log.events.push(MergeEvent {
@@ -1351,17 +1321,17 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
         });
     }
 
-    let dest_database_config_changed =
-        get_customm_time_changed(dest_db, CUSTOM_DATABASE_CONFIG_CHANGED, dest_settings_changed);
-    let source_database_config_changed =
-        get_customm_time_changed(source_db, CUSTOM_DATABASE_CONFIG_CHANGED, source_settings_changed);
+    let dest_database_config_changed = dest_db
+        .meta
+        .get_custom_time_changed(CUSTOM_DATABASE_CONFIG_CHANGED, dest_settings_changed);
+    let source_database_config_changed = source_db
+        .meta
+        .get_custom_time_changed(CUSTOM_DATABASE_CONFIG_CHANGED, source_settings_changed);
 
     if source_database_config_changed > dest_database_config_changed {
-        set_customm_time_changed(
-            dest_db,
-            CUSTOM_DATABASE_CONFIG_CHANGED,
-            source_database_config_changed,
-        );
+        dest_db
+            .meta
+            .set_custom_time_changed(CUSTOM_DATABASE_CONFIG_CHANGED, source_database_config_changed);
         dest_db.config.outer_cipher_config = source_db.config.outer_cipher_config.clone();
         dest_db.config.compression_config = source_db.config.compression_config.clone();
         dest_db.config.inner_cipher_config = source_db.config.inner_cipher_config.clone();
@@ -1457,24 +1427,6 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
     Ok(())
 }
 
-fn get_customm_time_changed(db: &Database, key: &str, default: NaiveDateTime) -> NaiveDateTime {
-    db.meta
-        .custom_data
-        .get(key)
-        .and_then(|item| item.last_modification_time)
-        .unwrap_or(default)
-}
-
-fn set_customm_time_changed(db: &mut Database, key: &str, time: NaiveDateTime) {
-    db.meta.custom_data.insert(
-        key.to_string(),
-        CustomDataItem {
-            value: None,
-            last_modification_time: Some(time),
-        },
-    );
-}
-
 fn have_groups_diverged(a: &Group, b: &Group) -> bool {
     let new_times = Times::default();
 
@@ -1527,7 +1479,7 @@ mod merge_tests {
     use crate::config::{
         CompressionConfig, DatabaseConfig, DatabaseVersion, InnerCipherConfig, KdfConfig, OuterCipherConfig,
     };
-    use crate::db::{Color, EntryId, GroupId, History, MemoryProtection, Times, fields};
+    use crate::db::{Color, CustomDataItem, EntryId, GroupId, History, MemoryProtection, Times, fields};
     use crate::db::{CustomDataValue, merge::*};
     use crate::{Database, DatabaseKey};
 
@@ -3407,14 +3359,14 @@ mod merge_tests {
         destination_db.meta.database_name_changed = Some(Times::now());
 
         destination_db.meta.history_max_items = Some(20);
-        set_customm_time_changed(
-            &mut destination_db,
-            CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
-            Times::now(),
-        );
+        destination_db
+            .meta
+            .set_custom_time_changed(CUSTOM_HISTORY_MAX_ITEMS_CHANGED, Times::now());
 
         destination_db.meta.history_max_size = Some(0);
-        set_customm_time_changed(&mut destination_db, CUSTOM_HISTORY_MAX_SIZE_CHANGED, Times::now());
+        destination_db
+            .meta
+            .set_custom_time_changed(CUSTOM_HISTORY_MAX_SIZE_CHANGED, Times::now());
 
         destination_db.meta.custom_data.insert(
             "test".into(),
@@ -3454,27 +3406,29 @@ mod merge_tests {
         source_db.meta.default_username_changed = Some(Times::now());
 
         source_db.meta.maintenance_history_days = Some(33);
-        set_customm_time_changed(
-            &mut source_db,
-            CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
-            Times::now(),
-        );
+        source_db
+            .meta
+            .set_custom_time_changed(CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED, Times::now());
 
         source_db.meta.color = Some(Color::default());
-        set_customm_time_changed(&mut source_db, CUSTOM_COLOR_CHANGED, Times::now());
+        source_db
+            .meta
+            .set_custom_time_changed(CUSTOM_COLOR_CHANGED, Times::now());
 
         source_db.meta.master_key_change_rec = Some(22);
-        set_customm_time_changed(&mut source_db, CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED, Times::now());
+        source_db
+            .meta
+            .set_custom_time_changed(CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED, Times::now());
 
         source_db.meta.memory_protection = Some(MemoryProtection::default());
-        set_customm_time_changed(&mut source_db, CUSTOM_MEMORY_PROTECTION_CHANGED, Times::now());
+        source_db
+            .meta
+            .set_custom_time_changed(CUSTOM_MEMORY_PROTECTION_CHANGED, Times::now());
 
         source_db.meta.master_key_change_force = Some(11);
-        set_customm_time_changed(
-            &mut source_db,
-            CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
-            Times::now(),
-        );
+        source_db
+            .meta
+            .set_custom_time_changed(CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED, Times::now());
 
         source_db.meta.entry_templates_group = Some(GROUP1_ID.uuid());
         source_db.meta.entry_templates_group_changed = Some(Times::now());
@@ -3484,10 +3438,14 @@ mod merge_tests {
         source_db.meta.last_top_visible_group = Some(SUBGROUP1_ID.uuid());
 
         source_db.meta.history_max_items = Some(-1);
-        set_customm_time_changed(&mut source_db, CUSTOM_HISTORY_MAX_ITEMS_CHANGED, Times::now());
+        source_db
+            .meta
+            .set_custom_time_changed(CUSTOM_HISTORY_MAX_ITEMS_CHANGED, Times::now());
 
         source_db.meta.history_max_size = Some(-1);
-        set_customm_time_changed(&mut source_db, CUSTOM_HISTORY_MAX_SIZE_CHANGED, Times::now());
+        source_db
+            .meta
+            .set_custom_time_changed(CUSTOM_HISTORY_MAX_SIZE_CHANGED, Times::now());
 
         source_db.meta.settings_changed = Some(Times::now());
 
@@ -3551,14 +3509,14 @@ mod merge_tests {
         destination_db.meta.database_name_changed = Some(Times::now());
 
         destination_db.meta.history_max_items = Some(20);
-        set_customm_time_changed(
-            &mut destination_db,
-            CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
-            Times::now(),
-        );
+        destination_db
+            .meta
+            .set_custom_time_changed(CUSTOM_HISTORY_MAX_ITEMS_CHANGED, Times::now());
 
         destination_db.meta.history_max_size = Some(0);
-        set_customm_time_changed(&mut destination_db, CUSTOM_HISTORY_MAX_SIZE_CHANGED, Times::now());
+        destination_db
+            .meta
+            .set_custom_time_changed(CUSTOM_HISTORY_MAX_SIZE_CHANGED, Times::now());
 
         destination_db.meta.custom_data.insert(
             "test".into(),
@@ -3598,35 +3556,29 @@ mod merge_tests {
         destination_db.meta.default_username_changed = Some(Times::now());
 
         destination_db.meta.maintenance_history_days = Some(33);
-        set_customm_time_changed(
-            &mut destination_db,
-            CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED,
-            Times::now(),
-        );
+        destination_db
+            .meta
+            .set_custom_time_changed(CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED, Times::now());
 
         destination_db.meta.color = Some(Color::default());
-        set_customm_time_changed(&mut destination_db, CUSTOM_COLOR_CHANGED, Times::now());
+        destination_db
+            .meta
+            .set_custom_time_changed(CUSTOM_COLOR_CHANGED, Times::now());
 
         destination_db.meta.master_key_change_rec = Some(22);
-        set_customm_time_changed(
-            &mut destination_db,
-            CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED,
-            Times::now(),
-        );
+        destination_db
+            .meta
+            .set_custom_time_changed(CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED, Times::now());
 
         destination_db.meta.memory_protection = Some(MemoryProtection::default());
-        set_customm_time_changed(
-            &mut destination_db,
-            CUSTOM_MEMORY_PROTECTION_CHANGED,
-            Times::now(),
-        );
+        destination_db
+            .meta
+            .set_custom_time_changed(CUSTOM_MEMORY_PROTECTION_CHANGED, Times::now());
 
         destination_db.meta.master_key_change_force = Some(11);
-        set_customm_time_changed(
-            &mut destination_db,
-            CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED,
-            Times::now(),
-        );
+        destination_db
+            .meta
+            .set_custom_time_changed(CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED, Times::now());
 
         destination_db.meta.entry_templates_group = Some(GROUP1_ID.uuid());
         destination_db.meta.entry_templates_group_changed = Some(Times::now());
@@ -3636,14 +3588,14 @@ mod merge_tests {
         destination_db.meta.last_top_visible_group = Some(SUBGROUP1_ID.uuid());
 
         destination_db.meta.history_max_items = Some(-1);
-        set_customm_time_changed(
-            &mut destination_db,
-            CUSTOM_HISTORY_MAX_ITEMS_CHANGED,
-            Times::now(),
-        );
+        destination_db
+            .meta
+            .set_custom_time_changed(CUSTOM_HISTORY_MAX_ITEMS_CHANGED, Times::now());
 
         destination_db.meta.history_max_size = Some(-1);
-        set_customm_time_changed(&mut destination_db, CUSTOM_HISTORY_MAX_SIZE_CHANGED, Times::now());
+        destination_db
+            .meta
+            .set_custom_time_changed(CUSTOM_HISTORY_MAX_SIZE_CHANGED, Times::now());
 
         destination_db.meta.settings_changed = Some(Times::now());
 
@@ -3720,7 +3672,9 @@ mod merge_tests {
 
         source_db.config = config;
         source_db.meta.settings_changed = Some(Times::now());
-        set_customm_time_changed(&mut source_db, CUSTOM_DATABASE_CONFIG_CHANGED, Times::now());
+        source_db
+            .meta
+            .set_custom_time_changed(CUSTOM_DATABASE_CONFIG_CHANGED, Times::now());
 
         destination_db.merge(&source_db).unwrap();
 
@@ -3747,7 +3701,9 @@ mod merge_tests {
 
         destination_db.config = config;
         destination_db.meta.settings_changed = Some(Times::now());
-        set_customm_time_changed(&mut destination_db, CUSTOM_DATABASE_CONFIG_CHANGED, Times::now());
+        destination_db
+            .meta
+            .set_custom_time_changed(CUSTOM_DATABASE_CONFIG_CHANGED, Times::now());
 
         let source_db = destination_db.clone();
 
@@ -3761,7 +3717,9 @@ mod merge_tests {
 
         destination_db.config = config;
         destination_db.meta.settings_changed = Some(Times::now());
-        set_customm_time_changed(&mut destination_db, CUSTOM_DATABASE_CONFIG_CHANGED, Times::now());
+        destination_db
+            .meta
+            .set_custom_time_changed(CUSTOM_DATABASE_CONFIG_CHANGED, Times::now());
 
         let merge_result = destination_db.merge(&source_db).unwrap();
         assert_eq!(merge_result.warnings.len(), 0);
@@ -3864,7 +3822,11 @@ mod merge_tests {
 
         let mut source_db = destination_db.clone();
 
-        destination_db.entry_mut(ENTRY1_ID).unwrap().track_changes().remove();
+        destination_db
+            .entry_mut(ENTRY1_ID)
+            .unwrap()
+            .track_changes()
+            .remove();
 
         destination_db = save_open(&destination_db);
 

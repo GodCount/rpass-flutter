@@ -661,9 +661,11 @@ impl GroupMut<'_> {
         let meta = &mut self.database.meta;
         if meta.recyclebin_uuid == Some(uuid) {
             meta.recyclebin_uuid = None;
+            meta.recyclebin_changed = Some(Times::now());
         }
         if meta.entry_templates_group == Some(uuid) {
             meta.entry_templates_group = None;
+            meta.entry_templates_group_changed = Some(Times::now());
         }
         if meta.last_selected_group == Some(uuid) {
             meta.last_selected_group = None;
@@ -759,10 +761,12 @@ impl GroupTrack<'_> {
 
     /// Deletes this group and all its child groups and entries from the database,
     /// adding them to the deleted entries and groups sets.
-    pub fn remove(self) -> Result<(), CannotDeleteRootError> {
+    pub fn remove(mut self) -> Result<(), CannotDeleteRootError> {
         if self.id() == self.database.root().id() {
             return Err(CannotDeleteRootError);
         }
+
+        self.as_mut().set_icon_none();
 
         // Remove from parent
         if let Some(parent_id) = self.parent
@@ -793,6 +797,25 @@ impl GroupTrack<'_> {
         self.database
             .deleted_objects
             .insert(self.id.uuid(), Some(Times::now()));
+
+        // Clear any Meta UUID fields that referenced this group, so they don't
+        // silently hold stale UUIDs that would be round-tripped back to disk.
+        let uuid = self.id.0;
+        let meta = &mut self.database.meta;
+        if meta.recyclebin_uuid == Some(uuid) {
+            meta.recyclebin_uuid = None;
+            meta.recyclebin_changed = Some(Times::now());
+        }
+        if meta.entry_templates_group == Some(uuid) {
+            meta.entry_templates_group = None;
+            meta.entry_templates_group_changed = Some(Times::now());
+        }
+        if meta.last_selected_group == Some(uuid) {
+            meta.last_selected_group = None;
+        }
+        if meta.last_top_visible_group == Some(uuid) {
+            meta.last_top_visible_group = None;
+        }
 
         Ok(())
     }
