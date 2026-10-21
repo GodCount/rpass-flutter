@@ -33,7 +33,12 @@ pub struct Entry {
     )]
     pub icon_id: Option<usize>,
 
-    #[serde(default, rename = "CustomIconUUID", skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        rename = "CustomIconUUID",
+        with = "cs_opt_string",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub custom_icon_uuid: Option<UUID>,
 
     #[serde(default, with = "cs_opt_string", skip_serializing_if = "Option::is_none")]
@@ -74,7 +79,7 @@ pub struct Entry {
     #[serde(default, with = "cs_opt_bool", skip_serializing_if = "Option::is_none")]
     pub quality_check: Option<bool>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default, with = "cs_opt_string", skip_serializing_if = "Option::is_none")]
     pub previous_parent_group: Option<UUID>,
 }
 
@@ -444,7 +449,10 @@ mod tests {
 
         let deserialized_protected: Test<StringField> = quick_xml::de::from_str(xml_protected).unwrap();
         assert_eq!(deserialized_protected.0.key, "Password");
-        assert_eq!(deserialized_protected.0.value.value.clone().unwrap(), "cGFzc3dvcmQ=");
+        assert_eq!(
+            deserialized_protected.0.value.value.clone().unwrap(),
+            "cGFzc3dvcmQ="
+        );
         assert!(deserialized_protected.0.value.protected);
     }
 
