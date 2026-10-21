@@ -533,7 +533,30 @@ fn merge_entries(dest_db: &mut Database, source_db: &Database, log: &mut MergeLo
             .add_entry_with_id(id)
             .expect("entry to be (re-)added should not exist yet");
 
-        *entry = source_entry.deref().clone();
+        let mut entry_clone = source_entry.deref().clone();
+        entry_clone.attachments.clear();
+
+        if let Some(history) = entry_clone.history.as_mut() {
+            let entry_id = id;
+
+            for (history_id, history_entry) in &mut history.entries {
+                for (_, id) in &mut history_entry.attachments {
+                    #[allow(clippy::expect_used)]
+                    let attch = source_db
+                        .attachment(*id)
+                        .expect("Unexpected attachment does not exist");
+                    *id = entry
+                        .database_mut()
+                        .add_attachment(&attch.data, vec![(entry_id, Some(*history_id))]);
+                }
+            }
+        }
+
+        *entry = entry_clone;
+
+        for (name, attach) in source_entry.attachments_named() {
+            entry.add_attachment(name, attach.data.clone());
+        }
 
         log.events.push(MergeEvent {
             target: MergeEventTarget::Entry(id),
@@ -3841,7 +3864,7 @@ mod merge_tests {
 
         let mut source_db = destination_db.clone();
 
-        destination_db.entry_mut(ENTRY1_ID).unwrap().remove();
+        destination_db.entry_mut(ENTRY1_ID).unwrap().track_changes().remove();
 
         destination_db = save_open(&destination_db);
 
@@ -3902,6 +3925,38 @@ mod merge_tests {
         assert_eq!(
             entry1_history1.attachment_by_name("file1.txt").unwrap().get(),
             b"1111"
+        );
+    }
+
+    #[test]
+    fn test_new_entry_attachments_in_source() {
+        let mut destination_db = create_test_database();
+
+        let mut source_db = destination_db.clone();
+
+        sleep();
+
+        let id = source_db
+            .root_mut()
+            .add_entry()
+            .edit(|entry| {
+                entry.add_attachment("file.txt", crate::db::Value::unprotected(b"1234"));
+            })
+            .id();
+
+        destination_db.merge(&source_db).unwrap();
+
+        assert_eq!(destination_db.num_attachments(), 1);
+
+        assert_eq!(
+            destination_db
+                .entry(id)
+                .unwrap()
+                .attachment_by_name("file.txt")
+                .unwrap()
+                .data
+                .get(),
+            b"1234"
         );
     }
 }

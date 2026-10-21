@@ -8,7 +8,7 @@ pub struct History {
     // 使用下标做ID时, 当记录有增删时在附件和自定义图标的反向引用中会出错
     // 使用 NaiveDateTime 做ID时, 不稳定,会有相同的 NaiveDateTime 但内容不同(在合并出现这种情况)
     auto_increment_num: u32,
-    entries: Vec<(u32, Entry)>,
+    pub(crate) entries: Vec<(u32, Entry)>,
 }
 
 impl History {
