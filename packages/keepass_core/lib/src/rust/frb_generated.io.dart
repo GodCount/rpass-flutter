@@ -234,6 +234,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   MemoryProtection dco_decode_box_autoadd_memory_protection(dynamic raw);
 
   @protected
+  MetaField dco_decode_box_autoadd_meta_field(dynamic raw);
+
+  @protected
   OuterCipherConfig dco_decode_box_autoadd_outer_cipher_config(dynamic raw);
 
   @protected
@@ -403,6 +406,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Meta dco_decode_meta(dynamic raw);
+
+  @protected
+  MetaField dco_decode_meta_field(dynamic raw);
 
   @protected
   Color?
@@ -768,6 +774,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  MetaField sse_decode_box_autoadd_meta_field(SseDeserializer deserializer);
+
+  @protected
   OuterCipherConfig sse_decode_box_autoadd_outer_cipher_config(
     SseDeserializer deserializer,
   );
@@ -955,6 +964,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Meta sse_decode_meta(SseDeserializer deserializer);
+
+  @protected
+  MetaField sse_decode_meta_field(SseDeserializer deserializer);
 
   @protected
   Color?
@@ -1424,6 +1436,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_meta_field(
+    MetaField self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_outer_cipher_config(
     OuterCipherConfig self,
     SseSerializer serializer,
@@ -1662,6 +1680,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_meta(Meta self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_meta_field(MetaField self, SseSerializer serializer);
 
   @protected
   void

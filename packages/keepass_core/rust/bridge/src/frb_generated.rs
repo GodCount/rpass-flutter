@@ -2605,6 +2605,25 @@ const _: fn() = || {
         let _: bool = MemoryProtection.protect_url;
         let _: bool = MemoryProtection.protect_notes;
     }
+    match None::<crate::api::kdbx::MetaField>.unwrap() {
+        crate::api::kdbx::MetaField::DatabaseName => {}
+        crate::api::kdbx::MetaField::DatabaseDescription => {}
+        crate::api::kdbx::MetaField::DefaultUsername => {}
+        crate::api::kdbx::MetaField::RecycleBin => {}
+        crate::api::kdbx::MetaField::EntryTemplatesGroup => {}
+        crate::api::kdbx::MetaField::MasterKeyChanged => {}
+        crate::api::kdbx::MetaField::MaintenanceHistoryDays => {}
+        crate::api::kdbx::MetaField::Color => {}
+        crate::api::kdbx::MetaField::MasterKeyChangeRec => {}
+        crate::api::kdbx::MetaField::MasterKeyChangeForce => {}
+        crate::api::kdbx::MetaField::MemoryProtection => {}
+        crate::api::kdbx::MetaField::HistoryMaxItems => {}
+        crate::api::kdbx::MetaField::HistoryMaxSize => {}
+        crate::api::kdbx::MetaField::Config => {}
+        crate::api::kdbx::MetaField::CustomData(field0) => {
+            let _: String = field0;
+        }
+    }
     {
         let Times = None::<crate::api::kdbx::Times>.unwrap();
         let _: Option<chrono::NaiveDateTime> = Times.creation;
@@ -3894,6 +3913,10 @@ impl SseDecode for crate::api::kdbx::MergeEventTarget {
                 let mut var_field0 = <String>::sse_decode(deserializer);
                 return crate::api::kdbx::MergeEventTarget::Icon(var_field0);
             }
+            3 => {
+                let mut var_field0 = <crate::api::kdbx::MetaField>::sse_decode(deserializer);
+                return crate::api::kdbx::MergeEventTarget::Meta(var_field0);
+            }
             _ => {
                 unimplemented!("");
             }
@@ -3918,15 +3941,13 @@ impl SseDecode for crate::api::kdbx::MergeEventType {
 impl SseDecode for crate::api::kdbx::MergeLog {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut var_masterKeyChanged = <bool>::sse_decode(deserializer);
-        let mut var_isUpdateMasterKey = <bool>::sse_decode(deserializer);
         let mut var_warnings = <Vec<String>>::sse_decode(deserializer);
         let mut var_events = <Vec<crate::api::kdbx::MergeEvent>>::sse_decode(deserializer);
+        let mut var_destEvents = <Vec<crate::api::kdbx::MergeEvent>>::sse_decode(deserializer);
         return crate::api::kdbx::MergeLog {
-            master_key_changed: var_masterKeyChanged,
-            is_update_master_key: var_isUpdateMasterKey,
             warnings: var_warnings,
             events: var_events,
+            dest_events: var_destEvents,
         };
     }
 }
@@ -3988,6 +4009,64 @@ impl SseDecode for crate::api::kdbx::Meta {
             settings_changed: var_settingsChanged,
             custom_data: var_customData,
         };
+    }
+}
+
+impl SseDecode for crate::api::kdbx::MetaField {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut tag_ = <i32>::sse_decode(deserializer);
+        match tag_ {
+            0 => {
+                return crate::api::kdbx::MetaField::DatabaseName;
+            }
+            1 => {
+                return crate::api::kdbx::MetaField::DatabaseDescription;
+            }
+            2 => {
+                return crate::api::kdbx::MetaField::DefaultUsername;
+            }
+            3 => {
+                return crate::api::kdbx::MetaField::RecycleBin;
+            }
+            4 => {
+                return crate::api::kdbx::MetaField::EntryTemplatesGroup;
+            }
+            5 => {
+                return crate::api::kdbx::MetaField::MasterKeyChanged;
+            }
+            6 => {
+                return crate::api::kdbx::MetaField::MaintenanceHistoryDays;
+            }
+            7 => {
+                return crate::api::kdbx::MetaField::Color;
+            }
+            8 => {
+                return crate::api::kdbx::MetaField::MasterKeyChangeRec;
+            }
+            9 => {
+                return crate::api::kdbx::MetaField::MasterKeyChangeForce;
+            }
+            10 => {
+                return crate::api::kdbx::MetaField::MemoryProtection;
+            }
+            11 => {
+                return crate::api::kdbx::MetaField::HistoryMaxItems;
+            }
+            12 => {
+                return crate::api::kdbx::MetaField::HistoryMaxSize;
+            }
+            13 => {
+                return crate::api::kdbx::MetaField::Config;
+            }
+            14 => {
+                let mut var_field0 = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::MetaField::CustomData(var_field0);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
     }
 }
 
@@ -5586,6 +5665,9 @@ impl flutter_rust_bridge::IntoDart for crate::api::kdbx::MergeEventTarget {
             crate::api::kdbx::MergeEventTarget::Icon(field0) => {
                 [2.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
+            crate::api::kdbx::MergeEventTarget::Meta(field0) => {
+                [3.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
             _ => {
                 unimplemented!("");
             }
@@ -5630,10 +5712,9 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::kdbx::MergeEventTy
 impl flutter_rust_bridge::IntoDart for crate::api::kdbx::MergeLog {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
-            self.master_key_changed.into_into_dart().into_dart(),
-            self.is_update_master_key.into_into_dart().into_dart(),
             self.warnings.into_into_dart().into_dart(),
             self.events.into_into_dart().into_dart(),
+            self.dest_events.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -5684,6 +5765,44 @@ impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api:
 impl flutter_rust_bridge::IntoIntoDart<crate::api::kdbx::Meta> for crate::api::kdbx::Meta {
     fn into_into_dart(self) -> crate::api::kdbx::Meta {
         self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::kdbx::MetaField> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self.0 {
+            crate::api::kdbx::MetaField::DatabaseName => [0.into_dart()].into_dart(),
+            crate::api::kdbx::MetaField::DatabaseDescription => [1.into_dart()].into_dart(),
+            crate::api::kdbx::MetaField::DefaultUsername => [2.into_dart()].into_dart(),
+            crate::api::kdbx::MetaField::RecycleBin => [3.into_dart()].into_dart(),
+            crate::api::kdbx::MetaField::EntryTemplatesGroup => [4.into_dart()].into_dart(),
+            crate::api::kdbx::MetaField::MasterKeyChanged => [5.into_dart()].into_dart(),
+            crate::api::kdbx::MetaField::MaintenanceHistoryDays => [6.into_dart()].into_dart(),
+            crate::api::kdbx::MetaField::Color => [7.into_dart()].into_dart(),
+            crate::api::kdbx::MetaField::MasterKeyChangeRec => [8.into_dart()].into_dart(),
+            crate::api::kdbx::MetaField::MasterKeyChangeForce => [9.into_dart()].into_dart(),
+            crate::api::kdbx::MetaField::MemoryProtection => [10.into_dart()].into_dart(),
+            crate::api::kdbx::MetaField::HistoryMaxItems => [11.into_dart()].into_dart(),
+            crate::api::kdbx::MetaField::HistoryMaxSize => [12.into_dart()].into_dart(),
+            crate::api::kdbx::MetaField::Config => [13.into_dart()].into_dart(),
+            crate::api::kdbx::MetaField::CustomData(field0) => {
+                [14.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::kdbx::MetaField>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::kdbx::MetaField>>
+    for crate::api::kdbx::MetaField
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::kdbx::MetaField> {
+        self.into()
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -6820,6 +6939,10 @@ impl SseEncode for crate::api::kdbx::MergeEventTarget {
                 <i32>::sse_encode(2, serializer);
                 <String>::sse_encode(field0, serializer);
             }
+            crate::api::kdbx::MergeEventTarget::Meta(field0) => {
+                <i32>::sse_encode(3, serializer);
+                <crate::api::kdbx::MetaField>::sse_encode(field0, serializer);
+            }
             _ => {
                 unimplemented!("");
             }
@@ -6848,10 +6971,9 @@ impl SseEncode for crate::api::kdbx::MergeEventType {
 impl SseEncode for crate::api::kdbx::MergeLog {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <bool>::sse_encode(self.master_key_changed, serializer);
-        <bool>::sse_encode(self.is_update_master_key, serializer);
         <Vec<String>>::sse_encode(self.warnings, serializer);
         <Vec<crate::api::kdbx::MergeEvent>>::sse_encode(self.events, serializer);
+        <Vec<crate::api::kdbx::MergeEvent>>::sse_encode(self.dest_events, serializer);
     }
 }
 
@@ -6885,6 +7007,63 @@ impl SseEncode for crate::api::kdbx::Meta {
         <Option<isize>>::sse_encode(self.history_max_size, serializer);
         <Option<chrono::NaiveDateTime>>::sse_encode(self.settings_changed, serializer);
         <std::collections::HashSet<String>>::sse_encode(self.custom_data, serializer);
+    }
+}
+
+impl SseEncode for crate::api::kdbx::MetaField {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        match self {
+            crate::api::kdbx::MetaField::DatabaseName => {
+                <i32>::sse_encode(0, serializer);
+            }
+            crate::api::kdbx::MetaField::DatabaseDescription => {
+                <i32>::sse_encode(1, serializer);
+            }
+            crate::api::kdbx::MetaField::DefaultUsername => {
+                <i32>::sse_encode(2, serializer);
+            }
+            crate::api::kdbx::MetaField::RecycleBin => {
+                <i32>::sse_encode(3, serializer);
+            }
+            crate::api::kdbx::MetaField::EntryTemplatesGroup => {
+                <i32>::sse_encode(4, serializer);
+            }
+            crate::api::kdbx::MetaField::MasterKeyChanged => {
+                <i32>::sse_encode(5, serializer);
+            }
+            crate::api::kdbx::MetaField::MaintenanceHistoryDays => {
+                <i32>::sse_encode(6, serializer);
+            }
+            crate::api::kdbx::MetaField::Color => {
+                <i32>::sse_encode(7, serializer);
+            }
+            crate::api::kdbx::MetaField::MasterKeyChangeRec => {
+                <i32>::sse_encode(8, serializer);
+            }
+            crate::api::kdbx::MetaField::MasterKeyChangeForce => {
+                <i32>::sse_encode(9, serializer);
+            }
+            crate::api::kdbx::MetaField::MemoryProtection => {
+                <i32>::sse_encode(10, serializer);
+            }
+            crate::api::kdbx::MetaField::HistoryMaxItems => {
+                <i32>::sse_encode(11, serializer);
+            }
+            crate::api::kdbx::MetaField::HistoryMaxSize => {
+                <i32>::sse_encode(12, serializer);
+            }
+            crate::api::kdbx::MetaField::Config => {
+                <i32>::sse_encode(13, serializer);
+            }
+            crate::api::kdbx::MetaField::CustomData(field0) => {
+                <i32>::sse_encode(14, serializer);
+                <String>::sse_encode(field0, serializer);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
     }
 }
 

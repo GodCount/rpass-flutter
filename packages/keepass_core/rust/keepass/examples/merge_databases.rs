@@ -66,6 +66,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             MergeEventTarget::Entry(id) => format!("entry {id}"),
             MergeEventTarget::Group(id) => format!("group {id}"),
             MergeEventTarget::Icon(id) => format!("icon {id}"),
+            MergeEventTarget::Meta(field) => format!("meta {field:?}"),
         };
         println!("  - {kind} {what}");
     }

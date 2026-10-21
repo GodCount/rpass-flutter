@@ -35,7 +35,7 @@ pub const CUSTOM_HISTORY_MAX_SIZE_CHANGED: &str = "HISTORY_MAX_SIZE_CHANGED";
 pub const CUSTOM_DATABASE_CONFIG_CHANGED: &str = "DATABASE_CONFIG_CHANGED";
 
 /// The kind of change a merge applied to an object.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MergeEventType {
     /// The object existed only in the source and was created in the destination.
     Created,
@@ -48,7 +48,7 @@ pub enum MergeEventType {
 }
 
 /// The object a [`MergeEvent`] applies to.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MergeEventTarget {
     /// An entry, identified by its UUID.
     Entry(EntryId),
@@ -56,10 +56,49 @@ pub enum MergeEventTarget {
     Group(GroupId),
     /// A custom icon, identified by its UUID.
     Icon(CustomIconId),
+    /// A piece of database metadata.
+    Meta(MetaField),
+}
+
+/// A piece of database metadata that a merge can change, see [`MergeEventTarget::Meta`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum MetaField {
+    /// The database name.
+    DatabaseName,
+    /// The database description.
+    DatabaseDescription,
+    /// The default username for new entries.
+    DefaultUsername,
+    /// The recycle bin group and whether the recycle bin is enabled.
+    RecycleBin,
+    /// The group containing entry templates.
+    EntryTemplatesGroup,
+    /// The database master key changed
+    MasterKeyChanged,
+
+    /// The database maintenance history days
+    MaintenanceHistoryDays,
+    /// The database color.
+    Color,
+    /// The database master key change rec
+    MasterKeyChangeRec,
+    /// The database master key change force
+    MasterKeyChangeForce,
+    /// The database memory protection
+    MemoryProtection,
+    /// The database history max items
+    HistoryMaxItems,
+    /// The database history max size
+    HistoryMaxSize,
+    /// The database encrypt config
+    Config,
+
+    /// A database-wide custom data item, identified by its key.
+    CustomData(String),
 }
 
 /// A single change applied to the destination database during a merge.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MergeEvent {
     /// The object that was changed.
     pub target: MergeEventTarget,
@@ -93,8 +132,11 @@ pub enum MergeError {
 pub struct MergeLog {
     /// Non-fatal issues encountered during the merge.
     pub warnings: Vec<String>,
-    /// The changes that were applied to the destination database.
+    /// Changes copied from the source because the source was newer.
     pub events: Vec<MergeEvent>,
+    /// Changes kept from the destination: objects that exist or were deleted only
+    /// there, and updates or moves where the destination is newer than the source.
+    pub dest_events: Vec<MergeEvent>,
 }
 
 impl Database {
@@ -146,18 +188,20 @@ fn merge_groups(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog
             // get the last modification time of the group in source.
             let source_last_update = get_last_update(source);
 
+            let mut is_deleted = false;
+
             // compare deletion time and last update time to decide whether to re-add the group
             match (deletion_time, source_last_update) {
                 (Some(deletion_time), Some(source_last_update)) => {
                     // if the group was deleted after its last modification time in source,
                     // do not re-add it, otherwise we can re-add the group
                     if *deletion_time >= source_last_update {
-                        continue;
+                        is_deleted = true;
                     }
                 }
                 (Some(_), None) => {
                     // blank last update time in source - do not re-add the group
-                    continue;
+                    is_deleted = true;
                 }
                 (None, Some(_)) => {
                     // blank deletion time is probably older than concrete update time - re-add the
@@ -165,8 +209,16 @@ fn merge_groups(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog
                 }
                 (None, None) => {
                     // both times are blank - do not re-add the group
-                    continue;
+                    is_deleted = true;
                 }
+            }
+
+            if is_deleted {
+                log.dest_events.push(MergeEvent {
+                    target: MergeEventTarget::Group(id),
+                    event_type: MergeEventType::Deleted,
+                });
+                continue;
             }
         }
 
@@ -259,6 +311,11 @@ fn merge_groups(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog
                 target: MergeEventTarget::Group(id),
                 event_type: MergeEventType::Deleted,
             });
+        } else {
+            log.dest_events.push(MergeEvent {
+                target: MergeEventTarget::Group(id),
+                event_type: MergeEventType::Created,
+            });
         }
     }
 
@@ -324,6 +381,11 @@ fn merge_groups(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog
                         target: MergeEventTarget::Group(id),
                         event_type: MergeEventType::LocationUpdated,
                     });
+                } else {
+                    log.dest_events.push(MergeEvent {
+                        target: MergeEventTarget::Group(id),
+                        event_type: MergeEventType::LocationUpdated,
+                    });
                 }
             } else {
                 log.warnings.push(format!(
@@ -363,7 +425,11 @@ fn merge_groups(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog
         }
 
         if dest_last_modification > source_last_modification {
-            // The destination group is more recent than the source group. Nothing to do.
+            // The destination group is more recent than the source group.
+            log.dest_events.push(MergeEvent {
+                target: MergeEventTarget::Group(id),
+                event_type: MergeEventType::Updated,
+            });
             continue;
         }
 
@@ -417,17 +483,19 @@ fn merge_entries(dest_db: &mut Database, source_db: &Database, log: &mut MergeLo
                 .last_modification
                 .or(source_entry.times.location_changed);
 
+            let mut is_deleted = false;
+
             match (deletion_time, source_update_time) {
                 (Some(deletion_time), Some(source_update_time)) => {
                     // if the entry was deleted after its last modification time in source,
                     // do not re-add it
                     if *deletion_time >= source_update_time {
-                        continue;
+                        is_deleted = true;
                     }
                 }
                 (Some(_), None) => {
                     // blank last update time in source - do not re-add the entry
-                    continue;
+                    is_deleted = true;
                 }
                 (None, Some(_)) => {
                     // blank deletion time is probably older than concrete update time - re-add the
@@ -435,8 +503,16 @@ fn merge_entries(dest_db: &mut Database, source_db: &Database, log: &mut MergeLo
                 }
                 (None, None) => {
                     // both times are blank - do not re-add the entry
-                    continue;
+                    is_deleted = true;
                 }
+            }
+
+            if is_deleted {
+                log.dest_events.push(MergeEvent {
+                    target: MergeEventTarget::Entry(id),
+                    event_type: MergeEventType::Deleted,
+                });
+                continue;
             }
 
             // otherwise, we can re-add the entry
@@ -491,6 +567,11 @@ fn merge_entries(dest_db: &mut Database, source_db: &Database, log: &mut MergeLo
                 target: MergeEventTarget::Entry(id),
                 event_type: MergeEventType::Deleted,
             });
+        } else {
+            log.dest_events.push(MergeEvent {
+                target: MergeEventTarget::Entry(id),
+                event_type: MergeEventType::Created,
+            });
         }
     }
 
@@ -530,6 +611,11 @@ fn merge_entries(dest_db: &mut Database, source_db: &Database, log: &mut MergeLo
                             source_parent_id,
                         ));
                     }
+                } else {
+                    log.dest_events.push(MergeEvent {
+                        target: MergeEventTarget::Entry(id),
+                        event_type: MergeEventType::LocationUpdated,
+                    });
                 }
             } else {
                 log.warnings.push(format!(
@@ -627,6 +713,11 @@ fn merge_entries(dest_db: &mut Database, source_db: &Database, log: &mut MergeLo
             merge_attachments(&mut dest_entry, &source_entry, log);
 
             log.events.push(MergeEvent {
+                target: MergeEventTarget::Entry(id),
+                event_type: MergeEventType::Updated,
+            });
+        } else {
+            log.dest_events.push(MergeEvent {
                 target: MergeEventTarget::Entry(id),
                 event_type: MergeEventType::Updated,
             });
@@ -793,21 +884,31 @@ fn merge_icons(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog)
         if let Some(deletion_time) = dest_db.deleted_objects.get(&id.uuid()) {
             let source_last_modification = source_icon.last_modification_time;
 
+            let mut is_deleted = false;
+
             if let (Some(deletion_time), Some(source_last_modification)) =
                 (deletion_time, source_last_modification)
             {
                 // if the icon was deleted after its last modification time in source,
                 // do not re-add it
                 if *deletion_time >= source_last_modification {
-                    continue;
+                    is_deleted = true;
                 }
             } else if deletion_time.is_some() && source_last_modification.is_none() {
                 // blank last modification time in source - do not re-add the icon
-                continue;
+                is_deleted = true;
             } else if deletion_time.is_none() && source_last_modification.is_some() {
                 // blank deletion time is probably older than concrete update time - re-add the icon
             } else {
                 // both times are blank - do not re-add the icon
+                is_deleted = true;
+            }
+
+            if is_deleted {
+                log.dest_events.push(MergeEvent {
+                    target: MergeEventTarget::Icon(id),
+                    event_type: MergeEventType::Deleted,
+                });
                 continue;
             }
         }
@@ -842,6 +943,11 @@ fn merge_icons(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog)
             log.events.push(MergeEvent {
                 target: MergeEventTarget::Icon(id),
                 event_type: MergeEventType::Deleted,
+            });
+        } else {
+            log.dest_events.push(MergeEvent {
+                target: MergeEventTarget::Icon(id),
+                event_type: MergeEventType::Created,
             });
         }
     }
@@ -880,7 +986,11 @@ fn merge_icons(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog)
         }
 
         if dest_last_modification > source_last_modification {
-            // The destination icon is more recent than the source icon. Nothing to do.
+            // The destination icon is more recent than the source icon.
+            log.dest_events.push(MergeEvent {
+                target: MergeEventTarget::Icon(id),
+                event_type: MergeEventType::Updated,
+            });
             continue;
         }
 
@@ -903,9 +1013,16 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
     if source_database_name_changed > dest_database_name_changed {
         dest_db.meta.database_name_changed = Some(source_database_name_changed);
         dest_db.meta.database_name = source_db.meta.database_name.clone();
-    } else if source_database_name_changed == dest_database_name_changed
-        && source_db.meta.database_name != dest_db.meta.database_name
-    {
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::DatabaseName),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_database_name_changed < dest_database_name_changed {
+        log.dest_events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::DatabaseName),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_db.meta.database_name != dest_db.meta.database_name {
         log.warnings
             .push("The database name change times are the same, but there’s already a deviation.".into());
     }
@@ -922,9 +1039,16 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
     if source_database_description_changed > dest_database_description_changed {
         dest_db.meta.database_description_changed = Some(source_database_description_changed);
         dest_db.meta.database_description = source_db.meta.database_description.clone();
-    } else if source_database_description_changed == dest_database_description_changed
-        && source_db.meta.database_description != dest_db.meta.database_description
-    {
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::DatabaseDescription),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_database_description_changed < dest_database_description_changed {
+        log.dest_events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::DatabaseDescription),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_db.meta.database_description != dest_db.meta.database_description {
         log.warnings.push(
             "The database description change times are the same, but there’s already a deviation.".into(),
         );
@@ -936,9 +1060,16 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
     if source_default_username_changed > dest_default_username_changed {
         dest_db.meta.default_username_changed = Some(source_default_username_changed);
         dest_db.meta.default_username = source_db.meta.default_username.clone();
-    } else if source_default_username_changed == dest_default_username_changed
-        && source_db.meta.default_username != dest_db.meta.default_username
-    {
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::DefaultUsername),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_default_username_changed < dest_default_username_changed {
+        log.dest_events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::DefaultUsername),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_db.meta.default_username != dest_db.meta.default_username {
         log.warnings
             .push("The default user name change times are the same, but there’s already a deviation.".into());
     }
@@ -950,9 +1081,17 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
         dest_db.meta.recyclebin_changed = Some(source_recyclebin_changed);
         dest_db.meta.recyclebin_enabled = source_db.meta.recyclebin_enabled;
         dest_db.meta.recyclebin_uuid = source_db.meta.recyclebin_uuid;
-    } else if source_recyclebin_changed == dest_recyclebin_changed
-        && (source_db.meta.recyclebin_enabled != dest_db.meta.recyclebin_enabled
-            || source_db.meta.recyclebin_uuid != dest_db.meta.recyclebin_uuid)
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::RecycleBin),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_recyclebin_changed < dest_recyclebin_changed {
+        log.dest_events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::RecycleBin),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_db.meta.recyclebin_enabled != dest_db.meta.recyclebin_enabled
+        || source_db.meta.recyclebin_uuid != dest_db.meta.recyclebin_uuid
     {
         log.warnings
             .push("The recycle bin change times are the same, but there’s already a deviation.".into());
@@ -970,9 +1109,16 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
     if source_entry_templates_group_changed > dest_entry_templates_group_changed {
         dest_db.meta.entry_templates_group_changed = Some(source_entry_templates_group_changed);
         dest_db.meta.entry_templates_group = source_db.meta.entry_templates_group;
-    } else if source_entry_templates_group_changed == dest_entry_templates_group_changed
-        && source_db.meta.entry_templates_group != dest_db.meta.entry_templates_group
-    {
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::EntryTemplatesGroup),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_entry_templates_group_changed < dest_entry_templates_group_changed {
+        log.dest_events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::EntryTemplatesGroup),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_db.meta.entry_templates_group != dest_db.meta.entry_templates_group {
         log.warnings.push(
             "The entry templates group change times are the same, but there’s already a deviation.".into(),
         );
@@ -983,6 +1129,15 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
 
     if source_master_key_changed > dest_master_key_changed {
         dest_db.meta.master_key_changed = source_db.meta.master_key_changed;
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::MasterKeyChanged),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_master_key_changed < dest_master_key_changed {
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::MasterKeyChanged),
+            event_type: MergeEventType::Updated,
+        });
     }
 
     let dest_settings_changed = dest_db.meta.settings_changed.unwrap_or(Times::epoch());
@@ -1006,6 +1161,16 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
             source_maintenance_history_days_changed,
         );
         dest_db.meta.maintenance_history_days = source_db.meta.maintenance_history_days;
+
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::MaintenanceHistoryDays),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_maintenance_history_days_changed < dest_maintenance_history_days_changed {
+        log.dest_events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::MaintenanceHistoryDays),
+            event_type: MergeEventType::Updated,
+        });
     }
 
     let dest_color_changed = get_customm_time_changed(dest_db, CUSTOM_COLOR_CHANGED, dest_settings_changed);
@@ -1015,6 +1180,15 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
     if source_color_changed > dest_color_changed {
         set_customm_time_changed(dest_db, CUSTOM_COLOR_CHANGED, source_color_changed);
         dest_db.meta.color = source_db.meta.color.clone();
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::Color),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_color_changed < dest_color_changed {
+        log.dest_events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::Color),
+            event_type: MergeEventType::Updated,
+        });
     }
 
     let dest_master_key_change_rec_changed = get_customm_time_changed(
@@ -1035,6 +1209,15 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
             source_master_key_change_rec_changed,
         );
         dest_db.meta.master_key_change_rec = source_db.meta.master_key_change_rec;
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::MasterKeyChangeRec),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_master_key_change_rec_changed < dest_master_key_change_rec_changed {
+        log.dest_events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::MasterKeyChangeRec),
+            event_type: MergeEventType::Updated,
+        });
     }
 
     let dest_master_key_change_force_changed = get_customm_time_changed(
@@ -1055,6 +1238,15 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
             source_master_key_change_force_changed,
         );
         dest_db.meta.master_key_change_force = source_db.meta.master_key_change_force;
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::MasterKeyChangeForce),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_master_key_change_force_changed < dest_master_key_change_force_changed {
+        log.dest_events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::MasterKeyChangeForce),
+            event_type: MergeEventType::Updated,
+        });
     }
 
     let dest_memory_protection_changed =
@@ -1072,6 +1264,15 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
             source_memory_protection_changed,
         );
         dest_db.meta.memory_protection = source_db.meta.memory_protection.clone();
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::MemoryProtection),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_memory_protection_changed < dest_memory_protection_changed {
+        log.dest_events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::MemoryProtection),
+            event_type: MergeEventType::Updated,
+        });
     }
 
     let dest_history_max_items_changed =
@@ -1089,6 +1290,15 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
             source_history_max_items_changed,
         );
         dest_db.meta.history_max_items = source_db.meta.history_max_items;
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::HistoryMaxItems),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_history_max_items_changed < dest_history_max_items_changed {
+        log.dest_events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::HistoryMaxItems),
+            event_type: MergeEventType::Updated,
+        });
     }
 
     let dest_history_max_size_changed =
@@ -1106,6 +1316,16 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
             source_history_max_size_changed,
         );
         dest_db.meta.history_max_size = source_db.meta.history_max_size;
+        dest_db.meta.history_max_items = source_db.meta.history_max_items;
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::HistoryMaxSize),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_history_max_size_changed < dest_history_max_size_changed {
+        log.dest_events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::HistoryMaxSize),
+            event_type: MergeEventType::Updated,
+        });
     }
 
     let dest_database_config_changed =
@@ -1123,18 +1343,62 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
         dest_db.config.compression_config = source_db.config.compression_config.clone();
         dest_db.config.inner_cipher_config = source_db.config.inner_cipher_config.clone();
         dest_db.config.kdf_config = source_db.config.kdf_config.clone();
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::Config),
+            event_type: MergeEventType::Updated,
+        });
+    } else if source_database_config_changed < dest_database_config_changed {
+        log.dest_events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::Config),
+            event_type: MergeEventType::Updated,
+        });
     }
 
     let dest_custom_data = dest_db.meta.custom_data.keys().cloned().collect::<HashSet<_>>();
     let source_custom_data = source_db.meta.custom_data.keys().cloned().collect::<HashSet<_>>();
 
+    fn skip_customm_time_key(key: &str) -> bool {
+        key == CUSTOM_MAINTENANCE_HISTORY_DAYS_CHANGED
+            || key == CUSTOM_COLOR_CHANGED
+            || key == CUSTOM_MASTER_KEY_CHANGE_REC_CHANGED
+            || key == CUSTOM_MASTER_KEY_CHANGE_FORCE_CHANGED
+            || key == CUSTOM_MEMORY_PROTECTION_CHANGED
+            || key == CUSTOM_HISTORY_MAX_ITEMS_CHANGED
+            || key == CUSTOM_HISTORY_MAX_SIZE_CHANGED
+            || key == CUSTOM_DATABASE_CONFIG_CHANGED
+    }
+
     for key in source_custom_data.difference(&dest_custom_data) {
+        if skip_customm_time_key(key) {
+            continue;
+        }
+
         #[allow(clippy::unwrap_used)]
         let value = source_db.meta.custom_data.get(key).unwrap().clone();
         dest_db.meta.custom_data.insert(key.clone(), value);
+
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::CustomData(key.clone())),
+            event_type: MergeEventType::Created,
+        });
+    }
+
+    for key in dest_custom_data.difference(&source_custom_data) {
+        if skip_customm_time_key(key) {
+            continue;
+        }
+
+        log.dest_events.push(MergeEvent {
+            target: MergeEventTarget::Meta(MetaField::CustomData(key.clone())),
+            event_type: MergeEventType::Created,
+        });
     }
 
     for key in dest_custom_data.intersection(&source_custom_data) {
+        if skip_customm_time_key(key) {
+            continue;
+        }
+
         #[allow(clippy::unwrap_used)]
         let dest_value_time = dest_db
             .meta
@@ -1151,6 +1415,15 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
 
         if source_value_time > dest_value_time {
             dest_db.meta.custom_data.insert(key.clone(), source_value.clone());
+            log.events.push(MergeEvent {
+                target: MergeEventTarget::Meta(MetaField::CustomData(key.clone())),
+                event_type: MergeEventType::Updated,
+            });
+        } else {
+            log.dest_events.push(MergeEvent {
+                target: MergeEventTarget::Meta(MetaField::CustomData(key.clone())),
+                event_type: MergeEventType::Updated,
+            });
         }
     }
 
@@ -1366,6 +1639,141 @@ mod merge_tests {
         // Merging twice in a row, even if the first merge updated the destination group,
         // should not create more changes.
         assert_eq!(destination_db_just_after_merge, destination_db);
+    }
+
+    /// Destination-side changes are recorded on `dest_events` and are not overwritten by an older source.
+    #[test]
+    fn test_dest_events() {
+        let mut destination_db = create_test_database();
+
+        let icon_id = destination_db
+            .group_mut(SUBGROUP2_ID)
+            .unwrap()
+            .set_icon_custom_new(vec![1, 2, 3, 4])
+            .id();
+
+        let mut source_db = destination_db.clone();
+
+        sleep();
+
+        // Source is newer only for the description, so this belongs in `events`.
+        source_db.meta.database_description = Some("from-source".into());
+        source_db.meta.database_description_changed = Some(Times::now());
+
+        sleep();
+
+        let created_entry_id = destination_db
+            .root_mut()
+            .add_entry()
+            .edit_tracking(|e| e.set_unprotected("Title", "dest_only_entry"))
+            .id();
+
+        let created_group_id = destination_db
+            .root_mut()
+            .add_group()
+            .edit(|g| g.name = "dest_only_group".into())
+            .id();
+
+        destination_db
+            .entry_mut(ENTRY2_ID)
+            .unwrap()
+            .track_changes()
+            .remove();
+
+        destination_db
+            .group_mut(GROUP1_ID)
+            .unwrap()
+            .track_changes()
+            .edit(|g| g.name = "group1_from_dest".into());
+
+        // A tracked move updates both the location time and the modification time.
+        destination_db
+            .entry_mut(ENTRY1_ID)
+            .unwrap()
+            .track_changes()
+            .move_to(GROUP2_ID)
+            .unwrap();
+
+        destination_db.custom_icon_mut(icon_id).unwrap().data = vec![5, 6, 7, 8];
+        destination_db
+            .custom_icon_mut(icon_id)
+            .unwrap()
+            .last_modification_time = Some(Times::now());
+
+        destination_db.meta.database_name = Some("from-dest".into());
+        destination_db.meta.database_name_changed = Some(Times::now());
+
+        let merge_result = destination_db.merge(&source_db).unwrap();
+        assert_eq!(merge_result.warnings.len(), 0);
+        assert_eq!(
+            merge_result.events,
+            vec![MergeEvent {
+                target: MergeEventTarget::Meta(MetaField::DatabaseDescription),
+                event_type: MergeEventType::Updated,
+            }]
+        );
+        assert_eq!(
+            merge_result.dest_events,
+            vec![
+                MergeEvent {
+                    target: MergeEventTarget::Meta(MetaField::DatabaseName),
+                    event_type: MergeEventType::Updated,
+                },
+                MergeEvent {
+                    target: MergeEventTarget::Icon(icon_id),
+                    event_type: MergeEventType::Updated,
+                },
+                MergeEvent {
+                    target: MergeEventTarget::Group(created_group_id),
+                    event_type: MergeEventType::Created,
+                },
+                MergeEvent {
+                    target: MergeEventTarget::Entry(ENTRY2_ID),
+                    event_type: MergeEventType::Deleted,
+                },
+                MergeEvent {
+                    target: MergeEventTarget::Entry(created_entry_id),
+                    event_type: MergeEventType::Created,
+                },
+                MergeEvent {
+                    target: MergeEventTarget::Entry(ENTRY1_ID),
+                    event_type: MergeEventType::LocationUpdated,
+                },
+                MergeEvent {
+                    target: MergeEventTarget::Entry(ENTRY1_ID),
+                    event_type: MergeEventType::Updated,
+                },
+                MergeEvent {
+                    target: MergeEventTarget::Group(GROUP1_ID),
+                    event_type: MergeEventType::Updated,
+                },
+            ]
+        );
+
+        assert_eq!(destination_db.entry(ENTRY1_ID).unwrap().parent().id(), GROUP2_ID);
+        assert_eq!(
+            destination_db.entry(ENTRY1_ID).unwrap().get(fields::TITLE),
+            Some("entry1")
+        );
+        assert!(destination_db.entry(ENTRY2_ID).is_none());
+        assert_eq!(
+            destination_db.entry(created_entry_id).unwrap().get(fields::TITLE),
+            Some("dest_only_entry")
+        );
+        assert_eq!(
+            destination_db.group(created_group_id).unwrap().name,
+            "dest_only_group"
+        );
+        assert_eq!(destination_db.group(GROUP1_ID).unwrap().name, "group1_from_dest");
+        assert_eq!(
+            destination_db.custom_icon(icon_id).unwrap().data,
+            vec![5, 6, 7, 8]
+        );
+        assert_eq!(destination_db.meta.database_name.as_deref(), Some("from-dest"));
+        assert_eq!(
+            destination_db.meta.database_description.as_deref(),
+            Some("from-source")
+        );
     }
 
     /// Test that a new entry in source is added to destination when merging.
@@ -3060,9 +3468,7 @@ mod merge_tests {
 
         source_db.meta.settings_changed = Some(Times::now());
 
-        let merge_result = destination_db.merge(&source_db).unwrap();
-        assert_eq!(merge_result.warnings.len(), 0);
-        assert_eq!(merge_result.events.len(), 0);
+        destination_db.merge(&source_db).unwrap();
 
         assert_eq!(
             destination_db
@@ -3293,9 +3699,7 @@ mod merge_tests {
         source_db.meta.settings_changed = Some(Times::now());
         set_customm_time_changed(&mut source_db, CUSTOM_DATABASE_CONFIG_CHANGED, Times::now());
 
-        let merge_result = destination_db.merge(&source_db).unwrap();
-        assert_eq!(merge_result.warnings.len(), 0);
-        assert_eq!(merge_result.events.len(), 0);
+        destination_db.merge(&source_db).unwrap();
 
         assert_ne!(destination_db.config.version, DatabaseVersion::KDB3(3));
         assert_eq!(destination_db.config.compression_config, CompressionConfig::None);

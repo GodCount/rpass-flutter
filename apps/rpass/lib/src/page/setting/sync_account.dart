@@ -417,6 +417,8 @@ extension _MergeEventTargetString on MergeEventTarget {
         return "Group($field0)";
       case MergeEventTarget_Icon():
         return "Icon($field0)";
+      case MergeEventTarget_Meta():
+        return "Meta($field0)";
     }
   }
 }
