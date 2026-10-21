@@ -1020,6 +1020,8 @@ sealed class MergeEventTarget with _$MergeEventTarget {
   const factory MergeEventTarget.group(String field0) = MergeEventTarget_Group;
   const factory MergeEventTarget.icon(String field0) = MergeEventTarget_Icon;
   const factory MergeEventTarget.meta(MetaField field0) = MergeEventTarget_Meta;
+  const factory MergeEventTarget.deletedObject(String field0) =
+      MergeEventTarget_DeletedObject;
 }
 
 enum MergeEventType { created, deleted, locationUpdated, updated }

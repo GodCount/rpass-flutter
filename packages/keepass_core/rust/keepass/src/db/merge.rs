@@ -8,6 +8,7 @@ use std::{collections::HashSet, ops::Deref};
 
 use chrono::NaiveDateTime;
 use thiserror::Error;
+use uuid::Uuid;
 
 use crate::{
     Database,
@@ -47,6 +48,8 @@ pub enum MergeEventTarget {
     Icon(CustomIconId),
     /// A piece of database metadata.
     Meta(MetaField),
+    /// The record of a deleted object, identified by the UUID of the deleted object.
+    DeletedObject(Uuid),
 }
 
 /// A piece of database metadata that a merge can change, see [`MergeEventTarget::Meta`].
@@ -137,6 +140,7 @@ impl Database {
         merge_meta(self, other, &mut log)?;
         merge_icons(self, other, &mut log)?;
         merge_groups(self, other, &mut log)?;
+        merge_deleted_objects(self, other, &mut log)?;
         self.cleanup();
 
         Ok(log)
@@ -1425,6 +1429,107 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
     }
 
     Ok(())
+}
+
+/// Merge the records of deleted objects from `source` into `dest`.
+///
+/// This runs after everything else was merged. Records are kept for objects that are not in the
+/// merged database, so that a later merge with a third copy still knows about the deletion. For an
+/// object deleted on both sides, the earlier deletion time is kept, like KeePassXC does. Records for
+/// objects that are still in the merged database, because they were changed after being deleted,
+/// are dropped.
+fn merge_deleted_objects(
+    dest_db: &mut Database,
+    source_db: &Database,
+    log: &mut MergeLog,
+) -> Result<(), MergeError> {
+    let present: HashSet<Uuid> = dest_db
+        .entries
+        .keys()
+        .map(|id| id.uuid())
+        .chain(dest_db.groups.keys().map(|id| id.uuid()))
+        .chain(dest_db.custom_icons.keys().map(|id| id.uuid()))
+        .collect();
+
+    let dropped: Vec<Uuid> = dest_db
+        .deleted_objects
+        .keys()
+        .filter(|uuid| present.contains(uuid))
+        .copied()
+        .collect();
+
+    for uuid in dropped {
+        dest_db.deleted_objects.shift_remove(&uuid);
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::DeletedObject(uuid),
+            event_type: MergeEventType::Deleted,
+        });
+    }
+
+    let uuids: Vec<&Uuid> = source_db.deleted_objects.keys().collect();
+
+    for uuid in uuids {
+        if present.contains(uuid) {
+            continue;
+        }
+
+        #[allow(clippy::unwrap_used)] // uuid was taken from source_db.deleted_objects
+        let source_time = *source_db.deleted_objects.get(uuid).unwrap();
+
+        let event_type = match dest_db.deleted_objects.get(uuid) {
+            None => MergeEventType::Created,
+            Some(dest_time) if is_earlier(source_time, *dest_time) => MergeEventType::Updated,
+            Some(_) => continue,
+        };
+
+        dest_db.deleted_objects.insert(*uuid, source_time);
+        log.events.push(MergeEvent {
+            target: MergeEventTarget::DeletedObject(*uuid),
+            event_type,
+        });
+    }
+
+    let dest_uuid = dest_db.deleted_objects.keys().collect::<HashSet<_>>();
+    let source_uuid = source_db.deleted_objects.keys().collect::<HashSet<_>>();
+
+    for &uuid in dest_uuid.difference(&source_uuid) {
+        log.dest_events.push(MergeEvent {
+            target: MergeEventTarget::DeletedObject(uuid.clone()),
+            event_type: MergeEventType::Created,
+        });
+    }
+
+    for &uuid in source_uuid.difference(&dest_uuid) {
+        log.dest_events.push(MergeEvent {
+            target: MergeEventTarget::DeletedObject(uuid.clone()),
+            event_type: MergeEventType::Deleted,
+        });
+    }
+
+    for &uuid in dest_uuid.intersection(&source_uuid) {
+        #[allow(clippy::unwrap_used)] // uuid was taken from dest_db.deleted_objects
+        let dest_time = dest_db.deleted_objects.get(uuid).unwrap();
+        #[allow(clippy::unwrap_used)] // uuid was taken from source_db.deleted_objects
+        let source_time = source_db.deleted_objects.get(uuid).unwrap();
+
+        if is_earlier(*dest_time, *source_time) {
+            log.dest_events.push(MergeEvent {
+                target: MergeEventTarget::DeletedObject(uuid.clone()),
+                event_type: MergeEventType::Updated,
+            });
+        }
+    }
+
+    Ok(())
+}
+
+/// Whether deletion time `a` is known and earlier than `b`, or `b` is unknown.
+fn is_earlier(a: Option<NaiveDateTime>, b: Option<NaiveDateTime>) -> bool {
+    match (a, b) {
+        (Some(a), Some(b)) => a < b,
+        (Some(_), None) => true,
+        (None, _) => false,
+    }
 }
 
 fn have_groups_diverged(a: &Group, b: &Group) -> bool {
@@ -3920,5 +4025,94 @@ mod merge_tests {
                 .get(),
             b"1234"
         );
+    }
+
+    /// A fixed point in time, `secs` seconds after the epoch.
+    fn at(secs: i64) -> chrono::NaiveDateTime {
+        chrono::DateTime::from_timestamp(secs, 0).unwrap().naive_utc()
+    }
+
+    /// Deletion records are copied for objects that the destination never had, keeping the earlier
+    /// deletion time for objects deleted on both sides.
+    #[test]
+    fn test_deleted_objects_are_merged() {
+        let mut destination_db = create_test_database();
+        let mut source_db = destination_db.clone();
+
+        let never_in_dest = uuid!("00000000-0000-0000-0000-0000000000a1");
+        let deleted_later_in_source = uuid!("00000000-0000-0000-0000-0000000000a2");
+        let deleted_earlier_in_source = uuid!("00000000-0000-0000-0000-0000000000a3");
+
+        destination_db
+            .deleted_objects
+            .insert(deleted_later_in_source, Some(at(1_000)));
+        destination_db
+            .deleted_objects
+            .insert(deleted_earlier_in_source, Some(at(2_000)));
+
+        source_db.deleted_objects.insert(never_in_dest, Some(at(1_000)));
+        source_db
+            .deleted_objects
+            .insert(deleted_later_in_source, Some(at(2_000)));
+        source_db
+            .deleted_objects
+            .insert(deleted_earlier_in_source, Some(at(1_000)));
+
+        let merge_result = destination_db.merge(&source_db).unwrap();
+        assert_eq!(merge_result.warnings.len(), 0);
+        let events: Vec<_> = merge_result
+            .events
+            .iter()
+            .map(|e| match (&e.target, &e.event_type) {
+                (MergeEventTarget::DeletedObject(uuid), MergeEventType::Created) => (*uuid, "created"),
+                (MergeEventTarget::DeletedObject(uuid), MergeEventType::Updated) => (*uuid, "updated"),
+                _ => panic!("unexpected event {:?}", e),
+            })
+            .collect();
+        assert_eq!(
+            events,
+            vec![(never_in_dest, "created"), (deleted_earlier_in_source, "updated")]
+        );
+
+        let deleted = &destination_db.deleted_objects;
+        assert_eq!(deleted.get(&never_in_dest), Some(&Some(at(1_000))));
+        assert_eq!(deleted.get(&deleted_later_in_source), Some(&Some(at(1_000))));
+        assert_eq!(deleted.get(&deleted_earlier_in_source), Some(&Some(at(1_000))));
+
+        let merge_result = destination_db.merge(&source_db).unwrap();
+        assert_eq!(merge_result.events.len(), 0);
+    }
+
+    /// An entry deleted in destination but changed later in source comes back, and its deletion
+    /// record is dropped.
+    #[test]
+    fn test_deleted_object_record_dropped_when_restored() {
+        let mut destination_db = create_test_database();
+        let mut source_db = destination_db.clone();
+
+        destination_db.entry_mut(ENTRY1_ID).unwrap().remove();
+        destination_db
+            .deleted_objects
+            .insert(ENTRY1_ID.uuid(), Some(at(1_000)));
+
+        source_db
+            .entry_mut(ENTRY1_ID)
+            .unwrap()
+            .edit_tracking(|e| e.set_unprotected(fields::TITLE, "changed after deletion"));
+
+        let merge_result = destination_db.merge(&source_db).unwrap();
+        assert_eq!(merge_result.warnings.len(), 0);
+        let deleted_object_events: Vec<_> = merge_result
+            .events
+            .iter()
+            .filter(|e| matches!(e.target, MergeEventTarget::DeletedObject(_)))
+            .collect();
+        assert_eq!(deleted_object_events.len(), 1);
+        assert!(matches!(
+            (&deleted_object_events[0].target, &deleted_object_events[0].event_type),
+            (MergeEventTarget::DeletedObject(uuid), MergeEventType::Deleted) if *uuid == ENTRY1_ID.uuid()
+        ));
+        assert!(destination_db.entry(ENTRY1_ID).is_some());
+        assert!(!destination_db.deleted_objects.contains_key(&ENTRY1_ID.uuid()));
     }
 }

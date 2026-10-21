@@ -3332,6 +3332,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         return MergeEventTarget_Icon(dco_decode_String(arr[1]));
       case 3:
         return MergeEventTarget_Meta(dco_decode_box_autoadd_meta_field(arr[1]));
+      case 4:
+        return MergeEventTarget_DeletedObject(dco_decode_String(arr[1]));
       default:
         throw Exception("unreachable");
     }
@@ -5125,6 +5127,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case 3:
         var var_field0 = sse_decode_box_autoadd_meta_field(deserializer);
         return MergeEventTarget_Meta(var_field0);
+      case 4:
+        var var_field0 = sse_decode_String(deserializer);
+        return MergeEventTarget_DeletedObject(var_field0);
       default:
         throw UnimplementedError('');
     }
@@ -7081,6 +7086,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case MergeEventTarget_Meta(field0: final field0):
         sse_encode_i_32(3, serializer);
         sse_encode_box_autoadd_meta_field(field0, serializer);
+      case MergeEventTarget_DeletedObject(field0: final field0):
+        sse_encode_i_32(4, serializer);
+        sse_encode_String(field0, serializer);
     }
   }
 

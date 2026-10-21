@@ -419,6 +419,8 @@ extension _MergeEventTargetString on MergeEventTarget {
         return "Icon($field0)";
       case MergeEventTarget_Meta():
         return "Meta($field0)";
+      case MergeEventTarget_DeletedObject():
+        return "DeletedObject($field0)";
     }
   }
 }

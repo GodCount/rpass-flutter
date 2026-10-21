@@ -3917,6 +3917,10 @@ impl SseDecode for crate::api::kdbx::MergeEventTarget {
                 let mut var_field0 = <crate::api::kdbx::MetaField>::sse_decode(deserializer);
                 return crate::api::kdbx::MergeEventTarget::Meta(var_field0);
             }
+            4 => {
+                let mut var_field0 = <String>::sse_decode(deserializer);
+                return crate::api::kdbx::MergeEventTarget::DeletedObject(var_field0);
+            }
             _ => {
                 unimplemented!("");
             }
@@ -5668,6 +5672,9 @@ impl flutter_rust_bridge::IntoDart for crate::api::kdbx::MergeEventTarget {
             crate::api::kdbx::MergeEventTarget::Meta(field0) => {
                 [3.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
+            crate::api::kdbx::MergeEventTarget::DeletedObject(field0) => {
+                [4.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
             _ => {
                 unimplemented!("");
             }
@@ -6942,6 +6949,10 @@ impl SseEncode for crate::api::kdbx::MergeEventTarget {
             crate::api::kdbx::MergeEventTarget::Meta(field0) => {
                 <i32>::sse_encode(3, serializer);
                 <crate::api::kdbx::MetaField>::sse_encode(field0, serializer);
+            }
+            crate::api::kdbx::MergeEventTarget::DeletedObject(field0) => {
+                <i32>::sse_encode(4, serializer);
+                <String>::sse_encode(field0, serializer);
             }
             _ => {
                 unimplemented!("");
