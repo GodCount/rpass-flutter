@@ -407,10 +407,10 @@ mod tests {
                  <UUID>tP/vJ/3uSHyomfPZ4dXVlg==</UUID><Name></Name>
                  <Entry>
                    <UUID>i8NatFz/SdeEcUBl+NnWnQ==</UUID>
-                     <Binary>
-                       <Key>doc.txt</Key>
-                       <Value Ref="0"/>
-                     </Binary>
+                   <Binary>
+                     <Key>doc.txt</Key>
+                     <Value Ref="0"/>
+                   </Binary>
                  </Entry>
                </Group>
             </Root>
@@ -426,5 +426,40 @@ mod tests {
 
         assert_eq!(db.num_attachments(), 1);
         assert_eq!(db.attachment(AttachmentId::new(0)).unwrap().entries.len(), 1);
+    }
+
+    #[test]
+    fn test_parse_empty_previous_parent_group_element() {
+        let xml = r#"<KeePassFile>
+            <Meta></Meta>
+            <Root>
+               <Group>
+                 <UUID>tP/vJ/3uSHyomfPZ4dXVlg==</UUID><Name></Name>
+                 <Entry>
+                   <UUID>i8NatFz/SdeEcUBl+NnWnQ==</UUID>
+                   <PreviousParentGroup/>
+                   <Binary>
+                     <Key>doc.txt</Key>
+                     <Value Ref="0"/>
+                   </Binary>
+                 </Entry>
+                 <Group>
+                   <UUID>pk1JqiDcSDW/p2AjHmF13g==</UUID><Name></Name>
+                   <PreviousParentGroup/>
+                 </Group>
+               </Group>
+            </Root>
+        </KeePassFile>"#;
+
+        let mut cipher = crate::config::InnerCipherConfig::Plain.get_cipher(&[]).unwrap();
+        let db = parse_xml(
+            xml.as_bytes(),
+            &[Value::Unprotected(vec![1, 0, 0, 8, 6])],
+            &mut *cipher,
+        )
+        .unwrap();
+        assert_eq!(db.entries.values().nth(0).unwrap().previous_parent_group, None);
+        assert_eq!(db.groups.values().nth(1).unwrap().previous_parent_group, None);
+
     }
 }
