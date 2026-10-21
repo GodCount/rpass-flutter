@@ -1827,6 +1827,10 @@ mod merge_tests {
                     target: MergeEventTarget::Group(GROUP1_ID),
                     event_type: MergeEventType::Updated,
                 },
+                MergeEvent {
+                    target: MergeEventTarget::DeletedObject(ENTRY2_ID.uuid()),
+                    event_type: MergeEventType::Created
+                }
             ]
         );
 
