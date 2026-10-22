@@ -51,7 +51,8 @@ class _HomePageState extends State<HomePage>
   ];
 
   bool _enableRemoteSync = false;
-  bool _hintMasterKeyChangeRec = true;
+  int? _lastMasterKeyChangeRec;
+  Color? _kdbxColor;
 
   @override
   bool get wantKeepAlive => true;
@@ -61,36 +62,39 @@ class _HomePageState extends State<HomePage>
     super.initState();
 
     Store.kdbx.addListener(this);
-    Store.kdbx.syncController.initConfig();
     Store.settings.addListener(_settingsListener);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await onKdbxSaved();
       _settingsListener();
-      onKdbxSaved();
     });
   }
 
   @override
   void onKdbxChanged(Kdbx? kdbx) {
-    _hintMasterKeyChangeRec = true;
+    _lastMasterKeyChangeRec = null;
+    Store.kdbx.syncController.initConfig();
   }
 
   @override
-  void onKdbxSaved() async {
+  Future<void> onKdbxSaved() async {
     final t = I18n.of(context)!;
     final meta = Store.kdbx.meta;
     final settings = Store.settings;
 
     if (meta != null) {
-      if (settings.useKdbxSeedColor && meta.color != null) {
+      if (settings.useKdbxSeedColor &&
+          meta.color != null &&
+          meta.color != _kdbxColor) {
+        _kdbxColor = meta.color;
         settings.notify();
       }
 
       final masterKeyChanged =
           meta.masterKeyChanged ??
           DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
-      final masterKeyChangeForce = meta.masterKeyChangeForce ?? 30;
-      final masterKeyChangeRec = meta.masterKeyChangeRec ?? 15;
+      final masterKeyChangeForce = meta.masterKeyChangeForce ?? -1;
+      final masterKeyChangeRec = meta.masterKeyChangeRec ?? -1;
 
       final diffDays = DateTime.now().difference(masterKeyChanged).inDays;
 
@@ -101,17 +105,18 @@ class _HomePageState extends State<HomePage>
           message: t.kdbx_password_expired_subtitle,
           confirm: t.modify_password,
         );
-        context.router.push(ModifyPasswordRoute(dismissible: false));
-      } else if (masterKeyChangeRec != -1 &&
-          _hintMasterKeyChangeRec &&
-          diffDays >= masterKeyChangeRec) {
-        _hintMasterKeyChangeRec = false;
+        await context.router.push(ModifyPasswordRoute(dismissible: false));
+      } else if (masterKeyChangeRec != -1 && diffDays >= masterKeyChangeRec) {
+        // 只执行一次, 除非masterKeyChangeRec更改
+        if (_lastMasterKeyChangeRec == masterKeyChangeRec) return;
+        _lastMasterKeyChangeRec = masterKeyChangeRec;
+
         if (await showConfirmDialog(
           title: t.kdbx_password_recommend_change,
           message: t.kdbx_password_recommend_change_subtitle,
           confirm: t.modify_password,
         )) {
-          context.router.push(ModifyPasswordRoute());
+          await context.router.push(ModifyPasswordRoute());
         }
       }
     }

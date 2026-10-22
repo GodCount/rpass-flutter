@@ -92,7 +92,7 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
     }
   }
 
-  void _celanKdbx() {
+  void _cleanKdbx() {
     if (_streamSubscription != null) {
       _streamSubscription!.cancel();
       _streamSubscription = null;
@@ -104,7 +104,7 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
   }
 
   Future<void> setKdbx(Kdbx? kdbx) async {
-    _celanKdbx();
+    _cleanKdbx();
 
     _kdbx = kdbx;
 
@@ -165,7 +165,7 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
   }
 
   void dispose() {
-    _celanKdbx();
+    _cleanKdbx();
     progressStream.close();
     removeAllListener();
   }
