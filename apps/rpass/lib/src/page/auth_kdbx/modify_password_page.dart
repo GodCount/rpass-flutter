@@ -67,13 +67,13 @@ class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
       final kdbx = Store.kdbx.kdbx!;
       final biometric = Biometric.of(context);
 
-      final credentials = Credentials.from(
-        password: isPassword ? password : null,
-        keyfile: keyFile?.$2,
-      );
-
       try {
-        await kdbx.modifyPassword(credentials: credentials);
+        await kdbx.modifyPassword(
+          credentials: Credentials.from(
+            password: isPassword ? password : null,
+            keyfile: keyFile?.$2,
+          ),
+        );
         _logger.finest("update credentials done!");
       } catch (error, stackTrace) {
         _logger.severe("update credentials fail!", error, stackTrace);
@@ -82,10 +82,7 @@ class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
 
       if (biometric.enable) {
         try {
-          await biometric.updateCredentials(
-            context,
-            credentials.getCompositeKey(),
-          );
+          await biometric.updateCredentials(context, kdbx.getCompositeKey());
           _logger.finest("update credentials to biometric done!");
         } catch (error, stackTrace) {
           if (error is AuthException &&

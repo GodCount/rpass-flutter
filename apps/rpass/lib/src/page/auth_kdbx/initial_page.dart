@@ -95,13 +95,11 @@ class _InitialPageState extends AuthorizedPageState<InitialPage> {
         throw Exception("Lack of key file.");
       }
 
-      final credentials = Credentials.from(
-        password: isPassword ? password : null,
-        keyfile: keyFile?.$2,
-      );
-
       final kdbx = Kdbx.createAndSink(
-        credentials: credentials,
+        credentials: Credentials.from(
+          password: isPassword ? password : null,
+          keyfile: keyFile?.$2,
+        ),
         filepath: Store.localInfo.localKdbxFile.path,
       );
 

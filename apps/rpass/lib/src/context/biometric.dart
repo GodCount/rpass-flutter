@@ -158,6 +158,7 @@ class BiometricState extends State<Biometric> {
     _assertBiometric();
 
     if (credentials == null) {
+      Store.settings.seEnableBiometric(false);
       await (await _getStorageFile(
         context,
         BiometricStorageKey.credentials,
@@ -167,6 +168,7 @@ class BiometricState extends State<Biometric> {
         context,
         BiometricStorageKey.credentials,
       )).write(_encode(credentials), promptInfo: _getPromptInfo(context));
+      Store.settings.seEnableBiometric(true);
     }
   }
 

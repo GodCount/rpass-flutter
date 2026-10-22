@@ -222,7 +222,6 @@ class _SettingsPageState extends State<SettingsPage>
                       context,
                       enableBiometric ? kdbx.getCompositeKey() : null,
                     );
-                    Store.settings.seEnableBiometric(enableBiometric);
                     _logger.finest("biometric status is $enableBiometric");
                   } catch (e, s) {
                     if (e is AuthException &&

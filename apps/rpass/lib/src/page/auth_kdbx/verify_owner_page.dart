@@ -71,12 +71,12 @@ class _VerifyOwnerPageState extends AuthorizedPageState<VerifyOwnerPage> {
 
       final kdbx = Store.kdbx.kdbx!;
 
-      final credentials = Credentials.from(
-        password: isPassword ? password : null,
-        keyfile: keyFile?.$2,
-      );
-
-      if (!(await kdbx.verifyCredentials(credentials: credentials))) {
+      if (!(await kdbx.verifyCredentials(
+        credentials: Credentials.from(
+          password: isPassword ? password : null,
+          keyfile: keyFile?.$2,
+        ),
+      ))) {
         throw Exception("password verify error");
       }
 
