@@ -277,8 +277,6 @@ mod kdbx4_tests {
 
         let decrypted_db = parse_kdbx4(&encrypted_db, &db_key, None).unwrap();
 
-        dbg!(&db, &decrypted_db);
-
         assert_eq!(decrypted_db.num_entries(), 3);
 
         let root = decrypted_db.root();
