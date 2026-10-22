@@ -72,17 +72,15 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
 
       await runWithLoadingDialog(
         () async {
-          final credentials = Credentials.from(
-            password: isPassword ? password : null,
-            keyfile: keyFile?.$2,
-          );
-
           kdbxFile =
               kdbxFile ?? await Store.localInfo.localKdbxFile.readAsBytes();
 
           Kdbx kdbx = await Kdbx.openBytesAndSink(
             bytes: kdbxFile!,
-            credentials: credentials,
+            credentials: Credentials.from(
+              password: isPassword ? password : null,
+              keyfile: keyFile?.$2,
+            ),
             filepath: Store.localInfo.localKdbxFile.path,
             onStream: (value) {
               sub = value.listen((event) {

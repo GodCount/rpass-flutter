@@ -299,7 +299,6 @@ class SyncKdbxController with ChangeNotifier {
             await biometric.updateCredentials(context, kdbx.getCompositeKey());
           } catch (e) {
             _logger.warning("update biometric failed! remove biometric data");
-            Store.settings.seEnableBiometric(false);
             await biometric.updateCredentials(context, null);
           }
         }
