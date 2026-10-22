@@ -1416,7 +1416,7 @@ fn merge_meta(dest_db: &mut Database, source_db: &Database, log: &mut MergeLog) 
                 target: MergeEventTarget::Meta(MetaField::CustomData(key.clone())),
                 event_type: MergeEventType::Updated,
             });
-        } else {
+        } else if source_value_time < dest_value_time {
             log.dest_events.push(MergeEvent {
                 target: MergeEventTarget::Meta(MetaField::CustomData(key.clone())),
                 event_type: MergeEventType::Updated,

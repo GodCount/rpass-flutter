@@ -113,7 +113,7 @@ impl Entry {
             id,
             parent,
             fields: IndexMap::new(),
-            autotype: None,
+            autotype: Some(AutoType::default()),
             tags: Vec::new(),
             times: Times::new(),
             custom_data: IndexMap::new(),

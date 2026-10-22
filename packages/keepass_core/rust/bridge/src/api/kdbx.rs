@@ -2296,6 +2296,7 @@ pub enum _VariantDictionaryValue {
     ByteArray(Vec<u8>),
 }
 
+#[derive(Debug, Clone)]
 pub struct MergeLog {
     pub warnings: Vec<String>,
     pub events: Vec<MergeEvent>,
@@ -2326,17 +2327,19 @@ impl From<MergeLog2> for MergeLog {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct MergeEvent {
     pub target: MergeEventTarget,
     pub event_type: MergeEventType,
 }
 
+#[derive(Debug, Clone)]
 pub enum MergeEventTarget {
     Entry(String),
     Group(String),
     Icon(String),
     Meta(MetaField),
-    DeletedObject(String)
+    DeletedObject(String),
 }
 
 impl From<MergeEventTarget2> for MergeEventTarget {

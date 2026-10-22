@@ -109,13 +109,17 @@ impl Meta {
 
     /// set custom data time
     pub fn set_custom_time_changed(&mut self, key: &str, time: NaiveDateTime) {
-        self.custom_data.insert(
-            key.to_string(),
-            CustomDataItem {
-                value: None,
-                last_modification_time: Some(time),
-            },
-        );
+        if let Some(item) = self.custom_data.get_mut(key) {
+            item.last_modification_time = Some(time);
+        } else {
+            self.custom_data.insert(
+                key.to_string(),
+                CustomDataItem {
+                    value: None,
+                    last_modification_time: Some(time),
+                },
+            );
+        }
     }
 }
 
