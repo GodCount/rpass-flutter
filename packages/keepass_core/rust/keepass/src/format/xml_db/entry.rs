@@ -131,7 +131,7 @@ impl Entry {
         target.autotype = self.auto_type.map(|at| at.into());
 
         if let Some(h) = self.history {
-            let mut history = crate::db::History::new();
+            let mut history = Vec::with_capacity(h.entries.len());
 
             for e in h.entries {
                 let id = EntryId::from_uuid(e.uuid.0);
@@ -141,10 +141,13 @@ impl Entry {
 
                 e.xml_to_db_handle(&mut he, attachments, custom_icons, inner_decryptor)?;
 
-                history.add_entry(he);
+                history.push(he);
             }
 
-            target.history = Some(history);
+            // 保证期降序排序
+            history.sort_by(|a, b| b.times.last_modification.cmp(&a.times.last_modification));
+
+            target.history = Some(crate::db::History::from(history));
         }
 
         if let Some(cd) = self.custom_data {
@@ -210,6 +213,7 @@ impl Entry {
             let entries = h
                 .get_entries()
                 .iter()
+                .rev() // 写到文档应该按照升序排序
                 .map(|(_, item)| Entry::db_to_xml(item, attachments, inner_encryptor))
                 .collect::<Result<Vec<_>, CryptographyError>>()?;
 
