@@ -102,9 +102,14 @@ fn wire__crate__api__kdbx__Credentials_from_impl(
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_password = <Option<String>>::sse_decode(&mut deserializer);
             let api_keyfile = <Option<Vec<u8>>>::sse_decode(&mut deserializer);
+            let api_try_legacy_keyfile = <Option<bool>>::sse_decode(&mut deserializer);
             deserializer.end();
             transform_result_sse::<_, crate::api::kdbx::KdbxError>((move || {
-                let output_ok = crate::api::kdbx::Credentials::from(api_password, api_keyfile)?;
+                let output_ok = crate::api::kdbx::Credentials::from(
+                    api_password,
+                    api_keyfile,
+                    api_try_legacy_keyfile,
+                )?;
                 std::result::Result::Ok(output_ok)
             })())
         },

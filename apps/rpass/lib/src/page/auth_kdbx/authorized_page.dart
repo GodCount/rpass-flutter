@@ -86,7 +86,7 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
   }
 
   @protected
-  Future<void> confirm() {
+  Future<void> confirm([bool? tryLegacyKeyfile]) {
     throw UnimplementedError('confirm() has not been implemented.');
   }
 
@@ -110,11 +110,26 @@ abstract class AuthorizedPageState<T extends AuthorizedPage> extends State<T> {
     context.router.pop();
   }
 
-  Future<void> _confirm() async {
+  Future<void> _confirm([bool? tryLegacyKeyfile]) async {
     try {
-      await confirm();
+      await confirm(tryLegacyKeyfile);
     } on KdbxError_IncorrectCredentials {
-      showError(I18n.of(context)!.password_error);
+      final t = I18n.of(context)!;
+      // 修复旧版依赖 kdbx.dart 中的一个错误
+      // 对于密钥文件的解析中只要不是xml格式的都执行了 sha256 哈希
+      // 这就导致旧版kdbx规范中的32位也进行了 sha256 哈希
+      // 如果是32位的密钥文件,在密码错误时, 使用 sha256 哈希重新试一次
+      if (tryLegacyKeyfile != true &&
+          keyFilecontroller.keyFile?.$2.length == 32) {
+        if (await showConfirmDialog(
+          title: t.password_error,
+          message: t.try_legacy_keyfile_hint,
+        )) {
+          return await _confirm(true);
+        }
+      } else {
+        showError(t.password_error);
+      }
     } catch (e, s) {
       showError(e, s);
     }

@@ -12,9 +12,9 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 part 'kdbx.freezed.dart';
 
-// These functions are ignored because they are not marked as `pub`: `credentials_empty`, `emit`, `enable_recyclebin`, `from`, `from`, `get`, `impl_action`, `io`, `merge`, `not_found`, `parse_uuid`, `summary`, `xml`
+// These functions are ignored because they are not marked as `pub`: `credentials_empty`, `emit`, `enable_recyclebin`, `from`, `from`, `get`, `impl_action`, `io`, `merge`, `not_found`, `parse_uuid`, `summary`, `try_legacy_key`, `xml`
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `SearchInputParse`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `drop`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `hash`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `drop`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `hash`
 // These functions are ignored (category: IgnoreBecauseOwnerTyShouldIgnore): `is_match`
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Credentials>>
@@ -22,10 +22,15 @@ abstract class Credentials implements RustOpaqueInterface {
   static Credentials formCompositeKey({required List<int> key}) =>
       RustLib.instance.api.crateApiKdbxCredentialsFormCompositeKey(key: key);
 
-  static Credentials from({String? password, Uint8List? keyfile}) => RustLib
-      .instance
-      .api
-      .crateApiKdbxCredentialsFrom(password: password, keyfile: keyfile);
+  static Credentials from({
+    String? password,
+    Uint8List? keyfile,
+    bool? tryLegacyKeyfile,
+  }) => RustLib.instance.api.crateApiKdbxCredentialsFrom(
+    password: password,
+    keyfile: keyfile,
+    tryLegacyKeyfile: tryLegacyKeyfile,
+  );
 
   Uint8List getCompositeKey();
 

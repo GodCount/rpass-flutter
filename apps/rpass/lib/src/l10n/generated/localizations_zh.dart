@@ -821,4 +821,7 @@ class MyLocalizationsZh extends MyLocalizations {
 
   @override
   String get file_path => '文件路径';
+
+  @override
+  String get try_legacy_keyfile_hint => '当前密钥文件属于旧版格式, 是否切换为旧版密钥计算方式进行重试？';
 }

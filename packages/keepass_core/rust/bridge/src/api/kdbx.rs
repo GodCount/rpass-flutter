@@ -336,7 +336,7 @@ impl Kdbx {
         let sink2 = sink.clone();
         let mut database = Database::parse(
             &bytes,
-            credentials.key.clone(),
+            credentials.try_legacy_key(),
             Some(&move |step| {
                 if let Some(sink) = &sink2 {
                     let _ = sink.add(KdbxEvent::Progress(KdbxProgress::from(step)));
@@ -1962,12 +1962,21 @@ pub struct _MemoryProtection {
 #[frb(opaque)]
 #[derive(Clone)]
 pub struct Credentials {
+    // 修复旧版依赖 kdbx.dart 中的一个错误
+    // 对于密钥文件的解析中只要不是xml格式的都执行了 sha256 哈希
+    // 这就导致旧版kdbx规范中的32位也进行了 sha256 哈希
+    // 如果是 true 并且是32位的密钥文件, 使用 sha256 哈希
+    try_legacy_keyfile: Option<bool>,
     key: DatabaseKey,
 }
 
 impl Credentials {
     #[frb(sync)]
-    pub fn from(password: Option<String>, keyfile: Option<Vec<u8>>) -> Result<Self, KdbxError> {
+    pub fn from(
+        password: Option<String>,
+        keyfile: Option<Vec<u8>>,
+        try_legacy_keyfile: Option<bool>,
+    ) -> Result<Self, KdbxError> {
         if password.is_none() && keyfile.is_none() {
             return Err(KdbxError::credentials_empty(
                 "No password or keyfile was provided.",
@@ -1985,12 +1994,32 @@ impl Credentials {
             key = key.with_keyfile(&mut keyfile)?;
         }
 
-        Ok(Self { key })
+        Ok(Self {
+            key,
+            try_legacy_keyfile,
+        })
+    }
+
+    #[allow(clippy::expect_used)]
+    fn try_legacy_key(&self) -> DatabaseKey {
+        let mut key = self.key.clone();
+        if self.try_legacy_keyfile.unwrap_or(false)
+            && let Some(keyfile) = self.key.get_keyfile()
+            && keyfile.len() == 32
+        {
+            let keyfile = DatabaseKey::calculate_sha256(&[keyfile]);
+            key = key
+                .with_keyfile(&mut keyfile.as_slice())
+                .expect("Slices don't read errors");
+        }
+
+        key
     }
 
     #[frb(sync)]
     pub fn form_composite_key(key: Vec<u8>) -> Result<Self, KdbxError> {
         Ok(Self {
+            try_legacy_keyfile: None,
             key: DatabaseKey::form_composite_key(key)?,
         })
     }
@@ -3005,7 +3034,7 @@ mod test {
     }
 
     fn credentials(password: &str) -> Credentials {
-        Credentials::from(Some(password.to_string()), None).unwrap()
+        Credentials::from(Some(password.to_string()), None, None).unwrap()
     }
 
     /// 测试用配置, 使用最轻量的 KDF 以免拖慢测试
@@ -3145,8 +3174,8 @@ mod test {
 
     #[test]
     fn credentials_need_password_or_keyfile() {
-        assert!(Credentials::from(None, None).is_err());
-        assert!(Credentials::from(Some("password".to_string()), None).is_ok());
+        assert!(Credentials::from(None, None, None).is_err());
+        assert!(Credentials::from(Some("password".to_string()), None, None).is_ok());
     }
 
     #[test]

@@ -1663,6 +1663,12 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'文件路径'**
   String get file_path;
+
+  /// No description provided for @try_legacy_keyfile_hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前密钥文件属于旧版格式, 是否切换为旧版密钥计算方式进行重试？'**
+  String get try_legacy_keyfile_hint;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

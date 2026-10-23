@@ -64,7 +64,7 @@ class _LoadExternalKdbxPageState
   bool get readHistoryKeyFile => false;
 
   @override
-  Future<void> confirm() async {
+  Future<void> confirm([bool? tryLegacyKeyfile]) async {
     if (form.currentState!.validate()) {
       final password = passwordController.text;
       final keyFile = keyFilecontroller.keyFile;
@@ -81,6 +81,7 @@ class _LoadExternalKdbxPageState
           credentials: Credentials.from(
             password: isPassword ? password : null,
             keyfile: keyFile?.$2,
+            tryLegacyKeyfile: tryLegacyKeyfile,
           ),
           onStream: (value) {
             sub = value.listen((event) {

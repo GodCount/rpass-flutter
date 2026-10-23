@@ -388,5 +388,6 @@
             }
         }
     },
-    "file_path": "File Path"
+    "file_path": "File Path",
+    "try_legacy_keyfile_hint": "The current key file is in an older format. Do you want to switch to the older key calculation method and try again?"
 }

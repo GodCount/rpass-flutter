@@ -145,7 +145,7 @@ impl Entry {
             }
 
             // 保证期降序排序
-            history.sort_by(|a, b| b.times.last_modification.cmp(&a.times.last_modification));
+            history.sort_by_key(|b| std::cmp::Reverse(b.times.last_modification));
 
             target.history = Some(crate::db::History::from(history));
         }
