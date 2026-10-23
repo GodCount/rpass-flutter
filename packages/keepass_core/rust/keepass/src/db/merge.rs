@@ -1494,14 +1494,14 @@ fn merge_deleted_objects(
 
     for &uuid in dest_uuid.difference(&source_uuid) {
         log.dest_events.push(MergeEvent {
-            target: MergeEventTarget::DeletedObject(uuid.clone()),
+            target: MergeEventTarget::DeletedObject(*uuid),
             event_type: MergeEventType::Created,
         });
     }
 
     for &uuid in source_uuid.difference(&dest_uuid) {
         log.dest_events.push(MergeEvent {
-            target: MergeEventTarget::DeletedObject(uuid.clone()),
+            target: MergeEventTarget::DeletedObject(*uuid),
             event_type: MergeEventType::Deleted,
         });
     }
@@ -1514,7 +1514,7 @@ fn merge_deleted_objects(
 
         if is_earlier(*dest_time, *source_time) {
             log.dest_events.push(MergeEvent {
-                target: MergeEventTarget::DeletedObject(uuid.clone()),
+                target: MergeEventTarget::DeletedObject(*uuid),
                 event_type: MergeEventType::Updated,
             });
         }

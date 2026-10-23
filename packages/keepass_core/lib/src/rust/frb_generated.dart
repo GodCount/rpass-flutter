@@ -103,6 +103,7 @@ abstract class RustLibApi extends BaseApi {
   Credentials crateApiKdbxCredentialsFrom({
     String? password,
     Uint8List? keyfile,
+    bool? tryLegacyKeyfile,
   });
 
   Uint8List crateApiKdbxCredentialsGetCompositeKey({required Credentials that});
@@ -378,6 +379,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Credentials crateApiKdbxCredentialsFrom({
     String? password,
     Uint8List? keyfile,
+    bool? tryLegacyKeyfile,
   }) {
     return handler.executeSync(
       SyncTask(
@@ -385,6 +387,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_opt_String(password, serializer);
           sse_encode_opt_list_prim_u_8_strict(keyfile, serializer);
+          sse_encode_opt_box_autoadd_bool(tryLegacyKeyfile, serializer);
           return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
         },
         codec: SseCodec(
@@ -393,7 +396,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_kdbx_error,
         ),
         constMeta: kCrateApiKdbxCredentialsFromConstMeta,
-        argValues: [password, keyfile],
+        argValues: [password, keyfile, tryLegacyKeyfile],
         apiImpl: this,
       ),
     );
@@ -402,7 +405,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiKdbxCredentialsFromConstMeta =>
       const TaskConstMeta(
         debugName: "Credentials_from",
-        argNames: ["password", "keyfile"],
+        argNames: ["password", "keyfile", "tryLegacyKeyfile"],
       );
 
   @override

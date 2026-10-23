@@ -60,7 +60,7 @@ class _VerifyOwnerPageState extends AuthorizedPageState<VerifyOwnerPage> {
   bool get enableBack => _operateConfirm;
 
   @override
-  Future<void> confirm() async {
+  Future<void> confirm([bool? tryLegacyKeyfile]) async {
     if (form.currentState!.validate()) {
       final password = passwordController.text;
       final keyFile = keyFilecontroller.keyFile;

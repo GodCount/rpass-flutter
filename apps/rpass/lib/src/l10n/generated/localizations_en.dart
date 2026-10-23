@@ -849,4 +849,8 @@ class MyLocalizationsEn extends MyLocalizations {
 
   @override
   String get file_path => 'File Path';
+
+  @override
+  String get try_legacy_keyfile_hint =>
+      'The current key file is in an older format. Do you want to switch to the older key calculation method and try again?';
 }

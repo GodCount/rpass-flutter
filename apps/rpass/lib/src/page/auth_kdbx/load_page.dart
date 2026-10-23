@@ -58,7 +58,7 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
   }
 
   @override
-  Future<void> confirm() async {
+  Future<void> confirm([bool? tryLegacyKeyfile]) async {
     if (form.currentState!.validate()) {
       final password = passwordController.text;
       final keyFile = keyFilecontroller.keyFile;
@@ -80,6 +80,7 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
             credentials: Credentials.from(
               password: isPassword ? password : null,
               keyfile: keyFile?.$2,
+              tryLegacyKeyfile: tryLegacyKeyfile,
             ),
             filepath: Store.localInfo.localKdbxFile.path,
             onStream: (value) {

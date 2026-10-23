@@ -55,7 +55,7 @@ class _ModifyPasswordPageState extends AuthorizedPageState<ModifyPasswordPage> {
   bool get enableBack => widget.dismissible;
 
   @override
-  Future<void> confirm() async {
+  Future<void> confirm([bool? tryLegacyKeyfile]) async {
     if (form.currentState!.validate()) {
       final password = passwordController.text;
       final keyFile = keyFilecontroller.keyFile;

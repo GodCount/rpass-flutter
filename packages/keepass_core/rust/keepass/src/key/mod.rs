@@ -323,6 +323,16 @@ impl DatabaseKey {
         }
         true
     }
+
+    /// Returns key file reference
+    pub fn get_keyfile(&self) -> Option<&Vec<u8>> {
+        self.keyfile.as_ref()
+    }
+
+    /// Convenience sah256, length type definition removed
+    pub fn calculate_sha256(elements: &[&[u8]]) -> Vec<u8> {
+        Vec::from(calculate_sha256(elements).0)
+    }
 }
 
 /// Errors that can occur when working with database keys
