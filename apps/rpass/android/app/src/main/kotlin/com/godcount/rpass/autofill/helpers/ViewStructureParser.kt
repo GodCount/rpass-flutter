@@ -53,6 +53,8 @@ class ViewStructureParser(private val structure: AssistStructure) {
     var webScheme: String? = null
     var fields = HashMap<String, AutofillId>()
 
+    var debugPlaceholderAutofillId: AutofillId? = null
+
 
     init {
         parse()
@@ -84,10 +86,6 @@ class ViewStructureParser(private val structure: AssistStructure) {
 
 
     private fun parseNode(fields: HashMap<String, AutofillId>, node: AssistStructure.ViewNode) {
-//        node.idPackage?.let {
-//            packageName = it
-//        }
-
         node.webDomain?.let {
             if (it.isNotEmpty()) {
                 webDomain = it
@@ -104,6 +102,7 @@ class ViewStructureParser(private val structure: AssistStructure) {
 
         if (node.visibility == View.VISIBLE) {
             if (node.autofillId != null) {
+                debugPlaceholderAutofillId = node.autofillId
                 parseField(node)?.let {
                     if (!fields.contains(it)) {
                         fields[it] = node.autofillId!!

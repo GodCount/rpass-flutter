@@ -43,6 +43,9 @@ class SettingsController with ChangeNotifier {
   late bool _manualSelectFillItem;
   bool get manualSelectFillItem => _manualSelectFillItem;
 
+  late bool _autoFillDebug;
+  bool get autoFillDebug => _autoFillDebug;
+
   late List<String> _autoFillAppIdBlacklist;
   List<String> get autoFillAppIdBlacklist => _autoFillAppIdBlacklist;
 
@@ -180,6 +183,16 @@ class SettingsController with ChangeNotifier {
     await _settingsService.setManualSelectFillItem(enable);
   }
 
+  Future<void> setAutoFillDebug(bool enable) async {
+    if (enable == _autoFillDebug) return;
+
+    _autoFillDebug = enable;
+
+    notifyListeners();
+
+    await _settingsService.setAutoFillDebug(enable);
+  }
+
   Future<void> setStartFocusSreach(bool enable) async {
     if (enable == _startFocusSreach) return;
 
@@ -267,6 +280,7 @@ class SettingsController with ChangeNotifier {
     _remoteSyncCycle = await _settingsService.getRemoteSyncCycle();
     _lastSyncTime = await _settingsService.getLastSyncTime();
     _manualSelectFillItem = await _settingsService.getManualSelectFillItem();
+    _autoFillDebug = await _settingsService.getAutoFillDebug();
     _autoFillAppIdBlacklist = await _settingsService
         .getAutoFillAppIdBlacklist();
     _autoFillDomainBlacklist = await _settingsService

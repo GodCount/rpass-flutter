@@ -173,6 +173,7 @@ class _MoreSecurityPageState extends State<MoreSecurityPage>
                 _AutoFillSetting.show(context);
               },
               title: Text(t.autofill_setting),
+              trailing: const Icon(Icons.more_horiz),
             ),
           ],
         ],
@@ -225,6 +226,19 @@ class _AutoFillSettingState extends State<_AutoFillSetting> {
         ListView(
           shrinkWrap: true,
           children: [
+            ListTile(
+              onTap: () async {
+                await Store.settings.setAutoFillDebug(
+                  !Store.settings.autoFillDebug,
+                );
+                setState(() {});
+              },
+              title: Text(t.debug),
+              subtitle: Text(t.autofill_debug),
+              trailing: Store.settings.autoFillDebug
+                  ? const Icon(Icons.check)
+                  : null,
+            ),
             ListTile(
               onTap: () async {
                 await Store.settings.setManualSelectFillItem(

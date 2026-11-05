@@ -1669,6 +1669,18 @@ abstract class MyLocalizations {
   /// In zh, this message translates to:
   /// **'当前密钥文件属于旧版格式, 是否切换为旧版密钥计算方式进行重试？'**
   String get try_legacy_keyfile_hint;
+
+  /// No description provided for @debug.
+  ///
+  /// In zh, this message translates to:
+  /// **'调试'**
+  String get debug;
+
+  /// No description provided for @autofill_debug.
+  ///
+  /// In zh, this message translates to:
+  /// **'开启自动填充调试模式, 显示解析到的字段信息'**
+  String get autofill_debug;
 }
 
 class _MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {

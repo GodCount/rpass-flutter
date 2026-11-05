@@ -25,6 +25,10 @@ object RemoteViewsHelper {
         return simpleRemoteViews(packageName, R.drawable.ic_person_black_24dp, title, subtitle)
     }
 
+    fun viewsWithNoIcon(packageName: String, title: String?, subtitle: String?): RemoteViews {
+        return simpleRemoteViews(packageName, null, title, subtitle)
+    }
+
     @RequiresApi(Build.VERSION_CODES.R)
     fun createInlinePresentation(
         context: Context,
@@ -54,7 +58,7 @@ object RemoteViewsHelper {
     }
 
     private fun simpleRemoteViews(
-        packageName: String, @DrawableRes drawableId: Int, title: String?, subtitle: String?,
+        packageName: String, @DrawableRes drawableId: Int?, title: String?, subtitle: String?,
     ): RemoteViews {
         val presentation = RemoteViews(
             packageName,
@@ -70,7 +74,13 @@ object RemoteViewsHelper {
             presentation.setViewVisibility(R.id.subtitle, View.GONE)
         }
 
-        presentation.setImageViewResource(R.id.icon, drawableId)
+        if (drawableId != null) {
+            presentation.setImageViewResource(R.id.icon, drawableId)
+        } else {
+            presentation.setViewPadding(R.id.label, 12, 0, 0, 0)
+            presentation.setViewVisibility(R.id.icon, View.GONE)
+        }
+
 
 
         return presentation

@@ -103,7 +103,7 @@ class MyAutofillService : AutofillService() {
 
             val response = responseHelper.buildDatasetResponse(dataset)
 
-            if (response != null && dataset.unlock == true && dataset.data.isNotEmpty()) {
+            if (dataset.unlock == true && dataset.data.isNotEmpty()) {
                 lastResponse = LastResponse(responseHelper.parsed.toAutofillMetadata(null), dataset)
             }
 
@@ -114,11 +114,13 @@ class MyAutofillService : AutofillService() {
 
     private var appsBlacklist: Set<String>? = null
     private var domainBlacklist: Set<String>? = null
+    private var debug = false
 
 
     private fun readPreferences() {
         appsBlacklist = PreferencesHelper.getAutoFillAppIdBlacklist(this)
         domainBlacklist = PreferencesHelper.getAutoFillDomainBlacklist(this)
+        debug = PreferencesHelper.getAutoFillDebug(this)
     }
 
     override fun onCreate() {
@@ -156,6 +158,10 @@ class MyAutofillService : AutofillService() {
 
         Log.d(TAG, "onFillRequest packageName=$packageName metadata=$metadata")
 
+        if (this.debug) {
+            return callback.onSuccess(responseHelper.buildDebugResponse())
+        }
+
         if (checkAppsBlacklist(packageName) || checkDomainBlacklist(responseHelper.parsed.webDomain)) {
             Log.d(TAG, "onFillRequest blocked by blacklist")
             return callback.onSuccess(null)
@@ -172,8 +178,8 @@ class MyAutofillService : AutofillService() {
         assistStructure = responseHelper.structure
         inlineSuggestion = responseHelper.inlineSuggestion
 
-        // 如果请求和上一次一样，则填充有一次的数据
-        // 遇到一种情况，activity.finish() 后数据没有正确填充或丢失，导致有触发验证请求
+        // 如果请求和上一次一样，则填充上一次的数据
+        // 遇到一种情况，activity.finish() 后数据没有正确填充或丢失，导致又触发验证请求
         // 当使用 moveTaskToBack 后退, 可能不会弹出菜单
         if (lastResponse != null && lastResponse!!.metadata == metadata) {
             Log.d(TAG, "onFillRequest using lastResponse")

@@ -120,7 +120,7 @@ class ResponseHelper private constructor(
     }
 
 
-    fun buildDatasetResponse(dataset: AutofillDataset): FillResponse? {
+    fun buildDatasetResponse(dataset: AutofillDataset): FillResponse {
 
         if (dataset.unlock != true) {
             return buildAuthOrManualResponse(true, dataset.manual, dataset.message)
@@ -171,6 +171,35 @@ class ResponseHelper private constructor(
         }.build()
     }
 
+    fun buildDebugResponse(): FillResponse {
+        return FillResponse.Builder().apply {
+
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU) {
+                setHeader(
+                    RemoteViewsHelper.viewsWithNoIcon(
+                        context.packageName,
+                        "Debug", null
+                    )
+                )
+            }
+
+
+            if (parsed.fields.isEmpty()) {
+                val datasetBuilder = createDatasetBuilder("empty fields", null, null)
+                datasetBuilder.addValue(parsed.debugPlaceholderAutofillId!!, null)
+                addDataset(datasetBuilder.build())
+            }
+
+            parsed.fields.forEach { field ->
+                val datasetBuilder = createDatasetBuilder(field.key, null, null)
+                datasetBuilder.addValue(field.value, null)
+                addDataset(datasetBuilder.build())
+            }
+
+
+        }.build()
+    }
+
     private fun buildAuthOrManualResponse(
         flags: Boolean,
         manual: Boolean?,
@@ -212,6 +241,7 @@ class ResponseHelper private constructor(
         }.build()
 
     }
+
 
     fun buildAuthResponse(flags: Boolean, label: String?): FillResponse {
         return buildAuthOrManualResponse(flags, null, label)

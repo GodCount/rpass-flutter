@@ -19,6 +19,16 @@ object PreferencesHelper {
         }
     }
 
+    private fun getBoolean(context: Context, key: String): Boolean? {
+        val preferences =
+            context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+        return if (preferences.contains(key)) {
+            preferences.getBoolean(key, false)
+        } else {
+            null
+        }
+    }
+
     private fun getStringList(
         context: Context,
         key: String,
@@ -61,6 +71,18 @@ object PreferencesHelper {
         } catch (e: Throwable) {
             Log.w(TAG, "getAutoFillDomainBlacklist error", e)
             emptySet()
+        }
+    }
+
+    fun getAutoFillDebug(context: Context): Boolean {
+        return try {
+            getBoolean(
+                context,
+                "flutter.auto_fill_debug"
+            ) ?: false
+        } catch (e: Throwable) {
+            Log.w(TAG, "getAutoFillDomainBlacklist error", e)
+            false
         }
     }
 
