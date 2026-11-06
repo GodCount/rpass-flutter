@@ -53,8 +53,6 @@ class ViewStructureParser(private val structure: AssistStructure) {
     var webScheme: String? = null
     var fields = HashMap<String, AutofillId>()
 
-    var debugPlaceholderAutofillId: AutofillId? = null
-
 
     init {
         parse()
@@ -71,8 +69,55 @@ class ViewStructureParser(private val structure: AssistStructure) {
     }
 
 
+    fun debugParse(): HashMap<AutofillId, String> {
+        val nodes = HashMap<AutofillId, String>()
+
+        fun debugParseNode(node: AssistStructure.ViewNode) {
+            if (node.visibility == View.VISIBLE) {
+                if (node.autofillId != null) {
+                    nodes[node.autofillId!!] = ""
+
+                    val autofillHints = node.autofillHints
+                    if (autofillHints != null) {
+                        nodes[node.autofillId!!] = autofillHints.joinToString()
+                    }
+
+                    val attributes = node.htmlInfo?.attributes
+                    if (attributes != null) {
+                        nodes[node.autofillId!!] += "; " + attributes.joinToString { it.first + "=" + it.second }
+                    }
+
+                    val input = parseInput(node)
+
+                    if (input != null) {
+                        nodes[node.autofillId!!] += "; $input"
+                    }
+
+                    if (nodes[node.autofillId!!] == null) {
+                        debug(node)
+                    }
+                }
+
+                for (i in 0..<node.childCount) {
+                    debugParseNode(node.getChildAt(i))
+                }
+            }
+        }
+
+
+        for (i in 0..<structure.windowNodeCount) {
+            val windowNode = structure.getWindowNodeAt(i)
+            val applicationId = windowNode.title.toString().split("/").first()
+            if (!applicationId.contains(APPLICATION_ID_POPUP_WINDOW)) {
+                debugParseNode(windowNode.rootViewNode)
+            }
+        }
+
+        return nodes
+    }
+
+
     private fun parse() {
-        this.fields.clear()
         for (i in 0..<structure.windowNodeCount) {
             val windowNode = structure.getWindowNodeAt(i)
             val applicationId = windowNode.title.toString().split("/").first()
@@ -80,7 +125,6 @@ class ViewStructureParser(private val structure: AssistStructure) {
                 packageName = applicationId
                 parseNode(this.fields, windowNode.rootViewNode)
             }
-
         }
     }
 
@@ -102,7 +146,6 @@ class ViewStructureParser(private val structure: AssistStructure) {
 
         if (node.visibility == View.VISIBLE) {
             if (node.autofillId != null) {
-                debugPlaceholderAutofillId = node.autofillId
                 parseField(node)?.let {
                     if (!fields.contains(it)) {
                         fields[it] = node.autofillId!!
@@ -280,36 +323,36 @@ class ViewStructureParser(private val structure: AssistStructure) {
     }
 
 
-    private fun debug(node: AssistStructure.ViewNode) {
-        println(
-            "node info: " +
-                    "autofillId: ${node.autofillId}; " +
-                    "visibility: ${node.visibility == View.VISIBLE}; " +
-                    "className: ${node.className.toString()}; " +
-                    "idPackage: ${node.idPackage}; " +
-                    "webDomain: ${node.webDomain}; " +
-                    "inputType: ${node.inputType}; " +
-                    "autofillType: ${node.autofillType}; " +
-                    "idEntry: ${node.idEntry}; " +
-                    "hint: ${node.hint}; " +
-                    "isOpaque: ${node.isOpaque}; " +
-                    "isFocusable: ${node.isFocusable}; " +
-                    "isChecked: ${node.isChecked}; " +
-                    "isEnabled: ${node.isEnabled}; " +
-                    "isFocused: ${node.isFocused}; " +
-                    "isAccessibilityFocused: ${node.isAccessibilityFocused}; " +
-                    "isActivated: ${node.isActivated}; " +
-                    "isAssistBlocked: ${node.isAssistBlocked}; " +
-                    "isCheckable: ${node.isCheckable}; " +
-                    "isClickable: ${node.isClickable}; " +
-                    "isContextClickable: ${node.isContextClickable}; " +
-                    "isLongClickable: ${node.isLongClickable}; " +
-                    "isSelected: ${node.isSelected}; " +
-                    "htmlInfo: ${
-                        node.htmlInfo?.attributes?.toTypedArray()?.contentDeepToString()
-                    }; " +
-                    "autofillHints: ${node.autofillHints.contentDeepToString()}"
-        )
+    private fun debug(node: AssistStructure.ViewNode): String {
+        val output = "node info: " +
+                "autofillId: ${node.autofillId}; " +
+                "visibility: ${node.visibility == View.VISIBLE}; " +
+                "className: ${node.className.toString()}; " +
+                "idPackage: ${node.idPackage}; " +
+                "webDomain: ${node.webDomain}; " +
+                "inputType: ${node.inputType}; " +
+                "autofillType: ${node.autofillType}; " +
+                "idEntry: ${node.idEntry}; " +
+                "hint: ${node.hint}; " +
+                "isOpaque: ${node.isOpaque}; " +
+                "isFocusable: ${node.isFocusable}; " +
+                "isChecked: ${node.isChecked}; " +
+                "isEnabled: ${node.isEnabled}; " +
+                "isFocused: ${node.isFocused}; " +
+                "isAccessibilityFocused: ${node.isAccessibilityFocused}; " +
+                "isActivated: ${node.isActivated}; " +
+                "isAssistBlocked: ${node.isAssistBlocked}; " +
+                "isCheckable: ${node.isCheckable}; " +
+                "isClickable: ${node.isClickable}; " +
+                "isContextClickable: ${node.isContextClickable}; " +
+                "isLongClickable: ${node.isLongClickable}; " +
+                "isSelected: ${node.isSelected}; " +
+                "htmlInfo: ${
+                    node.htmlInfo?.attributes?.toTypedArray()?.contentDeepToString()
+                }; " +
+                "autofillHints: ${node.autofillHints.contentDeepToString()}"
+        println(output)
+        return output
     }
 
 }

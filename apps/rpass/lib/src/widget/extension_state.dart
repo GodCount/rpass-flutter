@@ -14,6 +14,7 @@ import '../context/lan_fill_server.dart';
 import '../i18n.dart';
 import '../kdbx/auto_fill.dart';
 import '../kdbx/kdbx.dart';
+import '../native/channel.dart';
 import '../page/kdbx/edit_group_page.dart';
 import '../page/preview/image_preview.dart';
 import '../page/route.dart';
@@ -676,6 +677,42 @@ extension StatefulKdbx on State {
     } else {
       return await context.router.push(EditGroupPageRoute());
     }
+  }
+
+  Future<void> responseAutoFill(AutofillMetadata metadata, Kdbx? kdbx) async {
+    // 未解锁
+    AutofillDataset result = AutofillDataset();
+
+    if (kdbx != null) {
+      result = await kdbx.autofillSearch(metadata: metadata);
+
+      if (Store.settings.manualSelectFillItem) {
+        // 手动选择
+        if (metadata.manual == true || result.data?.isNotEmpty != true) {
+          final kdbxEntryId = await KdbxEntrySelectorDialog.openDialog(context);
+          if (kdbxEntryId != null) {
+            result = await kdbx.autofillSearch(
+              metadata: metadata,
+              entryId: kdbxEntryId,
+            );
+          } else {
+            // 取消选择
+            result = AutofillDataset(unlock: true);
+          }
+        }
+        result.manual = true;
+        result.message = I18n.of(context)!.manual_select_fill_item;
+      } else if (result.data?.isNotEmpty != true) {
+        // 未匹配
+        result.data = [
+          {"__empty__": "", "label": I18n.of(context)!.empty},
+        ];
+      }
+    }
+
+    await NativeInstancePlatform.instance.autofillService.responseDataset(
+      result,
+    );
   }
 }
 

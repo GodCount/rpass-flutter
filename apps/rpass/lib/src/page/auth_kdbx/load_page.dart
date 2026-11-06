@@ -119,25 +119,7 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
 
     if (metadata == null) return;
 
-    AutofillDataset result = await kdbx.autofillSearch(metadata: metadata);
-
-    if (Store.settings.manualSelectFillItem) {
-      result.manual = true;
-      result.message = I18n.of(context)!.manual_select_fill_item;
-
-      // 手动选择
-      if (metadata.manual == true) {
-        final kdbxEntryId = await KdbxEntrySelectorDialog.openDialog(context);
-        result = await kdbx.autofillSearch(
-          metadata: metadata,
-          entryId: kdbxEntryId,
-        );
-      }
-    }
-
-    await NativeInstancePlatform.instance.autofillService.responseDataset(
-      result,
-    );
+    await responseAutoFill(metadata, kdbx);
 
     return;
   }

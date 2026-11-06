@@ -81,8 +81,6 @@ object RemoteViewsHelper {
             presentation.setViewVisibility(R.id.icon, View.GONE)
         }
 
-
-
         return presentation
     }
 

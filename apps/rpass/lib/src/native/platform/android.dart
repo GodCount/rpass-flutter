@@ -9,13 +9,6 @@ final _logger = Logger("native:android");
 
 enum AutofillServiceStatus { unsupported, disabled, enabled }
 
-class AutofillField {
-  static const PASSWORD = "password";
-  static const USERNAME = "username";
-  static const EMAIL = "email";
-  static const OTP = "otp";
-}
-
 class AutofillService {
   Future<AutofillServiceStatus> status() async {
     return AutofillServiceStatus.unsupported;

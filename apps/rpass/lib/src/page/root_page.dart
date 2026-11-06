@@ -241,31 +241,7 @@ class _RootRpassAppState extends State<RootRpassApp>
   void onRequestAutofill(AutofillMetadata metadata) async {
     final kdbx = Store.kdbx.kdbx;
 
-    if (kdbx != null) {
-      AutofillDataset result = await kdbx.autofillSearch(metadata: metadata);
-
-      if (Store.settings.manualSelectFillItem) {
-        result.manual = true;
-        result.message = I18n.of(context)!.manual_select_fill_item;
-
-        // 手动选择
-        if (metadata.manual == true) {
-          final kdbxEntryId = await KdbxEntrySelectorDialog.openDialog(context);
-          result = await kdbx.autofillSearch(
-            metadata: metadata,
-            entryId: kdbxEntryId,
-          );
-        }
-      }
-
-      await NativeInstancePlatform.instance.autofillService.responseDataset(
-        result,
-      );
-    } else {
-      await NativeInstancePlatform.instance.autofillService.responseDataset(
-        AutofillDataset(data: []),
-      );
-    }
+    await responseAutoFill(metadata, kdbx);
   }
 
   @override

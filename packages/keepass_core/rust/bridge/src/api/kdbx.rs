@@ -1448,7 +1448,7 @@ impl Kdbx {
                 unlock: Some(true),
                 manual: Some(true),
                 message: None,
-                data: datasets,
+                data: Some(datasets),
             });
         }
 
@@ -1488,7 +1488,7 @@ impl Kdbx {
             unlock: Some(true),
             manual: None,
             message: None,
-            data: datasets,
+            data: Some(datasets),
         })
     }
 }
@@ -2642,7 +2642,7 @@ pub struct AutofillDataset {
     #[frb(non_final)]
     pub message: Option<String>,
     #[frb(non_final)]
-    pub data: Vec<HashMap<String, Option<String>>>,
+    pub data: Option<Vec<HashMap<String, Option<String>>>>,
 }
 
 #[frb(rust2dart(dart_type = "Color", dart_code = "Color({})"))]

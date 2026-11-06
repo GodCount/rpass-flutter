@@ -31,7 +31,10 @@ class MyAutofillService : AutofillService() {
         private var lastResponse: LastResponse? = null
 
         private fun getResponseHelper(context: Context, intent: Intent?): ResponseHelper? {
-            Log.d(TAG, "getResponseHelper intent=$intent assistStructureCached=${assistStructure != null}")
+            Log.d(
+                TAG,
+                "getResponseHelper intent=$intent assistStructureCached=${assistStructure != null}"
+            )
             if (assistStructure != null) return ResponseHelper.createResponseByStructure(
                 context,
                 assistStructure!!,
@@ -71,7 +74,10 @@ class MyAutofillService : AutofillService() {
             this.fillCallback = null
 
             val finish = activity.intent.action == Intent.ACTION_RUN
-            Log.d(TAG, "setFillResult response=${response != null} finish=$finish callbackPresent=${callback != null}")
+            Log.d(
+                TAG,
+                "setFillResult response=${response != null} finish=$finish callbackPresent=${callback != null}"
+            )
 
             if (callback != null) {
                 callback.onSuccess(response)
@@ -101,10 +107,21 @@ class MyAutofillService : AutofillService() {
                 return
             }
 
+
+            // 取消了
+            if (dataset.unlock == true && dataset.data == null) {
+                Log.w(TAG, "dataset is empty, user canceled")
+                setFillResult(activity, null)
+                return
+            }
+
             val response = responseHelper.buildDatasetResponse(dataset)
 
-            if (dataset.unlock == true && dataset.data.isNotEmpty()) {
-                lastResponse = LastResponse(responseHelper.parsed.toAutofillMetadata(null), dataset)
+            if (dataset.unlock == true && !dataset.data.isNullOrEmpty()) {
+                if (dataset.data.size > 1 || !dataset.data.first().containsKey("__empty__")) {
+                    lastResponse =
+                        LastResponse(responseHelper.parsed.toAutofillMetadata(null), dataset)
+                }
             }
 
             setFillResult(activity, response)
@@ -134,7 +151,7 @@ class MyAutofillService : AutofillService() {
 
 
     private fun checkAppsBlacklist(packageName: String?): Boolean {
-        if (packageName == this.packageName) return  true
+        if (packageName == this.packageName) return true
         if (packageName == null || appsBlacklist.isNullOrEmpty()) return false
         return appsBlacklist!!.contains(packageName)
     }
@@ -154,7 +171,7 @@ class MyAutofillService : AutofillService() {
 
         val packageName = responseHelper.parsed.packageName
             ?: responseHelper.structure.activityComponent.packageName
-        val metadata = responseHelper.parsed.toAutofillMetadata(false)
+        val metadata = responseHelper.parsed.toAutofillMetadata(null)
 
         Log.d(TAG, "onFillRequest packageName=$packageName metadata=$metadata")
 

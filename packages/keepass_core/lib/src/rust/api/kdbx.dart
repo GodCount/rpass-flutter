@@ -295,9 +295,9 @@ class AutofillDataset {
   bool? unlock;
   bool? manual;
   String? message;
-  List<Map<String, String?>> data;
+  List<Map<String, String?>>? data;
 
-  AutofillDataset({this.unlock, this.manual, this.message, required this.data});
+  AutofillDataset({this.unlock, this.manual, this.message, this.data});
 
   Map<String, Object?> toJson() => {
     'unlock': unlock,

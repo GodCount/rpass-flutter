@@ -121,34 +121,24 @@ class ResponseHelper private constructor(
 
 
     fun buildDatasetResponse(dataset: AutofillDataset): FillResponse {
-
         if (dataset.unlock != true) {
             return buildAuthOrManualResponse(true, dataset.manual, dataset.message)
         }
 
-
         return FillResponse.Builder().apply {
-            dataset.data.forEach { data ->
-                val map = HashMap<AutofillId, AutofillValue>()
-
+            dataset.data?.forEach { data ->
                 val label = data[AutofillDataset.DATASET_FIELD_LABEL]
                 val username = data[View.AUTOFILL_HINT_USERNAME]
 
+                val datasetBuilder = createDatasetBuilder(label, username, username ?: "")
+
                 parsed.fields.forEach { field ->
-                    if (data[field.key] != null) {
-                        map[field.value] = AutofillValue.forText(data[field.key])
-                    }
+                    datasetBuilder.addValue(
+                        field.value,
+                        if (data[field.key] != null) AutofillValue.forText(data[field.key]) else null
+                    )
                 }
-
-                if (map.isNotEmpty()) {
-                    val datasetBuilder = createDatasetBuilder(label, username, username ?: "")
-
-                    map.forEach {
-                        datasetBuilder.addValue(it.key, it.value)
-                    }
-
-                    addDataset(datasetBuilder.build())
-                }
+                addDataset(datasetBuilder.build())
             }
 
             if (dataset.manual == true) {
@@ -168,6 +158,19 @@ class ResponseHelper private constructor(
 
                 addDataset(datasetBuilder.build())
             }
+
+            if (dataset.manual != true && dataset.data.isNullOrEmpty()) {
+                Log.e(TAG, "dataset is null and not manual")
+
+                val datasetBuilder = createDatasetBuilder("Empty", null, null)
+
+                parsed.fields.forEach { field ->
+                    datasetBuilder.addValue(field.value, null)
+                }
+
+                addDataset(datasetBuilder.build())
+            }
+
         }.build()
     }
 
@@ -183,19 +186,28 @@ class ResponseHelper private constructor(
                 )
             }
 
+            val nodes = parsed.debugParse()
 
-            if (parsed.fields.isEmpty()) {
-                val datasetBuilder = createDatasetBuilder("empty fields", null, null)
-                datasetBuilder.addValue(parsed.debugPlaceholderAutofillId!!, null)
-                addDataset(datasetBuilder.build())
+            var empty = true
+
+            nodes.forEach { field ->
+                if (field.value.isNotEmpty()) {
+                    empty = false
+                    val datasetBuilder = createDatasetBuilder(field.value, null, null)
+                    nodes.forEach {
+                        datasetBuilder.addValue(it.key, null)
+                    }
+                    addDataset(datasetBuilder.build())
+                }
             }
 
-            parsed.fields.forEach { field ->
-                val datasetBuilder = createDatasetBuilder(field.key, null, null)
-                datasetBuilder.addValue(field.value, null)
+            if (empty) {
+                val datasetBuilder = createDatasetBuilder("empty", null, null)
+                nodes.forEach {
+                    datasetBuilder.addValue(it.key, null)
+                }
                 addDataset(datasetBuilder.build())
             }
-
 
         }.build()
     }
@@ -266,6 +278,7 @@ class ResponseHelper private constructor(
             request: FillRequest,
         ): ResponseHelper {
             val structure = request.fillContexts.last().structure
+            println(request.toString())
             return ResponseHelper(
                 context,
                 structure,
@@ -282,14 +295,12 @@ data class AutofillDataset(
     val message: String?,
     val unlock: Boolean?,
     val manual: Boolean?,
-    val data: List<HashMap<String, String>>
+    val data: List<HashMap<String, String>>?
 ) {
     companion object {
         const val EXTRA_AUTOFILL_MANUAL_DATASET = "com.godcount.rpass.EXTRA_AUTOFILL_MANUAL_DATASET"
 
-
         const val DATASET_FIELD_LABEL = "label"
-
 
         fun fromJson(map: Map<String, Any?>): AutofillDataset = AutofillDataset(
             unlock = map["unlock"] as? Boolean,
@@ -298,8 +309,8 @@ data class AutofillDataset(
             data = map.parseDatasetList("data")
         )
 
-        private fun Map<String, Any?>.parseDatasetList(key: String): List<HashMap<String, String>> {
-            val list = this[key] as? List<*> ?: return emptyList()
+        private fun Map<String, Any?>.parseDatasetList(key: String): List<HashMap<String, String>>? {
+            val list = this[key] as? List<*> ?: return null
 
             return list.mapNotNull { item ->
                 val map = item.toStringMap()

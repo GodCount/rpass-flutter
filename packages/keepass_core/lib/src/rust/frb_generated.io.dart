@@ -485,6 +485,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  List<Map<String, String?>>? dco_decode_opt_list_Map_String_opt_String_None(
+    dynamic raw,
+  );
+
+  @protected
   Uint8List? dco_decode_opt_list_prim_u_8_strict(dynamic raw);
 
   @protected
@@ -1055,6 +1060,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   VariantDictionaryValue? sse_decode_opt_box_autoadd_variant_dictionary_value(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  List<Map<String, String?>>? sse_decode_opt_list_Map_String_opt_String_None(
     SseDeserializer deserializer,
   );
 
@@ -1796,6 +1806,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_opt_box_autoadd_variant_dictionary_value(
     VariantDictionaryValue? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_list_Map_String_opt_String_None(
+    List<Map<String, String?>>? self,
     SseSerializer serializer,
   );
 

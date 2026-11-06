@@ -2949,7 +2949,9 @@ impl SseDecode for crate::api::kdbx::AutofillDataset {
         let mut var_manual = <Option<bool>>::sse_decode(deserializer);
         let mut var_message = <Option<String>>::sse_decode(deserializer);
         let mut var_data =
-            <Vec<std::collections::HashMap<String, Option<String>>>>::sse_decode(deserializer);
+            <Option<Vec<std::collections::HashMap<String, Option<String>>>>>::sse_decode(
+                deserializer,
+            );
         return crate::api::kdbx::AutofillDataset {
             unlock: var_unlock,
             manual: var_manual,
@@ -4323,6 +4325,19 @@ impl SseDecode for Option<crate::api::kdbx::VariantDictionaryValue> {
             return Some(<crate::api::kdbx::VariantDictionaryValue>::sse_decode(
                 deserializer,
             ));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<Vec<std::collections::HashMap<String, Option<String>>>> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(
+                <Vec<std::collections::HashMap<String, Option<String>>>>::sse_decode(deserializer),
+            );
         } else {
             return None;
         }
@@ -6159,7 +6174,9 @@ impl SseEncode for crate::api::kdbx::AutofillDataset {
         <Option<bool>>::sse_encode(self.unlock, serializer);
         <Option<bool>>::sse_encode(self.manual, serializer);
         <Option<String>>::sse_encode(self.message, serializer);
-        <Vec<std::collections::HashMap<String, Option<String>>>>::sse_encode(self.data, serializer);
+        <Option<Vec<std::collections::HashMap<String, Option<String>>>>>::sse_encode(
+            self.data, serializer,
+        );
     }
 }
 
@@ -7293,6 +7310,16 @@ impl SseEncode for Option<crate::api::kdbx::VariantDictionaryValue> {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
             <crate::api::kdbx::VariantDictionaryValue>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<Vec<std::collections::HashMap<String, Option<String>>>> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <Vec<std::collections::HashMap<String, Option<String>>>>::sse_encode(value, serializer);
         }
     }
 }
