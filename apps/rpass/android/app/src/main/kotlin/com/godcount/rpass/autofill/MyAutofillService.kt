@@ -18,8 +18,6 @@ import com.godcount.rpass.autofill.helpers.AutofillMetadata
 import com.godcount.rpass.autofill.helpers.ResponseHelper
 
 
-data class LastResponse(val metadata: AutofillMetadata, val dataset: AutofillDataset)
-
 class MyAutofillService : AutofillService() {
     companion object {
         private const val TAG = "MyAutofillService"
@@ -28,7 +26,6 @@ class MyAutofillService : AutofillService() {
         private var fillCallback: FillCallback? = null
         private var assistStructure: AssistStructure? = null
         private var inlineSuggestion: InlineSuggestionsRequest? = null
-        private var lastResponse: LastResponse? = null
 
         private fun getResponseHelper(context: Context, intent: Intent?): ResponseHelper? {
             Log.d(
@@ -115,16 +112,7 @@ class MyAutofillService : AutofillService() {
                 return
             }
 
-            val response = responseHelper.buildDatasetResponse(dataset)
-
-            if (dataset.unlock == true && !dataset.data.isNullOrEmpty()) {
-                if (dataset.data.size > 1 || !dataset.data.first().containsKey("__empty__")) {
-                    lastResponse =
-                        LastResponse(responseHelper.parsed.toAutofillMetadata(null), dataset)
-                }
-            }
-
-            setFillResult(activity, response)
+            setFillResult(activity, responseHelper.buildDatasetResponse(dataset))
         }
     }
 
@@ -195,14 +183,7 @@ class MyAutofillService : AutofillService() {
         assistStructure = responseHelper.structure
         inlineSuggestion = responseHelper.inlineSuggestion
 
-        // 如果请求和上一次一样，则填充上一次的数据
-        // 遇到一种情况，activity.finish() 后数据没有正确填充或丢失，导致又触发验证请求
-        // 当使用 moveTaskToBack 后退, 可能不会弹出菜单
-        if (lastResponse != null && lastResponse!!.metadata == metadata) {
-            Log.d(TAG, "onFillRequest using lastResponse")
-            callback.onSuccess(responseHelper.buildDatasetResponse(lastResponse!!.dataset))
-            lastResponse = null
-        } else if (onAutofillRequest != null) {
+        if (onAutofillRequest != null) {
             Log.d(TAG, "onFillRequest dispatching onAutofillRequest")
             fillCallback = callback
             onAutofillRequest!!(metadata)

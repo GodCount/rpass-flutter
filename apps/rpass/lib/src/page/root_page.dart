@@ -239,9 +239,7 @@ class _RootRpassAppState extends State<RootRpassApp>
 
   @override
   void onRequestAutofill(AutofillMetadata metadata) async {
-    final kdbx = Store.kdbx.kdbx;
-
-    await responseAutoFill(metadata, kdbx);
+    await responseAutoFill(metadata, Store.kdbx.kdbx);
   }
 
   @override

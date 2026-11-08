@@ -96,7 +96,7 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
             await Store.settings.setKeyFilePath(keyFile?.$1);
           }
 
-          Store.kdbx.setKdbx(kdbx);
+          await Store.kdbx.setKdbx(kdbx);
 
           await _responseAutoFill(kdbx);
 

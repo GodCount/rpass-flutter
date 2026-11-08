@@ -15,4 +15,6 @@
     <style name="NormalTheme" parent="Theme.AppCompat.Light">
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
+
+    <color name="text_color">#000000</color>
 </resources>

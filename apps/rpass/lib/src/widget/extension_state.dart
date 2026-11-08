@@ -680,15 +680,18 @@ extension StatefulKdbx on State {
   }
 
   Future<void> responseAutoFill(AutofillMetadata metadata, Kdbx? kdbx) async {
+    final t = I18n.of(context)!;
+
     // 未解锁
-    AutofillDataset result = AutofillDataset();
+    AutofillDataset result = AutofillDataset(message: t.locked);
 
     if (kdbx != null) {
       result = await kdbx.autofillSearch(metadata: metadata);
 
       if (Store.settings.manualSelectFillItem) {
         // 手动选择
-        if (metadata.manual == true || result.data?.isNotEmpty != true) {
+        if (WidgetsBinding.instance.lifecycleState == .resumed &&
+            (metadata.manual == true || result.data?.isNotEmpty != true)) {
           final kdbxEntryId = await KdbxEntrySelectorDialog.openDialog(context);
           if (kdbxEntryId != null) {
             result = await kdbx.autofillSearch(
@@ -701,11 +704,11 @@ extension StatefulKdbx on State {
           }
         }
         result.manual = true;
-        result.message = I18n.of(context)!.manual_select_fill_item;
+        result.message = t.manual_select_fill_item;
       } else if (result.data?.isNotEmpty != true) {
         // 未匹配
         result.data = [
-          {"__empty__": "", "label": I18n.of(context)!.empty},
+          {"__empty__": "", "label": t.empty},
         ];
       }
     }
