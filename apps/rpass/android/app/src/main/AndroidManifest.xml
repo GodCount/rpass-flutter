@@ -50,6 +50,19 @@
                 android:name="android.autofill"
                 android:resource="@xml/service_configuration" />
         </service>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.godcount.rpass.icon.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+
+            <grant-uri-permission android:pathPrefix="/icons" />
+
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

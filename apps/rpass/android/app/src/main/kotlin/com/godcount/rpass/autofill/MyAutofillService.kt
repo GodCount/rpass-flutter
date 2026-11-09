@@ -4,18 +4,22 @@ package com.godcount.rpass.autofill
 import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.app.assist.AssistStructure
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.*
+import android.provider.Settings
 import android.service.autofill.*
 import android.util.Log
 import android.view.autofill.AutofillManager
 import android.view.autofill.AutofillManager.EXTRA_AUTHENTICATION_RESULT
 import android.view.inputmethod.InlineSuggestionsRequest
+import android.view.inputmethod.InputMethodManager
 import com.godcount.rpass.PreferencesHelper
 import com.godcount.rpass.autofill.helpers.AutofillDataset
 import com.godcount.rpass.autofill.helpers.AutofillMetadata
 import com.godcount.rpass.autofill.helpers.ResponseHelper
+import androidx.core.net.toUri
 
 
 class MyAutofillService : AutofillService() {
@@ -79,7 +83,10 @@ class MyAutofillService : AutofillService() {
             if (callback != null) {
                 callback.onSuccess(response)
             } else {
-                activity.setResult(RESULT_OK, Intent().putExtra(EXTRA_AUTHENTICATION_RESULT, response))
+                activity.setResult(
+                    RESULT_OK,
+                    Intent().putExtra(EXTRA_AUTHENTICATION_RESULT, response)
+                )
 
                 if (finish) {
                     activity.finish()
@@ -148,6 +155,16 @@ class MyAutofillService : AutofillService() {
         return domainBlacklist!!.any { domain.contains(it) }
     }
 
+    private fun grantIconUriPermissions() {
+        for (packageName in listOfNotNull("android", if (inlineSuggestion != null) "com.google.android.ext.services" else null)) {
+            grantUriPermission(
+                packageName,
+                "content://com.godcount.rpass.icon.FileProvider/icons".toUri(),
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
+            )
+        }
+    }
+
     override fun onFillRequest(
         request: FillRequest, cancellationSignal: CancellationSignal, callback: FillCallback
     ) {
@@ -181,6 +198,8 @@ class MyAutofillService : AutofillService() {
 
         assistStructure = responseHelper.structure
         inlineSuggestion = responseHelper.inlineSuggestion
+
+        grantIconUriPermissions()
 
         if (onAutofillRequest != null) {
             Log.d(TAG, "onFillRequest dispatching onAutofillRequest")

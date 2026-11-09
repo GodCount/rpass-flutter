@@ -194,62 +194,65 @@ class IconConvertBase64 {
       if (iconCustom != null) {
         final data = kdbx.fieldSummary?.customIcons[iconCustom];
         if (data != null) {
-          dataset.icons[id] = data;
+          item["__icon__"] = await _CustomIconCache.get(id, data);
           continue;
         }
       }
 
-      if (favicon && url?.isNotEmpty == true) {
-        final data = await CacheNetworkImage.cacheManager.read(url!);
-        if (data != null) {
-          dataset.icons[id] = data;
-          continue;
-        }
+      if (favicon &&
+          url?.isNotEmpty == true &&
+          await CacheNetworkImage.cacheManager.exist(url!)) {
+        item["__icon__"] = await CacheNetworkImage.cacheManager.getFilepath(url);
+        continue;
       }
 
-      final data =
-          await _IconDataPngCache.instance.get(
+      final filepath =
+          await _IconDataPngCache.get(
             KdbxIcon2Material.to(iconBuiltIn) ?? KdbxIcon2Material.to(2)!,
             color,
           ) ??
-          await _IconDataPngCache.instance.get(KdbxIcon2Material.to(2)!, color);
+          await _IconDataPngCache.get(KdbxIcon2Material.to(2)!, color);
 
-      if (data != null) {
-        dataset.icons[id] = data;
+      if (filepath != null) {
+        item["__icon__"] = filepath;
       }
     }
   }
 }
 
+class _CustomIconCache {
+
+  static Future<String> get(String id, Uint8List data) async {
+    if (!(await CacheNetworkImage.cacheManager.exist(id))) {
+      await CacheNetworkImage.cacheManager.write(id, data);
+    }
+    return CacheNetworkImage.cacheManager.getFilepath(id);
+  }
+}
+
 class _IconDataPngCache {
-  _IconDataPngCache._();
-  static final _IconDataPngCache instance = _IconDataPngCache._();
+  static final double size = 72;
 
-  final double size = 72;
-
-  final Map<String, Uint8List> _cache = {};
-
-  Future<Uint8List?> get(IconData icon, Color color) async {
+  static Future<String?> get(IconData icon, Color color) async {
     final key = _key(icon, color);
 
-    final cached = _cache[key];
-    if (cached != null) return Future.value(cached);
-
-    try {
-      final data = await _render(icon, color);
-      _cache[key] = data;
-      return data;
-    } catch (e) {
-      _logger.warning(e);
-      return null;
+    if (!(await CacheNetworkImage.cacheManager.exist(key))) {
+      try {
+        final data = await _render(icon, color);
+        await CacheNetworkImage.cacheManager.write(key, data);
+      } catch (e) {
+        _logger.warning(e);
+        return null;
+      }
     }
+    return await CacheNetworkImage.cacheManager.getFilepath(key);
   }
 
-  String _key(IconData icon, Color color) =>
+  static String _key(IconData icon, Color color) =>
       '${icon.codePoint}_${icon.fontFamily}_${icon.fontPackage}_'
       '${color.toARGB32()}';
 
-  Future<Uint8List> _render(IconData icon, Color color) async {
+  static Future<Uint8List> _render(IconData icon, Color color) async {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
 
@@ -278,9 +281,5 @@ class _IconDataPngCache {
       throw StateError('Failed to render icon ${icon.codePoint}');
     }
     return data.buffer.asUint8List();
-  }
-
-  void clear() {
-    _cache.clear();
   }
 }

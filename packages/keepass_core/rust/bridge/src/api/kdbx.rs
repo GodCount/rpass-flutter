@@ -1465,7 +1465,6 @@ impl Kdbx {
                 manual: Some(true),
                 message: None,
                 data: Some(datasets),
-                icons: HashMap::new()
             });
         }
 
@@ -1506,7 +1505,6 @@ impl Kdbx {
             manual: None,
             message: None,
             data: Some(datasets),
-            icons: HashMap::new()
         })
     }
 }
@@ -2649,7 +2647,6 @@ pub struct AutofillMetadata {
     "manual": manual,
     'message': message,
     'data': data,
-    'icons': icons,
   };
 "#)]
 #[derive(Clone)]
@@ -2662,8 +2659,6 @@ pub struct AutofillDataset {
     pub message: Option<String>,
     #[frb(non_final)]
     pub data: Option<Vec<HashMap<String, Option<String>>>>,
-    #[frb(non_final, default = "const <String, Uint8List>{}")]
-    pub icons: HashMap<String, Vec<u8>>
 }
 
 #[frb(rust2dart(dart_type = "Color", dart_code = "Color({})"))]

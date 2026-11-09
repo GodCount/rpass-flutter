@@ -4,7 +4,6 @@ import android.app.PendingIntent
 import android.app.assist.AssistStructure
 import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.util.Log
@@ -20,7 +19,9 @@ import android.view.autofill.AutofillValue
 import android.view.inputmethod.InlineSuggestionsRequest
 import android.widget.inline.InlinePresentationSpec
 import androidx.annotation.RequiresApi
+import androidx.core.content.FileProvider
 import com.godcount.rpass.MainActivity
+import java.io.File
 import java.security.SecureRandom
 
 private const val TAG = "ResponseHelper"
@@ -55,8 +56,16 @@ class ResponseHelper private constructor(
         return this
     }
 
-    private fun ByteArray.toIcon(): Icon {
-        return Icon.createWithBitmap(BitmapFactory.decodeByteArray(this, 0, this.size))
+    private fun toIcon(filepath: String?): Icon? {
+        return filepath?.let {
+            Icon.createWithContentUri(
+                FileProvider.getUriForFile(
+                    context,
+                    "com.godcount.rpass.icon.FileProvider",
+                    File(filepath)
+                )
+            )
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -220,7 +229,7 @@ class ResponseHelper private constructor(
 
                     val title = data[AutofillDataset.DATASET_FIELD_LABEL] ?: "User ${i + 1}"
                     val subtitle = data[View.AUTOFILL_HINT_USERNAME]
-                    val icon = dataset.icons[id]
+                    val icon = data["__icon__"]
 
                     val attributionIntent = if (inlineSuggestion != null) createPendingIntent(
                         reuseActivity = true,
@@ -231,7 +240,7 @@ class ResponseHelper private constructor(
                     val datasetBuilder = createDatasetBuilder(
                         title,
                         subtitle,
-                        icon?.toIcon(),
+                        toIcon(icon),
                         attributionIntent,
                         numberInlineSuggestions
                     )
@@ -417,7 +426,6 @@ data class AutofillDataset(
     val unlock: Boolean?,
     val manual: Boolean?,
     val data: List<HashMap<String, String>>?,
-    val icons: Map<String, ByteArray>
 ) {
     companion object {
         const val EXTRA_AUTOFILL_MANUAL_DATASET = "com.godcount.rpass.EXTRA_AUTOFILL_MANUAL_DATASET"
@@ -429,15 +437,7 @@ data class AutofillDataset(
             message = map["message"] as? String,
             manual = map["manual"] as? Boolean,
             data = map.parseDatasetList("data"),
-            icons = map["icons"].toByteArrayMap() ?: emptyMap(),
         )
-
-
-        private fun Any?.toByteArrayMap(): Map<String, ByteArray>? {
-            val raw = this as? Map<*, *> ?: return null
-            @Suppress("UNCHECKED_CAST")
-            return raw as? Map<String, ByteArray>
-        }
 
         private fun Map<String, Any?>.parseDatasetList(key: String): List<HashMap<String, String>>? {
             val list = this[key] as? List<*> ?: return null

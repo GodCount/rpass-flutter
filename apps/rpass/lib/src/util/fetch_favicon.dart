@@ -172,13 +172,11 @@ class FaviconCacheManager extends BaseCacheManager<Uint8List> {
     }
 
     Directory dir = switch (Platform.operatingSystem) {
-      "android" =>
-        (await getExternalStorageDirectory()) ??
-            (await getApplicationSupportDirectory()),
+      "android" => await getApplicationCacheDirectory(),
       _ => await getApplicationSupportDirectory(),
     };
 
-    _cacheDir = Directory(path.join(dir.path, "cache", label));
+    _cacheDir = Directory(path.join(dir.path, label));
 
     if (!(await _cacheDir!.exists())) {
       await _cacheDir!.create(recursive: true);
@@ -188,7 +186,11 @@ class FaviconCacheManager extends BaseCacheManager<Uint8List> {
   }
 
   Future<File> _file(String key) async {
-    return File(path.join((await _getCacheDir()).path, md5(key)));
+    return File(await getFilepath(key));
+  }
+
+  Future<String> getFilepath(String key) async {
+    return path.join((await _getCacheDir()).path, md5(key));
   }
 
   @override
