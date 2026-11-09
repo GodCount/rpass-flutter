@@ -713,6 +713,15 @@ extension StatefulKdbx on State {
       }
     }
 
+    if (result.data != null) {
+      await IconConvertBase64.convertByAutofillIcon(
+        dataset: result,
+        kdbx: Store.kdbx,
+        favicon: Store.settings.faviconSource != null,
+        color: Store.settings.themeSeedColor,
+      );
+    }
+
     await NativeInstancePlatform.instance.autofillService.responseDataset(
       result,
     );

@@ -39,7 +39,6 @@ class KdbxIconWidget extends StatelessWidget {
     this.errorCallback,
   });
 
-  static final FaviconCacheManager cacheManager = FaviconCacheManager();
 
   final KdbxIconWidgetData kdbxIcon;
   final double size;
@@ -63,7 +62,7 @@ class KdbxIconWidget extends StatelessWidget {
 
     final faviconSource = Store.settings.faviconSource;
 
-    final icon = Icon(KdbxIcon2Material.to(iconIndex), size: size);
+    final icon = Icon(KdbxIcon2Material.to(iconIndex) ?? KdbxIcon2Material.to(2), size: size);
 
     if (kdbxIcon.domain == null ||
         kdbxIcon.domain!.isEmpty ||
@@ -76,7 +75,6 @@ class KdbxIconWidget extends StatelessWidget {
     return Image(
       image: CacheNetworkImage(
         kdbxIcon.domain!,
-        cacheManager: cacheManager,
         fetchNetworkImage: FetchFavicon(source),
       ),
       width: size,

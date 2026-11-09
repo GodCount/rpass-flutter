@@ -1,5 +1,14 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:keepass_core/keepass_core.dart';
+import 'package:logging/logging.dart';
+
+import '../store/kdbx/controller.dart';
+import '../util/cache_network_image.dart';
+
+final _logger = Logger("kdbx:icon");
 
 enum KdbxIconType {
   Key, // : 0,
@@ -152,7 +161,126 @@ class KdbxIcon2Material {
     Icons.smartphone_rounded,
   ];
 
-  static IconData to(int index) {
+  static IconData? to(int index) {
+    if (index < 0 || index >= icons.length) return null;
     return icons[index];
+  }
+}
+
+class IconConvertBase64 {
+  static Future<void> convertByAutofillIcon({
+    required AutofillDataset dataset,
+    required KdbxController kdbx,
+    required bool favicon,
+    required Color color,
+  }) async {
+    if (dataset.data == null) return;
+
+    for (final item in dataset.data!) {
+      final id = item["id"];
+
+      final url = item["__icon_url__"];
+      final iconBuiltIn = item["__icon_builtin__"] != null
+          ? int.tryParse(item["__icon_builtin__"]!) ?? 2
+          : 2;
+      final iconCustom = item["__icon_custom__"];
+
+      item.remove("__icon_url__");
+      item.remove("__icon_builtin__");
+      item.remove("__icon_custom__");
+
+      if (id == null) continue;
+
+      if (iconCustom != null) {
+        final data = kdbx.fieldSummary?.customIcons[iconCustom];
+        if (data != null) {
+          dataset.icons[id] = data;
+          continue;
+        }
+      }
+
+      if (favicon && url?.isNotEmpty == true) {
+        final data = await CacheNetworkImage.cacheManager.read(url!);
+        if (data != null) {
+          dataset.icons[id] = data;
+          continue;
+        }
+      }
+
+      final data =
+          await _IconDataPngCache.instance.get(
+            KdbxIcon2Material.to(iconBuiltIn) ?? KdbxIcon2Material.to(2)!,
+            color,
+          ) ??
+          await _IconDataPngCache.instance.get(KdbxIcon2Material.to(2)!, color);
+
+      if (data != null) {
+        dataset.icons[id] = data;
+      }
+    }
+  }
+}
+
+class _IconDataPngCache {
+  _IconDataPngCache._();
+  static final _IconDataPngCache instance = _IconDataPngCache._();
+
+  final double size = 72;
+
+  final Map<String, Uint8List> _cache = {};
+
+  Future<Uint8List?> get(IconData icon, Color color) async {
+    final key = _key(icon, color);
+
+    final cached = _cache[key];
+    if (cached != null) return Future.value(cached);
+
+    try {
+      final data = await _render(icon, color);
+      _cache[key] = data;
+      return data;
+    } catch (e) {
+      _logger.warning(e);
+      return null;
+    }
+  }
+
+  String _key(IconData icon, Color color) =>
+      '${icon.codePoint}_${icon.fontFamily}_${icon.fontPackage}_'
+      '${color.toARGB32()}';
+
+  Future<Uint8List> _render(IconData icon, Color color) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    final painter = TextPainter(textDirection: .ltr)
+      ..text = TextSpan(
+        text: String.fromCharCode(icon.codePoint),
+        style: TextStyle(
+          fontSize: size,
+          fontFamily: icon.fontFamily,
+          package: icon.fontPackage,
+          color: color,
+        ),
+      )
+      ..layout();
+    painter.paint(canvas, Offset.zero);
+
+    final picture = recorder.endRecording();
+    final pixel = size.ceil();
+    final image = await picture.toImage(pixel, pixel);
+    final data = await image.toByteData(format: ui.ImageByteFormat.png);
+
+    image.dispose();
+    picture.dispose();
+
+    if (data == null) {
+      throw StateError('Failed to render icon ${icon.codePoint}');
+    }
+    return data.buffer.asUint8List();
+  }
+
+  void clear() {
+    _cache.clear();
   }
 }

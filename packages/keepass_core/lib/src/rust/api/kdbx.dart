@@ -296,19 +296,31 @@ class AutofillDataset {
   bool? manual;
   String? message;
   List<Map<String, String?>>? data;
+  Map<String, Uint8List> icons;
 
-  AutofillDataset({this.unlock, this.manual, this.message, this.data});
+  AutofillDataset({
+    this.unlock,
+    this.manual,
+    this.message,
+    this.data,
+    this.icons = const <String, Uint8List>{},
+  });
 
   Map<String, Object?> toJson() => {
     'unlock': unlock,
     "manual": manual,
     'message': message,
     'data': data,
+    'icons': icons,
   };
 
   @override
   int get hashCode =>
-      unlock.hashCode ^ manual.hashCode ^ message.hashCode ^ data.hashCode;
+      unlock.hashCode ^
+      manual.hashCode ^
+      message.hashCode ^
+      data.hashCode ^
+      icons.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -318,7 +330,8 @@ class AutofillDataset {
           unlock == other.unlock &&
           manual == other.manual &&
           message == other.message &&
-          data == other.data;
+          data == other.data &&
+          icons == other.icons;
 }
 
 class AutofillMetadata {

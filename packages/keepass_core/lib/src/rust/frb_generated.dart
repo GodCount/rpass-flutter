@@ -2546,13 +2546,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   AutofillDataset dco_decode_autofill_dataset(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = dcoDecodeList(raw);
-    if (arr.length != 4)
-      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    if (arr.length != 5)
+      throw Exception('unexpected arr length: expect 5 but see ${arr.length}');
     return AutofillDataset(
       unlock: dco_decode_opt_box_autoadd_bool(arr[0]),
       manual: dco_decode_opt_box_autoadd_bool(arr[1]),
       message: dco_decode_opt_String(arr[2]),
       data: dco_decode_opt_list_Map_String_opt_String_None(arr[3]),
+      icons: dco_decode_Map_String_list_prim_u_8_strict_None(arr[4]),
     );
   }
 
@@ -4149,11 +4150,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_manual = sse_decode_opt_box_autoadd_bool(deserializer);
     var var_message = sse_decode_opt_String(deserializer);
     var var_data = sse_decode_opt_list_Map_String_opt_String_None(deserializer);
+    var var_icons = sse_decode_Map_String_list_prim_u_8_strict_None(
+      deserializer,
+    );
     return AutofillDataset(
       unlock: var_unlock,
       manual: var_manual,
       message: var_message,
       data: var_data,
+      icons: var_icons,
     );
   }
 
@@ -6189,6 +6194,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_box_autoadd_bool(self.manual, serializer);
     sse_encode_opt_String(self.message, serializer);
     sse_encode_opt_list_Map_String_opt_String_None(self.data, serializer);
+    sse_encode_Map_String_list_prim_u_8_strict_None(self.icons, serializer);
   }
 
   @protected

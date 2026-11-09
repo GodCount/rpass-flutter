@@ -79,8 +79,7 @@ class MyAutofillService : AutofillService() {
             if (callback != null) {
                 callback.onSuccess(response)
             } else {
-                val replyIntent = Intent().putExtra(EXTRA_AUTHENTICATION_RESULT, response)
-                activity.setResult(RESULT_OK, replyIntent)
+                activity.setResult(RESULT_OK, Intent().putExtra(EXTRA_AUTHENTICATION_RESULT, response))
 
                 if (finish) {
                     activity.finish()

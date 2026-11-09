@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.app.assist.AssistStructure
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.util.Log
@@ -52,6 +53,10 @@ class ResponseHelper private constructor(
             @Suppress("DEPRECATION") setValue(id, autofillValue)
         }
         return this
+    }
+
+    private fun ByteArray.toIcon(): Icon {
+        return Icon.createWithBitmap(BitmapFactory.decodeByteArray(this, 0, this.size))
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -211,19 +216,22 @@ class ResponseHelper private constructor(
                 for (i in 0 until count) {
                     val data = dataset.data[i]
 
+                    val id = data["id"]
+
                     val title = data[AutofillDataset.DATASET_FIELD_LABEL] ?: "User ${i + 1}"
                     val subtitle = data[View.AUTOFILL_HINT_USERNAME]
+                    val icon = dataset.icons[id]
 
                     val attributionIntent = if (inlineSuggestion != null) createPendingIntent(
                         reuseActivity = true,
                         manual = null,
-                        datasetId = subtitle
+                        datasetId = id
                     ) else null
 
                     val datasetBuilder = createDatasetBuilder(
                         title,
                         subtitle,
-                        null,
+                        icon?.toIcon(),
                         attributionIntent,
                         numberInlineSuggestions
                     )
@@ -408,7 +416,8 @@ data class AutofillDataset(
     val message: String?,
     val unlock: Boolean?,
     val manual: Boolean?,
-    val data: List<HashMap<String, String>>?
+    val data: List<HashMap<String, String>>?,
+    val icons: Map<String, ByteArray>
 ) {
     companion object {
         const val EXTRA_AUTOFILL_MANUAL_DATASET = "com.godcount.rpass.EXTRA_AUTOFILL_MANUAL_DATASET"
@@ -419,8 +428,16 @@ data class AutofillDataset(
             unlock = map["unlock"] as? Boolean,
             message = map["message"] as? String,
             manual = map["manual"] as? Boolean,
-            data = map.parseDatasetList("data")
+            data = map.parseDatasetList("data"),
+            icons = map["icons"].toByteArrayMap() ?: emptyMap(),
         )
+
+
+        private fun Any?.toByteArrayMap(): Map<String, ByteArray>? {
+            val raw = this as? Map<*, *> ?: return null
+            @Suppress("UNCHECKED_CAST")
+            return raw as? Map<String, ByteArray>
+        }
 
         private fun Map<String, Any?>.parseDatasetList(key: String): List<HashMap<String, String>>? {
             val list = this[key] as? List<*> ?: return null
@@ -435,13 +452,12 @@ data class AutofillDataset(
             val map = this as? Map<*, *> ?: return null
 
             val result = HashMap<String, String>()
-            map.forEach { (k, v) ->
-                val key = k?.toString()?.takeIf { it.isNotBlank() } ?: return@forEach
-                val value = v?.toString()?.takeIf { it.isNotBlank() } ?: return@forEach
+            for ((k, v) in map) {
+                val key = k?.toString()?.takeIf { it.isNotBlank() } ?: continue
+                val value = v?.toString()?.takeIf { it.isNotBlank() } ?: continue
                 result[key] = value
             }
-
-            return result.takeIf { it.isNotEmpty() }
+            return result.ifEmpty { null }
         }
 
     }

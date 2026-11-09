@@ -6,13 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:keepass_core/keepass_core.dart';
 
 import '../../context/biometric.dart';
-import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../native/channel.dart';
 import '../../store/index.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
-import '../../widget/common.dart';
 import '../../widget/extension_state.dart';
 import '../route.dart';
 import 'authorized_page.dart';

@@ -7,7 +7,6 @@ import '../../util/cache_network_image.dart';
 import '../../util/fetch_favicon.dart';
 import '../../util/route.dart';
 import '../../widget/extension_state.dart';
-import '../../widget/kdbx_icon.dart';
 
 class _OtherSettingsArgs extends PageRouteArgs {
   _OtherSettingsArgs({super.key});
@@ -44,7 +43,7 @@ class _OtherSettingsPageState extends State<OtherSettingsPage>
   @override
   void initState() {
     super.initState();
-    KdbxIconWidget.cacheManager.size().then((value) {
+    CacheNetworkImage.cacheManager.size().then((value) {
       if (value > 0) {
         setState(() {
           _existsCache = true;
@@ -61,7 +60,7 @@ class _OtherSettingsPageState extends State<OtherSettingsPage>
         title: t.warn,
         message: t.clear_favicon_cache,
       )) {
-        await KdbxIconWidget.cacheManager.clear();
+        await CacheNetworkImage.cacheManager.clear();
         MemoryImageCacheManager.instance.clear();
         setState(() {
           _existsCache = false;

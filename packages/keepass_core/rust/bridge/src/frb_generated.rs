@@ -2952,11 +2952,13 @@ impl SseDecode for crate::api::kdbx::AutofillDataset {
             <Option<Vec<std::collections::HashMap<String, Option<String>>>>>::sse_decode(
                 deserializer,
             );
+        let mut var_icons = <std::collections::HashMap<String, Vec<u8>>>::sse_decode(deserializer);
         return crate::api::kdbx::AutofillDataset {
             unlock: var_unlock,
             manual: var_manual,
             message: var_message,
             data: var_data,
+            icons: var_icons,
         };
     }
 }
@@ -4887,6 +4889,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::kdbx::AutofillDataset {
             self.manual.into_into_dart().into_dart(),
             self.message.into_into_dart().into_dart(),
             self.data.into_into_dart().into_dart(),
+            self.icons.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -6177,6 +6180,7 @@ impl SseEncode for crate::api::kdbx::AutofillDataset {
         <Option<Vec<std::collections::HashMap<String, Option<String>>>>>::sse_encode(
             self.data, serializer,
         );
+        <std::collections::HashMap<String, Vec<u8>>>::sse_encode(self.icons, serializer);
     }
 }
 
