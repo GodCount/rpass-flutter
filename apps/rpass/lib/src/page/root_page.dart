@@ -18,7 +18,6 @@ import '../store/settings/shortcuts.dart';
 import '../tray.dart';
 import '../util/common.dart';
 import '../util/route.dart';
-import '../widget/common.dart';
 import '../widget/extension_state.dart';
 import 'auth_kdbx/load_page.dart';
 import 'auth_kdbx/verify_owner_page.dart';

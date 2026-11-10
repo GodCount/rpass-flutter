@@ -202,7 +202,9 @@ class IconConvertBase64 {
       if (favicon &&
           url?.isNotEmpty == true &&
           await CacheNetworkImage.cacheManager.exist(url!)) {
-        item["__icon__"] = await CacheNetworkImage.cacheManager.getFilepath(url);
+        item["__icon__"] = await CacheNetworkImage.cacheManager.getFilepath(
+          url,
+        );
         continue;
       }
 
@@ -221,7 +223,6 @@ class IconConvertBase64 {
 }
 
 class _CustomIconCache {
-
   static Future<String> get(String id, Uint8List data) async {
     if (!(await CacheNetworkImage.cacheManager.exist(id))) {
       await CacheNetworkImage.cacheManager.write(id, data);

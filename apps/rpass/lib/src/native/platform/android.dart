@@ -44,7 +44,7 @@ class _AndroidAutofillService extends MethodChannelInterface
 
   @override
   Future<void> databaseStatus(bool locked) async {
-     await channel.invokeMethod("database_status", locked);
+    await channel.invokeMethod("database_status", locked);
   }
 
   @override

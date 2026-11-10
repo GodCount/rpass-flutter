@@ -109,7 +109,9 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
 
     _kdbx = kdbx;
 
-    NativeInstancePlatform.instance.autofillService.databaseStatus(_kdbx != null);
+    NativeInstancePlatform.instance.autofillService.databaseStatus(
+      _kdbx != null,
+    );
 
     if (kdbx != null) {
       assert(kdbx.stream != null);
