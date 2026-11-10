@@ -123,9 +123,7 @@ extension KdbxEntryCommon on EntryData {
 
   String? getOTPCode() {
     final url = getField(KdbxKeyCommon.OTP)?.get();
-    return url != null
-        ? AuthOneTimePassword.tryParse(url)?.codeString()
-        : null;
+    return url != null ? AuthOneTimePassword.tryParse(url)?.codeString() : null;
   }
 
   String copyBasicString() {
