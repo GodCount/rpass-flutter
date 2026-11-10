@@ -18,7 +18,6 @@ import '../store/settings/shortcuts.dart';
 import '../tray.dart';
 import '../util/common.dart';
 import '../util/route.dart';
-import '../widget/common.dart';
 import '../widget/extension_state.dart';
 import 'auth_kdbx/load_page.dart';
 import 'auth_kdbx/verify_owner_page.dart';
@@ -239,33 +238,7 @@ class _RootRpassAppState extends State<RootRpassApp>
 
   @override
   void onRequestAutofill(AutofillMetadata metadata) async {
-    final kdbx = Store.kdbx.kdbx;
-
-    if (kdbx != null) {
-      AutofillDataset result = await kdbx.autofillSearch(metadata: metadata);
-
-      if (Store.settings.manualSelectFillItem) {
-        result.manual = true;
-        result.message = I18n.of(context)!.manual_select_fill_item;
-
-        // 手动选择
-        if (metadata.manual == true) {
-          final kdbxEntryId = await KdbxEntrySelectorDialog.openDialog(context);
-          result = await kdbx.autofillSearch(
-            metadata: metadata,
-            entryId: kdbxEntryId,
-          );
-        }
-      }
-
-      await NativeInstancePlatform.instance.autofillService.responseDataset(
-        result,
-      );
-    } else {
-      await NativeInstancePlatform.instance.autofillService.responseDataset(
-        AutofillDataset(data: []),
-      );
-    }
+    await responseAutoFill(metadata, Store.kdbx.kdbx);
   }
 
   @override

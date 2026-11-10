@@ -1,5 +1,14 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:keepass_core/keepass_core.dart';
+import 'package:logging/logging.dart';
+
+import '../store/kdbx/controller.dart';
+import '../util/cache_network_image.dart';
+
+final _logger = Logger("kdbx:icon");
 
 enum KdbxIconType {
   Key, // : 0,
@@ -152,7 +161,126 @@ class KdbxIcon2Material {
     Icons.smartphone_rounded,
   ];
 
-  static IconData to(int index) {
+  static IconData? to(int index) {
+    if (index < 0 || index >= icons.length) return null;
     return icons[index];
+  }
+}
+
+class IconConvertBase64 {
+  static Future<void> convertByAutofillIcon({
+    required AutofillDataset dataset,
+    required KdbxController kdbx,
+    required bool favicon,
+    required Color color,
+  }) async {
+    if (dataset.data == null) return;
+
+    for (final item in dataset.data!) {
+      final id = item["id"];
+
+      final url = item["__icon_url__"];
+      final iconBuiltIn = item["__icon_builtin__"] != null
+          ? int.tryParse(item["__icon_builtin__"]!) ?? 2
+          : 2;
+      final iconCustom = item["__icon_custom__"];
+
+      item.remove("__icon_url__");
+      item.remove("__icon_builtin__");
+      item.remove("__icon_custom__");
+
+      if (id == null) continue;
+
+      if (iconCustom != null) {
+        final data = kdbx.fieldSummary?.customIcons[iconCustom];
+        if (data != null) {
+          item["__icon__"] = await _CustomIconCache.get(id, data);
+          continue;
+        }
+      }
+
+      if (favicon &&
+          url?.isNotEmpty == true &&
+          await CacheNetworkImage.cacheManager.exist(url!)) {
+        item["__icon__"] = await CacheNetworkImage.cacheManager.getFilepath(
+          url,
+        );
+        continue;
+      }
+
+      final filepath =
+          await _IconDataPngCache.get(
+            KdbxIcon2Material.to(iconBuiltIn) ?? KdbxIcon2Material.to(2)!,
+            color,
+          ) ??
+          await _IconDataPngCache.get(KdbxIcon2Material.to(2)!, color);
+
+      if (filepath != null) {
+        item["__icon__"] = filepath;
+      }
+    }
+  }
+}
+
+class _CustomIconCache {
+  static Future<String> get(String id, Uint8List data) async {
+    if (!(await CacheNetworkImage.cacheManager.exist(id))) {
+      await CacheNetworkImage.cacheManager.write(id, data);
+    }
+    return CacheNetworkImage.cacheManager.getFilepath(id);
+  }
+}
+
+class _IconDataPngCache {
+  static final double size = 72;
+
+  static Future<String?> get(IconData icon, Color color) async {
+    final key = _key(icon, color);
+
+    if (!(await CacheNetworkImage.cacheManager.exist(key))) {
+      try {
+        final data = await _render(icon, color);
+        await CacheNetworkImage.cacheManager.write(key, data);
+      } catch (e) {
+        _logger.warning(e);
+        return null;
+      }
+    }
+    return await CacheNetworkImage.cacheManager.getFilepath(key);
+  }
+
+  static String _key(IconData icon, Color color) =>
+      '${icon.codePoint}_${icon.fontFamily}_${icon.fontPackage}_'
+      '${color.toARGB32()}';
+
+  static Future<Uint8List> _render(IconData icon, Color color) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    final painter = TextPainter(textDirection: .ltr)
+      ..text = TextSpan(
+        text: String.fromCharCode(icon.codePoint),
+        style: TextStyle(
+          fontSize: size,
+          fontFamily: icon.fontFamily,
+          package: icon.fontPackage,
+          color: color,
+        ),
+      )
+      ..layout();
+    painter.paint(canvas, Offset.zero);
+
+    final picture = recorder.endRecording();
+    final pixel = size.ceil();
+    final image = await picture.toImage(pixel, pixel);
+    final data = await image.toByteData(format: ui.ImageByteFormat.png);
+
+    image.dispose();
+    picture.dispose();
+
+    if (data == null) {
+      throw StateError('Failed to render icon ${icon.codePoint}');
+    }
+    return data.buffer.asUint8List();
   }
 }

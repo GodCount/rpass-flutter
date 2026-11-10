@@ -2552,7 +2552,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       unlock: dco_decode_opt_box_autoadd_bool(arr[0]),
       manual: dco_decode_opt_box_autoadd_bool(arr[1]),
       message: dco_decode_opt_String(arr[2]),
-      data: dco_decode_list_Map_String_opt_String_None(arr[3]),
+      data: dco_decode_opt_list_Map_String_opt_String_None(arr[3]),
     );
   }
 
@@ -3594,6 +3594,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<Map<String, String?>>? dco_decode_opt_list_Map_String_opt_String_None(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_list_Map_String_opt_String_None(raw);
+  }
+
+  @protected
   Uint8List? dco_decode_opt_list_prim_u_8_strict(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_list_prim_u_8_strict(raw);
@@ -4140,7 +4148,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_unlock = sse_decode_opt_box_autoadd_bool(deserializer);
     var var_manual = sse_decode_opt_box_autoadd_bool(deserializer);
     var var_message = sse_decode_opt_String(deserializer);
-    var var_data = sse_decode_list_Map_String_opt_String_None(deserializer);
+    var var_data = sse_decode_opt_list_Map_String_opt_String_None(deserializer);
     return AutofillDataset(
       unlock: var_unlock,
       manual: var_manual,
@@ -5537,6 +5545,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<Map<String, String?>>? sse_decode_opt_list_Map_String_opt_String_None(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_list_Map_String_opt_String_None(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
   Uint8List? sse_decode_opt_list_prim_u_8_strict(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
@@ -6167,7 +6188,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_box_autoadd_bool(self.unlock, serializer);
     sse_encode_opt_box_autoadd_bool(self.manual, serializer);
     sse_encode_opt_String(self.message, serializer);
-    sse_encode_list_Map_String_opt_String_None(self.data, serializer);
+    sse_encode_opt_list_Map_String_opt_String_None(self.data, serializer);
   }
 
   @protected
@@ -7471,6 +7492,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_bool(self != null, serializer);
     if (self != null) {
       sse_encode_box_autoadd_variant_dictionary_value(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_list_Map_String_opt_String_None(
+    List<Map<String, String?>>? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_list_Map_String_opt_String_None(self, serializer);
     }
   }
 

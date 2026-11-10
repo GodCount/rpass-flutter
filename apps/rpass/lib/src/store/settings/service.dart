@@ -117,6 +117,14 @@ class SettingsService with SharedPreferencesService {
     return setBool("manual_select_fill_item", enbale);
   }
 
+  Future<bool> getAutoFillDebug() async {
+    return await getBool("auto_fill_debug") ?? false;
+  }
+
+  Future<bool> setAutoFillDebug(bool enbale) {
+    return setBool("auto_fill_debug", enbale);
+  }
+
   Future<List<String>> getAutoFillAppIdBlacklist() async {
     return await getStringList("autofill_appid_blacklist") ?? [];
   }

@@ -176,7 +176,7 @@ class _LookAccountPageState extends State<LookAccountPage>
         context.router.pop();
         if (_kdbxIcon.domain != null) {
           _kdbxIcon = _kdbxIcon.copyWith(source: value);
-          await KdbxIconWidget.cacheManager.write(_kdbxIcon.domain!, null);
+          await CacheNetworkImage.cacheManager.write(_kdbxIcon.domain!, null);
           MemoryImageCacheManager.instance.evict(_kdbxIcon.domain!);
           setState(() {});
         }

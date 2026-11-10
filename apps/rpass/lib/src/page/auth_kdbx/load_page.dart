@@ -6,13 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:keepass_core/keepass_core.dart';
 
 import '../../context/biometric.dart';
-import '../../i18n.dart';
 import '../../kdbx/kdbx.dart';
 import '../../native/channel.dart';
 import '../../store/index.dart';
 import '../../util/common.dart';
 import '../../util/route.dart';
-import '../../widget/common.dart';
 import '../../widget/extension_state.dart';
 import '../route.dart';
 import 'authorized_page.dart';
@@ -96,7 +94,7 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
             await Store.settings.setKeyFilePath(keyFile?.$1);
           }
 
-          Store.kdbx.setKdbx(kdbx);
+          await Store.kdbx.setKdbx(kdbx);
 
           await _responseAutoFill(kdbx);
 
@@ -119,25 +117,7 @@ class _LoadKdbxPageState extends AuthorizedPageState<LoadKdbxPage> {
 
     if (metadata == null) return;
 
-    AutofillDataset result = await kdbx.autofillSearch(metadata: metadata);
-
-    if (Store.settings.manualSelectFillItem) {
-      result.manual = true;
-      result.message = I18n.of(context)!.manual_select_fill_item;
-
-      // 手动选择
-      if (metadata.manual == true) {
-        final kdbxEntryId = await KdbxEntrySelectorDialog.openDialog(context);
-        result = await kdbx.autofillSearch(
-          metadata: metadata,
-          entryId: kdbxEntryId,
-        );
-      }
-    }
-
-    await NativeInstancePlatform.instance.autofillService.responseDataset(
-      result,
-    );
+    await responseAutoFill(metadata, kdbx);
 
     return;
   }

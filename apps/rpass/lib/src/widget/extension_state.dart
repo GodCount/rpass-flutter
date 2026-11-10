@@ -14,6 +14,7 @@ import '../context/lan_fill_server.dart';
 import '../i18n.dart';
 import '../kdbx/auto_fill.dart';
 import '../kdbx/kdbx.dart';
+import '../native/channel.dart';
 import '../page/kdbx/edit_group_page.dart';
 import '../page/preview/image_preview.dart';
 import '../page/route.dart';
@@ -676,6 +677,52 @@ extension StatefulKdbx on State {
     } else {
       return await context.router.push(EditGroupPageRoute());
     }
+  }
+
+  Future<void> responseAutoFill(AutofillMetadata metadata, Kdbx? kdbx) async {
+    final t = I18n.of(context)!;
+
+    // 未解锁
+    AutofillDataset result = AutofillDataset(message: t.locked);
+
+    if (kdbx != null) {
+      result = await kdbx.autofillSearch(metadata: metadata);
+
+      if (Store.settings.manualSelectFillItem) {
+        // 手动选择
+        if (metadata.manual == true ||
+            (result.data?.isNotEmpty != true &&
+                WidgetsBinding.instance.lifecycleState == .resumed)) {
+          final kdbxEntryId = await KdbxEntrySelectorDialog.openDialog(context);
+          if (kdbxEntryId != null) {
+            result = await kdbx.autofillSearch(
+              metadata: metadata,
+              entryId: kdbxEntryId,
+            );
+          } else {
+            // 取消选择
+            result = AutofillDataset(unlock: true);
+          }
+        }
+        result.manual = true;
+        result.message = t.manual_select_fill_item;
+      } else {
+        result.data ??= [];
+      }
+    }
+
+    if (result.data != null) {
+      await IconConvertBase64.convertByAutofillIcon(
+        dataset: result,
+        kdbx: Store.kdbx,
+        favicon: Store.settings.faviconSource != null,
+        color: Store.settings.themeSeedColor,
+      );
+    }
+
+    await NativeInstancePlatform.instance.autofillService.responseDataset(
+      result,
+    );
   }
 }
 

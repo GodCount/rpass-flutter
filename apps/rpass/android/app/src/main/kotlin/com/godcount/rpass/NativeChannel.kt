@@ -16,7 +16,9 @@ import io.flutter.plugin.common.PluginRegistry
 import androidx.core.net.toUri
 import com.godcount.rpass.autofill.MyAutofillService
 import com.godcount.rpass.autofill.helpers.AutofillDataset
+import com.godcount.rpass.autofill.helpers.AutofillIntentMode
 import com.godcount.rpass.autofill.helpers.AutofillMetadata
+import com.godcount.rpass.autofill.helpers.IntentBundleKey
 
 class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHandler,
     PluginRegistry.ActivityResultListener, PluginRegistry.NewIntentListener {
@@ -27,10 +29,12 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
             NativeChannel::class.java.hashCode() and 0xffff
     }
 
+    private lateinit var channel: MethodChannel
+    private lateinit var autofillManager: AutofillManager
+    private lateinit var activityBinding: ActivityPluginBinding
+
+    private var databaseUnlock = false
     private var lastAutofillIntent: Intent? = null
-    private var channel: MethodChannel? = null
-    private var autofillManager: AutofillManager? = null
-    private var activityBinding: ActivityPluginBinding? = null
     private var requestEnabledAutofillServiceResult: Result? = null
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -47,13 +51,13 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        channel?.setMethodCallHandler(null)
-        channel = null
+        channel.setMethodCallHandler(null)
         MyAutofillService.onAutofillRequest = null
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activityBinding = binding
+        lastAutofillIntent = binding.activity.intent
         binding.addActivityResultListener(this)
         binding.addOnNewIntentListener(this)
     }
@@ -67,25 +71,27 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
     }
 
     override fun onDetachedFromActivity() {
-        activityBinding?.removeActivityResultListener(this)
-        activityBinding?.removeOnNewIntentListener(this)
+        activityBinding.removeActivityResultListener(this)
+        activityBinding.removeOnNewIntentListener(this)
         lastAutofillIntent = null
-        activityBinding = null
     }
 
     override fun onNewIntent(intent: Intent): Boolean {
         Log.d(TAG, "onNewIntent action=${intent.action} extras=${intent.extras?.keySet()}")
-        if (intent.hasExtra(AutofillMetadata.EXTRA_AUTOFILL_METADATA)) {
-            if (intent.getBooleanExtra(AutofillDataset.EXTRA_AUTOFILL_MANUAL_DATASET, false)) {
-                val metadata = this.getAutofillMetadata(intent)
+        if (intent.hasExtra(IntentBundleKey.EXTRA_AUTOFILL_BUNDLE)) {
 
-                if (metadata != null) {
-                    this.requestAutofill(metadata)
-                }
-
-                return true
+            val datasetId = getAutofillDatasetId(intent)
+            if (datasetId != null) {
+                return false
             }
+
+            val metadata = getAutofillMetadata(intent)
+            if (metadata != null && databaseUnlock && getAutofillMode(intent) == AutofillIntentMode.MANUAL) {
+                requestAutofill(metadata)
+            }
+
             lastAutofillIntent = intent
+            return true
         }
         return false
     }
@@ -104,32 +110,34 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
+            "database_status" -> {
+                databaseUnlock = call.arguments<Boolean?>() ?: false
+            }
+
             "autofill_service_status" -> {
-                result.success(autofillManager?.hasEnabledAutofillServices())
+                result.success(autofillManager.hasEnabledAutofillServices())
             }
 
             "request_enabled_autofill_service" -> {
-                activityBinding?.activity?.let { activity ->
-                    requestEnabledAutofillServiceResult = result
-                    Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE).apply {
-                        data = "package:${activity.applicationContext.packageName}".toUri()
-                        activity.startActivityForResult(this, REQUEST_CODE_SET_AUTOFILL_SERVICE)
-                    }
-                } ?: result.success(null)
+                requestEnabledAutofillServiceResult = result
+
+                activityBinding.activity.startActivityForResult(
+                    Intent(
+                        Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE,
+                        "package:${activityBinding.activity.applicationContext.packageName}".toUri()
+                    ), REQUEST_CODE_SET_AUTOFILL_SERVICE
+                )
 
             }
 
             "disabled_autofill_service" -> {
-                autofillManager?.disableAutofillServices()
+                autofillManager.disableAutofillServices()
                 result.success(null)
             }
 
             "get_autofill_metadata" -> {
-
-                val intent = lastAutofillIntent ?: activityBinding?.activity?.intent
-
-                if (intent != null) {
-                    val metadata = getAutofillMetadata(intent)
+                if (lastAutofillIntent != null) {
+                    val metadata = getAutofillMetadata(lastAutofillIntent!!)
                     return result.success(metadata?.toMap())
                 }
                 result.success(null)
@@ -137,25 +145,14 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
 
             "response_autofill_dataset" -> {
                 try {
-                    if (activityBinding == null) {
-                        Log.w(TAG, "response_autofill_dataset called with no activityBinding")
-                        return result.success(false)
-                    }
-
                     val dataset =
                         AutofillDataset.fromJson(call.arguments<Map<String, Any?>>() ?: emptyMap())
-
-                    result.success(responseAutofillDataset(activityBinding!!.activity, dataset))
-
+                    result.success(responseAutofillDataset(activityBinding.activity, dataset))
                 } catch (e: Exception) {
                     result.error("unknown", e.message, e)
                 } finally {
                     lastAutofillIntent = null
-                    if (activityBinding != null) {
-                        activityBinding!!.activity.intent = Intent()
-                    }
                 }
-
             }
 
             else -> result.notImplemented()
@@ -170,19 +167,31 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
         MyAutofillService.onAutofillResponse(
             activity,
             dataset,
-            lastAutofillIntent ?: activity.intent,
+            lastAutofillIntent,
         )
         return true
     }
 
+    private fun getAutofillMode(intent: Intent): AutofillIntentMode? {
+        return intent.getBundleExtra(IntentBundleKey.EXTRA_AUTOFILL_BUNDLE)
+            ?.getString(IntentBundleKey.EXTRA_AUTOFILL_INTENT_MODE)
+            ?.let { name -> AutofillIntentMode.entries.firstOrNull { it.name == name } }
+    }
+
+    private fun getAutofillDatasetId(intent: Intent): String? {
+        return intent.getBundleExtra(IntentBundleKey.EXTRA_AUTOFILL_BUNDLE)
+            ?.getString(IntentBundleKey.EXTRA_DATASET_ID)
+    }
+
     private fun getAutofillMetadata(intent: Intent): AutofillMetadata? {
-        return intent.getStringExtra(
-            AutofillMetadata.EXTRA_AUTOFILL_METADATA
-        )?.let(AutofillMetadata.Companion::fromJsonString)
+        return intent.getBundleExtra(IntentBundleKey.EXTRA_AUTOFILL_BUNDLE)?.let {
+            it.getString(IntentBundleKey.EXTRA_AUTOFILL_METADATA)
+                ?.let(AutofillMetadata.Companion::fromJsonString)
+        }
     }
 
     private fun requestAutofill(metadata: AutofillMetadata) {
-        channel?.invokeMethod(
+        channel.invokeMethod(
             "request_autofill_metadata",
             mapOf(
                 "metadata" to metadata.toMap(),

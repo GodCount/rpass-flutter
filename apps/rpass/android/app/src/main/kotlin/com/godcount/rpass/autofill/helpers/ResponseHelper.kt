@@ -4,8 +4,9 @@ import android.app.PendingIntent
 import android.app.assist.AssistStructure
 import android.content.Context
 import android.content.Intent
-import android.content.IntentSender
+import android.graphics.drawable.Icon
 import android.os.Build
+import android.os.Bundle
 import android.util.Log
 import android.service.autofill.Dataset
 import android.service.autofill.Field
@@ -14,12 +15,36 @@ import android.service.autofill.FillResponse
 import android.service.autofill.Presentations
 import android.view.View
 import android.view.autofill.AutofillId
-import android.view.autofill.AutofillManager
 import android.view.autofill.AutofillValue
 import android.view.inputmethod.InlineSuggestionsRequest
+import android.widget.inline.InlinePresentationSpec
+import androidx.annotation.RequiresApi
+import androidx.core.content.FileProvider
 import com.godcount.rpass.MainActivity
+import com.godcount.rpass.autofill.AutofillActivity
+import java.io.File
+import java.security.SecureRandom
 
 private const val TAG = "ResponseHelper"
+
+
+class IntentBundleKey {
+    companion object {
+        const val EXTRA_AUTOFILL_METADATA = "com.godcount.rpass.AUTOFILL_METADATA"
+        const val EXTRA_AUTOFILL_BUNDLE = "com.godcount.rpass.AUTOFILL_BUNDLE"
+        const val EXTRA_DATASET_ID = "com.godcount.rpass.DATASET_ID"
+        const val EXTRA_RESULT_RECEIVER = "com.godcount.rpass.RESULT_RECEIVER"
+        const val EXTRA_AUTOFILL_INTENT_MODE = "com.godcount.rpass.AUTOFILL_INTENT_MODE"
+
+    }
+}
+
+enum class AutofillIntentMode {
+    MANUAL, // 手动选择
+    AUTH, // 需要验证
+    DETAILS // 查看条目详情
+}
+
 
 class ResponseHelper private constructor(
     val context: Context,
@@ -31,205 +56,379 @@ class ResponseHelper private constructor(
 
     val parsed = ViewStructureParser(structure)
 
+    private val secureRandom = SecureRandom()
+
+    private fun randomRequestCode(): Int {
+        return secureRandom.nextInt(Int.MAX_VALUE)
+    }
 
     private fun Dataset.Builder.addValue(
-        id: AutofillId,
-        autofillValue: AutofillValue?
+        id: AutofillId, autofillValue: AutofillValue?
     ): Dataset.Builder {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             setField(
                 id, autofillValue?.let {
-                    Field.Builder()
-                        .setValue(it)
-                        .build()
-                }
-            )
+                    Field.Builder().setValue(it).build()
+                })
         } else {
-            @Suppress("DEPRECATION")
-            setValue(id, autofillValue)
+            @Suppress("DEPRECATION") setValue(id, autofillValue)
         }
         return this
     }
 
-    private fun createDatasetBuilder(
-        title: String?,
-        subTitle: String?,
-        datasetId: String?
-    ): Dataset.Builder {
-        val remoteViews = RemoteViewsHelper.viewsWithUser(
-            context.packageName,
-            title,
-            subTitle
-        )
-
-        return when {
-            Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU -> Dataset.Builder(
-                Presentations.Builder().apply {
-                    setMenuPresentation(remoteViews)
-                    setDialogPresentation(remoteViews)
-
-                    if (inlineSuggestion != null) {
-                        setInlinePresentation(
-                            RemoteViewsHelper.createInlinePresentation(
-                                context,
-                                inlineSuggestion.inlinePresentationSpecs[0],
-                                title ?: subTitle ?: "Fill me", datasetId ?: ""
-                            )
-                        )
-                    }
-
-                }.build()
+    private fun toIcon(filepath: String?): Icon? {
+        return filepath?.let {
+            Icon.createWithContentUri(
+                FileProvider.getUriForFile(
+                    context,
+                    "com.godcount.rpass.icon.FileProvider",
+                    File(filepath)
+                )
             )
-
-            else -> @Suppress("DEPRECATION") Dataset.Builder(remoteViews)
         }
     }
 
-    private fun createIntentSender(flags: Boolean, manual: Boolean?): IntentSender {
-        val metadata = parsed.toAutofillMetadata(manual)
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun getInlinePresentationSpec(index: Int?): InlinePresentationSpec? {
+        if (inlineSuggestion == null || index == null || index >= inlineSuggestion.maxSuggestionCount) return null
+        return inlineSuggestion.inlinePresentationSpecs[index]
+    }
 
-        val intent = Intent(context, MainActivity::class.java)
-        intent.action = Intent.ACTION_RUN
+    private fun getMaxSuggestionCount(): Int? {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+            val count = inlineSuggestion?.maxSuggestionCount ?: 0
+            return if (count > 0) count else null
+        }
+        return null
+    }
 
-        // 复用存在的 MainActivity
-        if (flags) {
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                    Intent.FLAG_ACTIVITY_SINGLE_TOP or
-                    Intent.FLAG_ACTIVITY_NEW_TASK
+
+    private fun createDatasetBuilder(
+        title: String,
+        subtitle: String?,
+        icon: Icon?,
+        attributionIntent: PendingIntent?,
+        inlinePresentationSpecIndex: Int?
+    ): Dataset.Builder {
+
+        val remoteViews =
+            RemoteViewsHelper.remoteViewItem(context.packageName, title, subtitle, icon)
+
+        when {
+            Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU -> {
+                return Dataset.Builder(
+                    Presentations.Builder().apply {
+                        val inlinePresentationSpec =
+                            getInlinePresentationSpec(inlinePresentationSpecIndex)
+
+                        if (attributionIntent != null && inlinePresentationSpec != null) {
+                            val presentation = RemoteViewsHelper.createInlinePresentationWithUser(
+                                context,
+                                attributionIntent,
+                                inlinePresentationSpec,
+                                title,
+                                subtitle,
+                                icon
+                            )
+
+                            setInlinePresentation(presentation)
+                        }
+                        setMenuPresentation(remoteViews)
+                        setDialogPresentation(remoteViews)
+                    }.build()
+                )
+            }
+
+            Build.VERSION.SDK_INT > Build.VERSION_CODES.R -> {
+                @Suppress("DEPRECATION") return Dataset.Builder(remoteViews).apply {
+                    val inlinePresentationSpec =
+                        getInlinePresentationSpec(inlinePresentationSpecIndex)
+
+                    if (attributionIntent != null && inlinePresentationSpec != null) {
+                        val presentation = RemoteViewsHelper.createInlinePresentationWithUser(
+                            context,
+                            attributionIntent,
+                            inlinePresentationSpec,
+                            title,
+                            subtitle,
+                            icon,
+                        )
+                        setInlinePresentation(presentation)
+                    }
+                }
+            }
+
+            else -> {
+                @Suppress("DEPRECATION") return Dataset.Builder(remoteViews)
+            }
+        }
+    }
+
+    private fun createPendingIntent(
+        reuseActivity: Boolean,
+        mode: AutofillIntentMode,
+        datasetId: String?
+    ): PendingIntent {
+        val intent = when {
+            datasetId != null -> {
+                Intent(context, MainActivity::class.java).apply {
+                    putExtra(IntentBundleKey.EXTRA_AUTOFILL_BUNDLE, Bundle().apply {
+                        putString(IntentBundleKey.EXTRA_DATASET_ID, datasetId)
+                        putString(IntentBundleKey.EXTRA_AUTOFILL_INTENT_MODE, mode.name)
+                    })
+                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                            Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                            Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+            }
+
+            reuseActivity -> {
+                Intent(context, AutofillActivity::class.java).apply {
+                    putExtra(IntentBundleKey.EXTRA_AUTOFILL_BUNDLE, Bundle().apply {
+                        putString(
+                            IntentBundleKey.EXTRA_AUTOFILL_METADATA,
+                            parsed.toAutofillMetadata(mode == AutofillIntentMode.MANUAL)
+                                .toJsonString()
+                        )
+                        putString(IntentBundleKey.EXTRA_AUTOFILL_INTENT_MODE, mode.name)
+                    })
+                }
+            }
+
+            else -> {
+                Intent(context, MainActivity::class.java).apply {
+                    putExtra(IntentBundleKey.EXTRA_AUTOFILL_BUNDLE, Bundle().apply {
+                        putString(
+                            IntentBundleKey.EXTRA_AUTOFILL_METADATA,
+                            parsed.toAutofillMetadata(mode == AutofillIntentMode.MANUAL)
+                                .toJsonString()
+                        )
+                        putString(IntentBundleKey.EXTRA_AUTOFILL_INTENT_MODE, mode.name)
+                    })
+                }
+            }
+
         }
 
-        intent.putExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE, structure)
 
-        intent.putExtra(
-            AutofillMetadata.EXTRA_AUTOFILL_METADATA,
-            metadata.toJsonString()
-        )
-
-        if (manual == true) {
-            intent.putExtra(AutofillDataset.EXTRA_AUTOFILL_MANUAL_DATASET, true)
-        }
-
-        Log.d(TAG, "createIntentSender flags=$flags manual=$manual")
         return PendingIntent.getActivity(
             context,
-            0,
+            randomRequestCode(),
             intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
-        ).intentSender
-
+            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
+        )
     }
 
 
     fun buildDatasetResponse(dataset: AutofillDataset): FillResponse? {
-
         if (dataset.unlock != true) {
-            return buildAuthOrManualResponse(true, dataset.manual, dataset.message)
+            return buildAuthResponse(true, dataset.message)
         }
 
+        if (dataset.manual != true && dataset.data.isNullOrEmpty()) {
+            return null
+        }
 
         return FillResponse.Builder().apply {
-            dataset.data.forEach { data ->
-                val map = HashMap<AutofillId, AutofillValue>()
 
-                val label = data[AutofillDataset.DATASET_FIELD_LABEL]
-                val username = data[View.AUTOFILL_HINT_USERNAME]
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                setHeader(
+                    RemoteViewsHelper.remoteViewHeader(
+                        context.packageName, null, null
+                    )
+                )
+            }
 
-                parsed.fields.forEach { field ->
-                    if (data[field.key] != null) {
-                        map[field.value] = AutofillValue.forText(data[field.key])
-                    }
+
+            val maxSuggestionCount = getMaxSuggestionCount()
+            var numberInlineSuggestions: Int? = null
+
+            if (maxSuggestionCount != null) {
+                numberInlineSuggestions = if (dataset.data != null) minOf(
+                    maxSuggestionCount - 1,
+                    dataset.data.size
+                ) else maxSuggestionCount - 1
+
+                // 为手动选择保留一个，如果最大只有1个那就不使用内联
+                if (dataset.manual == true && dataset.data != null && dataset.data.size >= maxSuggestionCount) {
+                    numberInlineSuggestions =
+                        if (numberInlineSuggestions == 1) null else numberInlineSuggestions - 1
                 }
+            }
 
-                if (map.isNotEmpty()) {
-                    val datasetBuilder = createDatasetBuilder(label, username, username ?: "")
+            if (dataset.data != null) {
+                val count = numberInlineSuggestions ?: dataset.data.size
 
-                    map.forEach {
-                        datasetBuilder.addValue(it.key, it.value)
+                for (i in 0 until count) {
+                    val data = dataset.data[i]
+
+                    val id = data["id"]
+
+                    val title = data[AutofillDataset.DATASET_FIELD_LABEL] ?: "User ${i + 1}"
+                    val subtitle = data[View.AUTOFILL_HINT_USERNAME]
+                    val icon = data["__icon__"]
+
+                    val attributionIntent = if (inlineSuggestion != null) createPendingIntent(
+                        reuseActivity = true,
+                        mode = AutofillIntentMode.DETAILS,
+                        datasetId = id
+                    ) else null
+
+                    val datasetBuilder = createDatasetBuilder(
+                        title,
+                        subtitle,
+                        toIcon(icon),
+                        attributionIntent,
+                        numberInlineSuggestions
+                    )
+
+                    if (numberInlineSuggestions != null) numberInlineSuggestions--
+
+                    parsed.fields.forEach { field ->
+                        datasetBuilder.addValue(
+                            field.value,
+                            if (data[field.key] != null) AutofillValue.forText(data[field.key]) else null
+                        )
                     }
-
                     addDataset(datasetBuilder.build())
                 }
             }
 
             if (dataset.manual == true) {
-                val datasetBuilder =
-                    createDatasetBuilder(dataset.message ?: "Manual Select", null, null)
+                val attributionIntent = createPendingIntent(
+                    reuseActivity = true,
+                    mode = AutofillIntentMode.MANUAL,
+                    datasetId = null
+                )
+
+                val datasetBuilder = createDatasetBuilder(
+                    dataset.message ?: "Manual Select",
+                    null,
+                    null,
+                    attributionIntent,
+                    numberInlineSuggestions
+                )
 
                 parsed.fields.forEach { field ->
                     datasetBuilder.addValue(field.value, null)
                 }
 
                 datasetBuilder.setAuthentication(
-                    createIntentSender(
-                        flags = true,
-                        manual = true
-                    )
+                    attributionIntent.intentSender
                 )
 
                 addDataset(datasetBuilder.build())
             }
+
+
         }.build()
     }
 
-    private fun buildAuthOrManualResponse(
-        flags: Boolean,
-        manual: Boolean?,
-        label: String?
-    ): FillResponse {
-        Log.d(TAG, "buildAuthOrManualResponse flags=$flags manual=$manual label=$label")
+    fun buildAuthResponse(reuseActivity: Boolean, label: String?): FillResponse {
+        return FillResponse.Builder().apply {
+            Log.d(TAG, "buildAuthResponse reuseActivity=$reuseActivity label=$label")
 
-        val title = label ?: unlockLabel
+            val title = label ?: unlockLabel
 
-        val sender = createIntentSender(flags, manual)
+            val attributionIntent = createPendingIntent(
+                reuseActivity,
+                mode = AutofillIntentMode.AUTH,
+                datasetId = null
+            )
+            val remoteViews = RemoteViewsHelper.remoteViewItemWithAuth(
+                context.packageName, title
+            )
 
-        val remoteViews = if (manual == true) RemoteViewsHelper.viewsWithUser(
-            context.packageName,
-            title,
-            null
-        ) else RemoteViewsHelper.viewsWithAuth(
-            context.packageName,
-            title,
-            null
-        )
+            when {
+                Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU -> {
+                    setAuthentication(
+                        parsed.fields.values.toTypedArray(),
+                        attributionIntent.intentSender,
+                        Presentations.Builder().apply {
+                            if (inlineSuggestion != null && inlineSuggestion.maxSuggestionCount > 0) {
+                                val presentation =
+                                    RemoteViewsHelper.createInlinePresentationWithAuth(
+                                        context,
+                                        attributionIntent,
+                                        inlineSuggestion.inlinePresentationSpecs[0],
+                                        title
+                                    )
+                                setInlinePresentation(presentation)
+                            }
+                            setMenuPresentation(remoteViews)
+                            setDialogPresentation(remoteViews)
+                        }.build()
+                    )
+                }
 
+                Build.VERSION.SDK_INT > Build.VERSION_CODES.R && inlineSuggestion != null && inlineSuggestion.maxSuggestionCount > 0 -> {
+                    val presentation = RemoteViewsHelper.createInlinePresentationWithAuth(
+                        context,
+                        attributionIntent,
+                        inlineSuggestion.inlinePresentationSpecs[0],
+                        title
+                    )
+                    @Suppress("DEPRECATION") setAuthentication(
+                        parsed.fields.values.toTypedArray(),
+                        attributionIntent.intentSender,
+                        remoteViews,
+                        presentation,
+                    )
+                }
+
+                else -> {
+                    @Suppress("DEPRECATION") setAuthentication(
+                        parsed.fields.values.toTypedArray(),
+                        attributionIntent.intentSender,
+                        remoteViews
+                    )
+                }
+            }
+
+
+        }.build()
+    }
+
+    fun buildDebugResponse(): FillResponse? {
+        val nodes = parsed.debugParse()
+
+        if (nodes.all { it.value.isEmpty() }) return null
 
         return FillResponse.Builder().apply {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                setAuthentication(
-                    parsed.fields.values.toTypedArray(),
-                    sender,
-                    Presentations.Builder().setMenuPresentation(remoteViews).build()
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                setAuthentication(
-                    parsed.fields.values.toTypedArray(),
-                    sender,
-                    remoteViews
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                setHeader(
+                    RemoteViewsHelper.remoteViewHeader(
+                        context.packageName, "Debug", null
+                    )
                 )
             }
 
+            nodes.forEach { field ->
+                if (field.value.isNotEmpty()) {
+                    val remoteViews = RemoteViewsHelper.remoteViewItemWithUser(
+                        context.packageName, field.value, null
+                    )
+
+                    val datasetBuilder =
+                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU) Dataset.Builder(
+                            Presentations.Builder().apply {
+                                setMenuPresentation(remoteViews)
+                            }.build()
+                        )
+                        else @Suppress("DEPRECATION") Dataset.Builder(remoteViews)
+
+                    nodes.forEach {
+                        datasetBuilder.addValue(it.key, null)
+                    }
+                    addDataset(datasetBuilder.build())
+                }
+            }
+
         }.build()
-
     }
 
-    fun buildAuthResponse(flags: Boolean, label: String?): FillResponse {
-        return buildAuthOrManualResponse(flags, null, label)
-    }
 
     companion object {
-
-        fun createResponseByStructure(
-            context: Context,
-            structure: AssistStructure,
-            inlineSuggestion: InlineSuggestionsRequest?
-        ): ResponseHelper {
-            return ResponseHelper(
-                context,
-                structure,
-                inlineSuggestion
-            )
-        }
 
         fun createResponse(
             context: Context,
@@ -252,24 +451,20 @@ data class AutofillDataset(
     val message: String?,
     val unlock: Boolean?,
     val manual: Boolean?,
-    val data: List<HashMap<String, String>>
+    val data: List<HashMap<String, String>>?,
 ) {
     companion object {
-        const val EXTRA_AUTOFILL_MANUAL_DATASET = "com.godcount.rpass.EXTRA_AUTOFILL_MANUAL_DATASET"
-
-
         const val DATASET_FIELD_LABEL = "label"
-
 
         fun fromJson(map: Map<String, Any?>): AutofillDataset = AutofillDataset(
             unlock = map["unlock"] as? Boolean,
             message = map["message"] as? String,
             manual = map["manual"] as? Boolean,
-            data = map.parseDatasetList("data")
+            data = map.parseDatasetList("data"),
         )
 
-        private fun Map<String, Any?>.parseDatasetList(key: String): List<HashMap<String, String>> {
-            val list = this[key] as? List<*> ?: return emptyList()
+        private fun Map<String, Any?>.parseDatasetList(key: String): List<HashMap<String, String>>? {
+            val list = this[key] as? List<*> ?: return null
 
             return list.mapNotNull { item ->
                 val map = item.toStringMap()
@@ -281,13 +476,12 @@ data class AutofillDataset(
             val map = this as? Map<*, *> ?: return null
 
             val result = HashMap<String, String>()
-            map.forEach { (k, v) ->
-                val key = k?.toString()?.takeIf { it.isNotBlank() } ?: return@forEach
-                val value = v?.toString()?.takeIf { it.isNotBlank() } ?: return@forEach
+            for ((k, v) in map) {
+                val key = k?.toString()?.takeIf { it.isNotBlank() } ?: continue
+                val value = v?.toString()?.takeIf { it.isNotBlank() } ?: continue
                 result[key] = value
             }
-
-            return result.takeIf { it.isNotEmpty() }
+            return result.ifEmpty { null }
         }
 
     }

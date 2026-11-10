@@ -7,6 +7,8 @@ import 'package:logging/logging.dart';
 
 import 'package:dio/dio.dart';
 
+import 'fetch_favicon.dart';
+
 final _logger = Logger("util:cache_network_image");
 
 typedef _SimpleDecoderCallback =
@@ -83,18 +85,13 @@ class MemoryImageCacheManager {
 }
 
 class CacheNetworkImage extends ImageProvider<CacheNetworkImage> {
-  const CacheNetworkImage(
-    this.url, {
-    this.scale = 1.0,
-    this.cacheManager,
-    this.fetchNetworkImage,
-  });
+  const CacheNetworkImage(this.url, {this.scale = 1.0, this.fetchNetworkImage});
+
+  static final FaviconCacheManager cacheManager = FaviconCacheManager();
 
   final String url;
 
   final double scale;
-
-  final BaseCacheManager<Uint8List>? cacheManager;
 
   final FetchNetworkImage? fetchNetworkImage;
 
@@ -142,8 +139,8 @@ class CacheNetworkImage extends ImageProvider<CacheNetworkImage> {
       Uint8List? bytes;
 
       try {
-        if (cacheManager != null && await cacheManager!.exist(key.url)) {
-          bytes = await cacheManager!.read(key.url);
+        if (await cacheManager.exist(key.url)) {
+          bytes = await cacheManager.read(key.url);
         }
       } catch (e) {
         _logger.warning(
@@ -166,25 +163,21 @@ class CacheNetworkImage extends ImageProvider<CacheNetworkImage> {
       Future<ui.Codec> warpDecode(ui.ImmutableBuffer buffer) async {
         try {
           final result = await decode(buffer);
-          if (cacheManager != null) {
-            try {
-              await cacheManager!.write(key.url, bytes);
-            } catch (e) {
-              _logger.warning(
-                "cache manager (${cacheManager.runtimeType}) write fail $e",
-              );
-            }
+          try {
+            await cacheManager.write(key.url, bytes);
+          } catch (e) {
+            _logger.warning(
+              "cache manager (${cacheManager.runtimeType}) write fail $e",
+            );
           }
           return result;
         } catch (e) {
-          if (cacheManager != null) {
-            try {
-              await cacheManager!.write(key.url, null);
-            } catch (e) {
-              _logger.warning(
-                "cache manager (${cacheManager.runtimeType}) write fail $e",
-              );
-            }
+          try {
+            await cacheManager.write(key.url, null);
+          } catch (e) {
+            _logger.warning(
+              "cache manager (${cacheManager.runtimeType}) write fail $e",
+            );
           }
           rethrow;
         }

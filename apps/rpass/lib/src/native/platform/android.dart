@@ -9,14 +9,11 @@ final _logger = Logger("native:android");
 
 enum AutofillServiceStatus { unsupported, disabled, enabled }
 
-class AutofillField {
-  static const PASSWORD = "password";
-  static const USERNAME = "username";
-  static const EMAIL = "email";
-  static const OTP = "otp";
-}
-
 class AutofillService {
+  Future<void> databaseStatus(bool unlock) async {
+    return;
+  }
+
   Future<AutofillServiceStatus> status() async {
     return AutofillServiceStatus.unsupported;
   }
@@ -44,6 +41,11 @@ class _AndroidAutofillService extends MethodChannelInterface
 
   @override
   final List<String> methodCalls = ["request_autofill_metadata"];
+
+  @override
+  Future<void> databaseStatus(bool locked) async {
+    await channel.invokeMethod("database_status", locked);
+  }
 
   @override
   Future<AutofillServiceStatus> status() async {

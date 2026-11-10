@@ -122,6 +122,7 @@ static MAP_FIELD_TABLE: phf::Map<&'static str, &'static str> = phf::phf_map! {
 
 const DEFAULT_AUTO_TYPE_SEQUENCE: &str = "{UserName}{TAB}{Password}{ENTER}";
 
+const AUTOFILL_FIELD_ID: &str = "id";
 const AUTOFILL_FIELD_LABEL: &str = "label";
 const AUTOFILL_FIELD_USERNAME: &str = "username";
 const AUTOFILL_FIELD_EMAIL: &str = "email";
@@ -1400,6 +1401,7 @@ impl Kdbx {
             let user = get_option_string(item.fields.get(KEY_USER_NAME));
 
             let mut dataset = HashMap::from([
+                (AUTOFILL_FIELD_ID.to_string(), Some(item.id().to_string())),
                 (AUTOFILL_FIELD_LABEL.to_string(), title.or(user.clone())),
                 (
                     AUTOFILL_FIELD_USERNAME.to_string(),
@@ -1417,7 +1419,21 @@ impl Kdbx {
                         user
                     },
                 ),
+                (
+                    "__icon_url__".to_string(),
+                    get_option_string(item.fields.get(KEY_URL)),
+                ),
             ]);
+
+            match item.icon() {
+                Some(keepass::db::Icon::BuiltIn(id)) => {
+                    dataset.insert("__icon_builtin__".to_string(), Some(id.to_string()));
+                }
+                Some(keepass::db::Icon::Custom(id)) => {
+                    dataset.insert("__icon_custom__".to_string(), Some(id.uuid().to_string()));
+                }
+                _ => {}
+            }
 
             if metadata.field_types.contains(AUTOFILL_FIELD_PASSWORD) {
                 dataset.insert(
@@ -1448,7 +1464,7 @@ impl Kdbx {
                 unlock: Some(true),
                 manual: Some(true),
                 message: None,
-                data: datasets,
+                data: Some(datasets),
             });
         }
 
@@ -1488,7 +1504,7 @@ impl Kdbx {
             unlock: Some(true),
             manual: None,
             message: None,
-            data: datasets,
+            data: Some(datasets),
         })
     }
 }
@@ -2642,7 +2658,7 @@ pub struct AutofillDataset {
     #[frb(non_final)]
     pub message: Option<String>,
     #[frb(non_final)]
-    pub data: Vec<HashMap<String, Option<String>>>,
+    pub data: Option<Vec<HashMap<String, Option<String>>>>,
 }
 
 #[frb(rust2dart(dart_type = "Color", dart_code = "Color({})"))]
