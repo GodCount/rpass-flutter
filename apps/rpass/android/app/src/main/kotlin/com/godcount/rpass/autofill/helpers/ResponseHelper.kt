@@ -81,7 +81,7 @@ class ResponseHelper private constructor(
             Icon.createWithContentUri(
                 FileProvider.getUriForFile(
                     context,
-                    "com.godcount.rpass.icon.FileProvider",
+                    "${context.packageName}.icon.FileProvider",
                     File(filepath)
                 )
             )
