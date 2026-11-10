@@ -66,14 +66,15 @@ class _HomePageState extends State<HomePage>
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await onKdbxSaved();
+      await onKdbxChanged(null);
       _settingsListener();
     });
   }
 
   @override
-  void onKdbxChanged(Kdbx? kdbx) {
+  Future<void> onKdbxChanged(Kdbx? kdbx) async {
     _lastMasterKeyChangeRec = null;
-    Store.kdbx.syncController.initConfig();
+    await Store.kdbx.syncController.initConfig();
   }
 
   @override
