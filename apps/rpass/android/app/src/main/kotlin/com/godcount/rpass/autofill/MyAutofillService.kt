@@ -155,7 +155,7 @@ class MyAutofillService : AutofillService() {
         )) {
             grantUriPermission(
                 packageName,
-                "content://com.godcount.rpass.icon.FileProvider/icons".toUri(),
+                "content://${this.packageName}.icon.FileProvider/icons".toUri(),
                 Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
             )
         }
