@@ -3,122 +3,102 @@ package com.godcount.rpass.autofill
 
 import android.app.Activity
 import android.app.Activity.RESULT_OK
-import android.app.assist.AssistStructure
-import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.*
-import android.provider.Settings
 import android.service.autofill.*
 import android.util.Log
-import android.view.autofill.AutofillManager
 import android.view.autofill.AutofillManager.EXTRA_AUTHENTICATION_RESULT
 import android.view.inputmethod.InlineSuggestionsRequest
-import android.view.inputmethod.InputMethodManager
 import com.godcount.rpass.PreferencesHelper
 import com.godcount.rpass.autofill.helpers.AutofillDataset
 import com.godcount.rpass.autofill.helpers.AutofillMetadata
 import com.godcount.rpass.autofill.helpers.ResponseHelper
 import androidx.core.net.toUri
+import com.godcount.rpass.autofill.helpers.IntentBundleKey
+
+
+class HandleAutofill(
+    private val request: FillRequest,
+    private val callback: FillCallback,
+    private val responseHelper: ResponseHelper,
+    private var callbackExecuted: Boolean
+) {
+    companion object {
+        private const val TAG = "HandleAutofill"
+    }
+
+    private var canceled = false
+
+    private fun setFillResult(activity: Activity, response: FillResponse?, intent: Intent?) {
+
+        if (!callbackExecuted) {
+            callbackExecuted = true
+            callback.onSuccess(response)
+            return
+        }
+
+        if (intent != null) {
+            val receiver = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra(
+                    IntentBundleKey.EXTRA_RESULT_RECEIVER,
+                    ResultReceiver::class.java
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra(IntentBundleKey.EXTRA_RESULT_RECEIVER)
+            }
+
+            if (receiver != null) {
+                activity.moveTaskToBack(false)
+                receiver.send(RESULT_OK, Bundle().apply {
+                    putParcelable(EXTRA_AUTHENTICATION_RESULT, response)
+                })
+                return
+            }
+        }
+
+        activity.setResult(
+            RESULT_OK,
+            Intent().putExtra(EXTRA_AUTHENTICATION_RESULT, response)
+        )
+        activity.finish()
+    }
+
+
+    fun onAutofillResponse(activity: Activity, dataset: AutofillDataset, intent: Intent?) {
+        if (canceled) return
+
+        // 取消了
+        if (dataset.unlock == true && dataset.data == null) {
+            Log.w(TAG, "dataset is empty, user canceled")
+            setFillResult(activity, null, intent)
+            return
+        }
+
+        setFillResult(activity, responseHelper.buildDatasetResponse(dataset), intent)
+    }
+
+
+    fun dispose() {
+        canceled = true
+        if (!callbackExecuted) {
+            callbackExecuted = true
+            callback.onSuccess(null)
+        }
+    }
+}
 
 
 class MyAutofillService : AutofillService() {
     companion object {
         private const val TAG = "MyAutofillService"
         var onAutofillRequest: ((metadata: AutofillMetadata) -> Unit)? = null
+        private var inlineSuggestionRenderServicePackageName: String? = null
+        private var handleAutofill: HandleAutofill? = null
 
-        private var fillCallback: FillCallback? = null
-        private var assistStructure: AssistStructure? = null
-        private var inlineSuggestion: InlineSuggestionsRequest? = null
-
-        private fun getResponseHelper(context: Context, intent: Intent?): ResponseHelper? {
-            Log.d(
-                TAG,
-                "getResponseHelper intent=$intent assistStructureCached=${assistStructure != null}"
-            )
-            if (assistStructure != null) return ResponseHelper.createResponseByStructure(
-                context,
-                assistStructure!!,
-                inlineSuggestion
-            )
-
-            if (intent == null || !intent.hasExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE)) {
-                Log.w(TAG, "getResponseHelper missing assist structure")
-                return null
-            }
-
-            val structure = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                intent.getParcelableExtra(
-                    AutofillManager.EXTRA_ASSIST_STRUCTURE,
-                    AssistStructure::class.java
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                intent.getParcelableExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE)
-            }
-
-            if (structure == null) {
-                Log.w(TAG, "getResponseHelper structure was null")
-                return null
-            }
-
-            return ResponseHelper.createResponseByStructure(
-                context,
-                structure,
-                inlineSuggestion
-            )
-
-        }
-
-        private fun setFillResult(activity: Activity, response: FillResponse?) {
-            val callback = this.fillCallback
-            this.fillCallback = null
-
-            val finish = activity.intent.action == Intent.ACTION_RUN
-            Log.d(
-                TAG,
-                "setFillResult response=${response != null} finish=$finish callbackPresent=${callback != null}"
-            )
-
-            if (callback != null) {
-                callback.onSuccess(response)
-            } else {
-                activity.setResult(
-                    RESULT_OK,
-                    Intent().putExtra(EXTRA_AUTHENTICATION_RESULT, response)
-                )
-
-                if (finish) {
-                    activity.finish()
-                } else {
-                    activity.moveTaskToBack(false)
-                }
-            }
-        }
-
-
-        fun onAutofillResponse(
-            activity: Activity,
-            dataset: AutofillDataset,
-            intent: Intent?,
-        ) {
-            val responseHelper = getResponseHelper(activity, intent)
-
-            if (responseHelper == null) {
-                Log.w(TAG, "onAutofillResponse responseHelper is null")
-                setFillResult(activity, null)
-                return
-            }
-
-
-            // 取消了
-            if (dataset.unlock == true && dataset.data == null) {
-                Log.w(TAG, "dataset is empty, user canceled")
-                setFillResult(activity, null)
-                return
-            }
-
-            setFillResult(activity, responseHelper.buildDatasetResponse(dataset))
+        fun onAutofillResponse(activity: Activity, dataset: AutofillDataset, intent: Intent?) {
+            handleAutofill?.onAutofillResponse(activity, dataset, intent)
         }
     }
 
@@ -126,7 +106,6 @@ class MyAutofillService : AutofillService() {
     private var appsBlacklist: Set<String>? = null
     private var domainBlacklist: Set<String>? = null
     private var debug = false
-
 
     private fun readPreferences() {
         appsBlacklist = PreferencesHelper.getAutoFillAppIdBlacklist(this)
@@ -143,7 +122,6 @@ class MyAutofillService : AutofillService() {
         readPreferences()
     }
 
-
     private fun checkAppsBlacklist(packageName: String?): Boolean {
         if (packageName == this.packageName) return true
         if (packageName == null || appsBlacklist.isNullOrEmpty()) return false
@@ -151,12 +129,30 @@ class MyAutofillService : AutofillService() {
     }
 
     private fun checkDomainBlacklist(domain: String?): Boolean {
-        if (domain == null || domainBlacklist.isNullOrEmpty()) return false
-        return domainBlacklist!!.any { domain.contains(it) }
+        return !(domain == null || domainBlacklist.isNullOrEmpty()) && domainBlacklist!!.any {
+            domain.contains(
+                it
+            )
+        }
     }
 
-    private fun grantIconUriPermissions() {
-        for (packageName in listOfNotNull("android", if (inlineSuggestion != null) "com.google.android.ext.services" else null)) {
+    private fun getInlineRendererPackage(): String? {
+        if (inlineSuggestionRenderServicePackageName != null) return inlineSuggestionRenderServicePackageName
+        val intent = Intent("android.service.autofill.InlineSuggestionRenderService")
+        val resolveInfos = packageManager.queryIntentServices(
+            intent,
+            PackageManager.MATCH_SYSTEM_ONLY
+        )
+        inlineSuggestionRenderServicePackageName =
+            resolveInfos.firstOrNull()?.serviceInfo?.packageName
+        return inlineSuggestionRenderServicePackageName
+    }
+
+    private fun grantIconUriPermissions(inlineSuggestion: InlineSuggestionsRequest?) {
+        for (packageName in listOfNotNull(
+            "android",
+            if (inlineSuggestion != null) getInlineRendererPackage() else null
+        )) {
             grantUriPermission(
                 packageName,
                 "content://com.godcount.rpass.icon.FileProvider/icons".toUri(),
@@ -165,19 +161,27 @@ class MyAutofillService : AutofillService() {
         }
     }
 
+    private fun clearHandleAutofill() {
+        handleAutofill?.dispose()
+        handleAutofill = null
+    }
+
     override fun onFillRequest(
         request: FillRequest, cancellationSignal: CancellationSignal, callback: FillCallback
     ) {
-        fillCallback = null
+        clearHandleAutofill()
+        cancellationSignal.setOnCancelListener {
+            Log.d(TAG, "cancellationSignal")
+            clearHandleAutofill()
+        }
 
         val responseHelper =
             ResponseHelper.createResponse(this, request)
 
         val packageName = responseHelper.parsed.packageName
             ?: responseHelper.structure.activityComponent.packageName
-        val metadata = responseHelper.parsed.toAutofillMetadata(null)
 
-        Log.d(TAG, "onFillRequest packageName=$packageName metadata=$metadata")
+        Log.d(TAG, "onFillRequest packageName=$packageName request=$request")
 
         if (this.debug) {
             return callback.onSuccess(responseHelper.buildDebugResponse())
@@ -188,25 +192,20 @@ class MyAutofillService : AutofillService() {
             return callback.onSuccess(null)
         }
 
-        assistStructure = null
-        inlineSuggestion = null
-
         if (!responseHelper.parsed.canAutofill()) {
             Log.d(TAG, "onFillRequest cannot autofill")
             return callback.onSuccess(null)
         }
 
-        assistStructure = responseHelper.structure
-        inlineSuggestion = responseHelper.inlineSuggestion
-
-        grantIconUriPermissions()
+        grantIconUriPermissions(responseHelper.inlineSuggestion)
 
         if (onAutofillRequest != null) {
             Log.d(TAG, "onFillRequest dispatching onAutofillRequest")
-            fillCallback = callback
-            onAutofillRequest!!(metadata)
+            handleAutofill = HandleAutofill(request, callback, responseHelper, false)
+            onAutofillRequest!!(responseHelper.parsed.toAutofillMetadata(null))
         } else {
             Log.d(TAG, "onFillRequest building auth response")
+            handleAutofill = HandleAutofill(request, callback, responseHelper, true)
             callback.onSuccess(responseHelper.buildAuthResponse(false, null))
         }
 

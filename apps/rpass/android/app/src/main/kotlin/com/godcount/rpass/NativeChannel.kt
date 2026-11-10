@@ -16,7 +16,9 @@ import io.flutter.plugin.common.PluginRegistry
 import androidx.core.net.toUri
 import com.godcount.rpass.autofill.MyAutofillService
 import com.godcount.rpass.autofill.helpers.AutofillDataset
+import com.godcount.rpass.autofill.helpers.AutofillIntentMode
 import com.godcount.rpass.autofill.helpers.AutofillMetadata
+import com.godcount.rpass.autofill.helpers.IntentBundleKey
 
 class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHandler,
     PluginRegistry.ActivityResultListener, PluginRegistry.NewIntentListener {
@@ -30,6 +32,8 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
     private lateinit var channel: MethodChannel
     private lateinit var autofillManager: AutofillManager
     private lateinit var activityBinding: ActivityPluginBinding
+
+    private var databaseUnlock = false
     private var lastAutofillIntent: Intent? = null
     private var requestEnabledAutofillServiceResult: Result? = null
 
@@ -74,11 +78,16 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
 
     override fun onNewIntent(intent: Intent): Boolean {
         Log.d(TAG, "onNewIntent action=${intent.action} extras=${intent.extras?.keySet()}")
-        if (intent.hasExtra(AutofillMetadata.EXTRA_AUTOFILL_METADATA)) {
-            val metadata = this.getAutofillMetadata(intent)
+        if (intent.hasExtra(IntentBundleKey.EXTRA_AUTOFILL_BUNDLE)) {
 
-            if (metadata != null) {
-                this.requestAutofill(metadata)
+            val datasetId = getAutofillDatasetId(intent)
+            if (datasetId != null) {
+                return false
+            }
+
+            val metadata = getAutofillMetadata(intent)
+            if (metadata != null && databaseUnlock && getAutofillMode(intent) == AutofillIntentMode.MANUAL) {
+                requestAutofill(metadata)
             }
 
             lastAutofillIntent = intent
@@ -101,6 +110,10 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
+            "database_status" -> {
+                databaseUnlock = call.arguments<Boolean?>() ?: false
+            }
+
             "autofill_service_status" -> {
                 result.success(autofillManager.hasEnabledAutofillServices())
             }
@@ -159,10 +172,22 @@ class NativeChannel : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHand
         return true
     }
 
+    private fun getAutofillMode(intent: Intent): AutofillIntentMode? {
+        return intent.getBundleExtra(IntentBundleKey.EXTRA_AUTOFILL_BUNDLE)
+            ?.getString(IntentBundleKey.EXTRA_AUTOFILL_INTENT_MODE)
+            ?.let { name -> AutofillIntentMode.entries.firstOrNull { it.name == name } }
+    }
+
+    private fun getAutofillDatasetId(intent: Intent): String? {
+        return intent.getBundleExtra(IntentBundleKey.EXTRA_AUTOFILL_BUNDLE)
+            ?.getString(IntentBundleKey.EXTRA_DATASET_ID)
+    }
+
     private fun getAutofillMetadata(intent: Intent): AutofillMetadata? {
-        return intent.getStringExtra(
-            AutofillMetadata.EXTRA_AUTOFILL_METADATA
-        )?.let(AutofillMetadata.Companion::fromJsonString)
+        return intent.getBundleExtra(IntentBundleKey.EXTRA_AUTOFILL_BUNDLE)?.let {
+            it.getString(IntentBundleKey.EXTRA_AUTOFILL_METADATA)
+                ?.let(AutofillMetadata.Companion::fromJsonString)
+        }
     }
 
     private fun requestAutofill(metadata: AutofillMetadata) {

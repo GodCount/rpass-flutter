@@ -17,4 +17,6 @@
     </style>
 
     <color name="text_color">#FFFFFF</color>
+    <color name="subtitle_color">#CBD5E1</color>
+    <color name="autofill_item_bg">#000000</color>
 </resources>

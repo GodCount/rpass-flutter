@@ -690,8 +690,9 @@ extension StatefulKdbx on State {
 
       if (Store.settings.manualSelectFillItem) {
         // 手动选择
-        if (WidgetsBinding.instance.lifecycleState == .resumed &&
-            (metadata.manual == true || result.data?.isNotEmpty != true)) {
+        if (metadata.manual == true ||
+            (result.data?.isNotEmpty != true &&
+                WidgetsBinding.instance.lifecycleState == .resumed)) {
           final kdbxEntryId = await KdbxEntrySelectorDialog.openDialog(context);
           if (kdbxEntryId != null) {
             result = await kdbx.autofillSearch(
@@ -705,11 +706,8 @@ extension StatefulKdbx on State {
         }
         result.manual = true;
         result.message = t.manual_select_fill_item;
-      } else if (result.data?.isNotEmpty != true) {
-        // 未匹配
-        result.data = [
-          {"__empty__": "", "label": t.empty},
-        ];
+      } else {
+        result.data ??= [];
       }
     }
 

@@ -10,6 +10,10 @@ final _logger = Logger("native:android");
 enum AutofillServiceStatus { unsupported, disabled, enabled }
 
 class AutofillService {
+  Future<void> databaseStatus(bool unlock) async {
+    return;
+  }
+
   Future<AutofillServiceStatus> status() async {
     return AutofillServiceStatus.unsupported;
   }
@@ -37,6 +41,11 @@ class _AndroidAutofillService extends MethodChannelInterface
 
   @override
   final List<String> methodCalls = ["request_autofill_metadata"];
+
+  @override
+  Future<void> databaseStatus(bool locked) async {
+     await channel.invokeMethod("database_status", locked);
+  }
 
   @override
   Future<AutofillServiceStatus> status() async {

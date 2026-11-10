@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../context/biometric.dart';
 import '../../kdbx/kdbx.dart';
+import '../../native/channel.dart';
 import '../../page/route.dart';
 import '../../rpass.dart';
 import '../../remotes_fs/remote_fs.dart';
@@ -107,6 +108,8 @@ class KdbxController with SimpleObserverListener<KdbxProviderListener> {
     _cleanKdbx();
 
     _kdbx = kdbx;
+
+    NativeInstancePlatform.instance.autofillService.databaseStatus(_kdbx != null);
 
     if (kdbx != null) {
       assert(kdbx.stream != null);

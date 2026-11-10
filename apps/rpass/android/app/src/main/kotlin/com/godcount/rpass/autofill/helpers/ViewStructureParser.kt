@@ -366,8 +366,6 @@ data class AutofillMetadata(
     val webScheme: String?,
 ) {
     companion object {
-        const val EXTRA_AUTOFILL_METADATA = "com.godcount.rpass.AUTOFILL_METADATA"
-
         fun fromJsonString(json: String) =
             JSONObject(json).run {
                 AutofillMetadata(

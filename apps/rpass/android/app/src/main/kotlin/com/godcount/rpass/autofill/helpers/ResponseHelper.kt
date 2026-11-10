@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
+import android.os.Bundle
 import android.util.Log
 import android.service.autofill.Dataset
 import android.service.autofill.Field
@@ -14,17 +15,36 @@ import android.service.autofill.FillResponse
 import android.service.autofill.Presentations
 import android.view.View
 import android.view.autofill.AutofillId
-import android.view.autofill.AutofillManager
 import android.view.autofill.AutofillValue
 import android.view.inputmethod.InlineSuggestionsRequest
 import android.widget.inline.InlinePresentationSpec
 import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
 import com.godcount.rpass.MainActivity
+import com.godcount.rpass.autofill.AutofillActivity
 import java.io.File
 import java.security.SecureRandom
 
 private const val TAG = "ResponseHelper"
+
+
+class IntentBundleKey {
+    companion object {
+        const val EXTRA_AUTOFILL_METADATA = "com.godcount.rpass.AUTOFILL_METADATA"
+        const val EXTRA_AUTOFILL_BUNDLE = "com.godcount.rpass.AUTOFILL_BUNDLE"
+        const val EXTRA_DATASET_ID = "com.godcount.rpass.DATASET_ID"
+        const val EXTRA_RESULT_RECEIVER = "com.godcount.rpass.RESULT_RECEIVER"
+        const val EXTRA_AUTOFILL_INTENT_MODE = "com.godcount.rpass.AUTOFILL_INTENT_MODE"
+
+    }
+}
+
+enum class AutofillIntentMode {
+    MANUAL, // 手动选择
+    AUTH, // 需要验证
+    DETAILS // 查看条目详情
+}
+
 
 class ResponseHelper private constructor(
     val context: Context,
@@ -145,34 +165,51 @@ class ResponseHelper private constructor(
     }
 
     private fun createPendingIntent(
-        reuseActivity: Boolean, manual: Boolean?, datasetId: String?
+        reuseActivity: Boolean,
+        mode: AutofillIntentMode,
+        datasetId: String?
     ): PendingIntent {
-        Log.d(
-            TAG,
-            "createPendingIntent reuseActivity=$reuseActivity manual=$manual datasetId=$datasetId"
-        )
-        val intent = Intent(context, MainActivity::class.java)
-        intent.action = Intent.ACTION_RUN
-
-        if (datasetId != null) {
-            intent.putExtra("com.godcount.rpass.OPEN_USERNAME", datasetId)
-        } else {
-            intent.putExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE, structure)
-            intent.putExtra(
-                AutofillMetadata.EXTRA_AUTOFILL_METADATA,
-                parsed.toAutofillMetadata(manual).toJsonString()
-            )
-
-            if (manual == true) {
-                intent.putExtra(AutofillDataset.EXTRA_AUTOFILL_MANUAL_DATASET, true)
+        val intent = when {
+            datasetId != null -> {
+                Intent(context, MainActivity::class.java).apply {
+                    putExtra(IntentBundleKey.EXTRA_AUTOFILL_BUNDLE, Bundle().apply {
+                        putString(IntentBundleKey.EXTRA_DATASET_ID, datasetId)
+                        putString(IntentBundleKey.EXTRA_AUTOFILL_INTENT_MODE, mode.name)
+                    })
+                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                            Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                            Intent.FLAG_ACTIVITY_NEW_TASK
+                }
             }
+
+            reuseActivity -> {
+                Intent(context, AutofillActivity::class.java).apply {
+                    putExtra(IntentBundleKey.EXTRA_AUTOFILL_BUNDLE, Bundle().apply {
+                        putString(
+                            IntentBundleKey.EXTRA_AUTOFILL_METADATA,
+                            parsed.toAutofillMetadata(mode == AutofillIntentMode.MANUAL)
+                                .toJsonString()
+                        )
+                        putString(IntentBundleKey.EXTRA_AUTOFILL_INTENT_MODE, mode.name)
+                    })
+                }
+            }
+
+            else -> {
+                Intent(context, MainActivity::class.java).apply {
+                    putExtra(IntentBundleKey.EXTRA_AUTOFILL_BUNDLE, Bundle().apply {
+                        putString(
+                            IntentBundleKey.EXTRA_AUTOFILL_METADATA,
+                            parsed.toAutofillMetadata(mode == AutofillIntentMode.MANUAL)
+                                .toJsonString()
+                        )
+                        putString(IntentBundleKey.EXTRA_AUTOFILL_INTENT_MODE, mode.name)
+                    })
+                }
+            }
+
         }
 
-        // 复用存在的 MainActivity
-        if (reuseActivity) {
-            intent.flags =
-                Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-        }
 
         return PendingIntent.getActivity(
             context,
@@ -233,7 +270,7 @@ class ResponseHelper private constructor(
 
                     val attributionIntent = if (inlineSuggestion != null) createPendingIntent(
                         reuseActivity = true,
-                        manual = null,
+                        mode = AutofillIntentMode.DETAILS,
                         datasetId = id
                     ) else null
 
@@ -258,10 +295,9 @@ class ResponseHelper private constructor(
             }
 
             if (dataset.manual == true) {
-
                 val attributionIntent = createPendingIntent(
                     reuseActivity = true,
-                    manual = true,
+                    mode = AutofillIntentMode.MANUAL,
                     datasetId = null
                 )
 
@@ -296,7 +332,7 @@ class ResponseHelper private constructor(
 
             val attributionIntent = createPendingIntent(
                 reuseActivity,
-                manual = null,
+                mode = AutofillIntentMode.AUTH,
                 datasetId = null
             )
             val remoteViews = RemoteViewsHelper.remoteViewItemWithAuth(
@@ -394,16 +430,6 @@ class ResponseHelper private constructor(
 
     companion object {
 
-        fun createResponseByStructure(
-            context: Context,
-            structure: AssistStructure,
-            inlineSuggestion: InlineSuggestionsRequest?
-        ): ResponseHelper {
-            return ResponseHelper(
-                context, structure, inlineSuggestion
-            )
-        }
-
         fun createResponse(
             context: Context,
             request: FillRequest,
@@ -428,8 +454,6 @@ data class AutofillDataset(
     val data: List<HashMap<String, String>>?,
 ) {
     companion object {
-        const val EXTRA_AUTOFILL_MANUAL_DATASET = "com.godcount.rpass.EXTRA_AUTOFILL_MANUAL_DATASET"
-
         const val DATASET_FIELD_LABEL = "label"
 
         fun fromJson(map: Map<String, Any?>): AutofillDataset = AutofillDataset(
