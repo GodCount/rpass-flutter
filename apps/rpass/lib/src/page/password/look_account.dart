@@ -1092,7 +1092,7 @@ class _LookOtPasswordListTileState extends State<_LookOtPasswordListTile> {
           : null,
       onTap: widget.onTap,
       onLongPress: () {
-        writeClipboard("${_authOneTimePassword!.code()}");
+        writeClipboard(_authOneTimePassword!.codeString());
       },
     );
   }
