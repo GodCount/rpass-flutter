@@ -93,6 +93,16 @@ class AuthOneTimePassword {
     );
   }
 
+  String codeString() {
+    return OTP.generateTOTPCodeString(
+      secret,
+      DateTime.now().millisecondsSinceEpoch,
+      interval: period,
+      isGoogle: true,
+      algorithm: Algorithm.SHA1,
+    );
+  }
+
   double percent() {
     return ((DateTime.now().millisecondsSinceEpoch / 1000) % period) / period;
   }

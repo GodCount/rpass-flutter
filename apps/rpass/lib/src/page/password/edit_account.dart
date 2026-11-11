@@ -688,7 +688,7 @@ class _EntryFieldState extends State<EntryField> {
   }
 
   void onPressedLanFill() {
-    String? value = _otp != null ? _otp!.code().toString() : _value;
+    String? value = _otp != null ? _otp!.codeString() : _value;
 
     if (value != null && value.isNotEmpty) {
       final lanFill = LanFillInherited.of(context)!;
