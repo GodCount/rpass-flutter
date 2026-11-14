@@ -90,7 +90,8 @@ class ResponseHelper private constructor(
 
     @RequiresApi(Build.VERSION_CODES.R)
     private fun getInlinePresentationSpec(index: Int?): InlinePresentationSpec? {
-        if (inlineSuggestion == null || index == null || index >= inlineSuggestion.maxSuggestionCount) return null
+        if (inlineSuggestion == null || index == null || index > inlineSuggestion.maxSuggestionCount) return null
+        if (index >= inlineSuggestion.inlinePresentationSpecs.size) return inlineSuggestion.inlinePresentationSpecs.last();
         return inlineSuggestion.inlinePresentationSpecs[index]
     }
 
